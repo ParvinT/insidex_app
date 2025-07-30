@@ -1,39 +1,40 @@
 name: insidex_app
 description: "INSIDEX - Sound Healing & Subliminal App"
-publish_to: 'none'
+publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.0.0  # Flutter 3.x için uygun
+  sdk: ^3.0.0 # Flutter 3.x için uygun
 
 dependencies:
   flutter:
     sdk: flutter
-    
+
   # UI & Responsive
   flutter_screenutil: ^5.9.0
   responsive_framework: ^1.1.1
   google_fonts: ^6.1.0
-  
+
+  flutter_svg: ^2.0.9
+
   # State Management
   provider: ^6.1.1
-  
+
   # Storage
   shared_preferences: ^2.2.2
-  
+
   # Icons
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0  # Tek bir flutter_lints tanımı
+  flutter_lints: ^3.0.0
 
 flutter:
   uses-material-design: true
-  
-  # Assets eklenecek
-  # assets:
-  #   - assets/images/
-  #   - assets/sounds/
-  #   - assets/icons/
+
+  assets:
+    - assets/images/
+    #- assets/sounds/
+    - assets/icons/

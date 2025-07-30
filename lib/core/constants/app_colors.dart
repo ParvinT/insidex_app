@@ -9,14 +9,22 @@ class AppColors {
   static const Color primaryGoldLight = Color(0xFFE6D088);
   static const Color primaryGoldDark = Color(0xFFB8941F);
 
-  // Light Theme Colors
-  static const Color backgroundWhite = Color(0xFFFFFFFD);
-  static const Color backgroundMarble = Color(0xFFFAF7F5);
+  // Light Theme Colors - Tasarıma uygun
+  static const Color backgroundWhite = Color(0xFFF8F8F8);// Hafif gri-beyaz
+  static const Color backgroundPure = Color(0xFFFFFFFF); // Saf beyaz
+  static const Color backgroundCard = Color(0xFFF5F5F5); // Kart arka planı
+  static const Color backgroundMarble = Color(0xFFF5F0E8); // Eski renk, uyumluluk için
   static const Color backgroundBeige = Color(0xFFF5F0E8);
 
+  // Text Colors
   static const Color textPrimary = Color(0xFF1A1A1A);
   static const Color textSecondary = Color(0xFF666666);
   static const Color textLight = Color(0xFF999999);
+
+  // Gri tonları
+  static const Color greyLight = Color(0xFFEEEEEE);
+  static const Color greyMedium = Color(0xFFE0E0E0);
+  static const Color greyBorder = Color(0xFFD6D6D6);
 
   // Dark Theme Colors
   static const Color darkBackground = Color(0xFF0A0A0A);
