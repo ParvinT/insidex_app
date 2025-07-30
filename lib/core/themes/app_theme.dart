@@ -1,0 +1,141 @@
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../constants/app_colors.dart';
+
+class AppTheme {
+  // Prevent instantiation
+  AppTheme._();
+
+  // Light Theme
+  static ThemeData get lightTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.light,
+
+      // Colors
+      scaffoldBackgroundColor: AppColors.backgroundWhite,
+      primaryColor: AppColors.primaryGold,
+
+      // AppBar
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        backgroundColor: AppColors.backgroundWhite,
+        foregroundColor: AppColors.textPrimary,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.montserrat(
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimary,
+        ),
+      ),
+
+      // Text Theme
+      textTheme: _buildTextTheme(isDark: false),
+
+      // Elevated Button
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: AppColors.primaryGold,
+          foregroundColor: AppColors.backgroundWhite,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Dark Theme
+  static ThemeData get darkTheme {
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+
+      // Colors
+      scaffoldBackgroundColor: AppColors.darkBackground,
+      primaryColor: AppColors.primaryGold,
+
+      // AppBar
+      appBarTheme: AppBarTheme(
+        elevation: 0,
+        backgroundColor: AppColors.darkBackground,
+        foregroundColor: AppColors.darkTextPrimary,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.montserrat(
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+          color: AppColors.darkTextPrimary,
+        ),
+      ),
+
+      // Text Theme
+      textTheme: _buildTextTheme(isDark: true),
+
+      // Elevated Button
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: AppColors.primaryGold,
+          foregroundColor: AppColors.darkBackground,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Build text theme
+  static TextTheme _buildTextTheme({required bool isDark}) {
+    final Color primaryText =
+        isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+    final Color secondaryText =
+        isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+
+    return TextTheme(
+      // Display
+      displayLarge: GoogleFonts.montserrat(
+        fontSize: 48,
+        fontWeight: FontWeight.w300,
+        color: primaryText,
+      ),
+      displayMedium: GoogleFonts.montserrat(
+        fontSize: 36,
+        fontWeight: FontWeight.w300,
+        color: primaryText,
+      ),
+
+      // Headline
+      headlineLarge: GoogleFonts.montserrat(
+        fontSize: 24,
+        fontWeight: FontWeight.w500,
+        color: primaryText,
+      ),
+      headlineMedium: GoogleFonts.montserrat(
+        fontSize: 20,
+        fontWeight: FontWeight.w500,
+        color: primaryText,
+      ),
+
+      // Body
+      bodyLarge: GoogleFonts.lato(
+        fontSize: 16,
+        fontWeight: FontWeight.w400,
+        color: primaryText,
+      ),
+      bodyMedium: GoogleFonts.lato(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: primaryText,
+      ),
+      bodySmall: GoogleFonts.lato(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: secondaryText,
+      ),
+    );
+  }
+}
