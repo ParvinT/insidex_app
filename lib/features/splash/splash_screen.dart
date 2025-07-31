@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../core/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -83,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _navigateToNext() {
     Future.delayed(const Duration(seconds: 3), () {
-      // TODO: Navigate to onboarding or home
+      Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
     });
   }
 
@@ -129,7 +131,7 @@ class _SplashScreenState extends State<SplashScreen>
                   opacity: _fadeAnimation.value,
                   child: Text(
                     AppConstants.appTagline,
-                    style: TextStyle(
+                    style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w300,
                       color: AppColors.textSecondary,

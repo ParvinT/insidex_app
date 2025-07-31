@@ -90,52 +90,50 @@ class AppTheme {
 
   // Build text theme
   static TextTheme _buildTextTheme({required bool isDark}) {
-    final Color primaryText =
-        isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
-    final Color secondaryText =
-        isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
-
-    return TextTheme(
-      // Display
-      displayLarge: GoogleFonts.montserrat(
-        fontSize: 48,
-        fontWeight: FontWeight.w300,
-        color: primaryText,
-      ),
-      displayMedium: GoogleFonts.montserrat(
-        fontSize: 36,
-        fontWeight: FontWeight.w300,
-        color: primaryText,
-      ),
-
-      // Headline
-      headlineLarge: GoogleFonts.montserrat(
-        fontSize: 24,
-        fontWeight: FontWeight.w500,
-        color: primaryText,
-      ),
-      headlineMedium: GoogleFonts.montserrat(
-        fontSize: 20,
-        fontWeight: FontWeight.w500,
-        color: primaryText,
-      ),
-
-      // Body
-      bodyLarge: GoogleFonts.lato(
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
-        color: primaryText,
-      ),
-      bodyMedium: GoogleFonts.lato(
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-        color: primaryText,
-      ),
-      bodySmall: GoogleFonts.lato(
-        fontSize: 12,
-        fontWeight: FontWeight.w400,
-        color: secondaryText,
-      ),
-    );
-  }
+  final Color primaryText = isDark ? AppColors.darkTextPrimary : AppColors.textPrimary;
+  final Color secondaryText = isDark ? AppColors.darkTextSecondary : AppColors.textSecondary;
+  
+  return TextTheme(
+    // Display
+    displayLarge: GoogleFonts.inter(
+      fontSize: 48,
+      fontWeight: FontWeight.w300,
+      color: primaryText,
+    ),
+    displayMedium: GoogleFonts.inter(
+      fontSize: 36,
+      fontWeight: FontWeight.w300,
+      color: primaryText,
+    ),
+    
+    // Headline
+    headlineLarge: GoogleFonts.inter(
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      color: primaryText,
+    ),
+    headlineMedium: GoogleFonts.inter(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: primaryText,
+    ),
+    
+    // Body
+    bodyLarge: GoogleFonts.inter(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: primaryText,
+    ),
+    bodyMedium: GoogleFonts.inter(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: primaryText,
+    ),
+    bodySmall: GoogleFonts.inter(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: secondaryText,
+    ),
+  );
+}
 }
