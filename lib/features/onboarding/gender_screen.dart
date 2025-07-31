@@ -3,17 +3,22 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/models/user_preferences.dart';
-import 'gender_screen.dart';
+import 'birth_date_screen.dart';
 
-class GoalsScreen extends StatefulWidget {
-  const GoalsScreen({super.key});
+class GenderScreen extends StatefulWidget {
+  final List<UserGoal> selectedGoals;
+
+  const GenderScreen({
+    super.key,
+    required this.selectedGoals,
+  });
 
   @override
-  State<GoalsScreen> createState() => _GoalsScreenState();
+  State<GenderScreen> createState() => _GenderScreenState();
 }
 
-class _GoalsScreenState extends State<GoalsScreen> {
-  final Set<UserGoal> _selectedGoals = {};
+class _GenderScreenState extends State<GenderScreen> {
+  Gender? _selectedGender;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +38,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Progress indicator
+              _buildProgressIndicator(),
+              SizedBox(height: 32.h),
+
               // Title
               Text(
                 'Tell us about yourself',
@@ -44,7 +53,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Answer a few quick questions to get personalized recommendations',
+                'This helps us personalize your experience',
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w400,
@@ -55,7 +64,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
 
               // Question
               Text(
-                'What are your current goals',
+                'Gender',
                 style: GoogleFonts.inter(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
@@ -64,37 +73,26 @@ class _GoalsScreenState extends State<GoalsScreen> {
               ),
               SizedBox(height: 24.h),
 
-              // Goal Options
-              Expanded(
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 16.w,
-                    mainAxisSpacing: 16.h,
-                    childAspectRatio: 1.5,
-                  ),
-                  itemCount: UserGoal.values.length,
-                  itemBuilder: (context, index) {
-                    final goal = UserGoal.values[index];
-                    final isSelected = _selectedGoals.contains(goal);
+              // Gender Options
+              _buildGenderOption(Gender.male, 'Male'),
+              SizedBox(height: 16.h),
+              _buildGenderOption(Gender.female, 'Female'),
 
-                    return _buildGoalCard(goal, isSelected);
-                  },
-                ),
-              ),
+              const Spacer(),
 
               // Continue Button
               SizedBox(
                 width: double.infinity,
                 height: 56.h,
                 child: ElevatedButton(
-                  onPressed: _selectedGoals.isNotEmpty
+                  onPressed: _selectedGender != null
                       ? () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => GenderScreen(
-                                selectedGoals: _selectedGoals.toList(),
+                              builder: (context) => BirthDateScreen(
+                                selectedGoals: widget.selectedGoals,
+                                selectedGender: _selectedGender!,
                               ),
                             ),
                           );
@@ -124,19 +122,53 @@ class _GoalsScreenState extends State<GoalsScreen> {
     );
   }
 
-  Widget _buildGoalCard(UserGoal goal, bool isSelected) {
+  Widget _buildProgressIndicator() {
+    return Row(
+      children: [
+        Expanded(
+          child: Container(
+            height: 4.h,
+            decoration: BoxDecoration(
+              color: AppColors.primaryGold,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Container(
+            height: 4.h,
+            decoration: BoxDecoration(
+              color: AppColors.primaryGold,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Container(
+            height: 4.h,
+            decoration: BoxDecoration(
+              color: AppColors.greyLight,
+              borderRadius: BorderRadius.circular(2.r),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGenderOption(Gender gender, String label) {
+    final isSelected = _selectedGender == gender;
+
     return GestureDetector(
       onTap: () {
         setState(() {
-          if (isSelected) {
-            _selectedGoals.remove(goal);
-          } else {
-            _selectedGoals.add(goal);
-          }
+          _selectedGender = gender;
         });
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+      child: Container(
+        padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.textPrimary : Colors.white,
           borderRadius: BorderRadius.circular(16.r),
@@ -145,22 +177,39 @@ class _GoalsScreenState extends State<GoalsScreen> {
             width: 1.5,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
-            Text(
-              goal.emoji,
-              style: TextStyle(fontSize: 24.sp),
+            Container(
+              width: 24.w,
+              height: 24.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? Colors.white : AppColors.greyBorder,
+                  width: 2,
+                ),
+              ),
+              child: isSelected
+                  ? Center(
+                      child: Container(
+                        width: 12.w,
+                        height: 12.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : null,
             ),
-            SizedBox(height: 8.h),
+            SizedBox(width: 16.w),
             Text(
-              goal.title,
+              label,
               style: GoogleFonts.inter(
-                fontSize: 14.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
                 color: isSelected ? Colors.white : AppColors.textPrimary,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),
