@@ -1,8 +1,12 @@
+
 import 'package:flutter/material.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/onboarding/goals_screen.dart';
 import '../../features/onboarding/gender_screen.dart';
 import '../../features/auth/welcome_screen.dart';
+import '../../features/auth/login_screen.dart';
+import '../../features/auth/register_screen.dart';
+import '../../features/home/home_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -18,6 +22,8 @@ class AppRoutes {
     splash: (context) => const SplashScreen(),
     goalsScreen: (context) => const GoalsScreen(),
     welcome: (context) => const WelcomeScreen(),
-    // Diğer route'lar sonra eklenecek
+    login: (context) => const LoginScreen(),
+    register: (context) => const RegisterScreen(),
+    home: (context) => const HomeScreen(),
   };
 }

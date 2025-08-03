@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
+import '../../shared/widgets/social_login_button.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -66,24 +68,22 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(height: 60.h),
               
               // Google Sign In Button
-              _buildSocialButton(
+              SocialLoginButton(
                 onTap: () {
                   // TODO: Google sign in
                   print('Google sign in tapped');
                 },
-                icon: 'assets/icons/google_icon.png', // Google icon ekleyeceğiz
                 label: 'Google',
               ),
               
               SizedBox(height: 16.h),
               
               // Apple Sign In Button
-              _buildSocialButton(
+              SocialLoginButton(
                 onTap: () {
                   // TODO: Apple sign in
                   print('Apple sign in tapped');
                 },
-                icon: 'assets/icons/apple_icon.png', // Apple icon ekleyeceğiz
                 label: 'Apple ID',
                 isDark: true,
               ),
@@ -93,12 +93,29 @@ class WelcomeScreen extends StatelessWidget {
               // Email Sign In Button
               _buildEmailButton(
                 onTap: () {
-                  // TODO: Navigate to email login
-                  print('Email login tapped');
+                  Navigator.pushNamed(context, AppRoutes.login);
                 },
               ),
               
               const Spacer(flex: 3),
+              
+              // Continue as Guest
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Navigator.pushReplacementNamed(context, AppRoutes.home);
+                  },
+                  child: Text(
+                    'Continue as a Guest',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
               
               // Sign Up Link
               Row(
@@ -113,8 +130,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: Navigate to sign up
-                      print('Sign up tapped');
+                      Navigator.pushNamed(context, AppRoutes.register);
                     },
                     child: Text(
                       'Sign Up',
@@ -131,52 +147,6 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(height: 32.h),
             ],
           ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildSocialButton({
-    required VoidCallback onTap,
-    required String icon,
-    required String label,
-    bool isDark = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 56.h,
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.textPrimary : Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: isDark ? AppColors.textPrimary : AppColors.greyBorder,
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Geçici olarak icon yerine placeholder
-            Container(
-              width: 24.w,
-              height: 24.w,
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white : AppColors.greyLight,
-                shape: BoxShape.circle,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white : AppColors.textPrimary,
-              ),
-            ),
-          ],
         ),
       ),
     );
