@@ -69,7 +69,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // TODO: All Subliminals, Playlist ve AI Chat eklenecek
+            // All Subliminals Section - Overlap ile içine geçir
+            Transform.translate(
+              offset: Offset(0, -30.h), // Yukarı çek - overlap
+              child: _buildAllSubliminalsSection(),
+            ),
+
+            // TODO: Playlist ve AI Chat eklenecek
             Expanded(
               child: Container(
                 color: Colors.transparent, // Arka plan rengi görünsün
@@ -213,6 +219,53 @@ class _HomeScreenState extends State<HomeScreen> {
             color: isDark ? Colors.white : AppColors.textPrimary,
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildAllSubliminalsSection() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 0),
+      decoration: BoxDecoration(
+        color: const Color.fromARGB(255, 204, 203, 203), // Aynı gri renk
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(0), // Üst düz - overlap için
+          topRight: Radius.circular(0), // Üst düz - overlap için
+          bottomLeft: Radius.circular(40.r), // Alt oval
+          bottomRight: Radius.circular(40.r), // Alt oval
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          SizedBox(height: 60.h), // Overlap için boşluk
+
+          // Section Title - Sağda
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  'All Subliminals',
+                  style: GoogleFonts.inter(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 40.h),
+        ],
       ),
     );
   }
