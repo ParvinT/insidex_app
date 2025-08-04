@@ -7,6 +7,7 @@ import '../../features/auth/login_screen.dart';
 import '../../features/auth/register_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/profile/profile_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -18,14 +19,16 @@ class AppRoutes {
   static const String register = '/auth/register';
   static const String home = '/home';
   static const String settings = '/settings';
+  static const String profile = '/profile';
 
   static Map<String, WidgetBuilder> get routes => {
-    splash: (context) => const SplashScreen(),
-    goalsScreen: (context) => const GoalsScreen(),
-    welcome: (context) => const WelcomeScreen(),
-    login: (context) => const LoginScreen(),
-    register: (context) => const RegisterScreen(),
-    home: (context) => const HomeScreen(),
-    settings: (context) => const SettingsScreen(),
-  };
+        splash: (context) => const SplashScreen(),
+        goalsScreen: (context) => const GoalsScreen(),
+        welcome: (context) => const WelcomeScreen(),
+        login: (context) => const LoginScreen(),
+        register: (context) => const RegisterScreen(),
+        home: (context) => const HomeScreen(),
+        settings: (context) => const SettingsScreen(),
+        profile: (context) => const ProfileScreen(),
+      };
 }
