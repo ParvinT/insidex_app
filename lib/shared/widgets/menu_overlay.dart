@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 
 class MenuOverlay extends StatefulWidget {
   final VoidCallback onClose;
-  
+
   const MenuOverlay({
     super.key,
     required this.onClose,
@@ -77,7 +78,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                 ),
               ),
             ),
-            
+
             // Menu panel
             Align(
               alignment: Alignment.centerRight,
@@ -129,13 +130,13 @@ class _MenuOverlayState extends State<MenuOverlay>
                             ],
                           ),
                         ),
-                        
+
                         Divider(
                           color: AppColors.greyBorder,
                           thickness: 1,
                           height: 1,
                         ),
-                        
+
                         // Menu Items
                         Expanded(
                           child: ListView(
@@ -145,29 +146,31 @@ class _MenuOverlayState extends State<MenuOverlay>
                                 icon: Icons.person_outline,
                                 title: 'Profile',
                                 onTap: () {
-                                  print('Profile tapped');
+                                  _closeMenu();
                                   // TODO: Navigate to profile
+                                  print('Profile tapped');
                                 },
                               ),
                               _buildMenuItem(
                                 icon: Icons.settings_outlined,
                                 title: 'Settings',
                                 onTap: () {
-                                  print('Settings tapped');
-                                  // TODO: Navigate to settings
+                                  _closeMenu();
+                                  Navigator.pushNamed(
+                                      context, AppRoutes.settings);
                                 },
                               ),
                             ],
                           ),
                         ),
-                        
+
                         // Bottom section
                         Divider(
                           color: AppColors.greyBorder,
                           thickness: 1,
                           height: 1,
                         ),
-                        
+
                         Padding(
                           padding: EdgeInsets.all(24.w),
                           child: Column(
