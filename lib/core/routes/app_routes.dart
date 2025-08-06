@@ -8,6 +8,8 @@ import '../../features/auth/register_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/profile/profile_screen.dart';
+import '../../features/player/audio_player_screen.dart';
+import '../../features/library/session_detail_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -20,6 +22,8 @@ class AppRoutes {
   static const String home = '/home';
   static const String settings = '/settings';
   static const String profile = '/profile';
+  static const String player = '/player';
+  static const String sessionDetail = '/session-detail';
 
   static Map<String, WidgetBuilder> get routes => {
         splash: (context) => const SplashScreen(),
@@ -30,5 +34,15 @@ class AppRoutes {
         home: (context) => const HomeScreen(),
         settings: (context) => const SettingsScreen(),
         profile: (context) => const ProfileScreen(),
+        player: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return AudioPlayerScreen(sessionData: args);
+        },
+        sessionDetail: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return SessionDetailScreen(sessionData: args ?? {});
+        },
       };
 }
