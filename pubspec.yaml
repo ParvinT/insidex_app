@@ -4,7 +4,7 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.0.0 # Flutter 3.x için uygun
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -14,7 +14,6 @@ dependencies:
   flutter_screenutil: ^5.9.0
   responsive_framework: ^1.1.1
   google_fonts: ^6.1.0
-
   flutter_svg: ^2.0.9
 
   # State Management
@@ -36,5 +35,9 @@ flutter:
 
   assets:
     - assets/images/
-    #- assets/sounds/
     - assets/icons/
+
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf
