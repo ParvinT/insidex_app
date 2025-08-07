@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../player/audio_player_screen.dart';
 
 class SessionDetailScreen extends StatefulWidget {
   final Map<String, dynamic> sessionData;
@@ -51,7 +51,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               'I wake up refreshed and energized',
               'Sleep comes naturally to me'
             ],
-            'backgroundGradient': [Color(0xFF1e3c72), Color(0xFF2a5298)],
+            'backgroundGradient': [
+              const Color(0xFF1e3c72),
+              const Color(0xFF2a5298)
+            ],
             'playCount': 1247,
             'rating': 4.8,
             'tags': ['Sleep', 'Healing', 'Anxiety Relief', 'Insomnia'],
@@ -68,10 +71,11 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              _session['backgroundGradient'][0].withOpacity(0.1),
+              (_session['backgroundGradient'] as List<Color>)[0]
+                  .withOpacity(0.1),
               AppColors.backgroundWhite,
             ],
-            stops: [0.0, 0.3],
+            stops: const [0.0, 0.3],
           ),
         ),
         child: SafeArea(
@@ -166,7 +170,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             ),
           ),
 
-          Spacer(),
+          const Spacer(),
 
           // Favorite Button
           GestureDetector(
@@ -259,13 +263,17 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             height: 60.w,
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: _session['backgroundGradient'],
+                colors: _session['backgroundGradient'] ??
+                    [
+                      const Color(0xFF1e3c72),
+                      const Color(0xFF2a5298),
+                    ],
               ),
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Center(
               child: Text(
-                _session['emoji'],
+                _session['emoji'] ?? '🎵',
                 style: TextStyle(fontSize: 28.sp),
               ),
             ),
@@ -279,7 +287,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  _session['title'],
+                  _session['title'] ?? 'Untitled Session',
                   style: GoogleFonts.inter(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -288,7 +296,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  _session['category'],
+                  _session['category'] ?? 'General',
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
@@ -298,28 +306,29 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 SizedBox(height: 8.h),
 
                 // Tags
-                Wrap(
-                  spacing: 8.w,
-                  children:
-                      (_session['tags'] as List<String>).take(2).map((tag) {
-                    return Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: AppColors.greyLight,
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                      child: Text(
-                        tag,
-                        style: GoogleFonts.inter(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.textSecondary,
+                if (_session['tags'] != null)
+                  Wrap(
+                    spacing: 8.w,
+                    children:
+                        (_session['tags'] as List<String>).take(2).map((tag) {
+                      return Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 8.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: AppColors.greyLight,
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                        child: Text(
+                          tag,
+                          style: GoogleFonts.inter(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
               ],
             ),
           ),
@@ -345,7 +354,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             child: _buildDurationItem(
               icon: Icons.play_circle_outline,
               label: 'Intro',
-              duration: _session['introDuration'],
+              duration: _session['introDuration'] ?? '2 minutes',
             ),
           ),
           Container(
@@ -357,7 +366,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             child: _buildDurationItem(
               icon: Icons.graphic_eq,
               label: 'Subliminal',
-              duration: _session['subliminalDuration'],
+              duration: _session['subliminalDuration'] ?? '2 hours',
             ),
           ),
           Container(
@@ -369,7 +378,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             child: _buildDurationItem(
               icon: Icons.timer,
               label: 'Total',
-              duration: _session['duration'],
+              duration: _session['duration'] ?? '2 hours 2 minutes',
             ),
           ),
         ],
@@ -436,7 +445,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           ),
           SizedBox(height: 12.h),
           Text(
-            _session['description'],
+            _session['description'] ?? 'No description available.',
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w400,
@@ -450,6 +459,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   }
 
   Widget _buildBenefits() {
+    if (_session['benefits'] == null) return const SizedBox.shrink();
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -480,7 +491,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                   Container(
                     width: 6.w,
                     height: 6.w,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.textPrimary,
                       shape: BoxShape.circle,
                     ),
@@ -506,6 +517,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   }
 
   Widget _buildSubliminalPreview() {
+    if (_session['subliminals'] == null) return const SizedBox.shrink();
+
+    final subliminalsList = _session['subliminals'] as List<String>;
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -529,7 +544,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                   color: AppColors.textPrimary,
                 ),
               ),
-              Spacer(),
+              const Spacer(),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -548,9 +563,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             ],
           ),
           SizedBox(height: 12.h),
-          ...(_session['subliminals'] as List<String>)
-              .take(3)
-              .map((subliminal) {
+          ...subliminalsList.take(3).map((subliminal) {
             return Padding(
               padding: EdgeInsets.only(bottom: 6.h),
               child: Text(
@@ -564,15 +577,17 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               ),
             );
           }).toList(),
-          SizedBox(height: 8.h),
-          Text(
-            '+ ${(_session['subliminals'] as List).length - 3} more affirmations',
-            style: GoogleFonts.inter(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textLight,
+          if (subliminalsList.length > 3) ...[
+            SizedBox(height: 8.h),
+            Text(
+              '+ ${subliminalsList.length - 3} more affirmations',
+              style: GoogleFonts.inter(
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textLight,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -594,7 +609,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           Expanded(
             child: _buildStatItem(
               icon: Icons.play_arrow,
-              value: '${_session['playCount']}',
+              value: '${_session['playCount'] ?? 0}',
               label: 'Plays',
             ),
           ),
@@ -606,7 +621,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           Expanded(
             child: _buildStatItem(
               icon: Icons.star,
-              value: '${_session['rating']}',
+              value: '${_session['rating'] ?? 0.0}',
               label: 'Rating',
             ),
           ),
@@ -618,7 +633,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           Expanded(
             child: _buildStatItem(
               icon: Icons.favorite,
-              value: '${(_session['playCount'] * 0.12).round()}',
+              value: '${((_session['playCount'] ?? 0) * 0.12).round()}',
               label: 'Likes',
             ),
           ),
@@ -710,11 +725,41 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
             child: PrimaryButton(
               text: 'Start Session',
               onPressed: () {
-                // Navigate to Audio Player with session data
-                Navigator.pushNamed(
+                // Prepare complete session data for Audio Player
+                final audioSessionData = {
+                  'title': _session['title'] ?? 'Session',
+                  'category': _session['category'] ?? 'General',
+                  'emoji': _session['emoji'] ?? '🎵',
+                  'backgroundGradient': _session['backgroundGradient'] ??
+                      [const Color(0xFF1e3c72), const Color(0xFF2a5298)],
+                  'intro': {
+                    'title': 'Relaxation Introduction',
+                    'duration': 120, // 2 minutes in seconds
+                    'description': _session['description'] ??
+                        'A gentle introduction to prepare your mind',
+                  },
+                  'subliminal': {
+                    'title': _session['title'] ?? 'Subliminal Session',
+                    'duration': 7200, // 2 hours in seconds
+                    'affirmations': _session['subliminals'] ??
+                        [
+                          'Positive affirmation 1',
+                          'Positive affirmation 2',
+                          'Positive affirmation 3'
+                        ],
+                  },
+                  'description': _session['description'] ??
+                      'This session is designed to help you achieve your goals through powerful subliminal programming.',
+                };
+
+                // Navigate to Audio Player with complete session data
+                Navigator.push(
                   context,
-                  AppRoutes.player,
-                  arguments: _session,
+                  MaterialPageRoute(
+                    builder: (context) => AudioPlayerScreen(
+                      sessionData: audioSessionData,
+                    ),
+                  ),
                 );
               },
               backgroundColor: AppColors.textPrimary,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'dart:math' as math;
 import '../../core/constants/app_colors.dart';
+
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -24,13 +24,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   // Audio State
   bool _isPlaying = false;
-  bool _isIntroPhase = true;
   bool _showSubtitles = false;
   double _currentPosition = 0.0; // 0.0 to 1.0
   double _volume = 0.7;
 
   // Timer
   int? _sleepTimer;
+
+  // Audio Selection State
+  bool _includeIntro = true;
+  bool _includeSubliminal = true;
 
   // Mock session data
   late Map<String, dynamic> _session;
@@ -44,14 +47,25 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         {
           'title': 'Sleep',
           'category': 'Deep Sleep Healing',
-          'backgroundGradient': [Color(0xFF1e3c72), Color(0xFF2a5298)],
-          'introDuration': 120, // 2 minutes
-          'subliminalDuration': 7200, // 2 hours
-          'subliminals': [
-            'Deep Sleep Healing',
-            'Nighttime Anxiety Release',
-            'Positive Mindset Overnight'
+          'backgroundGradient': [
+            const Color(0xFF1e3c72),
+            const Color(0xFF2a5298)
           ],
+          'intro': {
+            'title': 'Relaxation Introduction',
+            'duration': 120, // 2 minutes in seconds
+            'description':
+                'A gentle introduction to prepare your mind for deep healing',
+          },
+          'subliminal': {
+            'title': 'Deep Sleep Subliminals',
+            'duration': 7200, // 2 hours in seconds
+            'affirmations': [
+              'Deep Sleep Healing',
+              'Nighttime Anxiety Release',
+              'Positive Mindset Overnight'
+            ],
+          },
           'description':
               'Subliminals for sleep are designed to work gently as you drift off and throughout the night. Play them quietly, 70-80% volumes as your subconscious mind is more open to change, making subliminal programming highly effective.',
         };
@@ -78,6 +92,35 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     super.dispose();
   }
 
+  // Calculate total duration based on selection
+  int _getTotalDuration() {
+    int total = 0;
+    if (_includeIntro) total += _session['intro']['duration'] as int;
+    if (_includeSubliminal) total += _session['subliminal']['duration'] as int;
+    return total;
+  }
+
+  // Get current playing audio type
+  String _getCurrentPlayingType() {
+    if (_includeIntro && _includeSubliminal) {
+      // Calculate which part is playing based on position
+      final introDuration = _session['intro']['duration'] as int;
+      final totalDuration = _getTotalDuration();
+      final currentSeconds = (_currentPosition * totalDuration).round();
+
+      if (currentSeconds < introDuration) {
+        return 'Playing: Introduction';
+      } else {
+        return 'Playing: Subliminal';
+      }
+    } else if (_includeIntro) {
+      return 'Playing: Introduction';
+    } else if (_includeSubliminal) {
+      return 'Playing: Subliminal';
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,6 +138,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   children: [
                     SizedBox(height: 20.h),
 
+                    // Audio Selection Section
+                    _buildAudioSelectionSection(),
+
+                    SizedBox(height: 20.h),
+
                     // Player Card
                     _buildPlayerCard(),
 
@@ -105,8 +153,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
                     SizedBox(height: 24.h),
 
-                    // Subliminals Section
-                    _buildSubliminalsSection(),
+                    // Session Info Section
+                    _buildSessionInfoSection(),
 
                     SizedBox(height: 20.h),
                   ],
@@ -156,7 +204,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
           ),
 
-          Spacer(),
+          const Spacer(),
 
           // Logo
           Text(
@@ -168,7 +216,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
           ),
 
-          Spacer(),
+          const Spacer(),
 
           // Menu button
           Container(
@@ -193,6 +241,200 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               Icons.more_vert,
               color: AppColors.textPrimary,
               size: 20.sp,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAudioSelectionSection() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: AppColors.greyBorder,
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Audio Selection',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Introduction Toggle
+          _buildAudioToggle(
+            title: 'Introduction',
+            subtitle: _formatDuration(_session['intro']['duration'] as int),
+            description: _session['intro']['description'],
+            icon: Icons.record_voice_over,
+            value: _includeIntro,
+            onChanged: (value) {
+              setState(() {
+                _includeIntro = value;
+                // At least one must be selected
+                if (!_includeIntro && !_includeSubliminal) {
+                  _includeSubliminal = true;
+                }
+              });
+            },
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Subliminal Toggle
+          _buildAudioToggle(
+            title: 'Subliminal Session',
+            subtitle:
+                _formatDuration(_session['subliminal']['duration'] as int),
+            description:
+                'Deep healing frequencies with subliminal affirmations',
+            icon: Icons.waves,
+            value: _includeSubliminal,
+            onChanged: (value) {
+              setState(() {
+                _includeSubliminal = value;
+                // At least one must be selected
+                if (!_includeSubliminal && !_includeIntro) {
+                  _includeIntro = true;
+                }
+              });
+            },
+          ),
+
+          SizedBox(height: 16.h),
+
+          // Total Duration Display
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: AppColors.greyLight,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.access_time,
+                  color: AppColors.textPrimary,
+                  size: 18.sp,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  'Total Duration: ${_formatDuration(_getTotalDuration())}',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAudioToggle({
+    required String title,
+    required String subtitle,
+    required String description,
+    required IconData icon,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: value
+            ? AppColors.textPrimary.withOpacity(0.05)
+            : AppColors.greyLight,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: value ? AppColors.textPrimary : AppColors.greyBorder,
+          width: value ? 1.5 : 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: value
+                      ? AppColors.textPrimary.withOpacity(0.1)
+                      : Colors.white,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Icon(
+                  icon,
+                  color:
+                      value ? AppColors.textPrimary : AppColors.textSecondary,
+                  size: 20.sp,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: value,
+                onChanged: onChanged,
+                activeColor: AppColors.textPrimary,
+                inactiveThumbColor: AppColors.textSecondary,
+                inactiveTrackColor: AppColors.greyLight,
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            description,
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w400,
+              color: AppColors.textSecondary,
+              height: 1.3,
             ),
           ),
         ],
@@ -278,7 +520,27 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ],
             ),
 
-            SizedBox(height: 40.h),
+            SizedBox(height: 20.h),
+
+            // Currently Playing Indicator
+            if (_isPlaying)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: AppColors.textPrimary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Text(
+                  _getCurrentPlayingType(),
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ),
+
+            SizedBox(height: 20.h),
 
             // Animated Pulse Circle
             _buildAnimatedPulse(),
@@ -307,7 +569,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) {
-        return Container(
+        return SizedBox(
           width: 120.w,
           height: 120.w,
           child: Stack(
@@ -446,6 +708,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Widget _buildProgressBar() {
+    final totalDuration = _getTotalDuration();
+    final currentSeconds = (_currentPosition * totalDuration).round();
+
     return Column(
       children: [
         // Progress bar
@@ -457,7 +722,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             child: LinearProgressIndicator(
               value: _currentPosition,
               backgroundColor: AppColors.greyLight,
-              valueColor: AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
             ),
           ),
         ),
@@ -471,14 +737,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                _formatTime(_currentPosition),
+                _formatDuration(currentSeconds),
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
               Text(
-                _isIntroPhase ? '2:00' : '2:00:00',
+                _formatDuration(totalDuration),
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -618,7 +884,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
-  Widget _buildSubliminalsSection() {
+  Widget _buildSessionInfoSection() {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 20.w),
       padding: EdgeInsets.all(20.w),
@@ -641,7 +907,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose Your Subliminals:',
+            'Session Details',
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -650,22 +916,48 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ),
           SizedBox(height: 12.h),
 
-          // Subliminal options
-          ...(_session['subliminals'] as List<String>).map((subliminal) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: 4.h),
-              child: Text(
-                '• $subliminal',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
-                ),
+          // Show subliminal affirmations if selected
+          if (_includeSubliminal) ...[
+            Text(
+              'Subliminal Affirmations:',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
               ),
-            );
-          }).toList(),
-
-          SizedBox(height: 12.h),
+            ),
+            SizedBox(height: 8.h),
+            ...(_session['subliminal']['affirmations'] as List<String>)
+                .map((affirmation) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 4.h),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 4.w,
+                      height: 4.w,
+                      decoration: const BoxDecoration(
+                        color: AppColors.textSecondary,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: Text(
+                        affirmation,
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w400,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+            SizedBox(height: 12.h),
+          ],
 
           Text(
             _session['description'],
@@ -690,7 +982,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           topLeft: Radius.circular(20.r),
           topRight: Radius.circular(20.r),
         ),
-        border: Border(
+        border: const Border(
           top: BorderSide(
             color: AppColors.greyBorder,
             width: 1,
@@ -762,30 +1054,34 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _previousTrack() {
-    if (_isIntroPhase) {
-      // Go to beginning
-      setState(() {
-        _currentPosition = 0.0;
-      });
-    } else {
-      // Go back to intro
-      setState(() {
-        _isIntroPhase = true;
-        _currentPosition = 0.0;
-      });
-    }
+    setState(() {
+      _currentPosition = 0.0;
+    });
   }
 
   void _nextTrack() {
-    if (_isIntroPhase) {
-      // Skip to subliminal
-      setState(() {
-        _isIntroPhase = false;
-        _currentPosition = 0.0;
-      });
+    // Skip to next part or next session
+    if (_includeIntro && _includeSubliminal) {
+      final introDuration = _session['intro']['duration'] as int;
+      final totalDuration = _getTotalDuration();
+      final currentSeconds = (_currentPosition * totalDuration).round();
+
+      if (currentSeconds < introDuration) {
+        // Skip to subliminal
+        setState(() {
+          _currentPosition = introDuration / totalDuration;
+        });
+      } else {
+        // Go to end or next session
+        setState(() {
+          _currentPosition = 1.0;
+        });
+      }
     } else {
-      // Next session (placeholder)
-      print('Next session');
+      // Single audio selected, go to end
+      setState(() {
+        _currentPosition = 1.0;
+      });
     }
   }
 
@@ -807,38 +1103,88 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          children: [15, 30, 45, 60, 90].map((minutes) {
-            return ListTile(
+          children: [
+            ...[15, 30, 45, 60, 90].map((minutes) {
+              return ListTile(
+                title: Text(
+                  '$minutes minutes',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                trailing: _sleepTimer == minutes
+                    ? Icon(Icons.check,
+                        color: AppColors.textPrimary, size: 20.sp)
+                    : null,
+                onTap: () {
+                  setState(() {
+                    _sleepTimer = minutes;
+                  });
+                  Navigator.pop(context);
+
+                  // Show confirmation
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Sleep timer set for $minutes minutes',
+                        style: GoogleFonts.inter(fontSize: 14.sp),
+                      ),
+                      backgroundColor: AppColors.textPrimary,
+                      behavior: SnackBarBehavior.floating,
+                      duration: const Duration(seconds: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+            ListTile(
               title: Text(
-                '$minutes minutes',
+                'Cancel Timer',
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
-                  color: AppColors.textPrimary,
+                  color: Colors.red,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               onTap: () {
                 setState(() {
-                  _sleepTimer = minutes;
+                  _sleepTimer = null;
                 });
                 Navigator.pop(context);
               },
-            );
-          }).toList(),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  String _formatTime(double progress) {
-    if (_isIntroPhase) {
-      final seconds = (progress * 120).round();
-      return '${(seconds ~/ 60)}:${(seconds % 60).toString().padLeft(2, '0')}';
+  String _formatDuration(int seconds) {
+    if (seconds < 3600) {
+      // Less than an hour
+      final minutes = seconds ~/ 60;
+      final secs = seconds % 60;
+      if (secs == 0) {
+        return '$minutes minutes';
+      }
+      return '${minutes}:${secs.toString().padLeft(2, '0')}';
     } else {
-      final totalSeconds = (progress * 7200).round();
-      final hours = totalSeconds ~/ 3600;
-      final minutes = (totalSeconds % 3600) ~/ 60;
-      final seconds = totalSeconds % 60;
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+      // An hour or more
+      final hours = seconds ~/ 3600;
+      final minutes = (seconds % 3600) ~/ 60;
+      final secs = seconds % 60;
+      if (hours == 1 && minutes == 0 && secs == 0) {
+        return '1 hour';
+      } else if (hours > 0 && minutes == 0 && secs == 0) {
+        return '$hours hours';
+      } else if (secs == 0) {
+        return '$hours hours $minutes minutes';
+      }
+      return '${hours}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     }
   }
 }

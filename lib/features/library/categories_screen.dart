@@ -349,6 +349,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     );
   }
 
+  
+
   Widget _buildSessionItem(Map<String, dynamic> session) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -374,10 +376,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           height: 50.w,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: session['backgroundGradient'] ?? [
-                AppColors.greyLight,
-                AppColors.greyMedium,
-              ],
+              colors: session['backgroundGradient'] != null
+                  ? (session['backgroundGradient'] as List).map((color) {
+                      if (color is Color) return color;
+                      return const Color(0xFF1e3c72); // Default color
+                    }).toList()
+                  : [
+                      AppColors.greyLight,
+                      AppColors.greyMedium,
+                    ],
             ),
             borderRadius: BorderRadius.circular(12.r),
           ),
@@ -389,7 +396,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ),
         ),
         title: Text(
-          session['title'],
+          session['title'] ?? 'Untitled Session',
           style: GoogleFonts.inter(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
@@ -411,13 +418,20 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         onTap: () {
           // Close bottom sheet
           Navigator.pop(context);
-          
+
+          // Ensure session data has all required fields
+          final completeSessionData = {
+            ...session,
+            'backgroundGradient': session['backgroundGradient'] ??
+                [const Color(0xFF1e3c72), const Color(0xFF2a5298)],
+          };
+
           // Navigate to session detail
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => SessionDetailScreen(
-                sessionData: session,
+                sessionData: completeSessionData,
               ),
             ),
           );
