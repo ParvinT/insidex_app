@@ -35,7 +35,10 @@ class _GoalsScreenState extends State<GoalsScreen>
       curve: Curves.easeInOut,
     ));
 
-    _animationController.forward();
+    // Animasyonu frame sonrası başlat
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _animationController.forward();
+    });
   }
 
   @override
@@ -97,25 +100,36 @@ class _GoalsScreenState extends State<GoalsScreen>
               Expanded(
                 child: FadeTransition(
                   opacity: _fadeAnimation,
-                  child: GridView.builder(
-                    physics: const BouncingScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16.w,
-                      mainAxisSpacing: 16.h,
-                      childAspectRatio: 1.5,
-                    ),
-                    itemCount: UserGoal.values.length,
-                    itemBuilder: (context, index) {
-                      final goal = UserGoal.values[index];
-                      final isSelected = _selectedGoals.contains(goal);
-                      return _buildGoalCard(goal, isSelected, index);
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Dinamik aspect ratio hesaplama
+                      final screenWidth = MediaQuery.of(context).size.width;
+                      final cardWidth = (screenWidth - 48.w - 16.w) / 2;
+                      final cardHeight = cardWidth / 1.5;
+
+                      return GridView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        padding: EdgeInsets.zero,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16.w,
+                          mainAxisSpacing: 16.h,
+                          childAspectRatio: cardWidth / cardHeight,
+                        ),
+                        itemCount: UserGoal.values.length,
+                        itemBuilder: (context, index) {
+                          final goal = UserGoal.values[index];
+                          final isSelected = _selectedGoals.contains(goal);
+                          return _buildGoalCard(goal, isSelected, index);
+                        },
+                      );
                     },
                   ),
                 ),
               ),
 
               // Continue Button
+              SizedBox(height: 24.h),
               SizedBox(
                 width: double.infinity,
                 height: 56.h,
@@ -163,9 +177,9 @@ class _GoalsScreenState extends State<GoalsScreen>
       curve: Curves.easeOutBack,
       builder: (context, value, child) {
         return Transform.scale(
-          scale: value,
+          scale: value.clamp(0.0, 1.0), // Scale değerini sınırla
           child: Opacity(
-            opacity: value,
+            opacity: value.clamp(0.0, 1.0), // Opacity değerini sınırla
             child: GestureDetector(
               onTap: () {
                 setState(() {
@@ -197,37 +211,45 @@ class _GoalsScreenState extends State<GoalsScreen>
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Icon with colored background
-                    Container(
-                      width: 45.w,
-                      height: 45.w,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withOpacity(0.2)
-                            : goal.color.withOpacity(0.1),
-                        shape: BoxShape.circle,
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon with colored background
+                      Flexible(
+                        child: Container(
+                          width: 45.w,
+                          height: 45.w,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Colors.white.withOpacity(0.2)
+                                : goal.color.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            goal.icon,
+                            size: 24.sp,
+                            color: isSelected ? Colors.white : goal.color,
+                          ),
+                        ),
                       ),
-                      child: Icon(
-                        goal.icon,
-                        size: 26.sp,
-                        color: isSelected ? Colors.white : goal.color,
+                      SizedBox(height: 8.h),
+                      Text(
+                        goal.title,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                          color:
+                              isSelected ? Colors.white : AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      goal.title,
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color:
-                            isSelected ? Colors.white : AppColors.textPrimary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

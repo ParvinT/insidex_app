@@ -36,8 +36,3 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-
-  fonts:
-    - family: NotoColorEmoji
-      fonts:
-        - asset: https://github.com/googlefonts/noto-emoji/raw/main/fonts/NotoColorEmoji.ttf
