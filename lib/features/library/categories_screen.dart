@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
@@ -12,11 +13,14 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
+  // Emoji'leri önceden yüklemek için
+  bool _isLoading = true;
+
   // Kategori listesi
   final List<Map<String, dynamic>> _categories = [
     {
-      'title': 'All', 
-      'emoji': '✨', 
+      'title': 'All',
+      'emoji': '✨',
       'count': 150,
       'sessions': [
         {
@@ -36,8 +40,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ]
     },
     {
-      'title': 'Sleep', 
-      'emoji': '😴', 
+      'title': 'Sleep',
+      'emoji': '😴',
       'count': 25,
       'sessions': [
         {
@@ -47,7 +51,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           'duration': '2 hours 2 minutes',
           'introDuration': '2 minutes',
           'subliminalDuration': '2 hours',
-          'description': 'This powerful sleep session combines gentle healing frequencies with subliminal affirmations designed to promote deep, restorative sleep.',
+          'description':
+              'This powerful sleep session combines gentle healing frequencies with subliminal affirmations designed to promote deep, restorative sleep.',
           'benefits': [
             'Promotes deeper sleep cycles',
             'Reduces nighttime anxiety',
@@ -75,8 +80,8 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ]
     },
     {
-      'title': 'Confidence', 
-      'emoji': '💪', 
+      'title': 'Confidence',
+      'emoji': '💪',
       'count': 18,
       'sessions': [
         {
@@ -95,6 +100,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
     {'title': 'Success', 'emoji': '🏆', 'count': 16},
     {'title': 'Love', 'emoji': '💕', 'count': 12},
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _preloadEmojis();
+  }
+
+  // Emoji'leri önceden yükle
+  Future<void> _preloadEmojis() async {
+    // Kısa bir gecikme ile emoji'lerin yüklenmesini sağla
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -209,10 +232,31 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Emoji
-            Text(
-              category['emoji'],
-              style: TextStyle(fontSize: isAllCategory ? 40.sp : 36.sp),
+            // Emoji Container - Boyut sabitleme ve fallback ile
+            Container(
+              height: isAllCategory ? 44.sp : 40.sp,
+              width: isAllCategory ? 44.sp : 40.sp,
+              alignment: Alignment.center,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: _isLoading
+                    ? Container(
+                        width: isAllCategory ? 40.sp : 36.sp,
+                        height: isAllCategory ? 40.sp : 36.sp,
+                        decoration: BoxDecoration(
+                          color: AppColors.greyLight,
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      )
+                    : Text(
+                        category['emoji'],
+                        key: ValueKey(category['emoji']),
+                        style: TextStyle(
+                          fontSize: isAllCategory ? 40.sp : 36.sp,
+                          fontFamily: 'NotoColorEmoji', // Emoji font family
+                        ),
+                      ),
+              ),
             ),
             SizedBox(height: 12.h),
 
@@ -222,9 +266,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               style: GoogleFonts.inter(
                 fontSize: isAllCategory ? 18.sp : 16.sp,
                 fontWeight: isAllCategory ? FontWeight.w700 : FontWeight.w600,
-                color: isAllCategory
-                    ? AppColors.textPrimary
-                    : AppColors.textPrimary,
+                color: AppColors.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -241,7 +283,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     : AppColors.textSecondary,
               ),
             ),
-            
+
             // Coming soon indicator for categories without sessions
             if (!hasSessions && category['title'] != 'All') ...[
               SizedBox(height: 4.h),
@@ -293,15 +335,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
-              
+
               // Header
               Padding(
                 padding: EdgeInsets.all(20.w),
                 child: Row(
                   children: [
-                    Text(
-                      category['emoji'],
-                      style: TextStyle(fontSize: 24.sp),
+                    // Emoji için sabit boyutlu container
+                    Container(
+                      width: 28.sp,
+                      height: 28.sp,
+                      alignment: Alignment.center,
+                      child: Text(
+                        category['emoji'],
+                        style: TextStyle(
+                          fontSize: 24.sp,
+                          fontFamily: 'NotoColorEmoji',
+                        ),
+                      ),
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
@@ -329,7 +380,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   ],
                 ),
               ),
-              
+
               // Sessions List
               Expanded(
                 child: ListView.builder(
@@ -348,8 +399,6 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
       ),
     );
   }
-
-  
 
   Widget _buildSessionItem(Map<String, dynamic> session) {
     return Container(
@@ -389,9 +438,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Center(
-            child: Text(
-              session['emoji'] ?? '🎵',
-              style: TextStyle(fontSize: 20.sp),
+            child: Container(
+              width: 24.sp,
+              height: 24.sp,
+              alignment: Alignment.center,
+              child: Text(
+                session['emoji'] ?? '🎵',
+                style: TextStyle(
+                  fontSize: 20.sp,
+                  fontFamily: 'NotoColorEmoji',
+                ),
+              ),
             ),
           ),
         ),

@@ -8,6 +8,7 @@ import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_login_button.dart';
+import '../../services/firebase_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -42,22 +43,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please agree to the terms and conditions'),
-        ),
+        const SnackBar(content: Text('Please agree to the terms')),
       );
       return;
     }
 
     setState(() => _isLoading = true);
 
-    // TODO: Implement registration logic
-    await Future.delayed(const Duration(seconds: 2));
+    final result = await FirebaseService.signUp(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      name: _nameController.text.trim(),
+    );
 
     setState(() => _isLoading = false);
 
-    // Navigate to home or verification screen
-    print('Register with: ${_emailController.text}');
+    if (!mounted) return;
+
+    if (result['success']) {
+      Navigator.pushReplacementNamed(context, AppRoutes.home);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['error']),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override

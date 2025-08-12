@@ -8,6 +8,7 @@ import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_login_button.dart';
+import '../../services/firebase_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -33,17 +34,30 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+  if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+  setState(() => _isLoading = true);
 
-    // TODO: Implement login logic
-    await Future.delayed(const Duration(seconds: 2));
+  final result = await FirebaseService.signIn(
+    email: _emailController.text.trim(),
+    password: _passwordController.text,
+  );
 
-    setState(() => _isLoading = false);
+  setState(() => _isLoading = false);
 
-    print('Login with email: ${_emailController.text}');
+  if (!mounted) return;
+
+  if (result['success']) {
+    Navigator.pushReplacementNamed(context, AppRoutes.home);
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result['error']),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {

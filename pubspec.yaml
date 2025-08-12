@@ -15,6 +15,7 @@ dependencies:
   responsive_framework: ^1.1.1
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.9
+  #emoji_picker_flutter: ^1.6.4
 
   # State Management
   provider: ^6.1.1
@@ -24,6 +25,10 @@ dependencies:
 
   # Icons
   cupertino_icons: ^1.0.8
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.0
+  cloud_firestore: ^6.0.0
+  firebase_storage: ^13.0.0
 
 dev_dependencies:
   flutter_test:
