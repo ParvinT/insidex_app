@@ -22,21 +22,16 @@ class FirebaseService {
     required String name,
   }) async {
     try {
-      print('📝 Attempting to sign up: $email'); // Debug log
-
       // Create user with email and password
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      print('✅ User created in Auth: ${credential.user?.uid}'); // Debug log
-
       // Update display name
       await credential.user?.updateDisplayName(name);
 
       // Create user document in Firestore
-      print('📄 Creating Firestore document...'); // Debug log
 
       await _firestore.collection('users').doc(credential.user!.uid).set({
         'uid': credential.user!.uid,
@@ -50,20 +45,16 @@ class FirebaseService {
         'lastActiveAt': DateTime.now(),
       });
 
-      print('✅ Firestore document created successfully!'); // Debug log
-
       return {
         'success': true,
         'user': credential.user,
       };
     } on FirebaseAuthException catch (e) {
-      print('❌ FirebaseAuthException: ${e.code} - ${e.message}'); // Debug log
       return {
         'success': false,
         'error': _getAuthErrorMessage(e.code),
       };
     } catch (e) {
-      print('❌ Unexpected error: $e'); // Debug log
       return {
         'success': false,
         'error': 'An unexpected error occurred. Please try again.',

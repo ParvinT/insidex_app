@@ -5,7 +5,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
-import 'package:firebase_core/firebase_core.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -27,12 +26,11 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
-    // Firebase Test
-    print('🔥 Firebase App Name: ${Firebase.app().name}');
-    print('✅ Firebase initialized successfully!');
     _initAnimations();
     _navigateToNext();
   }
+
+ 
 
   void _initAnimations() {
     // Drop animation controller
