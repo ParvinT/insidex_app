@@ -119,17 +119,75 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: SafeArea(
-        child: Row(
-          children: [
-            // Sidebar
-            _buildSidebar(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Responsive design for web/tablet
+            final isWideScreen = constraints.maxWidth > 768;
 
-            // Main Content
-            Expanded(
-              child: _buildMainContent(),
-            ),
-          ],
+            if (isWideScreen) {
+              // Wide screen layout with sidebar
+              return Row(
+                children: [
+                  // Sidebar
+                  _buildSidebar(),
+
+                  // Main Content
+                  Expanded(
+                    child: _buildMainContent(),
+                  ),
+                ],
+              );
+            } else {
+              // Mobile layout
+              return Column(
+                children: [
+                  _buildMobileHeader(),
+                  Expanded(
+                    child: _buildMainContent(),
+                  ),
+                ],
+              );
+            }
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _buildMobileHeader() {
+    return Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.greyBorder,
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () => Navigator.pop(context),
+          ),
+          SizedBox(width: 12.w),
+          Icon(
+            Icons.admin_panel_settings,
+            color: Colors.red,
+            size: 28.sp,
+          ),
+          SizedBox(width: 12.w),
+          Text(
+            'Admin Panel',
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -347,39 +405,51 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildStatisticsGrid() {
-    return GridView.count(
-      crossAxisCount: 4,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 20.w,
-      mainAxisSpacing: 20.h,
-      childAspectRatio: 1.5,
-      children: [
-        _buildStatCard(
-          title: 'Total Users',
-          value: '${_statistics['totalUsers'] ?? 0}',
-          icon: Icons.people,
-          color: Colors.blue,
-        ),
-        _buildStatCard(
-          title: 'Premium Users',
-          value: '${_statistics['premiumUsers'] ?? 0}',
-          icon: Icons.star,
-          color: AppColors.primaryGold,
-        ),
-        _buildStatCard(
-          title: 'Total Sessions',
-          value: '${_statistics['totalSessions'] ?? 0}',
-          icon: Icons.music_note,
-          color: Colors.green,
-        ),
-        _buildStatCard(
-          title: 'Categories',
-          value: '${_statistics['totalCategories'] ?? 0}',
-          icon: Icons.category,
-          color: Colors.purple,
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 1200
+            ? 4
+            : constraints.maxWidth > 800
+                ? 3
+                : constraints.maxWidth > 600
+                    ? 2
+                    : 1;
+
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 16.w,
+          mainAxisSpacing: 16.h,
+          childAspectRatio: constraints.maxWidth > 600 ? 1.5 : 1.2,
+          children: [
+            _buildStatCard(
+              title: 'Total Users',
+              value: '${_statistics['totalUsers'] ?? 0}',
+              icon: Icons.people,
+              color: Colors.blue,
+            ),
+            _buildStatCard(
+              title: 'Premium Users',
+              value: '${_statistics['premiumUsers'] ?? 0}',
+              icon: Icons.star,
+              color: AppColors.primaryGold,
+            ),
+            _buildStatCard(
+              title: 'Total Sessions',
+              value: '${_statistics['totalSessions'] ?? 0}',
+              icon: Icons.music_note,
+              color: Colors.green,
+            ),
+            _buildStatCard(
+              title: 'Categories',
+              value: '${_statistics['totalCategories'] ?? 0}',
+              icon: Icons.category,
+              color: Colors.purple,
+            ),
+          ],
+        );
+      },
     );
   }
 

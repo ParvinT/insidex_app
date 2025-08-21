@@ -11,6 +11,11 @@ import '../../features/profile/profile_screen.dart';
 import '../../features/player/audio_player_screen.dart';
 import '../../features/library/session_detail_screen.dart';
 import '../../features/admin/admin_dashboard_screen.dart';
+import '../../features/admin/add_session_screen.dart';
+import '../../features/admin/category_management_screen.dart';
+import '../../features/admin/session_management_screen.dart';
+import '../../features/admin/user_management_screen.dart';
+import '../../features/admin/admin_settings_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -37,6 +42,11 @@ class AppRoutes {
         settings: (context) => const SettingsScreen(),
         profile: (context) => const ProfileScreen(),
         adminDashboard: (context) => const AdminDashboardScreen(),
+        '/admin/add-session': (context) => const AddSessionScreen(),
+        '/admin/categories': (context) => const CategoryManagementScreen(),
+        '/admin/sessions': (context) => const SessionManagementScreen(),
+        '/admin/users': (context) => const UserManagementScreen(),
+        '/admin/settings': (context) => const AdminSettingsScreen(),
         player: (context) {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
