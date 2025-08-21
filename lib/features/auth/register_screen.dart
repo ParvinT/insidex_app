@@ -1,10 +1,8 @@
-// lib/features/auth/register_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
@@ -43,10 +41,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    // Validate form
     if (!_formKey.currentState!.validate()) return;
 
-    // Check terms agreement
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -59,7 +55,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    // Attempt registration
     final result = await FirebaseService.signUp(
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
@@ -67,28 +62,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     setState(() => _isLoading = false);
-
     if (!mounted) return;
 
     if (result['success']) {
-      // Initialize user data in provider
       final user = result['user'];
       if (user != null) {
         await context.read<UserProvider>().loadUserData(user.uid);
       }
-
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Account created successfully!'),
           backgroundColor: Colors.green,
         ),
       );
-
-      // Navigate to home
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['error'] ?? 'Registration failed'),
@@ -100,24 +88,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleGoogleSignUp() async {
     setState(() => _isLoading = true);
-
     try {
-      // TODO: Implement Google Sign In
-      // final result = await FirebaseService.signInWithGoogle();
-      
-      // For now, show coming soon message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Google Sign In coming soon!'),
           backgroundColor: Colors.orange,
-        ),
-      );
-    } catch (e) {
-      print('Google sign up error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google sign up failed'),
-          backgroundColor: Colors.red,
         ),
       );
     } finally {
@@ -127,24 +102,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _handleAppleSignUp() async {
     setState(() => _isLoading = true);
-
     try {
-      // TODO: Implement Apple Sign In
-      // final result = await FirebaseService.signInWithApple();
-      
-      // For now, show coming soon message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Apple Sign In coming soon!'),
           backgroundColor: Colors.orange,
-        ),
-      );
-    } catch (e) {
-      print('Apple sign up error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Apple sign up failed'),
-          backgroundColor: Colors.red,
         ),
       );
     } finally {
@@ -160,17 +122,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.textPrimary,
-            size: 24.sp,
-          ),
+          icon:
+              Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
+          padding: EdgeInsets.fromLTRB(
+            24.w,
+            0,
+            24.w,
+            24.h +
+                MediaQuery.of(context).viewInsets.bottom, // klavye için güvenli
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -206,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
-                    // Name Field
+                    // Name
                     CustomTextField(
                       controller: _nameController,
                       label: 'Full Name',
@@ -214,10 +179,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: FormValidators.validateName,
                       readOnly: _isLoading,
                     ),
-
                     SizedBox(height: 16.h),
 
-                    // Email Field
+                    // Email
                     CustomTextField(
                       controller: _emailController,
                       label: 'Email Address',
@@ -226,10 +190,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: FormValidators.validateEmail,
                       readOnly: _isLoading,
                     ),
-
                     SizedBox(height: 16.h),
 
-                    // Password Field
+                    // Password
                     CustomTextField(
                       controller: _passwordController,
                       label: 'Password',
@@ -245,26 +208,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: AppColors.textSecondary,
                           size: 20.sp,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _isPasswordVisible = !_isPasswordVisible;
-                          });
-                        },
+                        onPressed: () => setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        }),
                       ),
                     ),
-
                     SizedBox(height: 16.h),
 
-                    // Confirm Password Field
+                    // Confirm Password
                     CustomTextField(
                       controller: _confirmPasswordController,
                       label: 'Confirm Password',
                       hint: 'Re-enter your password',
                       obscureText: !_isConfirmPasswordVisible,
-                      validator: (value) => FormValidators.validateConfirmPassword(
-                        value,
-                        _passwordController.text,
-                      ),
+                      validator: (value) =>
+                          FormValidators.validateConfirmPassword(
+                              value, _passwordController.text),
                       readOnly: _isLoading,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -274,11 +233,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: AppColors.textSecondary,
                           size: 20.sp,
                         ),
-                        onPressed: () {
-                          setState(() {
-                            _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-                          });
-                        },
+                        onPressed: () => setState(() {
+                          _isConfirmPasswordVisible =
+                              !_isConfirmPasswordVisible;
+                        }),
                       ),
                     ),
                   ],
@@ -287,8 +245,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 24.h),
 
-              // Terms and Conditions Checkbox
+              // Terms
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(
                     width: 24.w,
@@ -297,15 +256,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       value: _agreeToTerms,
                       onChanged: _isLoading
                           ? null
-                          : (value) {
-                              setState(() {
-                                _agreeToTerms = value ?? false;
-                              });
-                            },
+                          : (v) => setState(() => _agreeToTerms = v ?? false),
                       activeColor: AppColors.primaryGold,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
+                          borderRadius: BorderRadius.circular(4.r)),
                     ),
                   ),
                   SizedBox(width: 12.w),
@@ -313,17 +267,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: GestureDetector(
                       onTap: _isLoading
                           ? null
-                          : () {
-                              setState(() {
-                                _agreeToTerms = !_agreeToTerms;
-                              });
-                            },
+                          : () =>
+                              setState(() => _agreeToTerms = !_agreeToTerms),
                       child: RichText(
                         text: TextSpan(
                           style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                          ),
+                              fontSize: 14.sp, color: AppColors.textSecondary),
                           children: [
                             const TextSpan(text: 'I agree to the '),
                             TextSpan(
@@ -351,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 32.h),
 
-              // Sign Up Button
+              // Sign Up
               PrimaryButton(
                 text: 'Sign Up',
                 onPressed: _isLoading ? null : _handleRegister,
@@ -365,43 +314,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               SizedBox(height: 24.h),
 
-              // Social Sign Up Buttons
+              // Social sign up (ikonsuz, metin ortalı)
               Column(
                 children: [
                   SocialLoginButton(
                     label: 'Continue with Google',
-                    iconPath: 'assets/icons/google.svg',
                     onTap: _isLoading ? () {} : _handleGoogleSignUp,
+                    // iconPath yok
                   ),
                   SizedBox(height: 12.h),
                   SocialLoginButton(
                     label: 'Continue with Apple',
-                    iconPath: 'assets/icons/apple.svg',
                     onTap: _isLoading ? () {} : _handleAppleSignUp,
                     isDark: true,
+                    // iconPath yok
                   ),
                 ],
               ),
 
               SizedBox(height: 32.h),
 
-              // Sign In Link
+              // Sign In link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     'Already have an account? ',
                     style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                    ),
+                        fontSize: 14.sp, color: AppColors.textSecondary),
                   ),
                   GestureDetector(
                     onTap: _isLoading
                         ? null
-                        : () {
-                            Navigator.pushReplacementNamed(context, AppRoutes.login);
-                          },
+                        : () => Navigator.pushReplacementNamed(
+                            context, AppRoutes.login),
                     child: Text(
                       'Sign In',
                       style: GoogleFonts.inter(
@@ -425,28 +371,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            color: AppColors.greyBorder,
-          ),
-        ),
+        Expanded(child: Container(height: 1, color: AppColors.greyBorder)),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Text(
             'OR',
             style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
+                fontSize: 14.sp, color: AppColors.textSecondary),
           ),
         ),
-        Expanded(
-          child: Container(
-            height: 1,
-            color: AppColors.greyBorder,
-          ),
-        ),
+        Expanded(child: Container(height: 1, color: AppColors.greyBorder)),
       ],
     );
   }

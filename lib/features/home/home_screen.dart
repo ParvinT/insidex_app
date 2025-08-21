@@ -1,22 +1,16 @@
-// lib/features/home/home_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../features/library/categories_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
-  final bool isGuest;
-
-  const HomeScreen({
-    super.key,
-    this.isGuest = false,
-  });
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,42 +20,52 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   bool _isMenuOpen = false;
 
-  // Drag animation variables for All Subliminals
+  // thresholds
+  static const double _dragThreshold = 60.0;
+
+  // All Subliminals (drag down)
   double _dragOffset = 0.0;
   bool _isDragging = false;
   bool _readyToNavigate = false;
+
+  // Your Playlist (drag down — aynı davranış)
+  double _playlistDragOffset = 0.0;
+  bool _isPlaylistDragging = false;
+  bool _playlistReadyToNavigate = false;
+
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  late AnimationController _playlistPulseController;
+  late Animation<double> _playlistPulseAnimation;
 
   @override
   void initState() {
     super.initState();
 
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
+        duration: const Duration(milliseconds: 1500), vsync: this)
+      ..repeat(reverse: true);
+    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
+    );
 
-    _pulseAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _pulseController,
-      curve: Curves.easeInOut,
-    ));
+    _playlistPulseController = AnimationController(
+        duration: const Duration(milliseconds: 1500), vsync: this)
+      ..repeat(reverse: true);
+    _playlistPulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
+      CurvedAnimation(
+          parent: _playlistPulseController, curve: Curves.easeInOut),
+    );
   }
 
   @override
   void dispose() {
     _pulseController.dispose();
+    _playlistPulseController.dispose();
     super.dispose();
   }
 
-  void _toggleMenu() {
-    setState(() {
-      _isMenuOpen = !_isMenuOpen;
-    });
-  }
+  void _toggleMenu() => setState(() => _isMenuOpen = !_isMenuOpen);
 
   @override
   Widget build(BuildContext context) {
@@ -69,364 +73,383 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       backgroundColor: Colors.grey[200],
       body: Stack(
         children: [
-          // Main content
           SafeArea(
             child: Stack(
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.grey[200]!,
-                        Colors.grey[300]!,
-                      ],
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-                  child: Stack(
-                    children: [
-                      // ✅ Your Playlist Container (UNCHANGED)
-                      Positioned(
-                        top: 180.h,
-                        left: 0,
-                        right: 0,
-                        height: 200.h,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFCCCBCB),
-                            borderRadius: BorderRadius.circular(30.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 15,
-                                offset: const Offset(0, 8),
-                              ),
-                            ],
-                          ),
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                right: 20.w,
-                                bottom: 20.h,
-                                child: Text(
-                                  'Your Playlist',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                Positioned.fill(child: _buildBackground()),
 
-                      // ✅ All Subliminals Container (ENHANCED WITH ANIMATION)
-                      Positioned(
-                        top: 120.h +
-                            (_dragOffset.clamp(0, 60) * 0.3), // Slight movement
-                        left: 0,
-                        right: 0,
-                        height: 200.h,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CategoriesScreen(),
-                              ),
-                            );
-                          },
-                          onVerticalDragStart: (_) {
-                            setState(() {
-                              _isDragging = true;
-                            });
-                          },
-                          onVerticalDragUpdate: (details) {
-                            setState(() {
-                              _dragOffset += details.delta.dy;
-                              if (_dragOffset > 60) {
-                                if (!_readyToNavigate) {
-                                  HapticFeedback.lightImpact();
-                                }
-                                _readyToNavigate = true;
-                              } else {
-                                _readyToNavigate = false;
-                              }
-                            });
-                          },
-                          onVerticalDragEnd: (details) {
-                            if (_readyToNavigate ||
-                                details.primaryVelocity! > 500) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      const CategoriesScreen(),
-                                ),
-                              );
-                            }
-                            // Reset
-                            setState(() {
-                              _isDragging = false;
-                              _readyToNavigate = false;
-                              _dragOffset = 0.0;
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            transform: Matrix4.identity()
-                              ..scale(_isDragging ? 0.97 : 1.0),
-                            decoration: BoxDecoration(
-                              color: _readyToNavigate
-                                  ? const Color(0xFFD4AF37)
-                                  : const Color(0xFFCCCBCB),
-                              borderRadius: BorderRadius.circular(30.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: _readyToNavigate
-                                      ? AppColors.primaryGold.withOpacity(0.3)
-                                      : Colors.black.withOpacity(0.1),
-                                  blurRadius: _isDragging ? 25 : 20,
-                                  offset: Offset(0, _isDragging ? 12 : 10),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  right: 20.w,
-                                  bottom: 20.h,
-                                  child: Text(
-                                    'All Subliminals',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: _readyToNavigate
-                                          ? Colors.white
-                                          : AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                                // Drag indicator
-                                Positioned(
-                                  bottom: 8.h,
-                                  left: 0,
-                                  right: 0,
-                                  child: Column(
-                                    children: [
-                                      AnimatedBuilder(
-                                        animation: _pulseAnimation,
-                                        builder: (context, child) {
-                                          return Transform.scale(
-                                            scale: _pulseAnimation.value,
-                                            child: Icon(
-                                              _readyToNavigate
-                                                  ? Icons.lock_open
-                                                  : Icons.keyboard_arrow_down,
-                                              color: _readyToNavigate
-                                                  ? Colors.white
-                                                      .withOpacity(0.8)
-                                                  : AppColors.textPrimary
-                                                      .withOpacity(0.5),
-                                              size: 20.sp,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                      Container(
-                                        width: 50.w,
-                                        height: 5.h,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.textPrimary
-                                              .withOpacity(0.4),
-                                          borderRadius:
-                                              BorderRadius.circular(3.r),
-                                        ),
-                                        child: FractionallySizedBox(
-                                          alignment: Alignment.centerLeft,
-                                          widthFactor:
-                                              (_dragOffset / 60).clamp(0, 1),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: _readyToNavigate
-                                                  ? Colors.white
-                                                  : AppColors.primaryGold,
-                                              borderRadius:
-                                                  BorderRadius.circular(3.r),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // Header Container (UNCHANGED)
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        height: 240.h,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                blurRadius: 25,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(24.w),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Header buttons
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    _buildHeaderButton('Category', false),
-                                    _buildHeaderButton('Menu', true),
-                                  ],
-                                ),
-                                // Title and Search
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Welcome to Insidex',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 24.sp,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.textPrimary,
-                                      ),
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 20.w,
-                                        vertical: 14.h,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey[100],
-                                        borderRadius:
-                                            BorderRadius.circular(25.r),
-                                      ),
-                                      child: TextField(
-                                        style: GoogleFonts.inter(
-                                          fontSize: 16.sp,
-                                          color: AppColors.textPrimary,
-                                        ),
-                                        decoration: InputDecoration(
-                                          hintText: 'Search...',
-                                          hintStyle: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            color: AppColors.textLight,
-                                          ),
-                                          prefixIcon: Icon(
-                                            Icons.search,
-                                            color: AppColors.textLight,
-                                            size: 24.sp,
-                                          ),
-                                          border: InputBorder.none,
-                                          contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 20.w,
-                                            vertical: 14.h,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 20.h),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Container(
-                                            height: 48.h,
-                                            decoration: BoxDecoration(
-                                              color: AppColors.textPrimary,
-                                              borderRadius:
-                                                  BorderRadius.circular(25.r),
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                'Start Healing',
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 16.w),
-                                        Expanded(
-                                          child: Container(
-                                            height: 48.h,
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey[300],
-                                              borderRadius:
-                                                  BorderRadius.circular(25.r),
-                                            ),
-                                            child: Center(
-                                              child: Text(
-                                                'My Programs',
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.textPrimary,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Z-order sabit
+                _buildPlaylistCard(),
+                _buildAllSubliminalsCard(),
+                _buildHeader(),
               ],
             ),
           ),
-
-          // Menu Overlay (UNCHANGED)
           if (_isMenuOpen)
-            Positioned.fill(
-              child: MenuOverlay(
-                onClose: () {
-                  setState(() {
-                    _isMenuOpen = false;
-                  });
-                },
-              ),
-            ),
+            MenuOverlay(onClose: () => setState(() => _isMenuOpen = false)),
         ],
       ),
       bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  // ---------- parts ----------
+
+  Widget _buildBackground() {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.grey[200]!, Colors.grey[300]!],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 240.h,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 25,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildHeaderButton('Category', false),
+                  _buildHeaderButton('Menu', true),
+                ],
+              ),
+              Text(
+                'Welcome to Insidex',
+                style: GoogleFonts.inter(
+                  fontSize: 24.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              Container(
+                height: 48.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(15.r),
+                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                ),
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w),
+                      child: Icon(Icons.search,
+                          color: Colors.grey[400], size: 22.sp),
+                    ),
+                    const Expanded(
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: 'Search...',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------- Your Playlist (All Subliminals ile aynı his) ----------
+  Widget _buildPlaylistCard() {
+    final progress = (_playlistDragOffset / _dragThreshold).clamp(0.0, 1.0);
+
+    return Positioned(
+      top: 160.h + (_playlistDragOffset.clamp(0, _dragThreshold) * 0.3),
+      left: 0,
+      right: 0,
+      height: 200.h,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragStart: (_) => setState(() => _isPlaylistDragging = true),
+        onVerticalDragUpdate: (details) {
+          setState(() {
+            // geri sarma: 0..threshold aralığı
+            _playlistDragOffset = (_playlistDragOffset + details.delta.dy)
+                .clamp(0.0, _dragThreshold);
+            final wasReady = _playlistReadyToNavigate;
+            _playlistReadyToNavigate = _playlistDragOffset >= _dragThreshold;
+            if (_playlistReadyToNavigate && !wasReady) {
+              HapticFeedback.lightImpact();
+            }
+          });
+        },
+        onVerticalDragEnd: (details) async {
+          final v = details.primaryVelocity ?? 0.0; // aşağı hızlı -> pozitif
+          if (_playlistReadyToNavigate || v > 500) {
+            // >>> POPUP: Coming Soon <<<
+            await showDialog(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.r)),
+                content: Text(
+                  'Coming Soon!',
+                  style: GoogleFonts.inter(
+                      fontSize: 16.sp, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text('OK',
+                        style: TextStyle(color: AppColors.primaryGold)),
+                  ),
+                ],
+              ),
+            );
+          }
+          setState(() {
+            _isPlaylistDragging = false;
+            _playlistReadyToNavigate = false;
+            _playlistDragOffset = 0.0;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          transform: Matrix4.identity()
+            ..scale(_isPlaylistDragging ? 0.97 : 1.0),
+          decoration: BoxDecoration(
+            color: _playlistReadyToNavigate
+                ? const Color(0xFFD4AF37)
+                : const Color(0xFFCCCBCB),
+            borderRadius: BorderRadius.circular(30.r),
+            boxShadow: [
+              BoxShadow(
+                color: _playlistReadyToNavigate
+                    ? AppColors.primaryGold.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.08),
+                blurRadius: _isPlaylistDragging ? 25 : 15,
+                offset: Offset(0, _isPlaylistDragging ? 12 : 8),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              // Başlık
+              Positioned(
+                right: 20.w,
+                bottom: 20.h,
+                child: Text(
+                  'Your Playlist',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _playlistReadyToNavigate
+                        ? Colors.white
+                        : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              // Indicator: altta
+              Positioned(
+                bottom: 8.h,
+                left: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    AnimatedBuilder(
+                      animation: _playlistPulseAnimation,
+                      builder: (_, __) {
+                        return Transform.scale(
+                          scale: _playlistPulseAnimation.value,
+                          child: Icon(
+                            _playlistReadyToNavigate
+                                ? Icons.lock_open
+                                : Icons.keyboard_arrow_down,
+                            size: 20.sp,
+                            color: _playlistReadyToNavigate
+                                ? Colors.white.withOpacity(0.85)
+                                : AppColors.textPrimary.withOpacity(0.5),
+                          ),
+                        );
+                      },
+                    ),
+                    Container(
+                      width: 50.w,
+                      height: 5.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.textPrimary.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(3.r),
+                      ),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: progress,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _playlistReadyToNavigate
+                                ? Colors.white
+                                : AppColors.primaryGold,
+                            borderRadius: BorderRadius.circular(3.r),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------- All Subliminals ----------
+  Widget _buildAllSubliminalsCard() {
+    final progress = (_dragOffset / _dragThreshold).clamp(0.0, 1.0);
+
+    return Positioned(
+      top: 100.h + (_dragOffset.clamp(0, _dragThreshold) * 0.3),
+      left: 0,
+      right: 0,
+      height: 200.h,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const CategoriesScreen()),
+          );
+        },
+        onVerticalDragStart: (_) => setState(() => _isDragging = true),
+        onVerticalDragUpdate: (details) {
+          setState(() {
+            _dragOffset =
+                (_dragOffset + details.delta.dy).clamp(0.0, _dragThreshold);
+            final wasReady = _readyToNavigate;
+            _readyToNavigate = _dragOffset >= _dragThreshold;
+            if (_readyToNavigate && !wasReady) {
+              HapticFeedback.lightImpact();
+            }
+          });
+        },
+        onVerticalDragEnd: (details) {
+          final v = details.primaryVelocity ?? 0.0; // aşağı hızlı -> pozitif
+          if (_readyToNavigate || v > 500) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CategoriesScreen()),
+            );
+          }
+          setState(() {
+            _isDragging = false;
+            _readyToNavigate = false;
+            _dragOffset = 0.0;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          transform: Matrix4.identity()..scale(_isDragging ? 0.97 : 1.0),
+          decoration: BoxDecoration(
+            color: _readyToNavigate
+                ? const Color(0xFFD4AF37)
+                : const Color(0xFFCCCBCB),
+            borderRadius: BorderRadius.circular(30.r),
+            boxShadow: [
+              BoxShadow(
+                color: _readyToNavigate
+                    ? AppColors.primaryGold.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.1),
+                blurRadius: _isDragging ? 25 : 20,
+                offset: Offset(0, _isDragging ? 12 : 10),
+              ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                right: 20.w,
+                bottom: 20.h,
+                child: Text(
+                  'All Subliminals',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color:
+                        _readyToNavigate ? Colors.white : AppColors.textPrimary,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 8.h,
+                left: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    AnimatedBuilder(
+                      animation: _pulseAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _pulseAnimation.value,
+                          child: Icon(
+                            _readyToNavigate
+                                ? Icons.lock_open
+                                : Icons.keyboard_arrow_down,
+                            color: _readyToNavigate
+                                ? Colors.white.withOpacity(0.8)
+                                : AppColors.textPrimary.withOpacity(0.5),
+                            size: 20.sp,
+                          ),
+                        );
+                      },
+                    ),
+                    Container(
+                      width: 50.w,
+                      height: 5.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.textPrimary.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(3.r),
+                      ),
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: progress,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _readyToNavigate
+                                ? Colors.white
+                                : AppColors.primaryGold,
+                            borderRadius: BorderRadius.circular(3.r),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -438,20 +461,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           color: isDark ? AppColors.textPrimary : Colors.transparent,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: AppColors.textPrimary,
-            width: 1,
-          ),
+          border: Border.all(color: AppColors.textPrimary, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (isDark) ...[
-              Icon(
-                Icons.menu,
-                color: Colors.white,
-                size: 14.sp,
-              ),
+            if (!isDark) ...[
+              Icon(Icons.category_outlined,
+                  size: 14.sp, color: AppColors.textPrimary),
               SizedBox(width: 4.w),
             ],
             Text(
@@ -462,6 +479,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: isDark ? Colors.white : AppColors.textPrimary,
               ),
             ),
+            if (isDark) ...[
+              SizedBox(width: 4.w),
+              const Icon(Icons.menu, size: 14, color: Colors.white),
+            ],
           ],
         ),
       ),
@@ -503,11 +524,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _selectedIndex = index;
-        });
+        setState(() => _selectedIndex = index);
 
-        // Navigation logic
         switch (index) {
           case 0:
             break;
@@ -516,79 +534,58 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               context,
               MaterialPageRoute(builder: (_) => const CategoriesScreen()),
             ).then((_) {
-              setState(() {
-                _selectedIndex = 0;
-              });
+              if (!mounted) return;
+              setState(() => _selectedIndex = 0);
             });
             break;
           case 2:
           case 3:
-            // Coming soon dialog
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
+                      borderRadius: BorderRadius.circular(20.r)),
                   content: Text(
                     'Coming Soon!',
                     style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
+                        fontSize: 16.sp, fontWeight: FontWeight.w600),
+                    textAlign: TextAlign.center,
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text('OK'),
+                      child: Text('OK',
+                          style: TextStyle(color: AppColors.primaryGold)),
                     ),
                   ],
                 );
               },
             );
-            setState(() {
-              _selectedIndex = 0;
-            });
             break;
           case 4:
-            Navigator.pushNamed(context, AppRoutes.profile).then((_) {
-              setState(() {
-                _selectedIndex = 0;
-              });
-            });
+            Navigator.pushNamed(context, AppRoutes.profile);
             break;
         }
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(vertical: 8.h),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 24.sp,
-              color: isSelected ? AppColors.textPrimary : AppColors.textLight,
-            ),
+            Icon(icon,
+                color: isSelected ? AppColors.primaryGold : Colors.grey[400],
+                size: 24.sp),
             SizedBox(height: 4.h),
             Text(
               label,
               style: GoogleFonts.inter(
                 fontSize: 10.sp,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.textPrimary : AppColors.textLight,
+                color: isSelected ? AppColors.primaryGold : Colors.grey[400],
               ),
             ),
-            if (isSelected)
-              Container(
-                margin: EdgeInsets.only(top: 2.h),
-                height: 2.h,
-                width: 20.w,
-                decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
-                  borderRadius: BorderRadius.circular(1.r),
-                ),
-              ),
           ],
         ),
       ),

@@ -1,7 +1,13 @@
+// lib/features/settings/settings_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
+import '../../providers/user_provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -11,8 +17,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  // Settings states
   bool _notificationsEnabled = true;
-  bool _offlineDownload = false;
   String _selectedLanguage = 'English';
   String _selectedTheme = 'Light';
 
@@ -43,135 +49,109 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 24.h),
+          child: Padding(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Account Section
+                _buildSectionHeader('Account'),
+                SizedBox(height: 12.h),
+                _buildSettingsCard([
+                  _buildSettingItem(
+                    icon: Icons.person_outline,
+                    title: 'Edit Profile',
+                    onTap: () => _handleProfileEdit(),
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.logout_outlined,
+                    title: 'Sign Out',
+                    isDestructive: true,
+                    onTap: () => _handleSignOut(),
+                  ),
+                ]),
 
-              // Account Section
-              _buildSectionHeader('Account'),
-              SizedBox(height: 12.h),
-              _buildSettingsCard([
-                _buildSettingItem(
-                  icon: Icons.person_outline,
-                  title: 'Edit Profile',
-                  onTap: () => _handleProfileEdit(),
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.logout_outlined,
-                  title: 'Sign Out',
-                  isDestructive: true,
-                  onTap: () => _handleSignOut(),
-                ),
-              ]),
+                SizedBox(height: 32.h),
 
-              SizedBox(height: 32.h),
+                // App Section
+                _buildSectionHeader('App'),
+                SizedBox(height: 12.h),
+                _buildSettingsCard([
+                  _buildSwitchItem(
+                    icon: Icons.notifications_outlined,
+                    title: 'Notifications',
+                    subtitle: 'Receive reminders and updates',
+                    value: _notificationsEnabled,
+                    onChanged: (value) {
+                      setState(() {
+                        _notificationsEnabled = value;
+                      });
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.language_outlined,
+                    title: 'Language',
+                    subtitle: _selectedLanguage,
+                    onTap: () => _showLanguageDialog(),
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.palette_outlined,
+                    title: 'Theme',
+                    subtitle: _selectedTheme,
+                    onTap: () => _showThemeDialog(),
+                  ),
+                ]),
 
-              // App Section
-              _buildSectionHeader('App'),
-              SizedBox(height: 12.h),
-              _buildSettingsCard([
-                _buildSwitchItem(
-                  icon: Icons.notifications_outlined,
-                  title: 'Notifications',
-                  subtitle: 'Receive reminders and updates',
-                  value: _notificationsEnabled,
-                  onChanged: (value) {
-                    setState(() {
-                      _notificationsEnabled = value;
-                    });
-                  },
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.language_outlined,
-                  title: 'Language',
-                  subtitle: _selectedLanguage,
-                  onTap: () => _showLanguageDialog(),
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.palette_outlined,
-                  title: 'Theme',
-                  subtitle: _selectedTheme,
-                  onTap: () => _showThemeDialog(),
-                ),
-              ]),
+                SizedBox(height: 32.h),
 
-              SizedBox(height: 32.h),
+                // About Section
+                _buildSectionHeader('About'),
+                SizedBox(height: 12.h),
+                _buildSettingsCard([
+                  _buildSettingItem(
+                    icon: Icons.info_outline,
+                    title: 'About',
+                    onTap: () {
+                      // TODO: Navigate to about screen
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.privacy_tip_outlined,
+                    title: 'Privacy Policy',
+                    onTap: () {
+                      // TODO: Open privacy policy
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.description_outlined,
+                    title: 'Terms of Service',
+                    onTap: () {
+                      // TODO: Open terms of service
+                    },
+                  ),
+                ]),
 
-              // Audio Section
-              _buildSectionHeader('Audio'),
-              SizedBox(height: 12.h),
-              _buildSettingsCard([
-                _buildSwitchItem(
-                  icon: Icons.download_outlined,
-                  title: 'Offline Download',
-                  subtitle: 'Download sessions for offline use',
-                  value: _offlineDownload,
-                  onChanged: (value) {
-                    setState(() {
-                      _offlineDownload = value;
-                    });
-                  },
-                ),
-              ]),
+                SizedBox(height: 32.h),
 
-              SizedBox(height: 32.h),
+                // Version info
+                Center(
+                  child: Text(
+                    'Version 1.0.0',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                ),
 
-              // Legal Section
-              _buildSectionHeader('Legal'),
-              SizedBox(height: 12.h),
-              _buildSettingsCard([
-                _buildSettingItem(
-                  icon: Icons.description_outlined,
-                  title: 'Terms of Service',
-                  onTap: () => _handleTermsOfService(),
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.privacy_tip_outlined,
-                  title: 'Privacy Policy',
-                  onTap: () => _handlePrivacyPolicy(),
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.code_outlined,
-                  title: 'Licenses',
-                  onTap: () => _handleLicenses(),
-                ),
-              ]),
-
-              SizedBox(height: 32.h),
-
-              // About Section
-              _buildSectionHeader('About'),
-              SizedBox(height: 12.h),
-              _buildSettingsCard([
-                _buildSettingItem(
-                  icon: Icons.info_outline,
-                  title: 'App Version',
-                  subtitle: '1.0.0',
-                  showArrow: false,
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.email_outlined,
-                  title: 'Contact Us',
-                  onTap: () => _handleContactUs(),
-                ),
-                _buildDivider(),
-                _buildSettingItem(
-                  icon: Icons.star_outline,
-                  title: 'Rate App',
-                  onTap: () => _handleRateApp(),
-                ),
-              ]),
-
-              SizedBox(height: 40.h),
-            ],
+                SizedBox(height: 24.h),
+              ],
+            ),
           ),
         ),
       ),
@@ -196,17 +176,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: AppColors.greyBorder,
-          width: 1.5,
+          width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
-      child: Column(children: children),
+      child: Column(
+        children: children,
+      ),
     );
   }
 
@@ -214,9 +189,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required IconData icon,
     required String title,
     String? subtitle,
-    bool showArrow = true,
     bool isDestructive = false,
-    VoidCallback? onTap,
+    required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
@@ -267,12 +241,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            if (showArrow && onTap != null)
-              Icon(
-                Icons.chevron_right,
-                color: AppColors.textSecondary,
-                size: 20.sp,
-              ),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.textLight,
+              size: 20.sp,
+            ),
           ],
         ),
       ),
@@ -355,12 +328,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Action Methods
   void _handleProfileEdit() {
-    print('Edit Profile tapped');
-    // TODO: Navigate to profile edit screen
+    Navigator.pushNamed(context, AppRoutes.profile);
   }
 
-  void _handleSignOut() {
-    showDialog(
+  Future<void> _handleSignOut() async {
+    // Show confirmation dialog
+    final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(
@@ -383,7 +356,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(context, false),
             child: Text(
               'Cancel',
               style: GoogleFonts.inter(
@@ -394,11 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Handle sign out
-              print('User signed out');
-            },
+            onPressed: () => Navigator.pop(context, true),
             child: Text(
               'Sign Out',
               style: GoogleFonts.inter(
@@ -411,6 +380,57 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+
+    // If user confirmed sign out
+    if (shouldSignOut == true && mounted) {
+      try {
+        // Show loading indicator
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+
+        // Sign out from Firebase
+        await FirebaseAuth.instance.signOut();
+        
+        // Clear user data from provider
+        if (mounted) {
+          await context.read<UserProvider>().signOut();
+        }
+
+        // Close loading dialog
+        if (mounted) {
+          Navigator.pop(context);
+        }
+
+        // Navigate to welcome screen and clear navigation stack
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.welcome,
+            (route) => false,
+          );
+        }
+      } catch (e) {
+        // Close loading dialog if error
+        if (mounted) {
+          Navigator.pop(context);
+        }
+
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to sign out: ${e.toString()}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    }
   }
 
   void _showLanguageDialog() {
@@ -432,7 +452,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildLanguageOption('English'),
-            _buildLanguageOption('Coming Soon...', isDisabled: true),
+            _buildLanguageOption('Turkish', isDisabled: true),
+            _buildLanguageOption('Spanish', isDisabled: true),
           ],
         ),
       ),
@@ -448,7 +469,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: isDisabled ? AppColors.textLight : AppColors.textPrimary,
         ),
       ),
-      trailing: _selectedLanguage == language
+      trailing: _selectedLanguage == language && !isDisabled
           ? Icon(Icons.check, color: AppColors.textPrimary, size: 20.sp)
           : null,
       onTap: isDisabled
@@ -481,88 +502,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildThemeOption('Light'),
-            _buildThemeOption('Dark', isDisabled: true),
-            _buildThemeOption('System', isDisabled: true),
+            _buildThemeOption('Dark'),
+            _buildThemeOption('System'),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildThemeOption(String theme, {bool isDisabled = false}) {
+  Widget _buildThemeOption(String theme) {
     return ListTile(
-      title: Row(
-        children: [
-          Text(
-            theme,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: isDisabled ? AppColors.textLight : AppColors.textPrimary,
-            ),
-          ),
-          if (isDisabled) ...[
-            SizedBox(width: 8.w),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-              decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(
-                  color: AppColors.greyBorder,
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                'Coming Soon',
-                style: GoogleFonts.inter(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ),
-          ],
-        ],
+      title: Text(
+        theme,
+        style: GoogleFonts.inter(
+          fontSize: 14.sp,
+          color: AppColors.textPrimary,
+        ),
       ),
       trailing: _selectedTheme == theme
           ? Icon(Icons.check, color: AppColors.textPrimary, size: 20.sp)
           : null,
-      onTap: isDisabled
-          ? null
-          : () {
-              setState(() {
-                _selectedTheme = theme;
-              });
-              Navigator.pop(context);
-            },
+      onTap: () {
+        setState(() {
+          _selectedTheme = theme;
+        });
+        Navigator.pop(context);
+      },
     );
-  }
-
-  void _handleTermsOfService() {
-    print('Terms of Service tapped');
-    // TODO: Navigate to terms screen or show web view
-  }
-
-  void _handlePrivacyPolicy() {
-    print('Privacy Policy tapped');
-    // TODO: Navigate to privacy policy screen or show web view
-  }
-
-  void _handleLicenses() {
-    showLicensePage(
-      context: context,
-      applicationName: 'INSIDEX',
-      applicationVersion: '1.0.0',
-    );
-  }
-
-  void _handleContactUs() {
-    print('Contact Us tapped');
-    // TODO: Open email or contact form
-  }
-
-  void _handleRateApp() {
-    print('Rate App tapped');
-    // TODO: Open app store rating
   }
 }
