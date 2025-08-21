@@ -1,4 +1,4 @@
-
+// lib/features/profile/profile_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -203,9 +203,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (!userProvider.isPremium)
                   _buildPremiumPrompt(),
                 
-                // Admin Badge (if applicable)
-                if (userProvider.isAdmin)
-                  _buildAdminBadge(),
+                // Admin Section
+                if (userProvider.isAdmin) ...[
+                  SizedBox(height: 16.h),
+                  _buildAdminSection(),
+                ],
                 
                 SizedBox(height: 32.h),
                 
@@ -264,8 +266,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     child: Icon(
                       Icons.edit,
-                      size: 16.sp,
                       color: Colors.white,
+                      size: 16.sp,
                     ),
                   ),
                 ),
@@ -275,14 +277,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         
         SizedBox(height: 16.h),
         
-        // User name
+        // Name field
         if (_isEditing)
           SizedBox(
             width: 200.w,
-            child: CustomTextField(
+            child: TextField(
               controller: _nameController,
-              label: 'Full Name',
-              hint: 'Enter your name',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+              decoration: InputDecoration(
+                border: UnderlineInputBorder(),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppColors.primaryGold),
+                ),
+              ),
             ),
           )
         else
@@ -294,26 +306,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: AppColors.textPrimary,
             ),
           ),
-        
-        SizedBox(height: 4.h),
-        
-        // User email
-        Text(
-          userProvider.userEmail,
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: AppColors.textSecondary,
-          ),
-        ),
       ],
     );
   }
 
   Widget _buildUserInfoSection(UserProvider userProvider) {
-    final userData = userProvider.userData ?? {};
-    final createdAt = userData['createdAt']?.toDate() ?? DateTime.now();
-    final memberSince = '${_getMonthName(createdAt.month)} ${createdAt.year}';
-    
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -332,21 +329,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Account Information',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 16.h),
-          
-          _buildInfoRow('Member Since', memberSince),
+          _buildInfoRow('Email', userProvider.userEmail),
           SizedBox(height: 12.h),
-          
           _buildInfoRow(
             'Account Type',
             userProvider.isPremium ? 'Premium' : 'Free',
@@ -567,132 +552,151 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAdminBadge() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: Colors.red.withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.admin_panel_settings,
-            color: Colors.red,
-            size: 24.sp,
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            'Administrator Access',
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.red,
+  Widget _buildAdminSection() {
+    return Column(
+      children: [
+        // Admin Badge
+        Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: Colors.red.withOpacity(0.05),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: Colors.red.withOpacity(0.2),
             ),
           ),
-          const Spacer(),
-          TextButton(
-            onPressed: () {
-              // Navigate to admin panel (web only)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Admin panel is only available on web'),
-                ),
-              );
-            },
-            child: Text(
-              'Open Panel',
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
+          child: Row(
+            children: [
+              Icon(
+                Icons.admin_panel_settings,
                 color: Colors.red,
+                size: 24.sp,
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                'Administrator Access',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.red,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Text(
+                  'ACTIVE',
+                  style: GoogleFonts.inter(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        SizedBox(height: 12.h),
+        
+        // Admin Panel Button
+        Container(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/admin/dashboard');
+            },
+            icon: Icon(Icons.dashboard, size: 20.sp),
+            label: Text(
+              'Open Admin Panel',
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              elevation: 2,
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildSignOutButton() {
-    return SizedBox(
+    return Container(
       width: double.infinity,
-      child: PrimaryButton(
-        text: 'Sign Out',
+      child: OutlinedButton.icon(
         onPressed: _handleSignOut,
-        backgroundColor: Colors.red,
+        icon: Icon(Icons.logout, color: Colors.red),
+        label: Text(
+          'Sign Out',
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.red,
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          side: BorderSide(color: Colors.red, width: 1.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+        ),
       ),
     );
   }
 
   void _showAvatarPicker() {
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) => Container(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Choose Avatar',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Wrap(
-              spacing: 16.w,
-              runSpacing: 16.h,
-              children: _availableAvatars.map((avatar) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedAvatar = avatar);
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 60.w,
-                    height: 60.w,
-                    decoration: BoxDecoration(
-                      color: _selectedAvatar == avatar
-                          ? AppColors.primaryGold.withOpacity(0.2)
-                          : AppColors.greyLight,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _selectedAvatar == avatar
-                            ? AppColors.primaryGold
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        avatar,
-                        style: TextStyle(fontSize: 28.sp),
-                      ),
-                    ),
+      builder: (context) => AlertDialog(
+        title: Text('Choose Avatar'),
+        content: Wrap(
+          spacing: 16.w,
+          runSpacing: 16.h,
+          children: _availableAvatars.map((avatar) {
+            return GestureDetector(
+              onTap: () {
+                setState(() => _selectedAvatar = avatar);
+                Navigator.pop(context);
+              },
+              child: Container(
+                width: 48.w,
+                height: 48.w,
+                decoration: BoxDecoration(
+                  color: _selectedAvatar == avatar
+                      ? AppColors.primaryGold.withOpacity(0.2)
+                      : AppColors.greyLight,
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(
+                    color: _selectedAvatar == avatar
+                        ? AppColors.primaryGold
+                        : AppColors.greyBorder,
                   ),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20.h),
-          ],
+                ),
+                child: Center(
+                  child: Text(
+                    avatar,
+                    style: TextStyle(fontSize: 24.sp),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
   }
 }

@@ -10,6 +10,7 @@ import '../../features/settings/settings_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/player/audio_player_screen.dart';
 import '../../features/library/session_detail_screen.dart';
+import '../../features/admin/admin_dashboard_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -24,6 +25,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String player = '/player';
   static const String sessionDetail = '/session-detail';
+  static const String adminDashboard = '/admin/dashboard';
 
   static Map<String, WidgetBuilder> get routes => {
         splash: (context) => const SplashScreen(),
@@ -34,6 +36,7 @@ class AppRoutes {
         home: (context) => const HomeScreen(),
         settings: (context) => const SettingsScreen(),
         profile: (context) => const ProfileScreen(),
+        adminDashboard: (context) => const AdminDashboardScreen(),
         player: (context) {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;

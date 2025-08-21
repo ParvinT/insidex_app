@@ -31,10 +31,13 @@ dependencies:
   firebase_storage: ^13.0.0
 
   # Audio packages
-  just_audio: ^0.9.40
-  audio_service: ^0.18.15
-  audio_video_progress_bar: ^2.0.2
+  just_audio: ^0.10.4
+  audio_service: ^0.18.18
+  audio_video_progress_bar: ^2.0.3
   rxdart: ^0.27.7
+  cached_network_image: ^3.4.1
+  flutter_cache_manager: ^3.4.1
+  file_picker: ^10.3.2
 
 dev_dependencies:
   flutter_test:

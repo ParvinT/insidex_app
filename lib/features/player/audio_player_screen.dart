@@ -1,7 +1,14 @@
+// lib/features/player/audio_player_screen_modern.dart
+
+import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_colors.dart';
+import '../../services/audio_player_service.dart';
+import '../../services/firebase_service.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -19,28 +26,33 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     with TickerProviderStateMixin {
   // Animation Controllers
   late AnimationController _pulseController;
-  late AnimationController _bounceController;
   late AnimationController _waveController;
+
+  // Audio Service
+  final AudioPlayerService _audioService = AudioPlayerService();
 
   // Audio State
   bool _isPlaying = false;
-  bool _showSubtitles = false;
-  double _currentPosition = 0.0; // 0.0 to 1.0
-  double _volume = 0.7;
-
-  // Timer
-  int? _sleepTimer;
-
-  // Current Playing Track
+  bool _isFavorite = false;
+  bool _isLooping = false;
+  bool _isShuffled = false;
   String _currentTrack = 'intro'; // 'intro' or 'subliminal'
-  bool _autoPlayEnabled = true; // Auto-play to next track
+  bool _autoPlayEnabled = true;
+  double _currentProgress = 0.0;
+  Duration _currentPosition = Duration.zero;
+  Duration _totalDuration = Duration.zero;
+  double _volume = 0.7;
+  int? _sleepTimerMinutes;
 
-  // Track durations (in seconds)
+  // Session data
+  late Map<String, dynamic> _session;
   late int _introDuration;
   late int _subliminalDuration;
 
-  // Mock session data
-  late Map<String, dynamic> _session;
+  // Stream subscriptions
+  StreamSubscription<bool>? _playingSubscription;
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<Duration>? _durationSubscription;
 
   @override
   void initState() {
@@ -49,175 +61,244 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     // Initialize session data
     _session = widget.sessionData ??
         {
-          'title': 'Sleep',
-          'category': 'Deep Sleep Healing',
-          'backgroundGradient': [
-            const Color(0xFF1e3c72),
-            const Color(0xFF2a5298)
-          ],
-          'backgroundImage': null, // Firebase'den gelecek
-          'audioUrl': null, // Firebase'den gelecek ses dosyası URL'i
+          'id': 'test_session',
+          'title': 'Deep Sleep Healing',
+          'category': 'Sleep',
+          'backgroundImage':
+              'https://images.unsplash.com/photo-1511295742362-92c96b1cf484?w=800',
           'intro': {
             'title': 'Relaxation Introduction',
-            'duration': 120, // 2 minutes in seconds
-            'description':
-                'A gentle introduction to prepare your mind for deep healing',
-            'audioUrl': null, // Firebase'den gelecek intro ses URL'i
+            'duration': 120,
+            'description': 'A gentle introduction to prepare your mind',
+            'audioUrl':
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
           },
           'subliminal': {
             'title': 'Deep Sleep Subliminals',
-            'duration': 7200, // 2 hours in seconds
-            'affirmations': [
-              'Deep Sleep Healing',
-              'Nighttime Anxiety Release',
-              'Positive Mindset Overnight'
-            ],
-            'audioUrl': null, // Firebase'den gelecek subliminal ses URL'i
+            'duration': 7200,
+            'description':
+                'Powerful subliminal affirmations for deep healing sleep',
+            'audioUrl':
+                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
           },
-          'description':
-              'Subliminals for sleep are designed to work gently as you drift off and throughout the night. Play them quietly, 70-80% volumes as your subconscious mind is more open to change, making subliminal programming highly effective.',
         };
 
     _introDuration = _session['intro']['duration'] as int;
     _subliminalDuration = _session['subliminal']['duration'] as int;
+    _totalDuration = Duration(seconds: _introDuration);
 
     // Initialize animations
     _pulseController = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
-    );
-
-    _bounceController = AnimationController(
-      duration: const Duration(seconds: 1),
-      vsync: this,
-    );
+    )..repeat(reverse: true);
 
     _waveController = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
     );
 
-    // Start pulse animation
-    _pulseController.repeat();
-    _bounceController.forward();
+    // Initialize audio
+    _initializeAudio();
 
-    // Auto-start introduction when entering session
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _startIntroduction();
+    // Check if favorite
+    _checkFavoriteStatus();
+  }
+
+  Future<void> _initializeAudio() async {
+    await _audioService.initialize();
+
+    // Listen to playback state
+    _playingSubscription = _audioService.isPlaying.listen((playing) {
+      if (mounted) {
+        setState(() => _isPlaying = playing);
+        if (playing) {
+          _waveController.repeat();
+        } else {
+          _waveController.stop();
+        }
+      }
     });
+
+    // Listen to position updates
+    _positionSubscription = _audioService.position.listen((position) {
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+          // Calculate progress based on actual duration from audio service
+          final actualDuration = _audioService.totalDuration;
+          if (actualDuration.inSeconds > 0) {
+            _currentProgress = position.inSeconds / actualDuration.inSeconds;
+            _currentProgress = _currentProgress.clamp(0.0, 1.0);
+            _totalDuration = actualDuration;
+          }
+        });
+
+        // Auto-play next track when current finishes
+        if (_autoPlayEnabled &&
+            _currentTrack == 'intro' &&
+            position.inSeconds >= _totalDuration.inSeconds - 1 &&
+            _totalDuration.inSeconds > 0) {
+          _switchToTrack('subliminal');
+        }
+      }
+    });
+
+    // Listen to duration updates
+    _durationSubscription = _audioService.duration.listen((duration) {
+      if (mounted && duration.inSeconds > 0) {
+        setState(() {
+          _totalDuration = duration;
+        });
+      }
+    });
+
+    // Listen to volume changes
+    _audioService.volume.listen((volume) {
+      if (mounted) {
+        setState(() => _volume = volume);
+      }
+    });
+
+    // Listen to sleep timer
+    _audioService.sleepTimer.listen((minutes) {
+      if (mounted) {
+        setState(() => _sleepTimerMinutes = minutes);
+      }
+    });
+  }
+
+  void _checkFavoriteStatus() async {
+    // Check if session is in favorites
+    // TODO: Implement with Firebase
+    setState(() {
+      _isFavorite = false; // Default
+    });
+  }
+
+  void _handleTrackCompletion() {
+    if (_currentTrack == 'intro' && _autoPlayEnabled) {
+      // Auto-play subliminal after intro
+      _switchToTrack('subliminal');
+    } else if (_isLooping) {
+      // Loop current track
+      _audioService.seek(Duration.zero);
+      _playCurrentTrack();
+    }
   }
 
   @override
   void dispose() {
+    _playingSubscription?.cancel();
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
     _pulseController.dispose();
-    _bounceController.dispose();
     _waveController.dispose();
     super.dispose();
-  }
-
-  // Auto-start introduction
-  void _startIntroduction() {
-    setState(() {
-      _currentTrack = 'intro';
-      _isPlaying = true;
-      _currentPosition = 0.0;
-    });
-    _waveController.repeat();
-
-    // Simulate intro completion for auto-play
-    if (_autoPlayEnabled) {
-      Future.delayed(Duration(seconds: _introDuration), () {
-        if (mounted && _autoPlayEnabled) {
-          _playNext();
-        }
-      });
-    }
-  }
-
-  // Play next track automatically
-  void _playNext() {
-    if (_currentTrack == 'intro') {
-      setState(() {
-        _currentTrack = 'subliminal';
-        _currentPosition = 0.0;
-      });
-
-      // Show notification
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Now playing: Subliminal Session',
-            style: GoogleFonts.inter(fontSize: 14.sp),
-          ),
-          backgroundColor: AppColors.textPrimary,
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-        ),
-      );
-    }
-  }
-
-  // Get current duration based on track
-  int _getCurrentDuration() {
-    return _currentTrack == 'intro' ? _introDuration : _subliminalDuration;
-  }
-
-  // Get current playing info
-  String _getCurrentPlayingInfo() {
-    if (_currentTrack == 'intro') {
-      return 'Introduction • ${_formatDuration(_introDuration)}';
-    } else {
-      return 'Subliminal Session • ${_formatDuration(_subliminalDuration)}';
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar with Back Button
-            _buildTopBar(),
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Background Image with Blur
+          _buildBackgroundImage(),
 
-            // Main Player Area
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    SizedBox(height: 20.h),
+          // Dark Overlay
+          Container(
+            color: Colors.black.withOpacity(0.4),
+          ),
 
-                    // Track Selection Section
-                    _buildTrackSelectionSection(),
+          // Main Content
+          SafeArea(
+            child: Column(
+              children: [
+                // Top Bar
+                _buildTopBar(),
 
-                    SizedBox(height: 20.h),
+                // Main Player Area
+                Expanded(
+                  child: Column(
+                    children: [
+                      const Spacer(),
 
-                    // Player Card
-                    _buildPlayerCard(),
+                      // Album Art / Session Image
+                      _buildAlbumArt(),
 
-                    SizedBox(height: 24.h),
+                      SizedBox(height: 40.h),
 
-                    // Volume Control
-                    _buildVolumeControl(),
+                      // Track Selector
+                      _buildTrackSelector(),
 
-                    SizedBox(height: 24.h),
+                      SizedBox(height: 24.h),
 
-                    // Session Info Section
-                    _buildSessionInfoSection(),
+                      // Progress Bar
+                      _buildProgressBar(),
 
-                    SizedBox(height: 20.h),
-                  ],
+                      SizedBox(height: 32.h),
+
+                      // Controls
+                      _buildControls(),
+
+                      const Spacer(),
+
+                      // Bottom Options
+                      _buildBottomOptions(),
+
+                      SizedBox(height: 20.h),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Sleep Timer Overlay (if active)
+          if (_sleepTimerMinutes != null)
+            Positioned(
+              top: 100.h,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    '💤 Sleep timer: ${_sleepTimerMinutes} min',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
 
-            // Bottom Navigation
-            _buildBottomNav(),
-          ],
+  Widget _buildBackgroundImage() {
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: CachedNetworkImageProvider(
+            _session['backgroundImage'] ??
+                'https://images.unsplash.com/photo-1511295742362-92c96b1cf484?w=800',
+          ),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          color: Colors.black.withOpacity(0.2),
         ),
       ),
     );
@@ -225,256 +306,116 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   Widget _buildTopBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+      padding: EdgeInsets.all(20.w),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Back Button
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40.w,
-              height: 40.w,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.greyBorder,
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.arrow_back,
-                color: AppColors.textPrimary,
-                size: 20.sp,
-              ),
-            ),
+          IconButton(
+            icon: Icon(Icons.keyboard_arrow_down,
+                color: Colors.white, size: 32.sp),
+            onPressed: () => Navigator.pop(context),
           ),
-
-          const Spacer(),
-
-          // Logo
-          Text(
-            'Inside⊗',
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-
-          const Spacer(),
-
-          // Menu button
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.greyBorder,
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Icon(
-              Icons.more_vert,
-              color: AppColors.textPrimary,
-              size: 20.sp,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrackSelectionSection() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: Text(
-                  'Track Selection',
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+              Text(
+                'NOW PLAYING',
+                style: GoogleFonts.inter(
+                  fontSize: 10.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white70,
+                  letterSpacing: 1.5,
                 ),
               ),
-              // Auto-play toggle - sadece switch
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Auto-play',
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w500,
-                      color: _autoPlayEnabled
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                  Transform.scale(
-                    scale: 0.8,
-                    child: Switch(
-                      value: _autoPlayEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          _autoPlayEnabled = value;
-                        });
-                      },
-                      activeColor: AppColors.textPrimary,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
-                ],
+              SizedBox(height: 4.h),
+              Text(
+                _session['category'] ?? 'Session',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
-          SizedBox(height: 12.h),
-
-          // Introduction Track
-          _buildTrackItem(
-            title: 'Introduction',
-            subtitle: _formatDuration(_introDuration),
-            description: _session['intro']['description'],
-            icon: Icons.record_voice_over,
-            isActive: _currentTrack == 'intro',
-            onTap: () {
-              setState(() {
-                _currentTrack = 'intro';
-                _currentPosition = 0.0;
-                if (!_isPlaying) {
-                  _isPlaying = true;
-                  _waveController.repeat();
-                }
-              });
-            },
-          ),
-
-          SizedBox(height: 10.h),
-
-          // Subliminal Track
-          _buildTrackItem(
-            title: 'Subliminal Session',
-            subtitle: _formatDuration(_subliminalDuration),
-            description:
-                'Deep healing frequencies with subliminal affirmations',
-            icon: Icons.waves,
-            isActive: _currentTrack == 'subliminal',
-            onTap: () {
-              setState(() {
-                _currentTrack = 'subliminal';
-                _currentPosition = 0.0;
-                if (!_isPlaying) {
-                  _isPlaying = true;
-                  _waveController.repeat();
-                }
-              });
-            },
-          ),
-
-          SizedBox(height: 12.h),
-
-          // Currently Playing Display - Daha küçük yaptık
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.textPrimary.withOpacity(0.05),
-                  AppColors.textPrimary.withOpacity(0.02),
-                ],
-              ),
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(
-                color: AppColors.textPrimary.withOpacity(0.2),
-                width: 1,
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (_isPlaying) ...[
-                  _buildAnimatedWave(),
-                  SizedBox(width: 6.w),
-                ],
-                Icon(
-                  _isPlaying ? Icons.graphic_eq : Icons.music_note,
-                  color: AppColors.textPrimary,
-                  size: 14.sp,
-                ),
-                SizedBox(width: 6.w),
-                Flexible(
-                  child: Text(
-                    _isPlaying
-                        ? 'Now Playing: ${_getCurrentPlayingInfo()}'
-                        : 'Paused',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
+          IconButton(
+            icon: Icon(Icons.more_vert, color: Colors.white, size: 24.sp),
+            onPressed: _showOptionsMenu,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAnimatedWave() {
+  Widget _buildAlbumArt() {
+    return AnimatedBuilder(
+      animation: _pulseController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _isPlaying ? 1.0 + (_pulseController.value * 0.02) : 1.0,
+          child: Container(
+            width: 280.w,
+            height: 280.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 30,
+                  offset: const Offset(0, 20),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20.r),
+              child: Stack(
+                children: [
+                  CachedNetworkImage(
+                    imageUrl: _session['backgroundImage'] ??
+                        'https://images.unsplash.com/photo-1511295742362-92c96b1cf484?w=800',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[800],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white30,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Playing indicator overlay
+                  if (_isPlaying)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                      ),
+                      child: Center(
+                        child: _buildWaveAnimation(),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildWaveAnimation() {
     return SizedBox(
-      width: 20.w,
-      height: 16.h,
+      width: 80.w,
+      height: 40.h,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(3, (index) {
+        children: List.generate(5, (index) {
           return AnimatedBuilder(
             animation: _waveController,
             builder: (context, child) {
-              final delay = index * 0.2;
+              final delay = index * 0.15;
               final animation = Tween<double>(
-                begin: 0.3,
+                begin: 0.2,
                 end: 1.0,
               ).animate(CurvedAnimation(
                 parent: _waveController,
@@ -482,10 +423,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ));
 
               return Container(
-                width: 3.w,
-                height: 16.h * animation.value,
+                width: 4.w,
+                height: 40.h * animation.value,
                 decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
+                  color: Colors.white70,
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               );
@@ -496,815 +437,716 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
-  Widget _buildTrackItem({
-    required String title,
-    required String subtitle,
-    required String description,
-    required IconData icon,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.textPrimary.withOpacity(0.05)
-              : AppColors.greyLight,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isActive ? AppColors.textPrimary : AppColors.greyBorder,
-            width: isActive ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.textPrimary.withOpacity(0.1)
-                    : Colors.white,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Icon(
-                icon,
-                color:
-                    isActive ? AppColors.textPrimary : AppColors.textSecondary,
-                size: 18.sp,
-              ),
-            ),
-            SizedBox(width: 10.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          title,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (isActive) ...[
-                        SizedBox(width: 6.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 5.w, vertical: 2.h),
-                          decoration: BoxDecoration(
-                            color: AppColors.textPrimary,
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            'PLAYING',
-                            style: GoogleFonts.inter(
-                              fontSize: 7.sp,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    description,
-                    style: GoogleFonts.inter(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Icon(
-              Icons.play_circle_filled,
-              color: isActive
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary.withOpacity(0.5),
-              size: 28.sp,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlayerCard() {
+  Widget _buildTrackSelector() {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w),
+      margin: EdgeInsets.symmetric(horizontal: 40.w),
+      padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+        color: Colors.white.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          _buildTrackTab(
+            title: 'Introduction',
+            duration: _formatDuration(Duration(seconds: _introDuration)),
+            isActive: _currentTrack == 'intro',
+            onTap: () => _switchToTrack('intro'),
+          ),
+          _buildTrackTab(
+            title: 'Subliminal',
+            duration: _formatDuration(Duration(seconds: _subliminalDuration)),
+            isActive: _currentTrack == 'subliminal',
+            onTap: () => _switchToTrack('subliminal'),
           ),
         ],
       ),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            // Session Info
-            Row(
-              children: [
-                // Sound wave icon
-                Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.greyLight,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: AppColors.greyBorder,
-                      width: 1,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.graphic_eq,
-                    color: AppColors.textPrimary,
-                    size: 18.sp,
-                  ),
-                ),
-                SizedBox(width: 10.w),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _session['title'],
-                        style: GoogleFonts.inter(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        _session['category'],
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondary,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Music note icon
-                Icon(
-                  Icons.music_note,
-                  color: AppColors.textSecondary,
-                  size: 20.sp,
-                ),
-              ],
-            ),
-
-            SizedBox(height: 24.h),
-
-            // Animated Pulse Circle
-            _buildAnimatedPulse(),
-
-            SizedBox(height: 24.h),
-
-            // Player Controls
-            _buildPlayerControls(),
-
-            SizedBox(height: 16.h),
-
-            // Progress Bar
-            _buildProgressBar(),
-
-            SizedBox(height: 12.h),
-
-            // Additional Controls
-            _buildAdditionalControls(),
-          ],
-        ),
-      ),
     );
   }
 
-  Widget _buildAnimatedPulse() {
-    return AnimatedBuilder(
-      animation: Listenable.merge([_pulseController, _bounceController]),
-      builder: (context, child) {
-        return SizedBox(
-          width: 100.w,
-          height: 100.w,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Pulse rings
-              for (int i = 0; i < 3; i++)
-                Positioned.fill(
-                  child: AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, child) {
-                      final delay = i * 0.3;
-                      final animation = Tween<double>(
-                        begin: 0.0,
-                        end: 1.0,
-                      ).animate(CurvedAnimation(
-                        parent: _pulseController,
-                        curve: Interval(delay, 1.0, curve: Curves.easeOut),
-                      ));
-
-                      return Transform.scale(
-                        scale: animation.value * 0.8 + 0.2,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.textPrimary.withOpacity(
-                                (1 - animation.value) * 0.3,
-                              ),
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-              // Center circle
-              Container(
-                width: 50.w,
-                height: 50.w,
-                decoration: BoxDecoration(
-                  color: AppColors.greyLight,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: AppColors.greyBorder,
-                    width: 2,
-                  ),
-                ),
-                child: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: AppColors.textPrimary,
-                  size: 24.sp,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildPlayerControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Previous
-        _buildControlButton(
-          icon: Icons.skip_previous,
-          onTap: _previousTrack,
-        ),
-
-        SizedBox(width: 20.w),
-
-        // Play/Pause
-        GestureDetector(
-          onTap: _togglePlayPause,
-          child: Container(
-            width: 56.w,
-            height: 56.w,
-            decoration: BoxDecoration(
-              color: AppColors.textPrimary,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 15,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Icon(
-              _isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
-              size: 28.sp,
-            ),
-          ),
-        ),
-
-        SizedBox(width: 20.w),
-
-        // Next
-        _buildControlButton(
-          icon: Icons.skip_next,
-          onTap: _nextTrack,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildControlButton({
-    required IconData icon,
+  Widget _buildTrackTab({
+    required String title,
+    required String duration,
+    required bool isActive,
     required VoidCallback onTap,
   }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44.w,
-        height: 44.w,
-        decoration: BoxDecoration(
-          color: AppColors.greyLight,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color: AppColors.greyBorder,
-            width: 1,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          padding: EdgeInsets.symmetric(vertical: 12.h),
+          decoration: BoxDecoration(
+            color:
+                isActive ? Colors.white.withOpacity(0.2) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.r),
           ),
-        ),
-        child: Icon(
-          icon,
-          color: AppColors.textPrimary,
-          size: 20.sp,
+          child: Column(
+            children: [
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                  color: isActive ? Colors.white : Colors.white70,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                duration,
+                style: GoogleFonts.inter(
+                  fontSize: 11.sp,
+                  color: isActive ? Colors.white70 : Colors.white54,
+                ),
+              ),
+              if (_autoPlayEnabled && isActive && _currentTrack == 'intro')
+                Padding(
+                  padding: EdgeInsets.only(top: 4.h),
+                  child: Text(
+                    'Auto-play next ➜',
+                    style: GoogleFonts.inter(
+                      fontSize: 9.sp,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProgressBar() {
-    final currentDuration = _getCurrentDuration();
-    final currentSeconds = (_currentPosition * currentDuration).round();
-
-    return Column(
-      children: [
-        // Progress bar
-        Container(
-          height: 4.h,
-          margin: EdgeInsets.symmetric(horizontal: 4.w),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(2.r),
-            child: LinearProgressIndicator(
-              value: _currentPosition,
-              backgroundColor: AppColors.greyLight,
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
-            ),
-          ),
-        ),
-
-        SizedBox(height: 8.h),
-
-        // Time labels
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 4.w),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                _formatDuration(currentSeconds),
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              Text(
-                _formatDuration(currentDuration),
-                style: GoogleFonts.inter(
-                  fontSize: 12.sp,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAdditionalControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        // Timer
-        _buildIconButton(
-          icon: Icons.timer,
-          isActive: _sleepTimer != null,
-          onTap: _showTimerDialog,
-        ),
-
-        // Subtitles
-        _buildIconButton(
-          icon: Icons.subtitles,
-          isActive: _showSubtitles,
-          onTap: () {
-            setState(() {
-              _showSubtitles = !_showSubtitles;
-            });
-          },
-        ),
-
-        // Share
-        _buildIconButton(
-          icon: Icons.share,
-          onTap: () {
-            // TODO: Share functionality
-          },
-        ),
-
-        // Favorite
-        _buildIconButton(
-          icon: Icons.favorite_border,
-          onTap: () {
-            // TODO: Favorite functionality
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildIconButton({
-    required IconData icon,
-    required VoidCallback onTap,
-    bool isActive = false,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40.w,
-        height: 40.w,
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.textPrimary.withOpacity(0.1)
-              : AppColors.greyLight,
-          borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: isActive ? AppColors.textPrimary : AppColors.greyBorder,
-            width: 1,
-          ),
-        ),
-        child: Icon(
-          icon,
-          color: isActive ? AppColors.textPrimary : AppColors.textSecondary,
-          size: 18.sp,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVolumeControl() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 40.w),
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.volume_down,
-            color: AppColors.textSecondary,
-            size: 20.sp,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: SliderTheme(
-              data: SliderTheme.of(context).copyWith(
-                activeTrackColor: AppColors.textPrimary,
-                inactiveTrackColor: AppColors.greyLight,
-                thumbColor: AppColors.textPrimary,
-                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
-                trackHeight: 3.h,
-              ),
-              child: Slider(
-                value: _volume,
-                onChanged: (value) {
-                  setState(() {
-                    _volume = value;
-                  });
-                },
-              ),
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Icon(
-            Icons.volume_up,
-            color: AppColors.textSecondary,
-            size: 20.sp,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSessionInfoSection() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w),
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Track Title
           Text(
-            'Session Details',
+            _currentTrack == 'intro'
+                ? _session['intro']['title']
+                : _session['subliminal']['title'],
             style: GoogleFonts.inter(
-              fontSize: 16.sp,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: Colors.white,
             ),
           ),
-          SizedBox(height: 12.h),
-
-          // Show subliminal affirmations
-          if (_currentTrack == 'subliminal') ...[
-            Text(
-              'Subliminal Affirmations:',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
+          SizedBox(height: 8.h),
+          Text(
+            _session['title'],
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: Colors.white70,
             ),
-            SizedBox(height: 8.h),
-            ...(_session['subliminal']['affirmations'] as List<String>)
-                .map((affirmation) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: 4.h),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 4.w,
-                      height: 4.w,
-                      decoration: const BoxDecoration(
-                        color: AppColors.textSecondary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                    Expanded(
-                      child: Text(
-                        affirmation,
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ],
+          ),
+          SizedBox(height: 24.h),
+
+          // Progress Slider
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: 4.h,
+              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.r),
+              overlayShape: RoundSliderOverlayShape(overlayRadius: 16.r),
+              activeTrackColor: Colors.white,
+              inactiveTrackColor: Colors.white24,
+              thumbColor: Colors.white,
+              overlayColor: Colors.white24,
+            ),
+            child: Slider(
+              value: _currentProgress,
+              onChanged: (value) async {
+                setState(() => _currentProgress = value);
+                final newPosition = Duration(
+                    milliseconds:
+                        (_totalDuration.inMilliseconds * value).round());
+                await _audioService.seek(newPosition);
+              },
+            ),
+          ),
+
+          // Time Labels
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _formatDuration(_currentPosition),
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.white70,
+                  ),
+                ),
+                Text(
+                  '-${_formatDuration(_totalDuration - _currentPosition)}',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildControls() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 40.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Shuffle
+          IconButton(
+            icon: Icon(
+              Icons.shuffle,
+              color: _isShuffled ? Colors.greenAccent : Colors.white54,
+              size: 24.sp,
+            ),
+            onPressed: () {
+              setState(() => _isShuffled = !_isShuffled);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_isShuffled ? 'Shuffle ON' : 'Shuffle OFF'),
+                  duration: Duration(seconds: 1),
                 ),
               );
-            }).toList(),
-            SizedBox(height: 12.h),
-          ],
+            },
+          ),
 
-          Text(
-            _session['description'],
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textLight,
-              height: 1.4,
+          // Previous
+          IconButton(
+            icon: Icon(Icons.skip_previous, color: Colors.white, size: 36.sp),
+            onPressed: _previousTrack,
+          ),
+
+          // Play/Pause
+          GestureDetector(
+            onTap: _togglePlayPause,
+            child: Container(
+              width: 72.w,
+              height: 72.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Colors.white, Colors.white70],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.white.withOpacity(0.3),
+                    blurRadius: 20,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Icon(
+                _isPlaying ? Icons.pause : Icons.play_arrow,
+                size: 36.sp,
+                color: Colors.black87,
+              ),
             ),
+          ),
+
+          // Next
+          IconButton(
+            icon: Icon(Icons.skip_next, color: Colors.white, size: 36.sp),
+            onPressed: _nextTrack,
+          ),
+
+          // Loop
+          IconButton(
+            icon: Icon(
+              Icons.repeat,
+              color: _isLooping ? Colors.greenAccent : Colors.white54,
+              size: 24.sp,
+            ),
+            onPressed: () {
+              setState(() => _isLooping = !_isLooping);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_isLooping ? 'Loop ON' : 'Loop OFF'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomNav() {
-    return Container(
-      height: 80.h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
-        ),
-        border: const Border(
-          top: BorderSide(
-            color: AppColors.greyBorder,
-            width: 1,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
+  Widget _buildBottomOptions() {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildNavItem(Icons.home_outlined, 'Home'),
-          _buildNavItem(Icons.library_music_outlined, 'Library'),
-          _buildNavItem(Icons.play_circle_outline, 'Playlist', isActive: true),
-          _buildNavItem(Icons.chat_bubble_outline, 'AI Chat'),
-          _buildNavItem(Icons.person_outline, 'Profile'),
+          // Favorite
+          IconButton(
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.redAccent : Colors.white70,
+              size: 24.sp,
+            ),
+            onPressed: _toggleFavorite,
+          ),
+
+          // Sleep Timer
+          IconButton(
+            icon: Icon(
+              Icons.bedtime,
+              color: _sleepTimerMinutes != null
+                  ? Colors.blueAccent
+                  : Colors.white70,
+              size: 24.sp,
+            ),
+            onPressed: _showSleepTimer,
+          ),
+
+          // Volume
+          IconButton(
+            icon: Icon(Icons.volume_up, color: Colors.white70, size: 24.sp),
+            onPressed: _showVolumeControl,
+          ),
+
+          // Playlist/Queue
+          IconButton(
+            icon: Icon(Icons.queue_music, color: Colors.white70, size: 24.sp),
+            onPressed: _showPlaylist,
+          ),
+
+          // Share
+          IconButton(
+            icon: Icon(Icons.share, color: Colors.white70, size: 24.sp),
+            onPressed: _shareSession,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, {bool isActive = false}) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          size: 24.sp,
-          color: isActive ? AppColors.textPrimary : AppColors.textLight,
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 10.sp,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-            color: isActive ? AppColors.textPrimary : AppColors.textLight,
-          ),
-        ),
-        if (isActive)
-          Container(
-            margin: EdgeInsets.only(top: 2.h),
-            height: 2.h,
-            width: 20.w,
-            decoration: BoxDecoration(
-              color: AppColors.textPrimary,
-              borderRadius: BorderRadius.circular(1.r),
-            ),
-          ),
-      ],
-    );
+  // Action Methods
+  void _switchToTrack(String track) async {
+    if (_currentTrack != track) {
+      // Stop current playback
+      await _audioService.stop();
+
+      setState(() {
+        _currentTrack = track;
+        _currentPosition = Duration.zero;
+        _currentProgress = 0.0;
+        _totalDuration = Duration(
+            seconds: track == 'intro' ? _introDuration : _subliminalDuration);
+      });
+
+      // If was playing, start the new track
+      if (_isPlaying) {
+        await _playCurrentTrack();
+      }
+    }
   }
 
-  // Audio Control Methods
-  void _togglePlayPause() {
-    setState(() {
-      _isPlaying = !_isPlaying;
-      if (_isPlaying) {
-        _waveController.repeat();
-      } else {
-        _waveController.stop();
-      }
-    });
+  void _togglePlayPause() async {
+    // Immediately update UI state
+    setState(() => _isPlaying = !_isPlaying);
+
+    if (_isPlaying) {
+      // Start playing
+      await _playCurrentTrack();
+      _waveController.repeat();
+    } else {
+      // Pause
+      await _audioService.pause();
+      _waveController.stop();
+    }
+  }
+
+  Future<void> _playCurrentTrack() async {
+    try {
+      final audioUrl = _currentTrack == 'intro'
+          ? _session['intro']['audioUrl']
+          : _session['subliminal']['audioUrl'];
+
+      // Test URL - gerçek uygulamada Firebase'den gelecek
+      final testUrl = audioUrl ??
+          'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+
+      await _audioService.playFromUrl(
+        testUrl,
+        title: _currentTrack == 'intro'
+            ? _session['intro']['title']
+            : _session['subliminal']['title'],
+        artist: 'INSIDEX',
+      );
+
+      // Update total duration for current track
+      setState(() {
+        _totalDuration = Duration(
+            seconds: _currentTrack == 'intro'
+                ? _introDuration
+                : _subliminalDuration);
+      });
+    } catch (e) {
+      print('Error playing audio: $e');
+      setState(() => _isPlaying = false);
+      _waveController.stop();
+    }
   }
 
   void _previousTrack() {
-    if (_currentTrack == 'subliminal') {
+    if (_currentPosition.inSeconds > 3) {
+      // If more than 3 seconds played, restart current track
+      _audioService.seek(Duration.zero);
+    } else if (_currentTrack == 'subliminal') {
       // Go back to intro
-      setState(() {
-        _currentTrack = 'intro';
-        _currentPosition = 0.0;
-      });
+      _switchToTrack('intro');
     } else {
-      // Reset current track
-      setState(() {
-        _currentPosition = 0.0;
-      });
+      // Already at intro, restart
+      _audioService.seek(Duration.zero);
     }
   }
 
   void _nextTrack() {
     if (_currentTrack == 'intro') {
-      // Go to subliminal
-      setState(() {
-        _currentTrack = 'subliminal';
-        _currentPosition = 0.0;
-      });
+      _switchToTrack('subliminal');
     } else {
-      // Already at subliminal, maybe loop or stop
-      setState(() {
-        _currentPosition = 0.0;
-      });
+      // Already at subliminal, maybe go to next session or stop
+      if (_isLooping) {
+        _switchToTrack('intro');
+      }
     }
   }
 
-  void _showTimerDialog() {
-    showDialog(
+  void _toggleFavorite() async {
+    setState(() => _isFavorite = !_isFavorite);
+
+    // Save to Firebase
+    if (_session['id'] != null) {
+      await FirebaseService.toggleFavorite(_session['id']);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content:
+            Text(_isFavorite ? 'Added to favorites' : 'Removed from favorites'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _showSleepTimer() {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          'Sleep Timer',
-          style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ...[15, 30, 45, 60, 90].map((minutes) {
-              return ListTile(
-                title: Text(
-                  '$minutes minutes',
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Container(
+            padding: EdgeInsets.all(24.w),
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Sleep Timer',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    color: AppColors.textPrimary,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
-                trailing: _sleepTimer == minutes
-                    ? Icon(Icons.check,
-                        color: AppColors.textPrimary, size: 20.sp)
-                    : null,
-                onTap: () {
-                  setState(() {
-                    _sleepTimer = minutes;
-                  });
-                  Navigator.pop(context);
-
-                  // Show confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Sleep timer set for $minutes minutes',
-                        style: GoogleFonts.inter(fontSize: 14.sp),
+                SizedBox(height: 8.h),
+                if (_sleepTimerMinutes != null)
+                  Text(
+                    'Active: $_sleepTimerMinutes minutes',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+                SizedBox(height: 24.h),
+                Wrap(
+                  spacing: 12.w,
+                  runSpacing: 12.h,
+                  children: [15, 30, 45, 60, 90, 120].map((minutes) {
+                    final isSelected = _sleepTimerMinutes == minutes;
+                    return ChoiceChip(
+                      label: Text(
+                        '$minutes min',
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.white70,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
                       ),
-                      backgroundColor: AppColors.textPrimary,
-                      behavior: SnackBarBehavior.floating,
-                      duration: const Duration(seconds: 2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10.r),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          _audioService.setSleepTimer(minutes);
+                          setState(() => _sleepTimerMinutes = minutes);
+                          setModalState(() {}); // Update modal state
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text('Sleep timer set to $minutes minutes'),
+                              duration: Duration(seconds: 2),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else {
+                          _audioService.cancelSleepTimer();
+                          setState(() => _sleepTimerMinutes = null);
+                          setModalState(() {}); // Update modal state
+                        }
+                        Navigator.pop(context);
+                      },
+                      backgroundColor: Colors.grey[800],
+                      selectedColor: Colors.greenAccent.withOpacity(0.3),
+                      checkmarkColor: Colors.greenAccent,
+                      side: BorderSide(
+                        color:
+                            isSelected ? Colors.greenAccent : Colors.grey[700]!,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    );
+                  }).toList(),
+                ),
+                if (_sleepTimerMinutes != null) ...[
+                  SizedBox(height: 16.h),
+                  TextButton.icon(
+                    onPressed: () {
+                      _audioService.cancelSleepTimer();
+                      setState(() => _sleepTimerMinutes = null);
+                      Navigator.pop(context);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Sleep timer cancelled'),
+                          duration: Duration(seconds: 2),
+                          backgroundColor: Colors.orange,
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.cancel, color: Colors.redAccent),
+                    label: Text(
+                      'Cancel Timer',
+                      style: TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
+                ],
+                SizedBox(height: 20.h),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showVolumeControl() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Container(
+            padding: EdgeInsets.all(24.w),
+            decoration: BoxDecoration(
+              color: Colors.grey[900],
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Volume Control',
+                  style: GoogleFonts.inter(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 24.h),
+                Row(
+                  children: [
+                    Icon(
+                      _volume == 0 ? Icons.volume_off : Icons.volume_down,
+                      color: Colors.white70,
+                      size: 24.sp,
+                    ),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderThemeData(
+                          trackHeight: 4.h,
+                          thumbShape:
+                              RoundSliderThumbShape(enabledThumbRadius: 10.r),
+                          overlayShape:
+                              RoundSliderOverlayShape(overlayRadius: 20.r),
+                          activeTrackColor: Colors.greenAccent,
+                          inactiveTrackColor: Colors.grey[700],
+                          thumbColor: Colors.greenAccent,
+                          overlayColor: Colors.greenAccent.withOpacity(0.2),
+                        ),
+                        child: Slider(
+                          value: _volume,
+                          min: 0.0,
+                          max: 1.0,
+                          divisions: 20,
+                          onChanged: (value) {
+                            // Update both modal state and main state
+                            setModalState(() {
+                              _volume = value;
+                            });
+                            setState(() {
+                              _volume = value;
+                            });
+                            _audioService.setVolume(value);
+                          },
+                        ),
                       ),
                     ),
-                  );
-                },
-              );
-            }).toList(),
-            ListTile(
-              title: Text(
-                'Cancel Timer',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.red,
-                  fontWeight: FontWeight.w500,
+                    Icon(
+                      _volume > 0.7 ? Icons.volume_up : Icons.volume_down,
+                      color: Colors.white70,
+                      size: 24.sp,
+                    ),
+                  ],
                 ),
+                SizedBox(height: 16.h),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    '${(_volume * 100).round()}%',
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16.h),
+                // Quick volume presets
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [0.0, 0.25, 0.5, 0.75, 1.0].map((preset) {
+                    return TextButton(
+                      onPressed: () {
+                        setModalState(() {
+                          _volume = preset;
+                        });
+                        setState(() {
+                          _volume = preset;
+                        });
+                        _audioService.setVolume(preset);
+                      },
+                      style: TextButton.styleFrom(
+                        backgroundColor: _volume == preset
+                            ? Colors.greenAccent.withOpacity(0.2)
+                            : Colors.grey[800],
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 8.h),
+                      ),
+                      child: Text(
+                        '${(preset * 100).round()}%',
+                        style: TextStyle(
+                          color: _volume == preset
+                              ? Colors.greenAccent
+                              : Colors.white70,
+                          fontWeight: _volume == preset
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                SizedBox(height: 20.h),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showPlaylist() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Playlist feature coming soon!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _shareSession() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Share feature coming soon!'),
+        duration: Duration(seconds: 1),
+      ),
+    );
+  }
+
+  void _showOptionsMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.info_outline, color: Colors.white70),
+              title: Text(
+                'Session Info',
+                style: TextStyle(color: Colors.white),
               ),
               onTap: () {
-                setState(() {
-                  _sleepTimer = null;
-                });
                 Navigator.pop(context);
+                // Show session details
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.download, color: Colors.white70),
+              title: Text(
+                'Download for Offline',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Premium feature')),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.report_problem, color: Colors.white70),
+              title: Text(
+                'Report Issue',
+                style: TextStyle(color: Colors.white),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                // Report issue
               },
             ),
           ],
@@ -1313,28 +1155,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
-  String _formatDuration(int seconds) {
-    if (seconds < 3600) {
-      // Less than an hour
-      final minutes = seconds ~/ 60;
-      final secs = seconds % 60;
-      if (secs == 0) {
-        return '$minutes minutes';
-      }
-      return '${minutes}:${secs.toString().padLeft(2, '0')}';
+  String _formatDuration(Duration duration) {
+    if (duration.inHours > 0) {
+      final hours = duration.inHours;
+      final minutes = duration.inMinutes.remainder(60);
+      return '${hours}h ${minutes}m';
     } else {
-      // An hour or more
-      final hours = seconds ~/ 3600;
-      final minutes = (seconds % 3600) ~/ 60;
-      final secs = seconds % 60;
-      if (hours == 1 && minutes == 0 && secs == 0) {
-        return '1 hour';
-      } else if (hours > 0 && minutes == 0 && secs == 0) {
-        return '$hours hours';
-      } else if (secs == 0) {
-        return '$hours hours $minutes minutes';
-      }
-      return '${hours}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+      final minutes = duration.inMinutes.remainder(60);
+      final seconds = duration.inSeconds.remainder(60);
+      return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
     }
   }
 }
