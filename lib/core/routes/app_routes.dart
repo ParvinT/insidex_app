@@ -7,7 +7,6 @@ import '../../features/onboarding/gender_screen.dart';
 import '../../features/auth/welcome_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/register_screen.dart';
-import '../../features/auth/email_verification_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/profile/profile_screen.dart';
@@ -28,7 +27,6 @@ class AppRoutes {
   static const String welcome = '/auth/welcome';
   static const String login = '/auth/login';
   static const String register = '/auth/register';
-  static const String verifyEmail = '/auth/verify-email';
   static const String home = '/home';
   static const String settings = '/settings';
   static const String profile = '/profile';
@@ -42,7 +40,6 @@ class AppRoutes {
         welcome: (context) => const WelcomeScreen(),
         login: (context) => const LoginScreen(),
         register: (context) => const RegisterScreen(),
-        verifyEmail: (context) => const EmailVerificationScreen(),
         home: (context) => const HomeScreen(),
         settings: (context) => const SettingsScreen(),
         profile: (context) => const ProfileScreen(),

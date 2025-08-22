@@ -30,8 +30,6 @@ class _SplashScreenState extends State<SplashScreen>
     _navigateToNext();
   }
 
- 
-
   void _initAnimations() {
     // Drop animation controller
     _dropController = AnimationController(

@@ -1,4 +1,5 @@
 // lib/providers/user_provider.dart
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,16 +8,18 @@ class UserProvider extends ChangeNotifier {
   User? _firebaseUser;
   Map<String, dynamic>? _userData;
   bool _isLoading = false;
+  bool _isAdmin = false; // Admin flag
 
   // Getters
   User? get firebaseUser => _firebaseUser;
   Map<String, dynamic>? get userData => _userData;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _firebaseUser != null;
-  bool get isAdmin => _userData?['isAdmin'] ?? false;
+  bool get isAdmin => _isAdmin; // Admin getter
   bool get isPremium => _userData?['isPremium'] ?? false;
   String get userName => _userData?['name'] ?? 'User';
   String get userEmail => _userData?['email'] ?? '';
+  String get userId => _firebaseUser?.uid ?? '';
 
   // Auth state listener
   void initAuthListener() {
@@ -26,26 +29,31 @@ class UserProvider extends ChangeNotifier {
         loadUserData(user.uid);
       } else {
         _userData = null;
+        _isAdmin = false;
         notifyListeners();
       }
     });
   }
 
-  // Firestore'dan kullanıcı verisini yükle
+  // Load user data from Firestore
   Future<void> loadUserData(String uid) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      final doc =
+      // Load user data
+      final userDoc =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
-      if (doc.exists) {
-        _userData = doc.data();
+      if (userDoc.exists) {
+        _userData = userDoc.data();
       } else {
-        // Eğer Firestore'da yoksa oluştur
+        // Create user document if doesn't exist
         await createUserDocument();
       }
+
+      // Check admin status separately
+      await checkAdminStatus(uid);
     } catch (e) {
       print('Error loading user data: $e');
     } finally {
@@ -54,7 +62,29 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Yeni kullanıcı için Firestore document oluştur
+  // Check if user is admin
+  Future<void> checkAdminStatus(String uid) async {
+    try {
+      // Check in admins collection
+      final adminDoc =
+          await FirebaseFirestore.instance.collection('admins').doc(uid).get();
+
+      _isAdmin = adminDoc.exists;
+
+      // Also check isAdmin field in users collection as fallback
+      if (!_isAdmin && _userData != null) {
+        _isAdmin = _userData!['isAdmin'] ?? false;
+      }
+
+      print('Admin status for $uid: $_isAdmin');
+      notifyListeners();
+    } catch (e) {
+      print('Error checking admin status: $e');
+      _isAdmin = false;
+    }
+  }
+
+  // Create new user document
   Future<void> createUserDocument() async {
     if (_firebaseUser == null) return;
 
@@ -63,7 +93,7 @@ class UserProvider extends ChangeNotifier {
       'email': _firebaseUser!.email,
       'name': _firebaseUser!.displayName ?? 'User',
       'photoUrl': _firebaseUser!.photoURL,
-      'isAdmin': false, // Admin email kontrolü yapılabilir
+      'isAdmin': false,
       'isPremium': false,
       'createdAt': FieldValue.serverTimestamp(),
       'lastActiveAt': FieldValue.serverTimestamp(),
@@ -81,7 +111,7 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Profil güncelleme
+  // Update profile
   Future<bool> updateProfile({
     String? name,
     String? photoUrl,
@@ -89,31 +119,23 @@ class UserProvider extends ChangeNotifier {
     if (_firebaseUser == null) return false;
 
     try {
-      final updates = <String, dynamic>{};
+      final updates = <String, dynamic>{
+        'lastActiveAt': FieldValue.serverTimestamp(),
+      };
 
-      if (name != null && name.isNotEmpty) {
-        updates['name'] = name;
-        await _firebaseUser!.updateDisplayName(name);
-      }
+      if (name != null) updates['name'] = name;
+      if (photoUrl != null) updates['photoUrl'] = photoUrl;
 
-      if (photoUrl != null) {
-        updates['photoUrl'] = photoUrl;
-        await _firebaseUser!.updatePhotoURL(photoUrl);
-      }
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_firebaseUser!.uid)
+          .update(updates);
 
-      if (updates.isNotEmpty) {
-        updates['updatedAt'] = FieldValue.serverTimestamp();
+      // Update local data
+      if (name != null) _userData!['name'] = name;
+      if (photoUrl != null) _userData!['photoUrl'] = photoUrl;
 
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(_firebaseUser!.uid)
-            .update(updates);
-
-        // Local state'i güncelle
-        _userData?.addAll(updates);
-        notifyListeners();
-      }
-
+      notifyListeners();
       return true;
     } catch (e) {
       print('Error updating profile: $e');
@@ -121,11 +143,29 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Çıkış yap
+  // Sign out
   Future<void> signOut() async {
     await FirebaseAuth.instance.signOut();
     _firebaseUser = null;
     _userData = null;
+    _isAdmin = false;
     notifyListeners();
+  }
+
+  // Update premium status
+  Future<void> updatePremiumStatus(bool isPremium) async {
+    if (_firebaseUser == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_firebaseUser!.uid)
+          .update({'isPremium': isPremium});
+
+      _userData!['isPremium'] = isPremium;
+      notifyListeners();
+    } catch (e) {
+      print('Error updating premium status: $e');
+    }
   }
 }

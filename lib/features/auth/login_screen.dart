@@ -12,7 +12,6 @@ import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_login_button.dart';
 import '../../services/firebase_service.dart';
-import '../../services/email_service.dart';
 import '../../providers/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -28,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
-  bool _rememberMe = false;
   bool _isLoading = false;
 
   @override
@@ -59,26 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = result['user'];
       if (user != null) {
         await context.read<UserProvider>().loadUserData(user.uid);
-
-        // Check if email is verified
-        if (!user.emailVerified) {
-          // Send verification email if not verified
-          await EmailService.sendEmailVerification();
-
-          // Navigate to verification screen
-          Navigator.pushReplacementNamed(context, '/auth/verify-email');
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please verify your email to continue'),
-              backgroundColor: Colors.orange,
-            ),
-          );
-          return;
-        }
       }
 
-      // Navigate to home screen if email is verified
+      // Navigate directly to home screen
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
       // Show error message
@@ -208,28 +189,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20.h),
+                SizedBox(height: 32.h),
 
-                // Logo
-                Center(
-                  child: SvgPicture.asset(
-                    'assets/images/logo.svg',
-                    width: 120.w,
-                    height: 40.h,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.textPrimary,
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 40.h),
-
-                // Welcome Title
+                // Title
                 Text(
-                  'Welcome back',
+                  'Welcome Back',
                   style: GoogleFonts.inter(
-                    fontSize: 28.sp,
+                    fontSize: 32.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
@@ -241,30 +207,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Sign in to continue your healing journey',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
+                    fontSize: 16.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
 
-                SizedBox(height: 32.h),
+                SizedBox(height: 48.h),
 
-                // Email Input Field
+                // Email field
                 CustomTextField(
                   controller: _emailController,
                   label: 'Email',
                   hint: 'Enter your email',
                   keyboardType: TextInputType.emailAddress,
                   validator: FormValidators.validateEmail,
-                  suffixIcon: Icon(
-                    Icons.email_outlined,
-                    color: AppColors.textSecondary,
-                    size: 20.sp,
-                  ),
                 ),
 
-                SizedBox(height: 16.h),
+                SizedBox(height: 20.h),
 
-                // Password Input Field
+                // Password field
                 CustomTextField(
                   controller: _passwordController,
                   label: 'Password',
@@ -274,53 +235,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordVisible
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: AppColors.textSecondary,
-                      size: 20.sp,
                     ),
                     onPressed: () {
-                      setState(() => _isPasswordVisible = !_isPasswordVisible);
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
                     },
                   ),
                 ),
 
                 SizedBox(height: 16.h),
 
-                // Remember Me & Forgot Password Row
+                // Forgot Password Row
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    // Remember Me Checkbox
-                    Row(
-                      children: [
-                        SizedBox(
-                          width: 20.w,
-                          height: 20.w,
-                          child: Checkbox(
-                            value: _rememberMe,
-                            onChanged: (value) {
-                              setState(() => _rememberMe = value ?? false);
-                            },
-                            activeColor: AppColors.primaryGold,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.r),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          'Remember me',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    // Forgot Password Button
-                    TextButton(
-                      onPressed: _handleForgotPassword,
+                    GestureDetector(
+                      onTap: _handleForgotPassword,
                       child: Text(
                         'Forgot Password?',
                         style: GoogleFonts.inter(
