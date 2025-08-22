@@ -52,3 +52,6 @@ ios/Firebase/GoogleService-Info.plist
 firebase.json
 .firebaserc
 **/firebase_options.dart
+functions/.env
+functions/node_modules/
+.firebase/
