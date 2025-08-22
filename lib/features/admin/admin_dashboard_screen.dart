@@ -114,42 +114,164 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
   }
 
+  void _showAdminMenu() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.r),
+            topRight: Radius.circular(20.r),
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle bar
+              Container(
+                margin: EdgeInsets.only(top: 12.h),
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(height: 20.h),
+
+              // Menu Title
+              Text(
+                'Admin Menu',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 20.h),
+
+              // Menu Items
+              _buildMenuItem(
+                icon: Icons.dashboard,
+                title: 'Dashboard',
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.category,
+                title: 'Categories',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/admin/categories');
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.music_note,
+                title: 'Sessions',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/admin/sessions');
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.add_circle,
+                title: 'Add Session',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/admin/add-session');
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.people,
+                title: 'Users',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/admin/users');
+                },
+              ),
+              _buildMenuItem(
+                icon: Icons.settings,
+                title: 'Settings',
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamed(context, '/admin/settings');
+                },
+              ),
+              Divider(height: 1),
+              _buildMenuItem(
+                icon: Icons.logout,
+                title: 'Exit Admin Panel',
+                color: Colors.red,
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+              ),
+              SizedBox(height: 20.h),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    Color? color,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: color ?? AppColors.textPrimary,
+        size: 24.sp,
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w500,
+          color: color ?? AppColors.textPrimary,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = screenWidth > 768;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            // Responsive design for web/tablet
-            final isWideScreen = constraints.maxWidth > 768;
-
-            if (isWideScreen) {
-              // Wide screen layout with sidebar
-              return Row(
+        child: isWideScreen
+            ? Row(
                 children: [
-                  // Sidebar
-                  _buildSidebar(),
-
+                  // Desktop Sidebar
+                  _buildDesktopSidebar(),
                   // Main Content
                   Expanded(
                     child: _buildMainContent(),
                   ),
                 ],
-              );
-            } else {
-              // Mobile layout
-              return Column(
+              )
+            : Column(
                 children: [
+                  // Mobile Header with Menu
                   _buildMobileHeader(),
+                  // Main Content
                   Expanded(
                     child: _buildMainContent(),
                   ),
                 ],
-              );
-            }
-          },
-        ),
+              ),
       ),
     );
   }
@@ -168,23 +290,85 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => Navigator.pop(context),
+          // Back Button
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: AppColors.backgroundWhite,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: AppColors.greyBorder,
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: AppColors.textPrimary,
+                size: 20.sp,
+              ),
+            ),
           ),
+
           SizedBox(width: 12.w),
-          Icon(
-            Icons.admin_panel_settings,
-            color: Colors.red,
-            size: 28.sp,
+
+          // Admin Panel Title
+          Expanded(
+            child: Row(
+              children: [
+                Icon(
+                  Icons.admin_panel_settings,
+                  color: Colors.red,
+                  size: 24.sp,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  'Admin Panel',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
-          SizedBox(width: 12.w),
-          Text(
-            'Admin Panel',
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+
+          // Menu Button (HomeScreen tarzı)
+          GestureDetector(
+            onTap: _showAdminMenu,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: AppColors.primaryGold,
+                borderRadius: BorderRadius.circular(20.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primaryGold.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Menu',
+                    style: GoogleFonts.inter(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  Icon(
+                    Icons.menu,
+                    size: 14.sp,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -192,7 +376,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildSidebar() {
+  Widget _buildDesktopSidebar() {
     return Container(
       width: 250.w,
       decoration: BoxDecoration(
@@ -240,41 +424,41 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: ListView(
               padding: EdgeInsets.symmetric(vertical: 20.h),
               children: [
-                _buildNavItem(
+                _buildSidebarItem(
                   icon: Icons.dashboard,
                   title: 'Dashboard',
                   isActive: true,
                   onTap: () {},
                 ),
-                _buildNavItem(
+                _buildSidebarItem(
                   icon: Icons.category,
                   title: 'Categories',
                   onTap: () {
                     Navigator.pushNamed(context, '/admin/categories');
                   },
                 ),
-                _buildNavItem(
+                _buildSidebarItem(
                   icon: Icons.music_note,
                   title: 'Sessions',
                   onTap: () {
                     Navigator.pushNamed(context, '/admin/sessions');
                   },
                 ),
-                _buildNavItem(
+                _buildSidebarItem(
                   icon: Icons.add_circle,
                   title: 'Add Session',
                   onTap: () {
                     Navigator.pushNamed(context, '/admin/add-session');
                   },
                 ),
-                _buildNavItem(
+                _buildSidebarItem(
                   icon: Icons.people,
                   title: 'Users',
                   onTap: () {
                     Navigator.pushNamed(context, '/admin/users');
                   },
                 ),
-                _buildNavItem(
+                _buildSidebarItem(
                   icon: Icons.settings,
                   title: 'Settings',
                   onTap: () {
@@ -293,7 +477,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
 
           // Logout
-          _buildNavItem(
+          _buildSidebarItem(
             icon: Icons.logout,
             title: 'Exit Admin',
             isDestructive: true,
@@ -304,7 +488,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildNavItem({
+  Widget _buildSidebarItem({
     required IconData icon,
     required String title,
     bool isActive = false,
@@ -366,36 +550,54 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     }
 
     return SingleChildScrollView(
-      padding: EdgeInsets.all(32.w),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Text(
-            'Dashboard Overview',
-            style: GoogleFonts.inter(
-              fontSize: 28.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+          // Header - Mobilde gösterme çünkü yukarıda var
+          if (MediaQuery.of(context).size.width > 768) ...[
+            Text(
+              'Dashboard Overview',
+              style: GoogleFonts.inter(
+                fontSize: 28.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-
-          SizedBox(height: 8.h),
-
-          Text(
-            'Welcome to your admin dashboard',
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              color: AppColors.textSecondary,
+            SizedBox(height: 8.h),
+            Text(
+              'Welcome to your admin dashboard',
+              style: GoogleFonts.inter(
+                fontSize: 16.sp,
+                color: AppColors.textSecondary,
+              ),
             ),
-          ),
-
-          SizedBox(height: 32.h),
+            SizedBox(height: 32.h),
+          ] else ...[
+            // Mobile için başlık
+            Text(
+              'Dashboard Overview',
+              style: GoogleFonts.inter(
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              'Welcome to your admin dashboard',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            SizedBox(height: 24.h),
+          ],
 
           // Statistics Grid
           _buildStatisticsGrid(),
 
-          SizedBox(height: 32.h),
+          SizedBox(height: 24.h),
 
           // Recent Activity
           _buildRecentActivity(),
@@ -407,13 +609,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildStatisticsGrid() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = constraints.maxWidth > 1200
-            ? 4
-            : constraints.maxWidth > 800
-                ? 3
-                : constraints.maxWidth > 600
-                    ? 2
-                    : 1;
+        final crossAxisCount = constraints.maxWidth > 600 ? 2 : 1;
 
         return GridView.count(
           crossAxisCount: crossAxisCount,

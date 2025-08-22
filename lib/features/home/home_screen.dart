@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -519,6 +518,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // lib/features/home/home_screen.dart içinde
+// _buildNavItem metodunu bulun ve şu şekilde güncelleyin:
+
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
 
@@ -528,42 +530,236 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
         switch (index) {
           case 0:
+            // Home - zaten home'dayız
             break;
           case 1:
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
-            ).then((_) {
-              if (!mounted) return;
-              setState(() => _selectedIndex = 0);
-            });
-            break;
-          case 2:
-          case 3:
+            // Library - Coming Soon
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20.r)),
-                  content: Text(
-                    'Coming Soon!',
-                    style: GoogleFonts.inter(
-                        fontSize: 16.sp, fontWeight: FontWeight.w600),
-                    textAlign: TextAlign.center,
+                  title: Row(
+                    children: [
+                      Icon(
+                        Icons.library_music,
+                        color: AppColors.primaryGold,
+                        size: 28.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Library',
+                        style: GoogleFonts.inter(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.construction,
+                        size: 64.sp,
+                        color: AppColors.primaryGold.withOpacity(0.5),
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'Coming Soon!',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Your personal library with favorites, downloads, and listening history will be available soon.',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text('OK',
-                          style: TextStyle(color: AppColors.primaryGold)),
+                      child: Text(
+                        'OK',
+                        style: GoogleFonts.inter(
+                          color: AppColors.primaryGold,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 );
               },
-            );
+            ).then((_) {
+              // Dialog kapandıktan sonra Home'a geri dön
+              if (mounted) {
+                setState(() => _selectedIndex = 0);
+              }
+            });
+            break;
+          case 2:
+            // Playlist - Coming Soon
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r)),
+                  title: Row(
+                    children: [
+                      Icon(
+                        Icons.playlist_play,
+                        color: AppColors.primaryGold,
+                        size: 28.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Playlist',
+                        style: GoogleFonts.inter(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.construction,
+                        size: 64.sp,
+                        color: AppColors.primaryGold.withOpacity(0.5),
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'Coming Soon!',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Create and manage your custom playlists for a personalized experience.',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'OK',
+                        style: GoogleFonts.inter(
+                          color: AppColors.primaryGold,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ).then((_) {
+              if (mounted) {
+                setState(() => _selectedIndex = 0);
+              }
+            });
+            break;
+          case 3:
+            // AI Chat - Coming Soon
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r)),
+                  title: Row(
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        color: AppColors.primaryGold,
+                        size: 28.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'AI Assistant',
+                        style: GoogleFonts.inter(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.construction,
+                        size: 64.sp,
+                        color: AppColors.primaryGold.withOpacity(0.5),
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        'Coming Soon!',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        'Your personal AI wellness coach will help you choose the perfect sessions and track your progress.',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: Text(
+                        'OK',
+                        style: GoogleFonts.inter(
+                          color: AppColors.primaryGold,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ).then((_) {
+              if (mounted) {
+                setState(() => _selectedIndex = 0);
+              }
+            });
             break;
           case 4:
+            // Profile
             Navigator.pushNamed(context, AppRoutes.profile);
             break;
         }

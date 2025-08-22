@@ -99,10 +99,150 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     }
   }
 
+  Future<void> _pickFile(String type) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: type == 'image' ? FileType.image : FileType.audio,
+      );
+
+      if (result != null) {
+        setState(() {
+          switch (type) {
+            case 'image':
+              _backgroundImage = result.files.first;
+              break;
+            case 'intro':
+              _introAudio = result.files.first;
+              break;
+            case 'subliminal':
+              _subliminalAudio = result.files.first;
+              break;
+          }
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking file: $e')),
+      );
+    }
+  }
+
+  Future<String?> _uploadFile(PlatformFile file, String folder) async {
+    try {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+      final ref = FirebaseStorage.instance.ref().child('$folder/$fileName');
+
+      final uploadTask =
+          kIsWeb ? ref.putData(file.bytes!) : ref.putFile(File(file.path!));
+
+      uploadTask.snapshotEvents.listen((event) {
+        setState(() {
+          _uploadProgress = event.bytesTransferred / event.totalBytes;
+          _uploadStatus = 'Uploading ${file.name}...';
+        });
+      });
+
+      final snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      debugPrint('Upload error: $e');
+      return null;
+    }
+  }
+
+  Future<void> _saveSession() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _uploadProgress = 0;
+    });
+
+    try {
+      // Upload files if selected
+      String? imageUrl;
+      String? introUrl;
+      String? subliminalUrl;
+
+      if (_backgroundImage != null) {
+        imageUrl = await _uploadFile(_backgroundImage!, 'session_images');
+      }
+
+      if (_introAudio != null) {
+        introUrl = await _uploadFile(_introAudio!, 'intro_audio');
+      }
+
+      if (_subliminalAudio != null) {
+        subliminalUrl =
+            await _uploadFile(_subliminalAudio!, 'subliminal_audio');
+      }
+
+      // Prepare session data
+      final sessionData = {
+        'title': _titleController.text.trim(),
+        'description': _descriptionController.text.trim(),
+        'category': _selectedCategory,
+        'emoji': _selectedEmoji,
+        'backgroundImage': imageUrl,
+        'intro': {
+          'title': _introTitleController.text.trim(),
+          'description': _introDescriptionController.text.trim(),
+          'audioUrl': introUrl,
+          'duration': _introDuration,
+        },
+        'subliminal': {
+          'title': _subliminalTitleController.text.trim(),
+          'audioUrl': subliminalUrl,
+          'duration': _subliminalDuration,
+          'affirmations': _affirmationsController.text
+              .split('\n')
+              .where((line) => line.isNotEmpty)
+              .toList(),
+        },
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Save to Firestore
+      if (widget.sessionToEdit != null) {
+        // Update existing
+        await FirebaseFirestore.instance
+            .collection('sessions')
+            .doc(widget.sessionToEdit!['id'])
+            .update(sessionData);
+      } else {
+        // Create new
+        await FirebaseFirestore.instance
+            .collection('sessions')
+            .add(sessionData);
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Session saved successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving session: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+        _uploadProgress = 0;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isWeb = kIsWeb || MediaQuery.of(context).size.width > 800;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -180,8 +320,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
               SizedBox(height: 40.h),
 
-              // Save Button
-              _buildSaveButton(),
+              // Create Session Button
+              _buildCreateButton(),
 
               SizedBox(height: 20.h),
             ],
@@ -198,9 +338,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       decoration: BoxDecoration(
         color: AppColors.primaryGold.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.3),
-        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,22 +345,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           Text(
             _uploadStatus,
             style: GoogleFonts.inter(
-              fontSize: 14.sp,
+              fontSize: 12.sp,
               color: AppColors.textPrimary,
-              fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(height: 8.h),
           LinearProgressIndicator(
             value: _uploadProgress,
-            backgroundColor: AppColors.greyLight,
+            backgroundColor: Colors.grey[300],
             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
           ),
           SizedBox(height: 4.h),
           Text(
-            '${(_uploadProgress * 100).toInt()}%',
+            '${(_uploadProgress * 100).toStringAsFixed(0)}%',
             style: GoogleFonts.inter(
-              fontSize: 12.sp,
+              fontSize: 10.sp,
               color: AppColors.textSecondary,
             ),
           ),
@@ -248,7 +384,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Widget _buildBasicInfoSection() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -256,14 +392,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       ),
       child: Column(
         children: [
-          // Title
+          // Title Input
           TextFormField(
             controller: _titleController,
             decoration: InputDecoration(
-              labelText: 'Session Title *',
-              hintText: 'e.g., Deep Sleep Healing',
+              labelText: 'Session Title',
+              hintText: 'Enter session title',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
             validator: (value) {
@@ -276,88 +412,42 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
           SizedBox(height: 16.h),
 
-          // Category and Emoji
-          Row(
-            children: [
-              // Category Dropdown
-              Expanded(
-                flex: 2,
-                child: DropdownButtonFormField<String>(
-                  value: _selectedCategory,
-                  decoration: InputDecoration(
-                    labelText: 'Category *',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  items: _categories.map((category) {
-                    return DropdownMenuItem(
-                      value: category,
-                      child: Text(category),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() => _selectedCategory = value);
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return 'Please select a category';
-                    }
-                    return null;
-                  },
-                ),
+          // Description
+          TextFormField(
+            controller: _descriptionController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'Description',
+              hintText: 'Enter session description',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.r),
               ),
-
-              SizedBox(width: 16.w),
-
-              // Emoji Picker
-              Expanded(
-                child: InkWell(
-                  onTap: _showEmojiPicker,
-                  child: Container(
-                    height: 56.h,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.greyBorder),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _selectedEmoji,
-                          style: TextStyle(fontSize: 24.sp),
-                        ),
-                        Text(
-                          'Emoji',
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
 
           SizedBox(height: 16.h),
 
-          // Description
-          TextFormField(
-            controller: _descriptionController,
-            maxLines: 4,
+          // Category Dropdown
+          DropdownButtonFormField<String>(
+            value: _selectedCategory,
             decoration: InputDecoration(
-              labelText: 'Description *',
-              hintText: 'Describe what this session helps with...',
+              labelText: 'Category',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
+            items: _categories.map((category) {
+              return DropdownMenuItem(
+                value: category,
+                child: Text(category),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() => _selectedCategory = value);
+            },
             validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter a description';
+              if (value == null) {
+                return 'Please select a category';
               }
               return null;
             },
@@ -369,7 +459,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Widget _buildMediaSection() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -377,73 +467,52 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       ),
       child: Column(
         children: [
-          // Background Image
-          _buildFileUploadCard(
+          _buildFileUploadTile(
             title: 'Background Image',
-            subtitle: 'Recommended: 1920x1080, JPG/PNG',
-            file: _backgroundImage,
+            subtitle: 'JPG, PNG (Max 5MB)',
             icon: Icons.image,
-            onTap: () => _pickFile(FileType.image, (file) {
-              setState(() => _backgroundImage = file);
-            }),
-            onRemove: () => setState(() => _backgroundImage = null),
+            file: _backgroundImage,
+            onTap: () => _pickFile('image'),
           ),
-
-          SizedBox(height: 16.h),
-
-          // Introduction Audio
-          _buildFileUploadCard(
-            title: 'Introduction Audio *',
-            subtitle: 'MP3 format, 1-5 minutes recommended',
-            file: _introAudio,
+          SizedBox(height: 12.h),
+          _buildFileUploadTile(
+            title: 'Introduction Audio',
+            subtitle: 'MP3, WAV (Max 50MB)',
             icon: Icons.audiotrack,
-            onTap: () => _pickFile(FileType.audio, (file) {
-              setState(() => _introAudio = file);
-            }),
-            onRemove: () => setState(() => _introAudio = null),
+            file: _introAudio,
+            onTap: () => _pickFile('intro'),
           ),
-
-          SizedBox(height: 16.h),
-
-          // Subliminal Audio
-          _buildFileUploadCard(
-            title: 'Subliminal Audio *',
-            subtitle: 'MP3 format, 30min - 2hours recommended',
-            file: _subliminalAudio,
+          SizedBox(height: 12.h),
+          _buildFileUploadTile(
+            title: 'Subliminal Audio',
+            subtitle: 'MP3, WAV (Max 200MB)',
             icon: Icons.music_note,
-            onTap: () => _pickFile(FileType.audio, (file) {
-              setState(() => _subliminalAudio = file);
-            }),
-            onRemove: () => setState(() => _subliminalAudio = null),
+            file: _subliminalAudio,
+            onTap: () => _pickFile('subliminal'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFileUploadCard({
+  Widget _buildFileUploadTile({
     required String title,
     required String subtitle,
-    required PlatformFile? file,
     required IconData icon,
+    PlatformFile? file,
     required VoidCallback onTap,
-    required VoidCallback onRemove,
   }) {
     return InkWell(
-      onTap: file == null ? onTap : null,
-      borderRadius: BorderRadius.circular(8.r),
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: EdgeInsets.all(16.w),
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: file != null
-              ? AppColors.primaryGold.withOpacity(0.05)
-              : AppColors.greyLight,
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: file != null
                 ? AppColors.primaryGold.withOpacity(0.3)
                 : AppColors.greyBorder,
-            style: file == null ? BorderStyle.solid : BorderStyle.solid,
             width: file != null ? 2 : 1,
           ),
         ),
@@ -494,16 +563,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 ],
               ),
             ),
-            if (file != null)
-              IconButton(
-                icon: Icon(Icons.close, color: Colors.red),
-                onPressed: onRemove,
-              )
-            else
-              Icon(
-                Icons.upload,
-                color: AppColors.textSecondary,
-              ),
+            Icon(
+              Icons.cloud_upload_outlined,
+              color: file != null
+                  ? AppColors.primaryGold
+                  : AppColors.textSecondary,
+            ),
           ],
         ),
       ),
@@ -512,7 +577,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Widget _buildIntroSection() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -524,52 +589,33 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             controller: _introTitleController,
             decoration: InputDecoration(
               labelText: 'Introduction Title',
-              hintText: 'e.g., Relaxation Introduction',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
           ),
-
           SizedBox(height: 16.h),
-
           TextFormField(
             controller: _introDescriptionController,
             maxLines: 2,
             decoration: InputDecoration(
               labelText: 'Introduction Description',
-              hintText: 'Brief description of the introduction...',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
           ),
-
           SizedBox(height: 16.h),
-
-          // Duration input
           Row(
             children: [
-              Text(
-                'Duration (seconds):',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Container(
-                width: 100.w,
+              Expanded(
                 child: TextFormField(
                   initialValue: _introDuration.toString(),
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
+                    labelText: 'Duration (seconds)',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                   onChanged: (value) {
@@ -577,9 +623,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   },
                 ),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 16.w),
               Text(
-                '(${(_introDuration / 60).toStringAsFixed(1)} minutes)',
+                '${(_introDuration / 60).toStringAsFixed(1)} minutes',
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -594,7 +640,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Widget _buildSubliminalSection() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -606,53 +652,34 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             controller: _subliminalTitleController,
             decoration: InputDecoration(
               labelText: 'Subliminal Title',
-              hintText: 'e.g., Deep Sleep Subliminals',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
           ),
-
           SizedBox(height: 16.h),
-
           TextFormField(
             controller: _affirmationsController,
             maxLines: 5,
             decoration: InputDecoration(
               labelText: 'Affirmations (one per line)',
-              hintText:
-                  'I am calm and peaceful\nI sleep deeply\nI wake up refreshed',
+              hintText: 'Enter affirmations, one per line',
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8.r),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
           ),
-
           SizedBox(height: 16.h),
-
-          // Duration input
           Row(
             children: [
-              Text(
-                'Duration (seconds):',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(width: 16.w),
-              Container(
-                width: 100.w,
+              Expanded(
                 child: TextFormField(
                   initialValue: _subliminalDuration.toString(),
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
+                    labelText: 'Duration (seconds)',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                   onChanged: (value) {
@@ -660,9 +687,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   },
                 ),
               ),
-              SizedBox(width: 8.w),
+              SizedBox(width: 16.w),
               Text(
-                '(${(_subliminalDuration / 3600).toStringAsFixed(1)} hours)',
+                '${(_subliminalDuration / 3600).toStringAsFixed(1)} hours',
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -675,24 +702,29 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     );
   }
 
-  Widget _buildSaveButton() {
-    return Container(
+  Widget _buildCreateButton() {
+    return SizedBox(
       width: double.infinity,
-      height: 56.h,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveSession,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGold,
+          padding: EdgeInsets.symmetric(vertical: 16.h),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
         ),
         child: _isLoading
-            ? CircularProgressIndicator(color: Colors.white)
+            ? SizedBox(
+                height: 20.h,
+                width: 20.h,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
             : Text(
-                widget.sessionToEdit != null
-                    ? 'Update Session'
-                    : 'Create Session',
+                'Create Session',
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -701,220 +733,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               ),
       ),
     );
-  }
-
-  void _showEmojiPicker() {
-    final emojis = ['🎵', '😴', '🧘', '💪', '🌙', '⭐', '✨', '🎯', '💫', '🌟'];
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Select Emoji'),
-        content: Wrap(
-          spacing: 16.w,
-          runSpacing: 16.h,
-          children: emojis.map((emoji) {
-            return InkWell(
-              onTap: () {
-                setState(() => _selectedEmoji = emoji);
-                Navigator.pop(context);
-              },
-              child: Container(
-                width: 48.w,
-                height: 48.w,
-                decoration: BoxDecoration(
-                  color: _selectedEmoji == emoji
-                      ? AppColors.primaryGold.withOpacity(0.2)
-                      : AppColors.greyLight,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: _selectedEmoji == emoji
-                        ? AppColors.primaryGold
-                        : AppColors.greyBorder,
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    emoji,
-                    style: TextStyle(fontSize: 24.sp),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _pickFile(FileType type, Function(PlatformFile) onPicked) async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: type,
-        allowedExtensions: type == FileType.audio ? ['mp3', 'm4a'] : null,
-      );
-
-      if (result != null && result.files.isNotEmpty) {
-        onPicked(result.files.first);
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error picking file: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<void> _saveSession() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    if (_introAudio == null || _subliminalAudio == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please upload both audio files'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _uploadProgress = 0.0;
-    });
-
-    try {
-      // Generate session ID
-      final sessionId = widget.sessionToEdit?['id'] ??
-          DateTime.now().millisecondsSinceEpoch.toString();
-
-      String? backgroundImageUrl;
-      String? introAudioUrl;
-      String? subliminalAudioUrl;
-
-      // Upload background image
-      if (_backgroundImage != null) {
-        setState(() => _uploadStatus = 'Uploading background image...');
-        backgroundImageUrl = await _uploadFile(
-          _backgroundImage!,
-          'images/sessions/$sessionId/background',
-        );
-      }
-
-      // Upload intro audio
-      setState(() {
-        _uploadStatus = 'Uploading introduction audio...';
-        _uploadProgress = 0.33;
-      });
-      introAudioUrl = await _uploadFile(
-        _introAudio!,
-        'audio/sessions/$sessionId/intro',
-      );
-
-      // Upload subliminal audio
-      setState(() {
-        _uploadStatus = 'Uploading subliminal audio...';
-        _uploadProgress = 0.66;
-      });
-      subliminalAudioUrl = await _uploadFile(
-        _subliminalAudio!,
-        'audio/sessions/$sessionId/subliminal',
-      );
-
-      // Prepare session data
-      final sessionData = {
-        'id': sessionId,
-        'title': _titleController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'category': _selectedCategory,
-        'emoji': _selectedEmoji,
-        'backgroundImage':
-            backgroundImageUrl ?? widget.sessionToEdit?['backgroundImage'],
-        'intro': {
-          'title': _introTitleController.text.trim(),
-          'description': _introDescriptionController.text.trim(),
-          'duration': _introDuration,
-          'audioUrl':
-              introAudioUrl ?? widget.sessionToEdit?['intro']?['audioUrl'],
-        },
-        'subliminal': {
-          'title': _subliminalTitleController.text.trim(),
-          'duration': _subliminalDuration,
-          'audioUrl': subliminalAudioUrl ??
-              widget.sessionToEdit?['subliminal']?['audioUrl'],
-          'affirmations': _affirmationsController.text
-              .split('\n')
-              .where((line) => line.trim().isNotEmpty)
-              .toList(),
-        },
-        'playCount': widget.sessionToEdit?['playCount'] ?? 0,
-        'rating': widget.sessionToEdit?['rating'] ?? 0.0,
-        'isActive': true,
-        'isPremium': false,
-        'createdAt':
-            widget.sessionToEdit?['createdAt'] ?? FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      // Save to Firestore
-      setState(() {
-        _uploadStatus = 'Saving session...';
-        _uploadProgress = 0.9;
-      });
-
-      await FirebaseFirestore.instance
-          .collection('sessions')
-          .doc(sessionId)
-          .set(sessionData, SetOptions(merge: true));
-
-      setState(() {
-        _uploadProgress = 1.0;
-        _uploadStatus = 'Session saved successfully!';
-      });
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.sessionToEdit != null
-                ? 'Session updated successfully!'
-                : 'Session created successfully!',
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Navigate back
-      Navigator.pop(context);
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _uploadProgress = 0.0;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error saving session: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  Future<String> _uploadFile(PlatformFile file, String path) async {
-    final ref = FirebaseStorage.instance.ref().child(path);
-
-    if (kIsWeb) {
-      // Web upload
-      await ref.putData(file.bytes!);
-    } else {
-      // Mobile upload
-      await ref.putFile(File(file.path!));
-    }
-
-    return await ref.getDownloadURL();
   }
 
   @override
