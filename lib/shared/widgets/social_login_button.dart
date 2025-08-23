@@ -10,6 +10,7 @@ class SocialLoginButton extends StatelessWidget {
   final String label;
   final bool isDark;
   final bool isLoading;
+  final bool isDisabled;
 
   const SocialLoginButton({
     super.key,
@@ -17,20 +18,30 @@ class SocialLoginButton extends StatelessWidget {
     required this.label,
     this.isDark = false,
     this.isLoading = false,
+    this.isDisabled = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool canTap = !isLoading && !isDisabled;
+
     return GestureDetector(
-      onTap: isLoading ? null : onTap,
-      child: Container(
+      onTap: canTap ? onTap : null,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         width: double.infinity,
         height: 48.h,
         decoration: BoxDecoration(
-          color: isDark ? Colors.black : Colors.white,
+          color: isDisabled
+              ? (isDark
+                  ? Colors.black.withOpacity(0.3)
+                  : Colors.white.withOpacity(0.5))
+              : (isDark ? Colors.black : Colors.white),
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isDark ? Colors.black : AppColors.greyBorder,
+            color: isDisabled
+                ? AppColors.greyBorder.withOpacity(0.3)
+                : (isDark ? Colors.black : AppColors.greyBorder),
             width: 1.5,
           ),
         ),
@@ -49,12 +60,16 @@ class SocialLoginButton extends StatelessWidget {
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Icon placeholder
+                    // Icon
                     Icon(
                       label.toLowerCase().contains('google')
                           ? Icons.g_mobiledata
                           : Icons.apple,
-                      color: isDark ? Colors.white : AppColors.textPrimary,
+                      color: isDisabled
+                          ? (isDark
+                              ? Colors.white.withOpacity(0.3)
+                              : AppColors.textPrimary.withOpacity(0.3))
+                          : (isDark ? Colors.white : AppColors.textPrimary),
                       size: 24.sp,
                     ),
                     SizedBox(width: 8.w),
@@ -63,7 +78,11 @@ class SocialLoginButton extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
-                        color: isDark ? Colors.white : AppColors.textPrimary,
+                        color: isDisabled
+                            ? (isDark
+                                ? Colors.white.withOpacity(0.3)
+                                : AppColors.textPrimary.withOpacity(0.3))
+                            : (isDark ? Colors.white : AppColors.textPrimary),
                       ),
                     ),
                   ],

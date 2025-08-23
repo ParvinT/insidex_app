@@ -1,6 +1,10 @@
+// lib/features/splash/splash_screen_rotation.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:math' as math;
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,59 +19,43 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _dropController;
-  late AnimationController _bounceController;
+  late AnimationController _rotationController;
   late AnimationController _fadeController;
-
-  late Animation<double> _dropAnimation;
-  late Animation<double> _bounceAnimation;
+  late Animation<double> _rotationAnimation;
   late Animation<double> _fadeAnimation;
+  late Animation<double> _textFadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _initAnimations();
-    _navigateToNext();
+    _startAnimations();
+    _checkAuthAndNavigate();
   }
 
   void _initAnimations() {
-    // Drop animation controller
-    _dropController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+    // 3D rotation controller
+    _rotationController = AnimationController(
+      duration: const Duration(milliseconds: 2500),
       vsync: this,
     );
 
-    // Bounce animation controller
-    _bounceController = AnimationController(
-      duration: const Duration(milliseconds: 600),
-      vsync: this,
-    );
-
-    // Fade animation controller for text
+    // Fade controller
     _fadeController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
 
-    // Logo drop animation - yukarıdan aşağıya
-    _dropAnimation = Tween<double>(
-      begin: -300.0, // Ekranın üstünden başla
-      end: 0.0, // Merkeze gel
+    // Rotate around Y axis in 3D
+    _rotationAnimation = Tween<double>(
+      begin: math.pi * 2, // 360 degrees
+      end: 0.0,
     ).animate(CurvedAnimation(
-      parent: _dropController,
-      curve: Curves.fastOutSlowIn,
+      parent: _rotationController,
+      curve: Curves.easeOutBack,
     ));
 
-    // Bounce effect when landing
-    _bounceAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _bounceController,
-      curve: Curves.elasticOut,
-    ));
-
-    // Text fade animation
+    // Logo fade
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -76,86 +64,112 @@ class _SplashScreenState extends State<SplashScreen>
       curve: Curves.easeIn,
     ));
 
-    // Start animations sequence
-    _dropController.forward().then((_) {
-      _bounceController.forward();
-      _fadeController.forward();
-    });
+    // Text fade
+    _textFadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+    ));
   }
 
-  void _navigateToNext() {
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
+  void _startAnimations() async {
+    _fadeController.forward();
+    await Future.delayed(const Duration(milliseconds: 200));
+    _rotationController.forward();
+  }
+
+  void _checkAuthAndNavigate() {
+    // Wait 4 seconds for animation to complete
+    Future.delayed(const Duration(seconds: 4), () async {
+      if (!mounted) return;
+
+      // Check Firebase Auth status
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        // User is already logged in
+        debugPrint('User is already logged in: ${user.email}');
+
+        // Check email verification (optional)
+        if (user.emailVerified || true) {
+          // Email verification not required for now
+          // Navigate directly to home screen
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+        } else {
+          // If email not verified, navigate to welcome
+          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+        }
+      } else {
+        // User is not logged in
+        debugPrint('No user logged in, going to welcome screen');
+
+        // Navigate to welcome screen
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      }
     });
   }
 
   @override
   void dispose() {
-    _dropController.dispose();
-    _bounceController.dispose();
+    _rotationController.dispose();
     _fadeController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: AppColors.backgroundWhite, // White background
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Logo with drop animation
-            AnimatedBuilder(
-              animation: Listenable.merge([_dropController, _bounceController]),
-              builder: (context, child) {
-                return Transform.translate(
-                  offset: Offset(0, _dropAnimation.value),
-                  child: Transform.scale(
-                    scale: _bounceAnimation.value,
-                    child: _buildLogo(isDark),
-                  ),
-                );
-              },
-            ),
-
-            SizedBox(height: 40.h),
-
-            // Tagline with fade animation
-            AnimatedBuilder(
-              animation: _fadeController,
-              builder: (context, child) {
-                return Opacity(
+        child: AnimatedBuilder(
+          animation: Listenable.merge([_rotationController, _fadeController]),
+          builder: (context, child) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // 3D rotating logo
+                Opacity(
                   opacity: _fadeAnimation.value,
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001) // 3D perspective
+                      ..rotateY(_rotationAnimation.value),
+                    child: SvgPicture.asset(
+                      'assets/images/logo.svg',
+                      width: 220.w,
+                      height: 65.h,
+                      fit: BoxFit.contain,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.textPrimary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 35.h),
+
+                // Tagline
+                Opacity(
+                  opacity: _textFadeAnimation.value,
                   child: Text(
                     AppConstants.appTagline,
                     style: GoogleFonts.inter(
-                      fontSize: 16.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w300,
                       color: AppColors.textSecondary,
-                      letterSpacing: 1.5,
+                      letterSpacing: 1.8,
                     ),
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
-    );
-  }
-
-  Widget _buildLogo(bool isDark) {
-    return SvgPicture.asset(
-      'assets/images/logo.svg',
-      width: 220.w,
-      height: 60.h,
-      fit: BoxFit.contain,
-      colorFilter: isDark
-          ? ColorFilter.mode(AppColors.primaryGoldLight, BlendMode.srcIn)
-          : null,
     );
   }
 }

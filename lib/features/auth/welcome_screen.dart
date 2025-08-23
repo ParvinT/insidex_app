@@ -1,3 +1,5 @@
+// lib/features/auth/welcome_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,7 +21,7 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              
+
               // Logo
               SvgPicture.asset(
                 'assets/images/logo.svg',
@@ -30,29 +32,21 @@ class WelcomeScreen extends StatelessWidget {
                   BlendMode.srcIn,
                 ),
               ),
-              
+
               SizedBox(height: 60.h),
-              
-              // Welcome Text
+
+              // Welcome Text - Only "Welcome" now
               Text(
-                'Welcome to',
+                'Welcome',
                 style: GoogleFonts.inter(
-                  fontSize: 32.sp,
+                  fontSize: 36.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
               ),
-              Text(
-                'Inside⊗',
-                style: GoogleFonts.inter(
-                  fontSize: 32.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              
+
               SizedBox(height: 16.h),
-              
+
               // Subtitle
               Text(
                 'Create your personal profile\nto get custom subliminal sessions',
@@ -64,9 +58,9 @@ class WelcomeScreen extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
-              
+
               SizedBox(height: 60.h),
-              
+
               // Google Sign In Button
               SocialLoginButton(
                 onTap: () {
@@ -75,9 +69,9 @@ class WelcomeScreen extends StatelessWidget {
                 },
                 label: 'Google',
               ),
-              
+
               SizedBox(height: 16.h),
-              
+
               // Apple Sign In Button
               SocialLoginButton(
                 onTap: () {
@@ -87,36 +81,37 @@ class WelcomeScreen extends StatelessWidget {
                 label: 'Apple ID',
                 isDark: true,
               ),
-              
+
               SizedBox(height: 16.h),
-              
+
               // Email Sign In Button
               _buildEmailButton(
                 onTap: () {
                   Navigator.pushNamed(context, AppRoutes.login);
                 },
               ),
-              
-              const Spacer(flex: 3),
-              
-              // Continue as Guest
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, AppRoutes.home);
-                  },
-                  child: Text(
-                    'Continue as a Guest',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w500,
-                      decoration: TextDecoration.underline,
-                    ),
+
+              const Spacer(),
+
+              // Continue as Guest Link
+              TextButton(
+                onPressed: () {
+                  // Navigate to home as guest
+                  Navigator.pushReplacementNamed(context, AppRoutes.home);
+                },
+                child: Text(
+                  'Continue as a Guest',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
                   ),
                 ),
               ),
-              
+
+              SizedBox(height: 16.h),
+
               // Sign Up Link
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +138,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              
+
               SizedBox(height: 32.h),
             ],
           ),
@@ -151,29 +146,40 @@ class WelcomeScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildEmailButton({required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 56.h,
+        height: 48.h,
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: AppColors.greyBorder,
             width: 1.5,
           ),
         ),
         child: Center(
-          child: Text(
-            'Email + Password',
-            style: GoogleFonts.inter(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.email_outlined,
+                color: AppColors.textPrimary,
+                size: 20.sp,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'Email + Password',
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
           ),
         ),
       ),

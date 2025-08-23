@@ -56,190 +56,239 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
         final isAdmin = userDoc.data()?['isAdmin'] ?? false;
 
-        if (!isAdmin && mounted) {
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Unauthorized Access'),
-              backgroundColor: Colors.red,
-            ),
-          );
+        if (!isAdmin) {
+          if (mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Admin access required'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
       }
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error checking admin access: $e');
-      }
+      debugPrint('Error checking admin access: $e');
     }
   }
 
   Future<void> _loadStatistics() async {
+    setState(() => _isLoading = true);
+
     try {
-      setState(() => _isLoading = true);
-
-      // Get total users count
+      // Load user statistics
       final usersSnapshot = await _firestore.collection('users').get();
-      final totalUsers = usersSnapshot.docs.length;
+      final premiumUsers = usersSnapshot.docs
+          .where((doc) => doc.data()['isPremium'] == true)
+          .length;
 
-      // Get premium users count
-      final premiumUsersSnapshot = await _firestore
-          .collection('users')
-          .where('isPremium', isEqualTo: true)
-          .get();
-      final premiumUsers = premiumUsersSnapshot.docs.length;
-
-      // Get total sessions count
+      // Load session statistics
       final sessionsSnapshot = await _firestore.collection('sessions').get();
-      final totalSessions = sessionsSnapshot.docs.length;
 
-      // Get total categories count
+      // Load category statistics
       final categoriesSnapshot =
           await _firestore.collection('categories').get();
-      final totalCategories = categoriesSnapshot.docs.length;
 
       setState(() {
         _statistics = {
-          'totalUsers': totalUsers,
+          'totalUsers': usersSnapshot.size,
           'premiumUsers': premiumUsers,
-          'totalSessions': totalSessions,
-          'totalCategories': totalCategories,
+          'totalSessions': sessionsSnapshot.size,
+          'totalCategories': categoriesSnapshot.size,
         };
         _isLoading = false;
       });
     } catch (e) {
-      if (kDebugMode) {
-        debugPrint('Error loading statistics: $e');
-      }
+      debugPrint('Error loading statistics: $e');
       setState(() => _isLoading = false);
     }
   }
 
   void _showAdminMenu() {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenHeight < 700; // iPhone SE gibi küçük ekranlar
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true, // İçeriğin yüksekliğine göre ayarlanabilir
+      constraints: BoxConstraints(
+        maxHeight: screenHeight * 0.75, // Maksimum ekranın %75'i
+      ),
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.backgroundWhite,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20.r),
             topRight: Radius.circular(20.r),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
         ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle bar
-              Container(
-                margin: EdgeInsets.only(top: 12.h),
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2.r),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 12.h),
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: AppColors.greyBorder,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+
+            SizedBox(height: isSmallScreen ? 12.h : 20.h),
+
+            // Menu Title
+            Text(
+              'Admin Menu',
+              style: GoogleFonts.inter(
+                fontSize: isSmallScreen ? 16.sp : 18.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+
+            SizedBox(height: isSmallScreen ? 12.h : 20.h),
+
+            // Scrollable Menu Items
+            Flexible(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildCompactMenuItem(
+                      icon: Icons.dashboard,
+                      title: 'Dashboard',
+                      onTap: () => Navigator.pop(context),
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.category,
+                      title: 'Categories',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/categories');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.music_note,
+                      title: 'Sessions',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/sessions');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.add_circle,
+                      title: 'Add Session',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/add-session');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.people,
+                      title: 'Users',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/users');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.settings,
+                      title: 'Settings',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/settings');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+
+                    // Divider
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                          vertical: isSmallScreen ? 8.h : 12.h),
+                      child: Divider(
+                        color: AppColors.greyBorder,
+                        height: 1,
+                      ),
+                    ),
+
+                    _buildCompactMenuItem(
+                      icon: Icons.logout,
+                      title: 'Exit Admin Panel',
+                      color: Colors.red,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 20.h),
+            ),
 
-              // Menu Title
-              Text(
-                'Admin Menu',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(height: 20.h),
-
-              // Menu Items
-              _buildMenuItem(
-                icon: Icons.dashboard,
-                title: 'Dashboard',
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.category,
-                title: 'Categories',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/admin/categories');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.music_note,
-                title: 'Sessions',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/admin/sessions');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.add_circle,
-                title: 'Add Session',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/admin/add-session');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.people,
-                title: 'Users',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/admin/users');
-                },
-              ),
-              _buildMenuItem(
-                icon: Icons.settings,
-                title: 'Settings',
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamed(context, '/admin/settings');
-                },
-              ),
-              Divider(height: 1),
-              _buildMenuItem(
-                icon: Icons.logout,
-                title: 'Exit Admin Panel',
-                color: Colors.red,
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(height: 20.h),
-            ],
-          ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom + 20.h),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildMenuItem({
+  Widget _buildCompactMenuItem({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
     Color? color,
+    bool isCompact = false,
   }) {
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: color ?? AppColors.textPrimary,
-        size: 24.sp,
-      ),
-      title: Text(
-        title,
-        style: GoogleFonts.inter(
-          fontSize: 14.sp,
-          fontWeight: FontWeight.w500,
-          color: color ?? AppColors.textPrimary,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: isCompact ? 12.h : 14.h,
+        ),
+        margin: EdgeInsets.only(bottom: isCompact ? 4.h : 8.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          color: Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: color ?? AppColors.textPrimary,
+              size: isCompact ? 20.sp : 22.sp,
+            ),
+            SizedBox(width: 16.w),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: isCompact ? 14.sp : 15.sp,
+                fontWeight: FontWeight.w500,
+                color: color ?? AppColors.textPrimary,
+              ),
+            ),
+          ],
         ),
       ),
-      onTap: onTap,
     );
   }
 
@@ -278,12 +327,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildMobileHeader() {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.backgroundWhite,
         border: Border(
           bottom: BorderSide(
-            color: AppColors.greyBorder,
+            color: AppColors.greyBorder.withOpacity(0.5),
             width: 1,
           ),
         ),
@@ -294,18 +343,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: EdgeInsets.all(8.w),
+              width: 36.w,
+              height: 36.w,
               decoration: BoxDecoration(
                 color: AppColors.backgroundWhite,
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(10.r),
                 border: Border.all(
                   color: AppColors.greyBorder,
+                  width: 1,
                 ),
               ),
               child: Icon(
                 Icons.arrow_back,
                 color: AppColors.textPrimary,
-                size: 20.sp,
+                size: 18.sp,
               ),
             ),
           ),
@@ -314,14 +365,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
           // Admin Panel Title
           Expanded(
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(
-                  Icons.admin_panel_settings,
-                  color: Colors.red,
-                  size: 24.sp,
-                ),
-                SizedBox(width: 8.w),
                 Text(
                   'Admin Panel',
                   style: GoogleFonts.inter(
@@ -330,44 +376,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
+                Text(
+                  'Manage your app',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
               ],
             ),
           ),
 
-          // Menu Button (HomeScreen tarzı)
+          // Menu Button - Siyah yapıldı
           GestureDetector(
             onTap: _showAdminMenu,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              width: 36.w,
+              height: 36.w,
               decoration: BoxDecoration(
-                color: AppColors.primaryGold,
-                borderRadius: BorderRadius.circular(20.r),
+                color: AppColors.textPrimary, // Siyah arka plan
+                borderRadius: BorderRadius.circular(10.r),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryGold.withOpacity(0.3),
+                    color: Colors.black.withOpacity(0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Menu',
-                    style: GoogleFonts.inter(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(width: 4.w),
-                  Icon(
-                    Icons.menu,
-                    size: 14.sp,
-                    color: Colors.white,
-                  ),
-                ],
+              child: Icon(
+                Icons.menu,
+                size: 18.sp,
+                color: Colors.white, // Beyaz ikon
               ),
             ),
           ),
@@ -380,27 +420,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Container(
       width: 250.w,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.backgroundWhite,
         border: Border(
           right: BorderSide(
-            color: AppColors.greyBorder,
+            color: AppColors.greyBorder.withOpacity(0.5),
             width: 1,
           ),
         ),
       ),
       child: Column(
         children: [
-          // Logo/Header
+          // Admin Header
           Container(
-            padding: EdgeInsets.all(20.w),
-            child: Row(
+            padding: EdgeInsets.all(24.w),
+            child: Column(
               children: [
                 Icon(
                   Icons.admin_panel_settings,
-                  color: Colors.red,
-                  size: 32.sp,
+                  color: AppColors.primaryGold,
+                  size: 48.sp,
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(height: 12.h),
                 Text(
                   'Admin Panel',
                   style: GoogleFonts.inter(
@@ -413,76 +453,64 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
 
-          Divider(
-            color: AppColors.greyBorder,
-            thickness: 1,
-            height: 1,
-          ),
+          Divider(color: AppColors.greyBorder.withOpacity(0.5)),
 
-          // Navigation Items
+          // Menu Items
           Expanded(
-            child: ListView(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              children: [
-                _buildSidebarItem(
-                  icon: Icons.dashboard,
-                  title: 'Dashboard',
-                  isActive: true,
-                  onTap: () {},
-                ),
-                _buildSidebarItem(
-                  icon: Icons.category,
-                  title: 'Categories',
-                  onTap: () {
-                    Navigator.pushNamed(context, '/admin/categories');
-                  },
-                ),
-                _buildSidebarItem(
-                  icon: Icons.music_note,
-                  title: 'Sessions',
-                  onTap: () {
-                    Navigator.pushNamed(context, '/admin/sessions');
-                  },
-                ),
-                _buildSidebarItem(
-                  icon: Icons.add_circle,
-                  title: 'Add Session',
-                  onTap: () {
-                    Navigator.pushNamed(context, '/admin/add-session');
-                  },
-                ),
-                _buildSidebarItem(
-                  icon: Icons.people,
-                  title: 'Users',
-                  onTap: () {
-                    Navigator.pushNamed(context, '/admin/users');
-                  },
-                ),
-                _buildSidebarItem(
-                  icon: Icons.settings,
-                  title: 'Settings',
-                  onTap: () {
-                    Navigator.pushNamed(context, '/admin/settings');
-                  },
-                ),
-              ],
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(vertical: 16.h),
+              child: Column(
+                children: [
+                  _buildSidebarItem(
+                    icon: Icons.dashboard,
+                    title: 'Dashboard',
+                    isActive: true,
+                  ),
+                  _buildSidebarItem(
+                    icon: Icons.category,
+                    title: 'Categories',
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/categories'),
+                  ),
+                  _buildSidebarItem(
+                    icon: Icons.music_note,
+                    title: 'Sessions',
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/sessions'),
+                  ),
+                  _buildSidebarItem(
+                    icon: Icons.add_circle,
+                    title: 'Add Session',
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/add-session'),
+                  ),
+                  _buildSidebarItem(
+                    icon: Icons.people,
+                    title: 'Users',
+                    onTap: () => Navigator.pushNamed(context, '/admin/users'),
+                  ),
+                  _buildSidebarItem(
+                    icon: Icons.settings,
+                    title: 'Settings',
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/settings'),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // Bottom section
-          Divider(
-            color: AppColors.greyBorder,
-            thickness: 1,
-            height: 1,
-          ),
+          Divider(color: AppColors.greyBorder.withOpacity(0.5)),
 
-          // Logout
+          // Exit Button
           _buildSidebarItem(
             icon: Icons.logout,
             title: 'Exit Admin',
             isDestructive: true,
             onTap: () => Navigator.pop(context),
           ),
+
+          SizedBox(height: 16.h),
         ],
       ),
     );
@@ -491,24 +519,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   Widget _buildSidebarItem({
     required IconData icon,
     required String title,
+    VoidCallback? onTap,
     bool isActive = false,
     bool isDestructive = false,
-    required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primaryGold.withOpacity(0.1) : null,
-          border: isActive
-              ? Border(
-                  left: BorderSide(
-                    color: AppColors.primaryGold,
-                    width: 3,
-                  ),
-                )
-              : null,
+          color: isActive
+              ? AppColors.primaryGold.withOpacity(0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
           children: [
@@ -554,50 +578,29 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header - Mobilde gösterme çünkü yukarıda var
-          if (MediaQuery.of(context).size.width > 768) ...[
-            Text(
-              'Dashboard Overview',
-              style: GoogleFonts.inter(
-                fontSize: 28.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
+          // Header
+          Text(
+            'Dashboard Overview',
+            style: GoogleFonts.inter(
+              fontSize: 24.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
             ),
-            SizedBox(height: 8.h),
-            Text(
-              'Welcome to your admin dashboard',
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                color: AppColors.textSecondary,
-              ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            'Welcome to your admin dashboard',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
             ),
-            SizedBox(height: 32.h),
-          ] else ...[
-            // Mobile için başlık
-            Text(
-              'Dashboard Overview',
-              style: GoogleFonts.inter(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              'Welcome to your admin dashboard',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-              ),
-            ),
-            SizedBox(height: 24.h),
-          ],
+          ),
+          SizedBox(height: 24.h),
 
           // Statistics Grid
           _buildStatisticsGrid(),
 
-          SizedBox(height: 24.h),
+          SizedBox(height: 32.h),
 
           // Recent Activity
           _buildRecentActivity(),
@@ -617,7 +620,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 16.w,
           mainAxisSpacing: 16.h,
-          childAspectRatio: constraints.maxWidth > 600 ? 1.5 : 1.2,
+          childAspectRatio: constraints.maxWidth > 600 ? 1.8 : 1.4,
           children: [
             _buildStatCard(
               title: 'Total Users',
@@ -656,18 +659,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder,
+          color: AppColors.greyBorder.withOpacity(0.5),
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -679,10 +683,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
                   icon,
@@ -692,18 +696,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               Icon(
                 Icons.trending_up,
-                color: Colors.green,
+                color: Colors.green.shade400,
                 size: 16.sp,
               ),
             ],
           ),
+          SizedBox(height: 12.h),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 value,
                 style: GoogleFonts.inter(
-                  fontSize: 24.sp,
+                  fontSize: 28.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -725,103 +730,133 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildRecentActivity() {
     return Container(
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
+        color: AppColors.backgroundWhite,
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder,
+          color: AppColors.greyBorder.withOpacity(0.5),
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Recent Activity',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-
-          SizedBox(height: 20.h),
-
-          // Activity List
-          ...List.generate(5, (index) {
-            return _buildActivityItem(
-              title: 'New user registered',
-              subtitle: 'user${index + 1}@example.com',
-              time: '${index + 1} hours ago',
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActivityItem({
-    required String title,
-    required String subtitle,
-    required String time,
-  }) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.greyBorder.withOpacity(0.5),
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 8.w,
-            height: 8.w,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold,
-              shape: BoxShape.circle,
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Recent Activity',
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
                 ),
-                SizedBox(height: 2.h),
-                Text(
-                  subtitle,
+              ),
+              TextButton(
+                onPressed: () {},
+                child: Text(
+                  'View All',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: AppColors.textSecondary,
+                    color: AppColors.primaryGold,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Text(
-            time,
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
+          SizedBox(height: 16.h),
+
+          // Activity Items
+          ...List.generate(3, (index) {
+            final activities = [
+              {
+                'icon': Icons.person_add,
+                'title': 'New user registered',
+                'subtitle': 'john.doe@example.com',
+                'time': '2 minutes ago',
+                'color': Colors.blue,
+              },
+              {
+                'icon': Icons.music_note,
+                'title': 'New session added',
+                'subtitle': 'Deep Sleep Meditation',
+                'time': '1 hour ago',
+                'color': Colors.green,
+              },
+              {
+                'icon': Icons.star,
+                'title': 'User upgraded to premium',
+                'subtitle': 'jane.smith@example.com',
+                'time': '3 hours ago',
+                'color': AppColors.primaryGold,
+              },
+            ];
+
+            final activity = activities[index];
+            return Container(
+              margin: EdgeInsets.only(bottom: 12.h),
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: AppColors.greyLight.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: (activity['color'] as Color).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Icon(
+                      activity['icon'] as IconData,
+                      color: activity['color'] as Color,
+                      size: 16.sp,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          activity['title'] as String,
+                          style: GoogleFonts.inter(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          activity['subtitle'] as String,
+                          style: GoogleFonts.inter(
+                            fontSize: 11.sp,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    activity['time'] as String,
+                    style: GoogleFonts.inter(
+                      fontSize: 11.sp,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );

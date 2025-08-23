@@ -27,7 +27,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   bool _isPasswordVisible = false;
-  bool _isLoading = false;
+
+  // Ayrı loading state'ler
+  bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -40,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Validate form
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+    setState(() => _isEmailLoading = true);
 
     // Attempt login with Firebase
     final result = await FirebaseService.signIn(
@@ -48,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text.trim(),
     );
 
-    setState(() => _isLoading = false);
+    setState(() => _isEmailLoading = false);
 
     if (!mounted) return;
 
@@ -73,10 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
 
     try {
       // TODO: Implement Google Sign In with Firebase
+      await Future.delayed(const Duration(seconds: 2)); // Simüle
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Google Sign In coming soon!'),
@@ -84,15 +90,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isGoogleLoading = false);
     }
   }
 
   Future<void> _handleAppleSignIn() async {
-    setState(() => _isLoading = true);
+    setState(() => _isAppleLoading = true);
 
     try {
       // TODO: Implement Apple Sign In with Firebase
+      await Future.delayed(const Duration(seconds: 2)); // Simüle
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Apple Sign In coming soon!'),
@@ -100,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isAppleLoading = false);
     }
   }
 
@@ -116,14 +124,14 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() => _isEmailLoading = true);
 
     // Send password reset email via Firebase
     final result = await FirebaseService.resetPassword(
       _emailController.text.trim(),
     );
 
-    setState(() => _isLoading = false);
+    setState(() => _isEmailLoading = false);
 
     if (!mounted) return;
 
@@ -171,6 +179,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Herhangi biri loading durumundaysa diğer butonları disable et
+    final isAnyLoading = _isEmailLoading || _isGoogleLoading || _isAppleLoading;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -189,13 +200,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 32.h),
+                SizedBox(height: 20.h),
 
                 // Title
                 Text(
-                  'Welcome Back',
+                  'Welcome Back!',
                   style: GoogleFonts.inter(
-                    fontSize: 32.sp,
+                    fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimary,
                   ),
@@ -212,59 +223,62 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
 
-                SizedBox(height: 48.h),
+                SizedBox(height: 40.h),
 
-                // Email field
+                // Email Field
                 CustomTextField(
                   controller: _emailController,
                   label: 'Email',
                   hint: 'Enter your email',
                   keyboardType: TextInputType.emailAddress,
                   validator: FormValidators.validateEmail,
+                  readOnly: isAnyLoading,
                 ),
 
-                SizedBox(height: 20.h),
+                SizedBox(height: 16.h),
 
-                // Password field
+                // Password Field
                 CustomTextField(
                   controller: _passwordController,
                   label: 'Password',
                   hint: 'Enter your password',
                   obscureText: !_isPasswordVisible,
                   validator: FormValidators.validatePassword,
+                  readOnly: isAnyLoading,
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordVisible
-                          ? Icons.visibility_off
-                          : Icons.visibility,
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
                       color: AppColors.textSecondary,
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _isPasswordVisible = !_isPasswordVisible;
-                      });
-                    },
+                    onPressed: isAnyLoading
+                        ? null
+                        : () {
+                            setState(
+                                () => _isPasswordVisible = !_isPasswordVisible);
+                          },
                   ),
                 ),
 
                 SizedBox(height: 16.h),
 
-                // Forgot Password Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                      onTap: _handleForgotPassword,
-                      child: Text(
-                        'Forgot Password?',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.primaryGold,
-                          fontWeight: FontWeight.w500,
-                        ),
+                // Forgot Password
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: isAnyLoading ? null : _handleForgotPassword,
+                    child: Text(
+                      'Forgot Password?',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        color: isAnyLoading
+                            ? AppColors.textSecondary
+                            : AppColors.primaryGold,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ],
+                  ),
                 ),
 
                 SizedBox(height: 32.h),
@@ -273,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 PrimaryButton(
                   text: 'Sign In',
                   onPressed: _handleLogin,
-                  isLoading: _isLoading,
+                  isLoading: _isEmailLoading,
                 ),
 
                 SizedBox(height: 24.h),
@@ -287,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 SocialLoginButton(
                   onTap: _handleGoogleSignIn,
                   label: 'Continue with Google',
-                  isLoading: _isLoading,
+                  isLoading: _isGoogleLoading,
                 ),
 
                 SizedBox(height: 12.h),
@@ -297,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onTap: _handleAppleSignIn,
                   label: 'Continue with Apple',
                   isDark: true,
-                  isLoading: _isLoading,
+                  isLoading: _isAppleLoading,
                 ),
 
                 SizedBox(height: 24.h),
@@ -305,15 +319,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Continue as Guest Button
                 Center(
                   child: TextButton(
-                    onPressed: () {
-                      // Navigate to home as guest user
-                      Navigator.pushReplacementNamed(context, AppRoutes.home);
-                    },
+                    onPressed: isAnyLoading
+                        ? null
+                        : () {
+                            Navigator.pushReplacementNamed(
+                                context, AppRoutes.home);
+                          },
                     child: Text(
                       'Continue as a Guest',
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
-                        color: AppColors.textSecondary,
+                        color: isAnyLoading
+                            ? AppColors.textSecondary.withOpacity(0.5)
+                            : AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                         decoration: TextDecoration.underline,
                       ),
@@ -335,14 +353,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, AppRoutes.register);
-                      },
+                      onTap: isAnyLoading
+                          ? null
+                          : () {
+                              Navigator.pushNamed(context, AppRoutes.register);
+                            },
                       child: Text(
                         'Sign Up',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: AppColors.primaryGold,
+                          color: isAnyLoading
+                              ? AppColors.primaryGold.withOpacity(0.5)
+                              : AppColors.primaryGold,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
