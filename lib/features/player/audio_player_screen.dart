@@ -57,6 +57,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   @override
   void initState() {
     super.initState();
+    print('SESSION DATA RECEIVED:');
+    print('Title: ${widget.sessionData?['title']}');
+    print('Background Image: ${widget.sessionData?['backgroundImage']}');
+    print('Intro Audio URL: ${widget.sessionData?['intro']?['audioUrl']}');
+    print(
+        'Subliminal Audio URL: ${widget.sessionData?['subliminal']?['audioUrl']}');
 
     // Initialize session data
     _session = widget.sessionData ??
