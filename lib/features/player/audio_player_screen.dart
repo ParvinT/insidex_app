@@ -1,4 +1,4 @@
-// lib/features/player/audio_player_screen_modern.dart
+// lib/features/player/audio_player_screen.dart
 
 import 'dart:async';
 import 'dart:ui';
@@ -9,6 +9,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/audio_player_service.dart';
 import '../../services/firebase_service.dart';
+import 'widgets/player_controls.dart';
+import 'widgets/player_modals.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -57,6 +59,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   @override
   void initState() {
     super.initState();
+
+    // Debug logs to check received data
     print('SESSION DATA RECEIVED:');
     print('Title: ${widget.sessionData?['title']}');
     print('Background Image: ${widget.sessionData?['backgroundImage']}');
@@ -70,27 +74,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           'id': 'test_session',
           'title': 'Deep Sleep Healing',
           'category': 'Sleep',
-          'backgroundImage':
-              'https://images.unsplash.com/photo-1511295742362-92c96b1cf484?w=800',
+          'backgroundImage': '',
           'intro': {
             'title': 'Relaxation Introduction',
             'duration': 120,
             'description': 'A gentle introduction to prepare your mind',
-            'audioUrl':
-                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+            'audioUrl': '',
           },
           'subliminal': {
             'title': 'Deep Sleep Subliminals',
             'duration': 7200,
             'description':
                 'Powerful subliminal affirmations for deep healing sleep',
-            'audioUrl':
-                'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+            'audioUrl': '',
           },
         };
 
-    _introDuration = _session['intro']['duration'] as int;
-    _subliminalDuration = _session['subliminal']['duration'] as int;
+    _introDuration = _session['intro']?['duration'] ?? 120;
+    _subliminalDuration = _session['subliminal']?['duration'] ?? 7200;
     _totalDuration = Duration(seconds: _introDuration);
 
     // Initialize animations
@@ -509,7 +510,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 Padding(
                   padding: EdgeInsets.only(top: 4.h),
                   child: Text(
-                    'Auto-play next ➜',
+                    'Auto-play next →',
                     style: GoogleFonts.inter(
                       fontSize: 9.sp,
                       color: Colors.greenAccent,
@@ -531,8 +532,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           // Track Title
           Text(
             _currentTrack == 'intro'
-                ? _session['intro']['title']
-                : _session['subliminal']['title'],
+                ? (_session['intro']?['title'] ?? 'Introduction')
+                : (_session['subliminal']?['title'] ?? 'Subliminal'),
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -541,7 +542,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ),
           SizedBox(height: 8.h),
           Text(
-            _session['title'],
+            _session['title'] ?? 'Session',
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: Colors.white70,
@@ -601,89 +602,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Widget _buildControls() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Shuffle
-          IconButton(
-            icon: Icon(
-              Icons.shuffle,
-              color: _isShuffled ? Colors.greenAccent : Colors.white54,
-              size: 24.sp,
-            ),
-            onPressed: () {
-              setState(() => _isShuffled = !_isShuffled);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(_isShuffled ? 'Shuffle ON' : 'Shuffle OFF'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-
-          // Previous
-          IconButton(
-            icon: Icon(Icons.skip_previous, color: Colors.white, size: 36.sp),
-            onPressed: _previousTrack,
-          ),
-
-          // Play/Pause
-          GestureDetector(
-            onTap: _togglePlayPause,
-            child: Container(
-              width: 72.w,
-              height: 72.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [Colors.white, Colors.white70],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withOpacity(0.3),
-                    blurRadius: 20,
-                    spreadRadius: 2,
-                  ),
-                ],
-              ),
-              child: Icon(
-                _isPlaying ? Icons.pause : Icons.play_arrow,
-                size: 36.sp,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-
-          // Next
-          IconButton(
-            icon: Icon(Icons.skip_next, color: Colors.white, size: 36.sp),
-            onPressed: _nextTrack,
-          ),
-
-          // Loop
-          IconButton(
-            icon: Icon(
-              Icons.repeat,
-              color: _isLooping ? Colors.greenAccent : Colors.white54,
-              size: 24.sp,
-            ),
-            onPressed: () {
-              setState(() => _isLooping = !_isLooping);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(_isLooping ? 'Loop ON' : 'Loop OFF'),
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
+    return PlayerControls(
+      isPlaying: _isPlaying,
+      isShuffled: _isShuffled,
+      isLooping: _isLooping,
+      onTogglePlayPause: _togglePlayPause,
+      onPrevious: _previousTrack,
+      onNext: _nextTrack,
+      onToggleShuffle: () {
+        setState(() => _isShuffled = !_isShuffled);
+      },
+      onToggleLoop: () {
+        setState(() => _isLooping = !_isLooping);
+      },
     );
   }
 
@@ -775,19 +706,48 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   Future<void> _playCurrentTrack() async {
     try {
+      // Check if session has audio URLs
+      if (_session['intro'] == null || _session['subliminal'] == null) {
+        print('ERROR: Session data incomplete');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Session data is incomplete'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        setState(() => _isPlaying = false);
+        return;
+      }
+
       final audioUrl = _currentTrack == 'intro'
           ? _session['intro']['audioUrl']
           : _session['subliminal']['audioUrl'];
 
-      // Test URL - gerçek uygulamada Firebase'den gelecek
-      final testUrl = audioUrl ??
-          'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+      // FIXED: Check if URL exists, DON'T use test URL
+      if (audioUrl == null || audioUrl.isEmpty) {
+        print('ERROR: No audio URL found for $_currentTrack');
+        print('Session data: ${_session.toString()}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Audio file not found for $_currentTrack'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+
+        setState(() => _isPlaying = false);
+        _waveController.stop();
+        return;
+      }
+
+      print('Playing audio from Firebase URL: $audioUrl');
 
       await _audioService.playFromUrl(
-        testUrl,
+        audioUrl, // Use actual Firebase URL, NOT test URL
         title: _currentTrack == 'intro'
-            ? _session['intro']['title']
-            : _session['subliminal']['title'],
+            ? (_session['intro']['title'] ?? 'Introduction')
+            : (_session['subliminal']['title'] ?? 'Subliminal'),
         artist: 'INSIDEX',
       );
 
@@ -800,8 +760,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       });
     } catch (e) {
       print('Error playing audio: $e');
+      print('Error details: ${e.toString()}');
+
       setState(() => _isPlaying = false);
       _waveController.stop();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error playing audio: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -847,251 +816,30 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _showSleepTimer() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          return Container(
-            padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              color: Colors.grey[900],
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Sleep Timer',
-                  style: GoogleFonts.inter(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                if (_sleepTimerMinutes != null)
-                  Text(
-                    'Active: $_sleepTimerMinutes minutes',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: Colors.greenAccent,
-                    ),
-                  ),
-                SizedBox(height: 24.h),
-                Wrap(
-                  spacing: 12.w,
-                  runSpacing: 12.h,
-                  children: [15, 30, 45, 60, 90, 120].map((minutes) {
-                    final isSelected = _sleepTimerMinutes == minutes;
-                    return ChoiceChip(
-                      label: Text(
-                        '$minutes min',
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.white70,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          _audioService.setSleepTimer(minutes);
-                          setState(() => _sleepTimerMinutes = minutes);
-                          setModalState(() {}); // Update modal state
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('Sleep timer set to $minutes minutes'),
-                              duration: Duration(seconds: 2),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        } else {
-                          _audioService.cancelSleepTimer();
-                          setState(() => _sleepTimerMinutes = null);
-                          setModalState(() {}); // Update modal state
-                        }
-                        Navigator.pop(context);
-                      },
-                      backgroundColor: Colors.grey[800],
-                      selectedColor: Colors.greenAccent.withOpacity(0.3),
-                      checkmarkColor: Colors.greenAccent,
-                      side: BorderSide(
-                        color:
-                            isSelected ? Colors.greenAccent : Colors.grey[700]!,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    );
-                  }).toList(),
-                ),
-                if (_sleepTimerMinutes != null) ...[
-                  SizedBox(height: 16.h),
-                  TextButton.icon(
-                    onPressed: () {
-                      _audioService.cancelSleepTimer();
-                      setState(() => _sleepTimerMinutes = null);
-                      Navigator.pop(context);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Sleep timer cancelled'),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.orange,
-                        ),
-                      );
-                    },
-                    icon: Icon(Icons.cancel, color: Colors.redAccent),
-                    label: Text(
-                      'Cancel Timer',
-                      style: TextStyle(color: Colors.redAccent),
-                    ),
-                  ),
-                ],
-                SizedBox(height: 20.h),
-              ],
-            ),
-          );
-        },
-      ),
+    PlayerModals.showSleepTimer(
+      context,
+      _sleepTimerMinutes,
+      _audioService,
+      (minutes) {
+        setState(() => _sleepTimerMinutes = minutes);
+      },
     );
   }
 
   void _showVolumeControl() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          return Container(
-            padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              color: Colors.grey[900],
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Volume Control',
-                  style: GoogleFonts.inter(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 24.h),
-                Row(
-                  children: [
-                    Icon(
-                      _volume == 0 ? Icons.volume_off : Icons.volume_down,
-                      color: Colors.white70,
-                      size: 24.sp,
-                    ),
-                    Expanded(
-                      child: SliderTheme(
-                        data: SliderThemeData(
-                          trackHeight: 4.h,
-                          thumbShape:
-                              RoundSliderThumbShape(enabledThumbRadius: 10.r),
-                          overlayShape:
-                              RoundSliderOverlayShape(overlayRadius: 20.r),
-                          activeTrackColor: Colors.greenAccent,
-                          inactiveTrackColor: Colors.grey[700],
-                          thumbColor: Colors.greenAccent,
-                          overlayColor: Colors.greenAccent.withOpacity(0.2),
-                        ),
-                        child: Slider(
-                          value: _volume,
-                          min: 0.0,
-                          max: 1.0,
-                          divisions: 20,
-                          onChanged: (value) {
-                            // Update both modal state and main state
-                            setModalState(() {
-                              _volume = value;
-                            });
-                            setState(() {
-                              _volume = value;
-                            });
-                            _audioService.setVolume(value);
-                          },
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      _volume > 0.7 ? Icons.volume_up : Icons.volume_down,
-                      color: Colors.white70,
-                      size: 24.sp,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Text(
-                    '${(_volume * 100).round()}%',
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.greenAccent,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                // Quick volume presets
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [0.0, 0.25, 0.5, 0.75, 1.0].map((preset) {
-                    return TextButton(
-                      onPressed: () {
-                        setModalState(() {
-                          _volume = preset;
-                        });
-                        setState(() {
-                          _volume = preset;
-                        });
-                        _audioService.setVolume(preset);
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: _volume == preset
-                            ? Colors.greenAccent.withOpacity(0.2)
-                            : Colors.grey[800],
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 16.w, vertical: 8.h),
-                      ),
-                      child: Text(
-                        '${(preset * 100).round()}%',
-                        style: TextStyle(
-                          color: _volume == preset
-                              ? Colors.greenAccent
-                              : Colors.white70,
-                          fontWeight: _volume == preset
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                SizedBox(height: 20.h),
-              ],
-            ),
-          );
-        },
-      ),
+    PlayerModals.showVolumeControl(
+      context,
+      _volume,
+      _audioService,
+      (volume) {
+        setState(() => _volume = volume);
+      },
     );
   }
 
   void _showPlaylist() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Playlist feature coming soon!'),
         duration: Duration(seconds: 1),
       ),
@@ -1100,7 +848,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   void _shareSession() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Text('Share feature coming soon!'),
         duration: Duration(seconds: 1),
       ),
@@ -1108,57 +856,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _showOptionsMenu() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: EdgeInsets.all(24.w),
-        decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.info_outline, color: Colors.white70),
-              title: Text(
-                'Session Info',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // Show session details
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.download, color: Colors.white70),
-              title: Text(
-                'Download for Offline',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Premium feature')),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.report_problem, color: Colors.white70),
-              title: Text(
-                'Report Issue',
-                style: TextStyle(color: Colors.white),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                // Report issue
-              },
-            ),
-          ],
-        ),
-      ),
-    );
+    PlayerModals.showOptionsMenu(context);
   }
 
   String _formatDuration(Duration duration) {

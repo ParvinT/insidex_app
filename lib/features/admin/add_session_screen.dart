@@ -101,7 +101,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     }
   }
 
-  // STORAGE UPLOAD FUNCTION - BASİT
+  // FIXED: Storage upload function with better error handling
   Future<String?> _uploadFile(PlatformFile file, String folder) async {
     try {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
@@ -110,9 +110,41 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       late UploadTask uploadTask;
 
       if (kIsWeb) {
+        // Web platform - check if bytes exists
+        if (file.bytes == null) {
+          print('ERROR: File bytes is null for web platform');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: Unable to read file on web'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return null;
+        }
+        print(
+            'Uploading file on web: ${file.name}, size: ${file.bytes!.length} bytes');
         uploadTask = ref.putData(file.bytes!);
       } else {
+        // Mobile platform - check if path exists
+        if (file.path == null) {
+          print('ERROR: File path is null for mobile platform');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: Unable to read file'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return null;
+        }
+        print('Uploading file on mobile: ${file.path}');
         final fileToUpload = File(file.path!);
+
+        // Check if file exists
+        if (!await fileToUpload.exists()) {
+          print('ERROR: File does not exist at path: ${file.path}');
+          return null;
+        }
+
         uploadTask = ref.putFile(fileToUpload);
       }
 
@@ -123,12 +155,29 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         setState(() {
           _uploadProgress = progress;
         });
+        print('Upload progress: ${progress.toStringAsFixed(2)}%');
       });
 
       final snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      print('File uploaded successfully!');
+      print('Download URL: $downloadUrl');
+
+      return downloadUrl;
     } catch (e) {
       print('Upload error: $e');
+      print('Error type: ${e.runtimeType}');
+      print('Error details: ${e.toString()}');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Upload failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+        ),
+      );
+
       return null;
     }
   }
@@ -144,6 +193,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         setState(() {
           _backgroundImage = result.files.first;
         });
+        print('Image selected: ${result.files.first.name}');
       }
     } catch (e) {
       print('Error picking image: $e');
@@ -160,6 +210,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         setState(() {
           _introAudio = result.files.first;
         });
+        print('Intro audio selected: ${result.files.first.name}');
       }
     } catch (e) {
       print('Error picking intro audio: $e');
@@ -191,6 +242,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         setState(() {
           _subliminalAudio = file;
         });
+        print(
+            'Subliminal audio selected: ${file.name}, size: ${sizeMB.toStringAsFixed(2)}MB');
       }
     } catch (e) {
       print('Error picking subliminal audio: $e');
@@ -224,17 +277,20 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       if (_backgroundImage != null) {
         setState(() => _uploadStatus = 'Uploading image...');
         imageUrl = await _uploadFile(_backgroundImage!, 'session_images');
+        print('Image URL: $imageUrl');
       }
 
       if (_introAudio != null) {
         setState(() => _uploadStatus = 'Uploading introduction...');
         introUrl = await _uploadFile(_introAudio!, 'intro_audio');
+        print('Intro URL: $introUrl');
       }
 
       if (_subliminalAudio != null) {
         setState(() => _uploadStatus = 'Uploading subliminal audio...');
         subliminalUrl =
             await _uploadFile(_subliminalAudio!, 'subliminal_audio');
+        print('Subliminal URL: $subliminalUrl');
       }
 
       setState(() => _uploadStatus = 'Saving session...');
@@ -265,16 +321,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
+      print('Saving session data to Firestore...');
+      print('Session data: ${sessionData.toString()}');
+
       // Save to Firestore
       if (widget.sessionToEdit != null) {
         await FirebaseFirestore.instance
             .collection('sessions')
             .doc(widget.sessionToEdit!['id'])
             .update(sessionData);
+        print('Session updated successfully');
       } else {
-        await FirebaseFirestore.instance
+        final docRef = await FirebaseFirestore.instance
             .collection('sessions')
             .add(sessionData);
+        print('Session created successfully with ID: ${docRef.id}');
       }
 
       if (mounted) {
@@ -287,16 +348,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
+      print('Error saving session: $e');
+      print('Error type: ${e.runtimeType}');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text('Error: ${e.toString()}'),
           backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
         ),
       );
     } finally {
       setState(() {
         _isLoading = false;
         _uploadProgress = 0;
+        _uploadStatus = '';
       });
     }
   }
@@ -518,18 +584,17 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Duration
+        // Duration Slider
         Row(
           children: [
             Text('Duration: '),
             Expanded(
               child: Slider(
                 value: _subliminalDuration.toDouble(),
-                min: 600,
-                max: 14400,
-                divisions: 46,
-                label:
-                    '${_subliminalDuration ~/ 3600}h ${(_subliminalDuration % 3600) ~/ 60}m',
+                min: 1800, // 30 minutes
+                max: 14400, // 4 hours
+                divisions: 25,
+                label: '${_subliminalDuration ~/ 3600} hours',
                 onChanged: (value) {
                   setState(() {
                     _subliminalDuration = value.toInt();
@@ -537,8 +602,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 },
               ),
             ),
-            Text(
-                '${_subliminalDuration ~/ 3600}h ${(_subliminalDuration % 3600) ~/ 60}m'),
+            Text('${(_subliminalDuration / 3600).toStringAsFixed(1)} hrs'),
           ],
         ),
 
@@ -550,7 +614,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           maxLines: 5,
           decoration: InputDecoration(
             labelText: 'Affirmations (one per line)',
-            hintText: 'I am relaxed\nI am peaceful\nI am calm',
+            hintText: 'Enter positive affirmations...',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -562,23 +626,36 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Widget _buildUploadProgress() {
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 20.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.primaryGold.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColors.primaryGold),
       ),
       child: Column(
         children: [
-          Text(_uploadStatus),
+          Text(
+            _uploadStatus,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           SizedBox(height: 8.h),
           LinearProgressIndicator(
             value: _uploadProgress / 100,
             backgroundColor: AppColors.greyLight,
-            valueColor: AlwaysStoppedAnimation(AppColors.primaryGold),
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
           ),
           SizedBox(height: 4.h),
-          Text('${_uploadProgress.toInt()}%'),
+          Text(
+            '${_uploadProgress.toStringAsFixed(1)}%',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
     );
