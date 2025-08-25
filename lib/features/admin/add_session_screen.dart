@@ -9,6 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
+import '../../services/storage_service.dart'; // IMPORTANT: Import StorageService
 
 class AddSessionScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionToEdit;
@@ -25,7 +26,7 @@ class AddSessionScreen extends StatefulWidget {
 class _AddSessionScreenState extends State<AddSessionScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Form Controllers - ORİJİNAL GİBİ
+  // Form Controllers
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _introTitleController = TextEditingController();
@@ -38,7 +39,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   String _selectedEmoji = '🎵';
   List<String> _categories = [];
 
-  // File uploads - YENİ
+  // File uploads
   PlatformFile? _backgroundImage;
   PlatformFile? _introAudio;
   PlatformFile? _subliminalAudio;
@@ -101,138 +102,78 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     }
   }
 
-  // FIXED: Storage upload function with better error handling
-  Future<String?> _uploadFile(PlatformFile file, String folder) async {
-    try {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
-      final ref = FirebaseStorage.instance.ref().child('$folder/$fileName');
-
-      late UploadTask uploadTask;
-
-      if (kIsWeb) {
-        // Web platform - check if bytes exists
-        if (file.bytes == null) {
-          print('ERROR: File bytes is null for web platform');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: Unable to read file on web'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return null;
-        }
-        print(
-            'Uploading file on web: ${file.name}, size: ${file.bytes!.length} bytes');
-        uploadTask = ref.putData(file.bytes!);
-      } else {
-        // Mobile platform - check if path exists
-        if (file.path == null) {
-          print('ERROR: File path is null for mobile platform');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error: Unable to read file'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return null;
-        }
-        print('Uploading file on mobile: ${file.path}');
-        final fileToUpload = File(file.path!);
-
-        // Check if file exists
-        if (!await fileToUpload.exists()) {
-          print('ERROR: File does not exist at path: ${file.path}');
-          return null;
-        }
-
-        uploadTask = ref.putFile(fileToUpload);
-      }
-
-      // Monitor progress
-      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
-        final progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        setState(() {
-          _uploadProgress = progress;
-        });
-        print('Upload progress: ${progress.toStringAsFixed(2)}%');
-      });
-
-      final snapshot = await uploadTask;
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-
-      print('File uploaded successfully!');
-      print('Download URL: $downloadUrl');
-
-      return downloadUrl;
-    } catch (e) {
-      print('Upload error: $e');
-      print('Error type: ${e.runtimeType}');
-      print('Error details: ${e.toString()}');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Upload failed: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 5),
-        ),
-      );
-
-      return null;
-    }
-  }
-
   // FILE PICKER FUNCTIONS
   Future<void> _pickImage() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-      );
+      final file = await StorageService.pickImageFile();
+      if (file != null) {
+        // Check file size (max 10MB for images)
+        if (!StorageService.validateFileSize(file, 10)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Image file too large! Max 10MB allowed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
 
-      if (result != null) {
         setState(() {
-          _backgroundImage = result.files.first;
+          _backgroundImage = file;
         });
-        print('Image selected: ${result.files.first.name}');
+        print('Image selected: ${file.name}');
       }
     } catch (e) {
       print('Error picking image: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting image: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   Future<void> _pickIntroAudio() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.audio,
-      );
+      final file = await StorageService.pickAudioFile();
+      if (file != null) {
+        // Check file size (max 50MB for intro)
+        if (!StorageService.validateFileSize(file, 50)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Audio file too large! Max 50MB allowed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
 
-      if (result != null) {
         setState(() {
-          _introAudio = result.files.first;
+          _introAudio = file;
         });
-        print('Intro audio selected: ${result.files.first.name}');
+        print('Intro audio selected: ${file.name}');
       }
     } catch (e) {
       print('Error picking intro audio: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting audio: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
   Future<void> _pickSubliminalAudio() async {
     try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.audio,
-      );
-
-      if (result != null) {
-        final file = result.files.first;
-        final sizeMB = file.size / (1024 * 1024);
-
-        // Size check
-        if (sizeMB > 500) {
+      final file = await StorageService.pickAudioFile();
+      if (file != null) {
+        // Check file size (max 500MB for subliminal)
+        if (!StorageService.validateFileSize(file, 500)) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  'File too large! Max 500MB. Current: ${sizeMB.toStringAsFixed(2)}MB'),
+            const SnackBar(
+              content: Text('Audio file too large! Max 500MB allowed'),
               backgroundColor: Colors.red,
             ),
           );
@@ -242,11 +183,16 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         setState(() {
           _subliminalAudio = file;
         });
-        print(
-            'Subliminal audio selected: ${file.name}, size: ${sizeMB.toStringAsFixed(2)}MB');
+        print('Subliminal audio selected: ${file.name}');
       }
     } catch (e) {
       print('Error picking subliminal audio: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error selecting audio: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -255,7 +201,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select a category'),
           backgroundColor: Colors.orange,
         ),
@@ -265,73 +211,138 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
     setState(() {
       _isLoading = true;
-      _uploadStatus = 'Uploading files...';
+      _uploadStatus = 'Starting upload...';
+      _uploadProgress = 0;
     });
 
     try {
-      // Upload files
+      // Generate session ID for folder organization
+      final sessionId = widget.sessionToEdit?['id'] ??
+          DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Upload files using StorageService
       String? imageUrl;
       String? introUrl;
       String? subliminalUrl;
 
+      // Upload background image
       if (_backgroundImage != null) {
-        setState(() => _uploadStatus = 'Uploading image...');
-        imageUrl = await _uploadFile(_backgroundImage!, 'session_images');
-        print('Image URL: $imageUrl');
+        setState(() {
+          _uploadStatus = 'Uploading background image...';
+          _uploadProgress = 0;
+        });
+
+        imageUrl = await StorageService.uploadImage(
+          folder: sessionId,
+          file: _backgroundImage!,
+          onProgress: (progress) {
+            setState(() {
+              _uploadProgress = progress * 100;
+            });
+          },
+        );
+
+        if (imageUrl == null) {
+          throw Exception('Failed to upload background image');
+        }
+        print('Image uploaded successfully: $imageUrl');
       }
 
+      // Upload intro audio
       if (_introAudio != null) {
-        setState(() => _uploadStatus = 'Uploading introduction...');
-        introUrl = await _uploadFile(_introAudio!, 'intro_audio');
-        print('Intro URL: $introUrl');
+        setState(() {
+          _uploadStatus = 'Uploading introduction audio...';
+          _uploadProgress = 0;
+        });
+
+        introUrl = await StorageService.uploadAudio(
+          sessionId: '$sessionId/intro',
+          file: _introAudio!,
+          onProgress: (progress) {
+            setState(() {
+              _uploadProgress = progress * 100;
+            });
+          },
+        );
+
+        if (introUrl == null) {
+          throw Exception('Failed to upload intro audio');
+        }
+        print('Intro audio uploaded successfully: $introUrl');
       }
 
+      // Upload subliminal audio
       if (_subliminalAudio != null) {
-        setState(() => _uploadStatus = 'Uploading subliminal audio...');
-        subliminalUrl =
-            await _uploadFile(_subliminalAudio!, 'subliminal_audio');
-        print('Subliminal URL: $subliminalUrl');
+        setState(() {
+          _uploadStatus = 'Uploading subliminal audio...';
+          _uploadProgress = 0;
+        });
+
+        subliminalUrl = await StorageService.uploadAudio(
+          sessionId: '$sessionId/subliminal',
+          file: _subliminalAudio!,
+          onProgress: (progress) {
+            setState(() {
+              _uploadProgress = progress * 100;
+            });
+          },
+        );
+
+        if (subliminalUrl == null) {
+          throw Exception('Failed to upload subliminal audio');
+        }
+        print('Subliminal audio uploaded successfully: $subliminalUrl');
       }
 
-      setState(() => _uploadStatus = 'Saving session...');
+      setState(() {
+        _uploadStatus = 'Saving session data...';
+        _uploadProgress = 100;
+      });
 
-      // Prepare session data - ORİJİNAL YAPI
+      // Prepare session data
       final sessionData = {
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
         'category': _selectedCategory,
         'emoji': _selectedEmoji,
-        'backgroundImage': imageUrl ?? '',
+        'backgroundImage':
+            imageUrl ?? widget.sessionToEdit?['backgroundImage'] ?? '',
         'intro': {
           'title': _introTitleController.text.trim(),
           'description': _introDescriptionController.text.trim(),
-          'audioUrl': introUrl ?? '',
+          'audioUrl':
+              introUrl ?? widget.sessionToEdit?['intro']?['audioUrl'] ?? '',
           'duration': _introDuration,
         },
         'subliminal': {
           'title': _subliminalTitleController.text.trim(),
-          'audioUrl': subliminalUrl ?? '',
+          'audioUrl': subliminalUrl ??
+              widget.sessionToEdit?['subliminal']?['audioUrl'] ??
+              '',
           'duration': _subliminalDuration,
           'affirmations': _affirmationsController.text
               .split('\n')
               .where((line) => line.isNotEmpty)
               .toList(),
         },
-        'createdAt': FieldValue.serverTimestamp(),
+        'createdAt': widget.sessionToEdit != null
+            ? widget.sessionToEdit!['createdAt']
+            : FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
       print('Saving session data to Firestore...');
-      print('Session data: ${sessionData.toString()}');
 
       // Save to Firestore
       if (widget.sessionToEdit != null) {
+        // Update existing session
         await FirebaseFirestore.instance
             .collection('sessions')
             .doc(widget.sessionToEdit!['id'])
             .update(sessionData);
         print('Session updated successfully');
       } else {
+        // Create new session
         final docRef = await FirebaseFirestore.instance
             .collection('sessions')
             .add(sessionData);
@@ -340,7 +351,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Session saved successfully! 🎉'),
             backgroundColor: Colors.green,
           ),
@@ -355,7 +366,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         SnackBar(
           content: Text('Error: ${e.toString()}'),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 5),
+          duration: const Duration(seconds: 5),
         ),
       );
     } finally {
@@ -367,7 +378,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     }
   }
 
-  // BUILD METHODS - ORİJİNAL TASARIM
+  // BUILD METHODS
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
@@ -420,53 +431,53 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Category
-        DropdownButtonFormField<String>(
-          value: _selectedCategory,
-          decoration: InputDecoration(
-            labelText: 'Category',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-          items: _categories.map((category) {
-            return DropdownMenuItem(
-              value: category,
-              child: Text(category),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedCategory = value;
-            });
-          },
-        ),
-
-        SizedBox(height: 16.h),
-
-        // Emoji Selector
-        Wrap(
-          spacing: 8.w,
-          children: ['🎵', '🧘', '😴', '🌙', '💆', '🌊'].map((emoji) {
-            return GestureDetector(
-              onTap: () => setState(() => _selectedEmoji = emoji),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: _selectedEmoji == emoji
-                      ? AppColors.primaryGold.withOpacity(0.2)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: _selectedEmoji == emoji
-                        ? AppColors.primaryGold
-                        : AppColors.greyBorder,
+        // Category and Emoji Row
+        Row(
+          children: [
+            // Category Dropdown
+            Expanded(
+              flex: 3,
+              child: DropdownButtonFormField<String>(
+                value: _selectedCategory,
+                decoration: InputDecoration(
+                  labelText: 'Category',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
-                child: Text(emoji, style: TextStyle(fontSize: 20.sp)),
+                items: _categories.map((category) {
+                  return DropdownMenuItem(
+                    value: category,
+                    child: Text(category),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedCategory = value;
+                  });
+                },
               ),
-            );
-          }).toList(),
+            ),
+
+            SizedBox(width: 16.w),
+
+            // Emoji Picker
+            Expanded(
+              child: Container(
+                height: 56.h,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Center(
+                  child: Text(
+                    _selectedEmoji,
+                    style: TextStyle(fontSize: 24.sp),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -476,41 +487,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     return Column(
       children: [
         // Background Image
-        ListTile(
-          title: Text('Background Image'),
-          subtitle: Text(_backgroundImage?.name ?? 'No file selected'),
-          trailing: IconButton(
-            icon: Icon(Icons.attach_file),
-            onPressed: _pickImage,
-          ),
-        ),
-
-        Divider(),
-
-        // Intro Audio
-        ListTile(
-          title: Text('Introduction Audio'),
-          subtitle: Text(_introAudio != null
-              ? '${(_introAudio!.size / (1024 * 1024)).toStringAsFixed(2)} MB'
-              : 'No file selected'),
-          trailing: IconButton(
-            icon: Icon(Icons.audio_file),
-            onPressed: _pickIntroAudio,
-          ),
-        ),
-
-        Divider(),
-
-        // Subliminal Audio
-        ListTile(
-          title: Text('Subliminal Audio'),
-          subtitle: Text(_subliminalAudio != null
-              ? '${(_subliminalAudio!.size / (1024 * 1024)).toStringAsFixed(2)} MB'
-              : 'No file selected (Max 500MB)'),
-          trailing: IconButton(
-            icon: Icon(Icons.audio_file),
-            onPressed: _pickSubliminalAudio,
-          ),
+        _buildFileUploadCard(
+          title: 'Background Image',
+          subtitle: _backgroundImage != null
+              ? _backgroundImage!.name
+              : 'No file selected',
+          icon: Icons.image,
+          onTap: _pickImage,
+          hasFile: _backgroundImage != null,
         ),
       ],
     );
@@ -519,10 +503,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   Widget _buildIntroSection() {
     return Column(
       children: [
+        // Intro Title
         TextFormField(
           controller: _introTitleController,
           decoration: InputDecoration(
             labelText: 'Introduction Title',
+            hintText: 'Enter intro title',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -531,11 +517,13 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
+        // Intro Description
         TextFormField(
           controller: _introDescriptionController,
           maxLines: 2,
           decoration: InputDecoration(
             labelText: 'Introduction Description',
+            hintText: 'Enter intro description',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -544,26 +532,35 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Duration Slider
-        Row(
-          children: [
-            Text('Duration: '),
-            Expanded(
-              child: Slider(
-                value: _introDuration.toDouble(),
-                min: 60,
-                max: 600,
-                divisions: 18,
-                label: '${_introDuration ~/ 60} minutes',
-                onChanged: (value) {
-                  setState(() {
-                    _introDuration = value.toInt();
-                  });
-                },
-              ),
+        // Intro Audio File
+        _buildFileUploadCard(
+          title: 'Introduction Audio',
+          subtitle:
+              _introAudio != null ? _introAudio!.name : 'No file selected',
+          icon: Icons.audiotrack,
+          onTap: _pickIntroAudio,
+          hasFile: _introAudio != null,
+        ),
+
+        SizedBox(height: 16.h),
+
+        // Duration Input
+        TextFormField(
+          initialValue: (_introDuration ~/ 60).toString(),
+          decoration: InputDecoration(
+            labelText: 'Duration (minutes)',
+            hintText: 'Enter duration in minutes',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            Text('${_introDuration ~/ 60} min'),
-          ],
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            final minutes = int.tryParse(value) ?? 2;
+            setState(() {
+              _introDuration = minutes * 60;
+            });
+          },
         ),
       ],
     );
@@ -572,10 +569,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   Widget _buildSubliminalSection() {
     return Column(
       children: [
+        // Subliminal Title
         TextFormField(
           controller: _subliminalTitleController,
           decoration: InputDecoration(
             labelText: 'Subliminal Title',
+            hintText: 'Enter subliminal title',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -584,26 +583,36 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Duration Slider
-        Row(
-          children: [
-            Text('Duration: '),
-            Expanded(
-              child: Slider(
-                value: _subliminalDuration.toDouble(),
-                min: 1800, // 30 minutes
-                max: 14400, // 4 hours
-                divisions: 25,
-                label: '${_subliminalDuration ~/ 3600} hours',
-                onChanged: (value) {
-                  setState(() {
-                    _subliminalDuration = value.toInt();
-                  });
-                },
-              ),
+        // Subliminal Audio File
+        _buildFileUploadCard(
+          title: 'Subliminal Audio',
+          subtitle: _subliminalAudio != null
+              ? _subliminalAudio!.name
+              : 'No file selected',
+          icon: Icons.music_note,
+          onTap: _pickSubliminalAudio,
+          hasFile: _subliminalAudio != null,
+        ),
+
+        SizedBox(height: 16.h),
+
+        // Duration Input
+        TextFormField(
+          initialValue: (_subliminalDuration ~/ 60).toString(),
+          decoration: InputDecoration(
+            labelText: 'Duration (minutes)',
+            hintText: 'Enter duration in minutes',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            Text('${(_subliminalDuration / 3600).toStringAsFixed(1)} hrs'),
-          ],
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            final minutes = int.tryParse(value) ?? 120;
+            setState(() {
+              _subliminalDuration = minutes * 60;
+            });
+          },
         ),
 
         SizedBox(height: 16.h),
@@ -613,14 +622,79 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           controller: _affirmationsController,
           maxLines: 5,
           decoration: InputDecoration(
-            labelText: 'Affirmations (one per line)',
-            hintText: 'Enter positive affirmations...',
+            labelText: 'Affirmations',
+            hintText: 'Enter affirmations (one per line)',
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildFileUploadCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool hasFile,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: hasFile ? AppColors.primaryGold : Colors.grey.shade400,
+            width: hasFile ? 2 : 1,
+          ),
+          borderRadius: BorderRadius.circular(12.r),
+          color: hasFile
+              ? AppColors.primaryGold.withOpacity(0.05)
+              : Colors.transparent,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 32.sp,
+              color: hasFile ? AppColors.primaryGold : AppColors.textSecondary,
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              hasFile ? Icons.check_circle : Icons.upload,
+              color: hasFile ? AppColors.primaryGold : AppColors.textSecondary,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -688,7 +762,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 child: SizedBox(
                   width: 20.w,
                   height: 20.w,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: const CircularProgressIndicator(strokeWidth: 2),
                 ),
               ),
             )

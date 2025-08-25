@@ -1,3 +1,5 @@
+// lib/services/audio_player_service.dart
+
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_service/audio_service.dart';
@@ -10,6 +12,12 @@ class AudioPlayerService {
 
   late AudioPlayer _audioPlayer;
   late AudioHandler _audioHandler;
+
+  // Track if service is initialized
+  bool _isInitialized = false;
+
+  // Track current URL to prevent reloading same audio
+  String? _currentUrl;
 
   // Audio state streams
   final BehaviorSubject<bool> _isPlaying = BehaviorSubject.seeded(false);
@@ -38,6 +46,8 @@ class AudioPlayerService {
   Duration get totalDuration => _duration.value;
 
   Future<void> initialize() async {
+    if (_isInitialized) return;
+
     _audioPlayer = AudioPlayer();
 
     // Initialize audio service for background play
@@ -63,12 +73,23 @@ class AudioPlayerService {
     _audioPlayer.durationStream.listen((duration) {
       if (duration != null) {
         _duration.add(duration);
+        print('Audio duration detected: ${duration.inSeconds} seconds');
       }
     });
 
     _audioPlayer.volumeStream.listen((volume) {
       _volume.add(volume);
     });
+
+    // Handle completion
+    _audioPlayer.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        _isPlaying.add(false);
+        _position.add(Duration.zero);
+      }
+    });
+
+    _isInitialized = true;
   }
 
   // Play audio from URL
@@ -79,67 +100,86 @@ class AudioPlayerService {
     String? artUri,
   }) async {
     try {
-      _currentTrack.add(title);
+      print('AudioPlayerService: Playing from URL: $url');
 
-      // Set media item for notification
-      final mediaItem = MediaItem(
-        id: url,
-        title: title,
-        artist: artist,
-        artUri: artUri != null ? Uri.parse(artUri) : null,
-        duration: null,
-      );
+      // Only reload if URL is different
+      if (_currentUrl != url) {
+        _currentUrl = url;
+        _currentTrack.add(title);
 
-      await _audioHandler
-          .customAction('setMediaItem', {'mediaItem': mediaItem});
+        // Reset position
+        _position.add(Duration.zero);
 
-      // Load and play audio
-      await _audioPlayer.setUrl(url);
+        // Set media item for notification
+        final mediaItem = MediaItem(
+          id: url,
+          title: title,
+          artist: artist,
+          artUri: artUri != null ? Uri.parse(artUri) : null,
+          duration: null,
+        );
+
+        await _audioHandler
+            .customAction('setMediaItem', {'mediaItem': mediaItem});
+
+        // Load audio
+        await _audioPlayer.setUrl(url);
+        print('Audio loaded successfully');
+      }
+
+      // Play
       await _audioPlayer.play();
+      print('Playback started');
     } catch (e) {
       print('Error playing audio: $e');
       _isPlaying.add(false);
-    }
-  }
-
-  // Play local asset
-  Future<void> playFromAsset(
-    String assetPath, {
-    required String title,
-    required String artist,
-  }) async {
-    try {
-      _currentTrack.add(title);
-      await _audioPlayer.setAsset(assetPath);
-      await _audioPlayer.play();
-    } catch (e) {
-      print('Error playing asset: $e');
-      _isPlaying.add(false);
+      throw e; // Re-throw to handle in UI
     }
   }
 
   // Playback controls
   Future<void> play() async {
-    await _audioPlayer.play();
+    try {
+      await _audioPlayer.play();
+    } catch (e) {
+      print('Error resuming playback: $e');
+    }
   }
 
   Future<void> pause() async {
-    await _audioPlayer.pause();
+    try {
+      await _audioPlayer.pause();
+    } catch (e) {
+      print('Error pausing playback: $e');
+    }
   }
 
   Future<void> stop() async {
-    await _audioPlayer.stop();
-    _position.add(Duration.zero);
-    _isPlaying.add(false);
+    try {
+      await _audioPlayer.stop();
+      _position.add(Duration.zero);
+      _isPlaying.add(false);
+      _currentUrl = null; // Reset current URL
+    } catch (e) {
+      print('Error stopping playback: $e');
+    }
   }
 
   Future<void> seek(Duration position) async {
-    await _audioPlayer.seek(position);
+    try {
+      await _audioPlayer.seek(position);
+    } catch (e) {
+      print('Error seeking: $e');
+    }
   }
 
   Future<void> setVolume(double volume) async {
-    await _audioPlayer.setVolume(volume);
-    _volume.add(volume);
+    try {
+      await _audioPlayer.setVolume(volume);
+      _volume.add(volume);
+    } catch (e) {
+      print('Error setting volume: $e');
+    }
   }
 
   // Sleep timer
@@ -156,17 +196,6 @@ class AudioPlayerService {
   void cancelSleepTimer() {
     _sleepTimer?.cancel();
     _sleepTimerMinutes.add(null);
-  }
-
-  // Auto-play next track
-  Future<void> playNext(
-    String nextUrl, {
-    required String title,
-    required String artist,
-    String? artUri,
-  }) async {
-    await stop();
-    await playFromUrl(nextUrl, title: title, artist: artist, artUri: artUri);
   }
 
   // Cleanup

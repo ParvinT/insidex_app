@@ -21,55 +21,79 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   bool _isLoading = true;
   Map<String, dynamic> _statistics = {};
+  User? _currentUser;
 
   @override
   void initState() {
     super.initState();
-    _checkAdminAccess();
+    _checkAuthenticationAndAccess();
     _loadStatistics();
   }
 
-  Future<void> _checkAdminAccess() async {
+  Future<void> _checkAuthenticationAndAccess() async {
     try {
-      final user = _auth.currentUser;
-      if (user == null) {
+      // Check if user is authenticated
+      _currentUser = _auth.currentUser;
+
+      if (_currentUser == null) {
+        // No authenticated user, redirect to login
+        debugPrint('ERROR: No authenticated user found!');
         if (mounted) {
-          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Unauthorized Access'),
+              content: Text('Please login to access admin panel'),
               backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
             ),
           );
+          // Navigate to login screen
+          Navigator.pushReplacementNamed(context, '/auth/login');
         }
         return;
       }
 
-      // Check in admins collection
+      debugPrint('Current user authenticated: ${_currentUser!.email}');
+      debugPrint('User UID: ${_currentUser!.uid}');
+
+      // Check admin privileges
       final adminDoc =
-          await _firestore.collection('admins').doc(user.uid).get();
+          await _firestore.collection('admins').doc(_currentUser!.uid).get();
 
       if (!adminDoc.exists) {
-        // Also check in users collection for isAdmin field
+        // Check in users collection for isAdmin field
         final userDoc =
-            await _firestore.collection('users').doc(user.uid).get();
-
+            await _firestore.collection('users').doc(_currentUser!.uid).get();
         final isAdmin = userDoc.data()?['isAdmin'] ?? false;
 
         if (!isAdmin) {
+          debugPrint(
+              'User ${_currentUser!.email} does not have admin privileges');
           if (mounted) {
-            Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Admin access required'),
-                backgroundColor: Colors.red,
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 3),
               ),
             );
+            Navigator.pop(context);
           }
+        } else {
+          debugPrint('User ${_currentUser!.email} has admin privileges');
         }
+      } else {
+        debugPrint('User ${_currentUser!.email} is in admins collection');
       }
     } catch (e) {
-      debugPrint('Error checking admin access: $e');
+      debugPrint('Error checking authentication/access: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -107,14 +131,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   void _showAdminMenu() {
     final screenHeight = MediaQuery.of(context).size.height;
-    final isSmallScreen = screenHeight < 700; // iPhone SE gibi küçük ekranlar
+    final isSmallScreen = screenHeight < 700;
 
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: true, // İçeriğin yüksekliğine göre ayarlanabilir
+      isScrollControlled: true,
       constraints: BoxConstraints(
-        maxHeight: screenHeight * 0.75, // Maksimum ekranın %75'i
+        maxHeight: screenHeight * 0.75,
       ),
       builder: (context) => Container(
         decoration: BoxDecoration(
@@ -223,27 +247,60 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       padding: EdgeInsets.symmetric(
                           vertical: isSmallScreen ? 8.h : 12.h),
                       child: Divider(
-                        color: AppColors.greyBorder,
-                        height: 1,
+                        color: AppColors.greyBorder.withOpacity(0.5),
                       ),
                     ),
 
+                    // Sign Out
                     _buildCompactMenuItem(
                       icon: Icons.logout,
-                      title: 'Exit Admin Panel',
-                      color: Colors.red,
-                      onTap: () {
+                      title: 'Sign Out',
+                      onTap: () async {
                         Navigator.pop(context);
-                        Navigator.pop(context);
+                        await _auth.signOut();
+                        if (mounted) {
+                          Navigator.pushReplacementNamed(
+                              context, '/auth/login');
+                        }
                       },
+                      color: Colors.red,
                       isCompact: isSmallScreen,
                     ),
+
+                    // Current User Info
+                    if (_currentUser != null)
+                      Container(
+                        margin: EdgeInsets.only(top: 16.h, bottom: 8.h),
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: AppColors.greyLight.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.account_circle,
+                              size: 16.sp,
+                              color: AppColors.textSecondary,
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              _currentUser!.email ?? 'Admin',
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    SizedBox(height: isSmallScreen ? 12.h : 20.h),
                   ],
                 ),
               ),
             ),
-
-            SizedBox(height: MediaQuery.of(context).padding.bottom + 20.h),
           ],
         ),
       ),
@@ -255,7 +312,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required String title,
     required VoidCallback onTap,
     Color? color,
-    bool isCompact = false,
+    required bool isCompact,
   }) {
     return InkWell(
       onTap: onTap,
@@ -263,21 +320,28 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Container(
         padding: EdgeInsets.symmetric(
           horizontal: 16.w,
-          vertical: isCompact ? 12.h : 14.h,
+          vertical: isCompact ? 10.h : 12.h,
         ),
-        margin: EdgeInsets.only(bottom: isCompact ? 4.h : 8.h),
+        margin: EdgeInsets.symmetric(vertical: isCompact ? 2.h : 4.h),
         decoration: BoxDecoration(
+          color: color != null
+              ? color.withOpacity(0.05)
+              : AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(12.r),
-          color: Colors.transparent,
+          border: Border.all(
+            color: color?.withOpacity(0.2) ??
+                AppColors.greyBorder.withOpacity(0.3),
+            width: 1,
+          ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
               color: color ?? AppColors.textPrimary,
-              size: isCompact ? 20.sp : 22.sp,
+              size: isCompact ? 18.sp : 20.sp,
             ),
-            SizedBox(width: 16.w),
+            SizedBox(width: 12.w),
             Text(
               title,
               style: GoogleFonts.inter(
@@ -288,130 +352,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 768;
-
-    return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: SafeArea(
-        child: isWideScreen
-            ? Row(
-                children: [
-                  // Desktop Sidebar
-                  _buildDesktopSidebar(),
-                  // Main Content
-                  Expanded(
-                    child: _buildMainContent(),
-                  ),
-                ],
-              )
-            : Column(
-                children: [
-                  // Mobile Header with Menu
-                  _buildMobileHeader(),
-                  // Main Content
-                  Expanded(
-                    child: _buildMainContent(),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildMobileHeader() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        border: Border(
-          bottom: BorderSide(
-            color: AppColors.greyBorder.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Row(
-        children: [
-          // Back Button
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: BoxDecoration(
-                color: AppColors.backgroundWhite,
-                borderRadius: BorderRadius.circular(10.r),
-                border: Border.all(
-                  color: AppColors.greyBorder,
-                  width: 1,
-                ),
-              ),
-              child: Icon(
-                Icons.arrow_back,
-                color: AppColors.textPrimary,
-                size: 18.sp,
-              ),
-            ),
-          ),
-
-          SizedBox(width: 12.w),
-
-          // Admin Panel Title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Admin Panel',
-                  style: GoogleFonts.inter(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                Text(
-                  'Manage your app',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Menu Button - Siyah yapıldı
-          GestureDetector(
-            onTap: _showAdminMenu,
-            child: Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: BoxDecoration(
-                color: AppColors.textPrimary, // Siyah arka plan
-                borderRadius: BorderRadius.circular(10.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.menu,
-                size: 18.sp,
-                color: Colors.white, // Beyaz ikon
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -449,6 +389,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     color: AppColors.textPrimary,
                   ),
                 ),
+                if (_currentUser != null)
+                  Column(
+                    children: [
+                      SizedBox(height: 8.h),
+                      Text(
+                        _currentUser!.email ?? '',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
@@ -500,17 +453,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
 
-          Divider(color: AppColors.greyBorder.withOpacity(0.5)),
-
-          // Exit Button
-          _buildSidebarItem(
-            icon: Icons.logout,
-            title: 'Exit Admin',
-            isDestructive: true,
-            onTap: () => Navigator.pop(context),
+          // Bottom Actions
+          Container(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              children: [
+                Divider(color: AppColors.greyBorder.withOpacity(0.5)),
+                _buildSidebarItem(
+                  icon: Icons.logout,
+                  title: 'Sign Out',
+                  onTap: () async {
+                    await _auth.signOut();
+                    if (mounted) {
+                      Navigator.pushReplacementNamed(context, '/auth/login');
+                    }
+                  },
+                  isDestructive: true,
+                ),
+              ],
+            ),
           ),
-
-          SizedBox(height: 16.h),
         ],
       ),
     );
@@ -527,12 +489,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
         decoration: BoxDecoration(
           color: isActive
               ? AppColors.primaryGold.withOpacity(0.1)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12.r),
+          border: isActive
+              ? Border(
+                  left: BorderSide(
+                    color: AppColors.primaryGold,
+                    width: 3,
+                  ),
+                )
+              : null,
         ),
         child: Row(
           children: [
@@ -708,7 +676,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Text(
                 value,
                 style: GoogleFonts.inter(
-                  fontSize: 28.sp,
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -749,115 +717,179 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Recent Activity',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              TextButton(
-                onPressed: () {},
-                child: Text(
-                  'View All',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: AppColors.primaryGold,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            'Recent Activity',
+            style: GoogleFonts.inter(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
           ),
           SizedBox(height: 16.h),
 
-          // Activity Items
-          ...List.generate(3, (index) {
-            final activities = [
-              {
-                'icon': Icons.person_add,
-                'title': 'New user registered',
-                'subtitle': 'john.doe@example.com',
-                'time': '2 minutes ago',
-                'color': Colors.blue,
-              },
-              {
-                'icon': Icons.music_note,
-                'title': 'New session added',
-                'subtitle': 'Deep Sleep Meditation',
-                'time': '1 hour ago',
-                'color': Colors.green,
-              },
-              {
-                'icon': Icons.star,
-                'title': 'User upgraded to premium',
-                'subtitle': 'jane.smith@example.com',
-                'time': '3 hours ago',
-                'color': AppColors.primaryGold,
-              },
-            ];
-
-            final activity = activities[index];
-            return Container(
-              margin: EdgeInsets.only(bottom: 12.h),
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: AppColors.greyLight.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Row(
+          // Activity list placeholder
+          ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: 3,
+            separatorBuilder: (context, index) => SizedBox(height: 12.h),
+            itemBuilder: (context, index) {
+              return Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(8.w),
+                    width: 8.w,
+                    height: 8.w,
                     decoration: BoxDecoration(
-                      color: (activity['color'] as Color).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Icon(
-                      activity['icon'] as IconData,
-                      color: activity['color'] as Color,
-                      size: 16.sp,
+                      color: AppColors.primaryGold,
+                      shape: BoxShape.circle,
                     ),
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          activity['title'] as String,
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          activity['subtitle'] as String,
-                          style: GoogleFonts.inter(
-                            fontSize: 11.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
+                    child: Text(
+                      'New session added to Sleep category',
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                   Text(
-                    activity['time'] as String,
+                    '2h ago',
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
-                      color: AppColors.textLight,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
-              ),
-            );
-          }),
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMobileHeader() {
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundWhite,
+        border: Border(
+          bottom: BorderSide(
+            color: AppColors.greyBorder.withOpacity(0.5),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Back Button
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: AppColors.backgroundWhite,
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(
+                  color: AppColors.greyBorder,
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: AppColors.textPrimary,
+                size: 18.sp,
+              ),
+            ),
+          ),
+
+          SizedBox(width: 12.w),
+
+          // Admin Panel Title
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Admin Panel',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  'Manage your app',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Menu Button
+          GestureDetector(
+            onTap: _showAdminMenu,
+            child: Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: AppColors.textPrimary,
+                borderRadius: BorderRadius.circular(10.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.menu,
+                size: 18.sp,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isWideScreen = screenWidth > 768;
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundWhite,
+      body: SafeArea(
+        child: isWideScreen
+            ? Row(
+                children: [
+                  // Desktop Sidebar
+                  _buildDesktopSidebar(),
+                  // Main Content
+                  Expanded(
+                    child: _buildMainContent(),
+                  ),
+                ],
+              )
+            : Column(
+                children: [
+                  // Mobile Header with Menu
+                  _buildMobileHeader(),
+                  // Main Content
+                  Expanded(
+                    child: _buildMainContent(),
+                  ),
+                ],
+              ),
       ),
     );
   }

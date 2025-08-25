@@ -8,10 +8,11 @@ import 'package:file_picker/file_picker.dart';
 class StorageService {
   static final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // Upload audio file
+  // Upload audio file with progress callback
   static Future<String?> uploadAudio({
     required String sessionId,
     required PlatformFile file,
+    Function(double)? onProgress,
   }) async {
     try {
       final String fileName =
@@ -25,9 +26,17 @@ class StorageService {
 
       if (kIsWeb) {
         // Web platform
+        if (file.bytes == null) {
+          debugPrint('Error: File bytes are null for web platform');
+          return null;
+        }
         uploadTask = ref.putData(file.bytes!);
       } else {
         // Mobile platform
+        if (file.path == null) {
+          debugPrint('Error: File path is null for mobile platform');
+          return null;
+        }
         File fileToUpload = File(file.path!);
         uploadTask = ref.putFile(fileToUpload);
       }
@@ -37,6 +46,11 @@ class StorageService {
         double progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         debugPrint('Upload progress: ${progress.toStringAsFixed(2)}%');
+
+        // Call progress callback if provided
+        if (onProgress != null) {
+          onProgress(progress / 100); // Convert to 0-1 range
+        }
       });
 
       // Wait for upload to complete
@@ -53,10 +67,11 @@ class StorageService {
     }
   }
 
-  // Upload image file
+  // Upload image file with progress callback
   static Future<String?> uploadImage({
     required String folder,
     required PlatformFile file,
+    Function(double)? onProgress,
   }) async {
     try {
       final String fileName =
@@ -70,9 +85,17 @@ class StorageService {
 
       if (kIsWeb) {
         // Web platform
+        if (file.bytes == null) {
+          debugPrint('Error: File bytes are null for web platform');
+          return null;
+        }
         uploadTask = ref.putData(file.bytes!);
       } else {
         // Mobile platform
+        if (file.path == null) {
+          debugPrint('Error: File path is null for mobile platform');
+          return null;
+        }
         File fileToUpload = File(file.path!);
         uploadTask = ref.putFile(fileToUpload);
       }
@@ -82,6 +105,11 @@ class StorageService {
         double progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
         debugPrint('Upload progress: ${progress.toStringAsFixed(2)}%');
+
+        // Call progress callback if provided
+        if (onProgress != null) {
+          onProgress(progress / 100); // Convert to 0-1 range
+        }
       });
 
       // Wait for upload to complete
@@ -162,22 +190,12 @@ class StorageService {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        PlatformFile file = result.files.first;
-
-        // Validate file size (max 50MB for audio)
-        if (file.size > 50 * 1024 * 1024) {
-          throw Exception('Audio file size must be less than 50MB');
-        }
-
-        debugPrint(
-            'Audio file selected: ${file.name}, Size: ${file.size} bytes');
-        return file;
+        return result.files.first;
       }
-
       return null;
     } catch (e) {
       debugPrint('Error picking audio file: $e');
-      rethrow;
+      return null;
     }
   }
 
@@ -190,22 +208,37 @@ class StorageService {
       );
 
       if (result != null && result.files.isNotEmpty) {
-        PlatformFile file = result.files.first;
-
-        // Validate file size (max 5MB for images)
-        if (file.size > 5 * 1024 * 1024) {
-          throw Exception('Image file size must be less than 5MB');
-        }
-
-        debugPrint(
-            'Image file selected: ${file.name}, Size: ${file.size} bytes');
-        return file;
+        return result.files.first;
       }
-
       return null;
     } catch (e) {
       debugPrint('Error picking image file: $e');
-      rethrow;
+      return null;
     }
+  }
+
+  // Validate file size (max size in MB)
+  static bool validateFileSize(PlatformFile file, int maxSizeMB) {
+    final maxSizeBytes = maxSizeMB * 1024 * 1024;
+    return file.size <= maxSizeBytes;
+  }
+
+  // Get file extension
+  static String getFileExtension(String fileName) {
+    return fileName.split('.').last.toLowerCase();
+  }
+
+  // Validate audio file extension
+  static bool isValidAudioFile(String fileName) {
+    final validExtensions = ['mp3', 'wav', 'm4a', 'aac', 'ogg'];
+    final extension = getFileExtension(fileName);
+    return validExtensions.contains(extension);
+  }
+
+  // Validate image file extension
+  static bool isValidImageFile(String fileName) {
+    final validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    final extension = getFileExtension(fileName);
+    return validExtensions.contains(extension);
   }
 }
