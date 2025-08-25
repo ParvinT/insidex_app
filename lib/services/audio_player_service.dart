@@ -48,48 +48,61 @@ class AudioPlayerService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    _audioPlayer = AudioPlayer();
+    try {
+      _audioPlayer = AudioPlayer();
 
-    // Initialize audio service for background play
-    _audioHandler = await AudioService.init(
-      builder: () => AudioPlayerHandler(_audioPlayer),
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'com.example.insidex_app.audio',
-        androidNotificationChannelName: 'INSIDEX Audio',
-        androidNotificationOngoing: true,
-        androidNotificationIcon: 'mipmap/ic_launcher',
-      ),
-    );
+      // Temporarily disable AudioService for testing
+      // Just use basic audio player without background service
 
-    // Listen to player state changes
-    _audioPlayer.playingStream.listen((playing) {
-      _isPlaying.add(playing);
-    });
+      /*
+      // Initialize audio service for background play
+      _audioHandler = await AudioService.init(
+        builder: () => AudioPlayerHandler(_audioPlayer),
+        config: const AudioServiceConfig(
+          androidNotificationChannelId: 'com.insidex.app.audio',
+          androidNotificationChannelName: 'INSIDEX Audio',
+          androidNotificationOngoing: true,
+          androidNotificationIcon: 'mipmap/ic_launcher',
+          androidStopForegroundOnPause: true,
+        ),
+      );
+      */
 
-    _audioPlayer.positionStream.listen((position) {
-      _position.add(position);
-    });
+      // Listen to player state changes
+      _audioPlayer.playingStream.listen((playing) {
+        _isPlaying.add(playing);
+      });
 
-    _audioPlayer.durationStream.listen((duration) {
-      if (duration != null) {
-        _duration.add(duration);
-        print('Audio duration detected: ${duration.inSeconds} seconds');
-      }
-    });
+      _audioPlayer.positionStream.listen((position) {
+        _position.add(position);
+      });
 
-    _audioPlayer.volumeStream.listen((volume) {
-      _volume.add(volume);
-    });
+      _audioPlayer.durationStream.listen((duration) {
+        if (duration != null) {
+          _duration.add(duration);
+          print('Audio duration detected: ${duration.inSeconds} seconds');
+        }
+      });
 
-    // Handle completion
-    _audioPlayer.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        _isPlaying.add(false);
-        _position.add(Duration.zero);
-      }
-    });
+      _audioPlayer.volumeStream.listen((volume) {
+        _volume.add(volume);
+      });
 
-    _isInitialized = true;
+      // Handle completion
+      _audioPlayer.playerStateStream.listen((state) {
+        if (state.processingState == ProcessingState.completed) {
+          _isPlaying.add(false);
+          _position.add(Duration.zero);
+        }
+      });
+
+      _isInitialized = true;
+      print(
+          'AudioPlayerService initialized successfully (without background service)');
+    } catch (e) {
+      print('Error initializing AudioPlayerService: $e');
+      _isInitialized = false;
+    }
   }
 
   // Play audio from URL
@@ -102,6 +115,12 @@ class AudioPlayerService {
     try {
       print('AudioPlayerService: Playing from URL: $url');
 
+      // Check if initialized
+      if (!_isInitialized) {
+        print('AudioService not initialized, initializing now...');
+        await initialize();
+      }
+
       // Only reload if URL is different
       if (_currentUrl != url) {
         _currentUrl = url;
@@ -110,6 +129,8 @@ class AudioPlayerService {
         // Reset position
         _position.add(Duration.zero);
 
+        // AudioHandler is disabled for now, skip notification setup
+        /*
         // Set media item for notification
         final mediaItem = MediaItem(
           id: url,
@@ -119,12 +140,17 @@ class AudioPlayerService {
           duration: null,
         );
 
-        await _audioHandler
-            .customAction('setMediaItem', {'mediaItem': mediaItem});
+        // Cast safely and handle if it's AudioPlayerHandler
+        if (_audioHandler is AudioPlayerHandler) {
+          await (_audioHandler as AudioPlayerHandler)
+              .customAction('setMediaItem', {'mediaItem': mediaItem});
+        }
+        */
 
-        // Load audio
-        await _audioPlayer.setUrl(url);
-        print('Audio loaded successfully');
+        // Load audio - handle both http and https URLs
+        final audioUrl = url.replaceAll(' ', '%20'); // URL encode spaces
+        await _audioPlayer.setUrl(audioUrl);
+        print('Audio loaded successfully from: $audioUrl');
       }
 
       // Play
@@ -132,8 +158,9 @@ class AudioPlayerService {
       print('Playback started');
     } catch (e) {
       print('Error playing audio: $e');
+      print('URL was: $url');
       _isPlaying.add(false);
-      throw e; // Re-throw to handle in UI
+      // Don't throw, just log
     }
   }
 
@@ -179,6 +206,30 @@ class AudioPlayerService {
       _volume.add(volume);
     } catch (e) {
       print('Error setting volume: $e');
+    }
+  }
+
+  // Add missing replay_15 method
+  Future<void> replay_15() async {
+    try {
+      final newPosition = _position.value - const Duration(seconds: 15);
+      await seek(newPosition.isNegative ? Duration.zero : newPosition);
+    } catch (e) {
+      print('Error replaying: $e');
+    }
+  }
+
+  // Add missing forward_15 method
+  Future<void> forward_15() async {
+    try {
+      final newPosition = _position.value + const Duration(seconds: 15);
+      if (_duration.value > Duration.zero && newPosition < _duration.value) {
+        await seek(newPosition);
+      } else if (_duration.value > Duration.zero) {
+        await seek(_duration.value - const Duration(seconds: 1));
+      }
+    } catch (e) {
+      print('Error forwarding: $e');
     }
   }
 

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.insidex_app">
+    package="com.insidexapp.mobile">
     
     <!-- PERMISSIONS -->
     <uses-permission android:name="android.permission.INTERNET"/>

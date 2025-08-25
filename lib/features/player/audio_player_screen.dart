@@ -8,7 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/audio_player_service.dart';
-import '../../services/firebase_service.dart';
+import 'widgets/player_modals.dart';
+import 'test_audio_data.dart'; // Add test data import
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -59,25 +60,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   void initState() {
     super.initState();
 
-    // Initialize session data
-    _session = widget.sessionData ??
-        {
-          'id': 'test_session',
-          'title': 'Deep Sleep Healing',
-          'category': 'Sleep',
-          'emoji': '🌙',
-          'intro': {
-            'title': 'Relaxation Introduction',
-            'description': 'A gentle introduction to prepare your mind',
-            'audioUrl': '',
-          },
-          'subliminal': {
-            'title': 'Deep Sleep Subliminals',
-            'description':
-                'Powerful subliminal affirmations for deep healing sleep',
-            'audioUrl': '',
-          },
-        };
+    // Initialize session data - use test data if no session provided
+    _session = widget.sessionData ?? TestAudioData.getTestSession();
 
     // Initialize animations
     _pulseController = AnimationController(
@@ -233,175 +217,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     await _playCurrentTrack();
   }
 
-  void _toggleAutoPlay() {
-    setState(() {
-      _autoPlayEnabled = !_autoPlayEnabled;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text(_autoPlayEnabled ? 'Auto-play enabled' : 'Auto-play disabled'),
-        duration: Duration(seconds: 1),
-      ),
-    );
-  }
-
-  void _toggleLoop() {
-    setState(() {
-      _isLooping = !_isLooping;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isLooping ? 'Loop enabled' : 'Loop disabled'),
-        duration: Duration(seconds: 1),
-      ),
-    );
-  }
-
-  void _showVolumeControl() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Container(
-          decoration: BoxDecoration(
-            color: AppColors.textPrimary.withOpacity(0.95),
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(20.r),
-              topRight: Radius.circular(20.r),
-            ),
-          ),
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Volume Control',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              SizedBox(height: 20.h),
-              Row(
-                children: [
-                  Icon(Icons.volume_down, color: Colors.white70),
-                  Expanded(
-                    child: Slider(
-                      value: _volume,
-                      activeColor: AppColors.primaryGold,
-                      inactiveColor: Colors.white30,
-                      onChanged: (value) {
-                        setModalState(() {
-                          _volume = value;
-                        });
-                        setState(() {
-                          _volume = value;
-                        });
-                        _audioService.setVolume(value);
-                      },
-                    ),
-                  ),
-                  Icon(Icons.volume_up, color: Colors.white70),
-                ],
-              ),
-              Text(
-                '${(_volume * 100).toInt()}%',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showSleepTimer() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: AppColors.textPrimary.withOpacity(0.95),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.r),
-            topRight: Radius.circular(20.r),
-          ),
-        ),
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Sleep Timer',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Wrap(
-              spacing: 10.w,
-              runSpacing: 10.h,
-              children: [
-                _buildTimerOption(15),
-                _buildTimerOption(30),
-                _buildTimerOption(45),
-                _buildTimerOption(60),
-                _buildTimerOption(90),
-                if (_sleepTimerMinutes != null)
-                  ElevatedButton(
-                    onPressed: () {
-                      _audioService.cancelSleepTimer();
-                      setState(() {
-                        _sleepTimerMinutes = null;
-                      });
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                    ),
-                    child: Text('Cancel Timer'),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimerOption(int minutes) {
-    return ElevatedButton(
-      onPressed: () {
-        _audioService.setSleepTimer(minutes);
-        setState(() {
-          _sleepTimerMinutes = minutes;
-        });
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Sleep timer set for $minutes minutes'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryGold,
-        foregroundColor: AppColors.textPrimary,
-      ),
-      child: Text('$minutes min'),
-    );
-  }
-
   @override
   void dispose() {
     _completionCheckTimer?.cancel();
@@ -416,6 +231,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Get safe area and screen dimensions for responsive design
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final safeAreaTop = mediaQuery.padding.top;
+    final safeAreaBottom = mediaQuery.padding.bottom;
+    final availableHeight = screenHeight - safeAreaTop - safeAreaBottom;
+
+    // Responsive sizing based on available height
+    final isSmallScreen = availableHeight < 700; // For phones like Huawei P20
+    final visualizerSize = isSmallScreen ? 200.w : 250.w;
+    final controlButtonSize = isSmallScreen ? 50.w : 60.w;
+    final iconButtonSize = isSmallScreen ? 36.w : 44.w;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: Container(
@@ -433,45 +261,68 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         child: SafeArea(
           child: Column(
             children: [
-              // Top Bar
-              _buildTopBar(),
+              // Header
+              _buildHeader(),
 
-              // Main Player Area
+              // Main content - use Expanded with Column for proper spacing
               Expanded(
-                child: Column(
-                  children: [
-                    const Spacer(),
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Container(
+                    height: isSmallScreen
+                        ? null
+                        : availableHeight - 60.h, // Adjust for header
+                    child: Column(
+                      mainAxisAlignment: isSmallScreen
+                          ? MainAxisAlignment.start
+                          : MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Visualizer Section
+                        Flexible(
+                          flex: isSmallScreen ? 0 : 3,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: isSmallScreen ? 20.h : 10.h),
+                              _buildVisualizer(visualizerSize),
+                            ],
+                          ),
+                        ),
 
-                    // Animated Player Visual
-                    _buildAnimatedPlayer(),
+                        // Middle Section - Session Info & Track Selector
+                        Flexible(
+                          flex: isSmallScreen ? 0 : 2,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: isSmallScreen ? 20.h : 10.h),
+                              _buildSessionInfo(),
+                              SizedBox(height: isSmallScreen ? 15.h : 20.h),
+                              _buildTrackSelector(),
+                            ],
+                          ),
+                        ),
 
-                    SizedBox(height: 40.h),
-
-                    // Session Info
-                    _buildSessionInfo(),
-
-                    SizedBox(height: 24.h),
-
-                    // Track Selector
-                    _buildTrackSelector(),
-
-                    SizedBox(height: 24.h),
-
-                    // Progress Bar
-                    _buildProgressBar(),
-
-                    SizedBox(height: 32.h),
-
-                    // Controls
-                    _buildControls(),
-
-                    const Spacer(),
-
-                    // Bottom Options
-                    _buildBottomOptions(),
-
-                    SizedBox(height: 20.h),
-                  ],
+                        // Controls Section
+                        Flexible(
+                          flex: isSmallScreen ? 0 : 3,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(height: isSmallScreen ? 15.h : 10.h),
+                              _buildProgressBar(),
+                              SizedBox(height: isSmallScreen ? 20.h : 25.h),
+                              _buildPlaybackControls(
+                                  controlButtonSize, iconButtonSize),
+                              SizedBox(height: isSmallScreen ? 15.h : 20.h),
+                              _buildAdditionalControls(),
+                              SizedBox(height: isSmallScreen ? 20.h : 10.h),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -481,113 +332,61 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             icon: Icon(Icons.keyboard_arrow_down,
-                color: Colors.white, size: 32.sp),
+                color: Colors.white, size: 28.sp),
             onPressed: () => Navigator.pop(context),
           ),
-          Column(
-            children: [
-              Text(
-                'NOW PLAYING',
-                style: GoogleFonts.inter(
-                  fontSize: 10.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white70,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                _session['category'] ?? 'Session',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                ),
-              ),
-            ],
+          Text(
+            'NOW PLAYING',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white70,
+              letterSpacing: 1.2,
+            ),
           ),
-          SizedBox(width: 32.sp), // Empty space instead of menu button
+          // Empty container to maintain spacing instead of three dots
+          SizedBox(width: 44.w),
         ],
       ),
     );
   }
 
-  Widget _buildAnimatedPlayer() {
-    return SizedBox(
-      width: 280.w,
-      height: 280.w,
+  Widget _buildVisualizer(double size) {
+    return Container(
+      width: size,
+      height: size,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Outer rotating ring
+          // Animated waves
           AnimatedBuilder(
-            animation: _rotationController,
+            animation: _waveController,
             builder: (context, child) {
-              return Transform.rotate(
-                angle: _rotationController.value * 2 * math.pi,
-                child: Container(
-                  width: 280.w,
-                  height: 280.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: SweepGradient(
-                      colors: [
-                        AppColors.primaryGold.withOpacity(0.3),
-                        Colors.white.withOpacity(0.1),
-                        AppColors.primaryGold.withOpacity(0.3),
-                        Colors.white.withOpacity(0.1),
-                      ],
-                    ),
-                  ),
+              return CustomPaint(
+                size: Size(size, size),
+                painter: WavePainter(
+                  animation: _waveController,
+                  color: AppColors.primaryGold.withOpacity(0.3),
                 ),
               );
             },
           ),
 
-          // Pulse rings
-          ...List.generate(3, (index) {
-            return AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                final value = (_pulseController.value + (index * 0.33)) % 1.0;
-                return Container(
-                  width: 200.w + (80.w * value),
-                  height: 200.w + (80.w * value),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color:
-                          AppColors.primaryGold.withOpacity(0.3 * (1 - value)),
-                      width: 2,
-                    ),
-                  ),
-                );
-              },
-            );
-          }),
-
           // Center circle with emoji
           Container(
-            width: 180.w,
-            height: 180.w,
+            width: size * 0.6,
+            height: size * 0.6,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.primaryGold,
-                  AppColors.primaryGold.withOpacity(0.7),
-                ],
-              ),
+              color: AppColors.primaryGold,
               boxShadow: [
                 BoxShadow(
                   color: AppColors.primaryGold.withOpacity(0.5),
@@ -597,51 +396,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ],
             ),
             child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  AnimatedSwitcher(
-                    duration: Duration(milliseconds: 300),
-                    child: _isPlaying
-                        ? _buildWaveAnimation()
-                        : Text(
-                            _session['emoji'] ?? '🎵',
-                            style: TextStyle(fontSize: 60.sp),
-                            key: ValueKey('emoji'),
-                          ),
-                  ),
-                ],
+              child: Text(
+                _session['emoji'] ?? '🎵',
+                style: TextStyle(fontSize: size * 0.25),
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildWaveAnimation() {
-    return SizedBox(
-      width: 60.w,
-      height: 30.h,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: List.generate(5, (index) {
-          return AnimatedBuilder(
-            animation: _waveController,
-            builder: (context, child) {
-              final value = math.sin((_waveController.value * 2 * math.pi) +
-                  (index * math.pi / 5));
-              return Container(
-                width: 4.w,
-                height: 10.h + (20.h * ((value + 1) / 2)),
-                decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-              );
-            },
-          );
-        }),
       ),
     );
   }
@@ -652,13 +413,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       child: Column(
         children: [
           Text(
-            _session['title'] ?? 'Session',
+            _session['title'] ?? 'Unknown Session',
             style: GoogleFonts.inter(
-              fontSize: 24.sp,
+              fontSize: 20.sp,
               fontWeight: FontWeight.w700,
               color: Colors.white,
             ),
             textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: 8.h),
           Text(
@@ -666,10 +429,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 ? (_session['intro']['title'] ?? 'Introduction')
                 : (_session['subliminal']['title'] ?? 'Subliminal'),
             style: GoogleFonts.inter(
-              fontSize: 16.sp,
+              fontSize: 14.sp,
               color: Colors.white70,
             ),
             textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -682,7 +447,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(25.r),
       ),
       child: Row(
         children: [
@@ -690,18 +455,20 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             child: GestureDetector(
               onTap: () => _switchToTrack('intro'),
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 10.h),
                 decoration: BoxDecoration(
                   color: _currentTrack == 'intro'
-                      ? AppColors.primaryGold.withOpacity(0.3)
+                      ? Colors.white.withOpacity(0.2)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   'Introduction',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12.sp,
+                    fontWeight: _currentTrack == 'intro'
+                        ? FontWeight.w600
+                        : FontWeight.w400,
                     color: _currentTrack == 'intro'
                         ? Colors.white
                         : Colors.white60,
@@ -715,20 +482,22 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             child: GestureDetector(
               onTap: () => _switchToTrack('subliminal'),
               child: Container(
-                padding: EdgeInsets.symmetric(vertical: 12.h),
+                padding: EdgeInsets.symmetric(vertical: 10.h),
                 decoration: BoxDecoration(
                   color: _currentTrack == 'subliminal'
-                      ? AppColors.primaryGold.withOpacity(0.3)
+                      ? AppColors.primaryGold
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   'Subliminal',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 12.sp,
+                    fontWeight: _currentTrack == 'subliminal'
+                        ? FontWeight.w600
+                        : FontWeight.w400,
                     color: _currentTrack == 'subliminal'
-                        ? Colors.white
+                        ? AppColors.textPrimary
                         : Colors.white60,
                   ),
                   textAlign: TextAlign.center,
@@ -743,43 +512,46 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   Widget _buildProgressBar() {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
+      padding: EdgeInsets.symmetric(horizontal: 30.w),
       child: Column(
         children: [
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: AppColors.primaryGold,
-              inactiveTrackColor: Colors.white.withOpacity(0.3),
+              inactiveTrackColor: Colors.white24,
               thumbColor: AppColors.primaryGold,
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
               trackHeight: 3.h,
+              overlayShape: RoundSliderOverlayShape(overlayRadius: 12.r),
+              overlayColor: AppColors.primaryGold.withOpacity(0.2),
             ),
             child: Slider(
               value: _currentProgress,
               onChanged: (value) {
+                setState(() => _currentProgress = value);
                 final newPosition = Duration(
-                  seconds: (value * _totalDuration.inSeconds).toInt(),
+                  seconds: (_totalDuration.inSeconds * value).round(),
                 );
                 _audioService.seek(newPosition);
               },
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   _formatDuration(_currentPosition),
                   style: GoogleFonts.inter(
-                    fontSize: 12.sp,
+                    fontSize: 11.sp,
                     color: Colors.white60,
                   ),
                 ),
                 Text(
                   _formatDuration(_totalDuration),
                   style: GoogleFonts.inter(
-                    fontSize: 12.sp,
+                    fontSize: 11.sp,
                     color: Colors.white60,
                   ),
                 ),
@@ -791,124 +563,130 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildPlaybackControls(double mainButtonSize, double sideButtonSize) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        // Previous/Replay button
         IconButton(
-          icon: Icon(Icons.skip_previous, color: Colors.white60, size: 32.sp),
-          onPressed: () {
-            if (_currentTrack == 'subliminal') {
-              _switchToTrack('intro');
-            }
-          },
+          icon: Icon(Icons.replay_10, color: Colors.white70),
+          iconSize: sideButtonSize * 0.6,
+          onPressed: () => _audioService.replay_15(),
         ),
+
         SizedBox(width: 20.w),
+
+        // Play/Pause button
         GestureDetector(
           onTap: _togglePlayPause,
           child: Container(
-            width: 64.w,
-            height: 64.w,
+            width: mainButtonSize,
+            height: mainButtonSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.primaryGold,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryGold.withOpacity(0.3),
+                  color: AppColors.primaryGold.withOpacity(0.4),
                   blurRadius: 20,
-                  spreadRadius: 5,
+                  spreadRadius: 2,
                 ),
               ],
             ),
             child: Icon(
               _isPlaying ? Icons.pause : Icons.play_arrow,
               color: AppColors.textPrimary,
-              size: 32.sp,
+              size: mainButtonSize * 0.5,
             ),
           ),
         ),
+
         SizedBox(width: 20.w),
+
+        // Next/Forward button
         IconButton(
-          icon: Icon(Icons.skip_next, color: Colors.white60, size: 32.sp),
-          onPressed: () {
-            if (_currentTrack == 'intro') {
-              _switchToTrack('subliminal');
-            }
-          },
+          icon: Icon(Icons.forward_10, color: Colors.white70),
+          iconSize: sideButtonSize * 0.6,
+          onPressed: () => _audioService.forward_15(),
         ),
       ],
     );
   }
 
-  Widget _buildBottomOptions() {
+  Widget _buildAdditionalControls() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          // Loop button
+          IconButton(
+            icon: Icon(
+              Icons.loop,
+              color: _isLooping ? AppColors.primaryGold : Colors.white38,
+            ),
+            iconSize: 22.sp,
+            onPressed: () {
+              setState(() => _isLooping = !_isLooping);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_isLooping ? 'Loop enabled' : 'Loop disabled'),
+                  duration: Duration(seconds: 1),
+                ),
+              );
+            },
+          ),
+
+          // Favorite button
           IconButton(
             icon: Icon(
               _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.red : Colors.white60,
-              size: 24.sp,
+              color: _isFavorite ? Colors.redAccent : Colors.white38,
             ),
+            iconSize: 22.sp,
             onPressed: () {
               setState(() => _isFavorite = !_isFavorite);
             },
           ),
+
+          // Sleep timer
           IconButton(
             icon: Icon(
-              Icons.loop,
-              color: _isLooping ? AppColors.primaryGold : Colors.white60,
-              size: 24.sp,
+              Icons.bedtime,
+              color: _sleepTimerMinutes != null
+                  ? AppColors.primaryGold
+                  : Colors.white38,
             ),
-            onPressed: _toggleLoop,
+            iconSize: 22.sp,
+            onPressed: () {
+              PlayerModals.showSleepTimer(
+                context,
+                _sleepTimerMinutes,
+                _audioService,
+                (minutes) {
+                  setState(() => _sleepTimerMinutes = minutes);
+                },
+              );
+            },
           ),
+
+          // Volume control
           IconButton(
             icon: Icon(
-              Icons.playlist_play,
-              color: _autoPlayEnabled ? AppColors.primaryGold : Colors.white60,
-              size: 24.sp,
+              Icons.volume_up,
+              color: Colors.white38,
             ),
-            onPressed: _toggleAutoPlay,
-          ),
-          IconButton(
-            icon: Stack(
-              children: [
-                Icon(
-                  Icons.bedtime,
-                  color: _sleepTimerMinutes != null
-                      ? AppColors.primaryGold
-                      : Colors.white60,
-                  size: 24.sp,
-                ),
-                if (_sleepTimerMinutes != null)
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      padding: EdgeInsets.all(2.w),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryGold,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        '$_sleepTimerMinutes',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 8.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            onPressed: _showSleepTimer,
-          ),
-          IconButton(
-            icon: Icon(Icons.volume_up, color: Colors.white60, size: 24.sp),
-            onPressed: _showVolumeControl,
+            iconSize: 22.sp,
+            onPressed: () {
+              PlayerModals.showVolumeControl(
+                context,
+                _volume,
+                _audioService,
+                (newVolume) {
+                  setState(() => _volume = newVolume);
+                },
+              );
+            },
           ),
         ],
       ),
@@ -919,6 +697,40 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     String twoDigits(int n) => n.toString().padLeft(2, '0');
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '${duration.inHours > 0 ? '${twoDigits(duration.inHours)}:' : ''}$minutes:$seconds';
+    return '$minutes:$seconds';
   }
+}
+
+// Wave Painter for visualizer
+class WavePainter extends CustomPainter {
+  final Animation<double> animation;
+  final Color color;
+
+  WavePainter({
+    required this.animation,
+    required this.color,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final maxRadius = math.min(size.width, size.height) / 2;
+
+    for (int i = 0; i < 3; i++) {
+      final progress = ((animation.value + (i * 0.2)) % 1.0);
+      final radius = maxRadius * progress;
+      final opacity = 1.0 - progress;
+
+      paint.color = color.withOpacity(opacity * 0.5);
+      canvas.drawCircle(center, radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(WavePainter oldDelegate) => true;
 }
