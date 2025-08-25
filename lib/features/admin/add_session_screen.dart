@@ -9,7 +9,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
-import '../../services/storage_service.dart'; // IMPORTANT: Import StorageService
+import '../../services/storage_service.dart';
 
 class AddSessionScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionToEdit;
@@ -332,6 +332,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       };
 
       print('Saving session data to Firestore...');
+      print('Intro duration: $_introDuration seconds');
+      print('Subliminal duration: $_subliminalDuration seconds');
 
       // Save to Firestore
       if (widget.sessionToEdit != null) {
@@ -375,6 +377,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         _uploadProgress = 0;
         _uploadStatus = '';
       });
+    }
+  }
+
+  // Duration formatter helper method
+  String _formatDuration(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final secs = seconds % 60;
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m ${secs}s';
+    } else {
+      return '${secs}s';
     }
   }
 
@@ -431,12 +448,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Category and Emoji Row
+        // Category & Emoji Row
         Row(
           children: [
             // Category Dropdown
             Expanded(
-              flex: 3,
+              flex: 2,
               child: DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: InputDecoration(
@@ -456,23 +473,35 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     _selectedCategory = value;
                   });
                 },
+                validator: (value) {
+                  if (value == null) {
+                    return 'Please select a category';
+                  }
+                  return null;
+                },
               ),
             ),
 
             SizedBox(width: 16.w),
 
-            // Emoji Picker
+            // Emoji Selector
             Expanded(
-              child: Container(
-                height: 56.h,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Center(
-                  child: Text(
-                    _selectedEmoji,
-                    style: TextStyle(fontSize: 24.sp),
+              child: InkWell(
+                onTap: () {
+                  // Show emoji picker dialog
+                  _showEmojiPicker();
+                },
+                child: Container(
+                  height: 56.h,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade400),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Center(
+                    child: Text(
+                      _selectedEmoji,
+                      style: TextStyle(fontSize: 28.sp),
+                    ),
                   ),
                 ),
               ),
@@ -544,23 +573,62 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Duration Input
-        TextFormField(
-          initialValue: (_introDuration ~/ 60).toString(),
-          decoration: InputDecoration(
-            labelText: 'Duration (minutes)',
-            hintText: 'Enter duration in minutes',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
+        // Duration Input - IMPROVED VERSION
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Introduction Duration',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          keyboardType: TextInputType.number,
-          onChanged: (value) {
-            final minutes = int.tryParse(value) ?? 2;
-            setState(() {
-              _introDuration = minutes * 60;
-            });
-          },
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: (_introDuration ~/ 60).toString(),
+                    decoration: InputDecoration(
+                      labelText: 'Minutes',
+                      hintText: 'Enter duration',
+                      suffixText: 'min',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final minutes = int.tryParse(value) ?? 2;
+                      setState(() {
+                        _introDuration = minutes * 60;
+                        print('Intro duration set to: $_introDuration seconds');
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    _formatDuration(_introDuration),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ],
     );
@@ -596,23 +664,71 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Duration Input
-        TextFormField(
-          initialValue: (_subliminalDuration ~/ 60).toString(),
-          decoration: InputDecoration(
-            labelText: 'Duration (minutes)',
-            hintText: 'Enter duration in minutes',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
+        // Duration Input - IMPROVED VERSION
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Subliminal Duration',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
             ),
-          ),
-          keyboardType: TextInputType.number,
-          onChanged: (value) {
-            final minutes = int.tryParse(value) ?? 120;
-            setState(() {
-              _subliminalDuration = minutes * 60;
-            });
-          },
+            SizedBox(height: 8.h),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    initialValue: (_subliminalDuration ~/ 60).toString(),
+                    decoration: InputDecoration(
+                      labelText: 'Minutes',
+                      hintText: 'Enter duration',
+                      suffixText: 'min',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      final minutes = int.tryParse(value) ?? 120;
+                      setState(() {
+                        _subliminalDuration = minutes * 60;
+                        print(
+                            'Subliminal duration set to: $_subliminalDuration seconds');
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight,
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    _formatDuration(_subliminalDuration),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Tip: For 2 hours enter 120, for 90 minutes enter 90',
+              style: GoogleFonts.inter(
+                fontSize: 11.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
 
         SizedBox(height: 16.h),
@@ -660,7 +776,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             Icon(
               icon,
               size: 32.sp,
-              color: hasFile ? AppColors.primaryGold : AppColors.textSecondary,
+              color: hasFile ? AppColors.primaryGold : Colors.grey.shade600,
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -682,15 +798,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       fontSize: 12.sp,
                       color: AppColors.textSecondary,
                     ),
-                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
             ),
             Icon(
-              hasFile ? Icons.check_circle : Icons.upload,
-              color: hasFile ? AppColors.primaryGold : AppColors.textSecondary,
+              hasFile ? Icons.check_circle : Icons.upload_file,
+              color: hasFile ? AppColors.primaryGold : Colors.grey.shade400,
             ),
           ],
         ),
@@ -700,29 +815,34 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Widget _buildUploadProgress() {
     return Container(
-      margin: EdgeInsets.only(bottom: 20.h),
+      margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColors.primaryGold.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.primaryGold),
+        border: Border.all(
+          color: AppColors.primaryGold,
+          width: 1,
+        ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             _uploadStatus,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(height: 8.h),
           LinearProgressIndicator(
             value: _uploadProgress / 100,
-            backgroundColor: AppColors.greyLight,
+            backgroundColor: Colors.grey.shade300,
             valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 8.h),
           Text(
             '${_uploadProgress.toStringAsFixed(1)}%',
             style: GoogleFonts.inter(
@@ -731,6 +851,81 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEmojiPicker() {
+    final emojis = [
+      '🎵',
+      '😴',
+      '💪',
+      '🎯',
+      '💰',
+      '❤️',
+      '🧠',
+      '✨',
+      '🌟',
+      '🚀',
+      '💡',
+      '🧘',
+      '🏃',
+      '📚',
+      '🎨',
+      '🌈',
+      '🔥',
+      '💎',
+      '🌙',
+      '☀️',
+      '🌺',
+      '🍀',
+      '🦋',
+      '🌊'
+    ];
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Select Emoji'),
+        content: Container(
+          width: double.maxFinite,
+          child: GridView.builder(
+            shrinkWrap: true,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 6,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: emojis.length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: () {
+                  setState(() {
+                    _selectedEmoji = emojis[index];
+                  });
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _selectedEmoji == emojis[index]
+                          ? AppColors.primaryGold
+                          : Colors.grey.shade300,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: Text(
+                      emojis[index],
+                      style: TextStyle(fontSize: 24.sp),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }

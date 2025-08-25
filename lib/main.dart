@@ -1,8 +1,9 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'package:audio_service/audio_service.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
@@ -17,7 +18,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Audio Service'i başlat
+  // Audio Service'i başlat - Basit versiyon
   try {
     await AudioPlayerService().initialize();
     print('Audio Service initialized successfully');
