@@ -15,9 +15,35 @@ class StorageService {
     Function(double)? onProgress,
   }) async {
     try {
+      // Clean sessionId and determine audio type
+      String cleanSessionId = sessionId;
+      String audioType = '';
+
+      // Check if sessionId contains /intro or /subliminal
+      if (sessionId.contains('/intro')) {
+        cleanSessionId = sessionId.replaceAll('/intro', '');
+        audioType = 'intro';
+      } else if (sessionId.contains('/subliminal')) {
+        cleanSessionId = sessionId.replaceAll('/subliminal', '');
+        audioType = 'subliminal';
+      }
+
+      // Create unique filename
       final String fileName =
           '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
-      final String path = 'sessions/audio/$sessionId/$fileName';
+
+      // Create proper path based on audio type
+      final String path = audioType.isNotEmpty
+          ? 'sessions/audio/$cleanSessionId/$audioType/$fileName'
+          : 'sessions/audio/$cleanSessionId/$fileName';
+
+      debugPrint('====== UPLOAD DEBUG ======');
+      debugPrint('Original sessionId: $sessionId');
+      debugPrint('Clean sessionId: $cleanSessionId');
+      debugPrint('Audio type: $audioType');
+      debugPrint('File name: $fileName');
+      debugPrint('Full path: $path');
+      debugPrint('=========================');
 
       Reference ref = _storage.ref().child(path);
 
@@ -159,9 +185,6 @@ class StorageService {
       final imageResult = await _storage.ref('sessions/images').listAll();
       totalFiles += imageResult.items.length;
 
-      // Note: Getting actual file sizes requires downloading metadata for each file
-      // This can be expensive for many files
-
       return {
         'totalFiles': totalFiles,
         'audioFiles': audioResult.items.length,
@@ -217,28 +240,9 @@ class StorageService {
     }
   }
 
-  // Validate file size (max size in MB)
+  // Validate file size (in MB)
   static bool validateFileSize(PlatformFile file, int maxSizeMB) {
     final maxSizeBytes = maxSizeMB * 1024 * 1024;
     return file.size <= maxSizeBytes;
-  }
-
-  // Get file extension
-  static String getFileExtension(String fileName) {
-    return fileName.split('.').last.toLowerCase();
-  }
-
-  // Validate audio file extension
-  static bool isValidAudioFile(String fileName) {
-    final validExtensions = ['mp3', 'wav', 'm4a', 'aac', 'ogg'];
-    final extension = getFileExtension(fileName);
-    return validExtensions.contains(extension);
-  }
-
-  // Validate image file extension
-  static bool isValidImageFile(String fileName) {
-    final validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    final extension = getFileExtension(fileName);
-    return validExtensions.contains(extension);
   }
 }

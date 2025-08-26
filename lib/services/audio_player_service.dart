@@ -1,298 +1,109 @@
-// lib/services/audio_player_service.dart
-
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
-import 'package:rxdart/rxdart.dart';
 
+/// Single-responsibility audio service.
+/// - Single AudioPlayer instance (prevents overlapping sounds)
+/// - Safe loading with a race-guard token
+/// - Always stop -> load -> play
+/// - Built-in sleep timer (set/cancel + stream)
+/// - Transient network errors are retried once (e.g., "Connection aborted")
 class AudioPlayerService {
-  static final AudioPlayerService _instance = AudioPlayerService._internal();
-  factory AudioPlayerService() => _instance;
-  AudioPlayerService._internal();
+  final AudioPlayer _player = AudioPlayer();
 
-  late AudioPlayer _audioPlayer;
-
-  bool _isInitialized = false;
-  String? _currentUrl;
-  Duration? _manualDuration; // Manuel duration için
-
-  // Audio state streams
-  final BehaviorSubject<bool> _isPlaying = BehaviorSubject.seeded(false);
-  final BehaviorSubject<Duration> _position =
-      BehaviorSubject.seeded(Duration.zero);
-  final BehaviorSubject<Duration> _duration =
-      BehaviorSubject.seeded(Duration.zero);
-  final BehaviorSubject<double> _volume = BehaviorSubject.seeded(0.7);
-  final BehaviorSubject<String> _currentTrack = BehaviorSubject.seeded('');
+  // Race guard for async loads: only the latest load may win.
+  int _loadToken = 0;
 
   // Sleep timer
   Timer? _sleepTimer;
-  final BehaviorSubject<int?> _sleepTimerMinutes = BehaviorSubject.seeded(null);
+  int? _sleepTimerMinutes;
+  final _sleepTimerCtrl = StreamController<int?>.broadcast();
 
-  // Getters
-  Stream<bool> get isPlaying => _isPlaying.stream;
-  Stream<Duration> get position => _position.stream;
-  Stream<Duration> get duration => _duration.stream;
-  Stream<double> get volume => _volume.stream;
-  Stream<String> get currentTrack => _currentTrack.stream;
-  Stream<int?> get sleepTimer => _sleepTimerMinutes.stream;
-
-  // Current values
-  bool get isPlayingNow => _isPlaying.value;
-  Duration get currentPosition => _position.value;
-  Duration get totalDuration => _duration.value;
+  // Exposed streams
+  Stream<bool> get isPlaying => _player.playingStream;
+  Stream<Duration> get position => _player.positionStream;
+  Stream<Duration?> get duration => _player.durationStream;
+  Stream<PlayerState> get playerState => _player.playerStateStream;
+  Stream<int?> get sleepTimer => _sleepTimerCtrl.stream; // minutes or null
 
   Future<void> initialize() async {
-    if (_isInitialized) return;
+    await _player.setVolume(0.7);
+  }
 
-    try {
-      _audioPlayer = AudioPlayer();
+  Future<void> setVolume(double value) async =>
+      _player.setVolume(value.clamp(0.0, 1.0));
 
-      // Listen to player state changes
-      _audioPlayer.playingStream.listen((playing) {
-        _isPlaying.add(playing);
-      });
+  Future<void> play() async => _player.play();
+  Future<void> pause() async => _player.pause();
+  Future<void> stop() async => _player.stop();
+  Future<void> seek(Duration position) async => _player.seek(position);
 
-      _audioPlayer.positionStream.listen((position) {
-        _position.add(position);
-      });
+  /// Safely loads & plays a URL with a small retry for transient errors.
+  /// Returns the resolved media duration (if known) so UI can show it immediately.
+  Future<Duration?> playFromUrl(String url,
+      {String? title, String? artist}) async {
+    final int token = ++_loadToken;
+    await _player.stop();
 
-      _audioPlayer.durationStream.listen((duration) {
-        if (duration != null) {
-          print('Audio duration detected: ${duration.inSeconds} seconds');
+    Duration? lastResolvedDuration;
 
-          // Duration kontrolü - çok kısa veya çok uzunsa ignore et
-          if (duration.inSeconds > 10 && duration.inSeconds < 14400) {
-            // 10 saniye - 4 saat arası
-            _duration.add(duration);
-          } else if (_manualDuration != null) {
-            // Manuel duration varsa onu kullan
-            _duration.add(_manualDuration!);
-            print(
-                'Using manual duration: ${_manualDuration!.inSeconds} seconds');
-          }
-        } else if (_manualDuration != null) {
-          // Duration null ise manuel olanı kullan
-          _duration.add(_manualDuration!);
+    for (int attempt = 0; attempt < 2; attempt++) {
+      if (token != _loadToken) return lastResolvedDuration;
+      try {
+        // setUrl resolves with the media duration (may be null for live/unknown)
+        lastResolvedDuration = await _player.setUrl(url);
+
+        if (token != _loadToken) return lastResolvedDuration;
+        await _player.play();
+        return lastResolvedDuration; // success
+      } on PlayerException catch (e) {
+        final code = (e.code).toString().toLowerCase();
+        final msg = (e.message ?? '').toString().toLowerCase();
+        final transient = code.contains('aborted') ||
+            msg.contains('aborted') ||
+            msg.contains('connection') ||
+            msg.contains('reset') ||
+            msg.contains('timed');
+        if (attempt == 0 && transient) {
+          await Future.delayed(const Duration(milliseconds: 350));
+          continue; // retry once
         }
-      });
-
-      _audioPlayer.volumeStream.listen((volume) {
-        _volume.add(volume);
-      });
-
-      // Handle completion
-      _audioPlayer.playerStateStream.listen((state) {
-        if (state.processingState == ProcessingState.completed) {
-          _isPlaying.add(false);
-          _position.add(Duration.zero);
-          print('Audio completed');
+        rethrow;
+      } catch (_) {
+        if (attempt == 0) {
+          await Future.delayed(const Duration(milliseconds: 350));
+          continue;
         }
-      });
-
-      _isInitialized = true;
-      print('AudioPlayerService initialized successfully (simple version)');
-    } catch (e) {
-      print('Error initializing AudioPlayerService: $e');
-      _isInitialized = false;
-    }
-  }
-
-  // Manuel duration ayarla
-  void setManualDuration(int seconds) {
-    _manualDuration = Duration(seconds: seconds);
-    _duration.add(_manualDuration!);
-    print('Manual duration set: $seconds seconds');
-  }
-
-  // Play audio from URL with optional duration
-  Future<void> playFromUrl(
-    String url, {
-    required String title,
-    required String artist,
-    String? artUri,
-    int? durationInSeconds, // Opsiyonel duration parametresi
-  }) async {
-    try {
-      print('AudioPlayerService: Playing from URL: $url');
-
-      // Check if initialized
-      if (!_isInitialized) {
-        print('AudioService not initialized, initializing now...');
-        await initialize();
+        rethrow;
       }
-
-      // Manuel duration ayarla
-      if (durationInSeconds != null && durationInSeconds > 0) {
-        setManualDuration(durationInSeconds);
-      }
-
-      // Only reload if URL is different
-      if (_currentUrl != url) {
-        _currentUrl = url;
-        _currentTrack.add(title);
-
-        // Reset position
-        _position.add(Duration.zero);
-
-        // Set audio source with custom loading config for long files
-        try {
-          final audioSource = AudioSource.uri(
-            Uri.parse(url),
-            tag: MediaItem(
-              id: url,
-              title: title,
-              artist: artist,
-              duration: _manualDuration,
-            ),
-          );
-
-          // Load with custom configuration for long files
-          await _audioPlayer.setAudioSource(
-            audioSource,
-            preload: false, // Büyük dosyalar için preload kapalı
-            initialPosition: Duration.zero,
-          );
-
-          print('Audio loaded successfully');
-
-          // Duration'ı tekrar kontrol et
-          final detectedDuration = _audioPlayer.duration;
-          if (detectedDuration == null || detectedDuration.inSeconds < 10) {
-            // Duration algılanamadıysa manuel olanı zorla
-            if (_manualDuration != null) {
-              _duration.add(_manualDuration!);
-              print(
-                  'Forced manual duration: ${_manualDuration!.inSeconds} seconds');
-            }
-          }
-        } catch (e) {
-          print('Error loading audio source: $e');
-          // Try alternative method
-          await _audioPlayer.setUrl(url);
-        }
-      }
-
-      // Play
-      await _audioPlayer.play();
-      print('Playback started');
-    } catch (e) {
-      print('Error playing audio: $e');
-      print('URL was: $url');
-      _isPlaying.add(false);
     }
+    return lastResolvedDuration;
   }
 
-  // Playback controls
-  Future<void> play() async {
-    try {
-      await _audioPlayer.play();
-    } catch (e) {
-      print('Error resuming playback: $e');
-    }
-  }
-
-  Future<void> pause() async {
-    try {
-      await _audioPlayer.pause();
-    } catch (e) {
-      print('Error pausing playback: $e');
-    }
-  }
-
-  Future<void> stop() async {
-    try {
-      await _audioPlayer.stop();
-      _position.add(Duration.zero);
-      _isPlaying.add(false);
-      _currentUrl = null;
-      _manualDuration = null; // Reset manual duration
-    } catch (e) {
-      print('Error stopping playback: $e');
-    }
-  }
-
-  Future<void> seek(Duration position) async {
-    try {
-      await _audioPlayer.seek(position);
-    } catch (e) {
-      print('Error seeking: $e');
-    }
-  }
-
-  Future<void> setVolume(double volume) async {
-    try {
-      await _audioPlayer.setVolume(volume);
-      _volume.add(volume);
-    } catch (e) {
-      print('Error setting volume: $e');
-    }
-  }
-
-  // 10 seconds backward
-  Future<void> replay_10() async {
-    try {
-      final newPosition = _position.value - const Duration(seconds: 10);
-      await seek(newPosition.isNegative ? Duration.zero : newPosition);
-    } catch (e) {
-      print('Error replaying: $e');
-    }
-  }
-
-  // 10 seconds forward
-  Future<void> forward_10() async {
-    try {
-      final newPosition = _position.value + const Duration(seconds: 10);
-      if (_duration.value > Duration.zero && newPosition < _duration.value) {
-        await seek(newPosition);
-      } else if (_duration.value > Duration.zero) {
-        await seek(_duration.value - const Duration(seconds: 1));
-      }
-    } catch (e) {
-      print('Error forwarding: $e');
-    }
-  }
-
-  // Sleep timer
-  void setSleepTimer(int minutes) {
+  /// ---- Sleep timer API (used by PlayerModals) ----
+  Future<void> setSleepTimer(int minutes) async {
     _sleepTimer?.cancel();
-    _sleepTimerMinutes.add(minutes);
+    _sleepTimerMinutes = minutes;
+    _sleepTimerCtrl.add(_sleepTimerMinutes);
 
-    _sleepTimer = Timer(Duration(minutes: minutes), () {
-      stop();
-      _sleepTimerMinutes.add(null);
-      print('Sleep timer completed');
+    _sleepTimer = Timer(Duration(minutes: minutes), () async {
+      _sleepTimerMinutes = null;
+      _sleepTimerCtrl.add(null);
+      try {
+        await _player.pause();
+      } catch (_) {}
     });
   }
 
-  void cancelSleepTimer() {
+  Future<void> cancelSleepTimer() async {
     _sleepTimer?.cancel();
-    _sleepTimerMinutes.add(null);
+    _sleepTimer = null;
+    _sleepTimerMinutes = null;
+    _sleepTimerCtrl.add(null);
   }
 
-  // Cleanup
   void dispose() {
     _sleepTimer?.cancel();
-    _audioPlayer.dispose();
-    _isPlaying.close();
-    _position.close();
-    _duration.close();
-    _volume.close();
-    _currentTrack.close();
-    _sleepTimerMinutes.close();
+    _sleepTimerCtrl.close();
+    _player.dispose();
   }
-}
-
-// MediaItem class for tag
-class MediaItem {
-  final String id;
-  final String title;
-  final String artist;
-  final Duration? duration;
-
-  MediaItem({
-    required this.id,
-    required this.title,
-    required this.artist,
-    this.duration,
-  });
 }

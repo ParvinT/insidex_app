@@ -30,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _initAnimations();
     _startAnimations();
-    _checkAuthAndNavigate();
+    _checkAuthAndNavigate(); // sadece yönlendirme mantığı güncellendi
   }
 
   void _initAnimations() {
@@ -50,28 +50,22 @@ class _SplashScreenState extends State<SplashScreen>
     _rotationAnimation = Tween<double>(
       begin: math.pi * 2, // 360 degrees
       end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _rotationController,
-      curve: Curves.easeOutBack,
-    ));
+    ).animate(
+      CurvedAnimation(parent: _rotationController, curve: Curves.easeOutBack),
+    );
 
     // Logo fade
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeIn,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
+    );
 
     // Text fade
-    _textFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
-    ));
+    _textFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _fadeController,
+        curve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+      ),
+    );
   }
 
   void _startAnimations() async {
@@ -81,32 +75,20 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _checkAuthAndNavigate() {
-    // Wait 4 seconds for animation to complete
+    // Animasyon bittikten kısa süre sonra yönlendir
     Future.delayed(const Duration(seconds: 4), () async {
       if (!mounted) return;
 
-      // Check Firebase Auth status
       final user = FirebaseAuth.instance.currentUser;
 
-      if (user != null) {
-        // User is already logged in
-        debugPrint('User is already logged in: ${user.email}');
-
-        // Check email verification (optional)
-        if (user.emailVerified || true) {
-          // Email verification not required for now
-          // Navigate directly to home screen
-          Navigator.pushReplacementNamed(context, AppRoutes.home);
-        } else {
-          // If email not verified, navigate to welcome
-          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
-        }
-      } else {
-        // User is not logged in
-        debugPrint('No user logged in, going to welcome screen');
-
-        // Navigate to welcome screen
+      // Yeni akış: OTP doğrulanmadan hesap oluşmadığı için
+      // sadece currentUser'a bakmamız yeterli.
+      if (user == null) {
+        // Oturum yok → Welcome/Login
         Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+      } else {
+        // Oturum var → Home
+        Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
     });
   }

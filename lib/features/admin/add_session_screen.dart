@@ -213,9 +213,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     });
 
     try {
-      // Generate session ID for folder organization
-      final sessionId = widget.sessionToEdit?['id'] ??
-          DateTime.now().millisecondsSinceEpoch.toString();
+      // Generate UNIQUE session ID for each new session
+      // Use combination of timestamp and random string
+      final String sessionId = widget.sessionToEdit?['id'] ??
+          '${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().microsecondsSinceEpoch}';
+
+      debugPrint('====== SAVING SESSION ======');
+      debugPrint('Session ID: $sessionId');
+      debugPrint('Title: ${_titleController.text}');
 
       // Upload files using StorageService
       String? imageUrl;
@@ -242,7 +247,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         if (imageUrl == null) {
           throw Exception('Failed to upload background image');
         }
-        print('Image uploaded successfully: $imageUrl');
+        debugPrint('Image uploaded: $imageUrl');
       }
 
       // Upload intro audio
@@ -252,8 +257,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           _uploadProgress = 0;
         });
 
+        // Use unique path for each session's intro
         introUrl = await StorageService.uploadAudio(
-          sessionId: '$sessionId/intro',
+          sessionId: sessionId, // Use the unique session ID
           file: _introAudio!,
           onProgress: (progress) {
             setState(() {
@@ -265,7 +271,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         if (introUrl == null) {
           throw Exception('Failed to upload intro audio');
         }
-        print('Intro audio uploaded successfully: $introUrl');
+        debugPrint('Intro audio uploaded: $introUrl');
       }
 
       // Upload subliminal audio
@@ -275,8 +281,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           _uploadProgress = 0;
         });
 
+        // Use unique path for each session's subliminal
         subliminalUrl = await StorageService.uploadAudio(
-          sessionId: '$sessionId/subliminal',
+          sessionId: sessionId, // Use the unique session ID
           file: _subliminalAudio!,
           onProgress: (progress) {
             setState(() {
@@ -288,7 +295,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         if (subliminalUrl == null) {
           throw Exception('Failed to upload subliminal audio');
         }
-        print('Subliminal audio uploaded successfully: $subliminalUrl');
+        debugPrint('Subliminal audio uploaded: $subliminalUrl');
       }
 
       setState(() {
@@ -296,8 +303,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         _uploadProgress = 100;
       });
 
-      // Prepare session data
+      // Prepare session data with CORRECT structure
       final sessionData = {
+        'id': sessionId, // Include the ID in the document
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
         'category': _selectedCategory,
@@ -322,15 +330,15 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               .where((line) => line.isNotEmpty)
               .toList(),
         },
+        'playCount': widget.sessionToEdit?['playCount'] ?? 0,
+        'rating': widget.sessionToEdit?['rating'] ?? 0.0,
         'createdAt': widget.sessionToEdit != null
             ? widget.sessionToEdit!['createdAt']
             : FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      print('Saving session data to Firestore...');
-      print('Intro duration: $_introDuration seconds');
-      print('Subliminal duration: $_subliminalDuration seconds');
+      debugPrint('Saving to Firestore with data: ${sessionData.keys}');
 
       // Save to Firestore
       if (widget.sessionToEdit != null) {
@@ -339,41 +347,40 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             .collection('sessions')
             .doc(widget.sessionToEdit!['id'])
             .update(sessionData);
-        print('Session updated successfully');
+        debugPrint('Session updated successfully');
       } else {
-        // Create new session
-        final docRef = await FirebaseFirestore.instance
+        // Create new session with the generated ID
+        await FirebaseFirestore.instance
             .collection('sessions')
-            .add(sessionData);
-        print('Session created successfully with ID: ${docRef.id}');
+            .doc(sessionId) // Use the same ID as document ID
+            .set(sessionData);
+        debugPrint('Session created successfully with ID: $sessionId');
       }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Session saved successfully! 🎉'),
+            content: Text('Session saved successfully!'),
             backgroundColor: Colors.green,
           ),
         );
         Navigator.pop(context);
       }
     } catch (e) {
-      print('Error saving session: $e');
-      print('Error type: ${e.runtimeType}');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    } finally {
+      debugPrint('Error saving session: $e');
       setState(() {
         _isLoading = false;
-        _uploadProgress = 0;
-        _uploadStatus = '';
+        _uploadStatus = 'Error: ${e.toString()}';
       });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error saving session: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -837,7 +844,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           LinearProgressIndicator(
             value: _uploadProgress / 100,
             backgroundColor: Colors.grey.shade300,
-            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+            valueColor:
+                const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
           ),
           SizedBox(height: 8.h),
           Text(

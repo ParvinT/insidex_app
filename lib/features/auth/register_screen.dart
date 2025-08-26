@@ -110,10 +110,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => OTPVerificationScreen(
+          builder: (_) => OTPVerificationScreen(
             email: _emailController.text.trim(),
-            name: _nameController.text.trim(),
-            isNewUser: true,
           ),
         ),
       );

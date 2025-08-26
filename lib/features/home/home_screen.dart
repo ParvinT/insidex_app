@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../features/library/categories_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -106,6 +107,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  // Update only the _buildHeader() method in home_screen.dart
+// Replace the existing _buildHeader() method with this:
+
   Widget _buildHeader() {
     return Positioned(
       top: 0,
@@ -128,49 +132,83 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           padding: EdgeInsets.all(24.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Top row with logo and menu
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildHeaderButton('Category', false),
+                  // Logo at top left
+                  Container(
+                    height: 30.h,
+                    alignment: Alignment.centerLeft,
+                    child: SvgPicture.asset(
+                      'assets/images/logo.svg',
+                      height: 30.h,
+                      fit: BoxFit.contain,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.textPrimary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                  // Only Menu button at top right
                   _buildHeaderButton('Menu', true),
                 ],
               ),
-              Text(
-                'Welcome to Insidex',
-                style: GoogleFonts.inter(
-                  fontSize: 24.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
+
+              const Spacer(),
+
+              // Search bar at bottom
               Container(
-                height: 48.h,
+                height: 45.h,
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(15.r),
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: Colors.grey[300]!,
+                    width: 1,
+                  ),
                 ),
                 child: Row(
                   children: [
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: Icon(Icons.search,
-                          color: Colors.grey[400], size: 22.sp),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.grey[400],
+                        size: 22.sp,
+                      ),
                     ),
-                    const Expanded(
+                    Expanded(
                       child: TextField(
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.textPrimary,
+                        ),
                         decoration: InputDecoration(
-                          hintText: 'Search...',
+                          hintText: 'Search subliminals...',
+                          hintStyle: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: Colors.grey[400],
+                          ),
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
                         ),
                       ),
                     ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      child: Icon(
+                        Icons.tune,
+                        color: Colors.grey[400],
+                        size: 20.sp,
+                      ),
+                    ),
                   ],
                 ),
               ),
+
+              SizedBox(height: 20.h), // Bottom spacing
             ],
           ),
         ),

@@ -6,120 +6,110 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../services/audio_player_service.dart';
 
 class PlayerModals {
+  // PlayerModals.showSleepTimer — shows current value, lets select & cancel
   static void showSleepTimer(
     BuildContext context,
-    int? currentTimer,
+    int? currentMinutes,
     AudioPlayerService audioService,
-    Function(int?) onTimerSet,
+    ValueChanged<int?> onChanged,
   ) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) {
-          return Container(
-            padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              color: Colors.grey[900],
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-            ),
+      backgroundColor: Colors.white,
+      isScrollControlled: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        int? selected = currentMinutes;
+        final options = <int>[10, 15, 20, 30, 45, 60, 90];
+
+        return StatefulBuilder(builder: (context, setState) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Sleep Timer',
-                  style: GoogleFonts.inter(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                if (currentTimer != null)
-                  Text(
-                    'Active: $currentTimer minutes',
+                Text('Sleep Timer',
                     style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: Colors.greenAccent,
-                    ),
-                  ),
-                SizedBox(height: 24.h),
-                Wrap(
-                  spacing: 12.w,
-                  runSpacing: 12.h,
-                  children: [15, 30, 45, 60, 90, 120].map((minutes) {
-                    final isSelected = currentTimer == minutes;
-                    return ChoiceChip(
-                      label: Text(
-                        '$minutes min',
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.white70,
-                          fontWeight:
-                              isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      selected: isSelected,
-                      onSelected: (selected) {
-                        if (selected) {
-                          audioService.setSleepTimer(minutes);
-                          onTimerSet(minutes);
-                          setModalState(() {});
-
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content:
-                                  Text('Sleep timer set to $minutes minutes'),
-                              duration: const Duration(seconds: 2),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
-                        } else {
-                          audioService.cancelSleepTimer();
-                          onTimerSet(null);
-                          setModalState(() {});
-                        }
-                        Navigator.pop(context);
-                      },
-                      backgroundColor: Colors.grey[800],
-                      selectedColor: Colors.greenAccent.withOpacity(0.3),
-                      checkmarkColor: Colors.greenAccent,
-                      side: BorderSide(
-                        color:
-                            isSelected ? Colors.greenAccent : Colors.grey[700]!,
-                        width: isSelected ? 2 : 1,
-                      ),
-                    );
-                  }).toList(),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black)),
+                const SizedBox(height: 8),
+                Text(
+                  selected != null
+                      ? 'Current: $selected minutes'
+                      : 'No timer set',
+                  style:
+                      GoogleFonts.inter(fontSize: 13, color: Color(0xFF6E6E6E)),
                 ),
-                if (currentTimer != null) ...[
-                  SizedBox(height: 16.h),
-                  TextButton.icon(
-                    onPressed: () {
-                      audioService.cancelSleepTimer();
-                      onTimerSet(null);
-                      Navigator.pop(context);
+                const SizedBox(height: 16),
 
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sleep timer cancelled'),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.orange,
+                // minute chips
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final m in options)
+                      ChoiceChip(
+                        label: Text('${m}m'),
+                        selected: selected == m,
+                        onSelected: (_) => setState(() => selected = m),
+                        selectedColor: Colors.black,
+                        backgroundColor: const Color(0xFFF5F5F5),
+                        labelStyle: GoogleFonts.inter(
+                          color: selected == m
+                              ? Colors.white
+                              : const Color(0xFF333333),
                         ),
-                      );
-                    },
-                    icon: const Icon(Icons.cancel, color: Colors.redAccent),
-                    label: const Text(
-                      'Cancel Timer',
-                      style: TextStyle(color: Colors.redAccent),
+                      ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    if (currentMinutes != null)
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await audioService.cancelSleepTimer();
+                            onChanged(null);
+                            if (context.mounted) Navigator.pop(context);
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            side: const BorderSide(color: Colors.black),
+                          ),
+                          child: const Text('Cancel timer'),
+                        ),
+                      ),
+                    if (currentMinutes != null) const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: selected == null
+                            ? null
+                            : () async {
+                                await audioService.setSleepTimer(selected!);
+                                onChanged(selected);
+                                if (context.mounted) Navigator.pop(context);
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                        child:
+                            Text(selected == null ? 'Set' : 'Set ${selected}m'),
+                      ),
                     ),
-                  ),
-                ],
-                SizedBox(height: 20.h),
+                  ],
+                ),
               ],
             ),
           );
-        },
-      ),
+        });
+      },
     );
   }
 
@@ -130,7 +120,7 @@ class PlayerModals {
     Function(double) onVolumeChanged,
   ) {
     double tempVolume = currentVolume;
-    
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

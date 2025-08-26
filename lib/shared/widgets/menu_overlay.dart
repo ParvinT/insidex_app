@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class MenuOverlay extends StatefulWidget {
   final VoidCallback onClose;
@@ -185,14 +186,18 @@ class _MenuOverlayState extends State<MenuOverlay>
                                 ),
                               ),
                               SizedBox(height: 8.h),
-                              // Logo or brand
-                              Text(
-                                'INSIDEX',
-                                style: GoogleFonts.inter(
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                  letterSpacing: 2,
+                              // Logo instead of INSIDEX text
+                              Container(
+                                height: 24.h,
+                                alignment: Alignment.center,
+                                child: SvgPicture.asset(
+                                  'assets/images/logo.svg',
+                                  height: 24.h,
+                                  fit: BoxFit.contain,
+                                  colorFilter: ColorFilter.mode(
+                                    AppColors.textPrimary.withOpacity(0.8),
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
                               ),
                             ],

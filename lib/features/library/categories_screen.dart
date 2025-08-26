@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
 import 'category_sessions_screen.dart'; // YENİ IMPORT
 import '../player/audio_player_screen.dart'; // AUDIO PLAYER IMPORT
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -88,15 +89,42 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'All Subliminals',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Logo
+            Container(
+              height: 28.h,
+              margin: EdgeInsets.only(right: 12.w),
+              child: SvgPicture.asset(
+                'assets/images/logo.svg',
+                height: 28.h,
+                fit: BoxFit.contain,
+                colorFilter: ColorFilter.mode(
+                  AppColors.textPrimary,
+                  BlendMode.srcIn,
+                ),
+              ),
+            ),
+            // Vertical divider
+            Container(
+              height: 24.h,
+              width: 1.5,
+              color: AppColors.textPrimary.withOpacity(0.2),
+              margin: EdgeInsets.symmetric(horizontal: 12.w),
+            ),
+            // Title
+            Text(
+              'All Subliminals',
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ],
         ),
-        centerTitle: true,
+        centerTitle: false, // Logo and title aligned to left after back button
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppColors.primaryGold,

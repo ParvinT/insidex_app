@@ -1,22 +1,21 @@
-// lib/features/player/audio_player_screen.dart
-
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
 import '../../services/audio_player_service.dart';
 import 'widgets/player_modals.dart';
-import 'test_audio_data.dart';
 
+/// Expected session shape:
+/// {
+///   "title": "...",
+///   "intro": { "title": "...", "audioUrl": "...", "duration": 120 },
+///   "subliminal": { "title": "...", "audioUrl": "...", "duration": 3600 }
+/// }
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
-
-  const AudioPlayerScreen({
-    super.key,
-    this.sessionData,
-  });
+  const AudioPlayerScreen({super.key, this.sessionData});
 
   @override
   State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
@@ -24,46 +23,59 @@ class AudioPlayerScreen extends StatefulWidget {
 
 class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     with TickerProviderStateMixin {
-  // Animation Controllers
-  late AnimationController _pulseController;
-  late AnimationController _waveController;
-  late AnimationController _rotationController;
+  // Equalizer animation (replaces old rotating note)
+  late final AnimationController _eqController = AnimationController(
+      vsync: this, duration: const Duration(milliseconds: 1200));
 
-  // Audio Service
+  // Service
   final AudioPlayerService _audioService = AudioPlayerService();
 
-  // Audio State
+  // UI State
   bool _isPlaying = false;
   bool _isFavorite = false;
   bool _isLooping = false;
   bool _autoPlayEnabled = true;
-  String _currentTrack = 'intro';
+
+  // Track state
+  String _currentTrack = 'intro'; // 'intro' | 'subliminal'
   double _currentProgress = 0.0;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
-  final double _volume = 0.7;
-  int? _sleepTimerMinutes;
 
-  // Session data
+  // Session
   late Map<String, dynamic> _session;
 
-  // Stream subscriptions
-  StreamSubscription<bool>? _playingSubscription;
-  StreamSubscription<Duration>? _positionSubscription;
-  StreamSubscription<Duration>? _durationSubscription;
+  // Subscriptions
+  StreamSubscription<bool>? _playingSub;
+  StreamSubscription<Duration>? _positionSub;
+  StreamSubscription<Duration?>? _durationSub;
+  StreamSubscription<PlayerState>? _playerStateSub;
 
-  // Track completion timer
-  Timer? _completionCheckTimer;
+  int? _sleepTimerMinutes;
+  StreamSubscription<int?>? _sleepTimerSub;
 
-  /// ----------------------------
-  /// Helpers for safe session access
-  /// ----------------------------
+  @override
+  void initState() {
+    super.initState();
+
+    _session = widget.sessionData ??
+        {
+          'title': 'Session',
+          'intro': {'title': 'Introduction', 'audioUrl': '', 'duration': 120},
+          'subliminal': {
+            'title': 'Subliminal',
+            'audioUrl': '',
+            'duration': 3600
+          }
+        };
+
+    _initializeAudio();
+  }
+
+  // --------- safe session helpers ----------
   Map<String, dynamic>? _section(String name) {
     final v = _session[name];
-    if (v is Map) {
-      // ensure it is a map with String keys
-      return Map<String, dynamic>.from(v as Map);
-    }
+    if (v is Map) return Map<String, dynamic>.from(v as Map);
     return null;
   }
 
@@ -80,134 +92,71 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   String _titleFor(String sectionName, {required String fallback}) =>
       _val<String>(sectionName, 'title') ?? fallback;
 
-  int _durationSecondsFor(String sectionName, {required int fallback}) =>
-      _val<int>(sectionName, 'duration') ?? fallback;
-
-  Duration _effectiveDurationFor(String sectionName) {
-    final fallback = sectionName == 'intro' ? 120 : 7200;
-    final secs = _durationSecondsFor(sectionName, fallback: fallback);
-    return Duration(seconds: secs);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize session data
-    _session = widget.sessionData ?? TestAudioData.getTestSession();
-
-    // Initialize animations
-    _pulseController = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    )..repeat(reverse: true);
-
-    _waveController = AnimationController(
-      duration: const Duration(seconds: 3),
-      vsync: this,
-    );
-
-    _rotationController = AnimationController(
-      duration: const Duration(seconds: 20),
-      vsync: this,
-    );
-
-    // Initialize audio
-    _initializeAudio();
+  Duration _fallbackDurationFor(String section) {
+    final secs = _val<int>(section, 'duration');
+    if (secs != null && secs > 0) return Duration(seconds: secs);
+    return section == 'intro'
+        ? const Duration(seconds: 120)
+        : const Duration(hours: 2);
   }
 
   Future<void> _initializeAudio() async {
     await _audioService.initialize();
-    await _audioService.setVolume(_volume);
 
-    _playingSubscription = _audioService.isPlaying.listen((playing) {
+    _playingSub = _audioService.isPlaying.listen((playing) {
       if (!mounted) return;
       setState(() => _isPlaying = playing);
       if (playing) {
-        _waveController.repeat();
-        _rotationController.repeat();
+        _eqController.repeat();
       } else {
-        _waveController.stop();
-        _rotationController.stop();
+        _eqController.stop();
       }
     });
 
-    _positionSubscription = _audioService.position.listen((position) {
+    _positionSub = _audioService.position.listen((pos) {
       if (!mounted) return;
       setState(() {
-        _currentPosition = position;
-
-        // Use session duration (intro/subliminal) as effective duration
-        final effectiveDuration = _effectiveDurationFor(_currentTrack);
-
-        if (effectiveDuration.inSeconds > 0) {
-          _currentProgress = position.inSeconds / effectiveDuration.inSeconds;
-          _currentProgress = _currentProgress.clamp(0.0, 1.0);
-
-          // Check for track completion (auto-play from intro → subliminal)
-          if (_autoPlayEnabled &&
-              _currentTrack == 'intro' &&
-              position.inSeconds >= effectiveDuration.inSeconds - 1) {
-            _handleTrackCompletion();
-          }
+        _currentPosition = pos;
+        final totalMs = _totalDuration.inMilliseconds;
+        if (totalMs > 0) {
+          _currentProgress =
+              (_currentPosition.inMilliseconds / totalMs).clamp(0.0, 1.0);
         } else {
-          _currentProgress = 0.0;
+          final fb = _fallbackDurationFor(_currentTrack);
+          _currentProgress =
+              (pos.inMilliseconds / fb.inMilliseconds).clamp(0.0, 1.0);
         }
       });
     });
 
-    _durationSubscription = _audioService.duration.listen((duration) {
+    _durationSub = _audioService.duration.listen((d) {
       if (!mounted) return;
-      if (duration.inSeconds > 0) {
-        setState(() {
-          _totalDuration = duration;
-        });
+      if (d != null) setState(() => _totalDuration = d);
+    });
+
+    _playerStateSub = _audioService.playerState.listen((state) {
+      if (!mounted) return;
+      if (state.processingState == ProcessingState.completed) {
+        if (_isLooping) {
+          _audioService.seek(Duration.zero);
+          _audioService.play();
+        } else if (_autoPlayEnabled && _currentTrack == 'intro') {
+          _switchToTrack('subliminal');
+        }
       }
     });
 
-    // Listen to sleep timer
-    _audioService.sleepTimer.listen((minutes) {
+    _sleepTimerSub = _audioService.sleepTimer.listen((m) {
       if (!mounted) return;
-      setState(() {
-        _sleepTimerMinutes = minutes;
-      });
+      setState(() => _sleepTimerMinutes = m);
     });
   }
 
-  void _setDurationFromSession() {
-    setState(() {
-      _totalDuration = _effectiveDurationFor(_currentTrack);
-    });
-  }
-
-  void _handleTrackCompletion() {
-    if (_currentTrack == 'intro' && _autoPlayEnabled && !_isLooping) {
-      _completionCheckTimer?.cancel();
-      _completionCheckTimer = Timer(const Duration(milliseconds: 500), () {
-        if (!mounted) return;
-        _switchToTrack('subliminal');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Now playing: Subliminal Session',
-              style: GoogleFonts.inter(fontSize: 14.sp),
-            ),
-            backgroundColor: AppColors.primaryGold,
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      });
-    } else if (_isLooping) {
-      _audioService.seek(Duration.zero);
-      _audioService.play();
-    }
-  }
-
-  void _togglePlayPause() async {
+  Future<void> _togglePlayPause() async {
     if (_isPlaying) {
       await _audioService.pause();
     } else {
-      if (_currentPosition.inSeconds > 0) {
+      if (_currentPosition > Duration.zero) {
         await _audioService.play();
       } else {
         await _playCurrentTrack();
@@ -216,24 +165,28 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _playCurrentTrack() async {
+    final String? audioUrl = _audioUrlFor(_currentTrack);
+
+    if (audioUrl == null || audioUrl.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Audio file not found for current track'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     try {
-      final String? audioUrl = _audioUrlFor(_currentTrack);
+      setState(() {
+        _currentPosition = Duration.zero;
+        _currentProgress = 0.0;
+        _totalDuration =
+            Duration.zero; // will be set by durationStream or setUrl
+      });
 
-      if (audioUrl == null || audioUrl.isEmpty) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Audio file not found for current track'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      // Set duration from session before playing
-      _setDurationFromSession();
-
-      await _audioService.playFromUrl(
+      final resolved = await _audioService.playFromUrl(
         audioUrl,
         title: _titleFor(
           _currentTrack,
@@ -242,107 +195,67 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         artist: 'INSIDEX',
       );
 
-      // Force set duration after playing (keeps slider correct for long files)
-      setState(() {
-        _totalDuration = _effectiveDurationFor(_currentTrack);
-      });
+      if (mounted && resolved != null) {
+        setState(() => _totalDuration = resolved);
+      }
     } catch (e) {
-      // ignore: avoid_print
-      print('Error playing audio: $e');
-      if (mounted) setState(() => _isPlaying = false);
+      if (!mounted) return;
+      // Only shown if both attempts fail (transient errors are retried in service)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to play audio. ($e)'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  void _switchToTrack(String track) async {
-    if (_currentTrack == track) return;
+  Future<void> _switchToTrack(String next) async {
+    if (_currentTrack == next) return;
 
     setState(() {
-      _currentTrack = track;
+      _currentTrack = next;
       _currentPosition = Duration.zero;
       _currentProgress = 0.0;
+      _totalDuration = Duration.zero; // refresh from player
     });
 
     await _audioService.stop();
-    await Future.delayed(const Duration(milliseconds: 200));
     await _playCurrentTrack();
   }
 
-  void _toggleAutoPlay() {
-    setState(() {
-      _autoPlayEnabled = !_autoPlayEnabled;
-    });
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content:
-            Text(_autoPlayEnabled ? 'Auto-play enabled' : 'Auto-play disabled'),
-        backgroundColor: AppColors.primaryGold,
-        duration: const Duration(seconds: 1),
-      ),
-    );
+  Future<void> _replay10() async {
+    final newPos = _currentPosition - const Duration(seconds: 10);
+    await _audioService.seek(newPos.isNegative ? Duration.zero : newPos);
   }
 
-  void _toggleLoop() {
-    setState(() {
-      _isLooping = !_isLooping;
-    });
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(_isLooping ? 'Loop enabled' : 'Loop disabled'),
-        backgroundColor: AppColors.primaryGold,
-        duration: const Duration(seconds: 1),
-      ),
-    );
-  }
-
-  void _replay10() async {
-    final newPosition = _currentPosition - const Duration(seconds: 10);
-    await _audioService
-        .seek(newPosition.isNegative ? Duration.zero : newPosition);
-  }
-
-  void _forward10() async {
-    final newPosition = _currentPosition + const Duration(seconds: 10);
-    final effectiveDuration = _effectiveDurationFor(_currentTrack);
-
-    if (effectiveDuration > Duration.zero && newPosition < effectiveDuration) {
-      await _audioService.seek(newPosition);
-    } else if (effectiveDuration > Duration.zero) {
-      await _audioService.seek(effectiveDuration - const Duration(seconds: 1));
-    }
+  Future<void> _forward10() async {
+    final total = _totalDuration.inMilliseconds > 0
+        ? _totalDuration
+        : _fallbackDurationFor(_currentTrack);
+    final newPos = _currentPosition + const Duration(seconds: 10);
+    await _audioService.seek(
+        newPos < total ? newPos : total - const Duration(milliseconds: 500));
   }
 
   @override
   void dispose() {
-    _completionCheckTimer?.cancel();
-    _playingSubscription?.cancel();
-    _positionSubscription?.cancel();
-    _durationSubscription?.cancel();
-    _pulseController.dispose();
-    _waveController.dispose();
-    _rotationController.dispose();
+    _playingSub?.cancel();
+    _positionSub?.cancel();
+    _durationSub?.cancel();
+    _playerStateSub?.cancel();
+    _eqController.dispose();
+    _audioService.dispose();
+    _sleepTimerSub?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.black,
-              Colors.grey[900]!,
-              Colors.black,
-            ],
-          ),
-        ),
+        color: Colors.white, // Variant B: plain white surface
         child: SafeArea(
           child: Column(
             children: [
@@ -351,7 +264,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildAlbumArt(),
+                    _buildCenterVisualizer(),
                     SizedBox(height: 40.h),
                     _buildSessionInfo(),
                     SizedBox(height: 30.h),
@@ -372,6 +285,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
+  // ---------------- UI blocks (Variant B colors) ----------------
+
   Widget _buildHeader() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -380,7 +295,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         children: [
           IconButton(
             icon: Icon(Icons.keyboard_arrow_down,
-                color: Colors.white, size: 30.sp),
+                color: Colors.black, size: 30.sp),
             onPressed: () => Navigator.pop(context),
           ),
           Text(
@@ -388,53 +303,33 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.white60,
+              color: const Color(0xFF5A5A5A), // mid gray
               letterSpacing: 1.2,
             ),
           ),
-          IconButton(
-            icon: Icon(Icons.more_vert, color: Colors.white, size: 24.sp),
-            onPressed: () {},
-          ),
+          const SizedBox(width: 24), // 3-dot menu removed
         ],
       ),
     );
   }
 
-  Widget _buildAlbumArt() {
-    return Container(
+  /// Modern equalizer animation inside a subtle ring (replaces rotating note)
+  Widget _buildCenterVisualizer() {
+    return SizedBox(
       width: 220.w,
       height: 220.w,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: LinearGradient(
-          colors: [
-            AppColors.primaryGold.withOpacity(0.8),
-            AppColors.primaryGold,
-          ],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primaryGold.withOpacity(0.3),
-            blurRadius: 30,
-            spreadRadius: 10,
-          ),
-        ],
-      ),
-      child: Center(
-        child: AnimatedBuilder(
-          animation: _rotationController,
-          builder: (context, child) {
-            return Transform.rotate(
-              angle: _rotationController.value * 2 * math.pi,
-              child: Icon(
-                Icons.music_note,
-                size: 80.sp,
-                color: Colors.white,
-              ),
-            );
-          },
-        ),
+      child: AnimatedBuilder(
+        animation: _eqController,
+        builder: (context, _) {
+          final t = _eqController.value;
+          final phases = [0.00, 0.22, 0.44, 0.66, 0.88];
+          final bars = phases.map((p) {
+            final s = 0.5 * (1 + math.sin(2 * math.pi * (t + p)));
+            return 60 + 60 * s; // 60..120 px
+          }).toList();
+
+          return CustomPaint(painter: _EqPainter(bars));
+        },
       ),
     );
   }
@@ -449,7 +344,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: Colors.black,
             ),
             textAlign: TextAlign.center,
           ),
@@ -460,7 +355,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 : _titleFor('subliminal', fallback: 'Subliminal'),
             style: GoogleFonts.inter(
               fontSize: 14.sp,
-              color: Colors.white70,
+              color: const Color(0xFF6E6E6E),
             ),
             textAlign: TextAlign.center,
           ),
@@ -474,7 +369,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       margin: EdgeInsets.symmetric(horizontal: 60.w),
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: const Color(0xFFF5F5F5), // light gray capsule
         borderRadius: BorderRadius.circular(25.r),
       ),
       child: Row(
@@ -486,7 +381,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 padding: EdgeInsets.symmetric(vertical: 10.h),
                 decoration: BoxDecoration(
                   color: _currentTrack == 'intro'
-                      ? AppColors.primaryGold
+                      ? const Color(0xFF191919) // selected: near-black
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
@@ -496,8 +391,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                     color: _currentTrack == 'intro'
-                        ? Colors.black
-                        : Colors.white60,
+                        ? Colors.white
+                        : const Color(0xFF7A7A7A),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -511,7 +406,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 padding: EdgeInsets.symmetric(vertical: 10.h),
                 decoration: BoxDecoration(
                   color: _currentTrack == 'subliminal'
-                      ? AppColors.primaryGold
+                      ? const Color(0xFF191919)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
@@ -521,8 +416,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                     color: _currentTrack == 'subliminal'
-                        ? Colors.black
-                        : Colors.white60,
+                        ? Colors.white
+                        : const Color(0xFF7A7A7A),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -535,7 +430,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Widget _buildProgressBar() {
-    final effectiveDuration = _effectiveDurationFor(_currentTrack);
+    final total = _totalDuration.inMilliseconds > 0
+        ? _totalDuration
+        : _fallbackDurationFor(_currentTrack);
+
+    final value = total.inMilliseconds == 0
+        ? 0.0
+        : (_currentPosition.inMilliseconds / total.inMilliseconds)
+            .clamp(0.0, 1.0);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 30.w),
@@ -543,21 +445,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         children: [
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: AppColors.primaryGold,
-              inactiveTrackColor: Colors.white24,
-              thumbColor: AppColors.primaryGold,
+              activeTrackColor: Colors.black,
+              inactiveTrackColor: const Color(0xFFE6E6E6),
+              thumbColor: Colors.black,
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
               trackHeight: 3.h,
               overlayShape: RoundSliderOverlayShape(overlayRadius: 12.r),
-              overlayColor: AppColors.primaryGold.withOpacity(0.2),
+              overlayColor: Colors.black.withOpacity(0.1),
             ),
             child: Slider(
-              value: _currentProgress,
-              onChanged: (value) {
-                final newPosition = Duration(
-                  seconds: (effectiveDuration.inSeconds * value).round(),
-                );
-                _audioService.seek(newPosition);
+              value: value,
+              onChanged: (v) {
+                final newMs = (total.inMilliseconds * v).round();
+                _audioService.seek(Duration(milliseconds: newMs));
               },
             ),
           ),
@@ -570,14 +470,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   _formatDuration(_currentPosition),
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
-                    color: Colors.white60,
+                    color: const Color(0xFF6E6E6E),
                   ),
                 ),
                 Text(
-                  _formatDuration(effectiveDuration),
+                  _totalDuration.inMilliseconds > 0
+                      ? _formatDuration(_totalDuration)
+                      : '--:--',
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
-                    color: Colors.white60,
+                    color: const Color(0xFF6E6E6E),
                   ),
                 ),
               ],
@@ -593,7 +495,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          icon: const Icon(Icons.replay_10, color: Colors.white70),
+          icon: const Icon(Icons.replay_10, color: Color(0xFF353535)),
           iconSize: 32.sp,
           onPressed: _replay10,
         ),
@@ -605,10 +507,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             height: 70.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.primaryGold,
+              color: Colors.black,
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primaryGold.withOpacity(0.4),
+                  color: Colors.black.withOpacity(0.12),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -616,14 +518,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
             child: Icon(
               _isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.black,
+              color: Colors.white,
               size: 35.sp,
             ),
           ),
         ),
         SizedBox(width: 20.w),
         IconButton(
-          icon: const Icon(Icons.forward_10, color: Colors.white70),
+          icon: const Icon(Icons.forward_10, color: Color(0xFF353535)),
           iconSize: 32.sp,
           onPressed: _forward10,
         ),
@@ -640,39 +542,84 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           IconButton(
             icon: Icon(
               Icons.loop,
-              color: _isLooping ? AppColors.primaryGold : Colors.white38,
-            ),
-            onPressed: _toggleLoop,
-          ),
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.redAccent : Colors.white38,
-            ),
-            onPressed: () => setState(() => _isFavorite = !_isFavorite),
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.bedtime,
-              color: _sleepTimerMinutes != null
-                  ? AppColors.primaryGold
-                  : Colors.white38,
+              color: _isLooping ? Colors.black : const Color(0xFFBDBDBD),
             ),
             onPressed: () {
-              PlayerModals.showSleepTimer(
-                context,
-                _sleepTimerMinutes,
-                _audioService,
-                (minutes) => setState(() => _sleepTimerMinutes = minutes),
+              setState(() => _isLooping = !_isLooping);
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_isLooping ? 'Loop enabled' : 'Loop disabled'),
+                  backgroundColor: Colors.black,
+                  duration: const Duration(seconds: 1),
+                ),
               );
             },
           ),
           IconButton(
             icon: Icon(
-              _autoPlayEnabled ? Icons.queue_music : Icons.music_off,
-              color: _autoPlayEnabled ? AppColors.primaryGold : Colors.white38,
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.redAccent : const Color(0xFFBDBDBD),
             ),
-            onPressed: _toggleAutoPlay,
+            onPressed: () => setState(() => _isFavorite = !_isFavorite),
+          ),
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(
+                  Icons.bedtime,
+                  color: _sleepTimerMinutes != null
+                      ? Colors.black
+                      : const Color(0xFFBDBDBD),
+                ),
+                onPressed: () {
+                  PlayerModals.showSleepTimer(
+                    context,
+                    _sleepTimerMinutes, // mevcut değer
+                    _audioService, // servis
+                    (minutes) => setState(
+                        () => _sleepTimerMinutes = minutes), // callback
+                  );
+                },
+              ),
+              if (_sleepTimerMinutes != null)
+                Positioned(
+                  right: 6,
+                  top: 6,
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '${_sleepTimerMinutes}m',
+                      style:
+                          GoogleFonts.inter(fontSize: 10, color: Colors.white),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          IconButton(
+            icon: Icon(
+              _autoPlayEnabled ? Icons.queue_music : Icons.music_off,
+              color: _autoPlayEnabled ? Colors.black : const Color(0xFFBDBDBD),
+            ),
+            onPressed: () {
+              setState(() => _autoPlayEnabled = !_autoPlayEnabled);
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(_autoPlayEnabled
+                      ? 'Auto-play enabled'
+                      : 'Auto-play disabled'),
+                  backgroundColor: Colors.black,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -680,17 +627,44 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   String _formatDuration(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-
+    String two(int n) => n.toString().padLeft(2, '0');
     if (duration.inHours > 0) {
-      final hours = duration.inHours;
-      final minutes = twoDigits(duration.inMinutes.remainder(60));
-      final seconds = twoDigits(duration.inSeconds.remainder(60));
-      return '$hours:$minutes:$seconds';
-    } else {
-      final minutes = twoDigits(duration.inMinutes.remainder(60));
-      final seconds = twoDigits(duration.inSeconds.remainder(60));
-      return '$minutes:$seconds';
+      return '${duration.inHours}:${two(duration.inMinutes.remainder(60))}:${two(duration.inSeconds.remainder(60))}';
+    }
+    return '${two(duration.inMinutes.remainder(60))}:${two(duration.inSeconds.remainder(60))}';
+  }
+}
+
+// ---- painter for the equalizer bars ----
+class _EqPainter extends CustomPainter {
+  final List<double> bars; // heights (px)
+  _EqPainter(this.bars);
+
+  @override
+  void paint(Canvas c, Size s) {
+    final center = Offset(s.width / 2, s.height / 2);
+
+    // subtle outer ring
+    final ringPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3
+      ..color = const Color(0xFFE6E6E6);
+    c.drawCircle(center, s.width / 2 - 4, ringPaint);
+
+    // bars
+    final barPaint = Paint()..color = const Color(0xFF191919);
+    const barW = 14.0, gap = 12.0;
+    final baseY = center.dy + 60;
+    double startX = center.dx - (2 * barW + 2 * gap);
+
+    for (int i = 0; i < bars.length; i++) {
+      final h = bars[i];
+      final rect = Rect.fromLTWH(startX + i * (barW + gap), baseY - h, barW, h);
+      final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(6));
+      c.drawRRect(rrect, barPaint);
     }
   }
+
+  @override
+  bool shouldRepaint(covariant _EqPainter old) => true;
 }
