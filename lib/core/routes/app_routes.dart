@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/onboarding/goals_screen.dart';
-import '../../features/onboarding/gender_screen.dart';
 import '../../features/auth/welcome_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/register_screen.dart';

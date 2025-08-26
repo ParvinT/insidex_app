@@ -172,7 +172,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             SizedBox(height: 12.h),
 
             if (_isLoading)
-              Center(child: CircularProgressIndicator())
+              const Center(child: CircularProgressIndicator())
             else
               ...(_adminList.map((admin) => _buildAdminCard(admin)).toList()),
           ],
@@ -194,7 +194,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         children: [
           CircleAvatar(
             backgroundColor: AppColors.primaryGold.withOpacity(0.1),
-            child: Icon(
+            child: const Icon(
               Icons.admin_panel_settings,
               color: AppColors.primaryGold,
             ),
@@ -223,7 +223,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.delete, color: Colors.red),
+            icon: const Icon(Icons.delete, color: Colors.red),
             onPressed: () => _removeAdmin(admin['id']),
           ),
         ],
@@ -235,16 +235,16 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Remove Admin Access'),
-        content: Text('Are you sure you want to remove admin access?'),
+        title: const Text('Remove Admin Access'),
+        content: const Text('Are you sure you want to remove admin access?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Remove', style: TextStyle(color: Colors.red)),
+            child: const Text('Remove', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -255,7 +255,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       if (success) {
         _loadAdmins();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Admin access removed'),
             backgroundColor: Colors.orange,
           ),

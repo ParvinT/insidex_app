@@ -220,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: Text('OK',
+                    child: const Text('OK',
                         style: TextStyle(color: AppColors.primaryGold)),
                   ),
                 ],

@@ -403,13 +403,13 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         fillColor: AppColors.greyLight,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: AppColors.greyBorder,
                           ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
-                          borderSide: BorderSide(
+                          borderSide: const BorderSide(
                             color: AppColors.primaryGold,
                             width: 2,
                           ),

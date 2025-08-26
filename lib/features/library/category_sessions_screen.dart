@@ -35,7 +35,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
@@ -68,7 +68,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                 .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(
                 color: AppColors.primaryGold,
               ),
@@ -194,7 +194,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
               blurRadius: 20,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -283,7 +283,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
                             blurRadius: 10,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
@@ -396,7 +396,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                         ),
                       ],
 
-                      Spacer(),
+                      const Spacer(),
 
                       // Category Badge
                       Container(

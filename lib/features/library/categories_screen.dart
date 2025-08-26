@@ -1,13 +1,10 @@
 // lib/features/library/categories_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
-import 'session_detail_screen.dart';
 import 'category_sessions_screen.dart'; // YENİ IMPORT
 import '../player/audio_player_screen.dart'; // AUDIO PLAYER IMPORT
 
@@ -131,7 +128,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   Widget _buildCategoriesTab() {
     if (_isLoadingCategories) {
-      return Center(
+      return const Center(
         child: CircularProgressIndicator(
           color: AppColors.primaryGold,
         ),
@@ -327,7 +324,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(
               color: AppColors.primaryGold,
             ),
@@ -510,7 +507,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       return '${seconds}s';
     } else if (seconds < 3600) {
       final minutes = seconds ~/ 60;
-      return '${minutes} minutes';
+      return '$minutes minutes';
     } else {
       final hours = seconds ~/ 3600;
       final minutes = (seconds % 3600) ~/ 60;

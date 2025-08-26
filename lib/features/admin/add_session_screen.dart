@@ -1,12 +1,9 @@
 // lib/features/admin/add_session_screen.dart
 
-import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/storage_service.dart';
@@ -840,7 +837,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           LinearProgressIndicator(
             value: _uploadProgress / 100,
             backgroundColor: Colors.grey.shade300,
-            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+            valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
           ),
           SizedBox(height: 8.h),
           Text(
@@ -886,12 +883,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Select Emoji'),
-        content: Container(
+        title: const Text('Select Emoji'),
+        content: SizedBox(
           width: double.maxFinite,
           child: GridView.builder(
             shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 6,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
@@ -938,7 +935,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -964,7 +961,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           else
             TextButton.icon(
               onPressed: _saveSession,
-              icon: Icon(Icons.save, color: AppColors.primaryGold),
+              icon: const Icon(Icons.save, color: AppColors.primaryGold),
               label: Text(
                 'Save',
                 style: GoogleFonts.inter(

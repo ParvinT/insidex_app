@@ -142,7 +142,7 @@ class _SplashScreenState extends State<SplashScreen>
                       width: 220.w,
                       height: 65.h,
                       fit: BoxFit.contain,
-                      colorFilter: ColorFilter.mode(
+                      colorFilter: const ColorFilter.mode(
                         AppColors.textPrimary,
                         BlendMode.srcIn,
                       ),

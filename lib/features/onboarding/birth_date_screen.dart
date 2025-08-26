@@ -377,7 +377,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                       ? SizedBox(
                           width: 24.w,
                           height: 24.w,
-                          child: CircularProgressIndicator(
+                          child: const CircularProgressIndicator(
                             color: Colors.white,
                             strokeWidth: 2,
                           ),

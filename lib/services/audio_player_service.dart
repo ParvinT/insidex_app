@@ -56,26 +56,22 @@ class AudioPlayerService {
         _position.add(position);
       });
 
-      // Duration stream - uzun dosyalar için özel işlem
       _audioPlayer.durationStream.listen((duration) {
         if (duration != null) {
           print('Audio duration detected: ${duration.inSeconds} seconds');
 
-          // Manuel duration varsa onu kullan
-          if (_manualDuration != null && _manualDuration!.inSeconds > 0) {
-            _duration.add(_manualDuration!);
-          }
-          // Duration çok kısa veya çok uzunsa güvenmeyelim
-          else if (duration.inSeconds > 10 && duration.inSeconds < 14400) {
-            // Max 4 saat
+          // Duration kontrolü - çok kısa veya çok uzunsa ignore et
+          if (duration.inSeconds > 10 && duration.inSeconds < 14400) {
+            // 10 saniye - 4 saat arası
             _duration.add(duration);
-          }
-          // Hatalı duration
-          else if (_manualDuration != null) {
+          } else if (_manualDuration != null) {
+            // Manuel duration varsa onu kullan
             _duration.add(_manualDuration!);
+            print(
+                'Using manual duration: ${_manualDuration!.inSeconds} seconds');
           }
         } else if (_manualDuration != null) {
-          // Duration null ise manuel değeri kullan
+          // Duration null ise manuel olanı kullan
           _duration.add(_manualDuration!);
         }
       });
@@ -94,31 +90,30 @@ class AudioPlayerService {
       });
 
       _isInitialized = true;
-      print('AudioPlayerService initialized successfully');
+      print('AudioPlayerService initialized successfully (simple version)');
     } catch (e) {
       print('Error initializing AudioPlayerService: $e');
       _isInitialized = false;
     }
   }
 
-  // Manuel duration ayarlama
+  // Manuel duration ayarla
   void setManualDuration(int seconds) {
     _manualDuration = Duration(seconds: seconds);
     _duration.add(_manualDuration!);
     print('Manual duration set: $seconds seconds');
   }
 
-  // Play audio from URL with duration
+  // Play audio from URL with optional duration
   Future<void> playFromUrl(
     String url, {
     required String title,
     required String artist,
     String? artUri,
-    int? durationInSeconds, // Duration parametresi eklendi
+    int? durationInSeconds, // Opsiyonel duration parametresi
   }) async {
     try {
       print('AudioPlayerService: Playing from URL: $url');
-      print('Manual duration provided: $durationInSeconds seconds');
 
       // Check if initialized
       if (!_isInitialized) {
@@ -126,7 +121,7 @@ class AudioPlayerService {
         await initialize();
       }
 
-      // Duration varsa ÖNCE ayarla
+      // Manuel duration ayarla
       if (durationInSeconds != null && durationInSeconds > 0) {
         setManualDuration(durationInSeconds);
       }
@@ -139,53 +134,47 @@ class AudioPlayerService {
         // Reset position
         _position.add(Duration.zero);
 
-        // Büyük dosyalar için özel yükleme
+        // Set audio source with custom loading config for long files
         try {
-          // LockCachingAudioSource kullanarak büyük dosyaları handle et
-          final audioSource = LockCachingAudioSource(
+          final audioSource = AudioSource.uri(
             Uri.parse(url),
-            tag: {
-              'title': title,
-              'artist': artist,
-            },
+            tag: MediaItem(
+              id: url,
+              title: title,
+              artist: artist,
+              duration: _manualDuration,
+            ),
           );
 
-          await _audioPlayer.setAudioSource(audioSource);
+          // Load with custom configuration for long files
+          await _audioPlayer.setAudioSource(
+            audioSource,
+            preload: false, // Büyük dosyalar için preload kapalı
+            initialPosition: Duration.zero,
+          );
 
           print('Audio loaded successfully');
 
-          // Duration kontrolü - her zaman manuel değeri tercih et
-          await Future.delayed(
-              Duration(milliseconds: 500)); // Duration yüklenmesi için bekle
-
+          // Duration'ı tekrar kontrol et
           final detectedDuration = _audioPlayer.duration;
-          print('Detected duration: ${detectedDuration?.inSeconds} seconds');
-
-          // Eğer algılanan duration yanlışsa (1 saat gibi) manuel değeri kullan
-          if (durationInSeconds != null && durationInSeconds > 0) {
-            if (detectedDuration == null ||
-                detectedDuration.inSeconds < durationInSeconds * 0.9) {
-              // %90'ından azsa
-              print('Using manual duration instead of detected');
-              setManualDuration(durationInSeconds);
+          if (detectedDuration == null || detectedDuration.inSeconds < 10) {
+            // Duration algılanamadıysa manuel olanı zorla
+            if (_manualDuration != null) {
+              _duration.add(_manualDuration!);
+              print(
+                  'Forced manual duration: ${_manualDuration!.inSeconds} seconds');
             }
           }
         } catch (e) {
-          print('Error with LockCachingAudioSource, trying direct URL: $e');
-          // Fallback to direct URL
+          print('Error loading audio source: $e');
+          // Try alternative method
           await _audioPlayer.setUrl(url);
-
-          // Yine manuel duration'ı zorla
-          if (durationInSeconds != null && durationInSeconds > 0) {
-            setManualDuration(durationInSeconds);
-          }
         }
       }
 
       // Play
       await _audioPlayer.play();
-      print(
-          'Playback started with duration: ${_duration.value.inSeconds} seconds');
+      print('Playback started');
     } catch (e) {
       print('Error playing audio: $e');
       print('URL was: $url');
@@ -253,14 +242,10 @@ class AudioPlayerService {
   Future<void> forward_10() async {
     try {
       final newPosition = _position.value + const Duration(seconds: 10);
-
-      // Manuel duration varsa onu kullan
-      final maxDuration = _manualDuration ?? _duration.value;
-
-      if (maxDuration > Duration.zero && newPosition < maxDuration) {
+      if (_duration.value > Duration.zero && newPosition < _duration.value) {
         await seek(newPosition);
-      } else if (maxDuration > Duration.zero) {
-        await seek(maxDuration - const Duration(seconds: 1));
+      } else if (_duration.value > Duration.zero) {
+        await seek(_duration.value - const Duration(seconds: 1));
       }
     } catch (e) {
       print('Error forwarding: $e');
@@ -297,13 +282,17 @@ class AudioPlayerService {
   }
 }
 
-// Audio metadata class
-class AudioMetadata {
+// MediaItem class for tag
+class MediaItem {
+  final String id;
   final String title;
   final String artist;
+  final Duration? duration;
 
-  AudioMetadata({
+  MediaItem({
+    required this.id,
     required this.title,
     required this.artist,
+    this.duration,
   });
 }

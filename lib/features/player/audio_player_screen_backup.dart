@@ -1107,7 +1107,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   ],
                 ),
               );
-            }).toList(),
+            }),
             SizedBox(height: 12.h),
           ],
 
@@ -1290,7 +1290,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   );
                 },
               );
-            }).toList(),
+            }),
             ListTile(
               title: Text(
                 'Cancel Timer',
@@ -1321,7 +1321,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       if (secs == 0) {
         return '$minutes minutes';
       }
-      return '${minutes}:${secs.toString().padLeft(2, '0')}';
+      return '$minutes:${secs.toString().padLeft(2, '0')}';
     } else {
       // An hour or more
       final hours = seconds ~/ 3600;
@@ -1334,7 +1334,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       } else if (secs == 0) {
         return '$hours hours $minutes minutes';
       }
-      return '${hours}:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
+      return '$hours:${minutes.toString().padLeft(2, '0')}:${secs.toString().padLeft(2, '0')}';
     }
   }
 }

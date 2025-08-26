@@ -63,7 +63,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -80,7 +80,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           // Add Category Section
           Container(
             padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(
                 bottom: BorderSide(color: AppColors.greyBorder),
@@ -139,7 +139,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.r),
-                            borderSide: BorderSide(
+                            borderSide: const BorderSide(
                               color: AppColors.primaryGold,
                               width: 2,
                             ),
@@ -168,7 +168,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         ? SizedBox(
                             height: 20.h,
                             width: 20.h,
-                            child: CircularProgressIndicator(
+                            child: const CircularProgressIndicator(
                               color: Colors.white,
                               strokeWidth: 2,
                             ),
@@ -196,7 +196,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(
                       color: AppColors.primaryGold,
                     ),
@@ -318,12 +318,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             IconButton(
-                              icon: Icon(Icons.edit,
+                              icon: const Icon(Icons.edit,
                                   color: AppColors.primaryGold),
                               onPressed: () => _editCategory(docId, category),
                             ),
                             IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
+                              icon: const Icon(Icons.delete, color: Colors.red),
                               onPressed: () =>
                                   _deleteCategory(docId, category['title']),
                             ),
@@ -436,7 +436,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   Future<void> _addCategory() async {
     if (_categoryController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please enter a category name'),
           backgroundColor: Colors.orange,
         ),
@@ -455,7 +455,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
       if (existingCategories.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('This category already exists'),
             backgroundColor: Colors.orange,
           ),
@@ -480,7 +480,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Category added successfully!'),
           backgroundColor: Colors.green,
         ),
@@ -505,7 +505,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Edit Category'),
+        title: const Text('Edit Category'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -517,13 +517,13 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: Text('Select Emoji'),
-                        content: Container(
+                        title: const Text('Select Emoji'),
+                        content: SizedBox(
                           width: 300.w,
                           height: 200.h,
                           child: GridView.builder(
                             gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
+                                const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 6,
                               crossAxisSpacing: 8,
                               mainAxisSpacing: 8,
@@ -571,7 +571,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 Expanded(
                   child: TextField(
                     controller: editController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Category Name',
                       border: OutlineInputBorder(),
                     ),
@@ -584,7 +584,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
@@ -597,7 +597,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               });
               Navigator.pop(context);
             },
-            child: Text('Save'),
+            child: const Text('Save'),
           ),
         ],
       ),
@@ -609,17 +609,17 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Category'),
+        title: const Text('Delete Category'),
         content: Text(
             'Are you sure you want to delete "${title ?? 'this category'}"?\n\nNote: Sessions in this category will NOT be deleted.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -633,7 +633,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             .delete();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Category deleted successfully'),
             backgroundColor: Colors.green,
           ),

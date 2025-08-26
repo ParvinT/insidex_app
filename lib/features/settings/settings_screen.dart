@@ -318,7 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildDivider() {
     return Padding(
       padding: EdgeInsets.only(left: 76.w),
-      child: Divider(
+      child: const Divider(
         height: 1,
         thickness: 1,
         color: AppColors.greyBorder,

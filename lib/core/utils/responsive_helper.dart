@@ -63,11 +63,11 @@ class ResponsiveWidget extends StatelessWidget {
   final Widget? desktop;
 
   const ResponsiveWidget({
-    Key? key,
+    super.key,
     required this.mobile,
     this.tablet,
     this.desktop,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

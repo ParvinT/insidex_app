@@ -1,6 +1,5 @@
 // lib/features/admin/admin_dashboard_screen.dart
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -494,7 +493,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ? AppColors.primaryGold.withOpacity(0.1)
               : Colors.transparent,
           border: isActive
-              ? Border(
+              ? const Border(
                   left: BorderSide(
                     color: AppColors.primaryGold,
                     width: 3,
@@ -739,7 +738,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Container(
                     width: 8.w,
                     height: 8.w,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.primaryGold,
                       shape: BoxShape.circle,
                     ),

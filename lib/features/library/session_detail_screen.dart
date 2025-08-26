@@ -510,7 +510,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -576,7 +576,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 ),
               ),
             );
-          }).toList(),
+          }),
           if (subliminalsList.length > 3) ...[
             SizedBox(height: 8.h),
             Text(

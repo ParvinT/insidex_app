@@ -1,7 +1,6 @@
 // lib/features/player/audio_player_screen.dart
 
 import 'dart:async';
-import 'dart:ui';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -37,12 +36,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isPlaying = false;
   bool _isFavorite = false;
   bool _isLooping = false;
-  bool _autoPlayEnabled = true; // Auto-play varsayılan olarak açık
-  String _currentTrack = 'intro'; // 'intro' or 'subliminal'
+  bool _autoPlayEnabled = true;
+  String _currentTrack = 'intro';
   double _currentProgress = 0.0;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
-  double _volume = 0.7;
+  final double _volume = 0.7;
   int? _sleepTimerMinutes;
 
   // Session data
@@ -56,11 +55,45 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   // Track completion timer
   Timer? _completionCheckTimer;
 
+  /// ----------------------------
+  /// Helpers for safe session access
+  /// ----------------------------
+  Map<String, dynamic>? _section(String name) {
+    final v = _session[name];
+    if (v is Map) {
+      // ensure it is a map with String keys
+      return Map<String, dynamic>.from(v as Map);
+    }
+    return null;
+  }
+
+  T? _val<T>(String sectionName, String key) {
+    final s = _section(sectionName);
+    final v = s?[key];
+    if (v is T) return v;
+    return null;
+  }
+
+  String? _audioUrlFor(String sectionName) =>
+      _val<String>(sectionName, 'audioUrl');
+
+  String _titleFor(String sectionName, {required String fallback}) =>
+      _val<String>(sectionName, 'title') ?? fallback;
+
+  int _durationSecondsFor(String sectionName, {required int fallback}) =>
+      _val<int>(sectionName, 'duration') ?? fallback;
+
+  Duration _effectiveDurationFor(String sectionName) {
+    final fallback = sectionName == 'intro' ? 120 : 7200;
+    final secs = _durationSecondsFor(sectionName, fallback: fallback);
+    return Duration(seconds: secs);
+  }
+
   @override
   void initState() {
     super.initState();
 
-    // Initialize session data - use test data if no session provided
+    // Initialize session data
     _session = widget.sessionData ?? TestAudioData.getTestSession();
 
     // Initialize animations
@@ -85,133 +118,86 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   Future<void> _initializeAudio() async {
     await _audioService.initialize();
-
-    // Set initial volume after initialization
     await _audioService.setVolume(_volume);
 
     _playingSubscription = _audioService.isPlaying.listen((playing) {
-      if (mounted) {
-        setState(() => _isPlaying = playing);
-        if (playing) {
-          _waveController.repeat();
-          _rotationController.repeat();
-        } else {
-          _waveController.stop();
-          _rotationController.stop();
-        }
+      if (!mounted) return;
+      setState(() => _isPlaying = playing);
+      if (playing) {
+        _waveController.repeat();
+        _rotationController.repeat();
+      } else {
+        _waveController.stop();
+        _rotationController.stop();
       }
     });
 
     _positionSubscription = _audioService.position.listen((position) {
-      if (mounted) {
-        setState(() {
-          _currentPosition = position;
+      if (!mounted) return;
+      setState(() {
+        _currentPosition = position;
 
-          // Duration yoksa veya hatalıysa session'dan al
-          if (_totalDuration.inSeconds == 0 ||
-              _totalDuration.inSeconds < position.inSeconds) {
-            _setDurationFromSession();
+        // Use session duration (intro/subliminal) as effective duration
+        final effectiveDuration = _effectiveDurationFor(_currentTrack);
+
+        if (effectiveDuration.inSeconds > 0) {
+          _currentProgress = position.inSeconds / effectiveDuration.inSeconds;
+          _currentProgress = _currentProgress.clamp(0.0, 1.0);
+
+          // Check for track completion (auto-play from intro → subliminal)
+          if (_autoPlayEnabled &&
+              _currentTrack == 'intro' &&
+              position.inSeconds >= effectiveDuration.inSeconds - 1) {
+            _handleTrackCompletion();
           }
-
-          // Progress hesaplama - duration'ın doğru olduğundan emin ol
-          if (_totalDuration.inSeconds > 0) {
-            // Position, duration'ı geçmesin
-            if (position.inSeconds <= _totalDuration.inSeconds) {
-              _currentProgress = position.inSeconds / _totalDuration.inSeconds;
-            } else {
-              // Position duration'ı geçtiyse, duration yanlış demektir
-              _setDurationFromSession();
-              if (_totalDuration.inSeconds > position.inSeconds) {
-                _currentProgress =
-                    position.inSeconds / _totalDuration.inSeconds;
-              } else {
-                _currentProgress = 0.99; // Maksimum %99
-              }
-            }
-            _currentProgress = _currentProgress.clamp(0.0, 1.0);
-
-            // Check for track completion for auto-play
-            if (_autoPlayEnabled &&
-                _currentTrack == 'intro' &&
-                position.inSeconds >= _totalDuration.inSeconds - 1 &&
-                _totalDuration.inSeconds > 0) {
-              _handleTrackCompletion();
-            }
-          } else {
-            _currentProgress = 0.0;
-          }
-        });
-      }
+        } else {
+          _currentProgress = 0.0;
+        }
+      });
     });
 
     _durationSubscription = _audioService.duration.listen((duration) {
-      if (mounted) {
-        // Duration kontrolü - 0 veya hatalı ise session'dan al
-        if (duration.inSeconds > 0 && duration.inSeconds < 10800) {
-          // Max 3 saat
-          setState(() {
-            _totalDuration = duration;
-          });
-        } else {
-          // Session'dan duration'ı al
-          _setDurationFromSession();
-        }
+      if (!mounted) return;
+      if (duration.inSeconds > 0) {
+        setState(() {
+          _totalDuration = duration;
+        });
       }
     });
 
-    // Listen to sleep timer updates
+    // Listen to sleep timer
     _audioService.sleepTimer.listen((minutes) {
-      if (mounted) {
-        setState(() {
-          _sleepTimerMinutes = minutes;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _sleepTimerMinutes = minutes;
+      });
     });
   }
 
-  // Session'dan duration ayarla
   void _setDurationFromSession() {
-    if (_currentTrack == 'intro' && _session['intro'] != null) {
-      final introDuration = _session['intro']['duration'];
-      if (introDuration != null) {
-        setState(() {
-          _totalDuration = Duration(seconds: introDuration);
-        });
-      }
-    } else if (_currentTrack == 'subliminal' &&
-        _session['subliminal'] != null) {
-      final subliminalDuration = _session['subliminal']['duration'];
-      if (subliminalDuration != null) {
-        setState(() {
-          _totalDuration = Duration(seconds: subliminalDuration);
-        });
-      }
-    }
+    setState(() {
+      _totalDuration = _effectiveDurationFor(_currentTrack);
+    });
   }
 
   void _handleTrackCompletion() {
     if (_currentTrack == 'intro' && _autoPlayEnabled && !_isLooping) {
-      // Auto-play subliminal after intro
       _completionCheckTimer?.cancel();
-      _completionCheckTimer = Timer(Duration(milliseconds: 500), () {
-        if (mounted) {
-          _switchToTrack('subliminal');
-
-          // Bildirim göster
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Now playing: Subliminal Session',
-                style: GoogleFonts.inter(fontSize: 14.sp),
-              ),
-              backgroundColor: AppColors.primaryGold,
-              duration: const Duration(seconds: 2),
+      _completionCheckTimer = Timer(const Duration(milliseconds: 500), () {
+        if (!mounted) return;
+        _switchToTrack('subliminal');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Now playing: Subliminal Session',
+              style: GoogleFonts.inter(fontSize: 14.sp),
             ),
-          );
-        }
+            backgroundColor: AppColors.primaryGold,
+            duration: const Duration(seconds: 2),
+          ),
+        );
       });
     } else if (_isLooping) {
-      // Loop current track
       _audioService.seek(Duration.zero);
       _audioService.play();
     }
@@ -221,7 +207,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     if (_isPlaying) {
       await _audioService.pause();
     } else {
-      // Check if we need to resume or start fresh
       if (_currentPosition.inSeconds > 0) {
         await _audioService.play();
       } else {
@@ -232,41 +217,39 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   Future<void> _playCurrentTrack() async {
     try {
-      final audioUrl = _currentTrack == 'intro'
-          ? _session['intro']['audioUrl']
-          : _session['subliminal']['audioUrl'];
+      final String? audioUrl = _audioUrlFor(_currentTrack);
 
       if (audioUrl == null || audioUrl.isEmpty) {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Audio file not found for $_currentTrack'),
+          const SnackBar(
+            content: Text('Audio file not found for current track'),
             backgroundColor: Colors.red,
           ),
         );
         return;
       }
 
-      // Session'dan duration'ı al
-      final durationInSeconds = _currentTrack == 'intro'
-          ? (_session['intro']['duration'] ?? 120)
-          : (_session['subliminal']['duration'] ?? 7200);
+      // Set duration from session before playing
+      _setDurationFromSession();
 
       await _audioService.playFromUrl(
         audioUrl,
-        title: _currentTrack == 'intro'
-            ? (_session['intro']['title'] ?? 'Introduction')
-            : (_session['subliminal']['title'] ?? 'Subliminal'),
+        title: _titleFor(
+          _currentTrack,
+          fallback: _currentTrack == 'intro' ? 'Introduction' : 'Subliminal',
+        ),
         artist: 'INSIDEX',
-        durationInSeconds: durationInSeconds, // Duration'ı gönder
       );
 
-      // Duration'ı manuel olarak da ayarla
+      // Force set duration after playing (keeps slider correct for long files)
       setState(() {
-        _totalDuration = Duration(seconds: durationInSeconds);
+        _totalDuration = _effectiveDurationFor(_currentTrack);
       });
     } catch (e) {
+      // ignore: avoid_print
       print('Error playing audio: $e');
-      setState(() => _isPlaying = false);
+      if (mounted) setState(() => _isPlaying = false);
     }
   }
 
@@ -277,15 +260,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _currentTrack = track;
       _currentPosition = Duration.zero;
       _currentProgress = 0.0;
-      _totalDuration = Duration.zero; // Reset duration
     });
 
     await _audioService.stop();
-    await Future.delayed(Duration(milliseconds: 200));
-
-    // Track değiştiğinde duration'ı session'dan ayarla
-    _setDurationFromSession();
-
+    await Future.delayed(const Duration(milliseconds: 200));
     await _playCurrentTrack();
   }
 
@@ -294,12 +272,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _autoPlayEnabled = !_autoPlayEnabled;
     });
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content:
             Text(_autoPlayEnabled ? 'Auto-play enabled' : 'Auto-play disabled'),
         backgroundColor: AppColors.primaryGold,
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
@@ -309,29 +288,30 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _isLooping = !_isLooping;
     });
 
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(_isLooping ? 'Loop enabled' : 'Loop disabled'),
         backgroundColor: AppColors.primaryGold,
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
       ),
     );
   }
 
-  // 10 saniye geri al (düzeltildi)
   void _replay10() async {
     final newPosition = _currentPosition - const Duration(seconds: 10);
     await _audioService
         .seek(newPosition.isNegative ? Duration.zero : newPosition);
   }
 
-  // 10 saniye ileri al (düzeltildi)
   void _forward10() async {
     final newPosition = _currentPosition + const Duration(seconds: 10);
-    if (_totalDuration > Duration.zero && newPosition < _totalDuration) {
+    final effectiveDuration = _effectiveDurationFor(_currentTrack);
+
+    if (effectiveDuration > Duration.zero && newPosition < effectiveDuration) {
       await _audioService.seek(newPosition);
-    } else if (_totalDuration > Duration.zero) {
-      await _audioService.seek(_totalDuration - const Duration(seconds: 1));
+    } else if (effectiveDuration > Duration.zero) {
+      await _audioService.seek(effectiveDuration - const Duration(seconds: 1));
     }
   }
 
@@ -476,8 +456,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           SizedBox(height: 8.h),
           Text(
             _currentTrack == 'intro'
-                ? (_session['intro']['title'] ?? 'Introduction')
-                : (_session['subliminal']['title'] ?? 'Subliminal'),
+                ? _titleFor('intro', fallback: 'Introduction')
+                : _titleFor('subliminal', fallback: 'Subliminal'),
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: Colors.white70,
@@ -506,17 +486,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 padding: EdgeInsets.symmetric(vertical: 10.h),
                 decoration: BoxDecoration(
                   color: _currentTrack == 'intro'
-                      ? Colors.white.withOpacity(0.2)
+                      ? AppColors.primaryGold
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  'Introduction',
+                  'Intro',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                     color: _currentTrack == 'intro'
-                        ? Colors.white
+                        ? Colors.black
                         : Colors.white60,
                   ),
                   textAlign: TextAlign.center,
@@ -555,6 +535,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Widget _buildProgressBar() {
+    final effectiveDuration = _effectiveDurationFor(_currentTrack);
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 30.w),
       child: Column(
@@ -573,7 +555,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               value: _currentProgress,
               onChanged: (value) {
                 final newPosition = Duration(
-                  seconds: (_totalDuration.inSeconds * value).round(),
+                  seconds: (effectiveDuration.inSeconds * value).round(),
                 );
                 _audioService.seek(newPosition);
               },
@@ -592,7 +574,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   ),
                 ),
                 Text(
-                  _formatDuration(_totalDuration),
+                  _formatDuration(effectiveDuration),
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
                     color: Colors.white60,
@@ -610,16 +592,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // 10 saniye geri
         IconButton(
-          icon: Icon(Icons.replay_10, color: Colors.white70),
+          icon: const Icon(Icons.replay_10, color: Colors.white70),
           iconSize: 32.sp,
           onPressed: _replay10,
         ),
-
         SizedBox(width: 20.w),
-
-        // Play/Pause
         GestureDetector(
           onTap: _togglePlayPause,
           child: Container(
@@ -643,12 +621,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
           ),
         ),
-
         SizedBox(width: 20.w),
-
-        // 10 saniye ileri
         IconButton(
-          icon: Icon(Icons.forward_10, color: Colors.white70),
+          icon: const Icon(Icons.forward_10, color: Colors.white70),
           iconSize: 32.sp,
           onPressed: _forward10,
         ),
@@ -662,7 +637,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Loop
           IconButton(
             icon: Icon(
               Icons.loop,
@@ -670,8 +644,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
             onPressed: _toggleLoop,
           ),
-
-          // Favorite
           IconButton(
             icon: Icon(
               _isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -679,8 +651,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
             onPressed: () => setState(() => _isFavorite = !_isFavorite),
           ),
-
-          // Sleep Timer
           IconButton(
             icon: Icon(
               Icons.bedtime,
@@ -697,8 +667,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               );
             },
           ),
-
-          // Auto-play toggle
           IconButton(
             icon: Icon(
               _autoPlayEnabled ? Icons.queue_music : Icons.music_off,
@@ -713,8 +681,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
-    final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$minutes:$seconds';
+
+    if (duration.inHours > 0) {
+      final hours = duration.inHours;
+      final minutes = twoDigits(duration.inMinutes.remainder(60));
+      final seconds = twoDigits(duration.inSeconds.remainder(60));
+      return '$hours:$minutes:$seconds';
+    } else {
+      final minutes = twoDigits(duration.inMinutes.remainder(60));
+      final seconds = twoDigits(duration.inSeconds.remainder(60));
+      return '$minutes:$seconds';
+    }
   }
 }

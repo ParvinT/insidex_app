@@ -194,7 +194,7 @@ class _GenderScreenState extends State<GenderScreen> {
                       child: Container(
                         width: 12.w,
                         height: 12.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white,
                         ),

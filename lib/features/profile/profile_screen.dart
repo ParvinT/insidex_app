@@ -166,7 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             elevation: 0,
             centerTitle: true,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -640,7 +640,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onPressed: () {
           Navigator.pushNamed(context, '/admin/dashboard');
         },
-        icon: Icon(Icons.dashboard_customize),
+        icon: const Icon(Icons.dashboard_customize),
         label: Text(
           'Open Admin Panel',
           style: GoogleFonts.inter(

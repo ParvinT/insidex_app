@@ -131,7 +131,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                           ),
                         ),
 
-                        Divider(
+                        const Divider(
                           color: AppColors.greyBorder,
                           thickness: 1,
                           height: 1,
@@ -165,7 +165,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                         ),
 
                         // Bottom section
-                        Divider(
+                        const Divider(
                           color: AppColors.greyBorder,
                           thickness: 1,
                           height: 1,

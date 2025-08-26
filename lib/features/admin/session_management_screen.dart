@@ -52,7 +52,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.add_circle, color: AppColors.primaryGold),
+            icon: const Icon(Icons.add_circle, color: AppColors.primaryGold),
             onPressed: () {
               Navigator.push(
                 context,
@@ -66,7 +66,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
       body: Column(
         children: [
           // Category Filter
-          Container(
+          SizedBox(
             height: 50.h,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
@@ -110,7 +110,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 final sessions = snapshot.data!.docs;
@@ -185,14 +185,14 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                 ),
                                 PopupMenuButton(
                                   itemBuilder: (context) => [
-                                    PopupMenuItem(
-                                      child: Text('Edit'),
+                                    const PopupMenuItem(
                                       value: 'edit',
+                                      child: Text('Edit'),
                                     ),
-                                    PopupMenuItem(
+                                    const PopupMenuItem(
+                                      value: 'delete',
                                       child: Text('Delete',
                                           style: TextStyle(color: Colors.red)),
-                                      value: 'delete',
                                     ),
                                   ],
                                   onSelected: (value) {
@@ -271,16 +271,16 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Delete Session'),
-        content: Text('Are you sure you want to delete this session?'),
+        title: const Text('Delete Session'),
+        content: const Text('Are you sure you want to delete this session?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Delete', style: TextStyle(color: Colors.red)),
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),

@@ -37,7 +37,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           final users = snapshot.data!.docs;
