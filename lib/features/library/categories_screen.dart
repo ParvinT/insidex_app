@@ -82,23 +82,20 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: AppColors.textPrimary,
-            size: 24.sp,
-          ),
+          icon:
+              Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 24.sp),
           onPressed: () => Navigator.pop(context),
         ),
         title: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min, // Prevent overflow
           children: [
-            // Logo
+            // SVG Logo - YOUR ORIGINAL LOGO!
             Container(
-              height: 28.h,
-              margin: EdgeInsets.only(right: 12.w),
+              height: 24.h, // Reduced from 28h
+              margin: EdgeInsets.only(right: 8.w), // Reduced margin
               child: SvgPicture.asset(
                 'assets/images/logo.svg',
-                height: 28.h,
+                height: 24.h,
                 fit: BoxFit.contain,
                 colorFilter: ColorFilter.mode(
                   AppColors.textPrimary,
@@ -108,23 +105,27 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             ),
             // Vertical divider
             Container(
-              height: 24.h,
+              height: 20.h, // Reduced from 24h
               width: 1.5,
               color: AppColors.textPrimary.withOpacity(0.2),
-              margin: EdgeInsets.symmetric(horizontal: 12.w),
+              margin: EdgeInsets.symmetric(horizontal: 8.w), // Reduced from 12w
             ),
-            // Title
-            Text(
-              'All Subliminals',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+            // Title - with Flexible to prevent overflow
+            Flexible(
+              child: Text(
+                'All Subliminals',
+                style: GoogleFonts.inter(
+                  fontSize: 15.sp, // Reduced from 18sp
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],
         ),
-        centerTitle: false, // Logo and title aligned to left after back button
+        centerTitle: false,
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: AppColors.primaryGold,

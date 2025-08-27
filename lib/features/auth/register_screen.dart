@@ -1,5 +1,6 @@
 // lib/features/auth/register_screen.dart
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -30,7 +31,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
   bool _agreeToTerms = false;
-  bool _isLoading = false;
+
+  // Separate loading states for each button
+  bool _isEmailLoading = false;
+  bool _isGoogleLoading = false;
+  bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -67,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() => _isEmailLoading = true);
 
     // Only create OTP record, NOT Firebase Auth account
     final result = await FirebaseService.signUp(
@@ -76,7 +81,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       name: _nameController.text.trim(),
     );
 
-    setState(() => _isLoading = false);
+    setState(() => _isEmailLoading = false);
 
     if (!mounted) return;
 
@@ -111,35 +116,111 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _handleGoogleSignUp() async {
-    setState(() => _isLoading = true);
+    setState(() => _isGoogleLoading = true);
 
     try {
-      // TODO: Implement Google Sign Up with Firebase
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google Sign Up coming soon!'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      // Show coming soon dialog
+      _showComingSoonDialog('Google Sign Up');
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isGoogleLoading = false);
     }
   }
 
   Future<void> _handleAppleSignUp() async {
-    setState(() => _isLoading = true);
+    setState(() => _isAppleLoading = true);
 
     try {
-      // TODO: Implement Apple Sign Up with Firebase
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Apple Sign Up coming soon!'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      // Show coming soon dialog
+      _showComingSoonDialog('Apple ID Sign Up');
     } finally {
-      setState(() => _isLoading = false);
+      setState(() => _isAppleLoading = false);
     }
+  }
+
+  void _showComingSoonDialog(String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: AppColors.backgroundWhite,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                width: 64.w,
+                height: 64.w,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.construction,
+                  color: AppColors.textPrimary,
+                  size: 32.sp,
+                ),
+              ),
+              SizedBox(height: 16.h),
+
+              // Title
+              Text(
+                'Coming Soon!',
+                style: GoogleFonts.inter(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+
+              // Message
+              Text(
+                '$feature will be available soon.\nStay tuned for updates!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 24.h),
+
+              // OK Button
+              SizedBox(
+                width: double.infinity,
+                height: 44.h, // Fixed height
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.textPrimary,
+                    padding: EdgeInsets.zero, // Remove padding
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'OK',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                        height: 1.0, // Line height
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildDivider() {
@@ -174,6 +255,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if any loading is active
+    final bool isAnyLoading =
+        _isEmailLoading || _isGoogleLoading || _isAppleLoading;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -318,7 +403,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 SizedBox(height: 20.h),
 
-                // Terms & Conditions Checkbox
+                // Terms & Conditions Checkbox with clickable links
                 Row(
                   children: [
                     SizedBox(
@@ -352,6 +437,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.underline,
                               ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.pushNamed(
+                                      context, AppRoutes.termsOfService);
+                                },
                             ),
                             const TextSpan(text: ' and '),
                             TextSpan(
@@ -361,6 +451,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.underline,
                               ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  Navigator.pushNamed(
+                                      context, AppRoutes.privacyPolicy);
+                                },
                             ),
                           ],
                         ),
@@ -375,7 +470,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 PrimaryButton(
                   text: 'Sign Up',
                   onPressed: _handleRegister,
-                  isLoading: _isLoading,
+                  isLoading: _isEmailLoading,
                 ),
 
                 SizedBox(height: 24.h),
@@ -389,7 +484,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SocialLoginButton(
                   onTap: _handleGoogleSignUp,
                   label: 'Sign up with Google',
-                  isLoading: _isLoading,
+                  isLoading: _isGoogleLoading,
+                  isDisabled: _isEmailLoading || _isAppleLoading,
                 ),
 
                 SizedBox(height: 12.h),
@@ -399,7 +495,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onTap: _handleAppleSignUp,
                   label: 'Sign up with Apple',
                   isDark: true,
-                  isLoading: _isLoading,
+                  isLoading: _isAppleLoading,
+                  isDisabled: _isEmailLoading || _isGoogleLoading,
                 ),
 
                 SizedBox(height: 32.h),
@@ -416,15 +513,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pushReplacementNamed(
-                            context, AppRoutes.login);
-                      },
+                      onTap: isAnyLoading
+                          ? null
+                          : () {
+                              Navigator.pushReplacementNamed(
+                                  context, AppRoutes.login);
+                            },
                       child: Text(
                         'Sign In',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: AppColors.primaryGold,
+                          color: isAnyLoading
+                              ? AppColors.primaryGold.withOpacity(0.5)
+                              : AppColors.primaryGold,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

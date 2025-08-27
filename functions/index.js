@@ -398,47 +398,57 @@ function getPremiumAnnouncementHTML(data) {
     </style>
 </head>
 <body>
-    ${isTest ? '<div class="test-banner">TEST EMAIL - Not sent to actual subscribers</div>' : ''}
+    ${isTest ? '<div class="test-banner">⚠️ TEST EMAIL - Not sent to all subscribers</div>' : ''}
     
     <div class="container">
         <div class="header">
-            <h1 style="margin: 0; font-size: 32px;">🎉 ${title}</h1>
-            <p style="margin: 10px 0 0 0; font-size: 18px;">INSIDEX Premium is Here!</p>
+            <h1 style="margin: 0; font-size: 32px;">${title}</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Exclusive offer for early supporters</p>
         </div>
         
         <div class="content">
-            <p>Dear Early Access Member,</p>
+            <p style="font-size: 16px; color: #555;">Dear INSIDEX Community Member,</p>
             
-            <p>${message}</p>
-            
-            <div class="features">
-                <h3 style="margin-top: 0;">✨ Premium Features:</h3>
-                <div class="feature">📱 <strong>Unlimited Offline Downloads</strong> - Listen anywhere, anytime</div>
-                <div class="feature">🎵 <strong>Access All 200+ Sessions</strong> - Full library unlocked</div>
-                <div class="feature">📊 <strong>Advanced Progress Tracking</strong> - Detailed insights</div>
-            </div>
+            <p style="font-size: 16px; line-height: 1.8;">${message}</p>
             
             <center>
-                <a href="https://insidex.app/premium" class="button">Get Premium Now</a>
+                <a href="https://insidex.app/premium" class="button">
+                    CLAIM YOUR DISCOUNT
+                </a>
             </center>
             
-            <p><strong>🎁 Special Early Bird Offer:</strong><br>
-            As a waitlist member, you get <strong>50% OFF</strong> for the first 3 months!</p>
+            <div class="features">
+                <h3 style="margin-top: 0;">🌟 Premium Features Include:</h3>
+                <div class="feature">✅ Unlimited access to 200+ healing sessions</div>
+                <div class="feature">✅ Offline downloads for on-the-go listening</div>
+                <div class="feature">✅ Advanced progress tracking & analytics</div>
+                <div class="feature">✅ Personalized AI recommendations</div>
+                <div class="feature">✅ Priority customer support</div>
+                <div class="feature">✅ Early access to new features</div>
+            </div>
             
-            <p>Use code: <strong style="background: #fff3cd; padding: 5px 10px; border-radius: 4px;">EARLY50</strong></p>
+            <p style="font-size: 16px;">
+                <strong>Limited Time Offer:</strong><br>
+                Use code <span style="background: #667eea; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold;">EARLY50</span> 
+                for 50% off your first 3 months!
+            </p>
             
-            <p>Thank you for being an early supporter of INSIDEX!</p>
+            <p style="font-size: 14px; color: #666; margin-top: 30px;">
+                Thank you for being part of our journey. Your early support means everything to us.
+            </p>
             
-            <p>With gratitude,<br>
-            <strong>The INSIDEX Team</strong></p>
+            <p style="font-size: 16px;">
+                With gratitude,<br>
+                <strong>The INSIDEX Team</strong>
+            </p>
         </div>
         
         <div class="footer">
-            <p>© 2025 INSIDEX. All rights reserved.</p>
-            <p>You received this email because you joined our waitlist.</p>
-            <p>
-                <a href="https://insidex.app/unsubscribe?email=${recipientEmail}" style="color: #888;">Unsubscribe</a> | 
-                <a href="https://insidex.app/privacy" style="color: #888;">Privacy Policy</a>
+            <p style="margin: 5px 0;">© 2025 INSIDEX. All rights reserved.</p>
+            <p style="margin: 5px 0; font-size: 12px;">
+                You received this email because you signed up for our waitlist.<br>
+                <a href="https://insidex.app/unsubscribe?email=${recipientEmail}" 
+                   style="color: #667eea; text-decoration: none;">Unsubscribe</a>
             </p>
         </div>
     </div>
@@ -446,3 +456,61 @@ function getPremiumAnnouncementHTML(data) {
 </html>
   `;
 }
+
+// Update sendEmailFromQueue to handle waitlist emails
+exports.sendEmailFromQueue = functions.firestore
+  .document('mail_queue/{docId}')
+  .onCreate(async (snap, context) => {
+    const mailData = snap.data();
+    
+    try {
+      let mailOptions = {
+        from: process.env.GMAIL_FROM || '"INSIDEX" <noreply@insidex.app>',
+        to: mailData.to,
+      };
+
+      // Check email type
+      if (mailData.type === 'otp') {
+        // OTP Email
+        mailOptions.subject = mailData.subject || 'Your INSIDEX Verification Code';
+        mailOptions.html = mailData.html;
+        
+        console.log(`Sending OTP email to ${mailData.to}`);
+        
+      } else if (mailData.type === 'welcome') {
+        // Welcome Email
+        mailOptions.subject = 'Welcome to INSIDEX! 🎉';
+        mailOptions.html = getWelcomeEmailHTML(mailData.template.data);
+        
+        console.log(`Sending welcome email to ${mailData.to}`);
+        
+      } else if (mailData.type === 'waitlist_announcement' || mailData.type === 'waitlist_test') {
+        // Waitlist Campaign Email
+        mailOptions.subject = mailData.subject;
+        mailOptions.html = mailData.html; // HTML already generated
+        
+        console.log(`Sending waitlist email to ${mailData.to}`);
+      }
+
+      // Send email
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Email sent successfully:', info.messageId);
+
+      // Update document status
+      await snap.ref.update({
+        status: 'sent',
+        sentAt: admin.firestore.FieldValue.serverTimestamp(),
+        messageId: info.messageId
+      });
+
+    } catch (error) {
+      console.error('Error sending email:', error);
+      
+      // Update document with error
+      await snap.ref.update({
+        status: 'error',
+        error: error.message,
+        errorAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+    }
+  });

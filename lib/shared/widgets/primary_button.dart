@@ -1,3 +1,5 @@
+// lib/shared/widgets/primary_button.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,7 +20,7 @@ class PrimaryButton extends StatelessWidget {
     required this.onPressed,
     this.isLoading = false,
     this.width,
-    this.height = 56,
+    this.height = 48, // Reduced from 56
     this.backgroundColor,
     this.textColor,
   });
@@ -35,28 +37,34 @@ class PrimaryButton extends StatelessWidget {
           foregroundColor: textColor ?? Colors.white,
           disabledBackgroundColor: AppColors.greyLight,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(12.r), // Reduced from 16.r
           ),
           elevation: 0,
+          padding: EdgeInsets.symmetric(vertical: 0), // Remove default padding
         ),
-        child: isLoading
-            ? SizedBox(
-                height: 20.h,
-                width: 20.w,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    textColor ?? Colors.white,
+        child: Center(
+          // Explicit center
+          child: isLoading
+              ? SizedBox(
+                  height: 20.h,
+                  width: 20.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      textColor ?? Colors.white,
+                    ),
                   ),
+                )
+              : Text(
+                  text,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp, // Reduced from 16.sp
+                    fontWeight: FontWeight.w600,
+                    height: 1.0, // Line height adjustment
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-              )
-            : Text(
-                text,
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+        ),
       ),
     );
   }
