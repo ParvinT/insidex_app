@@ -15,9 +15,14 @@ import '../../features/admin/category_management_screen.dart';
 import '../../features/admin/session_management_screen.dart';
 import '../../features/admin/user_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
+// New imports for legal and premium
+import '../../features/legal/privacy_policy_screen.dart';
+import '../../features/legal/terms_of_service_screen.dart';
+import '../../features/premium/premium_waitlist_screen.dart';
 
 // --- Aliased imports (YALNIZCA bu dört ekran alias'lı) ---
-import 'package:insidex_app/features/auth/register_screen.dart' as auth_register;
+import 'package:insidex_app/features/auth/register_screen.dart'
+    as auth_register;
 import 'package:insidex_app/features/auth/login_screen.dart' as auth_login;
 import 'package:insidex_app/features/auth/welcome_screen.dart' as auth_welcome;
 import 'package:insidex_app/features/home/home_screen.dart' as home_screen;
@@ -39,27 +44,39 @@ class AppRoutes {
   static const String sessionDetail = '/session-detail';
   static const String adminDashboard = '/admin/dashboard';
 
+  // New routes
+  static const String privacyPolicy = '/legal/privacy-policy';
+  static const String termsOfService = '/legal/terms-of-service';
+  static const String premiumWaitlist = '/premium/waitlist';
+
   static Map<String, WidgetBuilder> get routes => {
         splash: (_) => const SplashScreen(),
         goalsScreen: (_) => const GoalsScreen(),
 
         // auth (aliased)
         welcome: (_) => const auth_welcome.WelcomeScreen(),
-        login:   (_) => const auth_login.LoginScreen(),
-        register:(_) => const auth_register.RegisterScreen(),
+        login: (_) => const auth_login.LoginScreen(),
+        register: (_) => const auth_register.RegisterScreen(),
 
         // home (aliased, alias adı home DEĞİL!)
-        home:    (_) => const home_screen.HomeScreen(),
+        home: (_) => const home_screen.HomeScreen(),
 
         // others
         settings: (_) => const SettingsScreen(),
-        profile:  (_) => const ProfileScreen(),
+        profile: (_) => const ProfileScreen(),
         adminDashboard: (_) => const AdminDashboardScreen(),
         '/admin/add-session': (_) => const AddSessionScreen(),
         '/admin/categories': (_) => const CategoryManagementScreen(),
-        '/admin/sessions':   (_) => const SessionManagementScreen(),
-        '/admin/users':      (_) => const UserManagementScreen(),
-        '/admin/settings':   (_) => const AdminSettingsScreen(),
+        '/admin/sessions': (_) => const SessionManagementScreen(),
+        '/admin/users': (_) => const UserManagementScreen(),
+        '/admin/settings': (_) => const AdminSettingsScreen(),
+
+        // legal pages
+        privacyPolicy: (_) => const PrivacyPolicyScreen(),
+        termsOfService: (_) => const TermsOfServiceScreen(),
+
+        // premium
+        premiumWaitlist: (_) => const PremiumWaitlistScreen(),
 
         // routes with arguments
         player: (context) {

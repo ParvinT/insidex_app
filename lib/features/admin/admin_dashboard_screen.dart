@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/app_colors.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -617,6 +618,272 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         );
       },
     );
+  }
+
+  Widget _buildWaitlistSection() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('waitlist')
+          .where('marketingConsent', isEqualTo: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final subscriberCount = snapshot.data?.size ?? 0;
+
+        return Container(
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.primaryGold.withOpacity(0.1),
+                AppColors.primaryGold.withOpacity(0.05),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: AppColors.primaryGold.withOpacity(0.3),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '📧 Premium Waitlist',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        '$subscriberCount subscribers with marketing consent',
+                        style: GoogleFonts.inter(
+                          fontSize: 14.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () => _showSendEmailDialog(subscriberCount),
+                    icon: const Icon(Icons.send, size: 18),
+                    label: const Text('Send Email'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryGold,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // Email gönderme dialog'u
+  void _showSendEmailDialog(int subscriberCount) {
+    final subjectController = TextEditingController(
+      text: '🎉 INSIDEX Premium is Now Available!',
+    );
+    final titleController = TextEditingController(
+      text: 'Premium Launch - Special Offer',
+    );
+    final messageController = TextEditingController(
+      text: 'We are excited to announce that INSIDEX Premium is finally here! '
+          'As an early supporter, you get exclusive access at 50% OFF for the first 3 months.',
+    );
+    final testEmailController = TextEditingController();
+    bool sendTest = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(
+            'Send Premium Announcement',
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Container(
+              width: 400.w,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Send to $subscriberCount waitlist subscribers',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // Subject
+                  TextField(
+                    controller: subjectController,
+                    decoration: InputDecoration(
+                      labelText: 'Email Subject',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Title
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: 'Email Title',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Message
+                  TextField(
+                    controller: messageController,
+                    maxLines: 5,
+                    decoration: InputDecoration(
+                      labelText: 'Message',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+
+                  // Test option
+                  CheckboxListTile(
+                    value: sendTest,
+                    onChanged: (value) {
+                      setState(() => sendTest = value ?? false);
+                    },
+                    title: const Text('Send test email first'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+
+                  if (sendTest) ...[
+                    TextField(
+                      controller: testEmailController,
+                      decoration: InputDecoration(
+                        labelText: 'Test Email',
+                        hintText: 'your@email.com',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: AppColors.textSecondary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _sendWaitlistEmail(
+                  subject: subjectController.text,
+                  title: titleController.text,
+                  message: messageController.text,
+                  sendTest: sendTest,
+                  testEmail: sendTest ? testEmailController.text : null,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGold,
+              ),
+              child: Text(sendTest ? 'Send Test' : 'Send to All'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Email gönderme fonksiyonu
+  Future<void> _sendWaitlistEmail({
+    required String subject,
+    required String title,
+    required String message,
+    required bool sendTest,
+    String? testEmail,
+  }) async {
+    // Loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primaryGold,
+        ),
+      ),
+    );
+
+    try {
+      // Import ekleyin: import 'package:cloud_functions/cloud_functions.dart';
+      final functions = FirebaseFunctions.instance;
+      final callable = functions.httpsCallable('sendWaitlistAnnouncement');
+
+      final result = await callable.call({
+        'subject': subject,
+        'title': title,
+        'message': message,
+        'sendTest': sendTest,
+        'testEmail': testEmail,
+      });
+
+      // Hide loading
+      Navigator.pop(context);
+
+      // Show success
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.data['message'] ?? 'Email sent successfully!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      // Hide loading
+      Navigator.pop(context);
+
+      // Show error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildStatCard({

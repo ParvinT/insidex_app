@@ -169,3 +169,280 @@ function getWelcomeEmailHTML(data) {
 </html>
   `;
 }
+
+exports.sendWaitlistAnnouncement = functions.https.onCall(async (data, context) => {
+  console.log('sendWaitlistAnnouncement called');
+  
+  // 1. Admin kontrolü
+  if (!context.auth) {
+    throw new functions.https.HttpsError(
+      'unauthenticated', 
+      'Must be logged in to send emails'
+    );
+  }
+  
+  // Admin kontrolü
+  const adminDoc = await admin.firestore()
+    .collection('admins')
+    .doc(context.auth.uid)
+    .get();
+  
+  if (!adminDoc.exists) {
+    // Users collection'da da kontrol et
+    const userDoc = await admin.firestore()
+      .collection('users')
+      .doc(context.auth.uid)
+      .get();
+    
+    if (!userDoc.exists || !userDoc.data().isAdmin) {
+      throw new functions.https.HttpsError(
+        'permission-denied', 
+        'Only admins can send announcements'
+      );
+    }
+  }
+  
+  // 2. Email içeriğini validate et
+  const { subject, title, message, sendTest, testEmail } = data;
+  
+  if (!subject || !title || !message) {
+    throw new functions.https.HttpsError(
+      'invalid-argument',
+      'Subject, title and message are required'
+    );
+  }
+  
+  // 3. Test email gönderimi
+  if (sendTest && testEmail) {
+    console.log(`Sending test email to: ${testEmail}`);
+    
+    await admin.firestore().collection('mail_queue').add({
+      to: testEmail,
+      subject: `[TEST] ${subject}`,
+      html: getPremiumAnnouncementHTML({
+        title: title,
+        message: message,
+        recipientEmail: testEmail,
+        isTest: true
+      }),
+      type: 'waitlist_test',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: 'pending',
+      sentBy: context.auth.uid
+    });
+    
+    return {
+      success: true,
+      test: true,
+      count: 1,
+      message: `Test email sent to ${testEmail}`
+    };
+  }
+  
+  // 4. Waitlist'teki kullanıcıları al (sadece marketing consent verenler)
+  const waitlistSnapshot = await admin.firestore()
+    .collection('waitlist')
+    .where('marketingConsent', '==', true)
+    .get();
+  
+  console.log(`Found ${waitlistSnapshot.size} subscribers with marketing consent`);
+  
+  if (waitlistSnapshot.empty) {
+    return {
+      success: false,
+      count: 0,
+      message: 'No subscribers found with marketing consent'
+    };
+  }
+  
+  // 5. Batch işlemi için hazırlık
+  const batch = admin.firestore().batch();
+  let emailCount = 0;
+  const maxBatchSize = 500; // Firestore batch limit
+  const emailPromises = [];
+  
+  // 6. Her subscriber için email oluştur
+  for (const doc of waitlistSnapshot.docs) {
+    const subscriber = doc.data();
+    
+    // Email'i mail_queue'ya ekle
+    const mailRef = admin.firestore().collection('mail_queue').doc();
+    
+    const emailData = {
+      to: subscriber.email,
+      subject: subject,
+      html: getPremiumAnnouncementHTML({
+        title: title,
+        message: message,
+        recipientEmail: subscriber.email,
+        isTest: false
+      }),
+      type: 'waitlist_announcement',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: 'pending',
+      sentBy: context.auth.uid,
+      waitlistDocId: doc.id
+    };
+    
+    batch.set(mailRef, emailData);
+    emailCount++;
+    
+    // Batch limit'e ulaştıysak, commit et ve yeni batch başlat
+    if (emailCount % maxBatchSize === 0) {
+      await batch.commit();
+      batch = admin.firestore().batch();
+    }
+  }
+  
+  // 7. Kalan batch'i commit et
+  if (emailCount % maxBatchSize !== 0) {
+    await batch.commit();
+  }
+  
+  // 8. Log kaydet
+  await admin.firestore().collection('email_campaigns').add({
+    type: 'waitlist_announcement',
+    subject: subject,
+    title: title,
+    message: message,
+    recipientCount: emailCount,
+    sentBy: context.auth.uid,
+    sentAt: admin.firestore.FieldValue.serverTimestamp(),
+    status: 'completed'
+  });
+  
+  console.log(`Successfully queued ${emailCount} emails`);
+  
+  return {
+    success: true,
+    count: emailCount,
+    message: `Premium announcement sent to ${emailCount} subscribers!`
+  };
+});
+
+// Premium Announcement Email Template
+function getPremiumAnnouncementHTML(data) {
+  const { title, message, recipientEmail, isTest } = data;
+  
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 14px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            margin: 20px 0;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .features {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature {
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .feature:last-child {
+            border-bottom: none;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+            background: #f8f9fa;
+        }
+        .test-banner {
+            background: #ff9800;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    ${isTest ? '<div class="test-banner">TEST EMAIL - Not sent to actual subscribers</div>' : ''}
+    
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 32px;">🎉 ${title}</h1>
+            <p style="margin: 10px 0 0 0; font-size: 18px;">INSIDEX Premium is Here!</p>
+        </div>
+        
+        <div class="content">
+            <p>Dear Early Access Member,</p>
+            
+            <p>${message}</p>
+            
+            <div class="features">
+                <h3 style="margin-top: 0;">✨ Premium Features:</h3>
+                <div class="feature">📱 <strong>Unlimited Offline Downloads</strong> - Listen anywhere, anytime</div>
+                <div class="feature">🎵 <strong>Access All 200+ Sessions</strong> - Full library unlocked</div>
+                <div class="feature">📊 <strong>Advanced Progress Tracking</strong> - Detailed insights</div>
+            </div>
+            
+            <center>
+                <a href="https://insidex.app/premium" class="button">Get Premium Now</a>
+            </center>
+            
+            <p><strong>🎁 Special Early Bird Offer:</strong><br>
+            As a waitlist member, you get <strong>50% OFF</strong> for the first 3 months!</p>
+            
+            <p>Use code: <strong style="background: #fff3cd; padding: 5px 10px; border-radius: 4px;">EARLY50</strong></p>
+            
+            <p>Thank you for being an early supporter of INSIDEX!</p>
+            
+            <p>With gratitude,<br>
+            <strong>The INSIDEX Team</strong></p>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 INSIDEX. All rights reserved.</p>
+            <p>You received this email because you joined our waitlist.</p>
+            <p>
+                <a href="https://insidex.app/unsubscribe?email=${recipientEmail}" style="color: #888;">Unsubscribe</a> | 
+                <a href="https://insidex.app/privacy" style="color: #888;">Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+  `;
+}

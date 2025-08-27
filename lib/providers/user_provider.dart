@@ -16,10 +16,55 @@ class UserProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _firebaseUser != null;
   bool get isAdmin => _isAdmin; // Admin getter
-  bool get isPremium => _userData?['isPremium'] ?? false;
   String get userName => _userData?['name'] ?? 'User';
   String get userEmail => _userData?['email'] ?? '';
   String get userId => _firebaseUser?.uid ?? '';
+
+  // Premium related getters
+  bool get isPremium => _userData?['isPremium'] ?? false;
+  String get accountType => _userData?['accountType'] ?? 'free';
+  DateTime? get premiumExpiryDate {
+    final expiry = _userData?['premiumExpiryDate'];
+    return expiry != null ? (expiry as Timestamp).toDate() : null;
+  }
+
+  // Session limits
+  int get dailySessionsPlayed => _userData?['dailySessionsPlayed'] ?? 0;
+  String? get lastSessionDate => _userData?['lastSessionDate'];
+  int get dailySessionLimit => isPremium ? 999 : 3;
+
+  // Marketing consent
+  bool get marketingConsent => _userData?['marketingConsent'] ?? false;
+  bool get privacyConsent => _userData?['privacyConsent'] ?? true;
+
+  // Check if user can play another session today
+  bool canPlaySession() {
+    if (isPremium) return true;
+
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
+    // If it's a new day, reset the counter
+    if (lastSessionDate != today) {
+      return true;
+    }
+
+    // Check if under the daily limit
+    return dailySessionsPlayed < dailySessionLimit;
+  }
+
+  // Check if premium is active
+  bool get isPremiumActive {
+    if (!isPremium) return false;
+    if (premiumExpiryDate == null) return true; // Lifetime premium
+    return premiumExpiryDate!.isAfter(DateTime.now());
+  }
+
+  // Days left in premium
+  int get premiumDaysLeft {
+    if (!isPremium || premiumExpiryDate == null) return 0;
+    final difference = premiumExpiryDate!.difference(DateTime.now()).inDays;
+    return difference > 0 ? difference : 0;
+  }
 
   // Auth state listener
   void initAuthListener() {
@@ -47,6 +92,9 @@ class UserProvider extends ChangeNotifier {
 
       if (userDoc.exists) {
         _userData = userDoc.data();
+
+        // Check if it's a new day and reset session counter
+        await _checkAndResetDailyLimit();
       } else {
         // Create user document if doesn't exist
         await createUserDocument();
@@ -60,6 +108,46 @@ class UserProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  // Check and reset daily session limit
+  Future<void> _checkAndResetDailyLimit() async {
+    if (_firebaseUser == null || isPremium) return;
+
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
+    if (lastSessionDate != today) {
+      // Reset daily counter
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_firebaseUser!.uid)
+          .update({
+        'dailySessionsPlayed': 0,
+        'lastSessionDate': today,
+      });
+
+      _userData!['dailySessionsPlayed'] = 0;
+      _userData!['lastSessionDate'] = today;
+      notifyListeners();
+    }
+  }
+
+  // Increment session play count
+  Future<void> incrementSessionCount() async {
+    if (_firebaseUser == null || isPremium) return;
+
+    final newCount = dailySessionsPlayed + 1;
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(_firebaseUser!.uid)
+        .update({
+      'dailySessionsPlayed': newCount,
+      'lastActiveAt': FieldValue.serverTimestamp(),
+    });
+
+    _userData!['dailySessionsPlayed'] = newCount;
+    notifyListeners();
   }
 
   // Check if user is admin
@@ -88,6 +176,8 @@ class UserProvider extends ChangeNotifier {
   Future<void> createUserDocument() async {
     if (_firebaseUser == null) return;
 
+    final today = DateTime.now().toIso8601String().split('T')[0];
+
     final userData = {
       'uid': _firebaseUser!.uid,
       'email': _firebaseUser!.email,
@@ -95,11 +185,17 @@ class UserProvider extends ChangeNotifier {
       'photoUrl': _firebaseUser!.photoURL,
       'isAdmin': false,
       'isPremium': false,
+      'accountType': 'free',
       'createdAt': FieldValue.serverTimestamp(),
       'lastActiveAt': FieldValue.serverTimestamp(),
       'favoriteSessionIds': [],
       'completedSessionIds': [],
       'totalListeningMinutes': 0,
+      'dailySessionsPlayed': 0,
+      'lastSessionDate': today,
+      'marketingConsent': false,
+      'privacyConsent': true,
+      'consentDate': FieldValue.serverTimestamp(),
     };
 
     await FirebaseFirestore.instance
@@ -152,20 +248,55 @@ class UserProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Update premium status
-  Future<void> updatePremiumStatus(bool isPremium) async {
+  // Update premium status (for admin use)
+  Future<void> updatePremiumStatus({
+    required bool isPremium,
+    DateTime? expiryDate,
+  }) async {
+    if (_firebaseUser == null) return;
+
+    try {
+      final updates = {
+        'isPremium': isPremium,
+        'accountType': isPremium ? 'premium' : 'free',
+        'premiumExpiryDate':
+            expiryDate != null ? Timestamp.fromDate(expiryDate) : null,
+        'premiumUpdatedAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_firebaseUser!.uid)
+          .update(updates);
+
+      _userData!['isPremium'] = isPremium;
+      _userData!['accountType'] = isPremium ? 'premium' : 'free';
+      _userData!['premiumExpiryDate'] =
+          expiryDate != null ? Timestamp.fromDate(expiryDate) : null;
+
+      notifyListeners();
+    } catch (e) {
+      print('Error updating premium status: $e');
+    }
+  }
+
+  // Update marketing consent
+  Future<void> updateMarketingConsent(bool consent) async {
     if (_firebaseUser == null) return;
 
     try {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(_firebaseUser!.uid)
-          .update({'isPremium': isPremium});
+          .update({
+        'marketingConsent': consent,
+        'consentUpdatedAt': FieldValue.serverTimestamp(),
+      });
 
-      _userData!['isPremium'] = isPremium;
+      _userData!['marketingConsent'] = consent;
       notifyListeners();
     } catch (e) {
-      print('Error updating premium status: $e');
+      print('Error updating marketing consent: $e');
     }
   }
 }

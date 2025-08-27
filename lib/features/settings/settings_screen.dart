@@ -123,7 +123,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: Icons.privacy_tip_outlined,
                     title: 'Privacy Policy',
                     onTap: () {
-                      // TODO: Open privacy policy
+                      // Navigate to Privacy Policy screen
+                      Navigator.pushNamed(context, AppRoutes.privacyPolicy);
                     },
                   ),
                   _buildDivider(),
@@ -131,7 +132,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     icon: Icons.description_outlined,
                     title: 'Terms of Service',
                     onTap: () {
-                      // TODO: Open terms of service
+                      // Navigate to Terms of Service screen
+                      Navigator.pushNamed(context, AppRoutes.termsOfService);
                     },
                   ),
                 ]),
@@ -242,9 +244,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
             Icon(
-              Icons.chevron_right,
+              Icons.arrow_forward_ios,
               color: AppColors.textLight,
-              size: 20.sp,
+              size: 16.sp,
             ),
           ],
         ),
@@ -361,7 +363,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Cancel',
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),
             ),
@@ -372,8 +373,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Sign Out',
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
                 color: Colors.red,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ),
@@ -381,32 +382,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
 
-    // If user confirmed sign out
-    if (shouldSignOut == true && mounted) {
+    if (shouldSignOut == true) {
       try {
-        // Show loading indicator
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (_) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-
-        // Sign out from Firebase
         await FirebaseAuth.instance.signOut();
-        
-        // Clear user data from provider
-        if (mounted) {
-          await context.read<UserProvider>().signOut();
-        }
-
-        // Close loading dialog
-        if (mounted) {
-          Navigator.pop(context);
-        }
-
-        // Navigate to welcome screen and clear navigation stack
         if (mounted) {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -415,16 +393,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         }
       } catch (e) {
-        // Close loading dialog if error
-        if (mounted) {
-          Navigator.pop(context);
-        }
-
-        // Show error message
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to sign out: ${e.toString()}'),
+              content: Text('Failed to sign out: $e'),
               backgroundColor: Colors.red,
             ),
           );
