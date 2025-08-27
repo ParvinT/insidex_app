@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -75,20 +76,21 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _checkAuthAndNavigate() {
-    // Animasyon bittikten kısa süre sonra yönlendir
     Future.delayed(const Duration(seconds: 4), () async {
       if (!mounted) return;
 
+      // Get Firebase user
       final user = FirebaseAuth.instance.currentUser;
 
-      // Yeni akış: OTP doğrulanmadan hesap oluşmadığı için
-      // sadece currentUser'a bakmamız yeterli.
-      if (user == null) {
-        // Oturum yok → Welcome/Login
-        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
-      } else {
-        // Oturum var → Home
+      if (!mounted) return;
+
+      if (user != null) {
+        // User is logged in -> Go directly to Home
         Navigator.pushReplacementNamed(context, AppRoutes.home);
+      } else {
+        // User is not logged in -> Start from onboarding
+        // This ensures users always see onboarding before registration
+        Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
       }
     });
   }

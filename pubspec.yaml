@@ -16,6 +16,8 @@ dependencies:
   google_fonts: ^6.1.0
   flutter_svg: ^2.0.9
 
+  firebase_analytics: ^11.0.1
+
   # State Management
   provider: ^6.1.1
 
@@ -54,10 +56,9 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-
-flutter_icons:
-  android: true
-  ios: true
-  image_path: "assets/icons/app_icon.png"
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+#flutter_icons:
+#android: true
+#ios: true
+#image_path: "assets/icons/app_icon.png"
+#adaptive_icon_background: "#FFFFFF"
+#adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"

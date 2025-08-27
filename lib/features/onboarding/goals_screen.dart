@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/models/user_preferences.dart';
 import 'gender_screen.dart';
+import '../../services/analytics_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/routes/app_routes.dart';
 
 class GoalsScreen extends StatefulWidget {
   const GoalsScreen({super.key});
@@ -39,6 +42,9 @@ class _GoalsScreenState extends State<GoalsScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _animationController.forward();
     });
+
+    AnalyticsService.logOnboardingStart();
+    AnalyticsService.logScreenView('goals_screen');
   }
 
   @override
@@ -58,6 +64,28 @@ class _GoalsScreenState extends State<GoalsScreen>
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              // Skip onboarding
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('onboardingSkipped', true);
+
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+              }
+            },
+            child: Text(
+              'Skip',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -136,6 +164,9 @@ class _GoalsScreenState extends State<GoalsScreen>
                 child: ElevatedButton(
                   onPressed: _selectedGoals.isNotEmpty
                       ? () {
+                          AnalyticsService.logGoalsSelected(
+                            _selectedGoals.map((g) => g.title).toList(),
+                          );
                           Navigator.push(
                             context,
                             MaterialPageRoute(

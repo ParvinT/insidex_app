@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/models/user_preferences.dart';
 import 'birth_date_screen.dart';
+import '../../services/analytics_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../core/routes/app_routes.dart';
 
 class GenderScreen extends StatefulWidget {
   final List<UserGoal> selectedGoals;
@@ -21,6 +24,12 @@ class _GenderScreenState extends State<GenderScreen> {
   Gender? _selectedGender;
 
   @override
+  void initState() {
+    super.initState();
+    AnalyticsService.logScreenView('gender_screen');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -31,6 +40,30 @@ class _GenderScreenState extends State<GenderScreen> {
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              // Save what we have so far
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setStringList(
+                  'goals', widget.selectedGoals.map((g) => g.title).toList());
+              await prefs.setBool('onboardingSkipped', true);
+
+              if (mounted) {
+                Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+              }
+            },
+            child: Text(
+              'Skip',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: SafeArea(
         child: Padding(

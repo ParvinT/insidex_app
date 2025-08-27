@@ -10,6 +10,8 @@ import 'package:provider/provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/analytics_service.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -113,6 +115,47 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       _toast('Account created successfully!');
 
+      final prefs = await SharedPreferences.getInstance();
+      final goals = prefs.getStringList('goals') ?? [];
+      final gender = prefs.getString('gender');
+      final birthDateString = prefs.getString('birthDate');
+      final userAge = prefs.getInt('userAge');
+
+      if (user != null &&
+          (goals.isNotEmpty || gender != null || birthDateString != null)) {
+        try {
+          // Create a map with only non-null values
+          final Map<String, dynamic> userData = {
+            'onboardingComplete': true,
+            'updatedAt': FieldValue.serverTimestamp(),
+          };
+
+          if (goals.isNotEmpty) userData['goals'] = goals;
+          if (gender != null) userData['gender'] = gender.split('.').last;
+          if (birthDateString != null) {
+            userData['birthDate'] =
+                Timestamp.fromDate(DateTime.parse(birthDateString));
+          }
+          if (userAge != null) userData['age'] = userAge;
+
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update(userData);
+
+          // Set analytics user properties
+          await AnalyticsService.setUserProperties(
+            userId: user.uid,
+            goals: goals,
+            gender: gender?.split('.').last,
+            age: userAge,
+          );
+
+          debugPrint('Onboarding data saved to Firestore');
+        } catch (e) {
+          debugPrint('Error saving onboarding data: $e');
+        }
+      }
       // Navigate to home
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
