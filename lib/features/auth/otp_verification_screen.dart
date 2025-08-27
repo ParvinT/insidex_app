@@ -1,11 +1,15 @@
+// lib/features/auth/otp_verification_screen.dart
+
 import 'dart:async';
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:insidex_app/core/routes/app_routes.dart';
+import 'package:provider/provider.dart';
+import '../../core/routes/app_routes.dart';
+import '../../providers/user_provider.dart';
+import '../../services/firebase_service.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -24,6 +28,12 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   bool _resending = false;
   Timer? _t;
   int _left = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _countdown(); // Start countdown on init
+  }
 
   @override
   void dispose() {
@@ -57,27 +67,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   Future<void> _resend() async {
     if (_left > 0 || _resending) return;
     setState(() => _resending = true);
+
     try {
-      final code = _gen();
+      final result = await FirebaseService.resendOTP(widget.email);
 
-      await _firestore.collection('otp_verifications').doc(widget.email).set({
-        'email': widget.email,
-        'code': code,
-        'createdAt': FieldValue.serverTimestamp(),
-        'expiresAt':
-            Timestamp.fromDate(DateTime.now().add(const Duration(minutes: 10))),
-        'attempts': 0,
-      }, SetOptions(merge: true));
-
-      await _firestore.collection('mail_queue').add({
-        'to': widget.email,
-        'subject': 'Your INSIDEX password',
-        'text': 'Your password: $code',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-
-      _toast('Code sent to ${widget.email}');
-      _countdown();
+      if (result['success']) {
+        _toast('New code sent to ${widget.email}');
+        _countdown();
+      } else {
+        _toast(result['error'] ?? 'Failed to send code', bg: Colors.red);
+      }
     } catch (e) {
       _toast('Failed to send code. $e', bg: Colors.red);
     } finally {
@@ -87,85 +86,34 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
   Future<void> _verify() async {
     final input = _codeCtrl.text.trim();
-    if (input.length < 4) {
-      _toast('Please enter the code.');
+    if (input.length != 6) {
+      _toast('Please enter the 6-digit code.');
       return;
     }
     setState(() => _busy = true);
 
     try {
-      // 1) OTP kaydını al
-      final doc = await _firestore
-          .collection('otp_verifications')
-          .doc(widget.email)
-          .get();
-      if (!doc.exists) {
-        _toast('No code found. Please request a new one.', bg: Colors.red);
-        return;
-      }
-      final data = doc.data()!;
-      final server =
-          (data['code'] ?? data['otp'] ?? data['passcode'])?.toString();
-      final expiresAt = (data['expiresAt'] as Timestamp?)?.toDate();
-      if (expiresAt != null && DateTime.now().isAfter(expiresAt)) {
-        _toast('Code expired. Request a new one.', bg: Colors.red);
-        return;
-      }
-      if (server == null || input != server) {
-        try {
-          await doc.reference.update({'attempts': FieldValue.increment(1)});
-        } catch (_) {}
-        _toast('Incorrect code. Try again.', bg: Colors.red);
+      // Use Firebase service to verify OTP and create account
+      final result = await FirebaseService.verifyOTPAndCreateAccount(
+        email: widget.email,
+        code: input,
+      );
+
+      if (!result['success']) {
+        _toast(result['error'] ?? 'Verification failed', bg: Colors.red);
+        setState(() => _busy = false);
         return;
       }
 
-      // HESABI O ANDA OLUŞTUR
-      UserCredential cred;
-      try {
-        cred = await _auth.createUserWithEmailAndPassword(
-          email: widget.email,
-          password: input, // mailde gelen 6 haneli kod
-        );
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'email-already-in-use') {
-          _toast('Account already exists. Please log in.');
-          if (!mounted) return;
-          Navigator.pushNamedAndRemoveUntil(
-              context, AppRoutes.welcome, (_) => false);
-          return;
-        } else {
-          _toast('Verification failed. ${e.message ?? e.code}', bg: Colors.red);
-          return;
-        }
+      // Success! Load user data
+      final user = result['user'] as User;
+      if (mounted) {
+        await context.read<UserProvider>().loadUserData(user.uid);
       }
 
-      // 4) adı pending dokümandan çek (varsa)
-      final name = (data['name'] ?? '') as String;
+      _toast('Account created successfully!');
 
-      // 5) kullanıcı profili
-      await cred.user?.updateDisplayName(name);
-
-      await _firestore.collection('users').doc(cred.user!.uid).set({
-        'uid': cred.user!.uid,
-        'email': widget.email,
-        'name': name,
-        'createdAt': FieldValue.serverTimestamp(),
-        'lastActiveAt': FieldValue.serverTimestamp(),
-        'isPremium': false,
-        'favoriteSessionIds': [],
-        'completedSessionIds': [],
-        'totalListeningMinutes': 0,
-        'emailVerified': true,
-        'emailVerifiedAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
-
-      // 6) OTP dokümanını temizle
-      try {
-        await doc.reference.delete();
-      } catch (_) {}
-
-      _toast('Account created and verified!');
-
+      // Navigate to home
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
     } catch (e) {

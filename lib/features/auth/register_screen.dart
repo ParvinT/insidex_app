@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
@@ -12,8 +11,6 @@ import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_login_button.dart';
 import '../../services/firebase_service.dart';
-import '../../services/email_service.dart';
-import '../../providers/user_provider.dart';
 import 'otp_verification_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -72,7 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => _isLoading = true);
 
-    // Register user with Firebase
+    // Only create OTP record, NOT Firebase Auth account
     final result = await FirebaseService.signUp(
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
@@ -84,23 +81,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
 
     if (result['success']) {
-      // Initialize user data in provider
-      final user = result['user'];
-      if (user != null) {
-        await context.read<UserProvider>().loadUserData(user.uid);
-
-        // Queue welcome email for sending
-        await EmailService.queueWelcomeEmail(
-          userId: user.uid,
-          email: user.email ?? '',
-          name: _nameController.text.trim(),
-        );
-      }
-
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Account created! Please verify your email.'),
+          content: Text('Verification code sent! Please check your email.'),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 3),
         ),
@@ -434,9 +418,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     GestureDetector(
                       onTap: () {
                         Navigator.pushReplacementNamed(
-                          context,
-                          AppRoutes.login,
-                        );
+                            context, AppRoutes.login);
                       },
                       child: Text(
                         'Sign In',
