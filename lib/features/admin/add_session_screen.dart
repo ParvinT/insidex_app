@@ -46,10 +46,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   double _uploadProgress = 0.0;
   String _uploadStatus = '';
 
-  // Durations
-  int _introDuration = 120; // 2 minutes default
-  int _subliminalDuration = 7200; // 2 hours default
-
   @override
   void initState() {
     super.initState();
@@ -85,12 +81,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     if (session['intro'] != null) {
       _introTitleController.text = session['intro']['title'] ?? '';
       _introDescriptionController.text = session['intro']['description'] ?? '';
-      _introDuration = session['intro']['duration'] ?? 120;
     }
 
     if (session['subliminal'] != null) {
       _subliminalTitleController.text = session['subliminal']['title'] ?? '';
-      _subliminalDuration = session['subliminal']['duration'] ?? 7200;
 
       if (session['subliminal']['affirmations'] != null) {
         _affirmationsController.text =
@@ -317,14 +311,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           'description': _introDescriptionController.text.trim(),
           'audioUrl':
               introUrl ?? widget.sessionToEdit?['intro']?['audioUrl'] ?? '',
-          'duration': _introDuration,
+          'duration': 0, // Will be calculated from actual audio file
         },
         'subliminal': {
           'title': _subliminalTitleController.text.trim(),
           'audioUrl': subliminalUrl ??
               widget.sessionToEdit?['subliminal']?['audioUrl'] ??
               '',
-          'duration': _subliminalDuration,
+          'duration': 0, // Will be calculated from actual audio file
           'affirmations': _affirmationsController.text
               .split('\n')
               .where((line) => line.isNotEmpty)
@@ -384,21 +378,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     }
   }
 
-  // Duration formatter helper method
-  String _formatDuration(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-    final secs = seconds % 60;
-
-    if (hours > 0) {
-      return '${hours}h ${minutes}m';
-    } else if (minutes > 0) {
-      return '${minutes}m ${secs}s';
-    } else {
-      return '${secs}s';
-    }
-  }
-
   // BUILD METHODS
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -444,75 +423,245 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           decoration: InputDecoration(
             labelText: 'Description',
             hintText: 'Enter session description',
+            alignLabelWithHint: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
           ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Please enter a description';
+            }
+            return null;
+          },
         ),
 
         SizedBox(height: 16.h),
 
-        // Category & Emoji Row
-        Row(
-          children: [
-            // Category Dropdown
-            Expanded(
-              flex: 2,
-              child: DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: InputDecoration(
-                  labelText: 'Category',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.r),
+        // Category Dropdown
+        DropdownButtonFormField<String>(
+          value: _selectedCategory,
+          decoration: InputDecoration(
+            labelText: 'Category',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+          ),
+          items: _categories.map((category) {
+            return DropdownMenuItem(
+              value: category,
+              child: Text(category),
+            );
+          }).toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedCategory = value;
+            });
+          },
+          validator: (value) {
+            if (value == null) {
+              return 'Please select a category';
+            }
+            return null;
+          },
+        ),
+
+        SizedBox(height: 16.h),
+
+        // Emoji Selector
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.all(12.w),
+                child: Text(
+                  'Select Emoji',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.grey.shade600,
                   ),
                 ),
-                items: _categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                },
-                validator: (value) {
-                  if (value == null) {
-                    return 'Please select a category';
-                  }
-                  return null;
-                },
+              ),
+              Container(
+                height: 50.h,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      '🎵',
+                      '🌙',
+                      '💭',
+                      '🧘',
+                      '🎯',
+                      '💡',
+                      '⚡',
+                      '🌊',
+                      '🔮',
+                      '✨',
+                      '🌟',
+                      '💫',
+                      '🌈',
+                      '🦋',
+                      '🌸',
+                      '🍃'
+                    ].map((emoji) => _buildEmojiOption(emoji)).toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmojiOption(String emoji) {
+    bool isSelected = _selectedEmoji == emoji;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedEmoji = emoji;
+        });
+      },
+      child: Container(
+        width: 45.w,
+        height: 45.w,
+        margin: EdgeInsets.only(right: 8.w),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryGold.withOpacity(0.2)
+              : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(10.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryGold : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: Text(emoji, style: TextStyle(fontSize: 22.sp)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFileUploadCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    required bool hasFile,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: hasFile
+              ? AppColors.primaryGold.withOpacity(0.1)
+              : Colors.grey.shade50,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(
+            color: hasFile ? AppColors.primaryGold : Colors.grey.shade300,
+            width: hasFile ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: hasFile
+                    ? AppColors.primaryGold.withOpacity(0.2)
+                    : Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Icon(
+                icon,
+                color: hasFile ? AppColors.primaryGold : Colors.grey,
+                size: 24.sp,
               ),
             ),
-
             SizedBox(width: 16.w),
-
-            // Emoji Selector
             Expanded(
-              child: InkWell(
-                onTap: () {
-                  // Show emoji picker dialog
-                  _showEmojiPicker();
-                },
-                child: Container(
-                  height: 56.h,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade400),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _selectedEmoji,
-                      style: TextStyle(fontSize: 28.sp),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: Colors.grey.shade600,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
+            ),
+            Icon(
+              hasFile ? Icons.check_circle : Icons.upload_file,
+              color: hasFile ? AppColors.primaryGold : Colors.grey,
+              size: 24.sp,
             ),
           ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildUploadProgress() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: AppColors.primaryGold.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: AppColors.primaryGold.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _uploadStatus,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          LinearProgressIndicator(
+            value: _uploadProgress / 100,
+            backgroundColor: Colors.grey.shade300,
+            valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            '${_uploadProgress.toStringAsFixed(0)}%',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -574,66 +723,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           onTap: _pickIntroAudio,
           hasFile: _introAudio != null,
         ),
-
-        SizedBox(height: 16.h),
-
-        // Duration Input - IMPROVED VERSION
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Introduction Duration',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: (_introDuration ~/ 60).toString(),
-                    decoration: InputDecoration(
-                      labelText: 'Minutes',
-                      hintText: 'Enter duration',
-                      suffixText: 'min',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final minutes = int.tryParse(value) ?? 2;
-                      setState(() {
-                        _introDuration = minutes * 60;
-                        print('Intro duration set to: $_introDuration seconds');
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.greyLight,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    _formatDuration(_introDuration),
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -668,270 +757,20 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         SizedBox(height: 16.h),
 
-        // Duration Input - IMPROVED VERSION
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Subliminal Duration',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 8.h),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    initialValue: (_subliminalDuration ~/ 60).toString(),
-                    decoration: InputDecoration(
-                      labelText: 'Minutes',
-                      hintText: 'Enter duration',
-                      suffixText: 'min',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      final minutes = int.tryParse(value) ?? 120;
-                      setState(() {
-                        _subliminalDuration = minutes * 60;
-                        print(
-                            'Subliminal duration set to: $_subliminalDuration seconds');
-                      });
-                    },
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-                  decoration: BoxDecoration(
-                    color: AppColors.greyLight,
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Text(
-                    _formatDuration(_subliminalDuration),
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Tip: For 2 hours enter 120, for 90 minutes enter 90',
-              style: GoogleFonts.inter(
-                fontSize: 11.sp,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-
-        SizedBox(height: 16.h),
-
         // Affirmations
         TextFormField(
           controller: _affirmationsController,
           maxLines: 5,
           decoration: InputDecoration(
-            labelText: 'Affirmations',
-            hintText: 'Enter affirmations (one per line)',
+            labelText: 'Subliminal Affirmations',
+            hintText: 'Enter each affirmation on a new line',
+            alignLabelWithHint: true,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildFileUploadCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-    required bool hasFile,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12.r),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: hasFile ? AppColors.primaryGold : Colors.grey.shade400,
-            width: hasFile ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(12.r),
-          color: hasFile
-              ? AppColors.primaryGold.withOpacity(0.05)
-              : Colors.transparent,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 32.sp,
-              color: hasFile ? AppColors.primaryGold : Colors.grey.shade600,
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              hasFile ? Icons.check_circle : Icons.upload_file,
-              color: hasFile ? AppColors.primaryGold : Colors.grey.shade400,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUploadProgress() {
-    return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColors.primaryGold.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(
-          color: AppColors.primaryGold,
-          width: 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            _uploadStatus,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          LinearProgressIndicator(
-            value: _uploadProgress / 100,
-            backgroundColor: Colors.grey.shade300,
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            '${_uploadProgress.toStringAsFixed(1)}%',
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEmojiPicker() {
-    final emojis = [
-      '🎵',
-      '😴',
-      '💪',
-      '🎯',
-      '💰',
-      '❤️',
-      '🧠',
-      '✨',
-      '🌟',
-      '🚀',
-      '💡',
-      '🧘',
-      '🏃',
-      '📚',
-      '🎨',
-      '🌈',
-      '🔥',
-      '💎',
-      '🌙',
-      '☀️',
-      '🌺',
-      '🍀',
-      '🦋',
-      '🌊'
-    ];
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Select Emoji'),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: GridView.builder(
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 6,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: emojis.length,
-            itemBuilder: (context, index) {
-              return InkWell(
-                onTap: () {
-                  setState(() {
-                    _selectedEmoji = emojis[index];
-                  });
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: _selectedEmoji == emojis[index]
-                          ? AppColors.primaryGold
-                          : Colors.grey.shade300,
-                      width: 2,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Center(
-                    child: Text(
-                      emojis[index],
-                      style: TextStyle(fontSize: 24.sp),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
     );
   }
 
@@ -942,6 +781,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
           onPressed: () => Navigator.pop(context),

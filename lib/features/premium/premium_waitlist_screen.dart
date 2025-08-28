@@ -129,6 +129,14 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
     }
   }
 
+  // lib/features/premium/premium_waitlist_screen.dart
+
+// SADECE build metodunu değiştir (satır 125 civarından başlayarak)
+
+  // lib/features/premium/premium_waitlist_screen.dart
+
+// SADECE build metodunu değiştir (satır 125 civarından başlayarak)
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -144,83 +152,81 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
           ),
         ),
         child: SafeArea(
-          child: SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height -
-                    MediaQuery.of(context).padding.top -
-                    MediaQuery.of(context).padding.bottom,
+          child: Column(
+            children: [
+              // Close button
+              Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
               ),
-              child: Column(
-                children: [
-                  // Close button
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white),
-                      onPressed: () => Navigator.pop(context),
+
+              // Premium Features Showcase - Sabit üst kısım
+              SizedBox(
+                height: 280.h,
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() => _currentPage = index);
+                  },
+                  children: [
+                    _buildFeatureCard(
+                      icon: Icons.download_rounded,
+                      title: 'Unlimited Offline Downloads',
+                      description:
+                          'Download all sessions and listen anywhere, anytime',
                     ),
-                  ),
-
-                  // Premium Features Showcase
-                  SizedBox(
-                    height: 280.h,
-                    child: PageView(
-                      controller: _pageController,
-                      onPageChanged: (index) {
-                        setState(() => _currentPage = index);
-                      },
-                      children: [
-                        _buildFeatureCard(
-                          icon: Icons.download_rounded,
-                          title: 'Unlimited Offline Downloads',
-                          description:
-                              'Download all sessions and listen anywhere, anytime',
-                        ),
-                        _buildFeatureCard(
-                          icon: Icons.all_inclusive,
-                          title: 'Access All Sessions',
-                          description:
-                              'Unlock our entire library of premium sessions',
-                        ),
-                        _buildFeatureCard(
-                          icon: Icons.analytics_outlined,
-                          title: 'Advanced Progress Tracking',
-                          description:
-                              'Get detailed insights into your healing journey',
-                        ),
-                      ],
+                    _buildFeatureCard(
+                      icon: Icons.all_inclusive,
+                      title: 'Access All Sessions',
+                      description:
+                          'Unlock our entire library of premium sessions',
                     ),
-                  ),
+                    _buildFeatureCard(
+                      icon: Icons.analytics_outlined,
+                      title: 'Advanced Progress Tracking',
+                      description:
+                          'Get detailed insights into your healing journey',
+                    ),
+                  ],
+                ),
+              ),
 
-                  // Page indicators
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(3, (index) {
-                      return Container(
-                        margin: EdgeInsets.symmetric(horizontal: 4.w),
-                        width: _currentPage == index ? 24.w : 8.w,
-                        height: 8.h,
-                        decoration: BoxDecoration(
-                          color: _currentPage == index
-                              ? Colors.white
-                              : Colors.white.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                      );
-                    }),
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // Waitlist Form
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: 20.w),
-                    padding: EdgeInsets.all(20.w),
+              // Page indicators
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  return Container(
+                    margin: EdgeInsets.symmetric(horizontal: 4.w),
+                    width: _currentPage == index ? 24.w : 8.w,
+                    height: 8.h,
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20.r),
+                      color: _currentPage == index
+                          ? Colors.white
+                          : Colors.white.withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(4.r),
                     ),
+                  );
+                }),
+              ),
+
+              SizedBox(height: 20.h),
+
+              // Waitlist Form - Expanded ile scroll edilebilir
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(left: 20.w, right: 20.w, top: 0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(20.r),
+                      topRight: Radius.circular(20.r),
+                    ),
+                  ),
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(20.w, 20.w, 20.w, 40.w),
                     child: Form(
                       key: _formKey,
                       child: Column(
@@ -230,47 +236,32 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                             'Premium Coming Soon!',
                             style: GoogleFonts.inter(
                               fontSize: 20.sp,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w700,
                               color: AppColors.textPrimary,
                             ),
-                            textAlign: TextAlign.center,
                           ),
+
                           SizedBox(height: 8.h),
+
                           Text(
                             'Be the first to know when we launch',
                             style: GoogleFonts.inter(
-                              fontSize: 13.sp,
+                              fontSize: 14.sp,
                               color: AppColors.textSecondary,
                             ),
-                            textAlign: TextAlign.center,
                           ),
-                          SizedBox(height: 16.h),
 
-                          // Email input
+                          SizedBox(height: 24.h),
+
+                          // Email field
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
-                            style: GoogleFonts.inter(fontSize: 14.sp),
                             decoration: InputDecoration(
                               labelText: 'Email Address',
-                              labelStyle: GoogleFonts.inter(fontSize: 13.sp),
-                              hintText: 'your@email.com',
-                              hintStyle: GoogleFonts.inter(fontSize: 13.sp),
-                              prefixIcon:
-                                  Icon(Icons.email_outlined, size: 20.sp),
-                              contentPadding: EdgeInsets.symmetric(
-                                horizontal: 12.w,
-                                vertical: 10.h,
-                              ),
+                              prefixIcon: Icon(Icons.email_outlined),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12.r),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                                borderSide: const BorderSide(
-                                  color: Color(0xFF667eea),
-                                  width: 2,
-                                ),
                               ),
                             ),
                             validator: (value) {
@@ -357,9 +348,10 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                           SizedBox(height: 16.h),
 
                           // Submit button
-                          SizedBox(
+                          Container(
                             width: double.infinity,
-                            height: 44.h,
+                            height: 60.h.clamp(52.0, 65.0),
+                            margin: EdgeInsets.symmetric(vertical: 8.h),
                             child: ElevatedButton(
                               onPressed: _isSubmitting || !_agreedToPrivacy
                                   ? null
@@ -383,7 +375,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                                   : Text(
                                       'Join Early Access Waitlist',
                                       style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
+                                        fontSize: 16.sp,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                       ),
@@ -401,15 +393,18 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                               color: AppColors.textLight,
                             ),
                           ),
+
+                          // Extra bottom padding for safety
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).padding.bottom + 20.h),
                         ],
                       ),
                     ),
                   ),
-
-                  SizedBox(height: 20.h),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

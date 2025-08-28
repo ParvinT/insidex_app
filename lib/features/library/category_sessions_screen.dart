@@ -144,16 +144,9 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
               final session = sessionDoc.data() as Map<String, dynamic>;
               final sessionId = sessionDoc.id;
 
-              // Calculate total duration
-              final introDuration = session['intro']?['duration'] ?? 0;
-              final subliminalDuration =
-                  session['subliminal']?['duration'] ?? 0;
-              final totalDuration = introDuration + subliminalDuration;
-
               return _buildSessionCard(
                 sessionId: sessionId,
                 sessionData: session,
-                totalDuration: totalDuration,
               );
             },
           );
@@ -165,7 +158,6 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
   Widget _buildSessionCard({
     required String sessionId,
     required Map<String, dynamic> sessionData,
-    required int totalDuration,
   }) {
     return GestureDetector(
       onTap: () {
@@ -200,7 +192,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
         ),
         child: Column(
           children: [
-            // Image Section
+            // Image Section - ESKİSİ GİBİ AYNEN KALSIN
             Container(
               height: 180.h,
               decoration: BoxDecoration(
@@ -219,7 +211,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
               ),
               child: Stack(
                 children: [
-                  // Background Image
+                  // Background Image or Emoji - ESKİSİ GİBİ
                   if (sessionData['backgroundImage'] != null &&
                       sessionData['backgroundImage'].toString().isNotEmpty)
                     ClipRRect(
@@ -233,43 +225,49 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                         height: double.infinity,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => Container(
-                          color: AppColors.greyLight,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.primaryGold.withOpacity(0.8),
+                                AppColors.primaryGold.withOpacity(0.4),
+                              ],
+                            ),
+                          ),
                         ),
                         errorWidget: (context, url, error) => Container(
-                          color: AppColors.greyLight,
-                          child: Icon(
-                            Icons.image_not_supported,
-                            size: 40.sp,
-                            color: AppColors.textSecondary,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.primaryGold.withOpacity(0.8),
+                                AppColors.primaryGold.withOpacity(0.4),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     )
                   else
-                    Center(
-                      child: Text(
-                        sessionData['emoji'] ?? '🎵',
-                        style: TextStyle(fontSize: 60.sp),
+                    // Resim yoksa sadece gradient göster, emoji yok
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(16.r),
+                          topRight: Radius.circular(16.r),
+                        ),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.primaryGold.withOpacity(0.8),
+                            AppColors.primaryGold.withOpacity(0.4),
+                          ],
+                        ),
                       ),
                     ),
-
-                  // Gradient Overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16.r),
-                        topRight: Radius.circular(16.r),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.3),
-                        ],
-                      ),
-                    ),
-                  ),
 
                   // Play Button Overlay
                   Center(
@@ -294,130 +292,49 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                       ),
                     ),
                   ),
-
-                  // Duration Badge
-                  Positioned(
-                    top: 12.h,
-                    right: 12.w,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 6.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        _formatDuration(totalDuration),
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
 
-            // Content Section
+            // Content Section - SADECE BAŞLIK VE KATEGORİ
             Padding(
               padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
                   // Title
-                  Text(
-                    sessionData['title'] ?? 'Untitled Session',
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-
-                  SizedBox(height: 8.h),
-
-                  // Description
-                  if (sessionData['description'] != null &&
-                      sessionData['description'].toString().isNotEmpty)
-                    Text(
-                      sessionData['description'],
+                  Expanded(
+                    child: Text(
+                      sessionData['title'] ?? 'Untitled Session',
                       style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: AppColors.textSecondary,
-                        height: 1.4,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                  ),
 
-                  SizedBox(height: 12.h),
+                  SizedBox(width: 8.w),
 
-                  // Info Row
-                  Row(
-                    children: [
-                      // Introduction
-                      if (sessionData['intro'] != null) ...[
-                        Icon(
-                          Icons.record_voice_over,
-                          size: 16.sp,
-                          color: AppColors.primaryGold,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          'Intro ${_formatDuration(sessionData['intro']['duration'] ?? 0)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                      ],
-
-                      // Subliminal
-                      if (sessionData['subliminal'] != null) ...[
-                        Icon(
-                          Icons.waves,
-                          size: 16.sp,
-                          color: AppColors.primaryGold,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          'Subliminal ${_formatDuration(sessionData['subliminal']['duration'] ?? 0)}',
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-
-                      const Spacer(),
-
-                      // Category Badge
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryGold.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Text(
-                          sessionData['category'] ?? 'General',
-                          style: GoogleFonts.inter(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.primaryGold,
-                          ),
-                        ),
+                  // Category Badge
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryGold.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      sessionData['category'] ?? 'General',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.primaryGold,
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),

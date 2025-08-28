@@ -399,7 +399,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
               // Continue Button
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
+                height: 60.h,
                 child: ElevatedButton(
                   onPressed:
                       (_selectedDate != null && _isAgeValid && !_isLoading)
@@ -447,7 +447,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
             height: 4.h,
             margin: EdgeInsets.only(right: index < 2 ? 8.w : 0),
             decoration: BoxDecoration(
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -494,7 +494,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                     child: Text(
                       'Done',
                       style: GoogleFonts.inter(
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),

@@ -158,38 +158,41 @@ class _GoalsScreenState extends State<GoalsScreen>
 
               // Continue Button
               SizedBox(height: 24.h),
-              SizedBox(
-                width: double.infinity,
-                height: 56.h,
-                child: ElevatedButton(
-                  onPressed: _selectedGoals.isNotEmpty
-                      ? () {
-                          AnalyticsService.logGoalsSelected(
-                            _selectedGoals.map((g) => g.title).toList(),
-                          );
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => GenderScreen(
-                                selectedGoals: _selectedGoals.toList(),
+              Padding(
+                padding: EdgeInsets.only(bottom: 20.h),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 60.h,
+                  child: ElevatedButton(
+                    onPressed: _selectedGoals.isNotEmpty
+                        ? () {
+                            AnalyticsService.logGoalsSelected(
+                              _selectedGoals.map((g) => g.title).toList(),
+                            );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => GenderScreen(
+                                  selectedGoals: _selectedGoals.toList(),
+                                ),
                               ),
-                            ),
-                          );
-                        }
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.greyLight,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.r),
+                            );
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.textPrimary,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: AppColors.greyLight,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'Continue',
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      'Continue',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),

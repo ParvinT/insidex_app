@@ -8,8 +8,7 @@ import '../../services/audio_player_service.dart';
 import 'widgets/player_modals.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:marquee/marquee.dart';
 
 /// Expected session shape:
 /// {
@@ -65,8 +64,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   void initState() {
     super.initState();
 
-    _session =
-        widget.sessionData ??
+    _session = widget.sessionData ??
         {
           'title': 'Session',
           'intro': {'title': 'Introduction', 'audioUrl': '', 'duration': 120},
@@ -80,6 +78,52 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _initializeAudio();
     _addToRecentSessions();
     _checkFavoriteStatus();
+  }
+
+  Widget _buildScrollingText(String text, TextStyle style,
+      {double maxWidth = double.infinity}) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Calculate text width
+        final textPainter = TextPainter(
+          text: TextSpan(text: text, style: style),
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: double.infinity);
+
+        final availableWidth =
+            maxWidth != double.infinity ? maxWidth : constraints.maxWidth;
+
+        // If text fits, return normal Text
+        if (textPainter.width <= availableWidth) {
+          return Text(
+            text,
+            style: style,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+          );
+        }
+
+        // If doesn't fit, return Marquee
+        return SizedBox(
+          height: style.fontSize! * 1.5,
+          child: Marquee(
+            text: text,
+            style: style,
+            scrollAxis: Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            blankSpace: 50.0,
+            velocity: 30.0,
+            pauseAfterRound: const Duration(seconds: 2),
+            startPadding: 10.0,
+            accelerationDuration: const Duration(seconds: 1),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: const Duration(milliseconds: 500),
+            decelerationCurve: Curves.easeOut,
+          ),
+        );
+      },
+    );
   }
 
   void _checkFavoriteStatus() async {
@@ -114,9 +158,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             .collection('users')
             .doc(user.uid)
             .update({
-              'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
-              'lastActiveAt': FieldValue.serverTimestamp(),
-            });
+          'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
+          'lastActiveAt': FieldValue.serverTimestamp(),
+        });
         print('Added to recent sessions: ${_session['id']}');
       } catch (e) {
         print('Error adding to recent sessions: $e');
@@ -222,9 +266,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 .collection('users')
                 .doc(user.uid)
                 .update({
-                  'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
-                  'lastActiveAt': FieldValue.serverTimestamp(),
-                });
+              'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
+              'lastActiveAt': FieldValue.serverTimestamp(),
+            });
             print('Added to recent: ${_session['id']}');
           } catch (e) {
             print('Error adding to recent: $e');
@@ -419,25 +463,31 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
         children: [
-          Text(
-            _session['title'] ?? 'Unknown Session',
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w700,
-              color: Colors.black,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: _buildScrollingText(
+              _session['title'] ?? 'Untitled Session',
+              GoogleFonts.inter(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+              maxWidth: MediaQuery.of(context).size.width - 40.w,
             ),
-            textAlign: TextAlign.center,
           ),
           SizedBox(height: 8.h),
-          Text(
-            _currentTrack == 'intro'
-                ? _titleFor('intro', fallback: 'Introduction')
-                : _titleFor('subliminal', fallback: 'Subliminal'),
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: const Color(0xFF6E6E6E),
+          SizedBox(
+            width: 150.w,
+            child: _buildScrollingText(
+              _titleFor(_currentTrack,
+                  fallback:
+                      _currentTrack == 'intro' ? 'Introduction' : 'Subliminal'),
+              GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: const Color(0xFF7A7A7A),
+              ),
+              maxWidth: 150.w,
             ),
-            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -638,7 +688,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               );
             },
           ),
-
           IconButton(
             icon: const Icon(Icons.playlist_add, color: Color(0xFFBDBDBD)),
             onPressed: () async {
@@ -649,10 +698,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                       .collection('users')
                       .doc(user.uid)
                       .update({
-                        'playlistSessionIds': FieldValue.arrayUnion([
-                          _session['id'],
-                        ]),
-                      });
+                    'playlistSessionIds': FieldValue.arrayUnion([
+                      _session['id'],
+                    ]),
+                  });
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -683,19 +732,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                         .collection('users')
                         .doc(user.uid)
                         .update({
-                          'favoriteSessionIds': FieldValue.arrayUnion([
-                            _session['id'],
-                          ]),
-                        });
+                      'favoriteSessionIds': FieldValue.arrayUnion([
+                        _session['id'],
+                      ]),
+                    });
                   } else {
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(user.uid)
                         .update({
-                          'favoriteSessionIds': FieldValue.arrayRemove([
-                            _session['id'],
-                          ]),
-                        });
+                      'favoriteSessionIds': FieldValue.arrayRemove([
+                        _session['id'],
+                      ]),
+                    });
                   }
                 } catch (e) {
                   print('Error toggling favorite: $e');

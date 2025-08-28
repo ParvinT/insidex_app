@@ -116,7 +116,7 @@ class _GenderScreenState extends State<GenderScreen> {
               // Continue Button
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
+                height: 60.h,
                 child: ElevatedButton(
                   onPressed: _selectedGender != null
                       ? () {
@@ -162,7 +162,7 @@ class _GenderScreenState extends State<GenderScreen> {
           child: Container(
             height: 4.h,
             decoration: BoxDecoration(
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -172,7 +172,7 @@ class _GenderScreenState extends State<GenderScreen> {
           child: Container(
             height: 4.h,
             decoration: BoxDecoration(
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),

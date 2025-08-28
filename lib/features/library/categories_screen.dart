@@ -8,6 +8,7 @@ import '../../core/constants/app_colors.dart';
 import 'category_sessions_screen.dart'; // YENİ IMPORT
 import '../player/audio_player_screen.dart'; // AUDIO PLAYER IMPORT
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -128,7 +129,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         centerTitle: false,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.primaryGold,
+          indicatorColor: AppColors.textPrimary,
           indicatorWeight: 3,
           labelColor: AppColors.textPrimary,
           unselectedLabelColor: AppColors.textSecondary,
@@ -159,7 +160,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     if (_isLoadingCategories) {
       return const Center(
         child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
+          color: AppColors.textPrimary,
         ),
       );
     }
@@ -217,7 +218,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   Widget _buildCategoryCard(Map<String, dynamic> category) {
     // Parse color
-    Color cardColor = AppColors.primaryGold;
+    Color cardColor = AppColors.textPrimary;
     try {
       final colorString = category['color'] ?? '0xFF6B5B95';
       if (colorString.startsWith('0x') || colorString.startsWith('0X')) {
@@ -355,7 +356,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
             child: CircularProgressIndicator(
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
             ),
           );
         }
@@ -412,138 +413,204 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     );
   }
 
+// IMPORTANT: Only replace the _buildSessionItem method with this updated version
+// Add CachedNetworkImage import at the top of the file if not present
+
   Widget _buildSessionItem(BuildContext context, Map<String, dynamic> session) {
-    // Calculate total duration
-    final introDuration = session['intro']?['duration'] ?? 0;
-    final subliminalDuration = session['subliminal']?['duration'] ?? 0;
-    final totalDuration = introDuration + subliminalDuration;
+    // Add session ID if not present
+    if (!session.containsKey('id')) {
+      final sessionDoc = _firestore.collection('sessions').doc();
+      session['id'] = sessionDoc.id;
+    }
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Navigate to Audio Player
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AudioPlayerScreen(
-                  sessionData: session,
-                ),
-              ),
-            );
-          },
-          borderRadius: BorderRadius.circular(16.r),
-          child: Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Row(
-              children: [
-                // Session Icon
-                Container(
-                  width: 56.w,
-                  height: 56.w,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        AppColors.primaryGold.withOpacity(0.8),
-                        AppColors.primaryGold,
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Center(
-                    child: Text(
-                      session['emoji'] ?? '🎵',
-                      style: TextStyle(fontSize: 28.sp),
-                    ),
-                  ),
-                ),
-
-                SizedBox(width: 16.w),
-
-                // Session Info
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        session['title'] ?? 'Untitled Session',
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        session['category'] ?? 'Uncategorized',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: AppColors.primaryGold,
-                        ),
-                      ),
-                      Text(
-                        _formatDuration(totalDuration),
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Play Icon
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.play_arrow,
-                    color: AppColors.primaryGold,
-                    size: 24.sp,
-                  ),
-                ),
-              ],
+    return GestureDetector(
+      onTap: () {
+        // Navigate to Audio Player
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AudioPlayerScreen(
+              sessionData: session,
             ),
           ),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Image Section
+            Container(
+              height: 180.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16.r),
+                  topRight: Radius.circular(16.r),
+                ),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.textPrimary.withOpacity(0.8),
+                    AppColors.textPrimary.withOpacity(0.4),
+                  ],
+                ),
+              ),
+              child: Stack(
+                children: [
+                  // Background Image
+                  if (session['backgroundImage'] != null &&
+                      session['backgroundImage'].toString().isNotEmpty)
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16.r),
+                        topRight: Radius.circular(16.r),
+                      ),
+                      child: CachedNetworkImage(
+                        imageUrl: session['backgroundImage'],
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.textPrimary.withOpacity(0.8),
+                                AppColors.textPrimary.withOpacity(0.4),
+                              ],
+                            ),
+                          ),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                AppColors.textPrimary.withOpacity(0.8),
+                                AppColors.textPrimary.withOpacity(0.4),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            AppColors.textPrimary.withOpacity(0.8),
+                            AppColors.textPrimary.withOpacity(0.4),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                  // Play Button Overlay
+                  Positioned(
+                    bottom: 12.h,
+                    right: 12.w,
+                    child: Container(
+                      width: 48.w,
+                      height: 48.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.play_arrow_rounded,
+                        color: AppColors.textPrimary,
+                        size: 28.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Info Section - SIMPLIFIED
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Row(
+                children: [
+                  // Title
+                  Expanded(
+                    child: Text(
+                      session['title'] ?? 'Untitled Session',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+
+                  SizedBox(width: 8.w),
+
+                  // Category Badge
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.textPrimary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Text(
+                      session['category'] ?? 'General',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  String _formatDuration(int seconds) {
-    if (seconds < 60) {
-      return '${seconds}s';
-    } else if (seconds < 3600) {
-      final minutes = seconds ~/ 60;
-      return '$minutes minutes';
+// Helper method for formatting duration (if not already present)
+  String _formatDuration(int totalSeconds) {
+    if (totalSeconds == 0) return 'Duration not set';
+
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+
+    if (hours > 0) {
+      return '$hours ${hours == 1 ? 'hour' : 'hours'} ${minutes > 0 ? '$minutes ${minutes == 1 ? 'minute' : 'minutes'}' : ''}';
     } else {
-      final hours = seconds ~/ 3600;
-      final minutes = (seconds % 3600) ~/ 60;
-      if (minutes == 0) {
-        return '$hours hours';
-      }
-      return '$hours hours $minutes minutes';
+      return '$minutes ${minutes == 1 ? 'minute' : 'minutes'}';
     }
   }
 }
