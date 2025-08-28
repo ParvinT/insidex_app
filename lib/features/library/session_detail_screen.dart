@@ -6,14 +6,13 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../player/audio_player_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class SessionDetailScreen extends StatefulWidget {
   final Map<String, dynamic> sessionData;
 
-  const SessionDetailScreen({
-    super.key,
-    required this.sessionData,
-  });
+  const SessionDetailScreen({super.key, required this.sessionData});
 
   @override
   State<SessionDetailScreen> createState() => _SessionDetailScreenState();
@@ -54,7 +53,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
     // Get gradient colors or use defaults
     List<Color> gradientColors = [
       const Color(0xFF1e3c72),
-      const Color(0xFF2a5298)
+      const Color(0xFF2a5298),
     ];
 
     if (_session['backgroundGradient'] != null) {
@@ -228,10 +227,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       child: Column(
         children: [
           // Emoji or Icon
-          Text(
-            _session['emoji'] ?? '🎵',
-            style: TextStyle(fontSize: 48.sp),
-          ),
+          Text(_session['emoji'] ?? '🎵', style: TextStyle(fontSize: 48.sp)),
 
           SizedBox(height: 16.h),
 
@@ -322,29 +318,31 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           ),
         ),
         SizedBox(height: 12.h),
-        ...benefits.map((benefit) => Padding(
-              padding: EdgeInsets.only(bottom: 8.h),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: AppColors.primaryGold,
-                    size: 20.sp,
-                  ),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Text(
-                      benefit.toString(),
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: AppColors.textSecondary,
-                      ),
+        ...benefits.map(
+          (benefit) => Padding(
+            padding: EdgeInsets.only(bottom: 8.h),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.check_circle,
+                  color: AppColors.primaryGold,
+                  size: 20.sp,
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    benefit.toString(),
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                ],
-              ),
-            )),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -382,29 +380,31 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           child: Column(
             children: subliminals
                 .take(3)
-                .map((subliminal) => Padding(
-                      padding: EdgeInsets.only(bottom: 8.h),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.format_quote,
-                            color: AppColors.primaryGold,
-                            size: 16.sp,
-                          ),
-                          SizedBox(width: 8.w),
-                          Expanded(
-                            child: Text(
-                              subliminal.toString(),
-                              style: GoogleFonts.inter(
-                                fontSize: 13.sp,
-                                fontStyle: FontStyle.italic,
-                                color: AppColors.textPrimary,
-                              ),
+                .map(
+                  (subliminal) => Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.format_quote,
+                          color: AppColors.primaryGold,
+                          size: 16.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            subliminal.toString(),
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontStyle: FontStyle.italic,
+                              color: AppColors.textPrimary,
                             ),
                           ),
-                        ],
-                      ),
-                    ))
+                        ),
+                      ],
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ),
@@ -435,11 +435,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               label: 'Plays',
             ),
           ),
-          Container(
-            width: 1,
-            height: 40.h,
-            color: AppColors.greyBorder,
-          ),
+          Container(width: 1, height: 40.h, color: AppColors.greyBorder),
           Expanded(
             child: _buildStatItem(
               icon: Icons.star,
@@ -447,11 +443,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
               label: 'Rating',
             ),
           ),
-          Container(
-            width: 1,
-            height: 40.h,
-            color: AppColors.greyBorder,
-          ),
+          Container(width: 1, height: 40.h, color: AppColors.greyBorder),
           Expanded(
             child: _buildStatItem(
               icon: Icons.favorite,
@@ -471,11 +463,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: AppColors.textPrimary,
-          size: 20.sp,
-        ),
+        Icon(icon, color: AppColors.textPrimary, size: 20.sp),
         SizedBox(height: 4.h),
         Text(
           value,
@@ -517,28 +505,58 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
       child: Row(
         children: [
           // Add to Playlist Button
+          // Add to Playlist Button
           Expanded(
             flex: 1,
-            child: Container(
-              height: 48.h,
-              decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: AppColors.greyBorder,
-                  width: 1.5,
+            child: GestureDetector(
+              onTap: () async {
+                final user = FirebaseAuth.instance.currentUser;
+                if (user != null && _session['id'] != null) {
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .update({
+                          'playlistSessionIds': FieldValue.arrayUnion([
+                            _session['id'],
+                          ]),
+                        });
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Added to your playlist!'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  } catch (e) {
+                    print('Error adding to playlist: $e');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Failed to add to playlist'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: Container(
+                height: 48.h,
+                decoration: BoxDecoration(
+                  color: AppColors.greyLight,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: AppColors.greyBorder, width: 1.5),
                 ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.playlist_add,
-                  color: AppColors.textPrimary,
-                  size: 24.sp,
+                child: Center(
+                  child: Icon(
+                    Icons.playlist_add,
+                    color: AppColors.textPrimary,
+                    size: 24.sp,
+                  ),
                 ),
               ),
             ),
           ),
-
           SizedBox(width: 12.w),
 
           // Play Button - Send COMPLETE Firebase data
@@ -554,18 +572,19 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                 debugPrint('====== SENDING TO AUDIO PLAYER ======');
                 debugPrint('Session ID: ${audioSessionData['id']}');
                 debugPrint(
-                    'Intro URL: ${audioSessionData['intro']?['audioUrl']}');
+                  'Intro URL: ${audioSessionData['intro']?['audioUrl']}',
+                );
                 debugPrint(
-                    'Subliminal URL: ${audioSessionData['subliminal']?['audioUrl']}');
+                  'Subliminal URL: ${audioSessionData['subliminal']?['audioUrl']}',
+                );
                 debugPrint('=====================================');
 
                 // Navigate to Audio Player with the EXACT Firebase data
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AudioPlayerScreen(
-                      sessionData: audioSessionData,
-                    ),
+                    builder: (context) =>
+                        AudioPlayerScreen(sessionData: audioSessionData),
                   ),
                 );
               },

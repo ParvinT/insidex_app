@@ -69,11 +69,9 @@ class FirebaseService {
     } on FirebaseAuthException catch (e) {
       // Firebase Auth errors shouldn't occur here since we're not creating account yet
       print(
-          'Firebase Auth Error in signUp (unexpected): ${e.code} - ${e.message}');
-      return {
-        'success': false,
-        'error': _getAuthErrorMessage(e.code),
-      };
+        'Firebase Auth Error in signUp (unexpected): ${e.code} - ${e.message}',
+      );
+      return {'success': false, 'error': _getAuthErrorMessage(e.code)};
     } on FirebaseException catch (e) {
       // Firestore permission errors
       print('Firebase Exception in signUp: ${e.code} - ${e.message}');
@@ -85,11 +83,7 @@ class FirebaseService {
         errorMessage = 'Service unavailable. Please try again.';
       }
 
-      return {
-        'success': false,
-        'error': errorMessage,
-        'details': e.message,
-      };
+      return {'success': false, 'error': errorMessage, 'details': e.message};
     } catch (e) {
       print('Unexpected error during sign up: $e');
       print('Error type: ${e.runtimeType}');
@@ -110,8 +104,10 @@ class FirebaseService {
   }) async {
     try {
       // Get OTP document
-      final otpDoc =
-          await _firestore.collection('otp_verifications').doc(email).get();
+      final otpDoc = await _firestore
+          .collection('otp_verifications')
+          .doc(email)
+          .get();
 
       if (!otpDoc.exists) {
         return {
@@ -124,10 +120,7 @@ class FirebaseService {
 
       // Check if already verified
       if (data['verified'] == true) {
-        return {
-          'success': false,
-          'error': 'This code has already been used.',
-        };
+        return {'success': false, 'error': 'This code has already been used.'};
       }
 
       // Check expiration
@@ -151,9 +144,7 @@ class FirebaseService {
       // Verify code
       if (data['code'] != code) {
         // Increment attempts
-        await otpDoc.reference.update({
-          'attempts': FieldValue.increment(1),
-        });
+        await otpDoc.reference.update({'attempts': FieldValue.increment(1)});
         return {
           'success': false,
           'error': 'Invalid verification code. Please try again.',
@@ -194,6 +185,8 @@ class FirebaseService {
         'profileCompleted': false,
         'avatarEmoji': '👤',
         'onboardingCompleted': false,
+        'playlistSessionIds': [],
+        'recentSessionIds': [],
       });
 
       // Send Firebase email verification (optional, since we did OTP)
@@ -226,11 +219,7 @@ class FirebaseService {
     } on FirebaseAuthException catch (e) {
       // Handle specific Firebase Auth errors
       String errorMessage = _getAuthErrorMessage(e.code);
-      return {
-        'success': false,
-        'error': errorMessage,
-        'code': e.code,
-      };
+      return {'success': false, 'error': errorMessage, 'code': e.code};
     } catch (e) {
       print('Error verifying OTP: $e');
       return {
@@ -269,11 +258,7 @@ class FirebaseService {
       };
     } on FirebaseAuthException catch (e) {
       String errorMessage = _getAuthErrorMessage(e.code);
-      return {
-        'success': false,
-        'error': errorMessage,
-        'code': e.code,
-      };
+      return {'success': false, 'error': errorMessage, 'code': e.code};
     } catch (e) {
       print('Unexpected error during sign in: $e');
       return {
@@ -296,11 +281,7 @@ class FirebaseService {
       };
     } on FirebaseAuthException catch (e) {
       String errorMessage = _getAuthErrorMessage(e.code);
-      return {
-        'success': false,
-        'error': errorMessage,
-        'code': e.code,
-      };
+      return {'success': false, 'error': errorMessage, 'code': e.code};
     } catch (e) {
       print('Unexpected error during password reset: $e');
       return {
@@ -328,8 +309,10 @@ class FirebaseService {
   static Future<Map<String, dynamic>> resendOTP(String email) async {
     try {
       // Check if OTP record exists
-      final otpDoc =
-          await _firestore.collection('otp_verifications').doc(email).get();
+      final otpDoc = await _firestore
+          .collection('otp_verifications')
+          .doc(email)
+          .get();
 
       if (!otpDoc.exists) {
         return {

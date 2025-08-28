@@ -5,9 +5,10 @@ import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../features/library/categories_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../features/library/categories_screen.dart';
+import '../../features/playlist/playlist_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,18 +44,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     super.initState();
 
     _pulseController = AnimationController(
-        duration: const Duration(milliseconds: 1500), vsync: this)
-      ..repeat(reverse: true);
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
 
     _playlistPulseController = AnimationController(
-        duration: const Duration(milliseconds: 1500), vsync: this)
-      ..repeat(reverse: true);
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
     _playlistPulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
       CurvedAnimation(
-          parent: _playlistPulseController, curve: Curves.easeInOut),
+        parent: _playlistPulseController,
+        curve: Curves.easeInOut,
+      ),
     );
   }
 
@@ -108,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // Update only the _buildHeader() method in home_screen.dart
-// Replace the existing _buildHeader() method with this:
+  // Replace the existing _buildHeader() method with this:
 
   Widget _buildHeader() {
     return Positioned(
@@ -164,10 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(
-                    color: Colors.grey[300]!,
-                    width: 1,
-                  ),
+                  border: Border.all(color: Colors.grey[300]!, width: 1),
                 ),
                 child: Row(
                   children: [
@@ -244,25 +246,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           final v = details.primaryVelocity ?? 0.0; // aşağı hızlı -> pozitif
           if (_playlistReadyToNavigate || v > 500) {
             // >>> POPUP: Coming Soon <<<
-            await showDialog(
-              context: context,
-              builder: (ctx) => AlertDialog(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.r)),
-                content: Text(
-                  'Coming Soon!',
-                  style: GoogleFonts.inter(
-                      fontSize: 16.sp, fontWeight: FontWeight.w600),
-                  textAlign: TextAlign.center,
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('OK',
-                        style: TextStyle(color: AppColors.primaryGold)),
-                  ),
-                ],
-              ),
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PlaylistScreen()),
             );
           }
           setState(() {
@@ -277,13 +263,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ..scale(_isPlaylistDragging ? 0.97 : 1.0),
           decoration: BoxDecoration(
             color: _playlistReadyToNavigate
-                ? const Color(0xFFD4AF37)
+                ? AppColors.textPrimary
                 : const Color(0xFFCCCBCB),
             borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
                 color: _playlistReadyToNavigate
-                    ? AppColors.primaryGold.withOpacity(0.3)
+                    ? AppColors.textPrimary.withOpacity(0.3)
                     : Colors.black.withOpacity(0.08),
                 blurRadius: _isPlaylistDragging ? 25 : 15,
                 offset: Offset(0, _isPlaylistDragging ? 12 : 8),
@@ -345,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           decoration: BoxDecoration(
                             color: _playlistReadyToNavigate
                                 ? Colors.white
-                                : AppColors.primaryGold,
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(3.r),
                           ),
                         ),
@@ -381,8 +367,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         onVerticalDragStart: (_) => setState(() => _isDragging = true),
         onVerticalDragUpdate: (details) {
           setState(() {
-            _dragOffset =
-                (_dragOffset + details.delta.dy).clamp(0.0, _dragThreshold);
+            _dragOffset = (_dragOffset + details.delta.dy).clamp(
+              0.0,
+              _dragThreshold,
+            );
             final wasReady = _readyToNavigate;
             _readyToNavigate = _dragOffset >= _dragThreshold;
             if (_readyToNavigate && !wasReady) {
@@ -409,13 +397,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           transform: Matrix4.identity()..scale(_isDragging ? 0.97 : 1.0),
           decoration: BoxDecoration(
             color: _readyToNavigate
-                ? const Color(0xFFD4AF37)
+                ? AppColors.textPrimary
                 : const Color(0xFFCCCBCB),
             borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
                 color: _readyToNavigate
-                    ? AppColors.primaryGold.withOpacity(0.3)
+                    ? AppColors.textPrimary.withOpacity(0.3)
                     : Colors.black.withOpacity(0.1),
                 blurRadius: _isDragging ? 25 : 20,
                 offset: Offset(0, _isDragging ? 12 : 10),
@@ -432,8 +420,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color:
-                        _readyToNavigate ? Colors.white : AppColors.textPrimary,
+                    color: _readyToNavigate
+                        ? Colors.white
+                        : AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -474,7 +463,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           decoration: BoxDecoration(
                             color: _readyToNavigate
                                 ? Colors.white
-                                : AppColors.primaryGold,
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(3.r),
                           ),
                         ),
@@ -504,8 +493,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (!isDark) ...[
-              Icon(Icons.category_outlined,
-                  size: 14.sp, color: AppColors.textPrimary),
+              Icon(
+                Icons.category_outlined,
+                size: 14.sp,
+                color: AppColors.textPrimary,
+              ),
               SizedBox(width: 4.w),
             ],
             Text(
@@ -547,17 +539,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem(Icons.home_outlined, 'Home', 0),
-          _buildNavItem(Icons.library_music_outlined, 'Library', 1),
-          _buildNavItem(Icons.play_circle_outline, 'Playlist', 2),
-          _buildNavItem(Icons.chat_bubble_outline, 'AI Chat', 3),
-          _buildNavItem(Icons.person_outline, 'Profile', 4),
+          _buildNavItem(Icons.play_circle_outline, 'Playlist', 1),
+          _buildNavItem(Icons.chat_bubble_outline, 'AI Chat', 2),
+          _buildNavItem(Icons.person_outline, 'Profile', 3),
         ],
       ),
     );
   }
 
   // lib/features/home/home_screen.dart içinde
-// _buildNavItem metodunu bulun ve şu şekilde güncelleyin:
+  // _buildNavItem metodunu bulun ve şu şekilde güncelleyin:
 
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
@@ -571,169 +562,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // Home - zaten home'dayız
             break;
           case 1:
-            // Library - Coming Soon
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r)),
-                  title: Row(
-                    children: [
-                      Icon(
-                        Icons.library_music,
-                        color: AppColors.primaryGold,
-                        size: 28.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Text(
-                        'Library',
-                        style: GoogleFonts.inter(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.construction,
-                        size: 64.sp,
-                        color: AppColors.primaryGold.withOpacity(0.5),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'Coming Soon!',
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Your personal library with favorites, downloads, and listening history will be available soon.',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'OK',
-                        style: GoogleFonts.inter(
-                          color: AppColors.primaryGold,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ).then((_) {
-              // Dialog kapandıktan sonra Home'a geri dön
-              if (mounted) {
-                setState(() => _selectedIndex = 0);
-              }
-            });
+            // Playlist - Artık çalışıyor!
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PlaylistScreen()),
+            );
             break;
           case 2:
-            // Playlist - Coming Soon
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r)),
-                  title: Row(
-                    children: [
-                      Icon(
-                        Icons.playlist_play,
-                        color: AppColors.primaryGold,
-                        size: 28.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Text(
-                        'Playlist',
-                        style: GoogleFonts.inter(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.construction,
-                        size: 64.sp,
-                        color: AppColors.primaryGold.withOpacity(0.5),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'Coming Soon!',
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Create and manage your custom playlists for a personalized experience.',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'OK',
-                        style: GoogleFonts.inter(
-                          color: AppColors.primaryGold,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ).then((_) {
-              if (mounted) {
-                setState(() => _selectedIndex = 0);
-              }
-            });
-            break;
-          case 3:
             // AI Chat - Coming Soon
             showDialog(
               context: context,
               builder: (BuildContext context) {
                 return AlertDialog(
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r)),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
                   title: Row(
                     children: [
                       Icon(
                         Icons.auto_awesome,
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                         size: 28.sp,
                       ),
                       SizedBox(width: 12.w),
@@ -753,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Icon(
                         Icons.construction,
                         size: 64.sp,
-                        color: AppColors.primaryGold.withOpacity(0.5),
+                        color: AppColors.textPrimary.withOpacity(0.5),
                       ),
                       SizedBox(height: 16.h),
                       Text(
@@ -782,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: Text(
                         'OK',
                         style: GoogleFonts.inter(
-                          color: AppColors.primaryGold,
+                          color: AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -796,7 +644,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               }
             });
             break;
-          case 4:
+          case 3:
             // Profile
             Navigator.pushNamed(context, AppRoutes.profile);
             break;
@@ -808,16 +656,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon,
-                color: isSelected ? AppColors.primaryGold : Colors.grey[400],
-                size: 24.sp),
+            Icon(
+              icon,
+              color: isSelected ? AppColors.textPrimary : Colors.grey[400],
+              size: 24.sp,
+            ),
             SizedBox(height: 4.h),
             Text(
               label,
               style: GoogleFonts.inter(
                 fontSize: 10.sp,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.primaryGold : Colors.grey[400],
+                color: isSelected ? AppColors.textPrimary : Colors.grey[400],
               ),
             ),
           ],

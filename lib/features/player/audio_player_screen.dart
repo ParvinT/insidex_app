@@ -6,6 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
 import '../../services/audio_player_service.dart';
 import 'widgets/player_modals.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Expected session shape:
 /// {
@@ -25,7 +29,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     with TickerProviderStateMixin {
   // Equalizer animation (replaces old rotating note)
   late final AnimationController _eqController = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 1200));
+    vsync: this,
+    duration: const Duration(milliseconds: 1200),
+  );
 
   // Service
   final AudioPlayerService _audioService = AudioPlayerService();
@@ -41,6 +47,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   double _currentProgress = 0.0;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
+  bool _hasAddedToRecent = false;
 
   // Session
   late Map<String, dynamic> _session;
@@ -58,18 +65,63 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   void initState() {
     super.initState();
 
-    _session = widget.sessionData ??
+    _session =
+        widget.sessionData ??
         {
           'title': 'Session',
           'intro': {'title': 'Introduction', 'audioUrl': '', 'duration': 120},
           'subliminal': {
             'title': 'Subliminal',
             'audioUrl': '',
-            'duration': 3600
-          }
+            'duration': 3600,
+          },
         };
 
     _initializeAudio();
+    _addToRecentSessions();
+    _checkFavoriteStatus();
+  }
+
+  void _checkFavoriteStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _session['id'] != null) {
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final favoriteIds = List<String>.from(
+            userDoc.data()?['favoriteSessionIds'] ?? [],
+          );
+
+          setState(() {
+            _isFavorite = favoriteIds.contains(_session['id']);
+          });
+        }
+      } catch (e) {
+        print('Error checking favorite status: $e');
+      }
+    }
+  }
+
+  void _addToRecentSessions() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _session['id'] != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+              'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
+              'lastActiveAt': FieldValue.serverTimestamp(),
+            });
+        print('Added to recent sessions: ${_session['id']}');
+      } catch (e) {
+        print('Error adding to recent sessions: $e');
+      }
+    }
   }
 
   // --------- safe session helpers ----------
@@ -119,12 +171,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _currentPosition = pos;
         final totalMs = _totalDuration.inMilliseconds;
         if (totalMs > 0) {
-          _currentProgress =
-              (_currentPosition.inMilliseconds / totalMs).clamp(0.0, 1.0);
+          _currentProgress = (_currentPosition.inMilliseconds / totalMs).clamp(
+            0.0,
+            1.0,
+          );
         } else {
           final fb = _fallbackDurationFor(_currentTrack);
-          _currentProgress =
-              (pos.inMilliseconds / fb.inMilliseconds).clamp(0.0, 1.0);
+          _currentProgress = (pos.inMilliseconds / fb.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          );
         }
       });
     });
@@ -156,6 +212,26 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     if (_isPlaying) {
       await _audioService.pause();
     } else {
+      // İLK PLAY'DE RECENT'E EKLE
+      if (!_hasAddedToRecent && _session['id'] != null) {
+        _hasAddedToRecent = true;
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          try {
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(user.uid)
+                .update({
+                  'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
+                  'lastActiveAt': FieldValue.serverTimestamp(),
+                });
+            print('Added to recent: ${_session['id']}');
+          } catch (e) {
+            print('Error adding to recent: $e');
+          }
+        }
+      }
+
       if (_currentPosition > Duration.zero) {
         await _audioService.play();
       } else {
@@ -235,7 +311,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         : _fallbackDurationFor(_currentTrack);
     final newPos = _currentPosition + const Duration(seconds: 10);
     await _audioService.seek(
-        newPos < total ? newPos : total - const Duration(milliseconds: 500));
+      newPos < total ? newPos : total - const Duration(milliseconds: 500),
+    );
   }
 
   @override
@@ -294,8 +371,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.keyboard_arrow_down,
-                color: Colors.black, size: 30.sp),
+            icon: Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.black,
+              size: 30.sp,
+            ),
             onPressed: () => Navigator.pop(context),
           ),
           Text(
@@ -436,8 +516,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     final value = total.inMilliseconds == 0
         ? 0.0
-        : (_currentPosition.inMilliseconds / total.inMilliseconds)
-            .clamp(0.0, 1.0);
+        : (_currentPosition.inMilliseconds / total.inMilliseconds).clamp(
+            0.0,
+            1.0,
+          );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 30.w),
@@ -556,12 +638,71 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               );
             },
           ),
+
+          IconButton(
+            icon: const Icon(Icons.playlist_add, color: Color(0xFFBDBDBD)),
+            onPressed: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null && _session['id'] != null) {
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user.uid)
+                      .update({
+                        'playlistSessionIds': FieldValue.arrayUnion([
+                          _session['id'],
+                        ]),
+                      });
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Added to playlist!'),
+                      backgroundColor: Colors.green,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                } catch (e) {
+                  print('Error adding to playlist: $e');
+                }
+              }
+            },
+          ),
           IconButton(
             icon: Icon(
               _isFavorite ? Icons.favorite : Icons.favorite_border,
               color: _isFavorite ? Colors.redAccent : const Color(0xFFBDBDBD),
             ),
-            onPressed: () => setState(() => _isFavorite = !_isFavorite),
+            onPressed: () async {
+              final user = FirebaseAuth.instance.currentUser;
+              if (user != null && _session['id'] != null) {
+                setState(() => _isFavorite = !_isFavorite);
+
+                try {
+                  if (_isFavorite) {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .update({
+                          'favoriteSessionIds': FieldValue.arrayUnion([
+                            _session['id'],
+                          ]),
+                        });
+                  } else {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .update({
+                          'favoriteSessionIds': FieldValue.arrayRemove([
+                            _session['id'],
+                          ]),
+                        });
+                  }
+                } catch (e) {
+                  print('Error toggling favorite: $e');
+                  setState(() => _isFavorite = !_isFavorite);
+                }
+              }
+            },
           ),
           Stack(
             children: [
@@ -578,7 +719,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                     _sleepTimerMinutes, // mevcut değer
                     _audioService, // servis
                     (minutes) => setState(
-                        () => _sleepTimerMinutes = minutes), // callback
+                      () => _sleepTimerMinutes = minutes,
+                    ), // callback
                   );
                 },
               ),
@@ -587,16 +729,20 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   right: 6,
                   top: 6,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
                       '${_sleepTimerMinutes}m',
-                      style:
-                          GoogleFonts.inter(fontSize: 10, color: Colors.white),
+                      style: GoogleFonts.inter(
+                        fontSize: 10,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
@@ -612,9 +758,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(_autoPlayEnabled
-                      ? 'Auto-play enabled'
-                      : 'Auto-play disabled'),
+                  content: Text(
+                    _autoPlayEnabled
+                        ? 'Auto-play enabled'
+                        : 'Auto-play disabled',
+                  ),
                   backgroundColor: Colors.black,
                   duration: const Duration(seconds: 1),
                 ),
