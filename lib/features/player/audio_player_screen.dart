@@ -38,6 +38,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   // UI State
   bool _isPlaying = false;
   bool _isFavorite = false;
+  bool _isInPlaylist = false;
   bool _isLooping = false;
   bool _autoPlayEnabled = true;
 
@@ -78,6 +79,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _initializeAudio();
     _addToRecentSessions();
     _checkFavoriteStatus();
+    _checkPlaylistStatus();
   }
 
   Widget _buildScrollingText(String text, TextStyle style,
@@ -146,6 +148,30 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         }
       } catch (e) {
         print('Error checking favorite status: $e');
+      }
+    }
+  }
+
+  void _checkPlaylistStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _session['id'] != null) {
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          final playlistIds = List<String>.from(
+            userDoc.data()?['playlistSessionIds'] ?? [],
+          );
+
+          setState(() {
+            _isInPlaylist = playlistIds.contains(_session['id']);
+          });
+        }
+      } catch (e) {
+        print('Error checking playlist status: $e');
       }
     }
   }
@@ -689,29 +715,65 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             },
           ),
           IconButton(
-            icon: const Icon(Icons.playlist_add, color: Color(0xFFBDBDBD)),
+            icon: Icon(
+              _isInPlaylist ? Icons.playlist_add_check : Icons.playlist_add,
+              color: _isInPlaylist ? Colors.black : const Color(0xFFBDBDBD),
+            ),
             onPressed: () async {
               final user = FirebaseAuth.instance.currentUser;
               if (user != null && _session['id'] != null) {
-                try {
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(user.uid)
-                      .update({
-                    'playlistSessionIds': FieldValue.arrayUnion([
-                      _session['id'],
-                    ]),
-                  });
+                setState(() => _isInPlaylist = !_isInPlaylist);
 
+                try {
+                  if (_isInPlaylist) {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .update({
+                      'playlistSessionIds': FieldValue.arrayUnion([
+                        _session['id'],
+                      ]),
+                    });
+
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Added to playlist ✓'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  } else {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user.uid)
+                        .update({
+                      'playlistSessionIds': FieldValue.arrayRemove([
+                        _session['id'],
+                      ]),
+                    });
+
+                    if (!mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Removed from playlist'),
+                        backgroundColor: Colors.orange,
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  print('Error toggling playlist: $e');
+                  setState(() => _isInPlaylist = !_isInPlaylist);
+
+                  if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Added to playlist!'),
-                      backgroundColor: Colors.green,
+                      content: Text('Error updating playlist'),
+                      backgroundColor: Colors.red,
                       duration: Duration(seconds: 2),
                     ),
                   );
-                } catch (e) {
-                  print('Error adding to playlist: $e');
                 }
               }
             },

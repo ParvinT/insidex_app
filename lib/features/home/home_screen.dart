@@ -4,11 +4,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
+import '../profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -420,9 +420,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: _readyToNavigate
-                        ? Colors.white
-                        : AppColors.textPrimary,
+                    color:
+                        _readyToNavigate ? Colors.white : AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -461,9 +460,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         widthFactor: progress,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: _readyToNavigate
-                                ? Colors.white
-                                : Colors.white,
+                            color:
+                                _readyToNavigate ? Colors.white : Colors.white,
                             borderRadius: BorderRadius.circular(3.r),
                           ),
                         ),
@@ -547,65 +545,48 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // lib/features/home/home_screen.dart içinde
-  // _buildNavItem metodunu bulun ve şu şekilde güncelleyin:
-
   Widget _buildNavItem(IconData icon, String label, int index) {
     final isSelected = _selectedIndex == index;
 
     return GestureDetector(
-      onTap: () {
+      onTap: () async {
         setState(() => _selectedIndex = index);
 
         switch (index) {
           case 0:
-            // Home - zaten home'dayız
             break;
+
           case 1:
-            // Playlist - Artık çalışıyor!
-            Navigator.push(
+            // Playlist
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PlaylistScreen()),
             );
+            if (mounted) {
+              setState(() => _selectedIndex = 0);
+            }
             break;
+
           case 2:
-            // AI Chat - Coming Soon
+            // AI Chat - Dialog gösteriliyor
             showDialog(
               context: context,
-              builder: (BuildContext context) {
+              barrierDismissible: true,
+              builder: (context) {
                 return AlertDialog(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20.r),
                   ),
-                  title: Row(
+                  title: Column(
                     children: [
                       Icon(
-                        Icons.auto_awesome,
-                        color: AppColors.textPrimary,
-                        size: 28.sp,
+                        Icons.chat_bubble_outline,
+                        size: 48.sp,
+                        color: AppColors.primaryGold,
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(height: 12.h),
                       Text(
-                        'AI Assistant',
-                        style: GoogleFonts.inter(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  content: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.construction,
-                        size: 64.sp,
-                        color: AppColors.textPrimary.withOpacity(0.5),
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        'Coming Soon!',
+                        'AI Psychologist Coming Soon!',
                         style: GoogleFonts.inter(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.w600,
@@ -644,9 +625,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               }
             });
             break;
+
           case 3:
             // Profile
-            Navigator.pushNamed(context, AppRoutes.profile);
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      ProfileScreen()), 
+            );
+            if (mounted) {
+              setState(() => _selectedIndex = 0);
+            }
             break;
         }
       },

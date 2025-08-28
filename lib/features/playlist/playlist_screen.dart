@@ -12,6 +12,8 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../library/session_detail_screen.dart';
 import '../player/audio_player_screen.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:ui';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -98,10 +100,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     final sessions = <Map<String, dynamic>>[];
     for (String sessionId in sessionIds) {
       try {
-        final sessionDoc = await _firestore
-            .collection('sessions')
-            .doc(sessionId)
-            .get();
+        final sessionDoc =
+            await _firestore.collection('sessions').doc(sessionId).get();
 
         if (sessionDoc.exists) {
           final data = sessionDoc.data()!;
@@ -120,12 +120,23 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     if (user == null) return;
 
     try {
+      final session = _recentSessions.firstWhere(
+        (s) => s['id'] == sessionId,
+        orElse: () => _favoriteSessions.firstWhere(
+          (s) => s['id'] == sessionId,
+          orElse: () => {},
+        ),
+      );
+
+      if (session.isNotEmpty) {
+        setState(() {
+          _myPlaylistSessions.add(session);
+        });
+      }
+
       await _firestore.collection('users').doc(user.uid).update({
         'playlistSessionIds': FieldValue.arrayUnion([sessionId]),
       });
-
-      // Reload playlist
-      await _loadAllPlaylists();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -135,6 +146,10 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       );
     } catch (e) {
       print('Error adding to playlist: $e');
+
+      setState(() {
+        _myPlaylistSessions.removeWhere((s) => s['id'] == sessionId);
+      });
     }
   }
 
@@ -170,6 +185,23 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     if (user == null) return;
 
     try {
+      setState(() {
+        if (isCurrentlyFavorite) {
+          _favoriteSessions.removeWhere((s) => s['id'] == sessionId);
+        } else {
+          final session = _myPlaylistSessions.firstWhere(
+            (s) => s['id'] == sessionId,
+            orElse: () => _recentSessions.firstWhere(
+              (s) => s['id'] == sessionId,
+              orElse: () => {},
+            ),
+          );
+          if (session.isNotEmpty) {
+            _favoriteSessions.add(session);
+          }
+        }
+      });
+
       if (isCurrentlyFavorite) {
         await _firestore.collection('users').doc(user.uid).update({
           'favoriteSessionIds': FieldValue.arrayRemove([sessionId]),
@@ -179,8 +211,6 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           'favoriteSessionIds': FieldValue.arrayUnion([sessionId]),
         });
       }
-
-      await _loadAllPlaylists();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -194,6 +224,23 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       );
     } catch (e) {
       print('Error toggling favorite: $e');
+
+      setState(() {
+        if (!isCurrentlyFavorite) {
+          _favoriteSessions.removeWhere((s) => s['id'] == sessionId);
+        } else {
+          final session = _myPlaylistSessions.firstWhere(
+            (s) => s['id'] == sessionId,
+            orElse: () => _recentSessions.firstWhere(
+              (s) => s['id'] == sessionId,
+              orElse: () => {},
+            ),
+          );
+          if (session.isNotEmpty) {
+            _favoriteSessions.add(session);
+          }
+        }
+      });
     }
   }
 
@@ -253,96 +300,101 @@ class _PlaylistScreenState extends State<PlaylistScreen>
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Back button
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              width: 40.w,
-              height: 40.w,
-              decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: BorderRadius.circular(10.r),
+    return AnimatedBuilder(
+      animation: _tabController,
+      builder: (context, child) {
+        return Container(
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-              child: Icon(
-                Icons.arrow_back,
-                color: AppColors.textPrimary,
-                size: 20.sp,
-              ),
-            ),
+            ],
           ),
-
-          SizedBox(width: 16.w),
-
-          // Title
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'My Playlists',
-                  style: GoogleFonts.inter(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w700,
+          child: Row(
+            children: [
+              // Back button
+              GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(
+                  width: 40.w,
+                  height: 40.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight,
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(
+                    Icons.arrow_back,
                     color: AppColors.textPrimary,
-                  ),
-                ),
-                SizedBox(height: 4.h),
-                SvgPicture.asset(
-                  'assets/images/logo.svg',
-                  height: 16.h,
-                  colorFilter: ColorFilter.mode(
-                    AppColors.textSecondary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Edit/Reorder button (for My Playlist tab)
-          if (_tabController.index == 0) ...[
-            GestureDetector(
-              onTap: () {
-                setState(() => _isReorderMode = !_isReorderMode);
-                HapticFeedback.lightImpact();
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: _isReorderMode
-                      ? AppColors.textPrimary
-                      : AppColors.greyLight,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Text(
-                  _isReorderMode ? 'Done' : 'Edit',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _isReorderMode
-                        ? Colors.white
-                        : AppColors.textPrimary,
+                    size: 20.sp,
                   ),
                 ),
               ),
-            ),
-          ],
-        ],
-      ),
+
+              SizedBox(width: 16.w),
+
+              // Title
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'My Playlists',
+                      style: GoogleFonts.inter(
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    SvgPicture.asset(
+                      'assets/images/logo.svg',
+                      height: 16.h,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.textSecondary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Edit/Reorder button (for My Playlist tab)
+              if (_tabController.index == 0)
+                GestureDetector(
+                  onTap: () {
+                    setState(() => _isReorderMode = !_isReorderMode);
+                    HapticFeedback.lightImpact();
+                  },
+                  child: Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                    decoration: BoxDecoration(
+                      color: _isReorderMode
+                          ? AppColors.textPrimary
+                          : AppColors.greyLight,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Text(
+                      _isReorderMode ? 'Done' : 'Edit',
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: _isReorderMode
+                            ? Colors.white
+                            : AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -562,14 +614,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     VoidCallback? onToggleFavorite,
     VoidCallback? onAddToPlaylist,
   }) {
-    // Calculate duration
-    final introDuration = session['intro']?['duration'] ?? 0;
-    final subliminalDuration = session['subliminal']?['duration'] ?? 0;
-    final totalDuration = introDuration + subliminalDuration;
-
     return GestureDetector(
       onTap: () {
-        // Navigate to player
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -582,188 +628,231 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColors.greyBorder, width: 1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Row(
-            children: [
-              // Index or Emoji
-              if (index != null) ...[
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.greyLight,
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Center(
-                    child: Text(
-                      session['emoji'] ?? '$index',
-                      style: TextStyle(
-                        fontSize: session['emoji'] != null ? 20.sp : 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
+        child: Column(
+          children: [
+            // Image Section with Actions
+            Container(
+              height: 180.h,
+              child: Stack(
+                children: [
+                  // Background Image or Gradient
+                  ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16.r),
+                      topRight: Radius.circular(16.r),
                     ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-              ],
-
-              // Session Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      session['title'] ?? 'Untitled Session',
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 4.h),
-                    Row(
-                      children: [
-                        // Category
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGold.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            session['category'] ?? 'General',
-                            style: GoogleFonts.inter(
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.primaryGold,
+                    child: session['backgroundImage'] != null &&
+                            session['backgroundImage'].toString().isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: session['backgroundImage'],
+                            width: double.infinity,
+                            height: double.infinity,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.primaryGold.withOpacity(0.8),
+                                    AppColors.primaryGold.withOpacity(0.4),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    AppColors.primaryGold.withOpacity(0.8),
+                                    AppColors.primaryGold.withOpacity(0.4),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          )
+                        : Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  AppColors.primaryGold.withOpacity(0.8),
+                                  AppColors.primaryGold.withOpacity(0.4),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(width: 8.w),
-                        // Duration
-                        Icon(
-                          Icons.access_time,
-                          size: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          _formatDuration(totalDuration),
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                  ),
 
-              // Actions
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Favorite button
-                  if (onToggleFavorite != null) ...[
-                    GestureDetector(
-                      onTap: onToggleFavorite,
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: BoxDecoration(
-                          color: isFavorite
-                              ? Colors.red.withOpacity(0.1)
-                              : AppColors.greyLight,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          size: 18.sp,
-                          color: isFavorite
-                              ? Colors.red
-                              : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                  ],
-
-                  // Add to playlist button
-                  if (showAddToPlaylist && onAddToPlaylist != null) ...[
-                    GestureDetector(
-                      onTap: onAddToPlaylist,
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryGold.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(
-                          Icons.playlist_add,
-                          size: 18.sp,
-                          color: AppColors.primaryGold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 8.w),
-                  ],
-
-                  // Remove button
-                  if (showRemoveButton && onRemove != null) ...[
-                    GestureDetector(
-                      onTap: onRemove,
-                      child: Container(
-                        width: 36.w,
-                        height: 36.w,
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(
-                          Icons.remove_circle_outline,
-                          size: 18.sp,
-                          color: Colors.red,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w), // Daha fazla boşluk
-                  ],
-
-                  // Play button
+                  // Dark overlay for better contrast
                   Container(
-                    width: 36.w,
-                    height: 36.w,
                     decoration: BoxDecoration(
-                      color: AppColors.textPrimary,
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16.r),
+                        topRight: Radius.circular(16.r),
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                        ],
+                      ),
                     ),
-                    child: Icon(
-                      Icons.play_arrow,
-                      size: 18.sp,
-                      color: Colors.white,
+                  ),
+
+                  // Play Button
+                  Center(
+                    child: Container(
+                      width: 56.w,
+                      height: 56.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.play_arrow,
+                        size: 32.sp,
+                        color: AppColors.primaryGold,
+                      ),
+                    ),
+                  ),
+
+                  // Action Buttons (Top Right)
+                  Positioned(
+                    top: 12.h,
+                    right: 12.w,
+                    child: Row(
+                      children: [
+                        // Favorite Button
+                        if (onToggleFavorite != null)
+                          _buildActionButton(
+                            icon: isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: isFavorite ? Colors.redAccent : Colors.white,
+                            onTap: onToggleFavorite,
+                          ),
+
+                        if (onToggleFavorite != null &&
+                            (showRemoveButton || showAddToPlaylist))
+                          SizedBox(width: 8.w),
+
+                        // Remove from Playlist
+                        if (showRemoveButton && onRemove != null)
+                          _buildActionButton(
+                            icon: Icons.remove_circle_outline,
+                            color: Colors.white,
+                            onTap: onRemove,
+                          ),
+
+                        // Add to Playlist
+                        if (showAddToPlaylist && onAddToPlaylist != null)
+                          _buildActionButton(
+                            icon: Icons.playlist_add,
+                            color: Colors.white,
+                            onTap: onAddToPlaylist,
+                          ),
+                      ],
                     ),
                   ),
                 ],
               ),
-            ],
+            ),
+
+            // Content Section
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title and Category
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          session['title'] ?? 'Untitled Session',
+                          style: GoogleFonts.inter(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      // Category Badge
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 6.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primaryGold.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Text(
+                          session['category'] ?? 'General',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: AppColors.primaryGold,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18.r),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+            ),
+            child: Icon(
+              icon,
+              size: 20.sp,
+              color: color,
+            ),
           ),
         ),
       ),
@@ -875,16 +964,5 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         ),
       ),
     );
-  }
-
-  String _formatDuration(int seconds) {
-    if (seconds < 60) return '${seconds}s';
-    final minutes = seconds ~/ 60;
-    if (minutes < 60) return '${minutes}min';
-    final hours = minutes ~/ 60;
-    final remainingMinutes = minutes % 60;
-    return remainingMinutes > 0
-        ? '${hours}h ${remainingMinutes}min'
-        : '${hours}h';
   }
 }
