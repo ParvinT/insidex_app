@@ -9,13 +9,8 @@ import 'widgets/player_modals.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marquee/marquee.dart';
+import 'widgets/session_info_modal.dart';
 
-/// Expected session shape:
-/// {
-///   "title": "...",
-///   "intro": { "title": "...", "audioUrl": "...", "duration": 120 },
-///   "subliminal": { "title": "...", "audioUrl": "...", "duration": 3600 }
-/// }
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
   const AudioPlayerScreen({super.key, this.sessionData});
@@ -401,33 +396,39 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Container(
-        color: Colors.white, // Variant B: plain white surface
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildCenterVisualizer(),
-                    SizedBox(height: 40.h),
-                    _buildSessionInfo(),
-                    SizedBox(height: 30.h),
-                    _buildTrackSelector(),
-                    SizedBox(height: 30.h),
-                    _buildProgressBar(),
-                    SizedBox(height: 30.h),
-                    _buildControls(),
-                    SizedBox(height: 25.h),
-                    _buildBottomActions(),
-                  ],
-                ),
+      body: Stack(
+        // ← Container yerine Stack
+        children: [
+          // Mevcut UI (Container ile sarmalanmış)
+          Container(
+            color: Colors.white,
+            child: SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildCenterVisualizer(),
+                        SizedBox(height: 40.h),
+                        _buildSessionInfo(),
+                        SizedBox(height: 30.h),
+                        _buildTrackSelector(),
+                        SizedBox(height: 30.h),
+                        _buildProgressBar(),
+                        SizedBox(height: 30.h),
+                        _buildControls(),
+                        SizedBox(height: 25.h),
+                        _buildBottomActions(),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -453,11 +454,31 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF5A5A5A), // mid gray
+              color: const Color(0xFF5A5A5A),
               letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(width: 24), // 3-dot menu removed
+          IconButton(
+            icon: Container(
+              padding: EdgeInsets.all(8.w),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.info_outline,
+                color: Colors.black,
+                size: 22.sp,
+              ),
+            ),
+            onPressed: () {
+              SessionInfoModal.show(
+                context: context,
+                session: _session,
+                currentTrack: _currentTrack,
+              );
+            },
+          ),
         ],
       ),
     );
