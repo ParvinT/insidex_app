@@ -10,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marquee/marquee.dart';
 import 'widgets/session_info_modal.dart';
+import '../../services/listening_tracker_service.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -36,6 +37,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isInPlaylist = false;
   bool _isLooping = false;
   bool _autoPlayEnabled = true;
+  bool _isTracking = false;
 
   // Track state
   String _currentTrack = 'intro'; // 'intro' | 'subliminal'
@@ -43,6 +45,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool _hasAddedToRecent = false;
+  String? _currentTrackingSessionId;
 
   // Session
   late Map<String, dynamic> _session;
@@ -270,12 +273,23 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _sleepTimerSub = _audioService.sleepTimer.listen((m) {
       if (!mounted) return;
       setState(() => _sleepTimerMinutes = m);
+
+      if (m == null && _isTracking) {
+        ListeningTrackerService.endSession().then((_) {
+          print('Session ended due to sleep timer');
+        });
+        _isTracking = false;
+      }
     });
   }
 
   Future<void> _togglePlayPause() async {
     if (_isPlaying) {
       await _audioService.pause();
+
+      if (_isTracking) {
+        await ListeningTrackerService.pauseSession();
+      }
     } else {
       // İLK PLAY'DE RECENT'E EKLE
       if (!_hasAddedToRecent && _session['id'] != null) {
@@ -295,6 +309,21 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             print('Error adding to recent: $e');
           }
         }
+      }
+
+      // START TRACKING
+      if (!_isTracking && _session['id'] != null) {
+        _isTracking = true;
+        _currentTrackingSessionId = _session['id'];
+
+        await ListeningTrackerService.startSession(
+          sessionId: _session['id'],
+          sessionTitle: _session['title'] ?? 'Unknown Session',
+          categoryId: _session['categoryId'],
+        );
+      } else if (_isTracking) {
+        // RESUME TRACKING
+        await ListeningTrackerService.resumeSession();
       }
 
       if (_currentPosition > Duration.zero) {
@@ -354,6 +383,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Future<void> _switchToTrack(String next) async {
     if (_currentTrack == next) return;
 
+    if (_isTracking && next == 'subliminal') {
+      print('User switched from intro to subliminal');
+    }
+
     setState(() {
       _currentTrack = next;
       _currentPosition = Duration.zero;
@@ -382,6 +415,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   @override
   void dispose() {
+    if (_isTracking) {
+      ListeningTrackerService.endSession().then((_) {
+        print('Listening session ended and saved');
+      });
+    }
+
     _playingSub?.cancel();
     _positionSub?.cancel();
     _durationSub?.cancel();
@@ -394,41 +433,48 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        // ← Container yerine Stack
-        children: [
-          // Mevcut UI (Container ile sarmalanmış)
-          Container(
-            color: Colors.white,
-            child: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildCenterVisualizer(),
-                        SizedBox(height: 40.h),
-                        _buildSessionInfo(),
-                        SizedBox(height: 30.h),
-                        _buildTrackSelector(),
-                        SizedBox(height: 30.h),
-                        _buildProgressBar(),
-                        SizedBox(height: 30.h),
-                        _buildControls(),
-                        SizedBox(height: 25.h),
-                        _buildBottomActions(),
-                      ],
+    return WillPopScope(
+      onWillPop: () async {
+        if (_isTracking) {
+          await ListeningTrackerService.endSession();
+          print('Session tracking ended on back press');
+        }
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            Container(
+              color: Colors.white,
+              child: SafeArea(
+                child: Column(
+                  children: [
+                    _buildHeader(),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildCenterVisualizer(),
+                          SizedBox(height: 40.h),
+                          _buildSessionInfo(),
+                          SizedBox(height: 30.h),
+                          _buildTrackSelector(),
+                          SizedBox(height: 30.h),
+                          _buildProgressBar(),
+                          SizedBox(height: 30.h),
+                          _buildControls(),
+                          SizedBox(height: 25.h),
+                          _buildBottomActions(),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,4 +1,4 @@
-// lib/features/profile/profile_screen.dart
+// lib/features/profile/profile_screen.dart - Updated Version
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,8 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../shared/widgets/custom_text_field.dart';
-import '../../shared/widgets/primary_button.dart';
-import '../../core/routes/app_routes.dart';
+import 'progress_screen.dart'; // Import the new progress screen
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -23,7 +22,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isEditing = false;
   String _selectedAvatar = '👤';
 
-  // Available avatars for selection
   final List<String> _availableAvatars = [
     '👤',
     '😊',
@@ -45,7 +43,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _isEditing = !_isEditing;
       if (!_isEditing) {
-        // Cancel editing - reset the name
         final userProvider = context.read<UserProvider>();
         _nameController.text = userProvider.userName;
       }
@@ -54,25 +51,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveProfile() async {
     final userProvider = context.read<UserProvider>();
-
     setState(() => _isEditing = false);
 
-    // Show loading
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    // Update profile
     final success = await userProvider.updateProfile(
       name: _nameController.text.trim(),
     );
 
-    // Hide loading
     if (mounted) Navigator.pop(context);
 
-    // Show result
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -88,7 +80,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleSignOut() async {
-    // Show confirmation dialog
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -134,7 +125,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Check if user is logged in on init
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -148,16 +138,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // First check if user is logged in
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      // No user logged in, redirect to login
       return const Scaffold(
         backgroundColor: AppColors.backgroundWhite,
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return Scaffold(
@@ -186,9 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: _isEditing
-                        ? AppColors.primaryGold
-                        : AppColors.textPrimary,
+                    color: AppColors.primaryGold,
                   ),
                 ),
               ),
@@ -198,36 +185,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
             padding: EdgeInsets.all(20.w),
             child: Column(
               children: [
-                // Avatar Section
-                _buildAvatarSection(userProvider),
+                // Profile Header
+                _buildProfileHeader(userProvider),
                 SizedBox(height: 32.h),
 
-                // User Info Section
+                // Account Information
                 _buildUserInfoSection(userProvider),
-                SizedBox(height: 24.h),
+                SizedBox(height: 20.h),
 
-                // Stats Section
-                _buildStatsSection(userProvider),
-                SizedBox(height: 24.h),
+                // Your Progress Button
+                _buildProgressButton(),
+                SizedBox(height: 20.h),
 
-                // Premium Badge (if applicable)
-                if (!userProvider.isPremium) ...[
-                  _buildPremiumPrompt(),
-                  SizedBox(height: 16.h),
-                ],
+                _buildPremiumWaitlistButton(),
+                SizedBox(height: 20.h),
 
-                // Admin Badge (if applicable)
+                // Admin Panel Button - Only for admins
                 if (userProvider.isAdmin) ...[
-                  _buildAdminBadge(),
-                  SizedBox(height: 16.h),
                   _buildAdminPanelButton(),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 20.h),
                 ],
 
-                SizedBox(height: 16.h),
+                // Menu Items
+                _buildMenuSection(),
+                SizedBox(height: 32.h),
 
                 // Sign Out Button
-                _buildSignOutButton(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 60.h,
+                  child: ElevatedButton(
+                    onPressed: _handleSignOut,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red.withOpacity(0.1),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                    child: Text(
+                      'Sign Out',
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -236,63 +241,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAvatarSection(UserProvider userProvider) {
+  Widget _buildProfileHeader(UserProvider userProvider) {
     return Column(
       children: [
         Stack(
           children: [
-            // Avatar circle
             Container(
               width: 100.w,
               height: 100.w,
               decoration: BoxDecoration(
-                color: AppColors.greyLight,
                 shape: BoxShape.circle,
+                color: AppColors.greyLight,
                 border: Border.all(
-                  color: AppColors.primaryGold,
-                  width: 2,
+                  color: userProvider.isPremium
+                      ? AppColors.primaryGold
+                      : AppColors.greyBorder,
+                  width: 3,
                 ),
               ),
               child: Center(
                 child: Text(
                   _selectedAvatar,
-                  style: TextStyle(fontSize: 40.sp),
+                  style: TextStyle(fontSize: 48.sp),
                 ),
               ),
             ),
-
-            // Edit icon
             if (_isEditing)
               Positioned(
                 bottom: 0,
                 right: 0,
-                child: GestureDetector(
-                  onTap: () => _showAvatarPicker(),
-                  child: Container(
-                    width: 32.w,
-                    height: 32.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGold,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.white,
-                        width: 2,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.edit,
-                      size: 16.sp,
-                      color: Colors.white,
-                    ),
+                child: Container(
+                  width: 32.w,
+                  height: 32.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  child: Icon(
+                    Icons.edit,
+                    size: 16.sp,
+                    color: Colors.white,
                   ),
                 ),
               ),
           ],
         ),
-
         SizedBox(height: 16.h),
-
-        // User name
         if (_isEditing)
           SizedBox(
             width: 200.w,
@@ -311,10 +306,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               color: AppColors.textPrimary,
             ),
           ),
-
         SizedBox(height: 4.h),
-
-        // User email
         Text(
           userProvider.userEmail,
           style: GoogleFonts.inter(
@@ -336,10 +328,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
+        border: Border.all(color: AppColors.greyBorder, width: 1.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -372,6 +361,303 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _buildInfoRow('Role', 'Administrator', isAdmin: true),
           ],
         ],
+      ),
+    );
+  }
+
+  // NEW: Progress Button Widget
+  Widget _buildProgressButton() {
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const ProgressScreen()),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFF7DB9B6).withOpacity(0.1),
+              const Color(0xFFB8A6D9).withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: const Color(0xFF7DB9B6).withOpacity(0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFF7DB9B6),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                Icons.analytics_outlined,
+                color: Colors.white,
+                size: 24.sp,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your Progress',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Track your listening habits and improvements',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.textSecondary,
+              size: 16.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPremiumWaitlistButton() {
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/premium/waitlist');
+      },
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.primaryGold.withOpacity(0.15),
+              AppColors.primaryGold.withOpacity(0.05),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: AppColors.primaryGold.withOpacity(0.4),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primaryGold,
+                    AppColors.primaryGold.withOpacity(0.8)
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                Icons.star_rounded,
+                color: Colors.white,
+                size: 24.sp,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Premium Waitlist',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Join early access for premium features',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.primaryGold,
+              size: 16.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Admin Panel Button Widget
+  Widget _buildAdminPanelButton() {
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(context, '/admin/dashboard');
+      },
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.red.withOpacity(0.1),
+              Colors.orange.withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: Colors.red.withOpacity(0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                Icons.admin_panel_settings,
+                color: Colors.white,
+                size: 24.sp,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Admin Dashboard',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'Manage users, sessions and app settings',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.textSecondary,
+              size: 16.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuSection() {
+    return Column(
+      children: [
+        _buildMenuItem(
+          icon: Icons.settings,
+          title: 'Settings',
+          onTap: () => Navigator.pushNamed(context, '/settings'),
+        ),
+        _buildMenuItem(
+          icon: Icons.privacy_tip_outlined,
+          title: 'Privacy Policy',
+          onTap: () => Navigator.pushNamed(context, '/legal/privacy-policy'),
+        ),
+        _buildMenuItem(
+          icon: Icons.description_outlined,
+          title: 'Terms of Service',
+          onTap: () => Navigator.pushNamed(context, '/legal/terms-of-service'),
+        ),
+        _buildMenuItem(
+          icon: Icons.help_outline,
+          title: 'Help & Support',
+          onTap: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Help & Support coming soon!')),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 16.h),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: AppColors.greyBorder.withOpacity(0.3)),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: AppColors.textSecondary, size: 20.sp),
+            SizedBox(width: 16.w),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const Spacer(),
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.textSecondary,
+              size: 20.sp,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -418,325 +704,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildStatsSection(UserProvider userProvider) {
-    final userData = userProvider.userData ?? {};
-
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.greyBorder,
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Your Journey',
-            style: GoogleFonts.inter(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 20.h),
-          Row(
-            children: [
-              _buildStatItem(
-                icon: Icons.headphones,
-                value: '${userData['totalListeningMinutes'] ?? 0}',
-                label: 'Minutes',
-                color: AppColors.primaryGold,
-              ),
-              SizedBox(width: 16.w),
-              _buildStatItem(
-                icon: Icons.check_circle,
-                value:
-                    '${(userData['completedSessionIds'] as List?)?.length ?? 0}',
-                label: 'Completed',
-                color: Colors.green,
-              ),
-              SizedBox(width: 16.w),
-              _buildStatItem(
-                icon: Icons.favorite,
-                value:
-                    '${(userData['favoriteSessionIds'] as List?)?.length ?? 0}',
-                label: 'Favorites',
-                color: Colors.red,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String value,
-    required String label,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: color.withOpacity(0.2),
-          ),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              size: 24.sp,
-              color: color,
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              value,
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            Text(
-              label,
-              style: GoogleFonts.inter(
-                fontSize: 12.sp,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPremiumPrompt() {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to Premium Waitlist Screen
-        Navigator.pushNamed(context, AppRoutes.premiumWaitlist);
-      },
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primaryGold.withOpacity(0.1),
-              AppColors.primaryGold.withOpacity(0.05),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.3),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              Icons.star,
-              color: AppColors.primaryGold,
-              size: 32.sp,
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Upgrade to Premium',
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'Unlock all sessions and features',
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              color: AppColors.primaryGold,
-              size: 16.sp,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAdminBadge() {
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: Colors.red.withOpacity(0.2),
-        ),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.admin_panel_settings,
-            color: Colors.red,
-            size: 24.sp,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Administrator Access',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.red,
-                  ),
-                ),
-                Text(
-                  'You have full admin privileges',
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    color: Colors.red.withOpacity(0.8),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Icon(
-            Icons.verified,
-            color: Colors.red,
-            size: 20.sp,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAdminPanelButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.pushNamed(context, '/admin/dashboard');
-        },
-        icon: const Icon(Icons.dashboard_customize),
-        label: Text(
-          'Open Admin Panel',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 14.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          elevation: 2,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSignOutButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: PrimaryButton(
-        text: 'Sign Out',
-        onPressed: _handleSignOut,
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  void _showAvatarPicker() {
-    showModalBottomSheet(
-      context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) => Container(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Choose Avatar',
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 20.h),
-            Wrap(
-              spacing: 16.w,
-              runSpacing: 16.h,
-              children: _availableAvatars.map((avatar) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedAvatar = avatar);
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: 60.w,
-                    height: 60.w,
-                    decoration: BoxDecoration(
-                      color: _selectedAvatar == avatar
-                          ? AppColors.primaryGold.withOpacity(0.2)
-                          : AppColors.greyLight,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _selectedAvatar == avatar
-                            ? AppColors.primaryGold
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    child: Center(
-                      child: Text(
-                        avatar,
-                        style: TextStyle(fontSize: 28.sp),
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20.h),
-          ],
-        ),
-      ),
     );
   }
 
