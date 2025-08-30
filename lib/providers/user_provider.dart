@@ -19,6 +19,7 @@ class UserProvider extends ChangeNotifier {
   String get userName => _userData?['name'] ?? 'User';
   String get userEmail => _userData?['email'] ?? '';
   String get userId => _firebaseUser?.uid ?? '';
+  String get avatarEmoji => _userData?['avatarEmoji'] ?? '👤';
 
   // Premium related getters
   bool get isPremium => _userData?['isPremium'] ?? false;
@@ -207,6 +208,7 @@ class UserProvider extends ChangeNotifier {
       'email': _firebaseUser!.email,
       'name': _firebaseUser!.displayName ?? 'User',
       'photoUrl': _firebaseUser!.photoURL,
+      'avatarEmoji': '👤',
       'isAdmin': false,
       'isPremium': false,
       'accountType': 'free',
@@ -232,7 +234,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Update profile
-  Future<bool> updateProfile({String? name, String? photoUrl}) async {
+  Future<bool> updateProfile({String? name, String? photoUrl, String? avatarEmoji}) async {
     if (_firebaseUser == null) return false;
 
     try {
@@ -242,6 +244,7 @@ class UserProvider extends ChangeNotifier {
 
       if (name != null) updates['name'] = name;
       if (photoUrl != null) updates['photoUrl'] = photoUrl;
+      if (avatarEmoji != null) updates['avatarEmoji'] = avatarEmoji;
 
       await FirebaseFirestore.instance
           .collection('users')
@@ -251,6 +254,7 @@ class UserProvider extends ChangeNotifier {
       // Update local data
       if (name != null) _userData!['name'] = name;
       if (photoUrl != null) _userData!['photoUrl'] = photoUrl;
+      if (avatarEmoji != null) _userData!['avatarEmoji'] = avatarEmoji;
 
       notifyListeners();
       return true;

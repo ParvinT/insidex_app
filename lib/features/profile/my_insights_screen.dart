@@ -5,9 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:math' as math;
-import '../../core/constants/app_colors.dart';
-import '../../shared/models/user_preferences.dart';
 
 class MyInsightsScreen extends StatefulWidget {
   const MyInsightsScreen({super.key});
@@ -1100,7 +1097,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   Future<Map<String, int>> _getWeeklyActivity() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return _getFakeWeeklyData();
+      if (user == null) return _getEmptyWeeklyData();
 
       final now = DateTime.now();
       final weekStart = now.subtract(Duration(days: now.weekday - 1));
@@ -1113,7 +1110,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           .get();
 
       if (history.docs.isEmpty) {
-        return _getFakeWeeklyData();
+        return _getEmptyWeeklyData();
       }
 
       Map<String, int> weeklyData = {
@@ -1138,19 +1135,19 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
       return weeklyData;
     } catch (e) {
       print('Error getting weekly activity: $e');
-      return _getFakeWeeklyData();
+      return _getEmptyWeeklyData();
     }
   }
 
-  Map<String, int> _getFakeWeeklyData() {
+  Map<String, int> _getEmptyWeeklyData() {
     return {
-      'Mon': 45,
-      'Tue': 30,
-      'Wed': 60,
-      'Thu': 15,
-      'Fri': 90,
-      'Sat': 75,
-      'Sun': 40,
+      'Mon': 0,
+      'Tue': 0,
+      'Wed': 0,
+      'Thu': 0,
+      'Fri': 0,
+      'Sat': 0,
+      'Sun': 0,
     };
   }
 
@@ -1200,12 +1197,12 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   int _getGoalProgress(String goal) {
     final progressMap = {
-      'Health': 75,
-      'Confidence': 60,
-      'Energy': 45,
-      'Better Sleep': 90,
-      'Anxiety Relief': 30,
-      'Emotional Balance': 55,
+      'Health': 0,
+      'Confidence': 0,
+      'Energy': 0,
+      'Better Sleep': 0,
+      'Anxiety Relief': 0,
+      'Emotional Balance': 0,
     };
     return progressMap[goal] ?? 0;
   }
