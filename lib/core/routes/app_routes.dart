@@ -20,12 +20,12 @@ import '../../features/legal/privacy_policy_screen.dart';
 import '../../features/legal/terms_of_service_screen.dart';
 import '../../features/premium/premium_waitlist_screen.dart';
 
-// --- Aliased imports (YALNIZCA bu dört ekran alias'lı) ---
 import 'package:insidex_app/features/auth/register_screen.dart'
     as auth_register;
 import 'package:insidex_app/features/auth/login_screen.dart' as auth_login;
 import 'package:insidex_app/features/auth/welcome_screen.dart' as auth_welcome;
 import 'package:insidex_app/features/home/home_screen.dart' as home_screen;
+import '../../features/profile/my_insights_screen.dart';
 
 class AppRoutes {
   static const String splash = '/';
@@ -40,6 +40,7 @@ class AppRoutes {
   static const String home = '/home';
   static const String settings = '/settings';
   static const String profile = '/profile';
+  static const String myInsights = '/profile/my-insights';
   static const String player = '/player';
   static const String sessionDetail = '/session-detail';
   static const String adminDashboard = '/admin/dashboard';
@@ -64,6 +65,7 @@ class AppRoutes {
         // others
         settings: (_) => const SettingsScreen(),
         profile: (_) => const ProfileScreen(),
+        myInsights: (_) => const MyInsightsScreen(),
         adminDashboard: (_) => const AdminDashboardScreen(),
         '/admin/add-session': (_) => const AddSessionScreen(),
         '/admin/categories': (_) => const CategoryManagementScreen(),

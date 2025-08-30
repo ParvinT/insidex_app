@@ -8,7 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../shared/widgets/custom_text_field.dart';
-import 'progress_screen.dart'; // Import the new progress screen
+import 'progress_screen.dart';
+import 'my_insights_screen.dart';
+import '../../core/routes/app_routes.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -195,6 +197,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 // Your Progress Button
                 _buildProgressButton(),
+                SizedBox(height: 20.h),
+
+                //  MY INSIGHTS BUTTON
+                _buildMyInsightsButton(),
                 SizedBox(height: 20.h),
 
                 _buildPremiumWaitlistButton(),
@@ -422,6 +428,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(height: 4.h),
                   Text(
                     'Track your listening habits and improvements',
+                    style: GoogleFonts.inter(
+                      fontSize: 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: AppColors.textSecondary,
+              size: 16.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMyInsightsButton() {
+    return InkWell(
+      onTap: () {
+        // Sadece giriş yapmış kullanıcılar erişebilir
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          Navigator.pushNamed(context, AppRoutes.myInsights);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please login to view your insights'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0xFFE8C5A0).withOpacity(0.1),
+              const Color(0xFF7DB9B6).withOpacity(0.1),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: const Color(0xFFE8C5A0).withOpacity(0.3),
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 48.w,
+              height: 48.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8C5A0),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Icon(
+                Icons.insights_outlined,
+                color: Colors.white,
+                size: 24.sp,
+              ),
+            ),
+            SizedBox(width: 16.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'My Insights',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    'View your personalized wellness profile',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       color: AppColors.textSecondary,
