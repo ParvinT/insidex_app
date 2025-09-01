@@ -63,23 +63,6 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Check if email already exists in waitlist
-      final existingEmail = await FirebaseFirestore.instance
-          .collection('waitlist')
-          .where('email', isEqualTo: _emailController.text.trim())
-          .get();
-
-      if (existingEmail.docs.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You\'re already on the waitlist!'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-        setState(() => _isSubmitting = false);
-        return;
-      }
-
       // Add to waitlist
       await FirebaseFirestore.instance.collection('waitlist').add({
         'email': _emailController.text.trim(),

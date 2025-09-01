@@ -42,7 +42,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => UserProvider()..initAuthListener()),
+        ChangeNotifierProvider(
+            create: (_) => UserProvider()..initAuthListener()),
       ],
       child: const InsidexApp(),
     ),

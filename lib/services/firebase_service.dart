@@ -26,6 +26,21 @@ class FirebaseService {
       print('Email: $email');
       print('Name: $name');
 
+      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+        return {
+          'success': false,
+          'error': 'Please enter a valid email address',
+        };
+      }
+
+      // ✅ YENİ EKLENDİ - Name validation
+      if (name.isEmpty || name.length < 2) {
+        return {
+          'success': false,
+          'error': 'Name must be at least 2 characters',
+        };
+      }
+
       // Generate 6-digit OTP code
       String genCode() =>
           List.generate(6, (_) => Random.secure().nextInt(10)).join();
@@ -104,10 +119,8 @@ class FirebaseService {
   }) async {
     try {
       // Get OTP document
-      final otpDoc = await _firestore
-          .collection('otp_verifications')
-          .doc(email)
-          .get();
+      final otpDoc =
+          await _firestore.collection('otp_verifications').doc(email).get();
 
       if (!otpDoc.exists) {
         return {
@@ -309,10 +322,8 @@ class FirebaseService {
   static Future<Map<String, dynamic>> resendOTP(String email) async {
     try {
       // Check if OTP record exists
-      final otpDoc = await _firestore
-          .collection('otp_verifications')
-          .doc(email)
-          .get();
+      final otpDoc =
+          await _firestore.collection('otp_verifications').doc(email).get();
 
       if (!otpDoc.exists) {
         return {
