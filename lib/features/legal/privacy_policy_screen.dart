@@ -111,7 +111,7 @@ You have the right to:
 • Correct inaccurate data
 • Object to data processing
 
-To exercise these rights, contact us at: support@insidex.app
+To exercise these rights, contact us at: insidexapp@gmail.com
               ''',
             ),
 
@@ -169,8 +169,7 @@ We may update this Privacy Policy from time to time. We will notify you of any c
               title: '11. Contact Us',
               content: '''
 If you have any questions about this Privacy Policy, please contact us:
-• Email: support@insidex.app
-• Website: https://insidex.app
+• Email: insidexapp@gmail.com
               ''',
             ),
 

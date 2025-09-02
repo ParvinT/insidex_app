@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../providers/user_provider.dart';
+import '../feedback/feedback_dialog.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -75,7 +76,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 32.h),
 
                 // App Section
-                _buildSectionHeader('App'),
+                /* _buildSectionHeader('App'),
                 SizedBox(height: 12.h),
                 _buildSettingsCard([
                   _buildSwitchItem(
@@ -105,6 +106,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ]),
 
+                SizedBox(height: 32.h),*/
+
+                SizedBox(height: 32.h),
+                _buildSectionHeader('Support & Feedback'),
+                SizedBox(height: 12.h),
+                _buildSettingsCard([
+                  _buildSettingItem(
+                    icon: Icons.feedback_outlined,
+                    title: 'Send Feedback',
+                    subtitle: 'Help us improve INSIDEX',
+                    onTap: () => _showFeedbackDialog(),
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.bug_report_outlined,
+                    title: 'Report a Bug',
+                    subtitle: 'Something not working?',
+                    onTap: () => _showFeedbackDialog(isBugReport: true),
+                  ),
+                ]),
+
                 SizedBox(height: 32.h),
 
                 // About Section
@@ -114,9 +136,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildSettingItem(
                     icon: Icons.info_outline,
                     title: 'About',
-                    onTap: () {
-                      // TODO: Navigate to about screen
-                    },
+                    onTap: () => Navigator.pushNamed(context, AppRoutes.about),
+                  ),
+                  _buildDivider(),
+                  _buildSettingItem(
+                    icon: Icons.warning_amber_rounded,
+                    title: 'Disclaimer',
+                    onTap: () =>
+                        Navigator.pushNamed(context, AppRoutes.disclaimer),
                   ),
                   _buildDivider(),
                   _buildSettingItem(
@@ -137,8 +164,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                 ]),
-
-                SizedBox(height: 32.h),
 
                 // Version info
                 Center(
@@ -331,6 +356,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // Action Methods
   void _handleProfileEdit() {
     Navigator.pushNamed(context, AppRoutes.profile);
+  }
+
+  void _showFeedbackDialog({bool isBugReport = false}) {
+    FeedbackDialog.show(context, isBugReport: isBugReport);
   }
 
   Future<void> _handleSignOut() async {

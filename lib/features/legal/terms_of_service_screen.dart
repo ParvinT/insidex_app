@@ -172,8 +172,7 @@ These Terms shall be governed and construed in accordance with the laws of [Your
               title: '13. Contact Information',
               content: '''
 For any questions about these Terms of Service, please contact us:
-• Email: support@insidex.app
-• Website: https://insidex.app
+• Email: insidexapp@gmail.com
               ''',
             ),
 

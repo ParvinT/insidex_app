@@ -15,10 +15,11 @@ import '../../features/admin/category_management_screen.dart';
 import '../../features/admin/session_management_screen.dart';
 import '../../features/admin/user_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
-// New imports for legal and premium
 import '../../features/legal/privacy_policy_screen.dart';
 import '../../features/legal/terms_of_service_screen.dart';
 import '../../features/premium/premium_waitlist_screen.dart';
+import '../../features/legal/about_screen.dart';
+import '../../features/legal/disclaimer_screen.dart';
 
 import 'package:insidex_app/features/auth/register_screen.dart'
     as auth_register;
@@ -45,10 +46,11 @@ class AppRoutes {
   static const String sessionDetail = '/session-detail';
   static const String adminDashboard = '/admin/dashboard';
 
-  // New routes
   static const String privacyPolicy = '/legal/privacy-policy';
   static const String termsOfService = '/legal/terms-of-service';
   static const String premiumWaitlist = '/premium/waitlist';
+  static const String about = '/legal/about';
+  static const String disclaimer = '/legal/disclaimer';
 
   static Map<String, WidgetBuilder> get routes => {
         splash: (_) => const SplashScreen(),
@@ -76,6 +78,8 @@ class AppRoutes {
         // legal pages
         privacyPolicy: (_) => const PrivacyPolicyScreen(),
         termsOfService: (_) => const TermsOfServiceScreen(),
+        about: (_) => const AboutScreen(),
+        disclaimer: (_) => const DisclaimerScreen(),
 
         // premium
         premiumWaitlist: (_) => const PremiumWaitlistScreen(),

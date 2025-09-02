@@ -475,7 +475,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 SizedBox(height: 24.h),
 
-                // OR Divider
+               /* // OR Divider
                 _buildDivider(),
 
                 SizedBox(height: 24.h),
@@ -499,7 +499,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   isDisabled: _isEmailLoading || _isGoogleLoading,
                 ),
 
-                SizedBox(height: 32.h),
+                SizedBox(height: 32.h),*/
 
                 // Sign In Link
                 Row(

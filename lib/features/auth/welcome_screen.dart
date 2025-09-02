@@ -61,7 +61,7 @@ class WelcomeScreen extends StatelessWidget {
 
               SizedBox(height: 60.h),
 
-              // Google Sign In Button
+              /* // Google Sign In Button
               SocialLoginButton(
                 onTap: () {
                   // TODO: Google sign in
@@ -82,7 +82,7 @@ class WelcomeScreen extends StatelessWidget {
                 isDark: true,
               ),
 
-              SizedBox(height: 16.h),
+              SizedBox(height: 16.h), */
 
               // Email Sign In Button
               _buildEmailButton(

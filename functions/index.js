@@ -592,3 +592,47 @@ function getPremiumAnnouncementHTML(data) {
   `;
 }
 
+// Send email helper function
+async function sendEmail({ to, subject, html }) {
+  const mailOptions = {
+    from: process.env.GMAIL_FROM || process.env.GMAIL_USER,
+    to: to,
+    subject: subject,
+    html: html
+  };
+  
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+}
+
+
+exports.onFeedbackCreated = functions.firestore
+  .document('feedback/{feedbackId}')
+  .onCreate(async (snap, context) => {
+    const feedback = snap.data();
+    
+    const emailHtml = `
+      <h2>New Feedback Received</h2>
+      <p><strong>Type:</strong> ${feedback.type}</p>
+      <p><strong>Title:</strong> ${feedback.title}</p>
+      <p><strong>Rating:</strong> ${feedback.rating}/5</p>
+      <p><strong>Message:</strong></p>
+      <p>${feedback.message}</p>
+      <p><strong>User Email:</strong> ${feedback.email || 'Not provided'}</p>
+      <p><strong>User ID:</strong> ${feedback.userId || 'Guest'}</p>
+      <hr>
+      <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
+    `;
+    
+    await sendEmail({
+      to: process.env.GMAIL_USER,
+      subject: `[INSIDEX Feedback] ${feedback.type}: ${feedback.title}`,
+      html: emailHtml,
+    });
+});

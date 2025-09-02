@@ -296,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 24.h),
 
-                // Google Sign In Button
+                /* // Google Sign In Button
                 SocialLoginButton(
                   onTap: _handleGoogleSignIn,
                   label: 'Continue with Google',
@@ -313,7 +313,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   isLoading: _isAppleLoading,
                 ),
 
-                SizedBox(height: 24.h),
+                SizedBox(height: 24.h),*/
 
                 // Continue as Guest Button
                 Center(
