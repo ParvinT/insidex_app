@@ -70,7 +70,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
               child: CircularProgressIndicator(
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
               ),
             );
           }
@@ -192,7 +192,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
         ),
         child: Column(
           children: [
-            // Image Section - ESKİSİ GİBİ AYNEN KALSIN
+            // Image Section 
             Container(
               height: 180.h,
               decoration: BoxDecoration(
@@ -204,8 +204,8 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    AppColors.primaryGold.withOpacity(0.8),
-                    AppColors.primaryGold.withOpacity(0.4),
+                    AppColors.textPrimary.withOpacity(0.8),
+                    AppColors.textPrimary.withOpacity(0.4),
                   ],
                 ),
               ),
@@ -230,8 +230,8 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                AppColors.primaryGold.withOpacity(0.8),
-                                AppColors.primaryGold.withOpacity(0.4),
+                                AppColors.textPrimary.withOpacity(0.8),
+                                AppColors.textPrimary.withOpacity(0.4),
                               ],
                             ),
                           ),
@@ -242,8 +242,8 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                AppColors.primaryGold.withOpacity(0.8),
-                                AppColors.primaryGold.withOpacity(0.4),
+                                AppColors.textPrimary.withOpacity(0.8),
+                                AppColors.textPrimary.withOpacity(0.4),
                               ],
                             ),
                           ),
@@ -262,8 +262,8 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: [
-                            AppColors.primaryGold.withOpacity(0.8),
-                            AppColors.primaryGold.withOpacity(0.4),
+                            AppColors.textPrimary.withOpacity(0.8),
+                            AppColors.textPrimary.withOpacity(0.4),
                           ],
                         ),
                       ),
@@ -288,7 +288,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                       child: Icon(
                         Icons.play_arrow,
                         size: 32.sp,
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -324,7 +324,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                       vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryGold.withOpacity(0.1),
+                      color: AppColors.textPrimary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
@@ -332,7 +332,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),

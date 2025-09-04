@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../feedback/feedback_dialog.dart';
 
 class ProfileMenuSection extends StatelessWidget {
   const ProfileMenuSection({super.key});
@@ -29,16 +29,14 @@ class ProfileMenuSection extends StatelessWidget {
           title: 'Terms of Service',
           onTap: () => Navigator.pushNamed(context, '/legal/terms-of-service'),
         ),
-        _buildMenuItem(
+        /* _buildMenuItem(
           context: context,
           icon: Icons.help_outline,
           title: 'Help & Support',
           onTap: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Help & Support coming soon!')),
-            );
+            FeedbackDialog.show(context);
           },
-        ),
+        ),*/
       ],
     );
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -41,13 +42,12 @@ class AboutScreen extends StatelessWidget {
                 height: 100.w,
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryGold.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20.r),
                 ),
-                child: Icon(
-                  Icons.self_improvement,
-                  size: 60.sp,
-                  color: AppColors.primaryGold,
+                child: SvgPicture.asset(
+                  'assets/images/logo.svg',
+                  width: 60.w,
+                  height: 60.w,
                 ),
               ),
             ),

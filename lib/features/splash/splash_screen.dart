@@ -9,7 +9,6 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

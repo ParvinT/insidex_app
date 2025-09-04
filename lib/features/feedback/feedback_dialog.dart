@@ -369,7 +369,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                 // Submit Button
                 SizedBox(
                   width: double.infinity,
-                  height: 48.h,
+                  height: 65.h,
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitFeedback,
                     style: ElevatedButton.styleFrom(

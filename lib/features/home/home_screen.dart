@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
               const Spacer(),
 
-              // Search bar at bottom
+              /*// Search bar at bottom
               Container(
                 height: 45.h,
                 decoration: BoxDecoration(
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
-              ),
+              ), */
 
               SizedBox(height: 20.h), // Bottom spacing
             ],
@@ -630,9 +630,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // Profile
             final result = await Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      ProfileScreen()), 
+              MaterialPageRoute(builder: (context) => ProfileScreen()),
             );
             if (mounted) {
               setState(() => _selectedIndex = 0);

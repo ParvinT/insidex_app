@@ -451,7 +451,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
 
   Widget _buildLoadingState() {
     return const Center(
-      child: CircularProgressIndicator(color: AppColors.primaryGold),
+      child: CircularProgressIndicator(color: AppColors.textPrimary),
     );
   }
 
@@ -662,8 +662,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    AppColors.primaryGold.withOpacity(0.8),
-                                    AppColors.primaryGold.withOpacity(0.4),
+                                    AppColors.textPrimary.withOpacity(0.8),
+                                    AppColors.textPrimary.withOpacity(0.4),
                                   ],
                                 ),
                               ),
@@ -674,8 +674,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    AppColors.primaryGold.withOpacity(0.8),
-                                    AppColors.primaryGold.withOpacity(0.4),
+                                    AppColors.textPrimary.withOpacity(0.8),
+                                    AppColors.textPrimary.withOpacity(0.4),
                                   ],
                                 ),
                               ),
@@ -687,8 +687,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  AppColors.primaryGold.withOpacity(0.8),
-                                  AppColors.primaryGold.withOpacity(0.4),
+                                  AppColors.textPrimary.withOpacity(0.8),
+                                  AppColors.textPrimary.withOpacity(0.4),
                                 ],
                               ),
                             ),
@@ -732,7 +732,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                       child: Icon(
                         Icons.play_arrow,
                         size: 32.sp,
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -808,14 +808,14 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                           vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryGold.withOpacity(0.1),
+                          color: AppColors.textPrimary.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
                           session['category'] ?? 'General',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: AppColors.primaryGold,
+                            color: AppColors.textPrimary,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
