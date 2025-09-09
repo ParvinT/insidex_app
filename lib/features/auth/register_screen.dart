@@ -13,6 +13,8 @@ import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_login_button.dart';
 import '../../services/firebase_service.dart';
 import 'otp_verification_screen.dart';
+import '../../core/responsive/auth_scaffold.dart';
+import '../../core/responsive/context_ext.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -259,7 +261,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final bool isAnyLoading =
         _isEmailLoading || _isGoogleLoading || _isAppleLoading;
 
-    return Scaffold(
+    return AuthScaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundWhite,
@@ -475,7 +477,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 SizedBox(height: 24.h),
 
-               /* // OR Divider
+                /* // OR Divider
                 _buildDivider(),
 
                 SizedBox(height: 24.h),

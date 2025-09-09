@@ -12,6 +12,8 @@ import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/analytics_service.dart';
+import '../../core/responsive/auth_scaffold.dart';
+import '../../core/responsive/context_ext.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -170,7 +172,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   Widget build(BuildContext context) {
     final label =
         GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6E6E6E));
-    return Scaffold(
+    return AuthScaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Verify Email'),

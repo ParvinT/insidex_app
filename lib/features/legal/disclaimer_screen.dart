@@ -23,7 +23,7 @@ class DisclaimerScreen extends StatelessWidget {
         title: Text(
           'Disclaimer',
           style: GoogleFonts.inter(
-            fontSize: 20.sp,
+            fontSize: 20.sp.clamp(20.0, 22.0),
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -65,29 +65,32 @@ class DisclaimerScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             SizedBox(height: 24.h),
-            
+
             // Medical Disclaimer
             _buildSection(
               icon: '⚕️',
               title: 'Not Medical Treatment',
-              content: 'INSIDEX subliminal tracks are not medical treatments and are not intended to replace any medical advice or therapy. Results may vary for different individuals, and timeframes for perceived effects are not guaranteed.',
+              content:
+                  'INSIDEX subliminal tracks are not medical treatments and are not intended to replace any medical advice or therapy. Results may vary for different individuals, and timeframes for perceived effects are not guaranteed.',
               isImportant: true,
             ),
-            
+
             // No Warranties
             _buildSection(
               icon: '📋',
               title: 'No Warranties',
-              content: 'All content is provided "as is" and without warranties of any kind. INSIDEX and its team are not liable for any direct, indirect, incidental, or consequential damages resulting from the use or misuse of our content.',
+              content:
+                  'All content is provided "as is" and without warranties of any kind. INSIDEX and its team are not liable for any direct, indirect, incidental, or consequential damages resulting from the use or misuse of our content.',
             ),
-            
+
             // Safety Warning
             _buildSection(
               icon: '⚠️',
               title: 'Important Safety Note',
-              content: '''Some subliminal sessions may induce a deeply relaxed or meditative state. These should NOT be used while:
+              content:
+                  '''Some subliminal sessions may induce a deeply relaxed or meditative state. These should NOT be used while:
               
 - Operating heavy machinery
 - Driving (except our specially designed driving sessions)
@@ -96,21 +99,23 @@ class DisclaimerScreen extends StatelessWidget {
 Our dynamic tracks for driving, focus, and physical activity are clearly labeled and safe for their intended use.''',
               isImportant: true,
             ),
-            
+
             // Medical Conditions
             _buildSection(
               icon: '🏥',
               title: 'Medical Conditions',
-              content: 'Always consult your physician before using any audio program if you have a medical condition, especially:\n\n• Epilepsy or seizure disorders\n• Heart conditions\n• Mental health conditions\n• Hearing problems',
+              content:
+                  'Always consult your physician before using any audio program if you have a medical condition, especially:\n\n• Epilepsy or seizure disorders\n• Heart conditions\n• Mental health conditions\n• Hearing problems',
             ),
-            
+
             // Age Restriction
             _buildSection(
               icon: '🔞',
               title: 'Age Restriction',
-              content: 'This app is intended for users 13 years and older. Users under 18 should use the app with parental guidance.',
+              content:
+                  'This app is intended for users 13 years and older. Users under 18 should use the app with parental guidance.',
             ),
-            
+
             // Professional Healthcare
             Container(
               margin: EdgeInsets.only(top: 24.h, bottom: 24.h),
@@ -151,7 +156,7 @@ Our dynamic tracks for driving, focus, and physical activity are clearly labeled
                 ],
               ),
             ),
-            
+
             // Agreement
             Text(
               'By using INSIDEX, you acknowledge that you have read and understood this disclaimer.',
@@ -162,9 +167,9 @@ Our dynamic tracks for driving, focus, and physical activity are clearly labeled
               ),
               textAlign: TextAlign.center,
             ),
-            
+
             SizedBox(height: 32.h),
-            
+
             // Last Updated
             Center(
               child: Text(
@@ -175,14 +180,14 @@ Our dynamic tracks for driving, focus, and physical activity are clearly labeled
                 ),
               ),
             ),
-            
+
             SizedBox(height: 20.h),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildSection({
     required String icon,
     required String title,
@@ -214,7 +219,8 @@ Our dynamic tracks for driving, focus, and physical activity are clearly labeled
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: isImportant ? Colors.red[700] : AppColors.textPrimary,
+                    color:
+                        isImportant ? Colors.red[700] : AppColors.textPrimary,
                   ),
                 ),
               ),

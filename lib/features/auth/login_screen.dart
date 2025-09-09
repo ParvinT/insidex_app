@@ -12,6 +12,8 @@ import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/social_login_button.dart';
 import '../../services/firebase_service.dart';
 import '../../providers/user_provider.dart';
+import '../../core/responsive/auth_scaffold.dart';
+import '../../core/responsive/context_ext.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -181,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Herhangi biri loading durumundaysa diğer butonları disable et
     final isAnyLoading = _isEmailLoading || _isGoogleLoading || _isAppleLoading;
 
-    return Scaffold(
+    return AuthScaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundWhite,

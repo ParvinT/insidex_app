@@ -1135,27 +1135,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: SafeArea(
-        child: isWideScreen
-            ? Row(
-                children: [
-                  // Desktop Sidebar
-                  _buildDesktopSidebar(),
-                  // Main Content
-                  Expanded(
-                    child: _buildMainContent(),
-                  ),
-                ],
-              )
-            : Column(
-                children: [
-                  // Mobile Header with Menu
-                  _buildMobileHeader(),
-                  // Main Content
-                  Expanded(
-                    child: _buildMainContent(),
-                  ),
-                ],
-              ),
+        child: Column(
+          children: [
+            // Header with Menu (unified)
+            _buildMobileHeader(),
+            // Main Content
+            Expanded(
+              child: _buildMainContent(),
+            ),
+          ],
+        ),
       ),
     );
   }

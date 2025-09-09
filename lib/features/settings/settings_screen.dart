@@ -25,23 +25,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final screenSize = mq.size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final bool isShortWide =
+        screenWidth >= 1024 && screenHeight <= 800; // Nest Hub (Max)
+    final bool isDesktop = screenWidth >= 1024 && !isShortWide;
+    final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
+        toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
             color: AppColors.textPrimary,
-            size: 24.sp,
+            size: 24.sp.clamp(24.0, 26.0),
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Settings',
           style: GoogleFonts.inter(
-            fontSize: 24.sp,
+            fontSize: 24.sp.clamp(24.0, 28.0),
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),

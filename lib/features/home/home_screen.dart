@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/app_colors.dart';
-import '../../shared/widgets/menu_overlay.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../../core/responsive/responsive_scaffold.dart';
+import '../../core/responsive/context_ext.dart';
 import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
 import '../profile/profile_screen.dart';
+import '../../shared/widgets/menu_overlay.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,109 +20,90 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
-  int _selectedIndex = 0;
+  // Menu state
   bool _isMenuOpen = false;
+  void _toggleMenu() => setState(() => _isMenuOpen = !_isMenuOpen);
 
-  // thresholds
-  static const double _dragThreshold = 60.0;
+  // Drag states (All & Playlist)
+  bool _isDraggingAll = false;
+  double _dragAll = 0.0;
+  bool _readyAll = false;
 
-  // All Subliminals (drag down)
-  double _dragOffset = 0.0;
-  bool _isDragging = false;
-  bool _readyToNavigate = false;
+  bool _isDraggingPl = false;
+  double _dragPl = 0.0;
+  bool _readyPl = false;
 
-  // Your Playlist (drag down — aynı davranış)
-  double _playlistDragOffset = 0.0;
-  bool _isPlaylistDragging = false;
-  bool _playlistReadyToNavigate = false;
+  final double _dragThreshold = 60.0;
 
-  late AnimationController _pulseController;
-  late Animation<double> _pulseAnimation;
-  late AnimationController _playlistPulseController;
-  late Animation<double> _playlistPulseAnimation;
+  late final AnimationController _pulseAll = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
 
-  @override
-  void initState() {
-    super.initState();
-
-    _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
-    );
-
-    _playlistPulseController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
-      vsync: this,
-    )..repeat(reverse: true);
-    _playlistPulseAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(
-        parent: _playlistPulseController,
-        curve: Curves.easeInOut,
-      ),
-    );
-  }
+  late final AnimationController _pulsePl = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
 
   @override
   void dispose() {
-    _pulseController.dispose();
-    _playlistPulseController.dispose();
+    _pulseAll.dispose();
+    _pulsePl.dispose();
     super.dispose();
   }
 
-  void _toggleMenu() => setState(() => _isMenuOpen = !_isMenuOpen);
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[200],
+    final isTablet = context.isTablet;
+    // Referans 844; tablette sabit değerler daha stabil
+    final refH = 844.0;
+    final s = (context.h / refH).clamp(0.85, 1.15);
+
+    final double headerH = isTablet ? 280.0 : (240.0 * s).clamp(200.0, 260.0);
+    final double cardH = isTablet ? 210.0 : (200.0 * s).clamp(160.0, 220.0);
+
+    double topAll = headerH - (cardH * 0.35);
+    double topPlaylist = topAll + (cardH * 0.60) + 8.0;
+
+    final double baseBarH =
+        isTablet ? 64.0 : (context.isCompactH ? 56.0 : 60.0);
+    final double maxY = context.h - baseBarH - 16.0;
+    final double bottomOfPlaylist = topPlaylist + cardH;
+
+    if (bottomOfPlaylist > maxY) {
+      final shiftUp = bottomOfPlaylist - maxY;
+      topAll = (topAll - shiftUp).clamp(12.0, headerH - (cardH * 0.25));
+      topPlaylist = (topPlaylist - shiftUp).clamp(topAll + 8.0, maxY - cardH);
+    }
+
+    return ResponsiveScaffold(
+      appBar: null,
       body: Stack(
         children: [
-          SafeArea(
-            child: Stack(
-              children: [
-                Positioned.fill(child: _buildBackground()),
-
-                // Z-order sabit
-                _buildPlaylistCard(),
-                _buildAllSubliminalsCard(),
-                _buildHeader(),
-              ],
-            ),
-          ),
+          // background
+          Positioned.fill(child: _buildBackground()),
+          // content
+          _buildPlaylistCard(top: topPlaylist, height: cardH),
+          _buildAllSubliminalsCard(top: topAll, height: cardH),
+          _buildHeader(height: headerH),
+          // overlay
           if (_isMenuOpen)
-            MenuOverlay(onClose: () => setState(() => _isMenuOpen = false)),
+            Positioned.fill(
+              child: MenuOverlay(onClose: _toggleMenu),
+            ),
         ],
       ),
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNav: _buildBottomNavContent(),
     );
   }
 
-  // ---------- parts ----------
-
-  Widget _buildBackground() {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Colors.grey[200]!, Colors.grey[300]!],
-        ),
-      ),
-    );
-  }
-
-  // Update only the _buildHeader() method in home_screen.dart
-  // Replace the existing _buildHeader() method with this:
-
-  Widget _buildHeader() {
+  // ---------- UI parts ----------
+  Widget _buildHeader({required double height}) {
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
-      height: 240.h,
+      height: height,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
@@ -134,83 +117,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ],
         ),
         child: Padding(
-          padding: EdgeInsets.all(24.w),
+          // yatay .w, dikey .h kullan
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top row with logo and menu
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Logo at top left
-                  Container(
-                    height: 30.h,
-                    alignment: Alignment.centerLeft,
-                    child: SvgPicture.asset(
-                      'assets/images/logo.svg',
-                      height: 30.h,
-                      fit: BoxFit.contain,
-                      colorFilter: ColorFilter.mode(
-                        AppColors.textPrimary,
-                        BlendMode.srcIn,
-                      ),
-                    ),
+                  // Only logo (no text title as requested)
+                  SvgPicture.asset(
+                    'assets/images/logo.svg',
+                    height: 28.h,
+                    fit: BoxFit.contain,
+                    colorFilter: ColorFilter.mode(
+                        AppColors.textPrimary, BlendMode.srcIn),
                   ),
-                  // Only Menu button at top right
+                  const Spacer(),
                   _buildHeaderButton('Menu', true),
                 ],
               ),
-
               const Spacer(),
-
-              /*// Search bar at bottom
-              Container(
-                height: 45.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.grey[300]!, width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: Icon(
-                        Icons.search,
-                        color: Colors.grey[400],
-                        size: 22.sp,
-                      ),
-                    ),
-                    Expanded(
-                      child: TextField(
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textPrimary,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Search subliminals...',
-                          hintStyle: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: Colors.grey[400],
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      child: Icon(
-                        Icons.tune,
-                        color: Colors.grey[400],
-                        size: 20.sp,
-                      ),
-                    ),
-                  ],
-                ),
-              ), */
-
-              SizedBox(height: 20.h), // Bottom spacing
+              SizedBox(height: 12.h),
             ],
           ),
         ),
@@ -218,195 +145,55 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  // ---------- Your Playlist (All Subliminals ile aynı his) ----------
-  Widget _buildPlaylistCard() {
-    final progress = (_playlistDragOffset / _dragThreshold).clamp(0.0, 1.0);
+  Widget _buildAllSubliminalsCard(
+      {required double top, required double height}) {
+    final progress = (_dragAll / _dragThreshold).clamp(0.0, 1.0);
 
     return Positioned(
-      top: 160.h + (_playlistDragOffset.clamp(0, _dragThreshold) * 0.3),
+      top: top,
       left: 0,
       right: 0,
-      height: 200.h,
+      height: height,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onVerticalDragStart: (_) => setState(() => _isPlaylistDragging = true),
-        onVerticalDragUpdate: (details) {
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const CategoriesScreen()));
+        },
+        onVerticalDragStart: (_) => setState(() => _isDraggingAll = true),
+        onVerticalDragUpdate: (d) {
           setState(() {
-            // geri sarma: 0..threshold aralığı
-            _playlistDragOffset = (_playlistDragOffset + details.delta.dy)
-                .clamp(0.0, _dragThreshold);
-            final wasReady = _playlistReadyToNavigate;
-            _playlistReadyToNavigate = _playlistDragOffset >= _dragThreshold;
-            if (_playlistReadyToNavigate && !wasReady) {
-              HapticFeedback.lightImpact();
-            }
+            _dragAll = (_dragAll + d.delta.dy).clamp(0.0, _dragThreshold);
+            final wasReady = _readyAll;
+            _readyAll = _dragAll >= _dragThreshold;
+            if (_readyAll && !wasReady) HapticFeedback.lightImpact();
           });
         },
-        onVerticalDragEnd: (details) async {
-          final v = details.primaryVelocity ?? 0.0; // aşağı hızlı -> pozitif
-          if (_playlistReadyToNavigate || v > 500) {
-            // >>> POPUP: Coming Soon <<<
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const PlaylistScreen()),
-            );
+        onVerticalDragEnd: (details) {
+          final v = details.primaryVelocity ?? 0.0;
+          if (_readyAll || v > 500) {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const CategoriesScreen()));
           }
           setState(() {
-            _isPlaylistDragging = false;
-            _playlistReadyToNavigate = false;
-            _playlistDragOffset = 0.0;
+            _isDraggingAll = false;
+            _readyAll = false;
+            _dragAll = 0.0;
           });
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          transform: Matrix4.identity()
-            ..scale(_isPlaylistDragging ? 0.97 : 1.0),
+          transform: Matrix4.identity()..scale(_isDraggingAll ? 0.97 : 1.0),
           decoration: BoxDecoration(
-            color: _playlistReadyToNavigate
-                ? AppColors.textPrimary
-                : const Color(0xFFCCCBCB),
+            color: _readyAll ? AppColors.textPrimary : const Color(0xFFCCCBCB),
             borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
-                color: _playlistReadyToNavigate
-                    ? AppColors.textPrimary.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.08),
-                blurRadius: _isPlaylistDragging ? 25 : 15,
-                offset: Offset(0, _isPlaylistDragging ? 12 : 8),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              // Başlık
-              Positioned(
-                right: 20.w,
-                bottom: 20.h,
-                child: Text(
-                  'Your Playlist',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _playlistReadyToNavigate
-                        ? Colors.white
-                        : AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              // Indicator: altta
-              Positioned(
-                bottom: 8.h,
-                left: 0,
-                right: 0,
-                child: Column(
-                  children: [
-                    AnimatedBuilder(
-                      animation: _playlistPulseAnimation,
-                      builder: (_, __) {
-                        return Transform.scale(
-                          scale: _playlistPulseAnimation.value,
-                          child: Icon(
-                            _playlistReadyToNavigate
-                                ? Icons.lock_open
-                                : Icons.keyboard_arrow_down,
-                            size: 20.sp,
-                            color: _playlistReadyToNavigate
-                                ? Colors.white.withOpacity(0.85)
-                                : AppColors.textPrimary.withOpacity(0.5),
-                          ),
-                        );
-                      },
-                    ),
-                    Container(
-                      width: 50.w,
-                      height: 5.h,
-                      decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(3.r),
-                      ),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: progress,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: _playlistReadyToNavigate
-                                ? Colors.white
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(3.r),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ---------- All Subliminals ----------
-  Widget _buildAllSubliminalsCard() {
-    final progress = (_dragOffset / _dragThreshold).clamp(0.0, 1.0);
-
-    return Positioned(
-      top: 100.h + (_dragOffset.clamp(0, _dragThreshold) * 0.3),
-      left: 0,
-      right: 0,
-      height: 200.h,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const CategoriesScreen()),
-          );
-        },
-        onVerticalDragStart: (_) => setState(() => _isDragging = true),
-        onVerticalDragUpdate: (details) {
-          setState(() {
-            _dragOffset = (_dragOffset + details.delta.dy).clamp(
-              0.0,
-              _dragThreshold,
-            );
-            final wasReady = _readyToNavigate;
-            _readyToNavigate = _dragOffset >= _dragThreshold;
-            if (_readyToNavigate && !wasReady) {
-              HapticFeedback.lightImpact();
-            }
-          });
-        },
-        onVerticalDragEnd: (details) {
-          final v = details.primaryVelocity ?? 0.0; // aşağı hızlı -> pozitif
-          if (_readyToNavigate || v > 500) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CategoriesScreen()),
-            );
-          }
-          setState(() {
-            _isDragging = false;
-            _readyToNavigate = false;
-            _dragOffset = 0.0;
-          });
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          transform: Matrix4.identity()..scale(_isDragging ? 0.97 : 1.0),
-          decoration: BoxDecoration(
-            color: _readyToNavigate
-                ? AppColors.textPrimary
-                : const Color(0xFFCCCBCB),
-            borderRadius: BorderRadius.circular(30.r),
-            boxShadow: [
-              BoxShadow(
-                color: _readyToNavigate
+                color: _readyAll
                     ? AppColors.textPrimary.withOpacity(0.3)
                     : Colors.black.withOpacity(0.1),
-                blurRadius: _isDragging ? 25 : 20,
-                offset: Offset(0, _isDragging ? 12 : 10),
+                blurRadius: _isDraggingAll ? 25 : 20,
+                offset: Offset(0, _isDraggingAll ? 12 : 10),
               ),
             ],
           ),
@@ -420,8 +207,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color:
-                        _readyToNavigate ? Colors.white : AppColors.textPrimary,
+                    color: _readyAll ? Colors.white : AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -431,22 +217,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 right: 0,
                 child: Column(
                   children: [
-                    AnimatedBuilder(
-                      animation: _pulseAnimation,
-                      builder: (context, child) {
-                        return Transform.scale(
-                          scale: _pulseAnimation.value,
-                          child: Icon(
-                            _readyToNavigate
-                                ? Icons.lock_open
-                                : Icons.keyboard_arrow_down,
-                            color: _readyToNavigate
-                                ? Colors.white.withOpacity(0.8)
-                                : AppColors.textPrimary.withOpacity(0.5),
-                            size: 20.sp,
-                          ),
-                        );
-                      },
+                    ScaleTransition(
+                      scale: Tween(begin: 0.9, end: 1.0).animate(
+                          CurvedAnimation(
+                              parent: _pulseAll, curve: Curves.easeInOut)),
+                      child: Icon(
+                        _readyAll ? Icons.lock_open : Icons.keyboard_arrow_down,
+                        color: _readyAll
+                            ? Colors.white.withOpacity(0.8)
+                            : AppColors.textPrimary.withOpacity(0.5),
+                        size: 20.sp,
+                      ),
                     ),
                     Container(
                       width: 50.w,
@@ -460,8 +241,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         widthFactor: progress,
                         child: Container(
                           decoration: BoxDecoration(
-                            color:
-                                _readyToNavigate ? Colors.white : Colors.white,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(3.r),
                           ),
                         ),
@@ -477,190 +257,210 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildHeaderButton(String text, bool isDark) {
-    return GestureDetector(
-      onTap: isDark ? _toggleMenu : null,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.textPrimary : Colors.transparent,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColors.textPrimary, width: 1),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!isDark) ...[
-              Icon(
-                Icons.category_outlined,
-                size: 14.sp,
-                color: AppColors.textPrimary,
-              ),
-              SizedBox(width: 4.w),
-            ],
-            Text(
-              text,
-              style: GoogleFonts.inter(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : AppColors.textPrimary,
-              ),
-            ),
-            if (isDark) ...[
-              SizedBox(width: 4.w),
-              const Icon(Icons.menu, size: 14, color: Colors.white),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildPlaylistCard({required double top, required double height}) {
+    final progress = (_dragPl / _dragThreshold).clamp(0.0, 1.0);
 
-  Widget _buildBottomNav() {
-    return Container(
-      height: 80.h,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+    return Positioned(
+      top: top,
+      left: 0,
+      right: 0,
+      height: height,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragStart: (_) => setState(() => _isDraggingPl = true),
+        onVerticalDragUpdate: (d) {
+          setState(() {
+            _dragPl = (_dragPl + d.delta.dy).clamp(0.0, _dragThreshold);
+            final wasReady = _readyPl;
+            _readyPl = _dragPl >= _dragThreshold;
+            if (_readyPl && !wasReady) HapticFeedback.lightImpact();
+          });
+        },
+        onVerticalDragEnd: (details) async {
+          final v = details.primaryVelocity ?? 0.0;
+          if (_readyPl || v > 500) {
+            await Navigator.push(context,
+                MaterialPageRoute(builder: (_) => const PlaylistScreen()));
+          }
+          setState(() {
+            _isDraggingPl = false;
+            _readyPl = false;
+            _dragPl = 0.0;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          transform: Matrix4.identity()..scale(_isDraggingPl ? 0.97 : 1.0),
+          decoration: BoxDecoration(
+            color: _readyPl ? AppColors.textPrimary : const Color(0xFFCCCBCB),
+            borderRadius: BorderRadius.circular(30.r),
+            boxShadow: [
+              BoxShadow(
+                color: _readyPl
+                    ? AppColors.textPrimary.withOpacity(0.3)
+                    : Colors.black.withOpacity(0.08),
+                blurRadius: _isDraggingPl ? 25 : 15,
+                offset: Offset(0, _isDraggingPl ? 12 : 8),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildNavItem(Icons.home_outlined, 'Home', 0),
-          _buildNavItem(Icons.play_circle_outline, 'Playlist', 1),
-          _buildNavItem(Icons.chat_bubble_outline, 'AI Chat', 2),
-          _buildNavItem(Icons.person_outline, 'Profile', 3),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    final isSelected = _selectedIndex == index;
-
-    return GestureDetector(
-      onTap: () async {
-        setState(() => _selectedIndex = index);
-
-        switch (index) {
-          case 0:
-            break;
-
-          case 1:
-            // Playlist
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const PlaylistScreen()),
-            );
-            if (mounted) {
-              setState(() => _selectedIndex = 0);
-            }
-            break;
-
-          case 2:
-            // AI Chat - Dialog gösteriliyor
-            showDialog(
-              context: context,
-              barrierDismissible: true,
-              builder: (context) {
-                return AlertDialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.r),
+          child: Stack(
+            children: [
+              Positioned(
+                right: 20.w,
+                bottom: 20.h,
+                child: Text(
+                  'Your Playlist',
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    color: _readyPl ? Colors.white : AppColors.textPrimary,
                   ),
-                  title: Column(
-                    children: [
-                      Icon(
-                        Icons.chat_bubble_outline,
-                        size: 48.sp,
-                        color: AppColors.primaryGold,
+                ),
+              ),
+              Positioned(
+                bottom: 8.h,
+                left: 0,
+                right: 0,
+                child: Column(
+                  children: [
+                    ScaleTransition(
+                      scale: Tween(begin: 0.9, end: 1.0).animate(
+                          CurvedAnimation(
+                              parent: _pulsePl, curve: Curves.easeInOut)),
+                      child: Icon(
+                        _readyPl ? Icons.lock_open : Icons.keyboard_arrow_down,
+                        size: 20.sp,
+                        color: _readyPl
+                            ? Colors.white.withOpacity(0.85)
+                            : AppColors.textPrimary.withOpacity(0.5),
                       ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        'AI Psychologist Coming Soon!',
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.center,
+                    ),
+                    Container(
+                      width: 50.w,
+                      height: 5.h,
+                      decoration: BoxDecoration(
+                        color: AppColors.textPrimary.withOpacity(0.4),
+                        borderRadius: BorderRadius.circular(3.r),
                       ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'Your personal AI wellness coach will help you choose the perfect sessions and track your progress.',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: Text(
-                        'OK',
-                        style: GoogleFonts.inter(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
+                      child: FractionallySizedBox(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: progress,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(3.r),
+                          ),
                         ),
                       ),
                     ),
                   ],
-                );
-              },
-            ).then((_) {
-              if (mounted) {
-                setState(() => _selectedIndex = 0);
-              }
-            });
-            break;
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
-          case 3:
-            // Profile
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ProfileScreen()),
-            );
-            if (mounted) {
-              setState(() => _selectedIndex = 0);
-            }
-            break;
-        }
-      },
+  // Background
+  Widget _buildBackground() {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF9F9F9), Color(0xFFEFEFEF)],
+        ),
+      ),
+    );
+  }
+
+  // Header menu button
+  Widget _buildHeaderButton(String text, bool isFilled) {
+    return InkWell(
+      onTap: _toggleMenu,
+      borderRadius: BorderRadius.circular(20.r),
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 8.h),
-        child: Column(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isFilled ? Colors.black : Colors.transparent,
+          borderRadius: BorderRadius.circular(20.r),
+          border: isFilled ? null : Border.all(color: Colors.black, width: 1),
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              color: isSelected ? AppColors.textPrimary : Colors.grey[400],
-              size: 24.sp,
-            ),
-            SizedBox(height: 4.h),
             Text(
-              label,
+              text,
               style: GoogleFonts.inter(
-                fontSize: 10.sp,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? AppColors.textPrimary : Colors.grey[400],
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600,
+                color: isFilled ? Colors.white : Colors.black,
               ),
             ),
+            SizedBox(width: 6.w),
+            Icon(Icons.menu,
+                size: 14.sp, color: isFilled ? Colors.white : Colors.black),
           ],
         ),
       ),
+    );
+  }
+
+  // Bottom nav content (only content; height/shape is in ResponsiveScaffold)
+  Widget _buildBottomNavContent() {
+    int current = 0; // TODO: wire with state if needed
+
+    Widget item(IconData icon, String label, int idx, VoidCallback onTap) {
+      final selected = current == idx;
+      return InkWell(
+        onTap: onTap,
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon,
+                  size: context.isTablet ? 24 : 22,
+                  color: selected ? AppColors.textPrimary : Colors.grey[500]),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: context.isTablet ? 76 : 64,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: context.isTablet ? 11 : 10,
+                    fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+                    color: selected ? AppColors.textPrimary : Colors.grey[500],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        item(Icons.home_outlined, 'Home', 0, () {}),
+        item(Icons.play_circle_outline, 'Playlist', 1, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PlaylistScreen()));
+        }),
+        item(Icons.chat_bubble_outline, 'AI Chat', 2, () {
+          // TODO: navigate to chat
+        }),
+        item(Icons.person_outline, 'Profile', 3, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const ProfileScreen()));
+        }),
+      ],
     );
   }
 }

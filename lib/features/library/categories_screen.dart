@@ -9,6 +9,7 @@ import 'category_sessions_screen.dart'; // YENİ IMPORT
 import '../player/audio_player_screen.dart'; // AUDIO PLAYER IMPORT
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../../core/responsive/breakpoints.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -77,81 +78,135 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
-        elevation: 0,
-        leading: IconButton(
-          icon:
-              Icon(Icons.arrow_back, color: AppColors.textPrimary, size: 24.sp),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Row(
-          mainAxisSize: MainAxisSize.min, // Prevent overflow
-          children: [
-            // SVG Logo - YOUR ORIGINAL LOGO!
-            Container(
-              height: 24.h, // Reduced from 28h
-              margin: EdgeInsets.only(right: 8.w), // Reduced margin
-              child: SvgPicture.asset(
-                'assets/images/logo.svg',
-                height: 24.h,
-                fit: BoxFit.contain,
-                colorFilter: ColorFilter.mode(
-                  AppColors.textPrimary,
-                  BlendMode.srcIn,
-                ),
-              ),
-            ),
-            // Vertical divider
-            Container(
-              height: 20.h, // Reduced from 24h
-              width: 1.5,
-              color: AppColors.textPrimary.withOpacity(0.2),
-              margin: EdgeInsets.symmetric(horizontal: 8.w), // Reduced from 12w
-            ),
-            // Title - with Flexible to prevent overflow
-            Flexible(
-              child: Text(
-                'All Subliminals',
-                style: GoogleFonts.inter(
-                  fontSize: 15.sp, // Reduced from 18sp
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ),
-        centerTitle: false,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: AppColors.textPrimary,
-          indicatorWeight: 3,
-          labelColor: AppColors.textPrimary,
-          unselectedLabelColor: AppColors.textSecondary,
-          labelStyle: GoogleFonts.inter(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-          ),
-          tabs: const [
-            Tab(text: 'Categories'),
-            Tab(text: 'All Sessions'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Categories Tab
-          _buildCategoriesTab(),
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
 
-          // All Sessions Tab
-          _buildAllSessionsTab(),
-        ],
+    final bool isTablet =
+        width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
+    final bool isDesktop = width >= Breakpoints.desktopMin;
+
+// Geri ok alanı
+    final double leadingWidth = isTablet ? 64 : 56;
+    final double leadingPad = isTablet ? 12 : 8;
+
+// AppBar yüksekliği (logo rahat sığsın)
+    final double toolbarH = isDesktop ? 64.0 : (isTablet ? 60.0 : 56.0);
+
+// WORDMARK için genişlik odaklı ölçüler (KARE DEĞİL!)
+    final double logoW = isDesktop ? 120.0 : (isTablet ? 104.0 : 92.0);
+    final double logoH = toolbarH * 0.70; // yüksekliği AppBar’a göre türet
+    final double dividerH = (logoH * 0.9).clamp(18.0, 36.0);
+
+    final double _ts = mq.textScaleFactor.clamp(1.0, 1.2);
+    final double gutter = isDesktop ? 32 : (isTablet ? 24 : 16);
+
+    return MediaQuery(
+      data: mq.copyWith(textScaleFactor: _ts),
+      child: Scaffold(
+        backgroundColor: AppColors.backgroundWhite,
+        appBar: AppBar(
+          toolbarHeight: toolbarH,
+          backgroundColor: AppColors.backgroundWhite,
+          elevation: 0,
+          leadingWidth: leadingWidth,
+          titleSpacing: isTablet ? 8 : 4,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: AppColors.textPrimary,
+              size: (24.sp).clamp(20.0, 28.0),
+            ),
+            padding: EdgeInsets.only(left: leadingPad),
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            onPressed: () => Navigator.of(context).maybePop(),
+          ),
+          title: LayoutBuilder(
+            builder: (context, c) {
+              return Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  SizedBox(
+                    width: logoW,
+                    height: logoH,
+                    child: SvgPicture.asset(
+                      'assets/images/logo.svg',
+                      width: logoW,
+                      height: logoH,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.centerLeft,
+                      colorFilter: ColorFilter.mode(
+                        AppColors.textPrimary,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+
+                  // ORTA: Ayraç tam ortada
+                  Expanded(
+                    child: Center(
+                      child: Container(
+                        height: dividerH,
+                        width: 1.5,
+                        color: AppColors.textPrimary.withOpacity(0.2),
+                      ),
+                    ),
+                  ),
+
+                  // SAĞ: Başlık – sağa yapışık ve tek satır
+                  Flexible(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        'All Subliminals',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          fontSize: (15.sp).clamp(14.0, 20.0),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          bottom: TabBar(
+            isScrollable: true,
+            padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 12 : (isTablet ? 10 : 6)),
+            labelPadding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 24 : (isTablet ? 20 : 14),
+            ),
+            indicatorPadding:
+                EdgeInsets.symmetric(horizontal: isTablet ? 8 : 4),
+            controller: _tabController,
+            indicatorColor: AppColors.textPrimary,
+            indicatorWeight: 3,
+            labelColor: AppColors.textPrimary,
+            unselectedLabelColor: AppColors.textSecondary,
+            labelStyle: GoogleFonts.inter(
+              fontSize: (14.sp).clamp(12.0, 18.0),
+              fontWeight: FontWeight.w600,
+            ),
+            unselectedLabelStyle: GoogleFonts.inter(
+              fontSize: (14.sp).clamp(12.0, 18.0),
+              fontWeight: FontWeight.w500,
+            ),
+            tabs: const [
+              Tab(text: 'Categories'),
+              Tab(text: 'All Sessions'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildCategoriesTab(),
+            _buildAllSessionsTab(),
+          ],
+        ),
       ),
     );
   }
@@ -177,7 +232,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               Text(
                 'Choose a Category',
                 style: GoogleFonts.inter(
-                  fontSize: 24.sp,
+                  fontSize: 24.sp.clamp(22.0, 34.0),
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -301,6 +356,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   // Title
                   Text(
                     category['title'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
@@ -366,7 +423,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             child: Text(
               'Error loading sessions',
               style: GoogleFonts.inter(
-                fontSize: 16.sp,
+                fontSize: 16.sp.clamp(14.0, 22.0),
                 color: AppColors.textSecondary,
               ),
             ),

@@ -451,24 +451,44 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 child: Column(
                   children: [
                     _buildHeader(),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildCenterVisualizer(),
-                          SizedBox(height: 40.h),
-                          _buildSessionInfo(),
-                          SizedBox(height: 30.h),
-                          _buildTrackSelector(),
-                          SizedBox(height: 30.h),
-                          _buildProgressBar(),
-                          SizedBox(height: 30.h),
-                          _buildControls(),
-                          SizedBox(height: 25.h),
-                          _buildBottomActions(),
-                        ],
-                      ),
-                    ),
+                    Expanded(child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final Widget _inner = Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildCenterVisualizer(),
+                            SizedBox(height: 40.h),
+                            _buildSessionInfo(),
+                            SizedBox(height: 30.h),
+                            _buildTrackSelector(),
+                            SizedBox(height: 30.h),
+                            _buildProgressBar(),
+                            SizedBox(height: 30.h),
+                            _buildControls(),
+                            SizedBox(height: 25.h),
+                            _buildBottomActions(),
+                          ],
+                        );
+                        final bool _isSmallPhone =
+                            constraints.maxWidth <= 400 ||
+                                constraints.maxHeight <= 700;
+                        return SingleChildScrollView(
+                          padding: EdgeInsets.only(
+                              bottom:
+                                  MediaQuery.of(context).padding.bottom + 12),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight),
+                            child: Align(
+                              alignment: _isSmallPhone
+                                  ? Alignment.topCenter
+                                  : Alignment.center,
+                              child: _inner,
+                            ),
+                          ),
+                        );
+                      },
+                    )),
                   ],
                 ),
               ),

@@ -234,6 +234,8 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
           // Title
           Text(
             _session['title'] ?? 'Session',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
               fontSize: 24.sp,
               fontWeight: FontWeight.w700,
@@ -284,7 +286,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         Text(
           'About This Session',
           style: GoogleFonts.inter(
-            fontSize: 18.sp,
+            fontSize: 18.sp.clamp(16.0, 24.0),
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -312,7 +314,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         Text(
           'Benefits',
           style: GoogleFonts.inter(
-            fontSize: 18.sp,
+            fontSize: 18.sp.clamp(16.0, 24.0),
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -365,7 +367,7 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
         Text(
           'Sample Affirmations',
           style: GoogleFonts.inter(
-            fontSize: 18.sp,
+            fontSize: 18.sp.clamp(16.0, 24.0),
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
@@ -517,10 +519,10 @@ class _SessionDetailScreenState extends State<SessionDetailScreen> {
                         .collection('users')
                         .doc(user.uid)
                         .update({
-                          'playlistSessionIds': FieldValue.arrayUnion([
-                            _session['id'],
-                          ]),
-                        });
+                      'playlistSessionIds': FieldValue.arrayUnion([
+                        _session['id'],
+                      ]),
+                    });
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(

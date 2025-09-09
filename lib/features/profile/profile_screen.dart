@@ -13,6 +13,7 @@ import 'widgets/profile_action_button.dart';
 import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
+import '../../core/responsive/breakpoints.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -167,6 +168,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final screenSize = mq.size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final bool isShortWide =
+        screenWidth >= 1024 && screenHeight <= 800; // Nest Hub (Max)
+    final bool isDesktop = screenWidth >= 1024 && !isShortWide;
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
@@ -184,6 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: AppColors.backgroundWhite,
             elevation: 0,
             centerTitle: true,
+            toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
               onPressed: () => Navigator.pop(context),
@@ -191,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             title: Text(
               'Profile',
               style: GoogleFonts.inter(
-                fontSize: 20.sp,
+                fontSize: 20.sp.clamp(20.0, 22.0),
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
@@ -202,7 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Text(
                   _isEditing ? 'Save' : 'Edit',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
+                    fontSize: 14.sp.clamp(14.0, 18.0),
                     fontWeight: FontWeight.w600,
                     color: AppColors.primaryGold,
                   ),
@@ -305,7 +315,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Text(
                       'Sign Out',
                       style: GoogleFonts.inter(
-                        fontSize: 16.sp,
+                        fontSize: (18.sp).clamp(16.0, 22.0),
                         fontWeight: FontWeight.w600,
                         color: Colors.red,
                       ),

@@ -2,180 +2,195 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../shared/widgets/social_login_button.dart';
+import '../../core/responsive/auth_scaffold.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Column(
-            children: [
-              const Spacer(flex: 2),
+    // NOTE: We provide a scrollable body to AuthScaffold (bodyIsScrollable: true)
+    // so it won't wrap with an extra scroll and it will only add safe bottom padding if needed.
+    return AuthScaffold(
+      backgroundColor: const Color(0xFFF6F6F6),
+      bodyIsScrollable: true,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Clamp max text width on very wide screens so typography stays nice.
+          const double kMaxTextWidth = 720;
+          final double horizontalPad =
+              constraints.maxWidth >= 900 ? 64.0 : 24.0;
 
-              // Logo
-              SvgPicture.asset(
-                'assets/images/logo.svg',
-                width: 180.w,
-                height: 60.h,
-                colorFilter: const ColorFilter.mode(
-                  AppColors.textPrimary,
-                  BlendMode.srcIn,
-                ),
-              ),
-
-              SizedBox(height: 60.h),
-
-              // Welcome Text - Only "Welcome" now
-              Text(
-                'Welcome',
-                style: GoogleFonts.inter(
-                  fontSize: 36.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-
-              SizedBox(height: 16.h),
-
-              // Subtitle
-              Text(
-                'Create your personal profile\nto get custom subliminal sessions',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-
-              SizedBox(height: 60.h),
-
-              /* // Google Sign In Button
-              SocialLoginButton(
-                onTap: () {
-                  // TODO: Google sign in
-                  print('Google sign in tapped');
-                },
-                label: 'Google',
-              ),
-
-              SizedBox(height: 16.h),
-
-              // Apple Sign In Button
-              SocialLoginButton(
-                onTap: () {
-                  // TODO: Apple sign in
-                  print('Apple sign in tapped');
-                },
-                label: 'Apple ID',
-                isDark: true,
-              ),
-
-              SizedBox(height: 16.h), */
-
-              // Email Sign In Button
-              _buildEmailButton(
-                onTap: () {
-                  Navigator.pushNamed(context, AppRoutes.login);
-                },
-              ),
-
-              const Spacer(),
-
-              // Continue as Guest Link
-              TextButton(
-                onPressed: () {
-                  // Navigate to home as guest
-                  Navigator.pushReplacementNamed(context, AppRoutes.home);
-                },
-                child: Text(
-                  'Continue as a Guest',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 16.h),
-
-              // Sign Up Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account? ",
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.register);
-                    },
-                    child: Text(
-                      'Sign Up',
+          return SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(horizontalPad, 32, horizontalPad, 32),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: kMaxTextWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // App wordmark (kept as text; your real logo widget can stay here)
+                    Text(
+                      'InsideX',
+                      textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: AppColors.primaryGold,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                        height: 1.2,
                       ),
                     ),
-                  ),
-                ],
-              ),
 
-              SizedBox(height: 32.h),
-            ],
-          ),
-        ),
+                    SizedBox(height: 28.h),
+
+                    // Title
+                    Text(
+                      'Welcome',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize:
+                            48.sp, // Keep your styling; ScreenUtil will adapt
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        height: 1.15,
+                      ),
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    // Subtitle
+                    Text(
+                      'Create your personal profile\nto get custom subliminal sessions',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColors.textSecondary,
+                        height: 1.5,
+                      ),
+                    ),
+
+                    SizedBox(height: 28.h),
+
+                    // EMAIL + PASSWORD CTA (kept as a full-width button-like surface)
+                    SizedBox(
+                      width: double.infinity,
+                      child: _OutlinedBigButton(
+                        label: 'Email + Password',
+                        onTap: () {
+                          // Preserve original navigation
+                          Navigator.of(context).pushNamed(AppRoutes.login);
+                        },
+                      ),
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    // Continue as Guest
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushReplacementNamed(AppRoutes.home);
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.symmetric(
+                            vertical: 8.h, horizontal: 4.w),
+                      ),
+                      child: Text(
+                        'Continue as a Guest',
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    // Sign Up
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w400,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(AppRoutes.register);
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Text(
+                              'Sign Up',
+                              style: GoogleFonts.inter(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.primaryGold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildEmailButton({required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        height: 48.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: AppColors.greyBorder,
-            width: 1.5,
-          ),
-        ),
-        child: Center(
+/// A simple, design-friendly outlined button used above for "Email + Password".
+class _OutlinedBigButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _OutlinedBigButton({
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: Colors.black.withOpacity(0.15), width: 1),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 16.w),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.email_outlined,
-                color: AppColors.textPrimary,
-                size: 20.sp,
-              ),
-              SizedBox(width: 8.w),
+              // Left icon placeholder (envelope) – replace with your SVG if needed
+              Icon(Icons.mail_outline,
+                  size: 22.sp, color: AppColors.textPrimary),
+              SizedBox(width: 10.w),
               Text(
-                'Email + Password',
+                label,
                 style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),

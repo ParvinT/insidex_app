@@ -51,58 +51,81 @@ class _SessionInfoContent extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isTablet = screenWidth > 600;
+    final mq = MediaQuery.of(context);
+    final w = mq.size.width;
+    final h = mq.size.height;
 
-    final modalWidth = isTablet ? screenWidth * 0.6 : screenWidth * 0.9;
-    final maxModalWidth = 500.0;
-    final modalHeight = screenHeight * 0.75;
+    // Adaptive modal width/height for phones, tablets, and hubs.
+    final bool isUltraWide = w >= 1200;
+    final bool isTablet = w >= 768 && w < 1200;
 
-    return Center(
-      child: Container(
-        width: modalWidth > maxModalWidth ? maxModalWidth : modalWidth,
-        height: modalHeight,
-        margin: EdgeInsets.symmetric(horizontal: 20.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(24.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            _buildHeader(context),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildSessionTitle(),
-                    if (session['description'] != null) _buildDescription(),
-                    _buildNowPlayingCard(),
-                    if (session['howToListen'] != null ||
-                        session['listeningTips'] != null)
-                      _buildListeningGuide(),
-                    if (session['benefits'] != null &&
-                        (session['benefits'] as List).isNotEmpty)
-                      _buildBenefits(),
-                    if (currentTrack == 'subliminal' &&
-                        session['subliminal']?['affirmations'] != null)
-                      _buildAffirmations(),
-                    SizedBox(height: 24.h),
-                  ],
+    final double modalW = () {
+      if (isUltraWide) return (w * 0.60).clamp(480.0, 820.0);
+      if (isTablet) return (w * 0.70).clamp(420.0, 720.0);
+      return (w * 0.92).clamp(320.0, 420.0);
+    }();
+
+    final double modalH = (h * (isUltraWide ? 0.90 : 0.86)).clamp(360.0, 900.0);
+
+    // Keep large accessibility text sane inside this modal only.
+    final double clampedTextScale = mq.textScaleFactor.clamp(1.0, 1.2);
+
+    return MediaQuery(
+      data: mq.copyWith(textScaleFactor: clampedTextScale),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: modalW,
+            maxHeight: modalH,
+          ),
+          child: Container(
+            margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
-              ),
+              ],
             ),
-          ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildHeader(context),
+                // Scrollable content; never overflows.
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(
+                        24.w, 16.h, 24.w, 24.h + mq.viewPadding.bottom),
+                    physics: const ClampingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSessionTitle(),
+                        if (session['description'] != null) _buildDescription(),
+                        _buildNowPlayingCard(),
+                        if (session['howToListen'] != null ||
+                            session['listeningTips'] != null)
+                          _buildListeningGuide(),
+                        if (session['benefits'] != null &&
+                            (session['benefits'] as List).isNotEmpty)
+                          _buildBenefits(),
+                        if (currentTrack == 'subliminal' &&
+                            session['affirmations'] != null)
+                          _buildAffirmations(),
+                        SizedBox(height: 8.h),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -133,6 +156,8 @@ class _SessionInfoContent extends StatelessWidget {
           Expanded(
             child: Text(
               'Session Details',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -178,7 +203,7 @@ class _SessionInfoContent extends StatelessWidget {
       child: Text(
         cleanTitle,
         style: GoogleFonts.inter(
-          fontSize: 24.sp,
+          fontSize: (24.sp).clamp(18.sp, 30.sp),
           fontWeight: FontWeight.w700,
           color: Colors.black,
           decoration: TextDecoration.none,

@@ -287,268 +287,317 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final screenSize = mq.size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+
+    // Improved responsive detection
+    final bool isCompactDevice = screenHeight < 700 || screenWidth < 360;
+    final bool isTablet = screenWidth >= 600 && screenWidth < 1024;
+    final bool isShortWide =
+        screenWidth >= 1024 && screenHeight <= 800; // Nest Hub (Max)
+    final bool isDesktop = screenWidth >= 1024 && !isShortWide;
+
+    // Adaptive sizing
+    final double donutSize = isCompactDevice
+        ? 120
+        : isShortWide
+            ? 110
+            : isTablet
+                ? 140
+                : isDesktop
+                    ? 160
+                    : 130;
+
+    final double chartHeight = isCompactDevice
+        ? 120
+        : isShortWide
+            ? 100
+            : isTablet
+                ? 160
+                : 140;
+
+    final double statCardPadding = isCompactDevice ? 8 : 16;
+    final double spacingUnit = isCompactDevice
+        ? 12
+        : isShortWide
+            ? 16
+            : 24;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
-          'Your Progress',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+        title: Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            'Your Progress',
+            style: GoogleFonts.inter(
+              fontSize: (isTablet || isDesktop) ? 22 : 20,
+              height: 1.15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
           ),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await _loadAnalyticsData();
-        },
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.all(20.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Subtitle
-                    Text(
-                      'Track your listening habits and improvements',
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
+      body: MediaQuery(
+        data: (screenHeight <= 740)
+            ? mq.copyWith(textScaler: const TextScaler.linear(1.0))
+            : mq,
+        child: RefreshIndicator(
+          onRefresh: () async => _loadAnalyticsData(),
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.all(isCompactDevice ? 12.w : 20.w),
 
-                    // Stats Cards
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            value: '${_analyticsData['totalMinutes'] ?? 0}',
-                            unit: 'min',
-                            label: 'Total Listening',
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: _buildStatCard(
-                            value: '${_analyticsData['totalSessions'] ?? 0}',
-                            unit: 'subliminals',
-                            label: 'Total Sessions',
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: _buildStatCard(
-                            value: '${_analyticsData['currentStreak'] ?? 0}',
-                            unit: 'days streak',
-                            label: 'Current Streak',
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24.h),
-
-                    // Period Tabs
-                    Container(
-                      height: 40.h,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFEEEEEE),
-                        borderRadius: BorderRadius.circular(24.r),
-                      ),
-                      padding: EdgeInsets.all(3.w),
-                      child: TabBar(
-                        controller: _tabController,
-                        indicator: BoxDecoration(
-                          color: Colors.black,
-                          borderRadius: BorderRadius.circular(20.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
+                  // 1) Max içerik genişliği + merkezleme (Nest Hub/Max’ta aşırı yayılmayı keser)
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1100),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Description
+                          Text(
+                            'Track your listening habits and improvements',
+                            style: GoogleFonts.inter(
+                              fontSize: isCompactDevice ? 12.sp : 14.sp,
+                              color: Colors.grey[600],
                             ),
-                          ],
-                        ),
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        labelColor: Colors.white,
-                        unselectedLabelColor: Colors.black87,
-                        labelStyle: GoogleFonts.inter(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        unselectedLabelStyle: GoogleFonts.inter(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                        labelPadding: EdgeInsets.zero,
-                        tabs: _periods
-                            .map((period) => Tab(text: period))
-                            .toList(),
-                        onTap: (index) {
-                          setState(() {
-                            _selectedPeriod = _periods[index];
-                          });
-                        },
-                      ),
-                    ),
-                    SizedBox(height: 24.h),
+                          ),
+                          SizedBox(height: spacingUnit.h),
 
-                    // Circular Progress with Top Sessions
-                    Row(
-                      children: [
-                        // Circular Progress
-                        SizedBox(
-                          width: 140.w,
-                          height: 140.w,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              CustomPaint(
-                                size: Size(140.w, 140.w),
-                                painter: CircularProgressPainter(
-                                  progress:
-                                      (_analyticsData['todayMinutes'] ?? 0) /
-                                          30.0,
-                                  backgroundColor: Colors.grey[300]!,
-                                  progressColor: const Color(0xFF7DB9B6),
-                                  strokeWidth: 20.w,
-                                ),
-                              ),
-                              Column(
-                                mainAxisSize: MainAxisSize.min,
+                          // 2) Stat Cards — Row/Expanded yerine genişliği kontrollü Wrap
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final double gap = 12.w;
+                              final double perCard =
+                                  (constraints.maxWidth - (2 * gap)) / 3;
+                              final double maxCardW =
+                                  isDesktop ? 320 : (isTablet ? 300 : perCard);
+                              final double cardW =
+                                  perCard > maxCardW ? maxCardW : perCard;
+
+                              return Wrap(
+                                spacing: gap,
+                                runSpacing: gap,
                                 children: [
-                                  Text(
-                                    '${_analyticsData['todayMinutes'] ?? 0}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 32.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                                  SizedBox(
+                                    width: cardW,
+                                    child: _buildStatCard(
+                                      value:
+                                          '${_analyticsData['totalMinutes'] ?? 0}',
+                                      unit: 'min',
+                                      label: 'Total Listening',
+                                      isCompact: isCompactDevice,
+                                      padding: statCardPadding,
                                     ),
                                   ),
-                                  Text(
-                                    'minutes today',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      color: Colors.grey[600],
+                                  SizedBox(
+                                    width: cardW,
+                                    child: _buildStatCard(
+                                      value:
+                                          '${_analyticsData['totalSessions'] ?? 0}',
+                                      unit: 'subliminals',
+                                      label: 'Total Sessions',
+                                      isCompact: isCompactDevice,
+                                      padding: statCardPadding,
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: cardW,
+                                    child: _buildStatCard(
+                                      value:
+                                          '${_analyticsData['currentStreak'] ?? 0}',
+                                      unit: 'days streak',
+                                      label: 'Current Streak',
+                                      isCompact: isCompactDevice,
+                                      padding: statCardPadding,
                                     ),
                                   ),
                                 ],
-                              ),
-                            ],
+                              );
+                            },
                           ),
-                        ),
-                        SizedBox(width: 20.w),
+                          SizedBox(height: spacingUnit.h),
 
-                        // Top Sessions
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Top Sessions',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
+                          // Period tabs - Fixed alignment
+                          Container(
+                            height: 40.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEEEEEE),
+                              borderRadius: BorderRadius.circular(24.r),
+                            ),
+                            padding: EdgeInsets.all(3.w),
+                            child: TabBar(
+                              controller: _tabController,
+                              isScrollable: false, // Always fill width
+                              indicator: BoxDecoration(
+                                color: Colors.black,
+                                borderRadius: BorderRadius.circular(20.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                              SizedBox(height: 8.h),
-                              ...(_buildTopSessionBars()),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 24.h),
-
-                    // Progress Bars
-                    Column(
-                      children: [
-                        _buildProgressBar(
-                            'Day',
-                            (_analyticsData['monthlyProgress']
-                                    as Map<String, double>?)?['Day'] ??
-                                0.0,
-                            const Color(0xFFE8C5A0)),
-                        SizedBox(height: 12.h),
-                        _buildProgressBar(
-                            'Week',
-                            (_analyticsData['monthlyProgress']
-                                    as Map<String, double>?)?['Week'] ??
-                                0.0,
-                            const Color(0xFF7DB9B6)),
-                        SizedBox(height: 12.h),
-                        _buildProgressBar(
-                            'Month',
-                            (_analyticsData['monthlyProgress']
-                                    as Map<String, double>?)?['Month'] ??
-                                0.0,
-                            const Color(0xFF7DB9B6)),
-                        SizedBox(height: 12.h),
-                        _buildProgressBar(
-                            'Year',
-                            (_analyticsData['monthlyProgress']
-                                    as Map<String, double>?)?['Year'] ??
-                                0.0,
-                            const Color(0xFF9B8B7E)),
-                      ],
-                    ),
-                    SizedBox(height: 24.h),
-
-                    // Weekly Chart
-                    Container(
-                      height: 180.h,
-                      padding: EdgeInsets.all(16.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'This Week',
-                                style: GoogleFonts.inter(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              labelColor: Colors.white,
+                              unselectedLabelColor: Colors.black87,
+                              labelStyle: GoogleFonts.inter(
+                                fontSize: isCompactDevice ? 10.sp : 11.sp,
+                                fontWeight: FontWeight.w600,
                               ),
-                              Text(
-                                '${_analyticsData['weeklyTotal'] ?? 0} min total',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: Colors.grey[600],
-                                ),
+                              unselectedLabelStyle: GoogleFonts.inter(
+                                fontSize: isCompactDevice ? 10.sp : 11.sp,
+                                fontWeight: FontWeight.w500,
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 16.h),
-                          Expanded(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: _buildWeeklyBars(),
+                              labelPadding: EdgeInsets.zero,
+                              tabs: _periods.map((p) => Tab(text: p)).toList(),
+                              onTap: (i) =>
+                                  setState(() => _selectedPeriod = _periods[i]),
                             ),
                           ),
+                          SizedBox(height: spacingUnit.h),
+
+                          // Donut + Top Sessions - short-wide (Hub/Max) cihazlarda stack
+                          if (isCompactDevice || isShortWide) ...[
+                            Center(
+                              child: _Donut(
+                                donutSize: donutSize,
+                                stroke: isCompactDevice ? 15 : 20,
+                                analytics: _analyticsData,
+                              ),
+                            ),
+                            SizedBox(height: 16.h),
+                            _TopSessions(_buildTopSessionBars),
+                          ] else ...[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _Donut(
+                                  donutSize: donutSize,
+                                  stroke: 20,
+                                  analytics: _analyticsData,
+                                ),
+                                SizedBox(width: 20.w),
+                                Expanded(
+                                    child: _TopSessions(_buildTopSessionBars)),
+                              ],
+                            ),
+                          ],
+                          SizedBox(height: spacingUnit.h),
+
+                          // Progress bars
+                          Column(
+                            children: [
+                              _buildProgressBar(
+                                'Day',
+                                (_analyticsData['monthlyProgress']
+                                        as Map<String, double>?)?['Day'] ??
+                                    0.0,
+                                const Color(0xFFE8C5A0),
+                                isCompact: isCompactDevice,
+                              ),
+                              SizedBox(height: 12.h),
+                              _buildProgressBar(
+                                'Week',
+                                (_analyticsData['monthlyProgress']
+                                        as Map<String, double>?)?['Week'] ??
+                                    0.0,
+                                const Color(0xFF7DB9B6),
+                                isCompact: isCompactDevice,
+                              ),
+                              SizedBox(height: 12.h),
+                              _buildProgressBar(
+                                'Month',
+                                (_analyticsData['monthlyProgress']
+                                        as Map<String, double>?)?['Month'] ??
+                                    0.0,
+                                const Color(0xFF7DB9B6),
+                                isCompact: isCompactDevice,
+                              ),
+                              SizedBox(height: 12.h),
+                              _buildProgressBar(
+                                'Year',
+                                (_analyticsData['monthlyProgress']
+                                        as Map<String, double>?)?['Year'] ??
+                                    0.0,
+                                const Color(0xFF9B8B7E),
+                                isCompact: isCompactDevice,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: spacingUnit.h),
+
+                          // Weekly chart
+                          Container(
+                            padding:
+                                EdgeInsets.all(isCompactDevice ? 12.w : 16.w),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'This Week',
+                                      style: GoogleFonts.inter(
+                                        fontSize:
+                                            isCompactDevice ? 12.sp : 14.sp,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      '${_analyticsData['weeklyTotal'] ?? 0} min total',
+                                      style: GoogleFonts.inter(
+                                        fontSize:
+                                            isCompactDevice ? 10.sp : 12.sp,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16.h),
+                                SizedBox(
+                                  height: chartHeight,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: _buildWeeklyBars(),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: mq.padding.bottom + 20),
                         ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }
@@ -557,9 +606,14 @@ class _ProgressScreenState extends State<ProgressScreen>
     required String value,
     required String unit,
     required String label,
+    required bool isCompact,
+    required double padding,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 4.w),
+      padding: EdgeInsets.symmetric(
+        vertical: isCompact ? 12.h : 16.h,
+        horizontal: 4.w,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12.r),
@@ -573,41 +627,45 @@ class _ProgressScreenState extends State<ProgressScreen>
       ),
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                value,
-                style: GoogleFonts.inter(
-                  fontSize: 28.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                  height: 1,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  value,
+                  style: GoogleFonts.inter(
+                    fontSize: isCompact ? 22.sp : 28.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                    height: 1,
+                  ),
                 ),
-              ),
-              SizedBox(width: 2.w),
-              Text(
-                unit,
-                style: GoogleFonts.inter(
-                  fontSize: 10.sp,
-                  color: Colors.black54,
-                  height: 1,
+                SizedBox(width: 2.w),
+                Text(
+                  unit,
+                  style: GoogleFonts.inter(
+                    fontSize: isCompact ? 8.sp : 10.sp,
+                    color: Colors.black54,
+                    height: 1,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           SizedBox(height: 8.h),
           Text(
             label,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
-              fontSize: 11.sp,
+              fontSize: isCompact ? 9.sp : 11.sp,
               color: Colors.grey[600],
               height: 1.2,
             ),
             maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -659,6 +717,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   fontSize: 10.sp,
                   color: Colors.grey[700],
                 ),
+                overflow: TextOverflow.ellipsis,
               ),
               SizedBox(height: 2.h),
               Container(
@@ -704,17 +763,18 @@ class _ProgressScreenState extends State<ProgressScreen>
     return bars;
   }
 
-  Widget _buildProgressBar(String label, double progress, Color color) {
+  Widget _buildProgressBar(String label, double progress, Color color,
+      {bool isCompact = false}) {
     return Row(
       children: [
-        Icon(Icons.circle, size: 8.sp, color: color),
+        Icon(Icons.circle, size: isCompact ? 6.sp : 8.sp, color: color),
         SizedBox(width: 8.w),
         SizedBox(
           width: 40.w,
           child: Text(
             label,
             style: GoogleFonts.inter(
-              fontSize: 12.sp,
+              fontSize: isCompact ? 10.sp : 12.sp,
               color: Colors.black87,
             ),
           ),
@@ -724,7 +784,7 @@ class _ProgressScreenState extends State<ProgressScreen>
           child: Stack(
             children: [
               Container(
-                height: 6.h,
+                height: isCompact ? 4.h : 6.h,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(3.r),
@@ -733,7 +793,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               FractionallySizedBox(
                 widthFactor: progress,
                 child: Container(
-                  height: 6.h,
+                  height: isCompact ? 4.h : 6.h,
                   decoration: BoxDecoration(
                     color: color,
                     borderRadius: BorderRadius.circular(3.r),
@@ -747,7 +807,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         Text(
           '${(progress * 100).toInt()}%',
           style: GoogleFonts.inter(
-            fontSize: 11.sp,
+            fontSize: isCompact ? 9.sp : 11.sp,
             color: Colors.grey[600],
           ),
         ),
@@ -796,31 +856,56 @@ class _ProgressScreenState extends State<ProgressScreen>
     return bars;
   }
 
-  Widget _buildDayBar(String day, double height, Color color) {
+  Widget _buildDayBar(String day, double t, Color color) {
     return Expanded(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 2.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Container(
-              width: double.infinity,
-              height: 100.h * height.clamp(0.0, 1.0),
-              decoration: BoxDecoration(
-                color: color,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(4.r)),
-              ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const double gap = 6;
+          // chart yüksekliğine göre 10–13 aralığında ölçekle
+          final double fs = (constraints.maxHeight * 0.12).clamp(10.0, 13.0);
+          final double labelBox = fs + 8; // metrik payı
+
+          // Bar için gerçekten kullanılabilir yükseklik
+          final double maxBarH = (constraints.maxHeight - (labelBox + gap))
+              .clamp(0.0, double.infinity);
+
+          // Oransal bar yüksekliği (0..1 arası)
+          final double barH = maxBarH * t.clamp(0.0, 1.0);
+
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 2), // yatay aralık
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: barH,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(4)),
+                  ),
+                ),
+                const SizedBox(height: gap),
+                SizedBox(
+                  height: labelBox,
+                  child: FittedBox(
+                    // küçük ekranlarda metni güvenle sığdırır
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      day,
+                      style: GoogleFonts.inter(
+                        fontSize: fs,
+                        height: 1.0,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 4.h),
-            Text(
-              day,
-              style: GoogleFonts.inter(
-                fontSize: 9.sp,
-                color: Colors.grey[600],
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -876,5 +961,101 @@ class CircularProgressPainter extends CustomPainter {
     return oldDelegate.progress != progress ||
         oldDelegate.progressColor != progressColor ||
         oldDelegate.backgroundColor != backgroundColor;
+  }
+}
+
+class _Donut extends StatelessWidget {
+  const _Donut(
+      {required this.donutSize, required this.stroke, required this.analytics});
+  final double donutSize;
+  final double stroke;
+  final Map<String, dynamic> analytics;
+
+  @override
+  Widget build(BuildContext context) {
+    final today = (analytics['todayMinutes'] ?? 0) as num;
+    final double inner = donutSize - 2 * stroke - 8.0;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: donutSize,
+        maxHeight: donutSize,
+        minWidth: 100,
+        minHeight: 100,
+      ),
+      child: SizedBox(
+        width: donutSize,
+        height: donutSize,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CustomPaint(
+              size: Size(donutSize, donutSize),
+              painter: CircularProgressPainter(
+                progress: (today / 30.0).clamp(0.0, 1.0),
+                backgroundColor: const Color(0xFFEAEAEA),
+                progressColor: const Color(0xFF7DB9B6),
+                strokeWidth: stroke,
+              ),
+            ),
+            SizedBox(
+              width: inner,
+              height: inner,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '$today',
+                        style: GoogleFonts.inter(
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        'minutes today',
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TopSessions extends StatelessWidget {
+  const _TopSessions(this.builder);
+  final List<Widget> Function() builder;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Top Sessions',
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        ...builder(),
+      ],
+    );
   }
 }
