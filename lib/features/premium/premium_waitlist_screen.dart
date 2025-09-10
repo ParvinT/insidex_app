@@ -147,35 +147,42 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
 
                   // Premium Features Showcase - Sabit üst kısım
                   Flexible(
-                    fit: FlexFit.loose,
-                    child: SizedBox(
-                      height: _isCompactH ? 220.h : 260.h,
-                      child: PageView(
-                        controller: _pageController,
-                        onPageChanged: (index) {
-                          setState(() => _currentPage = index);
-                        },
-                        children: [
-                          _buildFeatureCard(
-                            icon: Icons.download_rounded,
-                            title: 'Unlimited Offline Downloads',
-                            description:
-                                'Download all sessions and listen anywhere, anytime',
+                    flex: 2,
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: 150, // Minimum yükseklik
+                            maxHeight: constraints
+                                .maxHeight, // Flexible'ın verdiği max alan
                           ),
-                          _buildFeatureCard(
-                            icon: Icons.all_inclusive,
-                            title: 'Access All Sessions',
-                            description:
-                                'Unlock our entire library of premium sessions',
-                          ),
-                          _buildFeatureCard(
-                            icon: Icons.analytics_outlined,
-                            title: 'Advanced Progress Tracking',
-                            description:
-                                'Get detailed insights into your healing journey',
-                          ),
-                        ],
-                      ),
+                          child: PageView(
+                              controller: _pageController,
+                              onPageChanged: (index) {
+                                setState(() => _currentPage = index);
+                              },
+                              children: [
+                                _buildFeatureCard(
+                                  icon: Icons.download_rounded,
+                                  title: 'Unlimited Offline Downloads',
+                                  description:
+                                      'Download all sessions and listen anywhere, anytime',
+                                ),
+                                _buildFeatureCard(
+                                  icon: Icons.all_inclusive,
+                                  title: 'Access All Sessions',
+                                  description:
+                                      'Unlock our entire library of premium sessions',
+                                ),
+                                _buildFeatureCard(
+                                  icon: Icons.analytics_outlined,
+                                  title: 'Advanced Progress Tracking',
+                                  description:
+                                      'Get detailed insights into your healing journey',
+                                ),
+                              ]),
+                        );
+                      },
                     ),
                   ),
 
@@ -200,7 +207,8 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                   SizedBox(height: _isCompactH ? 8.h : 20.h),
 
                   // Waitlist Form - Expanded ile scroll edilebilir
-                  Expanded(
+                  Flexible(
+                    flex: 3,
                     child: Container(
                       margin: EdgeInsets.only(left: 20.w, right: 20.w, top: 0),
                       decoration: BoxDecoration(

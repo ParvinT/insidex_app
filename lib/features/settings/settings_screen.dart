@@ -365,7 +365,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Action Methods
   void _handleProfileEdit() {
-    Navigator.pushNamed(context, AppRoutes.profile);
+    AppRoutes.navigateToProfile(context);
   }
 
   void _showFeedbackDialog({bool isBugReport = false}) {

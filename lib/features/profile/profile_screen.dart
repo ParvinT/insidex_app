@@ -13,7 +13,6 @@ import 'widgets/profile_action_button.dart';
 import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
-import '../../core/responsive/breakpoints.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -302,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 32.h),
                 SizedBox(
                   width: double.infinity,
-                  height: 60.h,
+                  height: 70.h,
                   child: ElevatedButton(
                     onPressed: _handleSignOut,
                     style: ElevatedButton.styleFrom(
@@ -315,7 +314,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     child: Text(
                       'Sign Out',
                       style: GoogleFonts.inter(
-                        fontSize: (18.sp).clamp(16.0, 22.0),
+                        fontSize: (18.sp).clamp(18.0, 22.0),
                         fontWeight: FontWeight.w600,
                         color: Colors.red,
                       ),

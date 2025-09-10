@@ -14,6 +14,7 @@ import '../library/session_detail_screen.dart';
 import '../player/audio_player_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
+import 'dart:async';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -35,16 +36,19 @@ class _PlaylistScreenState extends State<PlaylistScreen>
 
   // Drag to reorder
   bool _isReorderMode = false;
+  StreamSubscription? _userDataSubscription;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _listenToUserData();
     _loadAllPlaylists();
   }
 
   @override
   void dispose() {
+    _userDataSubscription?.cancel();
     _tabController.dispose();
     super.dispose();
   }
@@ -90,6 +94,44 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _listenToUserData() {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    _userDataSubscription = _firestore
+        .collection('users')
+        .doc(user.uid)
+        .snapshots()
+        .listen((snapshot) async {
+      if (snapshot.exists && mounted) {
+        final userData = snapshot.data()!;
+
+        // ID listelerini al
+        final playlistIds =
+            List<String>.from(userData['playlistSessionIds'] ?? []);
+        final favoriteIds =
+            List<String>.from(userData['favoriteSessionIds'] ?? []);
+        final recentIds = List<String>.from(userData['recentSessionIds'] ?? [])
+            .take(10)
+            .toList();
+
+        // Session'ları yükle
+        final myPlaylist = await _fetchSessions(playlistIds);
+        final favorites = await _fetchSessions(favoriteIds);
+        final recent = await _fetchSessions(recentIds);
+
+        // State'i güncelle
+        if (mounted) {
+          setState(() {
+            _myPlaylistSessions = myPlaylist;
+            _favoriteSessions = favorites;
+            _recentSessions = recent;
+          });
+        }
+      }
+    });
   }
 
   Future<List<Map<String, dynamic>>> _fetchSessions(
@@ -466,6 +508,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
 
     if (_isReorderMode) {
       return ReorderableListView.builder(
+        buildDefaultDragHandles: false,
         padding: EdgeInsets.all(20.w),
         itemCount: _myPlaylistSessions.length,
         onReorder: _reorderPlaylist,
@@ -864,103 +907,106 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     required Map<String, dynamic> session,
     required int index,
   }) {
-    return Container(
+    return ReorderableDragStartListener(
       key: key,
-      margin: EdgeInsets.only(bottom: 16.h),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColors.textPrimary, // Siyaha değiştirildi
-          width: 2,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1), // Siyah gölge
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+      index: index,
+      child: Container(
+        margin: EdgeInsets.only(bottom: 16.h),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: AppColors.textPrimary, // Siyaha değiştirildi
+            width: 2,
           ),
-        ],
-      ),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Row(
-          children: [
-            // Drag handle
-            Icon(
-              Icons.drag_handle,
-              color: AppColors.textPrimary, // Siyah
-              size: 24.sp,
-            ),
-            SizedBox(width: 12.w),
-
-            // Index
-            Container(
-              width: 32.w,
-              height: 32.w,
-              decoration: BoxDecoration(
-                color: AppColors.greyLight,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Center(
-                child: Text(
-                  '${index + 1}',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(width: 12.w),
-
-            // Session info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    session['title'] ?? 'Untitled',
-                    style: GoogleFonts.inter(
-                      fontSize: 15.sp, // Biraz küçültüldü
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    session['category'] ?? 'General',
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(width: 12.w), // Ekstra boşluk
-            // Remove button
-            GestureDetector(
-              onTap: () => _removeFromPlaylist(session['id']),
-              child: Container(
-                width: 36.w,
-                height: 36.w,
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Icon(
-                  Icons.delete_outline,
-                  size: 18.sp,
-                  color: Colors.red,
-                ),
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1), // Siyah gölge
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.all(16.w),
+          child: Row(
+            children: [
+              // Drag handle
+              Icon(
+                Icons.drag_handle,
+                color: AppColors.textPrimary, // Siyah
+                size: 24.sp,
+              ),
+              SizedBox(width: 12.w),
+
+              // Index
+              Container(
+                width: 32.w,
+                height: 32.w,
+                decoration: BoxDecoration(
+                  color: AppColors.greyLight,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Center(
+                  child: Text(
+                    '${index + 1}',
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+              SizedBox(width: 12.w),
+
+              // Session info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      session['title'] ?? 'Untitled',
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp, // Biraz küçültüldü
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      session['category'] ?? 'General',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(width: 12.w), // Ekstra boşluk
+              // Remove button
+              GestureDetector(
+                onTap: () => _removeFromPlaylist(session['id']),
+                child: Container(
+                  width: 36.w,
+                  height: 36.w,
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Icon(
+                    Icons.delete_outline,
+                    size: 18.sp,
+                    color: Colors.red,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

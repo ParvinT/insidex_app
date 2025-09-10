@@ -20,6 +20,8 @@ import '../../features/legal/terms_of_service_screen.dart';
 import '../../features/premium/premium_waitlist_screen.dart';
 import '../../features/legal/about_screen.dart';
 import '../../features/legal/disclaimer_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:insidex_app/features/auth/register_screen.dart'
     as auth_register;
@@ -96,4 +98,33 @@ class AppRoutes {
           return SessionDetailScreen(sessionData: args ?? {});
         },
       };
+
+  // Profile navigation helper method
+  static Future<void> navigateToProfile(BuildContext context) async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+
+    if (currentUser == null) {
+      // Kullanıcı giriş yapmamış, onboarding kontrolü yap
+      final prefs = await SharedPreferences.getInstance();
+      final goals = prefs.getStringList('goals');
+      final gender = prefs.getString('gender');
+      final birthDate = prefs.getString('birthDate');
+
+      if (goals == null ||
+          goals.isEmpty ||
+          gender == null ||
+          gender.isEmpty ||
+          birthDate == null ||
+          birthDate.isEmpty) {
+        // Onboarding eksik, oraya yönlendir
+        Navigator.pushNamed(context, goalsScreen);
+      } else {
+        // Onboarding tam ama giriş yapmamış, login'e yönlendir
+        Navigator.pushNamed(context, login);
+      }
+    } else {
+      // Kullanıcı giriş yapmış, profile'a git
+      Navigator.pushNamed(context, profile);
+    }
+  }
 }

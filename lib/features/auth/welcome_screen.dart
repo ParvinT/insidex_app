@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/responsive/auth_scaffold.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -33,16 +34,39 @@ class WelcomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // App wordmark (kept as text; your real logo widget can stay here)
-                    Text(
-                      'InsideX',
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.inter(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                        height: 1.2,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final screenWidth = MediaQuery.of(context).size.width;
+                        final bool isTablet = screenWidth >= 600;
+                        final bool isDesktop = screenWidth >= 1024;
+
+                        // Ekran boyutuna göre logo boyutu
+                        final logoWidth = isDesktop
+                            ? 180.w
+                            : isTablet
+                                ? 160.w
+                                : 140.w;
+
+                        final logoHeight = isDesktop
+                            ? 60.h
+                            : isTablet
+                                ? 55.h
+                                : 48.h;
+
+                        return Container(
+                          alignment: Alignment.center,
+                          child: SvgPicture.asset(
+                            'assets/images/logo.svg',
+                            width: logoWidth,
+                            height: logoHeight,
+                            fit: BoxFit.contain,
+                            colorFilter: ColorFilter.mode(
+                              AppColors.textPrimary,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        );
+                      },
                     ),
 
                     SizedBox(height: 28.h),

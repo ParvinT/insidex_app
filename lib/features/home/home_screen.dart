@@ -11,6 +11,7 @@ import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
+import '../../core/routes/app_routes.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -454,13 +455,98 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               MaterialPageRoute(builder: (_) => const PlaylistScreen()));
         }),
         item(Icons.chat_bubble_outline, 'AI Chat', 2, () {
-          // TODO: navigate to chat
+          _showComingSoonDialog('AI Psychologist');
         }),
         item(Icons.person_outline, 'Profile', 3, () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const ProfileScreen()));
+          AppRoutes.navigateToProfile(context);
         }),
       ],
+    );
+  }
+
+  void _showComingSoonDialog(String feature) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
+        child: Container(
+          padding: EdgeInsets.all(24.w),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Icon
+              Container(
+                width: 72.w,
+                height: 72.w,
+                decoration: BoxDecoration(
+                  color: AppColors.greyLight,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.construction_rounded,
+                  color: AppColors.textPrimary,
+                  size: 36.sp,
+                ),
+              ),
+
+              SizedBox(height: 20.h),
+
+              // Title
+              Text(
+                'Coming Soon!',
+                style: GoogleFonts.inter(
+                  fontSize: 22.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+
+              SizedBox(height: 12.h),
+
+              // Message
+              Text(
+                '$feature is under development.\nWe\'re working hard to bring it to you!',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: AppColors.textSecondary,
+                  height: 1.5,
+                ),
+              ),
+
+              SizedBox(height: 24.h),
+
+              // OK Button
+              SizedBox(
+                width: double.infinity,
+                height: 48.h,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.textPrimary,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    'Got it!',
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

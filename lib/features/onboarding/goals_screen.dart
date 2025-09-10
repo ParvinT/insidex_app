@@ -66,8 +66,7 @@ class _GoalsScreenState extends State<GoalsScreen>
 
     final clamped = mq.copyWith(textScaler: const TextScaler.linear(1.0));
     final bool isWideOrShort = size.width >= 1024 || size.height <= 740;
-    final double bottomVisual =
-        isWideOrShort ? 96.0 : 80.0; 
+    final double bottomVisual = isWideOrShort ? 96.0 : 80.0;
     return MediaQuery(
       data: isCompactHeight ? clamped : mq,
       child: AuthScaffold(
@@ -82,10 +81,7 @@ class _GoalsScreenState extends State<GoalsScreen>
           backgroundColor: AppColors.backgroundWhite,
           elevation: 0,
           toolbarHeight: 64,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-            onPressed: () => Navigator.pop(context),
-          ),
+          automaticallyImplyLeading: false,
           actions: [
             Padding(
               padding: const EdgeInsetsDirectional.only(end: 16),

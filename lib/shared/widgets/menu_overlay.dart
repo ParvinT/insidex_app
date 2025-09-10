@@ -148,8 +148,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                                 title: 'Profile',
                                 onTap: () {
                                   _closeMenu();
-                                  Navigator.pushNamed(
-                                      context, AppRoutes.profile);
+                                  AppRoutes.navigateToProfile(context);
                                 },
                               ),
                               _buildMenuItem(

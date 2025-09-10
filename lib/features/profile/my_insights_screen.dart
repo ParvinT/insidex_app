@@ -80,7 +80,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             color: Colors.black,
           ),
         ),
-        actions: [
+        /*actions: [
           IconButton(
             icon: Icon(
               _isEditMode ? Icons.check : Icons.edit_outlined,
@@ -93,7 +93,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               }
             },
           ),
-        ],
+        ],*/
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
