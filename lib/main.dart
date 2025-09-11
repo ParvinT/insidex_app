@@ -8,6 +8,7 @@ import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'services/audio_player_service.dart';
+import 'services/notification_service.dart';
 import 'app.dart';
 
 void main() async {
@@ -24,6 +25,14 @@ void main() async {
     print('Audio Service initialized successfully');
   } catch (e) {
     print('Audio Service initialization error: $e');
+  }
+
+  // Notification Service
+  try {
+    await NotificationService().initialize();
+    print('Notification Service initialized successfully');
+  } catch (e) {
+    print('Notification Service initialization error: $e');
   }
 
   SystemChrome.setSystemUIOverlayStyle(

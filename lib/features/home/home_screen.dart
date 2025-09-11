@@ -9,9 +9,10 @@ import '../../core/responsive/responsive_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
-import '../profile/profile_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
+import '../../services/notification_service.dart';
+import 'package:flutter/foundation.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +46,126 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     vsync: this,
     duration: const Duration(milliseconds: 900),
   )..repeat(reverse: true);
+
+  @override
+  void initState() {
+    super.initState();
+    _checkNotificationPermission();
+  }
+
+  // Notification permission kontrolü
+  Future<void> _checkNotificationPermission() async {
+    // Web'de çalışmaz
+    if (kIsWeb) return;
+
+    // İlk açılışta değil, 3 saniye sonra sor (UX için)
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (!mounted) return;
+
+    // Check if already enabled
+    final enabled = await NotificationService().areNotificationsEnabled();
+
+    if (!enabled) {
+      // Show permission dialog
+      _showNotificationPermissionDialog();
+    }
+  }
+
+  // Permission dialog
+  Future<void> _showNotificationPermissionDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Row(
+          children: [
+            Icon(
+              Icons.notifications_active,
+              color: AppColors.primaryGold,
+              size: 28.sp,
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                'Stay Motivated',
+                style: GoogleFonts.inter(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Get daily reminders, celebrate achievements, and track your progress with notifications.',
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: AppColors.textSecondary,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Not Now',
+              style: GoogleFonts.inter(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+
+              final granted = await NotificationService().requestPermissions();
+
+              if (granted) {
+                // Schedule default daily reminder
+                await NotificationService().scheduleDailyReminder(
+                  time: const TimeOfDay(hour: 20, minute: 0),
+                  title: 'Time for your daily session 🧘',
+                  body: 'Take a moment to relax with INSIDEX',
+                );
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Notifications enabled! Daily reminder set for 8:00 PM'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGold,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              padding: EdgeInsets.symmetric(
+                horizontal: 24.w,
+                vertical: 12.h,
+              ),
+            ),
+            child: Text(
+              'Enable',
+              style: GoogleFonts.inter(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {

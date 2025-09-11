@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../providers/user_provider.dart';
 import '../feedback/feedback_dialog.dart';
+import 'notification_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -86,37 +87,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 32.h),
 
                 // App Section
-                /* _buildSectionHeader('App'),
+                _buildSectionHeader('App'),
                 SizedBox(height: 12.h),
                 _buildSettingsCard([
-                  _buildSwitchItem(
+                  _buildSettingItem(
                     icon: Icons.notifications_outlined,
                     title: 'Notifications',
-                    subtitle: 'Receive reminders and updates',
-                    value: _notificationsEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _notificationsEnabled = value;
-                      });
+                    subtitle: 'Manage notification preferences',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationSettingsScreen(),
+                        ),
+                      );
                     },
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.language_outlined,
-                    title: 'Language',
-                    subtitle: _selectedLanguage,
-                    onTap: () => _showLanguageDialog(),
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.palette_outlined,
-                    title: 'Theme',
-                    subtitle: _selectedTheme,
-                    onTap: () => _showThemeDialog(),
                   ),
                 ]),
 
-                SizedBox(height: 32.h),*/
+                SizedBox(height: 32.h),
 
                 SizedBox(height: 32.h),
                 _buildSectionHeader('Support & Feedback'),
