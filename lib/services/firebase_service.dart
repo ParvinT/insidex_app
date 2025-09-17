@@ -202,14 +202,6 @@ class FirebaseService {
         'recentSessionIds': [],
       });
 
-      // Send Firebase email verification (optional, since we did OTP)
-      try {
-        await user.sendEmailVerification();
-      } catch (e) {
-        // Ignore email verification errors
-        print('Could not send email verification: $e');
-      }
-
       // Delete OTP document (cleanup)
       await otpDoc.reference.delete();
 
