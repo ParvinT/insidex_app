@@ -28,8 +28,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
-  static const int minimumAge = 13;
-  static const int recommendedAge = 16;
+  static const int minimumAge = 18;
+  static const int recommendedAge = 18;
 
   @override
   void initState() {
@@ -74,7 +74,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
       await prefs.setStringList(
           'goals', widget.selectedGoals.map((g) => g.title).toList());
 
-      await AnalyticsService.logBirthDateSelected(_userAge!, _userAge! < 16);
+      await AnalyticsService.logBirthDateSelected(_userAge!, _userAge! < 18);
       await AnalyticsService.logOnboardingComplete();
 
       final user = FirebaseAuth.instance.currentUser;
@@ -84,7 +84,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
           'email': user.email,
           'birthDate': Timestamp.fromDate(_selectedDate!),
           'age': _userAge,
-          'ageRestricted': _userAge! < recommendedAge,
+          'ageRestricted': _userAge! < 18,
           'gender': widget.selectedGender.toString().split('.').last,
           'goals': widget.selectedGoals.map((g) => g.title).toList(),
           'onboardingComplete': true,
@@ -303,10 +303,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
           Expanded(
             child: Text(
               _isAgeValid
-                  ? (_isAgeRecommended
-                      ? 'Age: ${_userAge} years old'
-                      : 'Age: ${_userAge} (Some content may be restricted)')
-                  : 'You must be at least $minimumAge years old',
+                  ? 'Age: ${_userAge} years old'
+                  : 'You must be at least 18 years old',
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,

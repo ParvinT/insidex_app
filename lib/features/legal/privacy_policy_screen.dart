@@ -4,12 +4,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/responsive/context_ext.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = context.isTablet;
+    final isDesktop = context.isDesktop;
+
+    // Responsive değerler
+    final double maxContentWidth =
+        isDesktop ? 800 : (isTablet ? 600 : double.infinity);
+    final double horizontalPadding =
+        isDesktop ? 40.w : (isTablet ? 30.w : 20.w);
+    final double titleSize =
+        isDesktop ? 22.sp : (isTablet ? 20.sp : 20.sp.clamp(20.0, 22.0));
+    final double headerTitleSize =
+        isDesktop ? 26.sp : (isTablet ? 22.sp : 24.sp);
+    final double sectionTitleSize =
+        isDesktop ? 18.sp : (isTablet ? 16.sp : 18.sp);
+    final double bodyTextSize = isDesktop ? 14.sp : (isTablet ? 13.sp : 14.sp);
+    final double smallTextSize = isTablet ? 11.sp : 12.sp;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -17,7 +35,10 @@ class PrivacyPolicyScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: AppColors.textPrimary,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -30,194 +51,308 @@ class PrivacyPolicyScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: AppColors.greyLight.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Privacy Policy',
-                    style: GoogleFonts.inter(
-                      fontSize: 24.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: 20.h),
+
+                // Header with Company Info
+                Container(
+                  padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    'Last Updated: January 27, 2025',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'INSIDEX Privacy Policy',
+                        style: GoogleFonts.inter(
+                          fontSize: headerTitleSize,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Effective Date: September 11, 2025',
+                        style: GoogleFonts.inter(
+                          fontSize: bodyTextSize,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Text(
+                        'Data Controller: ALZHAMI LTD\nCompany Number: 16545604\nRegistered Office: 85 Great Portland Street, London, England W1W 7LT',
+                        style: GoogleFonts.inter(
+                          fontSize: smallTextSize,
+                          color: AppColors.textSecondary,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            SizedBox(height: 24.h),
+                SizedBox(height: 24.h),
 
-            // Content sections
-            _buildSection(
-              title: '1. Information We Collect',
-              content: '''
-INSIDEX ("we", "our", or "us") collects the following information:
-• Email address (for waitlist registration and account creation)
-• Name (optional, for personalization)
-• Usage analytics (anonymous)
-• Device information (for app performance)
-• Session listening history
-• User preferences and settings
-              ''',
-            ),
+                // Introduction
+                Text(
+                  'ALZHAMI LTD ("we," "us," or "our") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our INSIDEX mobile application and related services.',
+                  style: GoogleFonts.inter(
+                    fontSize: bodyTextSize,
+                    color: AppColors.textSecondary,
+                    height: 1.6,
+                  ),
+                ),
 
-            _buildSection(
-              title: '2. How We Use Your Information',
-              content: '''
-We use the collected information to:
-• Notify you about premium features and updates
-• Send product announcements and newsletters
-• Provide customer support
-• Improve our app and services
-• Personalize your experience
-• Process your account registration
-              ''',
-            ),
+                SizedBox(height: 24.h),
 
-            _buildSection(
-              title: '3. Data Storage and Security',
-              content: '''
-Your data is securely stored on Google Firebase infrastructure with industry-standard security protocols. Our servers are located in europe-west region. We implement appropriate technical and organizational measures to protect your data.
-              ''',
-            ),
+                // Content sections
+                _buildSection(
+                  context: context,
+                  title: '1. Information We Collect',
+                  content:
+                      '''We collect information to provide personalized subliminal audio recommendations and improve the App.
 
-            _buildSection(
-              title: '4. Your Rights',
-              content: '''
-You have the right to:
+Personal Information:
+• Account Data: Email address, name, password (encrypted)
+• Profile Data: Date of birth, gender (from onboarding), avatar emoji
+• Preferences: Selected wellness goals during onboarding
+
+Usage and Activity Data:
+• Listening History: Sessions played, duration, timestamps
+• User Interactions: 
+  - Favorite session IDs
+  - Completed session IDs
+  - Playlist session IDs
+  - Recent session IDs (last 10)
+  - Total listening minutes
+  - Daily sessions played count
+• Account Status: Premium membership status, account type
+
+Technical Information:
+• Authentication: Firebase Auth tokens and user ID
+• Device Data: Device type, OS version, app version
+• Analytics: App usage via Firebase Analytics (anonymized)
+• Timestamps: Account creation, last active date
+
+Consent Records:
+• Privacy consent acceptance
+• Marketing consent preferences''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '2. How We Collect Information',
+                  content:
+                      '''• Directly from You: When you create an account, select preferences, or contact support
+• Automatically: Through Firebase services when you use the App
+• Third-Party Services: Firebase (Google) for authentication, database, and analytics''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '3. How We Use Your Information',
+                  content: '''Service Delivery:
+• Provide access to subliminal audio sessions
+• Track your progress and listening history
+• Maintain your favorites and playlists
+• Enforce daily session limits (3 sessions/day for free users)
+
+Personalization:
+• Generate AI-powered recommendations
+• Customize content based on your goals
+• Remember preferences and recent sessions
+
+Communication:
+• Send OTP verification codes
+• Welcome emails and service updates
+• Marketing (only with explicit consent)
+
+Service Improvement:
+• Analyze usage patterns
+• Fix bugs and technical issues
+• Develop new features
+
+Security and Compliance:
+• Prevent fraud and unauthorized access
+• Enforce Terms of Service
+• Comply with legal obligations''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '4. Data Storage and Service Providers',
+                  content: '''Firebase (Google):
+• Purpose: Authentication, database (Firestore), storage, analytics
+• Location: europe-west region
+• Security: Industry-standard encryption
+
+Email Services:
+• Purpose: OTP verification, newsletters (with consent)
+• Data Shared: Email address, name
+
+All service providers are GDPR-compliant.''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '5. Data Sharing',
+                  content:
+                      '''We do not sell your personal data. We share data only:
+• With service providers (Firebase, email)
+• For legal requirements
+• In case of business transfers (with notice)
+• With your explicit consent
+• As aggregated, anonymized insights''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '6. Data Security',
+                  content: '''We implement:
+• Encryption in transit (HTTPS/TLS)
+• Encryption at rest (Firebase security)
+• Access controls and authentication
+• Regular security audits
+• Secure password storage
+
+Report breaches to: support@insidexapp.com''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '7. Data Retention',
+                  content: '''• Active Accounts: Data retained while active
+• Inactive Accounts: Deleted after 24 months
+• Deleted Accounts: Data removed within 30 days
+• Analytics: Anonymized after 14 months
+• Legal Obligations: Some data retained as required by law''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '8. Your Rights (GDPR)',
+                  content: '''You have the right to:
 • Access your personal data
-• Request deletion of your data
-• Unsubscribe from our emails
-• Data portability
 • Correct inaccurate data
-• Object to data processing
+• Request deletion ("right to be forgotten")
+• Restrict processing
+• Object to processing
+• Data portability
+• Withdraw consent anytime
 
-To exercise these rights, contact us at: insidexapp@gmail.com
-              ''',
-            ),
+Contact: support@insidexapp.com (response within 30 days)
 
-            _buildSection(
-              title: '5. Data Sharing',
-              content: '''
-We do not sell, trade, or rent your personal information to third parties. We may share your information only:
-• With your consent
-• To comply with legal obligations
-• With service providers (Firebase, email services)
-              ''',
-            ),
-
-            _buildSection(
-              title: '6. Cookies',
-              content: '''
-We use essential cookies to maintain your session and preferences. You can control cookies through your browser settings.
-              ''',
-            ),
-
-            _buildSection(
-              title: '7. Children\'s Privacy',
-              content: '''
-Our service is not intended for children under 13. We do not knowingly collect information from children under 13. If you are a parent and believe we have collected your child's information, please contact us immediately.
-              ''',
-            ),
-
-            _buildSection(
-              title: '8. Email Communications',
-              content: '''
-By joining our waitlist, you agree to receive emails about:
-• Product updates
-• Premium features launch
-• Special offers (if opted in)
-
-You can unsubscribe at any time using the link in our emails.
-              ''',
-            ),
-
-            _buildSection(
-              title: '9. Data Retention',
-              content: '''
-We retain your data for as long as necessary to provide our services or as required by law. You may request deletion at any time.
-              ''',
-            ),
-
-            _buildSection(
-              title: '10. Changes to This Policy',
-              content: '''
-We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date.
-              ''',
-            ),
-
-            _buildSection(
-              title: '11. Contact Us',
-              content: '''
-If you have any questions about this Privacy Policy, please contact us:
-• Email: insidexapp@gmail.com
-              ''',
-            ),
-
-            _buildSection(
-              title: '12. Legal Basis for Processing (GDPR)',
-              content: '''
-We process your data based on:
-• Your consent
-• Legitimate interests
-• Contractual necessity
-• Legal obligations
-              ''',
-            ),
-
-            SizedBox(height: 32.h),
-
-            // Agreement notice
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: AppColors.primaryGold.withOpacity(0.3),
+You may lodge complaints with the UK ICO at ico.org.uk''',
                 ),
-              ),
-              child: Text(
-                'By using INSIDEX, you agree to the collection and use of information in accordance with this Privacy Policy.',
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textPrimary,
-                  height: 1.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
 
-            SizedBox(height: 40.h),
-          ],
+                _buildSection(
+                  context: context,
+                  title: '9. International Data Transfers',
+                  content: '''Data is stored in UK/EU (Firebase europe-west). 
+Transfers outside EEA are protected by:
+• Standard Contractual Clauses (SCCs)
+• Adequacy decisions
+• GDPR safeguards''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '10. Age Restriction',
+                  content: '''The Services are for users 18+ only. 
+We do not knowingly collect data from anyone under 18.
+If we discover such data, we delete it immediately.
+
+Parents: Contact support@insidexapp.com if you believe we have your child's data.''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '11. Cookies and Tracking',
+                  content: '''The App uses:
+• Essential cookies for authentication
+• Firebase Analytics (can be disabled)
+• No third-party advertising or tracking pixels''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '12. Changes to This Policy',
+                  content:
+                      '''We may update this policy. Material changes notified via:
+• In-app notification
+• Email (if provided)
+• Update notice on app launch
+
+Continued use constitutes acceptance.''',
+                ),
+
+                _buildSection(
+                  context: context,
+                  title: '13. Contact Information',
+                  content: '''Data Controller:
+ALZHAMI LTD
+Company Number: 16545604
+85 Great Portland Street, London, W1W 7LT
+
+Contact:
+General Inquiries: hello@insidexapp.com
+Support: support@insidexapp.com
+Phone: +44 7456 460096
+
+Automated Emails: noreply@insidexapp.com
+(Please do not reply to emails from this address)''',
+                ),
+
+                SizedBox(height: 32.h),
+
+                // Compliance notice
+                Container(
+                  padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryGold.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: AppColors.primaryGold.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    'This policy complies with UK GDPR, Apple App Store guidelines, and Privacy Manifest requirements.',
+                    style: GoogleFonts.inter(
+                      fontSize: bodyTextSize,
+                      color: AppColors.textPrimary,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                SizedBox(height: 40.h),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildSection({
+    required BuildContext context,
     required String title,
     required String content,
   }) {
+    final isTablet = context.isTablet;
+    final isDesktop = context.isDesktop;
+    final sectionTitleSize = isDesktop ? 18.sp : (isTablet ? 16.sp : 18.sp);
+    final bodyTextSize = isDesktop ? 14.sp : (isTablet ? 13.sp : 14.sp);
+
     return Container(
       margin: EdgeInsets.only(bottom: 24.h),
       child: Column(
@@ -226,7 +361,7 @@ We process your data based on:
           Text(
             title,
             style: GoogleFonts.inter(
-              fontSize: 18.sp,
+              fontSize: sectionTitleSize,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
@@ -235,7 +370,7 @@ We process your data based on:
           Text(
             content.trim(),
             style: GoogleFonts.inter(
-              fontSize: 14.sp,
+              fontSize: bodyTextSize,
               color: AppColors.textSecondary,
               height: 1.6,
             ),

@@ -113,7 +113,7 @@ Our dynamic tracks for driving, focus, and physical activity are clearly labeled
               icon: '🔞',
               title: 'Age Restriction',
               content:
-                  'This app is intended for users 13 years and older. Users under 18 should use the app with parental guidance.',
+                  'This app is intended for users 18 years and older only.',
             ),
 
             // Professional Healthcare
