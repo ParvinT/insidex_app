@@ -7,6 +7,7 @@ const nodemailer = require("nodemailer");
 // Initialize Firebase Admin
 admin.initializeApp();
 
+
 // Email validation helper
 function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -15,11 +16,13 @@ function isValidEmail(email) {
 
 // Email configuration
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST || "smtppro.zoho.eu",
+  port: 465,               
+  secure: true,            
   auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS,
-  },
+    user: process.env.ZOHO_USER,     
+    pass: process.env.ZOHO_PASS,        
+  }
 });
 
 // Listen for new documents in mail_queue
@@ -53,7 +56,7 @@ exports.sendEmailFromQueue = functions.firestore
 
       try {
         const mailOptions = {
-          from: process.env.GMAIL_FROM,
+          from: process.env.ZOHO_FROM,
           to: mailData.to,
         };
 
@@ -66,9 +69,19 @@ exports.sendEmailFromQueue = functions.firestore
           
           console.log(`Sending OTP email to ${mailData.to}`);
         } else if (mailData.type === "welcome") {
+
+          console.log('Welcome email data:', mailData); // Debug log
+          console.log('Template data:', mailData.template?.data);
         // Welcome Email
           mailOptions.subject = "Welcome to INSIDEX! 🎉";
-          mailOptions.html = getWelcomeEmailHTML(mailData.template.data);
+           if (mailData.html) {
+    mailOptions.html = mailData.html;  // firebase_service.dart'tan gelen HTML
+  } else if (mailData.template?.data) {
+    mailOptions.html = getWelcomeEmailHTML(mailData.template.data);
+  } else {
+    // Fallback
+    mailOptions.html = getWelcomeEmailHTML({ userName: 'User' });
+  }
 
           console.log(`Sending welcome email to ${mailData.to}`);
         }
@@ -595,7 +608,7 @@ function getPremiumAnnouncementHTML(data) {
 // Send email helper function
 async function sendEmail({ to, subject, html }) {
   const mailOptions = {
-    from: process.env.GMAIL_FROM || process.env.GMAIL_USER,
+    from: process.env.ZOHO_FROM,
     to: to,
     subject: subject,
     html: html
@@ -631,7 +644,7 @@ exports.onFeedbackCreated = functions.firestore
     `;
     
     await sendEmail({
-      to: process.env.GMAIL_USER,
+      to: process.env.FEEDBACK_EMAIL,
       subject: `[INSIDEX Feedback] ${feedback.type}: ${feedback.title}`,
       html: emailHtml,
     });

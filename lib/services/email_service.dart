@@ -112,7 +112,7 @@ class EmailService {
             'userName': name,
             'userEmail': email,
             'appName': 'INSIDEX',
-            'supportEmail': 'support@insidex.app',
+            'supportEmail': 'support@insidexapp.com',
             'currentYear': DateTime.now().year.toString(),
           },
         },
@@ -337,9 +337,7 @@ class EmailService {
             <div class="feature">💬 AI Psychologist support</div>
             <div class="feature">📊 Track your progress</div>
             
-            <center>
-                <a href="https://insidex.app/login" class="button">Start Your Journey</a>
-            </center>
+            
             
             <h3>Getting Started Tips:</h3>
             <ol>
@@ -350,7 +348,7 @@ class EmailService {
             </ol>
             
             <p><strong>Need Help?</strong><br>
-            Our support team is here for you. Feel free to reach out at support@insidex.app</p>
+            Our support team is here for you. Feel free to reach out at support@insidexapp.com</p>
             
             <p>We're excited to support you on your wellness journey!</p>
             
@@ -361,7 +359,6 @@ class EmailService {
         <div class="footer">
             <p>© 2025 INSIDEX. All rights reserved.</p>
             <p>This email was sent to $userEmail</p>
-            <p><a href="https://insidex.app/unsubscribe">Unsubscribe</a> | <a href="https://insidex.app/privacy">Privacy Policy</a></p>
         </div>
     </div>
 </body>
