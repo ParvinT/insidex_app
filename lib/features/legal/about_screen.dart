@@ -163,7 +163,12 @@ class AboutScreen extends StatelessWidget {
             // Contact
             _buildSection(
               title: '📧 Contact Us',
-              content: 'Email: insidexapp@gmail.com',
+              content: 'Email: hello@insidexapp.com',
+            ),
+            //Support
+            _buildSection(
+              title: '📧 For Support',
+              content: 'Email: support@insidexapp.com',
             ),
 
             SizedBox(height: 32.h),
