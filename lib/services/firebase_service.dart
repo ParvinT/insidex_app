@@ -2,6 +2,7 @@
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 class FirebaseService {
   FirebaseService._();
@@ -277,22 +278,39 @@ class FirebaseService {
   // =========================
   // RESET PASSWORD
   // =========================
+
   static Future<Map<String, dynamic>> resetPassword(String email) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
+      final callable =
+          FirebaseFunctions.instance.httpsCallable('customPasswordReset');
+
+      await callable.call({'email': email});
+
       return {
         'success': true,
-        'message': 'Password reset email sent successfully',
+        'message': 'Password reset email sent successfully!',
       };
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = _getAuthErrorMessage(e.code);
-      return {'success': false, 'error': errorMessage, 'code': e.code};
-    } catch (e) {
-      print('Unexpected error during password reset: $e');
+    } on FirebaseFunctionsException catch (e) {
+      print('Cloud Function Error: ${e.code} - ${e.message}');
+
+      if (e.code == 'not-found') {
+        return {
+          'success': false,
+          'error': 'No account found with this email address.',
+          'code': 'user-not-found',
+        };
+      }
+
       return {
         'success': false,
-        'error': 'Failed to send password reset email. Please try again.',
-        'details': e.toString(),
+        'error': e.message ?? 'Failed to send reset email',
+        'code': e.code,
+      };
+    } catch (e) {
+      print('Unexpected error: $e');
+      return {
+        'success': false,
+        'error': 'Failed to send reset email. Please try again.',
       };
     }
   }

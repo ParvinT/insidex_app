@@ -43,7 +43,7 @@ exports.sendEmailFromQueue = functions.firestore
       }
 
       // ✅ YENİ - Type validation
-      const allowedTypes = ["otp", "welcome", "password_reset", "waitlist_announcement", "waitlist_test"];
+      const allowedTypes = ["otp", "welcome", "password_reset", "password_reset_custom", "waitlist_announcement", "waitlist_test"];
       if (!allowedTypes.includes(mailData.type)) {
         console.error("Invalid email type:", mailData.type);
         await snap.ref.update({
@@ -85,6 +85,7 @@ exports.sendEmailFromQueue = functions.firestore
 
           console.log(`Sending welcome email to ${mailData.to}`);
         }
+        
           else if (mailData.type === "waitlist_announcement" || mailData.type === "waitlist_test") {
         // WAITLIST EMAIL - BU KISIM EKSİK!
         mailOptions.subject = mailData.subject;
@@ -648,4 +649,120 @@ exports.onFeedbackCreated = functions.firestore
       subject: `[INSIDEX Feedback] ${feedback.type}: ${feedback.title}`,
       html: emailHtml,
     });
+});
+
+// Custom Password Reset with Link
+exports.customPasswordReset = functions.https.onCall(async (data, context) => {
+  const { email } = data;
+  
+  if (!email || !isValidEmail(email)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid email required');
+  }
+  
+  try {
+    // 1. Kullanıcı var mı kontrol et
+    console.log('Checking user existence...');
+    const userRecord = await admin.auth().getUserByEmail(email);
+    console.log('User found:', userRecord.uid);
+    
+    // 2. Reset linki oluştur (Firebase Admin SDK)
+    console.log('Generating reset link...');
+    const resetLink = await admin.auth().generatePasswordResetLink(email);
+    console.log('Reset link generated');
+    
+    // 3. Kullanıcı adını al
+    const userDoc = await admin.firestore()
+      .collection('users')
+      .doc(userRecord.uid)
+      .get();
+    
+    const userName = userDoc.exists ? userDoc.data().name : 'User';
+    
+    // 4. Email HTML'i oluştur
+    const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
+        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center; border-radius: 10px 10px 0 0; }
+        .header h1 { color: white; margin: 0; font-size: 32px; }
+        .content { padding: 40px; }
+        .reset-button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; padding: 15px 40px; text-decoration: none; border-radius: 50px; display: inline-block; font-weight: 600; margin: 20px 0; }
+        .warning-box { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .link-box { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; word-break: break-all; font-size: 12px; color: #666; }
+        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 10px 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>INSIDEX</h1>
+            <p style="color: white; margin: 10px 0 0 0;">Password Reset Request</p>
+        </div>
+        <div class="content">
+            <h2>Hi ${userName}! 👋</h2>
+            <p>You requested to reset your password. Click the button below to create a new password:</p>
+            
+            <div style="text-align: center;">
+                <a href="${resetLink}" class="reset-button">Reset My Password</a>
+            </div>
+            
+            <div class="warning-box">
+                <strong>⚠️ Security Notice:</strong>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>This link expires in 1 hour</li>
+                    <li>Never share this link with anyone</li>
+                    <li>If you didn't request this, ignore this email</li>
+                </ul>
+            </div>
+            
+            <p style="color: #666; font-size: 14px;">Or copy this link:</p>
+            <div class="link-box">${resetLink}</div>
+        </div>
+        <div class="footer">
+            <p>© 2025 INSIDEX. All rights reserved.</p>
+            <p>You received this because a password reset was requested for your account.</p>
+        </div>
+    </div>
+</body>
+</html>
+    `;
+    
+    // 5. Email'i gönder
+    const mailOptions = {
+      from: process.env.ZOHO_FROM,
+      to: email,
+      subject: '🔐 Reset Your INSIDEX Password',
+      html: emailHtml
+    };
+    
+    try {
+  const info = await transporter.sendMail(mailOptions);
+  console.log('Password reset email sent:', info.messageId);
+} catch (mailError) {
+  console.error('Failed to send email:', mailError);
+  throw new functions.https.HttpsError('internal', 'Failed to send email: ' + mailError.message);
+}
+    
+    // 6. Log tut
+    await admin.firestore().collection('password_reset_logs').add({
+      email: email,
+      userId: userRecord.uid,
+      requestedAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: 'sent'
+    });
+    
+    return { success: true, message: 'Password reset email sent!' };
+    
+  } catch (error) {
+    console.error('Password reset error:', error);
+    
+    if (error.code === 'auth/user-not-found') {
+      throw new functions.https.HttpsError('not-found', 'No account found with this email');
+    }
+    
+    throw new functions.https.HttpsError('internal', 'Failed to send reset email');
+  }
 });
