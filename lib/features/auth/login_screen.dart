@@ -114,38 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleForgotPassword() async {
-    // Check if email is entered
-    if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter your email first'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    setState(() => _isEmailLoading = true);
-
-    // Send password reset email via Firebase
-    final result = await FirebaseService.resetPassword(
-      _emailController.text.trim(),
-    );
-
-    setState(() => _isEmailLoading = false);
-
-    if (!mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          result['success']
-              ? 'Password reset email sent!'
-              : result['error'] ?? 'Failed to send reset email',
-        ),
-        backgroundColor: result['success'] ? Colors.green : Colors.red,
-      ),
-    );
+    Navigator.pushNamed(context, AppRoutes.forgotPassword);
   }
 
   Widget _buildDivider() {

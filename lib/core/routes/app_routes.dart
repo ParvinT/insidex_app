@@ -20,6 +20,7 @@ import '../../features/legal/terms_of_service_screen.dart';
 import '../../features/premium/premium_waitlist_screen.dart';
 import '../../features/legal/about_screen.dart';
 import '../../features/legal/disclaimer_screen.dart';
+import '../../features/auth/forgot_password_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,6 +40,7 @@ class AppRoutes {
   static const String welcome = '/auth/welcome';
   static const String login = '/auth/login';
   static const String register = '/auth/register';
+  static const String forgotPassword = '/auth/forgot-password';
 
   static const String home = '/home';
   static const String settings = '/settings';
@@ -62,6 +64,7 @@ class AppRoutes {
         welcome: (_) => const auth_welcome.WelcomeScreen(),
         login: (_) => const auth_login.LoginScreen(),
         register: (_) => const auth_register.RegisterScreen(),
+        forgotPassword: (context) => const ForgotPasswordScreen(),
 
         // home (aliased, alias adı home DEĞİL!)
         home: (_) => const home_screen.HomeScreen(),
