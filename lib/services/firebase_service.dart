@@ -316,6 +316,104 @@ class FirebaseService {
   }
 
   // =========================
+  // CHANGE PASSWORD
+  // =========================
+  static Future<Map<String, dynamic>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    try {
+      if (currentPassword == newPassword) {
+        return {
+          'success': false,
+          'error': 'New password must be different from current password',
+          'code': 'same-password',
+        };
+      }
+      final user = _auth.currentUser;
+
+      if (user == null) {
+        return {
+          'success': false,
+          'error': 'No user is currently signed in',
+          'code': 'no-user',
+        };
+      }
+
+      // Step 1: Reauthenticate user
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: currentPassword,
+      );
+
+      try {
+        await user.reauthenticateWithCredential(credential);
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
+          return {
+            'success': false,
+            'error': 'Current password is incorrect',
+            'code': 'wrong-password',
+          };
+        } else {
+          return {
+            'success': false,
+            'error': 'Authentication failed: ${e.message}',
+            'code': e.code,
+          };
+        }
+      }
+
+      // Step 2: Update password
+      await user.updatePassword(newPassword);
+
+      // Step 3: Log in Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'passwordLastChangedAt': FieldValue.serverTimestamp(),
+        'lastModifiedAt': FieldValue.serverTimestamp(),
+      });
+
+      return {
+        'success': true,
+        'message': 'Password changed successfully',
+      };
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Failed to change password';
+
+      switch (e.code) {
+        case 'weak-password':
+          errorMessage = 'The password is too weak.';
+          break;
+        case 'requires-recent-login':
+          errorMessage =
+              'Please sign out and sign in again before changing your password.';
+          break;
+        case 'network-request-failed':
+          errorMessage = 'Network error. Please check your connection.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many attempts. Please try again later.';
+          break;
+        default:
+          errorMessage = e.message ?? errorMessage;
+      }
+
+      return {
+        'success': false,
+        'error': errorMessage,
+        'code': e.code,
+      };
+    } catch (e) {
+      print('Unexpected error changing password: $e');
+      return {
+        'success': false,
+        'error': 'An unexpected error occurred. Please try again.',
+        'details': e.toString(),
+      };
+    }
+  }
+
+  // =========================
   // SIGN OUT
   // =========================
   static Future<void> signOut() async {
