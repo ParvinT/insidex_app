@@ -9,11 +9,9 @@ import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
-import '../../shared/widgets/social_login_button.dart';
 import '../../services/firebase_service.dart';
 import '../../providers/user_provider.dart';
 import '../../core/responsive/auth_scaffold.dart';
-import '../../core/responsive/context_ext.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

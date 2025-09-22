@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../feedback/feedback_dialog.dart';
+import '../change_password_screen.dart';
 
 class ProfileMenuSection extends StatelessWidget {
   const ProfileMenuSection({super.key});
@@ -11,6 +12,19 @@ class ProfileMenuSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _buildMenuItem(
+          context: context,
+          icon: Icons.lock_outline,
+          title: 'Change Password',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const ChangePasswordScreen(),
+              ),
+            );
+          },
+        ),
         _buildMenuItem(
           context: context,
           icon: Icons.settings,
