@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
+import '../../services/notification/notification_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _initAnimations();
     _startAnimations();
-    _checkAuthAndNavigate(); // sadece yönlendirme mantığı güncellendi
+    _checkAuthAndNavigate();
   }
 
   void _initAnimations() {
@@ -77,6 +78,11 @@ class _SplashScreenState extends State<SplashScreen>
   void _checkAuthAndNavigate() {
     Future.delayed(const Duration(seconds: 4), () async {
       if (!mounted) return;
+
+      final pendingPayload = NotificationService.pendingNavigationPayload;
+      if (pendingPayload != null) {
+        debugPrint('Pending notification found in splash');
+      }
 
       // Get Firebase user
       final user = FirebaseAuth.instance.currentUser;

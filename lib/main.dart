@@ -8,7 +8,8 @@ import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'services/audio_player_service.dart';
-import 'services/notification_service.dart';
+import 'services/notification/notification_service.dart';
+import 'services/notification/app_lifecycle_service.dart';
 import 'app.dart';
 
 void main() async {

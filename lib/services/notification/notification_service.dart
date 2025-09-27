@@ -10,6 +10,9 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../app.dart';
+import '../../core/routes/app_routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NotificationService {
   // Singleton pattern
@@ -28,6 +31,9 @@ class NotificationService {
   // Initialization status
   bool _isInitialized = false;
 
+  // Pending navigation
+  static String? pendingNavigationPayload;
+
   /// Initialize notification service
   Future<void> initialize() async {
     if (_isInitialized) return;
@@ -45,6 +51,8 @@ class NotificationService {
 
       // Initialize FCM
       await _initializeFCM();
+
+      await _syncPendingToken();
 
       _isInitialized = true;
       debugPrint('NotificationService initialized successfully');
@@ -127,22 +135,139 @@ class NotificationService {
   /// Save FCM token to Firestore
   Future<void> _saveTokenToFirestore(String token) async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    if (user == null) {
+      debugPrint('No user logged in, skipping token save');
+      return;
+    }
+
+    // Retry logic
+    int attempts = 0;
+    const maxAttempts = 3;
+    const retryDelay = Duration(seconds: 3);
+
+    while (attempts < maxAttempts) {
       try {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'fcmToken': token,
           'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+          'devicePlatform': Platform.operatingSystem,
         }, SetOptions(merge: true));
+
+        debugPrint('✅ FCM token saved successfully (attempt ${attempts + 1})');
+        return;
       } catch (e) {
-        debugPrint('Error saving FCM token: $e');
+        attempts++;
+        debugPrint(
+            '❌ FCM token save failed (attempt $attempts/$maxAttempts): $e');
+
+        if (attempts >= maxAttempts) {
+          debugPrint('Failed to save token after $maxAttempts attempts');
+
+          await _saveTokenLocally(token);
+          break;
+        }
+
+        debugPrint('Retrying in ${retryDelay.inSeconds} seconds...');
+        await Future.delayed(retryDelay);
       }
+    }
+  }
+
+  Future<void> _saveTokenLocally(String token) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('pending_fcm_token', token);
+      await prefs.setBool('has_pending_token', true);
+      debugPrint('💾 Token saved locally for later sync');
+    } catch (e) {
+      debugPrint('Even local save failed: $e');
+    }
+  }
+
+// YENİ METOD EKLE (app başlangıcında pending token'ı sync et):
+  Future<void> _syncPendingToken() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final hasPending = prefs.getBool('has_pending_token') ?? false;
+
+      if (hasPending) {
+        final pendingToken = prefs.getString('pending_fcm_token');
+        if (pendingToken != null) {
+          debugPrint('📤 Found pending token, syncing to Firebase...');
+          await _saveTokenToFirestore(pendingToken);
+
+          // Başarılıysa local'den sil
+          await prefs.remove('has_pending_token');
+          await prefs.remove('pending_fcm_token');
+          debugPrint('✅ Pending token synced successfully');
+        }
+      }
+    } catch (e) {
+      debugPrint('Error syncing pending token: $e');
     }
   }
 
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
     debugPrint('Notification tapped: ${response.payload}');
-    // TODO: Navigate based on payload if needed
+
+    final context = InsidexApp.navigatorKey.currentContext;
+
+    if (context == null) {
+      pendingNavigationPayload = response.payload;
+      debugPrint('⚠️ Context not ready, saved payload for later navigation');
+      return;
+    }
+
+    debugPrint('✅ Context ready, navigating now');
+    _performNavigation(context, response.payload);
+  }
+
+  void _performNavigation(BuildContext context, String? payload) {
+    debugPrint('Performing navigation with payload: $payload');
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (!context.mounted) return;
+
+      if (payload == 'daily_reminder') {
+        debugPrint('Navigating to home (daily reminder)');
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRoutes.home,
+          (route) => false,
+        );
+      } else if (payload == 'test') {
+        debugPrint('Navigating to home (test notification)');
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRoutes.home,
+          (route) => false,
+        );
+      } else if (payload != null && payload.startsWith('session:')) {
+        // Örnek: Belirli bir session'a git
+        final sessionId = payload.replaceFirst('session:', '');
+        debugPrint('Navigating to session: $sessionId');
+        Navigator.of(context).pushNamed(
+          AppRoutes.sessionDetail,
+          arguments: {'sessionId': sessionId},
+        );
+      } else {
+        // Default: Ana sayfaya git
+        debugPrint('Navigating to home (default)');
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          AppRoutes.home,
+          (route) => false,
+        );
+      }
+    });
+  }
+
+  static void checkPendingNavigation(BuildContext context) {
+    if (pendingNavigationPayload != null) {
+      final payload = pendingNavigationPayload;
+      pendingNavigationPayload = null; // Temizle
+
+      debugPrint('📍 Found pending navigation, executing now...');
+      NotificationService()._performNavigation(context, payload);
+    }
   }
 
   /// Handle foreground FCM message
@@ -354,6 +479,7 @@ class NotificationService {
         body,
         scheduledDate,
         details,
+        payload: 'daily_reminder',
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,

@@ -11,7 +11,7 @@ import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
-import '../../services/notification_service.dart';
+import '../../services/notification/notification_service.dart';
 import 'package:flutter/foundation.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -51,6 +51,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _checkNotificationPermission();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          NotificationService.checkPendingNavigation(context);
+        }
+      });
+    });
   }
 
   // Notification permission kontrolü
