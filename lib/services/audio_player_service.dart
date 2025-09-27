@@ -1,5 +1,8 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart';
+import 'package:audio_session/audio_session.dart';
 
 /// Single-responsibility audio service.
 /// - Single AudioPlayer instance (prevents overlapping sounds)
@@ -26,7 +29,13 @@ class AudioPlayerService {
   Stream<int?> get sleepTimer => _sleepTimerCtrl.stream; // minutes or null
 
   Future<void> initialize() async {
-    await _player.setVolume(0.7);
+    await _player.setVolume(0.9);
+    await _player.setAndroidAudioAttributes(
+      const AndroidAudioAttributes(
+        contentType: AndroidAudioContentType.music,
+        usage: AndroidAudioUsage.media,
+      ),
+    );
   }
 
   Future<void> setVolume(double value) async =>
@@ -46,11 +55,24 @@ class AudioPlayerService {
 
     Duration? lastResolvedDuration;
 
-    for (int attempt = 0; attempt < 2; attempt++) {
+    for (int attempt = 0; attempt < 3; attempt++) {
       if (token != _loadToken) return lastResolvedDuration;
       try {
-        // setUrl resolves with the media duration (may be null for live/unknown)
-        lastResolvedDuration = await _player.setUrl(url);
+        // ÖNEMLİ: setUrl yerine LockCachingAudioSource kullan
+        final audioSource = LockCachingAudioSource(
+          Uri.parse(url),
+          tag: {
+            'title': title ?? 'Unknown',
+            'artist': artist ?? 'INSIDEX',
+          },
+        );
+
+        // AudioSource ile yükle (daha güvenli)
+        lastResolvedDuration = await _player.setAudioSource(
+          audioSource,
+          preload: true, // Ön yükleme yap
+          initialPosition: Duration.zero,
+        );
 
         if (token != _loadToken) return lastResolvedDuration;
         await _player.play();
@@ -63,14 +85,15 @@ class AudioPlayerService {
             msg.contains('connection') ||
             msg.contains('reset') ||
             msg.contains('timed');
-        if (attempt == 0 && transient) {
-          await Future.delayed(const Duration(milliseconds: 350));
+        if (attempt < 2) {
+          await Future.delayed(const Duration(seconds: 1));
           continue; // retry once
         }
         rethrow;
-      } catch (_) {
-        if (attempt == 0) {
-          await Future.delayed(const Duration(milliseconds: 350));
+      } catch (e) {
+        print('General error attempt ${attempt + 1}: $e');
+        if (attempt < 2) {
+          await Future.delayed(const Duration(seconds: 1));
           continue;
         }
         rethrow;

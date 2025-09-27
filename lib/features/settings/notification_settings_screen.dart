@@ -17,17 +17,13 @@ class NotificationSettingsScreen extends StatefulWidget {
 
 class _NotificationSettingsScreenState
     extends State<NotificationSettingsScreen> {
-  // Loading states
+  // Loading state
   bool _isLoading = true;
-  bool _isSaving = false;
 
   // Notification settings
   bool _notificationsEnabled = false;
-  bool _dailyReminder = true;
+  bool _dailyReminder = false;
   TimeOfDay _reminderTime = const TimeOfDay(hour: 20, minute: 0);
-  bool _sessionNotifications = true;
-  bool _achievementNotifications = true;
-  bool _marketingNotifications = false;
 
   @override
   void initState() {
@@ -37,32 +33,40 @@ class _NotificationSettingsScreenState
 
   Future<void> _loadSettings() async {
     try {
-      // Check system notification permission
-      final enabled = await NotificationService().areNotificationsEnabled();
-
-      // Load user preferences
+      // Get saved settings from Firebase
       final settings = await NotificationService().getNotificationSettings();
+
+      debugPrint('Loaded settings from service: $settings');
 
       // Parse reminder time
       final timeStr = settings['reminderTime'] ?? '20:00';
+      debugPrint('Parsing time string: $timeStr');
+
       final parts = timeStr.split(':');
       final hour = int.tryParse(parts[0]) ?? 20;
       final minute = parts.length > 1 ? (int.tryParse(parts[1]) ?? 0) : 0;
 
+      debugPrint('Parsed time - Hour: $hour, Minute: $minute');
+
       if (mounted) {
         setState(() {
-          _notificationsEnabled = enabled;
-          _dailyReminder = settings['dailyReminder'] ?? true;
+          _notificationsEnabled = settings['enabled'] ?? false;
+          _dailyReminder = settings['dailyReminder'] ?? false;
           _reminderTime = TimeOfDay(hour: hour, minute: minute);
-          _sessionNotifications = settings['sessionNotifications'] ?? true;
-          _achievementNotifications =
-              settings['achievementNotifications'] ?? true;
-          _marketingNotifications = settings['marketingNotifications'] ?? false;
           _isLoading = false;
         });
+
+        debugPrint(
+            'State updated - Reminder time: ${_reminderTime.hour}:${_reminderTime.minute}');
+
+        // If both notifications and daily reminder are enabled, schedule it
+        if (_notificationsEnabled && _dailyReminder) {
+          await _scheduleDailyReminder();
+          debugPrint('Daily reminder scheduled on load');
+        }
       }
     } catch (e) {
-      print('Error loading notification settings: $e');
+      debugPrint('Error loading notification settings: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -71,61 +75,156 @@ class _NotificationSettingsScreenState
 
   Future<void> _handleMainToggle(bool value) async {
     if (value) {
-      // Request permissions
-      final granted = await NotificationService().requestPermissions();
+      // Request system permissions if needed
+      final systemEnabled =
+          await NotificationService().areNotificationsEnabled();
 
-      if (granted) {
-        setState(() => _notificationsEnabled = true);
+      if (!systemEnabled) {
+        // Need to request system permission first
+        final granted = await NotificationService().requestPermissions();
 
-        // Show success notification
-        await NotificationService().showNotification(
-          title: 'Notifications Enabled! 🎉',
-          body: 'You will now receive INSIDEX notifications',
-        );
+        if (!granted) {
+          // Permission denied at system level
+          setState(() => _notificationsEnabled = false);
 
-        // Schedule daily reminder if enabled
-        if (_dailyReminder) {
-          await _scheduleDailyReminder();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Please enable notifications in system settings',
+                  style: GoogleFonts.inter(fontSize: 14.sp),
+                ),
+                backgroundColor: Colors.grey[800],
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+              ),
+            );
+          }
+          return;
         }
+      }
 
-        // Save settings
-        await _saveSettings();
+      // System permission granted, enable notifications
+      setState(() => _notificationsEnabled = true);
 
-        _showSnackBar('Notifications enabled successfully!', isSuccess: true);
-      } else {
-        setState(() => _notificationsEnabled = false);
-        _showSnackBar('Please enable notifications in system settings',
-            isWarning: true);
+      // Save to Firebase with current dailyReminder state
+      final settings = {
+        'enabled': true,
+        'dailyReminder': _dailyReminder,
+        'reminderTime':
+            '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}',
+      };
+
+      debugPrint('Saving main toggle ON: $settings');
+      await NotificationService().saveNotificationSettings(settings);
+
+      // Schedule daily reminder if it was enabled
+      if (_dailyReminder) {
+        await _scheduleDailyReminder();
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Notifications enabled successfully',
+              style: GoogleFonts.inter(fontSize: 14.sp),
+            ),
+            backgroundColor: AppColors.textPrimary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+          ),
+        );
       }
     } else {
-      // Disable all notifications
-      setState(() => _notificationsEnabled = false);
+      // Disable notifications - ALSO DISABLE DAILY REMINDER
+      setState(() {
+        _notificationsEnabled = false;
+        _dailyReminder = false; // ÖNEMLİ: Daily reminder'ı da kapat
+      });
+
+      // Cancel all scheduled notifications
       await NotificationService().cancelAllNotifications();
-      await _saveSettings();
-      _showSnackBar('Notifications disabled');
+
+      // Save to Firebase - dailyReminder is now false
+      final settings = {
+        'enabled': false,
+        'dailyReminder': false, // KAPATILDI
+        'reminderTime':
+            '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}',
+      };
+
+      debugPrint('Saving main toggle OFF: $settings');
+      await NotificationService().saveNotificationSettings(settings);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'All notifications disabled',
+              style: GoogleFonts.inter(fontSize: 14.sp),
+            ),
+            backgroundColor: Colors.grey[800],
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+          ),
+        );
+      }
     }
   }
 
   Future<void> _handleDailyReminderToggle(bool value) async {
-    if (!_notificationsEnabled) {
-      _showSnackBar('Please enable notifications first', isWarning: true);
-      return;
-    }
+    if (!_notificationsEnabled) return;
 
+    // Update state first
     setState(() => _dailyReminder = value);
 
+    // Directly save with the new value
+    final settings = {
+      'enabled': _notificationsEnabled,
+      'dailyReminder': value, // Use the new value directly
+      'reminderTime':
+          '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}',
+    };
+
+    debugPrint('Saving daily reminder toggle: $settings');
+    await NotificationService().saveNotificationSettings(settings);
+
     if (value) {
+      // Schedule daily reminder
       await _scheduleDailyReminder();
-      _showSnackBar('Daily reminder enabled');
     } else {
+      // Cancel daily reminder
       await NotificationService().cancelDailyReminder();
-      _showSnackBar('Daily reminder disabled');
     }
 
-    await _saveSettings();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            value ? 'Daily reminder enabled' : 'Daily reminder disabled',
+            style: GoogleFonts.inter(fontSize: 14.sp),
+          ),
+          backgroundColor: AppColors.textPrimary,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _scheduleDailyReminder() async {
+    debugPrint(
+        'Scheduling daily reminder for ${_reminderTime.hour}:${_reminderTime.minute}');
+
     await NotificationService().scheduleDailyReminder(
       time: _reminderTime,
       title: 'Time for your daily session 🧘',
@@ -134,10 +233,7 @@ class _NotificationSettingsScreenState
   }
 
   Future<void> _selectReminderTime() async {
-    if (!_notificationsEnabled || !_dailyReminder) {
-      _showSnackBar('Enable daily reminder first', isWarning: true);
-      return;
-    }
+    if (!_notificationsEnabled || !_dailyReminder) return;
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -145,10 +241,17 @@ class _NotificationSettingsScreenState
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: AppColors.textPrimary,
               onPrimary: Colors.white,
+              surface: Colors.white,
               onSurface: AppColors.textPrimary,
+            ),
+            dialogBackgroundColor: Colors.white,
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.textPrimary,
+              ),
             ),
           ),
           child: child!,
@@ -157,57 +260,85 @@ class _NotificationSettingsScreenState
     );
 
     if (picked != null && picked != _reminderTime) {
+      // Update state
       setState(() => _reminderTime = picked);
-      await _scheduleDailyReminder();
-      await _saveSettings();
-      _showSnackBar('Reminder time updated to ${picked.format(context)}',
-          isSuccess: true);
+
+      // Format time string properly
+      final formattedTime =
+          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+
+      // Save to Firebase
+      final settings = {
+        'enabled': _notificationsEnabled,
+        'dailyReminder': _dailyReminder,
+        'reminderTime': formattedTime,
+      };
+
+      debugPrint('Saving new reminder time: $formattedTime');
+      await NotificationService().saveNotificationSettings(settings);
+
+      // Reschedule with new time
+      await NotificationService().scheduleDailyReminder(
+        time: picked,
+        title: 'Time for your daily session 🧘',
+        body: 'Take a moment to relax and recharge with INSIDEX',
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Reminder time updated to ${picked.format(context)}',
+              style: GoogleFonts.inter(fontSize: 14.sp),
+            ),
+            backgroundColor: AppColors.textPrimary,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+          ),
+        );
+      }
     }
   }
 
   Future<void> _saveSettings() async {
-    setState(() => _isSaving = true);
-
     try {
-      await NotificationService().saveNotificationSettings({
+      // Prepare settings object
+      final settings = {
         'enabled': _notificationsEnabled,
         'dailyReminder': _dailyReminder,
-        'reminderTime': '${_reminderTime.hour}:${_reminderTime.minute}',
-        'sessionNotifications': _sessionNotifications,
-        'achievementNotifications': _achievementNotifications,
-        'marketingNotifications': _marketingNotifications,
-      });
+        'reminderTime':
+            '${_reminderTime.hour.toString().padLeft(2, '0')}:${_reminderTime.minute.toString().padLeft(2, '0')}',
+      };
+
+      debugPrint('Saving settings to Firebase: $settings');
+
+      await NotificationService().saveNotificationSettings(settings);
     } catch (e) {
-      print('Error saving settings: $e');
+      debugPrint('Error saving settings: $e');
     }
-
-    setState(() => _isSaving = false);
-  }
-
-  void _showSnackBar(String message,
-      {bool isSuccess = false, bool isWarning = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isSuccess
-            ? Colors.green
-            : isWarning
-                ? Colors.orange
-                : null,
-      ),
-    );
   }
 
   Future<void> _testNotification() async {
     if (!_notificationsEnabled) {
-      _showSnackBar('Please enable notifications first', isWarning: true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Please enable notifications first',
+            style: GoogleFonts.inter(fontSize: 14.sp),
+          ),
+          backgroundColor: Colors.grey[800],
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+        ),
+      );
       return;
     }
 
-    await NotificationService().showNotification(
-      title: 'Test Notification 🔔',
-      body: 'This is a test notification from INSIDEX',
-    );
+    await NotificationService().showTestNotification();
   }
 
   @override
@@ -215,47 +346,31 @@ class _NotificationSettingsScreenState
     // Responsive helpers
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
-    final horizontalPadding = isDesktop ? 32.w : (isTablet ? 28.w : 24.w);
+    final horizontalPadding = isDesktop ? 40.w : (isTablet ? 32.w : 20.w);
+    final maxWidth = isDesktop ? 800.0 : (isTablet ? 600.0 : double.infinity);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
-        toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
+        centerTitle: true,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
             color: AppColors.textPrimary,
-            size: 24.sp.clamp(24.0, 26.0),
+            size: 24.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           'Notifications',
           style: GoogleFonts.inter(
-            fontSize: 24.sp.clamp(24.0, 28.0),
-            fontWeight: FontWeight.w700,
+            fontSize: isTablet ? 22.sp : 20.sp,
+            fontWeight: FontWeight.w600,
             color: AppColors.textPrimary,
           ),
         ),
-        centerTitle: true,
-        actions: [
-          if (_isSaving)
-            Center(
-              child: Padding(
-                padding: EdgeInsets.only(right: 16.w),
-                child: SizedBox(
-                  width: 20.w,
-                  height: 20.w,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-            ),
-        ],
       ),
       body: _isLoading
           ? const Center(
@@ -263,71 +378,87 @@ class _NotificationSettingsScreenState
                 color: AppColors.textPrimary,
               ),
             )
-          : SafeArea(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 20.h),
+          : SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: maxWidth),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 24.h),
 
-                    // Main notification toggle
-                    _buildMainToggle(),
+                      // Main toggle card
+                      _buildMainToggleCard(),
 
-                    SizedBox(height: 32.h),
+                      // Show other options only if notifications are enabled
+                      if (_notificationsEnabled) ...[
+                        SizedBox(height: 32.h),
 
-                    // Notification Types Section
-                    _buildSectionHeader('Notification Types'),
-                    SizedBox(height: 12.h),
-                    _buildNotificationTypes(),
+                        // Daily Reminder Section
+                        Text(
+                          'Reminder Settings',
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 18.sp : 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 16.h),
 
-                    SizedBox(height: 32.h),
+                        _buildDailyReminderCard(),
 
-                    // Schedule Section
-                    _buildSectionHeader('Schedule'),
-                    SizedBox(height: 12.h),
-                    _buildScheduleSection(),
+                        // Show time selector if daily reminder is enabled
+                        if (_dailyReminder) ...[
+                          SizedBox(height: 16.h),
+                          _buildTimeSelector(),
+                        ],
 
-                    SizedBox(height: 32.h),
+                        SizedBox(height: 32.h),
 
-                    // Test Section
-                    _buildTestSection(),
+                        // Test notification button
+                        _buildTestButton(),
+                      ],
 
-                    SizedBox(height: 40.h),
-                  ],
+                      SizedBox(height: 40.h),
+                    ],
+                  ),
                 ),
               ),
             ),
     );
   }
 
-  Widget _buildMainToggle() {
+  Widget _buildMainToggleCard() {
+    final isTablet = context.isTablet;
+
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: _notificationsEnabled
-              ? AppColors.primaryGold
+              ? AppColors.primaryGold.withOpacity(0.3)
               : AppColors.greyBorder,
-          width: _notificationsEnabled ? 2 : 1,
+          width: _notificationsEnabled ? 1.5 : 1,
         ),
-        boxShadow: _notificationsEnabled
-            ? [
-                BoxShadow(
-                  color: AppColors.primaryGold.withOpacity(0.1),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
+        boxShadow: [
+          BoxShadow(
+            color: _notificationsEnabled
+                ? AppColors.primaryGold.withOpacity(0.08)
+                : Colors.black.withOpacity(0.03),
+            blurRadius: _notificationsEnabled ? 20 : 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
+          // Icon
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: isTablet ? 56.w : 48.w,
+            height: isTablet ? 56.w : 48.w,
             decoration: BoxDecoration(
               color: _notificationsEnabled
                   ? AppColors.primaryGold.withOpacity(0.1)
@@ -341,10 +472,12 @@ class _NotificationSettingsScreenState
               color: _notificationsEnabled
                   ? AppColors.primaryGold
                   : AppColors.textSecondary,
-              size: 24.sp,
+              size: isTablet ? 28.sp : 24.sp,
             ),
           ),
           SizedBox(width: 16.w),
+
+          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,7 +485,7 @@ class _NotificationSettingsScreenState
                 Text(
                   'Enable Notifications',
                   style: GoogleFonts.inter(
-                    fontSize: 16.sp,
+                    fontSize: isTablet ? 18.sp : 16.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -360,247 +493,195 @@ class _NotificationSettingsScreenState
                 SizedBox(height: 4.h),
                 Text(
                   _notificationsEnabled
-                      ? 'Receiving all notifications'
+                      ? 'You will receive notifications'
                       : 'Turn on to receive notifications',
                   style: GoogleFonts.inter(
-                    fontSize: 14.sp,
+                    fontSize: isTablet ? 14.sp : 13.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
+
+          // Switch
           Switch(
             value: _notificationsEnabled,
             onChanged: _handleMainToggle,
             activeColor: AppColors.primaryGold,
+            activeTrackColor: AppColors.primaryGold.withOpacity(0.3),
+            inactiveThumbColor: Colors.grey[400],
+            inactiveTrackColor: Colors.grey[300],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
-      style: GoogleFonts.inter(
-        fontSize: 18.sp,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
+  Widget _buildDailyReminderCard() {
+    final isTablet = context.isTablet;
 
-  Widget _buildNotificationTypes() {
     return Container(
+      padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.greyBorder),
       ),
-      child: Column(
-        children: [
-          _buildSwitchTile(
-            icon: Icons.wb_sunny_outlined,
-            title: 'Daily Reminders',
-            subtitle: 'Get reminded for your daily session',
-            value: _dailyReminder,
-            enabled: _notificationsEnabled,
-            onChanged: _handleDailyReminderToggle,
-          ),
-          _buildDivider(),
-          _buildSwitchTile(
-            icon: Icons.check_circle_outline,
-            title: 'Session Notifications',
-            subtitle: 'Notifications when you complete sessions',
-            value: _sessionNotifications,
-            enabled: _notificationsEnabled,
-            onChanged: (value) async {
-              setState(() => _sessionNotifications = value);
-              await _saveSettings();
-            },
-          ),
-          _buildDivider(),
-          _buildSwitchTile(
-            icon: Icons.emoji_events_outlined,
-            title: 'Achievements',
-            subtitle: 'Celebrate your milestones',
-            value: _achievementNotifications,
-            enabled: _notificationsEnabled,
-            onChanged: (value) async {
-              setState(() => _achievementNotifications = value);
-              await _saveSettings();
-            },
-          ),
-          _buildDivider(),
-          _buildSwitchTile(
-            icon: Icons.campaign_outlined,
-            title: 'Updates & Offers',
-            subtitle: 'New content and special offers',
-            value: _marketingNotifications,
-            enabled: _notificationsEnabled,
-            onChanged: (value) async {
-              setState(() => _marketingNotifications = value);
-              await _saveSettings();
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildScheduleSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
-      ),
-      child: ListTile(
-        enabled: _notificationsEnabled && _dailyReminder,
-        onTap: _selectReminderTime,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 20.w,
-          vertical: 8.h,
-        ),
-        leading: Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: (_notificationsEnabled && _dailyReminder)
-                ? AppColors.primaryGold.withOpacity(0.1)
-                : AppColors.greyLight,
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-          child: Icon(
-            Icons.access_time,
-            color: (_notificationsEnabled && _dailyReminder)
-                ? AppColors.primaryGold
-                : AppColors.textSecondary,
-            size: 20.sp,
-          ),
-        ),
-        title: Text(
-          'Daily Reminder Time',
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: (_notificationsEnabled && _dailyReminder)
-                ? AppColors.textPrimary
-                : AppColors.textSecondary,
-          ),
-        ),
-        subtitle: Text(
-          _reminderTime.format(context),
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            color: AppColors.textSecondary,
-          ),
-        ),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: AppColors.textSecondary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTestSection() {
-    return Center(
-      child: TextButton.icon(
-        onPressed: _notificationsEnabled ? _testNotification : null,
-        icon: Icon(
-          Icons.bug_report_outlined,
-          color: _notificationsEnabled
-              ? AppColors.textPrimary
-              : AppColors.textSecondary,
-        ),
-        label: Text(
-          'Send Test Notification',
-          style: GoogleFonts.inter(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: _notificationsEnabled
-                ? AppColors.textPrimary
-                : AppColors.textSecondary,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSwitchTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required bool value,
-    required bool enabled,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Row(
         children: [
+          // Icon
           Container(
-            width: 40.w,
-            height: 40.w,
+            width: isTablet ? 44.w : 40.w,
+            height: isTablet ? 44.w : 40.w,
             decoration: BoxDecoration(
-              color: enabled
+              color: _dailyReminder
                   ? AppColors.primaryGold.withOpacity(0.1)
                   : AppColors.greyLight,
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Icon(
-              icon,
-              color: enabled ? AppColors.primaryGold : AppColors.textSecondary,
-              size: 20.sp,
+              Icons.wb_sunny_outlined,
+              color: _dailyReminder
+                  ? AppColors.primaryGold
+                  : AppColors.textSecondary,
+              size: isTablet ? 24.sp : 20.sp,
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 12.w),
+
+          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  'Daily Reminders',
                   style: GoogleFonts.inter(
-                    fontSize: 15.sp,
+                    fontSize: isTablet ? 16.sp : 15.sp,
                     fontWeight: FontWeight.w500,
-                    color: enabled
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  subtitle,
+                  'Get reminded for your daily session',
                   style: GoogleFonts.inter(
-                    fontSize: 13.sp,
+                    fontSize: isTablet ? 13.sp : 12.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
+
+          // Switch
           Switch(
-            value: value && enabled,
-            onChanged: enabled ? onChanged : null,
+            value: _dailyReminder,
+            onChanged:
+                _notificationsEnabled ? _handleDailyReminderToggle : null,
             activeColor: AppColors.primaryGold,
-            inactiveThumbColor: AppColors.textSecondary,
-            inactiveTrackColor: AppColors.greyLight,
+            activeTrackColor: AppColors.primaryGold.withOpacity(0.3),
+            inactiveThumbColor: Colors.grey[400],
+            inactiveTrackColor: Colors.grey[300],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDivider() {
-    return Padding(
-      padding: EdgeInsets.only(left: 76.w),
-      child: const Divider(
-        height: 1,
-        thickness: 1,
-        color: AppColors.greyBorder,
+  Widget _buildTimeSelector() {
+    final isTablet = context.isTablet;
+
+    return InkWell(
+      onTap: _selectReminderTime,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: AppColors.greyBorder),
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: isTablet ? 44.w : 40.w,
+              height: isTablet ? 44.w : 40.w,
+              decoration: BoxDecoration(
+                color: AppColors.greyLight,
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Icon(
+                Icons.access_time,
+                color: AppColors.textPrimary,
+                size: isTablet ? 24.sp : 20.sp,
+              ),
+            ),
+            SizedBox(width: 12.w),
+
+            // Text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Reminder Time',
+                    style: GoogleFonts.inter(
+                      fontSize: isTablet ? 16.sp : 15.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Text(
+                    _reminderTime.format(context),
+                    style: GoogleFonts.inter(
+                      fontSize: isTablet ? 13.sp : 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Arrow
+            Icon(
+              Icons.chevron_right,
+              color: AppColors.textSecondary,
+              size: 24.sp,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTestButton() {
+    final isTablet = context.isTablet;
+
+    return Center(
+      child: TextButton.icon(
+        onPressed: _testNotification,
+        icon: Icon(
+          Icons.notifications_outlined,
+          size: isTablet ? 20.sp : 18.sp,
+        ),
+        label: Text(
+          'Send Test Notification',
+          style: GoogleFonts.inter(
+            fontSize: isTablet ? 15.sp : 14.sp,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.textPrimary,
+          padding: EdgeInsets.symmetric(
+            horizontal: 24.w,
+            vertical: 12.h,
+          ),
+        ),
       ),
     );
   }

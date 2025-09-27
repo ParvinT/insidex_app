@@ -126,6 +126,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               final granted = await NotificationService().requestPermissions();
 
               if (granted) {
+                // Save initial settings to Firebase
+                await NotificationService().saveNotificationSettings({
+                  'enabled': true,
+                  'dailyReminder': true, // Default olarak açık
+                  'reminderTime': '20:00',
+                });
+
                 // Schedule default daily reminder
                 await NotificationService().scheduleDailyReminder(
                   time: const TimeOfDay(hour: 20, minute: 0),

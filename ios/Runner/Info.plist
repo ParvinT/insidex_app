@@ -47,6 +47,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>NSUserNotificationUsageDescription</key>
+	<string>INSIDEX needs notification permission to send you daily reminders and session updates</string>
 	
 	<!-- AUDIO PLAYER PERMISSIONS -->
 	<key>UIBackgroundModes</key>

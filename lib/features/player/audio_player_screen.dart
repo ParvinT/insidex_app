@@ -11,7 +11,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marquee/marquee.dart';
 import 'widgets/session_info_modal.dart';
 import '../../services/listening_tracker_service.dart';
-import '../../services/notification_service.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -262,16 +261,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _playerStateSub = _audioService.playerState.listen((state) {
       if (!mounted) return;
       if (state.processingState == ProcessingState.completed) {
-        if (_currentTrack == 'subliminal') {
-          // Subliminal tamamlandı - full session complete
-          NotificationService().showSessionCompleteNotification(
-            sessionTitle: _session['title'] ?? 'Session',
-            durationMinutes: _totalDuration.inMinutes,
-          );
-
-          // Check for streak
-          _checkAndShowStreakNotification();
-        }
+        if (_currentTrack == 'subliminal') {}
         if (_isLooping) {
           _audioService.seek(Duration.zero);
           _audioService.play();
@@ -422,47 +412,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     await _audioService.seek(
       newPos < total ? newPos : total - const Duration(milliseconds: 500),
     );
-  }
-
-  Future<void> _checkAndShowStreakNotification() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (userDoc.exists) {
-        final data = userDoc.data()!;
-        final lastSessionDate = data['lastSessionDate'] as String?;
-        final today = DateTime.now().toIso8601String().split('T')[0];
-
-        if (lastSessionDate != null && lastSessionDate != today) {
-          // Yeni gün, streak kontrolü yap
-          final currentStreak = (data['currentStreak'] ?? 0) + 1;
-
-          // Update streak in Firestore
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(user.uid)
-              .update({
-            'currentStreak': currentStreak,
-            'lastSessionDate': today,
-          });
-
-          // Show streak notification for milestones
-          if ([3, 7, 14, 30].contains(currentStreak)) {
-            await NotificationService().showStreakNotification(
-              streakDays: currentStreak,
-            );
-          }
-        }
-      }
-    } catch (e) {
-      print('Error checking streak: $e');
-    }
   }
 
   @override

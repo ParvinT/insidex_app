@@ -23,7 +23,7 @@ class InsidexApp extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
-              themeMode: ThemeMode.light, // Geçici olarak light'a zorlanmış
+              themeMode: ThemeMode.light, 
               initialRoute: AppRoutes.splash,
               routes: AppRoutes.routes,
               builder: (context, child) => ResponsiveBreakpoints.builder(

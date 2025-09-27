@@ -1,6 +1,7 @@
 // lib/services/notification_service.dart
 
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,7 +10,6 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 
 class NotificationService {
   // Singleton pattern
@@ -22,10 +22,8 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   final FirebaseMessaging _fcm = FirebaseMessaging.instance;
 
-  // Notification IDs
+  // Notification ID for daily reminder
   static const int dailyReminderId = 100;
-  static const int sessionCompleteId = 200;
-  static const int achievementId = 300;
 
   // Initialization status
   bool _isInitialized = false;
@@ -35,8 +33,12 @@ class NotificationService {
     if (_isInitialized) return;
 
     try {
-      // Initialize timezone for scheduled notifications
+      // Initialize timezone
       tz.initializeTimeZones();
+
+      // Set local timezone (önemli!)
+      final String timeZoneName = await _findLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
 
       // Initialize local notifications
       await _initializeLocalNotifications();
@@ -45,9 +47,9 @@ class NotificationService {
       await _initializeFCM();
 
       _isInitialized = true;
-      print('NotificationService initialized successfully');
+      debugPrint('NotificationService initialized successfully');
     } catch (e) {
-      print('Error initializing NotificationService: $e');
+      debugPrint('Error initializing NotificationService: $e');
     }
   }
 
@@ -59,7 +61,7 @@ class NotificationService {
 
     // iOS settings
     final iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: false, // We'll request manually
+      requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
       onDidReceiveLocalNotification: (id, title, body, payload) async {
@@ -78,50 +80,30 @@ class NotificationService {
       onDidReceiveNotificationResponse: _onNotificationTapped,
     );
 
-    // Create notification channels for Android
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      await _createNotificationChannels();
+    // Create Android notification channel
+    if (!kIsWeb && Platform.isAndroid) {
+      await _createNotificationChannel();
     }
   }
 
-  /// Create Android notification channels
-  Future<void> _createNotificationChannels() async {
-    final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+  /// Create Android notification channel
+  Future<void> _createNotificationChannel() async {
+    final androidPlugin =
         _localNotifications.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidPlugin == null) return;
 
-    // Daily reminder channel
     const dailyChannel = AndroidNotificationChannel(
       'daily_reminder',
       'Daily Reminders',
-      description: 'Daily session reminders',
+      description: 'Daily session reminders from INSIDEX',
       importance: Importance.high,
       playSound: true,
       enableVibration: true,
     );
 
-    // Session channel
-    const sessionChannel = AndroidNotificationChannel(
-      'session_notifications',
-      'Session Notifications',
-      description: 'Session related notifications',
-      importance: Importance.high,
-    );
-
-    // Achievement channel
-    const achievementChannel = AndroidNotificationChannel(
-      'achievements',
-      'Achievements',
-      description: 'Achievement notifications',
-      importance: Importance.high,
-      playSound: true,
-    );
-
     await androidPlugin.createNotificationChannel(dailyChannel);
-    await androidPlugin.createNotificationChannel(sessionChannel);
-    await androidPlugin.createNotificationChannel(achievementChannel);
   }
 
   /// Initialize Firebase Cloud Messaging
@@ -130,7 +112,7 @@ class NotificationService {
     final token = await _fcm.getToken();
     if (token != null) {
       await _saveTokenToFirestore(token);
-      print('FCM Token: $token');
+      debugPrint('FCM Token saved');
     }
 
     // Listen for token refresh
@@ -147,29 +129,25 @@ class NotificationService {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .update({
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
           'fcmToken': token,
           'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
-        });
+        }, SetOptions(merge: true));
       } catch (e) {
-        // If update fails, user document might not exist yet
-        print('Error saving FCM token: $e');
+        debugPrint('Error saving FCM token: $e');
       }
     }
   }
 
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
-    print('Notification tapped: ${response.payload}');
-    // TODO: Navigate based on payload
+    debugPrint('Notification tapped: ${response.payload}');
+    // TODO: Navigate based on payload if needed
   }
 
   /// Handle foreground FCM message
   void _handleForegroundMessage(RemoteMessage message) {
-    print('Foreground message: ${message.notification?.title}');
+    debugPrint('Foreground message: ${message.notification?.title}');
 
     // Show local notification
     if (message.notification != null) {
@@ -183,18 +161,18 @@ class NotificationService {
 
   /// Handle message when app is opened from notification
   void _handleMessageOpenedApp(RemoteMessage message) {
-    print('Message opened app: ${message.notification?.title}');
-    // TODO: Navigate based on message
+    debugPrint('Message opened app: ${message.notification?.title}');
+    // TODO: Navigate based on message if needed
   }
 
   /// Request notification permissions
   Future<bool> requestPermissions() async {
     if (kIsWeb) {
-      print('Notifications not supported on web');
+      debugPrint('Notifications not supported on web');
       return false;
     }
 
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    if (Platform.isIOS) {
       // iOS permissions
       final settings = await _fcm.requestPermission(
         alert: true,
@@ -203,9 +181,23 @@ class NotificationService {
         provisional: false,
       );
       return settings.authorizationStatus == AuthorizationStatus.authorized;
-    } else if (defaultTargetPlatform == TargetPlatform.android) {
-      // Android permissions (Android 13+)
+    } else if (Platform.isAndroid) {
+      // Android permissions
       final status = await Permission.notification.request();
+
+      // Android 12+ için exact alarm izni
+      // scheduleExactAlarm izni Android 12+ için otomatik kontrol edilir
+      try {
+        final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
+        if (!exactAlarmStatus.isGranted) {
+          debugPrint(
+              'Exact alarm permission not granted, will use inexact alarms');
+          // Kullanıcıya bilgi verilebilir ama zorunlu değil
+        }
+      } catch (e) {
+        debugPrint('Exact alarm permission check skipped: $e');
+      }
+
       return status.isGranted;
     }
 
@@ -214,14 +206,12 @@ class NotificationService {
 
   /// Check if notifications are enabled
   Future<bool> areNotificationsEnabled() async {
-    if (kIsWeb) {
-      return false;
-    }
+    if (kIsWeb) return false;
 
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
+    if (Platform.isIOS) {
       final settings = await _fcm.getNotificationSettings();
       return settings.authorizationStatus == AuthorizationStatus.authorized;
-    } else if (defaultTargetPlatform == TargetPlatform.android) {
+    } else if (Platform.isAndroid) {
       return await Permission.notification.isGranted;
     }
 
@@ -235,22 +225,22 @@ class NotificationService {
     String? payload,
   }) async {
     const androidDetails = AndroidNotificationDetails(
-      'default',
-      'Default',
-      channelDescription: 'Default notification channel',
+      'daily_reminder',
+      'Daily Reminders',
+      channelDescription: 'Daily session reminders from INSIDEX',
       importance: Importance.high,
       priority: Priority.high,
       showWhen: true,
       icon: '@mipmap/ic_launcher',
     );
 
-    final iosDetails = DarwinNotificationDetails(
+    const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
 
-    final details = NotificationDetails(
+    const details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
@@ -264,12 +254,56 @@ class NotificationService {
     );
   }
 
+  /// Find local timezone
+  Future<String> _findLocalTimezone() async {
+    // Default to UTC if we can't find the timezone
+    String timeZoneName = 'UTC';
+
+    try {
+      // Try to get the local timezone
+      timeZoneName = DateTime.now().timeZoneName;
+
+      // Common timezone mappings
+      final tzMap = {
+        'CST': 'America/Chicago',
+        'EST': 'America/New_York',
+        'PST': 'America/Los_Angeles',
+        'GMT': 'Europe/London',
+        'CET': 'Europe/Berlin',
+        'EET': 'Europe/Istanbul',
+        'JST': 'Asia/Tokyo',
+        'IST': 'Asia/Kolkata',
+      };
+
+      if (tzMap.containsKey(timeZoneName)) {
+        timeZoneName = tzMap[timeZoneName]!;
+      } else if (timeZoneName.length <= 3) {
+        // If it's a short timezone code, default to Istanbul for Turkey
+        timeZoneName = 'Europe/Istanbul';
+      }
+    } catch (e) {
+      debugPrint('Error finding timezone: $e');
+      timeZoneName = 'Europe/Istanbul'; // Default for Turkey
+    }
+
+    debugPrint('Using timezone: $timeZoneName');
+    return timeZoneName;
+  }
+
   /// Schedule daily reminder
   Future<void> scheduleDailyReminder({
     required TimeOfDay time,
     required String title,
     required String body,
   }) async {
+    // Check if notifications are enabled at all
+    final settings = await getNotificationSettings();
+    if (settings['enabled'] != true || settings['dailyReminder'] != true) {
+      debugPrint(
+          'Cannot schedule daily reminder: notifications or daily reminder disabled');
+      return;
+    }
+
     // Cancel existing daily reminder
     await _localNotifications.cancel(dailyReminderId);
 
@@ -284,151 +318,108 @@ class NotificationService {
       time.minute,
     );
 
+    // If the time has passed today, schedule for tomorrow
     if (scheduledDate.isBefore(now)) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
+      debugPrint('Time has passed today, scheduling for tomorrow');
     }
 
     const androidDetails = AndroidNotificationDetails(
       'daily_reminder',
       'Daily Reminders',
-      channelDescription: 'Daily session reminders',
+      channelDescription: 'Daily session reminders from INSIDEX',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
+      playSound: true,
+      enableVibration: true,
     );
 
-    final iosDetails = DarwinNotificationDetails(
+    const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
       presentSound: true,
     );
 
-    final details = NotificationDetails(
+    const details = NotificationDetails(
       android: androidDetails,
       iOS: iosDetails,
     );
 
-    await _localNotifications.zonedSchedule(
-      dailyReminderId,
-      title,
-      body,
-      scheduledDate,
-      details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
-    );
+    try {
+      // Try exact alarm first
+      await _localNotifications.zonedSchedule(
+        dailyReminderId,
+        title,
+        body,
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+      );
 
-    print('Daily reminder scheduled for ${time.hour}:${time.minute}');
+      debugPrint('=== Daily Reminder Scheduled (EXACT) ===');
+    } catch (e) {
+      if (e.toString().contains('exact_alarms_not_permitted')) {
+        // Fallback to inexact alarm
+        debugPrint('Exact alarm failed, trying inexact alarm...');
+
+        await _localNotifications.zonedSchedule(
+          dailyReminderId,
+          title,
+          body,
+          scheduledDate,
+          details,
+          androidScheduleMode:
+              AndroidScheduleMode.inexactAllowWhileIdle, // INEXACT
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time, // Repeat daily
+        );
+
+        debugPrint('=== Daily Reminder Scheduled (INEXACT) ===');
+        debugPrint(
+            'Note: Notification may arrive within 15 minutes of scheduled time');
+      } else {
+        // Re-throw other errors
+        throw e;
+      }
+    }
+
+    debugPrint('Current time: ${now.hour}:${now.minute}');
+    debugPrint(
+        'Scheduled for: ${scheduledDate.hour}:${scheduledDate.minute} on ${scheduledDate.day}/${scheduledDate.month}');
+    debugPrint('Will repeat daily at ${time.hour}:${time.minute}');
+    debugPrint('================================');
   }
 
   /// Cancel daily reminder
   Future<void> cancelDailyReminder() async {
     await _localNotifications.cancel(dailyReminderId);
+    debugPrint('Daily reminder cancelled');
   }
 
   /// Cancel all notifications
   Future<void> cancelAllNotifications() async {
     await _localNotifications.cancelAll();
+    debugPrint('All notifications cancelled');
   }
 
-  /// Show session complete notification
-  Future<void> showSessionCompleteNotification({
-    required String sessionTitle,
-    required int durationMinutes,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'session_notifications',
-      'Session Notifications',
-      channelDescription: 'Session related notifications',
-      importance: Importance.high,
-      priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
-      playSound: true,
-    );
-
-    final iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _localNotifications.show(
-      sessionCompleteId,
-      'Session Complete! 🎉',
-      'Great job! You completed "$sessionTitle" (${durationMinutes} min)',
-      details,
-      payload: 'session_complete',
-    );
-  }
-
-  /// Show achievement notification
-  Future<void> showAchievementNotification({
-    required String achievement,
-    required String description,
-  }) async {
-    const androidDetails = AndroidNotificationDetails(
-      'achievements',
-      'Achievements',
-      channelDescription: 'Achievement notifications',
-      importance: Importance.high,
-      priority: Priority.high,
-      playSound: true,
-      icon: '@mipmap/ic_launcher',
-    );
-
-    final iosDetails = DarwinNotificationDetails(
-      presentAlert: true,
-      presentBadge: true,
-      presentSound: true,
-    );
-
-    final details = NotificationDetails(
-      android: androidDetails,
-      iOS: iosDetails,
-    );
-
-    await _localNotifications.show(
-      achievementId,
-      achievement,
-      description,
-      details,
-      payload: 'achievement',
-    );
-  }
-
-  /// Show streak notification
-  Future<void> showStreakNotification({
-    required int streakDays,
-  }) async {
-    String title = '🔥 $streakDays Day Streak!';
-    String body = 'Keep it up! You\'re doing amazing!';
-
-    if (streakDays == 7) {
-      title = '🏆 One Week Streak!';
-      body = 'Incredible! You\'ve maintained a 7-day streak!';
-    } else if (streakDays == 30) {
-      title = '🌟 30 Day Streak!';
-      body = 'WOW! A whole month of consistency!';
-    }
-
-    await showAchievementNotification(
-      achievement: title,
-      description: body,
-    );
-  }
-
-  /// Get notification settings for display
+  /// Get notification settings from Firestore
   Future<Map<String, dynamic>> getNotificationSettings() async {
-    final enabled = await areNotificationsEnabled();
+    // System permission check
+    final systemEnabled = await areNotificationsEnabled();
 
-    // Get from user preferences (Firestore)
+    // Default settings
+    Map<String, dynamic> settings = {
+      'enabled': false,
+      'dailyReminder': false,
+      'reminderTime': '20:00',
+    };
+
+    // Get from Firestore if user is logged in
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
@@ -437,60 +428,66 @@ class NotificationService {
             .doc(user.uid)
             .get();
 
-        final data = doc.data();
-        return {
-          'enabled': enabled,
-          'dailyReminder':
-              data?['notificationSettings']?['dailyReminder'] ?? true,
-          'reminderTime':
-              data?['notificationSettings']?['reminderTime'] ?? '20:00',
-          'sessionNotifications':
-              data?['notificationSettings']?['sessionNotifications'] ?? true,
-          'achievementNotifications': data?['notificationSettings']
-                  ?['achievementNotifications'] ??
-              true,
-        };
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data()!;
+          if (data['notificationSettings'] != null) {
+            final savedSettings = data['notificationSettings'];
+
+            // User preference for notifications
+            final userWantsNotifications = savedSettings['enabled'] ?? false;
+
+            settings = {
+              // Only enabled if BOTH system allows AND user wants
+              'enabled': systemEnabled && userWantsNotifications,
+              'dailyReminder': savedSettings['dailyReminder'] ?? false,
+              'reminderTime': savedSettings['reminderTime'] ?? '20:00',
+              'systemEnabled': systemEnabled, // Add this for debugging
+            };
+
+            debugPrint('Loaded settings from Firebase: $settings');
+          }
+        }
       } catch (e) {
-        print('Error getting notification settings: $e');
+        debugPrint('Error getting notification settings: $e');
       }
     }
 
-    return {
-      'enabled': enabled,
-      'dailyReminder': true,
-      'reminderTime': '20:00',
-      'sessionNotifications': true,
-      'achievementNotifications': true,
-    };
+    return settings;
   }
 
-  /// Save notification settings
+  /// Save notification settings to Firestore
   Future<void> saveNotificationSettings(Map<String, dynamic> settings) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       try {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .update({
-          'notificationSettings': settings,
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'notificationSettings': {
+            'enabled': settings['enabled'] ?? false,
+            'dailyReminder': settings['dailyReminder'] ?? false,
+            'reminderTime': settings['reminderTime'] ?? '20:00',
+          },
           'updatedAt': FieldValue.serverTimestamp(),
-        });
+        }, SetOptions(merge: true));
+
+        debugPrint('Notification settings saved: ${settings}');
       } catch (e) {
-        print('Error saving notification settings: $e');
+        debugPrint('Error saving notification settings: $e');
       }
     }
+  }
+
+  /// Test notification
+  Future<void> showTestNotification() async {
+    await showNotification(
+      title: 'Test Notification 🔔',
+      body: 'This is a test notification from INSIDEX',
+    );
   }
 }
 
 // Top-level function for background messages
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Initialize Firebase if needed
-  // await Firebase.initializeApp();
-
-  print('Background message: ${message.notification?.title}');
-
-  // You can show a local notification here if needed
-  // But usually FCM handles showing the notification automatically
+  debugPrint('Background message: ${message.notification?.title}');
+  // FCM usually handles showing the notification automatically
 }
