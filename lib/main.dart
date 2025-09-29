@@ -54,6 +54,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
             create: (_) => UserProvider()..initAuthListener()),
+        ChangeNotifierProvider(
+            create: (_) => NotificationProvider()..initialize()),
       ],
       child: const InsidexApp(),
     ),

@@ -88,10 +88,8 @@ class UserProvider extends ChangeNotifier {
 
     try {
       // Load user data
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
+      final userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
         _userData = userDoc.data();
@@ -165,9 +163,9 @@ class UserProvider extends ChangeNotifier {
         .collection('users')
         .doc(_firebaseUser!.uid)
         .update({
-          'dailySessionsPlayed': newCount,
-          'lastActiveAt': FieldValue.serverTimestamp(),
-        });
+      'dailySessionsPlayed': newCount,
+      'lastActiveAt': FieldValue.serverTimestamp(),
+    });
 
     _userData!['dailySessionsPlayed'] = newCount;
     notifyListeners();
@@ -177,10 +175,8 @@ class UserProvider extends ChangeNotifier {
   Future<void> checkAdminStatus(String uid) async {
     try {
       // Check in admins collection
-      final adminDoc = await FirebaseFirestore.instance
-          .collection('admins')
-          .doc(uid)
-          .get();
+      final adminDoc =
+          await FirebaseFirestore.instance.collection('admins').doc(uid).get();
 
       _isAdmin = adminDoc.exists;
 
@@ -234,7 +230,8 @@ class UserProvider extends ChangeNotifier {
   }
 
   // Update profile
-  Future<bool> updateProfile({String? name, String? photoUrl, String? avatarEmoji}) async {
+  Future<bool> updateProfile(
+      {String? name, String? photoUrl, String? avatarEmoji}) async {
     if (_firebaseUser == null) return false;
 
     try {
@@ -284,9 +281,8 @@ class UserProvider extends ChangeNotifier {
       final updates = {
         'isPremium': isPremium,
         'accountType': isPremium ? 'premium' : 'free',
-        'premiumExpiryDate': expiryDate != null
-            ? Timestamp.fromDate(expiryDate)
-            : null,
+        'premiumExpiryDate':
+            expiryDate != null ? Timestamp.fromDate(expiryDate) : null,
         'premiumUpdatedAt': FieldValue.serverTimestamp(),
       };
 
@@ -297,9 +293,8 @@ class UserProvider extends ChangeNotifier {
 
       _userData!['isPremium'] = isPremium;
       _userData!['accountType'] = isPremium ? 'premium' : 'free';
-      _userData!['premiumExpiryDate'] = expiryDate != null
-          ? Timestamp.fromDate(expiryDate)
-          : null;
+      _userData!['premiumExpiryDate'] =
+          expiryDate != null ? Timestamp.fromDate(expiryDate) : null;
 
       notifyListeners();
     } catch (e) {
@@ -316,9 +311,9 @@ class UserProvider extends ChangeNotifier {
           .collection('users')
           .doc(_firebaseUser!.uid)
           .update({
-            'marketingConsent': consent,
-            'consentUpdatedAt': FieldValue.serverTimestamp(),
-          });
+        'marketingConsent': consent,
+        'consentUpdatedAt': FieldValue.serverTimestamp(),
+      });
 
       _userData!['marketingConsent'] = consent;
       notifyListeners();
