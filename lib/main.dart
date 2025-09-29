@@ -9,6 +9,8 @@ import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'services/audio_player_service.dart';
 import 'app.dart';
+import 'providers/notification_provider.dart';
+import 'services/notifications/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +19,14 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Notification Service
+  try {
+    await NotificationService().initialize();
+    print('Notification Service initialized successfully');
+  } catch (e) {
+    print('Notification Service initialization error: $e');
+  }
 
   // Audio Service'i başlat - Basit versiyon
   try {

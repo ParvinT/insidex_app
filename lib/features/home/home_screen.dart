@@ -9,9 +9,9 @@ import '../../core/responsive/responsive_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
-import '../profile/profile_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
+import '../../services/notifications/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +45,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     vsync: this,
     duration: const Duration(milliseconds: 900),
   )..repeat(reverse: true);
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Check notification permission after screen loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService.checkAndShowPermissionDialog(context);
+    });
+  }
 
   @override
   void dispose() {

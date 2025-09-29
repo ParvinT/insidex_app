@@ -78,6 +78,9 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+
+	<key>NSUserNotificationUsageDescription</key>
+<string>INSIDEX would like to send you daily reminders to maintain your wellness routine.</string>
 	
 	<!-- STATUS BAR STYLE -->
 	<key>UIStatusBarStyle</key>

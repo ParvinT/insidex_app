@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../providers/user_provider.dart';
 import '../feedback/feedback_dialog.dart';
+import '../notifications/notification_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,7 +20,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   // Settings states
-  bool _notificationsEnabled = true;
+
   String _selectedLanguage = 'English';
   String _selectedTheme = 'Light';
 
@@ -80,6 +81,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'Sign Out',
                     isDestructive: true,
                     onTap: () => _handleSignOut(),
+                  ),
+                ]),
+
+                SizedBox(height: 32.h),
+
+                _buildSectionHeader('App'),
+                SizedBox(height: 12.h),
+                _buildSettingsCard([
+                  _buildSettingItem(
+                    icon: Icons.notifications_outlined,
+                    title: 'Notifications',
+                    subtitle: 'Manage your notification preferences',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const NotificationSettingsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ]),
 

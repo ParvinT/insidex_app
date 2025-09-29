@@ -36,6 +36,12 @@ dependencies:
   cloud_functions: ^5.0.3
   firebase_app_check: ^0.3.2+10
 
+  # Notification packages
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  permission_handler: ^11.3.1
+  firebase_messaging: ^15.1.0
+
   # Audio packages
   just_audio: ^0.10.4
   audio_service: ^0.18.18
