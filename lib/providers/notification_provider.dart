@@ -89,6 +89,27 @@ class NotificationProvider extends ChangeNotifier {
     _hasPermission = await NotificationService().hasPermission();
     _systemNotificationsEnabled =
         await NotificationService().areSystemNotificationsEnabled();
+
+    
+    if (!_systemNotificationsEnabled || !_hasPermission) {
+      
+      if (_settings.allNotificationsEnabled ||
+          _settings.dailyReminder.enabled) {
+        _settings = _settings.copyWith(
+          allNotificationsEnabled: false,
+          dailyReminder: _settings.dailyReminder.copyWith(enabled: false),
+        );
+
+        // Daily reminder'ı iptal et
+        await _dailyReminderService.cancelDailyReminder();
+
+        // Firebase'e kaydet
+        await _syncService.saveSettingsToFirebase(_settings);
+
+        debugPrint('⚠️ System notifications disabled - app settings synced');
+      }
+    }
+
     notifyListeners();
   }
 

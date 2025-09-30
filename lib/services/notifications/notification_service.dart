@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../features/notifications/notification_models.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/notification_provider.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -65,9 +66,115 @@ class NotificationService {
 
   /// Get local timezone name
   Future<String> _getLocalTimezone() async {
-    // This is a simplified version. In production, you might want to use
-    // flutter_native_timezone package for accurate timezone detection
-    return 'America/New_York'; // Default, will be overridden by system
+    try {
+      // Cihazın timezone'ını otomatik algıla
+      final String currentTimeZone = await FlutterTimezone.getLocalTimezone();
+      debugPrint('✅ Detected device timezone: $currentTimeZone');
+      return currentTimeZone;
+    } catch (e) {
+      debugPrint('⚠️ Error detecting timezone: $e');
+      debugPrint('📍 Falling back to UTC offset detection...');
+
+      // FALLBACK: UTC offset'e göre tahmin et
+      try {
+        final now = DateTime.now();
+        final offset = now.timeZoneOffset.inHours;
+
+        // En yaygın timezone'lar
+        final fallbackTimezone = _getTimezoneFromOffset(offset);
+        debugPrint(
+            '📍 Using fallback timezone: $fallbackTimezone (UTC${offset >= 0 ? '+' : ''}$offset)');
+        return fallbackTimezone;
+      } catch (fallbackError) {
+        debugPrint('❌ Fallback also failed: $fallbackError');
+        debugPrint('🌍 Using UTC as last resort');
+        return 'UTC';
+      }
+    }
+  }
+
+  String _getTimezoneFromOffset(int offsetHours) {
+    switch (offsetHours) {
+      case -11:
+        return 'Pacific/Midway';
+      case -10:
+        return 'Pacific/Honolulu';
+      case -9:
+        return 'America/Anchorage';
+      case -8:
+        return 'America/Los_Angeles';
+      case -7:
+        return 'America/Denver';
+      case -6:
+        return 'America/Chicago';
+      case -5:
+        return 'America/New_York';
+      case -4:
+        return 'America/Caracas';
+      case -3:
+        return 'America/Sao_Paulo';
+      case -2:
+        return 'Atlantic/South_Georgia';
+      case -1:
+        return 'Atlantic/Azores';
+      case 0:
+        return 'Europe/London';
+      case 1:
+        return 'Europe/Paris';
+      case 2:
+        return 'Europe/Athens';
+      case 3:
+        return 'Europe/Istanbul';
+      case 4:
+        return 'Asia/Dubai';
+      case 5:
+        return 'Asia/Karachi';
+      case 6:
+        return 'Asia/Dhaka';
+      case 7:
+        return 'Asia/Bangkok';
+      case 8:
+        return 'Asia/Shanghai';
+      case 9:
+        return 'Asia/Tokyo';
+      case 10:
+        return 'Australia/Sydney';
+      case 11:
+        return 'Pacific/Noumea';
+      case 12:
+        return 'Pacific/Auckland';
+      default:
+        return 'UTC';
+    }
+  }
+
+  Future<bool> checkAndRequestExactAlarmPermission() async {
+    if (!Platform.isAndroid) return true;
+
+    try {
+      final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+          _notifications.resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidPlugin != null) {
+        final bool? canScheduleExact =
+            await androidPlugin.canScheduleExactNotifications();
+
+        if (canScheduleExact == false) {
+          debugPrint('⚠️ Exact alarm permission not granted');
+
+          await androidPlugin.requestExactAlarmsPermission();
+          return false;
+        }
+
+        debugPrint('✅ Exact alarm permission granted');
+        return canScheduleExact ?? true;
+      }
+    } catch (e) {
+      debugPrint('Error checking exact alarm permission: $e');
+    }
+
+    return true;
   }
 
   /// Create notification channels for Android
