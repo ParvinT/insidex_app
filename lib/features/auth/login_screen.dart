@@ -12,6 +12,7 @@ import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
 import '../../providers/user_provider.dart';
 import '../../core/responsive/auth_scaffold.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -60,6 +61,15 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = result['user'];
       if (user != null) {
         await context.read<UserProvider>().loadUserData(user.uid);
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('has_logged_in', true);
+          await prefs.setString('cached_user_id', user.uid);
+          await prefs.setString('cached_user_email', user.email ?? '');
+          debugPrint('✅ Login state cached for device');
+        } catch (e) {
+          debugPrint('⚠️ Could not cache login state: $e');
+        }
       }
 
       // Navigate directly to home screen

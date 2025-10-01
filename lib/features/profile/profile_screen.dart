@@ -13,6 +13,7 @@ import 'widgets/profile_action_button.dart';
 import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
+import '../../services/auth_helper.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -31,14 +32,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/auth/login');
-      });
-    } else {
+
+    if (currentUser != null) {
       final userProvider = context.read<UserProvider>();
       _nameController.text = userProvider.userName;
       _selectedAvatar = userProvider.avatarEmoji ?? '👤';
+    } else {
+      debugPrint('⚠️ ProfileScreen: No user found, this shouldn\'t happen');
+      _nameController.text = 'User';
+      _selectedAvatar = '👤';
     }
   }
 
@@ -154,13 +156,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldSignOut == true) {
-      await FirebaseAuth.instance.signOut();
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/auth/welcome',
-          (route) => false,
-        );
+      try {
+        // ⭐ AuthHelper kullanarak logout yap
+        await AuthHelper.logout(context);
+        debugPrint('✅ User signed out successfully from profile');
+      } catch (e) {
+        debugPrint('❌ Sign out error from profile: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to sign out: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }

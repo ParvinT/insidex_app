@@ -4,12 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../providers/user_provider.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
+import '../../services/auth_helper.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -445,15 +444,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (shouldSignOut == true) {
       try {
-        await FirebaseAuth.instance.signOut();
-        if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.welcome,
-            (route) => false,
-          );
-        }
+        await AuthHelper.logout(context);
+      debugPrint('✅ User signed out successfully');
       } catch (e) {
+        debugPrint('❌ Sign out error: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

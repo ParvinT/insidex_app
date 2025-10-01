@@ -117,6 +117,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       _toast('Account created successfully!');
 
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('has_logged_in', true);
+        await prefs.setString('cached_user_id', user.uid);
+        await prefs.setString('cached_user_email', user.email ?? '');
+        debugPrint('✅ New user login state cached for device');
+      } catch (e) {
+        debugPrint('⚠️ Could not cache login state: $e');
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final goals = prefs.getStringList('goals') ?? [];
       final gender = prefs.getString('gender');
