@@ -445,7 +445,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (shouldSignOut == true) {
       try {
         await AuthHelper.logout(context);
-      debugPrint('✅ User signed out successfully');
+        debugPrint('✅ User signed out successfully');
       } catch (e) {
         debugPrint('❌ Sign out error: $e');
         if (mounted) {

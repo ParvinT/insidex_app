@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
+import '../../services/auth_persistence_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -25,8 +26,6 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _rotationAnimation;
   late Animation<double> _fadeAnimation;
   late Animation<double> _textFadeAnimation;
-
-  bool _navigationHandled = false;
 
   @override
   void initState() {
@@ -77,86 +76,79 @@ class _SplashScreenState extends State<SplashScreen>
     _rotationController.forward();
   }
 
-  void _checkAuthAndNavigate() async {
-    try {
-      // Minimum 3 saniye splash göster (animasyon için)
-      await Future.delayed(const Duration(seconds: 3));
-
-      // Önce SharedPreferences'tan kontrol et (Huawei için fallback)
-      final prefs = await SharedPreferences.getInstance();
-      final hasLoggedInBefore = prefs.getBool('has_logged_in') ?? false;
-      final savedUserId = prefs.getString('cached_user_id');
-
-      debugPrint('🔍 Checking auth status...');
-      debugPrint('📱 Has logged in before: $hasLoggedInBefore');
-      debugPrint('💾 Saved user ID: $savedUserId');
-
-      // Firebase Auth kontrolü - try/catch ile sarmalayalım
-      User? currentUser;
-      try {
-        // Önce mevcut kullanıcıyı kontrol et (senkron)
-        currentUser = FirebaseAuth.instance.currentUser;
-        debugPrint('🔥 Current user (immediate): ${currentUser?.email}');
-
-        // Eğer kullanıcı yoksa ve daha önce giriş yapılmışsa, biraz bekle
-        if (currentUser == null && hasLoggedInBefore) {
-          debugPrint('⏳ Waiting for auth state to settle...');
-
-          // Firebase Auth'un yüklenmesini bekle (max 2 saniye)
-          await Future.delayed(const Duration(seconds: 2));
-
-          // Tekrar kontrol et
-          currentUser = FirebaseAuth.instance.currentUser;
-          debugPrint('🔥 Current user (after wait): ${currentUser?.email}');
-        }
-      } catch (e) {
-        debugPrint('⚠️ Error checking Firebase Auth: $e');
-        // Firebase Auth hatası durumunda SharedPreferences'a güven
-        if (hasLoggedInBefore && savedUserId != null) {
-          debugPrint('📱 Using cached login state for navigation');
-          _navigateToHome();
-          return;
-        }
-      }
-
-      // Navigation kararı
+  void _checkAuthAndNavigate() {
+    Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
 
-      if (currentUser != null) {
-        // Firebase'den kullanıcı alındı
-        debugPrint('✅ User is logged in via Firebase: ${currentUser.email}');
+      print('========== AUTH CHECK START ==========');
 
-        // Cache'i güncelle
-        await prefs.setBool('has_logged_in', true);
-        await prefs.setString('cached_user_id', currentUser.uid);
+      try {
+        // Firebase user kontrolü
+        User? firebaseUser = FirebaseAuth.instance.currentUser;
+        print('Firebase User: ${firebaseUser?.email ?? "NULL"}');
 
-        _navigateToHome();
-      } else if (hasLoggedInBefore && savedUserId != null) {
-        // Firebase'den alınamadı ama cache'de var (Huawei için)
-        debugPrint('📱 Using cached auth state, navigating to home');
-        _navigateToHome();
-      } else {
-        // Kullanıcı giriş yapmamış
-        debugPrint('❌ User is not logged in, going to onboarding');
-        _navigateToOnboarding();
+        // Saved session kontrolü
+        final hasSession = await AuthPersistenceService.hasValidSession();
+        print('Has Valid Session: $hasSession');
+
+        // SharedPreferences'ı direkt kontrol et
+        final prefs = await SharedPreferences.getInstance();
+        print('Saved Email: ${prefs.getString('user_email') ?? "NULL"}');
+        print(
+            'Saved Token: ${prefs.getString('fb_auth_token')?.substring(0, 20) ?? "NULL"}...');
+        print('Token Timestamp: ${prefs.getInt('token_timestamp') ?? 0}');
+
+        if (hasSession) {
+          print('Valid session found, checking Firebase user...');
+
+          if (firebaseUser != null) {
+            print('Firebase user exists, refreshing token...');
+
+            try {
+              await firebaseUser.reload();
+              final token = await firebaseUser.getIdToken();
+              print('Token refresh successful');
+
+              if (mounted) {
+                print('Navigating to HOME');
+                Navigator.pushReplacementNamed(context, AppRoutes.home);
+                return;
+              }
+            } catch (e) {
+              print('Token refresh failed: $e');
+            }
+          } else {
+            print('No Firebase user, trying auto login...');
+          }
+        }
+
+        // Auto login dene
+        print('Attempting auto sign-in...');
+        final user = await AuthPersistenceService.autoSignIn();
+
+        if (user != null) {
+          print('Auto login successful: ${user.email}');
+          if (mounted) {
+            print('Navigating to HOME after auto login');
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+          }
+        } else {
+          print('Auto login failed, going to onboarding');
+          if (mounted) {
+            print('Navigating to GOALS SCREEN');
+            Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
+          }
+        }
+      } catch (e) {
+        print('ERROR in auth check: $e');
+        print(e.toString());
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
+        }
       }
-    } catch (e) {
-      debugPrint('❌ Error in auth check: $e');
-      // Hata durumunda güvenli taraf: onboarding
-      _navigateToOnboarding();
-    }
-  }
 
-  void _navigateToHome() {
-    if (_navigationHandled || !mounted) return;
-    _navigationHandled = true;
-    Navigator.pushReplacementNamed(context, AppRoutes.home);
-  }
-
-  void _navigateToOnboarding() {
-    if (_navigationHandled || !mounted) return;
-    _navigationHandled = true;
-    Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
+      print('========== AUTH CHECK END ==========');
+    });
   }
 
   @override
