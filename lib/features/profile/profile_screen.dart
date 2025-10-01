@@ -13,6 +13,7 @@ import 'widgets/profile_action_button.dart';
 import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
+import '../../services/auth_persistence_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -154,6 +155,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldSignOut == true) {
+      await AuthPersistenceService.clearSession();
       await FirebaseAuth.instance.signOut();
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(

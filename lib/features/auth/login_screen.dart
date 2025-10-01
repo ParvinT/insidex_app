@@ -12,6 +12,8 @@ import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
 import '../../providers/user_provider.dart';
 import '../../core/responsive/auth_scaffold.dart';
+import '../../services/auth_persistence_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,15 +42,17 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    // Validate form
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isEmailLoading = true);
 
-    // Attempt login with Firebase
+    // ⭐ ÖNEMLİ: Password'ü sakla
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
     final result = await FirebaseService.signIn(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
+      email: email,
+      password: password,
     );
 
     setState(() => _isEmailLoading = false);
@@ -56,16 +60,25 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (result['success']) {
-      // Load user data into provider
       final user = result['user'];
       if (user != null) {
+        // ⭐ BURASI KRİTİK - Session'ı kaydet
+        print('SAVING AUTH SESSION for: ${user.email}');
+        await AuthPersistenceService.saveAuthSession(user,
+            password: password // ⭐ Password'ü geçiriyoruz
+            );
+
+        // Test için SharedPreferences'ı kontrol et
+        final prefs = await SharedPreferences.getInstance();
+        print('After save - Email: ${prefs.getString('user_email')}');
+        print(
+            'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
+
         await context.read<UserProvider>().loadUserData(user.uid);
       }
 
-      // Navigate directly to home screen
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result['error'] ?? 'Login failed'),
