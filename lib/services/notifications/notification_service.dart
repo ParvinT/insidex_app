@@ -163,18 +163,33 @@ class NotificationService {
         if (canScheduleExact == false) {
           debugPrint('⚠️ Exact alarm permission not granted');
 
-          await androidPlugin.requestExactAlarmsPermission();
-          return false;
+          final bool? granted =
+              await androidPlugin.requestExactAlarmsPermission();
+          if (granted == true) {
+            debugPrint('✅ Exact alarm permission granted');
+            return true;
+          } else {
+            debugPrint('❌ Exact alarm permission denied');
+            // Kullanıcıyı ayarlara yönlendir
+            await _showAlarmPermissionDialog();
+            return false;
+          }
         }
 
-        debugPrint('✅ Exact alarm permission granted');
         return canScheduleExact ?? true;
       }
     } catch (e) {
       debugPrint('Error checking exact alarm permission: $e');
+      return true;
     }
 
     return true;
+  }
+
+  Future<void> _showAlarmPermissionDialog() async {
+    debugPrint('💡 User needs to manually enable alarm permission in settings');
+    // Burada kullanıcıya bir dialog gösterebilirsiniz
+    // openAppSettings() çağırabilirsiniz
   }
 
   /// Create notification channels for Android

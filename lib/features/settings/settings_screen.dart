@@ -8,7 +8,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
-import '../../services/auth_helper.dart';
+import '../../services/auth_persistence_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -444,8 +445,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (shouldSignOut == true) {
       try {
-        await AuthHelper.logout(context);
-        debugPrint('✅ User signed out successfully');
+        // Her iki session sistemini de temizle
+        await AuthPersistenceService.clearSession(); // Token ve şifre temizliği
+
+        // Firebase'den çıkış
+        await FirebaseAuth.instance.signOut();
+
+        // Eski cache'leri de temizle (uyumluluk için)
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('has_logged_in');
+        await prefs.remove('cached_user_id');
+        await prefs.remove('cached_user_email');
+
+        if (mounted) {
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            AppRoutes.welcome,
+            (route) => false,
+          );
+        }
       } catch (e) {
         debugPrint('❌ Sign out error: $e');
         if (mounted) {

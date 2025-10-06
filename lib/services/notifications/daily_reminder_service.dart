@@ -1,5 +1,5 @@
 // lib/services/notifications/daily_reminder_service.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -54,11 +54,14 @@ class DailyReminderService {
         NotificationConstants.dailyReminderChannelId,
         NotificationConstants.dailyReminderChannelName,
         channelDescription: NotificationConstants.dailyReminderChannelDesc,
-        importance: Importance.high,
-        priority: Priority.high,
+        importance: Importance.max,
+        priority: Priority.max,
         showWhen: true,
         enableVibration: true,
         playSound: true,
+        fullScreenIntent: true,
+        category: AndroidNotificationCategory.reminder,
+        audioAttributesUsage: AudioAttributesUsage.alarm,
       );
 
       // iOS notification details
@@ -80,17 +83,62 @@ class DailyReminderService {
         reminder.message,
         scheduledDate,
         notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: Platform.isAndroid
+            ? AndroidScheduleMode.alarmClock
+            : AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time, // Daily repeat
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       );
 
       debugPrint('Daily reminder scheduled for: ${scheduledDate.toString()}');
+
+      if (Platform.isAndroid) {
+        final pending = await _notifications.pendingNotificationRequests();
+        debugPrint('📋 Pending notifications: ${pending.length}');
+        for (var notif in pending) {
+          debugPrint('  - ID: ${notif.id}, Title: ${notif.title}');
+        }
+      }
+
       debugPrint('Will repeat daily at: ${reminder.formattedTime12Hour}');
     } catch (e) {
       debugPrint('Error scheduling daily reminder: $e');
-      rethrow;
+      await _tryAlternativeScheduling(reminder);
+    }
+  }
+
+  Future<void> _tryAlternativeScheduling(DailyReminder reminder) async {
+    try {
+      debugPrint('🔄 Trying alternative scheduling method...');
+
+      // periodicallyShow kullanarak günlük tekrar
+      await _notifications.periodicallyShow(
+        reminder.notificationId,
+        reminder.title,
+        reminder.message,
+        RepeatInterval.daily,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_reminder_backup',
+            'Daily Reminder Backup',
+            channelDescription: 'Backup channel for daily reminders',
+            importance: Importance.max,
+            priority: Priority.max,
+            playSound: true,
+            enableVibration: true,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+      );
+
+      debugPrint('✅ Alternative scheduling successful');
+    } catch (e) {
+      debugPrint('❌ Alternative scheduling also failed: $e');
     }
   }
 
