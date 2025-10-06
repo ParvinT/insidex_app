@@ -37,7 +37,7 @@ class NotificationService {
 
     // Android settings
     const androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings('@drawable/ic_notification');
 
     // iOS settings
     const iosSettings = DarwinInitializationSettings(
@@ -304,6 +304,8 @@ class NotificationService {
               : NotificationConstants.generalChannelDesc,
       importance: Importance.high,
       priority: Priority.high,
+      icon: 'ic_notification',
+      largeIcon: const DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
       showWhen: true,
     );
 

@@ -54,14 +54,17 @@ class DailyReminderService {
         NotificationConstants.dailyReminderChannelId,
         NotificationConstants.dailyReminderChannelName,
         channelDescription: NotificationConstants.dailyReminderChannelDesc,
-        importance: Importance.max,
-        priority: Priority.max,
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: 'ic_notification',
+        largeIcon: DrawableResourceAndroidBitmap('@mipmap/ic_launcher'),
         showWhen: true,
         enableVibration: true,
         playSound: true,
-        fullScreenIntent: true,
+        autoCancel: true,
+        ongoing: false,
+        enableLights: true,
         category: AndroidNotificationCategory.reminder,
-        audioAttributesUsage: AudioAttributesUsage.alarm,
       );
 
       // iOS notification details

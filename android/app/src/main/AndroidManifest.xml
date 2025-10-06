@@ -73,10 +73,13 @@
         <!-- Scheduled Notification Receivers -->
 <receiver 
     android:exported="false"
+    android:enabled="true"
+    android:directBootAware="true"
     android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
     
 <receiver
     android:exported="false"
+    android:enabled="true"
     android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
     <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
@@ -88,6 +91,7 @@
 
 <receiver
     android:exported="false"
+    android:enabled="true"
     android:name="com.dexterous.flutterlocalnotifications.NotificationActionReceiver" />
         
         <!-- Don't delete the meta-data below.
@@ -99,11 +103,10 @@
         <!-- Firebase Messaging (if using) -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
+            android:resource="@drawable/ic_notification" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@android:color/white" />
-            
+            android:resource="@color/notification_color" />
     </application>
     
     <!-- Queries for Android 11+ (API 30+) package visibility -->

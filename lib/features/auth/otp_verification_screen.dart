@@ -13,7 +13,6 @@ import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/analytics_service.dart';
 import '../../core/responsive/auth_scaffold.dart';
-import '../../core/responsive/context_ext.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -28,6 +27,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   final _firestore = FirebaseFirestore.instance;
 
   final _codeCtrl = TextEditingController();
+  final _focusNode = FocusNode(); // ✅ EKLE
   bool _busy = false;
   bool _resending = false;
   Timer? _t;
@@ -37,11 +37,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   void initState() {
     super.initState();
     _countdown(); // Start countdown on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        _focusNode.requestFocus();
+      });
+    });
   }
 
   @override
   void dispose() {
     _codeCtrl.dispose();
+    _focusNode.dispose();
     _t?.cancel();
     super.dispose();
   }
@@ -207,8 +213,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _codeCtrl,
+              focusNode: _focusNode,
+              autofocus: true,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
               maxLength: 6,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 4,
+              ),
               decoration: const InputDecoration(
                 counterText: '',
                 border: OutlineInputBorder(),

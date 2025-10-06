@@ -13,6 +13,18 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
+    packagingOptions {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt", 
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt"
+            )
+        }
+    }
+
     compileOptions {
         isCoreLibraryDesugaringEnabled = true  
         sourceCompatibility = JavaVersion.VERSION_11  
@@ -46,6 +58,9 @@ android {
             getDefaultProguardFile("proguard-android-optimize.txt"),
             "proguard-rules.pro"
         )
+         ndk {
+            debugSymbolLevel = "FULL"
+            }
         }
     }
 }
