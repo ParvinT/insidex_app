@@ -546,7 +546,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: Text(
                     'Got it!',
                     style: GoogleFonts.inter(
-                      fontSize: 16.sp,
+                      fontSize: (16.sp).clamp(16.0, 20.0),
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),

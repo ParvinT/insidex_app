@@ -114,28 +114,9 @@ class WelcomeScreen extends StatelessWidget {
 
                     SizedBox(height: 12.h),
 
-                    // Continue as Guest
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context)
-                            .pushReplacementNamed(AppRoutes.home);
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(
-                            vertical: 8.h, horizontal: 4.w),
-                      ),
-                      child: Text(
-                        'Continue as a Guest',
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
+                
 
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 32.h),
 
                     // Sign Up
                     Wrap(

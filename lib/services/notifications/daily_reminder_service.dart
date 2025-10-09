@@ -86,6 +86,7 @@ class DailyReminderService {
         reminder.message,
         scheduledDate,
         notificationDetails,
+        payload: 'daily_reminder',
         androidScheduleMode: Platform.isAndroid
             ? AndroidScheduleMode.alarmClock
             : AndroidScheduleMode.exactAllowWhileIdle,

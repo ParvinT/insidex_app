@@ -14,6 +14,8 @@ import '../../features/notifications/notification_models.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/notification_provider.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import '../../app.dart';
+import '../../core/routes/app_routes.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -340,9 +342,14 @@ class NotificationService {
 
   /// Handle notification tap
   void _onNotificationTapped(NotificationResponse response) {
-    // Handle notification tap
-    // You can navigate to specific screens based on payload
-    debugPrint('Notification tapped: ${response.payload}');
+    debugPrint('Notification tapped with payload: ${response.payload}');
+    final navigatorKey = InsidexApp.navigatorKey;
+    if (navigatorKey.currentState != null) {
+    navigatorKey.currentState!.pushNamedAndRemoveUntil(
+      AppRoutes.home,
+      (route) => false, 
+    );
+  }
   }
 
   /// Check if Android 13 or higher
