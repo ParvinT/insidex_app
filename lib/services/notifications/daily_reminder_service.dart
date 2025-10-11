@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import '../../features/notifications/notification_models.dart';
 import 'notification_service.dart';
+import 'notification_reliability_service.dart';
 
 class DailyReminderService {
   static final DailyReminderService _instance =
@@ -19,6 +20,7 @@ class DailyReminderService {
   Future<void> scheduleDailyReminder(DailyReminder reminder) async {
     if (!reminder.enabled) {
       await cancelDailyReminder();
+      await NotificationReliabilityService.saveSettings(reminder);
       return;
     }
 
@@ -80,30 +82,36 @@ class DailyReminderService {
       );
 
       // Schedule the notification
-      await _notifications.zonedSchedule(
-        reminder.notificationId,
-        reminder.title,
-        reminder.message,
-        scheduledDate,
-        notificationDetails,
-        payload: 'daily_reminder',
-        androidScheduleMode: Platform.isAndroid
-            ? AndroidScheduleMode.alarmClock
-            : AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      );
-
-      debugPrint('Daily reminder scheduled for: ${scheduledDate.toString()}');
-
       if (Platform.isAndroid) {
-        final pending = await _notifications.pendingNotificationRequests();
-        debugPrint('📋 Pending notifications: ${pending.length}');
-        for (var notif in pending) {
-          debugPrint('  - ID: ${notif.id}, Title: ${notif.title}');
-        }
+        await _notifications.zonedSchedule(
+          NotificationConstants.dailyReminderId,
+          reminder.title,
+          reminder.message,
+          scheduledDate,
+          notificationDetails,
+          androidScheduleMode:
+              AndroidScheduleMode.exactAllowWhileIdle, // ÇOK ÖNEMLİ!
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents:
+              DateTimeComponents.time, // Her gün aynı saatte
+        );
+      } else {
+        // iOS için normal schedule
+        await _notifications.zonedSchedule(
+          NotificationConstants.dailyReminderId,
+          reminder.title,
+          reminder.message,
+          scheduledDate,
+          notificationDetails,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
       }
+
+      // WorkManager için local storage'a kaydet
+      await NotificationReliabilityService.saveSettings(reminder);
 
       debugPrint('Will repeat daily at: ${reminder.formattedTime12Hour}');
     } catch (e) {

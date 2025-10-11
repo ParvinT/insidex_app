@@ -188,7 +188,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   Widget build(BuildContext context) {
     final label =
         GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6E6E6E));
-    return AuthScaffold(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Verify Email'),
@@ -196,7 +197,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         foregroundColor: Colors.black,
         elevation: 0.5,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
+        physics: ClampingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
