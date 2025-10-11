@@ -143,6 +143,27 @@ class _NotificationSettingsScreenState
 
                     SizedBox(height: 24.h),
 
+                    _buildSectionHeader(
+                        'Achievement Notifications', sectionTitleSize),
+                    SizedBox(height: 12.h),
+
+                    _buildNotificationCard(
+                        context: context,
+                        title: 'Streak Milestones',
+                        subtitle: 'Celebrate your consistency achievements',
+                        icon: Icons.local_fire_department,
+                        value: provider.settings.streakNotificationsEnabled,
+                        onChanged: provider.hasPermission &&
+                                provider.allNotificationsEnabled
+                            ? (value) async {
+                                await provider.toggleStreakNotifications(value);
+                              }
+                            : null,
+                        bodyTextSize: bodyTextSize, 
+                        sectionTitleSize: sectionTitleSize),
+
+                    SizedBox(height: 24.h),
+
                     // Test Notification Button (for debugging)
                     if (provider.allNotificationsEnabled &&
                         provider.hasPermission) ...[

@@ -24,6 +24,7 @@ class NotificationProvider extends ChangeNotifier {
   bool get hasPermission => _hasPermission;
   bool get systemNotificationsEnabled => _systemNotificationsEnabled;
   bool get allNotificationsEnabled => _settings.allNotificationsEnabled;
+  bool get streakNotificationsEnabled => _settings.streakNotificationsEnabled;
   DailyReminder get dailyReminder => _settings.dailyReminder;
 
   /// Initialize provider
@@ -90,9 +91,7 @@ class NotificationProvider extends ChangeNotifier {
     _systemNotificationsEnabled =
         await NotificationService().areSystemNotificationsEnabled();
 
-    
     if (!_systemNotificationsEnabled || !_hasPermission) {
-      
       if (_settings.allNotificationsEnabled ||
           _settings.dailyReminder.enabled) {
         _settings = _settings.copyWith(
@@ -141,6 +140,7 @@ class NotificationProvider extends ChangeNotifier {
       dailyReminder: _settings.dailyReminder.copyWith(
         enabled: enabled ? _settings.dailyReminder.enabled : false,
       ),
+      streakNotificationsEnabled: enabled ? _settings.streakNotificationsEnabled : false,
     );
     notifyListeners();
 
@@ -155,6 +155,24 @@ class NotificationProvider extends ChangeNotifier {
       await _dailyReminderService
           .scheduleDailyReminder(_settings.dailyReminder);
     }
+  }
+
+  Future<void> toggleStreakNotifications(bool enabled) async {
+    // Can't enable if all notifications are disabled
+    if (enabled && !_settings.allNotificationsEnabled) {
+      debugPrint(
+          'Cannot enable streak notifications when all notifications are disabled');
+      return;
+    }
+
+    // Update settings
+    _settings = _settings.copyWith(streakNotificationsEnabled: enabled);
+    notifyListeners();
+
+    // Save to Firebase
+    await _syncService.saveSettingsToFirebase(_settings);
+
+    debugPrint('Streak notifications ${enabled ? "enabled" : "disabled"}');
   }
 
   /// Toggle daily reminder

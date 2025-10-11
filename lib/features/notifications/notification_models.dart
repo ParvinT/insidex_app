@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class NotificationSettings {
   final bool allNotificationsEnabled;
   final DailyReminder dailyReminder;
+  final bool streakNotificationsEnabled;
   final DateTime lastUpdated;
   final String? deviceToken;
   final String? platform; // 'ios' or 'android'
@@ -13,6 +14,7 @@ class NotificationSettings {
   NotificationSettings({
     required this.allNotificationsEnabled,
     required this.dailyReminder,
+    this.streakNotificationsEnabled = true,
     required this.lastUpdated,
     this.deviceToken,
     this.platform,
@@ -22,6 +24,7 @@ class NotificationSettings {
     return NotificationSettings(
       allNotificationsEnabled: false,
       dailyReminder: DailyReminder.defaultReminder(),
+      streakNotificationsEnabled: true,
       lastUpdated: DateTime.now(),
     );
   }
@@ -32,6 +35,7 @@ class NotificationSettings {
       dailyReminder: DailyReminder.fromMap(
         map['dailyReminder'] ?? {},
       ),
+      streakNotificationsEnabled: map['streakNotificationsEnabled'] ?? true,
       lastUpdated:
           (map['lastUpdated'] as Timestamp?)?.toDate() ?? DateTime.now(),
       deviceToken: map['deviceToken'],
@@ -43,6 +47,7 @@ class NotificationSettings {
     return {
       'allNotificationsEnabled': allNotificationsEnabled,
       'dailyReminder': dailyReminder.toMap(),
+      'streakNotificationsEnabled': streakNotificationsEnabled,
       'lastUpdated': Timestamp.fromDate(lastUpdated),
       'deviceToken': deviceToken,
       'platform': platform,
@@ -52,6 +57,7 @@ class NotificationSettings {
   NotificationSettings copyWith({
     bool? allNotificationsEnabled,
     DailyReminder? dailyReminder,
+    bool? streakNotificationsEnabled,
     DateTime? lastUpdated,
     String? deviceToken,
     String? platform,
@@ -60,6 +66,8 @@ class NotificationSettings {
       allNotificationsEnabled:
           allNotificationsEnabled ?? this.allNotificationsEnabled,
       dailyReminder: dailyReminder ?? this.dailyReminder,
+      streakNotificationsEnabled: 
+          streakNotificationsEnabled ?? this.streakNotificationsEnabled,
       lastUpdated: lastUpdated ?? this.lastUpdated,
       deviceToken: deviceToken ?? this.deviceToken,
       platform: platform ?? this.platform,
