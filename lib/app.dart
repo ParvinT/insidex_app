@@ -9,6 +9,9 @@ import 'providers/theme_provider.dart';
 class InsidexApp extends StatelessWidget {
   const InsidexApp({super.key});
 
+  static final GlobalKey<NavigatorState> navigatorKey =
+      GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -24,6 +27,7 @@ class InsidexApp extends StatelessWidget {
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: ThemeMode.light, // Geçici olarak light'a zorlanmış
+              navigatorKey: navigatorKey,
               initialRoute: AppRoutes.splash,
               routes: AppRoutes.routes,
               builder: (context, child) => ResponsiveBreakpoints.builder(

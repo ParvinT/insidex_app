@@ -54,6 +54,7 @@
 		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
+		<string>processing</string>
 	</array>
 	
 	
@@ -67,6 +68,9 @@
 		<key>UIUserNotificationTypeSound</key>
 		<true/>
 	</dict>
+
+	<key>NSTimeZoneUsageDescription</key>
+<string>This app needs to access your timezone for scheduling notifications at the correct time.</string>
 	
 	<!-- APP TRANSPORT SECURITY (API calls için) -->
 	<key>NSAppTransportSecurity</key>
@@ -78,6 +82,9 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+
+	<key>NSUserNotificationUsageDescription</key>
+<string>INSIDEX would like to send you daily reminders to maintain your wellness routine.</string>
 	
 	<!-- STATUS BAR STYLE -->
 	<key>UIStatusBarStyle</key>

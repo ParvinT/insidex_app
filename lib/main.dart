@@ -4,11 +4,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:background_fetch/background_fetch.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'services/audio_player_service.dart';
 import 'app.dart';
+import 'providers/notification_provider.dart';
+import 'services/notifications/notification_service.dart';
+import 'services/notifications/notification_reliability_service.dart';
+
+@pragma('vm:entry-point')
+void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  debugPrint('[BackgroundFetch] Headless çalışıyor');
+
+  await Firebase.initializeApp();
+  await NotificationReliabilityService.checkAndRescheduleNotifications();
+
+  BackgroundFetch.finish(task.taskId);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +31,17 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+  await NotificationReliabilityService.initialize();
+
+  // Notification Service
+  try {
+    await NotificationService().initialize();
+    print('Notification Service initialized successfully');
+  } catch (e) {
+    print('Notification Service initialization error: $e');
+  }
 
   // Audio Service'i başlat - Basit versiyon
   try {
@@ -44,6 +69,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(
             create: (_) => UserProvider()..initAuthListener()),
+        ChangeNotifierProvider(
+            create: (_) => NotificationProvider()..initialize()),
       ],
       child: const InsidexApp(),
     ),

@@ -13,7 +13,6 @@ import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/analytics_service.dart';
 import '../../core/responsive/auth_scaffold.dart';
-import '../../core/responsive/context_ext.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -28,6 +27,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   final _firestore = FirebaseFirestore.instance;
 
   final _codeCtrl = TextEditingController();
+  final _focusNode = FocusNode(); // ✅ EKLE
   bool _busy = false;
   bool _resending = false;
   Timer? _t;
@@ -37,11 +37,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   void initState() {
     super.initState();
     _countdown(); // Start countdown on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(milliseconds: 300), () {
+        _focusNode.requestFocus();
+      });
+    });
   }
 
   @override
   void dispose() {
     _codeCtrl.dispose();
+    _focusNode.dispose();
     _t?.cancel();
     super.dispose();
   }
@@ -117,6 +123,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       _toast('Account created successfully!');
 
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('has_logged_in', true);
+        await prefs.setString('cached_user_id', user.uid);
+        await prefs.setString('cached_user_email', user.email ?? '');
+        debugPrint('✅ New user login state cached for device');
+      } catch (e) {
+        debugPrint('⚠️ Could not cache login state: $e');
+      }
+
       final prefs = await SharedPreferences.getInstance();
       final goals = prefs.getStringList('goals') ?? [];
       final gender = prefs.getString('gender');
@@ -172,7 +188,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   Widget build(BuildContext context) {
     final label =
         GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6E6E6E));
-    return AuthScaffold(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Verify Email'),
@@ -180,7 +197,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         foregroundColor: Colors.black,
         elevation: 0.5,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
+        physics: ClampingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,8 +215,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _codeCtrl,
+              focusNode: _focusNode,
+              autofocus: true,
               keyboardType: TextInputType.number,
+              textInputAction: TextInputAction.done,
               maxLength: 6,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 4,
+              ),
               decoration: const InputDecoration(
                 counterText: '',
                 border: OutlineInputBorder(),

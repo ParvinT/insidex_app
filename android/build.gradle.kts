@@ -2,6 +2,12 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        
+        // BACKGROUND FETCH İÇİN BUNLARI EKLEYİN
+        maven { url = uri("https://www.jitpack.io") }
+        maven { 
+            url = uri("${project(":background_fetch").projectDir}/libs")
+        }
     }
 }
 

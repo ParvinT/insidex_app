@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import '../../providers/user_provider.dart';
 import '../feedback/feedback_dialog.dart';
+import '../notifications/notification_settings_screen.dart';
+import '../../services/auth_persistence_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -19,7 +20,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   // Settings states
-  bool _notificationsEnabled = true;
+
   String _selectedLanguage = 'English';
   String _selectedTheme = 'Light';
 
@@ -80,6 +81,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: 'Sign Out',
                     isDestructive: true,
                     onTap: () => _handleSignOut(),
+                  ),
+                ]),
+
+                SizedBox(height: 32.h),
+
+                _buildSectionHeader('App'),
+                SizedBox(height: 12.h),
+                _buildSettingsCard([
+                  _buildSettingItem(
+                    icon: Icons.notifications_outlined,
+                    title: 'Notifications',
+                    subtitle: 'Manage your notification preferences',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const NotificationSettingsScreen(),
+                        ),
+                      );
+                    },
                   ),
                 ]),
 
@@ -423,7 +445,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (shouldSignOut == true) {
       try {
+        // Her iki session sistemini de temizle
+        await AuthPersistenceService.clearSession(); // Token ve şifre temizliği
+
+        // Firebase'den çıkış
         await FirebaseAuth.instance.signOut();
+
+        // Eski cache'leri de temizle (uyumluluk için)
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.remove('has_logged_in');
+        await prefs.remove('cached_user_id');
+        await prefs.remove('cached_user_email');
+
         if (mounted) {
           Navigator.pushNamedAndRemoveUntil(
             context,
@@ -432,6 +465,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           );
         }
       } catch (e) {
+        debugPrint('❌ Sign out error: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

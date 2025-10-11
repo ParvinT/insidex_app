@@ -13,8 +13,21 @@ android {
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
 
+    packagingOptions {
+        resources {
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt", 
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt"
+            )
+        }
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true  
+        sourceCompatibility = JavaVersion.VERSION_11  
         targetCompatibility = JavaVersion.VERSION_11
     }
 
@@ -31,17 +44,34 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
+
+    
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
+            isMinifyEnabled = false    // Code obfuscation kapalı
+            isShrinkResources = false  // Resource shrinking kapalı
+             proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
+         ndk {
+            debugSymbolLevel = "FULL"
+            }
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")  
+    
+    
 }

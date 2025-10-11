@@ -276,8 +276,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 // OR Divider
                 _buildDivider(),
 
-                SizedBox(height: 24.h),
-
                 /* // Google Sign In Button
                 SocialLoginButton(
                   onTap: _handleGoogleSignIn,
@@ -297,30 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 SizedBox(height: 24.h),*/
 
-                // Continue as Guest Button
-                Center(
-                  child: TextButton(
-                    onPressed: isAnyLoading
-                        ? null
-                        : () {
-                            Navigator.pushReplacementNamed(
-                                context, AppRoutes.home);
-                          },
-                    child: Text(
-                      'Continue as a Guest',
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        color: isAnyLoading
-                            ? AppColors.textSecondary.withOpacity(0.5)
-                            : AppColors.textSecondary,
-                        fontWeight: FontWeight.w500,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 24.h),
+                SizedBox(height: 20.h),
 
                 // Sign Up Link
                 Row(
