@@ -7,14 +7,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
-import '../../providers/user_provider.dart';
-import '../library/session_detail_screen.dart';
-import '../player/audio_player_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
 import 'dart:async';
+import '../../core/constants/app_colors.dart';
+import '../player/audio_player_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -181,8 +179,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Added to playlist'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).addedToPlaylist),
           duration: Duration(seconds: 2),
         ),
       );
@@ -209,8 +207,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Removed from playlist'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).removedFromPlaylist),
           duration: Duration(seconds: 2),
         ),
       );
@@ -258,8 +256,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         SnackBar(
           content: Text(
             isCurrentlyFavorite
-                ? 'Removed from favorites'
-                : 'Added to favorites',
+                ? AppLocalizations.of(context).removedFromFavorites
+                : AppLocalizations.of(context).addedToFavorites,
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -385,7 +383,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'My Playlists',
+                      AppLocalizations.of(context).myPlaylists,
                       style: GoogleFonts.inter(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w700,
@@ -422,7 +420,9 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
-                      _isReorderMode ? 'Done' : 'Edit',
+                      _isReorderMode
+                          ? AppLocalizations.of(context).done
+                          : AppLocalizations.of(context).edit,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
@@ -471,19 +471,22 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           Tab(
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text('My Playlist (${_myPlaylistSessions.length})'),
+              child: Text(
+                  '${AppLocalizations.of(context).myPlaylist} (${_myPlaylistSessions.length})'),
             ),
           ),
           Tab(
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text('Favorites (${_favoriteSessions.length})'),
+              child: Text(
+                  '${AppLocalizations.of(context).favorites} (${_favoriteSessions.length})'),
             ),
           ),
           Tab(
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              child: Text('Recent (${_recentSessions.length})'),
+              child: Text(
+                  '${AppLocalizations.of(context).recent} (${_recentSessions.length})'),
             ),
           ),
         ],
@@ -501,8 +504,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     if (_myPlaylistSessions.isEmpty) {
       return _buildEmptyState(
         icon: Icons.queue_music,
-        title: 'No Sessions in Playlist',
-        subtitle: 'Add sessions to create your perfect healing journey',
+        title: AppLocalizations.of(context).noSessionsInPlaylist,
+        subtitle: AppLocalizations.of(context).addSessionsToPlaylist,
       );
     }
 
@@ -547,8 +550,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     if (_favoriteSessions.isEmpty) {
       return _buildEmptyState(
         icon: Icons.favorite_border,
-        title: 'No Favorite Sessions',
-        subtitle: 'Mark sessions as favorite to find them quickly',
+        title: AppLocalizations.of(context).noFavoriteSessions,
+        subtitle: AppLocalizations.of(context).markSessionsAsFavorite,
       );
     }
 
@@ -573,8 +576,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     if (_recentSessions.isEmpty) {
       return _buildEmptyState(
         icon: Icons.history,
-        title: 'No Recent Sessions',
-        subtitle: 'Sessions you play will appear here',
+        title: AppLocalizations.of(context).noRecentSessions,
+        subtitle: AppLocalizations.of(context).sessionsWillAppearHere,
       );
     }
 
@@ -833,7 +836,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          session['title'] ?? 'Untitled Session',
+                          session['title'] ??
+                              AppLocalizations.of(context).untitledSession,
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
@@ -855,7 +859,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                           borderRadius: BorderRadius.circular(20.r),
                         ),
                         child: Text(
-                          session['category'] ?? 'General',
+                          session['category'] ??
+                              AppLocalizations.of(context).general,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             color: AppColors.textPrimary,
@@ -966,7 +971,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      session['title'] ?? 'Untitled',
+                      session['title'] ?? AppLocalizations.of(context).untitled,
                       style: GoogleFonts.inter(
                         fontSize: 15.sp, // Biraz küçültüldü
                         fontWeight: FontWeight.w600,
@@ -977,7 +982,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      session['category'] ?? 'General',
+                      session['category'] ??
+                          AppLocalizations.of(context).general,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         color: AppColors.textSecondary,

@@ -1,0 +1,143 @@
+{
+  "@@locale": "en",
+  
+  "appName": "INSIDEX",
+  "appTagline": "Sound Healing & Subliminal",
+  
+  "settings": "Settings",
+  "account": "Account",
+  "editProfile": "Edit Profile",
+  "signOut": "Sign Out",
+  "signOutConfirmTitle": "Sign Out",
+  "signOutConfirmMessage": "Are you sure you want to sign out?",
+  "cancel": "Cancel",
+  "confirm": "Confirm",
+  
+  "app": "App",
+  "notifications": "Notifications",
+  "notificationsSubtitle": "Manage your notification preferences",
+  
+  "language": "Language",
+  "languageSubtitle": "Language / Язык",
+  
+  "supportAndFeedback": "Support & Feedback",
+  "sendFeedback": "Send Feedback",
+  "sendFeedbackSubtitle": "Help us improve INSIDEX",
+  "reportBug": "Report a Bug",
+  "reportBugSubtitle": "Something not working?",
+  
+  "about": "About",
+  "aboutApp": "About",
+  "disclaimer": "Disclaimer",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service",
+  
+  "version": "Version",
+  
+  "ok": "OK",
+  "yes": "Yes",
+  "no": "No",
+  "save": "Save",
+  "delete": "Delete",
+  "edit": "Edit",
+  "close": "Close",
+
+  "home": "Home",
+  "playlist": "Playlist",
+  "profile": "Profile",
+  "allSubliminals": "All Subliminals",
+  "yourPlaylist": "Your Playlist",
+  "menu": "Menu",
+
+  "myPlaylists": "My Playlists",
+  "myPlaylist": "My Playlist",
+  "favorites": "Favorites",
+  "recent": "Recent",
+  "done": "Done",
+  
+  "noSessionsInPlaylist": "No Sessions in Playlist",
+  "addSessionsToPlaylist": "Add sessions to create your perfect healing journey",
+  "noFavoriteSessions": "No Favorite Sessions",
+  "markSessionsAsFavorite": "Mark sessions as favorite to find them quickly",
+  "noRecentSessions": "No Recent Sessions",
+  "sessionsWillAppearHere": "Sessions you play will appear here",
+  
+  "removedFromFavorites": "Removed from favorites",
+  "addedToFavorites": "Added to favorites",
+  "removedFromPlaylist": "Removed from playlist",
+  "untitledSession": "Untitled Session",
+  "general": "General",
+  "untitled": "Untitled",
+  "addedToPlaylist": "Added to playlist",
+
+  "savingProfile": "Saving profile...",
+  "profileUpdated": "Profile updated successfully!",
+  "errorUpdatingProfile": "Error updating profile",
+  
+  "fullName": "Full Name",
+  "enterYourName": "Enter your name",
+  
+  "accountInformation": "Account Information",
+  "memberSince": "Member Since",
+  "accountType": "Account Type",
+  "premium": "Premium",
+  "free": "Free",
+  "role": "Role",
+  "administrator": "Administrator",
+  
+  "yourProgress": "Your Progress",
+  "trackYourListening": "Track your listening habits and improvements",
+  "myInsights": "My Insights",
+  "viewPersonalizedWellness": "View your personalized wellness profile",
+  "premiumWaitlist": "Premium Waitlist",
+  "joinEarlyAccess": "Join early access for premium features",
+  "adminDashboard": "Admin Dashboard",
+  "manageUsersAndSessions": "Manage users, sessions and app settings",
+  
+  "changePassword": "Change Password",
+  "helpAndSupport": "Help & Support",
+
+  "totalListening": "Total Listening",
+  "totalSessions": "Total Sessions",
+  "currentStreak": "Current Streak",
+  "min": "min",
+  "subliminals": "subliminals",
+  "days": "days",
+  
+  "analytics": "Analytics",
+  "year": "Year",
+  "month": "Month",
+  "week": "Week",
+  "day": "Day",
+  
+  "thisWeek": "This Week",
+  "topSessions": "Top Sessions",
+  "minutesToday": "minutes today",
+  "total": "total",
+  "noSessionsYet": "No sessions yet",
+  
+  "mon": "Mon",
+  "tue": "Tue",
+  "wed": "Wed",
+  "thu": "Thu",
+  "fri": "Fri",
+  "sat": "Sat",
+  "sun": "Sun",
+
+  "categories": "Categories",
+  "allSessions": "All Sessions",
+  "chooseCategory": "Choose a Category",
+  "selectCategoryExplore": "Select a category to explore sessions",
+  "sessions": "sessions",
+
+  "errorLoadingSessions": "Error loading sessions",
+  "noSessionsAvailable": "No sessions available",
+  "checkBackLater": "Check back later for new content",
+  "durationNotSet": "Duration not set",
+  "hour": "hour",
+  "hours": "hours",
+  "minute": "minute",
+  "minutes": "minutes"
+
+  
+}

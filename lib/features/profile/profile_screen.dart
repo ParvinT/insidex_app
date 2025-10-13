@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../core/routes/app_routes.dart';
+import '../../l10n/app_localizations.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_info_section.dart';
 import 'widgets/profile_action_button.dart';
@@ -89,8 +90,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).profileUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -100,7 +101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text(AppLocalizations.of(context).errorUpdatingProfile),
             backgroundColor: Colors.red,
           ),
         );
@@ -128,25 +129,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: Text(
-          'Sign Out',
+          AppLocalizations.of(context).signOutConfirmTitle,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         content: Text(
-          'Are you sure you want to sign out?',
+          AppLocalizations.of(context).signOutConfirmMessage,
           style: GoogleFonts.inter(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context).cancel,
               style: GoogleFonts.inter(color: AppColors.textSecondary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'Sign Out',
+              AppLocalizations.of(context).signOut,
               style: GoogleFonts.inter(color: Colors.red),
             ),
           ),
@@ -200,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
-              'Profile',
+              AppLocalizations.of(context).profile,
               style: GoogleFonts.inter(
                 fontSize: 20.sp.clamp(20.0, 22.0),
                 fontWeight: FontWeight.w600,
@@ -211,7 +212,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextButton(
                 onPressed: _isEditing ? _saveProfile : _toggleEditMode,
                 child: Text(
-                  _isEditing ? 'Save' : 'Edit',
+                  _isEditing
+                      ? AppLocalizations.of(context).save
+                      : AppLocalizations.of(context).edit,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp.clamp(14.0, 18.0),
                     fontWeight: FontWeight.w600,
@@ -237,8 +240,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 20.h),
                 ProfileActionButton(
                   icon: Icons.analytics_outlined,
-                  title: 'Your Progress',
-                  subtitle: 'Track your listening habits and improvements',
+                  title: AppLocalizations.of(context).yourProgress,
+                  subtitle: AppLocalizations.of(context).trackYourListening,
                   gradientColors: [
                     const Color(0xFF7DB9B6).withOpacity(0.1),
                     const Color(0xFFB8A6D9).withOpacity(0.1),
@@ -256,8 +259,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 20.h),
                 ProfileActionButton(
                   icon: Icons.insights_outlined,
-                  title: 'My Insights',
-                  subtitle: 'View your personalized wellness profile',
+                  title: AppLocalizations.of(context).myInsights,
+                  subtitle:
+                      AppLocalizations.of(context).viewPersonalizedWellness,
                   gradientColors: [
                     const Color(0xFFE8C5A0).withOpacity(0.1),
                     const Color(0xFF7DB9B6).withOpacity(0.1),
@@ -270,8 +274,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 20.h),
                 ProfileActionButton(
                   icon: Icons.star_rounded,
-                  title: 'Premium Waitlist',
-                  subtitle: 'Join early access for premium features',
+                  title: AppLocalizations.of(context).premiumWaitlist,
+                  subtitle: AppLocalizations.of(context).joinEarlyAccess,
                   gradientColors: [
                     AppColors.primaryGold.withOpacity(0.15),
                     AppColors.primaryGold.withOpacity(0.05),
@@ -286,8 +290,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(
                     icon: Icons.admin_panel_settings,
-                    title: 'Admin Dashboard',
-                    subtitle: 'Manage users, sessions and app settings',
+                    title: AppLocalizations.of(context).adminDashboard,
+                    subtitle:
+                        AppLocalizations.of(context).manageUsersAndSessions,
                     gradientColors: [
                       Colors.red.withOpacity(0.1),
                       Colors.orange.withOpacity(0.1),
@@ -314,7 +319,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     child: Text(
-                      'Sign Out',
+                      AppLocalizations.of(context).signOut,
                       style: GoogleFonts.inter(
                         fontSize: (18.sp).clamp(18.0, 22.0),
                         fontWeight: FontWeight.w600,

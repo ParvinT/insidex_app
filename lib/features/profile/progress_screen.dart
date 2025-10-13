@@ -3,14 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:math' as math;
 import 'dart:async';
-import '../../core/constants/app_colors.dart';
-import '../../providers/user_provider.dart';
 import '../../services/listening_tracker_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -29,9 +27,6 @@ class _ProgressScreenState extends State<ProgressScreen>
   bool _isLoading = true;
   bool _mounted = true;
   Timer? _refreshTimer;
-
-  // Time periods
-  final List<String> _periods = ['Analytics', 'Year', 'Month', 'Week', 'Day'];
 
   @override
   void initState() {
@@ -285,6 +280,28 @@ class _ProgressScreenState extends State<ProgressScreen>
     }
   }
 
+  String _translateDayName(String dayName) {
+    final l10n = AppLocalizations.of(context);
+    switch (dayName) {
+      case 'Mon':
+        return l10n.mon;
+      case 'Tue':
+        return l10n.tue;
+      case 'Wed':
+        return l10n.wed;
+      case 'Thu':
+        return l10n.thu;
+      case 'Fri':
+        return l10n.fri;
+      case 'Sat':
+        return l10n.sat;
+      case 'Sun':
+        return l10n.sun;
+      default:
+        return dayName;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -339,7 +356,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         title: Padding(
           padding: const EdgeInsets.only(top: 2),
           child: Text(
-            'Your Progress',
+            AppLocalizations.of(context).yourProgress,
             style: GoogleFonts.inter(
               fontSize: (isTablet || isDesktop) ? 22 : 20,
               height: 1.15,
@@ -371,7 +388,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                         children: [
                           // Description
                           Text(
-                            'Track your listening habits and improvements',
+                            AppLocalizations.of(context).trackYourListening,
                             style: GoogleFonts.inter(
                               fontSize: isCompactDevice ? 12.sp : 14.sp,
                               color: Colors.grey[600],
@@ -399,8 +416,9 @@ class _ProgressScreenState extends State<ProgressScreen>
                                     child: _buildStatCard(
                                       value:
                                           '${_analyticsData['totalMinutes'] ?? 0}',
-                                      unit: 'min',
-                                      label: 'Total Listening',
+                                      unit: AppLocalizations.of(context).min,
+                                      label: AppLocalizations.of(context)
+                                          .totalListening,
                                       isCompact: isCompactDevice,
                                       padding: statCardPadding,
                                     ),
@@ -410,8 +428,10 @@ class _ProgressScreenState extends State<ProgressScreen>
                                     child: _buildStatCard(
                                       value:
                                           '${_analyticsData['totalSessions'] ?? 0}',
-                                      unit: 'subliminals',
-                                      label: 'Total Sessions',
+                                      unit: AppLocalizations.of(context)
+                                          .subliminals,
+                                      label: AppLocalizations.of(context)
+                                          .totalSessions,
                                       isCompact: isCompactDevice,
                                       padding: statCardPadding,
                                     ),
@@ -421,8 +441,9 @@ class _ProgressScreenState extends State<ProgressScreen>
                                     child: _buildStatCard(
                                       value:
                                           '${_analyticsData['currentStreak'] ?? 0}',
-                                      unit: 'days streak',
-                                      label: 'Current Streak',
+                                      unit: AppLocalizations.of(context).days,
+                                      label: AppLocalizations.of(context)
+                                          .currentStreak,
                                       isCompact: isCompactDevice,
                                       padding: statCardPadding,
                                     ),
@@ -467,9 +488,25 @@ class _ProgressScreenState extends State<ProgressScreen>
                                 fontWeight: FontWeight.w500,
                               ),
                               labelPadding: EdgeInsets.zero,
-                              tabs: _periods.map((p) => Tab(text: p)).toList(),
-                              onTap: (i) =>
-                                  setState(() => _selectedPeriod = _periods[i]),
+                              tabs: [
+                                Tab(
+                                    text:
+                                        AppLocalizations.of(context).analytics),
+                                Tab(text: AppLocalizations.of(context).year),
+                                Tab(text: AppLocalizations.of(context).month),
+                                Tab(text: AppLocalizations.of(context).week),
+                                Tab(text: AppLocalizations.of(context).day),
+                              ],
+                              onTap: (i) {
+                                final periods = [
+                                  AppLocalizations.of(context).analytics,
+                                  AppLocalizations.of(context).year,
+                                  AppLocalizations.of(context).month,
+                                  AppLocalizations.of(context).week,
+                                  AppLocalizations.of(context).day,
+                                ];
+                                setState(() => _selectedPeriod = periods[i]);
+                              },
                             ),
                           ),
                           SizedBox(height: spacingUnit.h),
@@ -506,7 +543,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                           Column(
                             children: [
                               _buildProgressBar(
-                                'Day',
+                                AppLocalizations.of(context).day,
                                 (_analyticsData['monthlyProgress']
                                         as Map<String, double>?)?['Day'] ??
                                     0.0,
@@ -515,7 +552,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                               ),
                               SizedBox(height: 12.h),
                               _buildProgressBar(
-                                'Week',
+                                AppLocalizations.of(context).week,
                                 (_analyticsData['monthlyProgress']
                                         as Map<String, double>?)?['Week'] ??
                                     0.0,
@@ -524,7 +561,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                               ),
                               SizedBox(height: 12.h),
                               _buildProgressBar(
-                                'Month',
+                                AppLocalizations.of(context).month,
                                 (_analyticsData['monthlyProgress']
                                         as Map<String, double>?)?['Month'] ??
                                     0.0,
@@ -533,7 +570,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                               ),
                               SizedBox(height: 12.h),
                               _buildProgressBar(
-                                'Year',
+                                AppLocalizations.of(context).year,
                                 (_analyticsData['monthlyProgress']
                                         as Map<String, double>?)?['Year'] ??
                                     0.0,
@@ -561,7 +598,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      'This Week',
+                                      AppLocalizations.of(context).thisWeek,
                                       style: GoogleFonts.inter(
                                         fontSize:
                                             isCompactDevice ? 12.sp : 14.sp,
@@ -569,7 +606,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                       ),
                                     ),
                                     Text(
-                                      '${_analyticsData['weeklyTotal'] ?? 0} min total',
+                                      '${_analyticsData['weeklyTotal'] ?? 0} ${AppLocalizations.of(context).min} ${AppLocalizations.of(context).total}',
                                       style: GoogleFonts.inter(
                                         fontSize:
                                             isCompactDevice ? 10.sp : 12.sp,
@@ -679,7 +716,7 @@ class _ProgressScreenState extends State<ProgressScreen>
     if (topSessions.isEmpty) {
       return [
         Text(
-          'No sessions yet',
+          AppLocalizations.of(context).noSessionsYet,
           style: GoogleFonts.inter(
             fontSize: 12.sp,
             color: Colors.grey[500],
@@ -742,7 +779,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          '$minutes min',
+                          '$minutes ${AppLocalizations.of(context).min}',
                           style: GoogleFonts.inter(
                             fontSize: 11.sp,
                             color: Colors.white,
@@ -850,7 +887,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         barColor = const Color(0xFF7DB9B6);
       }
 
-      bars.add(_buildDayBar(dayName.substring(0, 3), height, barColor));
+      bars.add(_buildDayBar(_translateDayName(dayName), height, barColor));
     }
 
     return bars;
@@ -1017,7 +1054,7 @@ class _Donut extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'minutes today',
+                        AppLocalizations.of(context).minutesToday,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 14,
@@ -1046,7 +1083,7 @@ class _TopSessions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Top Sessions',
+          AppLocalizations.of(context).topSessions,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,

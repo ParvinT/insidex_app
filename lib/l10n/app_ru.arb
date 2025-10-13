@@ -1,0 +1,143 @@
+{
+  "@@locale": "ru",
+  
+  "appName": "INSIDEX",
+  "appTagline": "Звуковое Исцеление и Сублиминалы",
+  
+  "settings": "Настройки",
+  "account": "Аккаунт",
+  "editProfile": "Редактировать профиль",
+  "signOut": "Выйти",
+  "signOutConfirmTitle": "Выход",
+  "signOutConfirmMessage": "Вы уверены, что хотите выйти?",
+  "cancel": "Отмена",
+  "confirm": "Подтвердить",
+  
+  "app": "Приложение",
+  "notifications": "Уведомления",
+  "notificationsSubtitle": "Управление уведомлениями",
+  
+  "language": "Язык",
+  "languageSubtitle": "Language / Язык",
+  
+  "supportAndFeedback": "Поддержка и обратная связь",
+  "sendFeedback": "Отправить отзыв",
+  "sendFeedbackSubtitle": "Помогите нам улучшить INSIDEX",
+  "reportBug": "Сообщить об ошибке",
+  "reportBugSubtitle": "Что-то не работает?",
+  
+  "about": "О приложении",
+  "aboutApp": "О приложении",
+  "disclaimer": "Отказ от ответственности",
+  "privacyPolicy": "Политика конфиденциальности",
+  "termsOfService": "Условия использования",
+  
+  "version": "Версия",
+  
+  "ok": "ОК",
+  "yes": "Да",
+  "no": "Нет",
+  "save": "Сохранить",
+  "delete": "Удалить",
+  "edit": "Изменить",
+  "close": "Закрыть",
+
+  "home": "Главная",
+  "playlist": "Плейлист",
+  "profile": "Профиль",
+  "allSubliminals": "Все сублиминалы",
+  "yourPlaylist": "Ваш плейлист",
+  "menu": "Меню",
+
+  "myPlaylists": "Мои плейлисты",
+  "myPlaylist": "Мой плейлист",
+  "favorites": "Избранное",
+  "recent": "Недавние",
+  "done": "Готово",
+  
+  "noSessionsInPlaylist": "Нет сессий в плейлисте",
+  "addSessionsToPlaylist": "Добавьте сессии для создания идеального путешествия",
+  "noFavoriteSessions": "Нет избранных сессий",
+  "markSessionsAsFavorite": "Отметьте сессии как избранные для быстрого доступа",
+  "noRecentSessions": "Нет недавних сессий",
+  "sessionsWillAppearHere": "Прослушанные сессии появятся здесь",
+  
+  "removedFromFavorites": "Удалено из избранного",
+  "addedToFavorites": "Добавлено в избранное",
+  "removedFromPlaylist": "Удалено из плейлиста",
+  "untitledSession": "Сессия без названия",
+  "general": "Общее",
+  "untitled": "Без названия",
+  "addedToPlaylist": "Добавлено в плейлист",
+
+  "savingProfile": "Сохранение профиля...",
+  "profileUpdated": "Профиль успешно обновлен!",
+  "errorUpdatingProfile": "Ошибка обновления профиля",
+  
+  "fullName": "Полное имя",
+  "enterYourName": "Введите ваше имя",
+  
+  "accountInformation": "Информация об аккаунте",
+  "memberSince": "Участник с",
+  "accountType": "Тип аккаунта",
+  "premium": "Премиум",
+  "free": "Бесплатный",
+  "role": "Роль",
+  "administrator": "Администратор",
+  
+  "yourProgress": "Ваш прогресс",
+  "trackYourListening": "Отслеживайте свои привычки прослушивания и улучшения",
+  "myInsights": "Мои данные",
+  "viewPersonalizedWellness": "Просмотрите свой персонализированный профиль здоровья",
+  "premiumWaitlist": "Список ожидания Премиум",
+  "joinEarlyAccess": "Присоединяйтесь к раннему доступу к премиум-функциям",
+  "adminDashboard": "Панель администратора",
+  "manageUsersAndSessions": "Управление пользователями, сессиями и настройками приложения",
+  
+  "changePassword": "Изменить пароль",
+  "helpAndSupport": "Помощь и поддержка",
+
+   "totalListening": "Общее прослушивание",
+  "totalSessions": "Всего сессий",
+  "currentStreak": "Текущая серия",
+  "min": "мин",
+  "subliminals": "сублиминалов",
+  "days": "дней",
+  
+  "analytics": "Аналитика",
+  "year": "Год",
+  "month": "Месяц",
+  "week": "Неделя",
+  "day": "День",
+  
+  "thisWeek": "На этой неделе",
+  "topSessions": "Топ сессии",
+  "minutesToday": "минут сегодня",
+  "total": "всего",
+  "noSessionsYet": "Сессий пока нет",
+  
+  "mon": "Пн",
+  "tue": "Вт",
+  "wed": "Ср",
+  "thu": "Чт",
+  "fri": "Пт",
+  "sat": "Сб",
+  "sun": "Вс",
+
+  "categories": "Категории",
+  "allSessions": "Все сессии",
+  "chooseCategory": "Выберите категорию",
+  "selectCategoryExplore": "Выберите категорию для просмотра сессий",
+  "sessions": "сессий",
+
+  "errorLoadingSessions": "Ошибка загрузки сессий",
+  "noSessionsAvailable": "Нет доступных сессий",
+  "checkBackLater": "Вернитесь позже за новым контентом",
+  "durationNotSet": "Длительность не установлена",
+  "hour": "час",
+  "hours": "часов",
+  "minute": "минута",
+  "minutes": "минут"
+
+  
+}

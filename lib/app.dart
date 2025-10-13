@@ -5,6 +5,9 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'core/themes/app_theme.dart';
 import 'core/routes/app_routes.dart';
 import 'providers/theme_provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'l10n/app_localizations.dart';
+import 'providers/locale_provider.dart';
 
 class InsidexApp extends StatelessWidget {
   const InsidexApp({super.key});
@@ -19,11 +22,19 @@ class InsidexApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return Consumer<ThemeProvider>(
-          builder: (context, themeProvider, _) {
+        return Consumer2<ThemeProvider, LocaleProvider>(
+          builder: (context, themeProvider, localeProvider, _) {
             return MaterialApp(
               title: 'INSIDEX',
               debugShowCheckedModeBanner: false,
+              locale: localeProvider.locale,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: LocaleProvider.supportedLocales,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
               themeMode: ThemeMode.light, // Geçici olarak light'a zorlanmış

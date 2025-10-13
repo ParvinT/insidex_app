@@ -9,6 +9,7 @@ import '../../core/constants/app_colors.dart';
 import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../l10n/app_localizations.dart';
 
 class CategorySessionsScreen extends StatefulWidget {
   final String categoryTitle;
@@ -50,8 +51,9 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
     // Sadece bu ekranda font şişmesini yumuşat
     final double _ts = mq.textScaleFactor.clamp(1.0, 1.2);
 
-    final String rightTitleText =
-        widget.showAllSessions ? 'All Subliminals' : widget.categoryTitle;
+    final String rightTitleText = widget.showAllSessions
+        ? AppLocalizations.of(context).allSubliminals
+        : widget.categoryTitle;
 
     return MediaQuery(
       data: mq.copyWith(textScaleFactor: _ts),
@@ -183,7 +185,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                     Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
                     SizedBox(height: 16.h),
                     Text(
-                      'Error loading sessions',
+                      AppLocalizations.of(context).errorLoadingSessions,
                       style: GoogleFonts.inter(
                           fontSize: 16.sp, color: AppColors.textSecondary),
                     ),
@@ -208,7 +210,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                         size: 64.sp, color: AppColors.greyLight),
                     SizedBox(height: 16.h),
                     Text(
-                      'No sessions available',
+                      AppLocalizations.of(context).noSessionsAvailable,
                       style: GoogleFonts.inter(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -217,7 +219,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                     ),
                     SizedBox(height: 8.h),
                     Text(
-                      'Check back later for new content',
+                      AppLocalizations.of(context).checkBackLater,
                       style: GoogleFonts.inter(
                           fontSize: 14.sp, color: AppColors.textSecondary),
                     ),
@@ -395,7 +397,8 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                   // Title
                   Expanded(
                     child: Text(
-                      sessionData['title'] ?? 'Untitled Session',
+                      sessionData['title'] ??
+                          AppLocalizations.of(context).untitledSession,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
@@ -419,7 +422,8 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                       borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Text(
-                      sessionData['category'] ?? 'General',
+                      sessionData['category'] ??
+                          AppLocalizations.of(context).general,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
@@ -434,25 +438,5 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
         ),
       ),
     );
-  }
-
-  String _formatDuration(int seconds) {
-    if (seconds < 60) {
-      return '${seconds}s';
-    } else if (seconds < 3600) {
-      final minutes = seconds ~/ 60;
-      final remainingSeconds = seconds % 60;
-      if (remainingSeconds == 0) {
-        return '${minutes}m';
-      }
-      return '${minutes}m ${remainingSeconds}s';
-    } else {
-      final hours = seconds ~/ 3600;
-      final remainingMinutes = (seconds % 3600) ~/ 60;
-      if (remainingMinutes == 0) {
-        return '${hours}h';
-      }
-      return '${hours}h ${remainingMinutes}m';
-    }
   }
 }

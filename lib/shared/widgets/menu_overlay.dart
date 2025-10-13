@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../../l10n/app_localizations.dart';
 
 class MenuOverlay extends StatefulWidget {
   final VoidCallback onClose;
@@ -113,7 +114,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                'Menu',
+                                AppLocalizations.of(context).menu,
                                 style: GoogleFonts.inter(
                                   fontSize: 24.sp,
                                   fontWeight: FontWeight.w700,
@@ -145,7 +146,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                             children: [
                               _buildMenuItem(
                                 icon: Icons.person_outline,
-                                title: 'Profile',
+                                title: AppLocalizations.of(context).profile,
                                 onTap: () {
                                   _closeMenu();
                                   AppRoutes.navigateToProfile(context);
@@ -153,7 +154,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                               ),
                               _buildMenuItem(
                                 icon: Icons.settings_outlined,
-                                title: 'Settings',
+                                title: AppLocalizations.of(context).settings,
                                 onTap: () {
                                   _closeMenu();
                                   Navigator.pushNamed(
@@ -177,7 +178,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                             children: [
                               // Version info
                               Text(
-                                'Version 1.0.0',
+                                '${AppLocalizations.of(context).version} 1.0.0',
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w400,

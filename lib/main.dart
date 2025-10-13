@@ -13,6 +13,8 @@ import 'app.dart';
 import 'providers/notification_provider.dart';
 import 'services/notifications/notification_service.dart';
 import 'services/notifications/notification_reliability_service.dart';
+import 'providers/locale_provider.dart';
+import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
@@ -32,9 +34,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-  await NotificationReliabilityService.initialize();
-
+  if (!kIsWeb) {
+    BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+    await NotificationReliabilityService.initialize();
+  }
   // Notification Service
   try {
     await NotificationService().initialize();
@@ -67,6 +70,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(
             create: (_) => UserProvider()..initAuthListener()),
         ChangeNotifierProvider(
