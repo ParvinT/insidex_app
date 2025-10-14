@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:ui' as ui;
 
 class LocaleProvider extends ChangeNotifier {
   Locale _locale = const Locale('en'); // Varsayılan İngilizce
@@ -37,9 +38,16 @@ class LocaleProvider extends ChangeNotifier {
 
   // Cihazın dilini al (destekleniyorsa)
   Locale _getDeviceLocale() {
-    // Platform locale'i alınacak (şimdilik varsayılan İngilizce)
-    // Gerçek implementasyon main.dart'ta olacak
-    return const Locale('en');
+    // Platformun dilini al
+    final deviceLocale = ui.PlatformDispatcher.instance.locale;
+
+    // Desteklenen diller arasında var mı kontrol et
+    final isSupported = supportedLocales.any(
+      (locale) => locale.languageCode == deviceLocale.languageCode,
+    );
+
+    // Destekleniyorsa cihaz dilini, yoksa İngilizce kullan
+    return isSupported ? Locale(deviceLocale.languageCode) : const Locale('en');
   }
 
   // Dil değiştir ve kaydet

@@ -182,12 +182,6 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get language;
 
-  /// No description provided for @languageSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Language / Язык'**
-  String get languageSubtitle;
-
   /// No description provided for @supportAndFeedback.
   ///
   /// In en, this message translates to:
@@ -260,41 +254,17 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
-  /// No description provided for @yes.
-  ///
-  /// In en, this message translates to:
-  /// **'Yes'**
-  String get yes;
-
-  /// No description provided for @no.
-  ///
-  /// In en, this message translates to:
-  /// **'No'**
-  String get no;
-
   /// No description provided for @save.
   ///
   /// In en, this message translates to:
   /// **'Save'**
   String get save;
 
-  /// No description provided for @delete.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete'**
-  String get delete;
-
   /// No description provided for @edit.
   ///
   /// In en, this message translates to:
   /// **'Edit'**
   String get edit;
-
-  /// No description provided for @close.
-  ///
-  /// In en, this message translates to:
-  /// **'Close'**
-  String get close;
 
   /// No description provided for @home.
   ///
@@ -440,12 +410,6 @@ abstract class AppLocalizations {
   /// **'Added to playlist'**
   String get addedToPlaylist;
 
-  /// No description provided for @savingProfile.
-  ///
-  /// In en, this message translates to:
-  /// **'Saving profile...'**
-  String get savingProfile;
-
   /// No description provided for @profileUpdated.
   ///
   /// In en, this message translates to:
@@ -566,41 +530,11 @@ abstract class AppLocalizations {
   /// **'Change Password'**
   String get changePassword;
 
-  /// No description provided for @helpAndSupport.
-  ///
-  /// In en, this message translates to:
-  /// **'Help & Support'**
-  String get helpAndSupport;
-
-  /// No description provided for @totalListening.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Listening'**
-  String get totalListening;
-
-  /// No description provided for @totalSessions.
-  ///
-  /// In en, this message translates to:
-  /// **'Total Sessions'**
-  String get totalSessions;
-
-  /// No description provided for @currentStreak.
-  ///
-  /// In en, this message translates to:
-  /// **'Current Streak'**
-  String get currentStreak;
-
   /// No description provided for @min.
   ///
   /// In en, this message translates to:
   /// **'min'**
   String get min;
-
-  /// No description provided for @subliminals.
-  ///
-  /// In en, this message translates to:
-  /// **'subliminals'**
-  String get subliminals;
 
   /// No description provided for @days.
   ///
@@ -758,35 +692,587 @@ abstract class AppLocalizations {
   /// **'Check back later for new content'**
   String get checkBackLater;
 
-  /// No description provided for @durationNotSet.
+  /// No description provided for @overview.
   ///
   /// In en, this message translates to:
-  /// **'Duration not set'**
-  String get durationNotSet;
+  /// **'Overview'**
+  String get overview;
 
-  /// No description provided for @hour.
+  /// No description provided for @goalsTab.
   ///
   /// In en, this message translates to:
-  /// **'hour'**
-  String get hour;
+  /// **'Goals'**
+  String get goalsTab;
 
-  /// No description provided for @hours.
+  /// No description provided for @stats.
   ///
   /// In en, this message translates to:
-  /// **'hours'**
-  String get hours;
+  /// **'Stats'**
+  String get stats;
 
-  /// No description provided for @minute.
+  /// No description provided for @journey.
   ///
   /// In en, this message translates to:
-  /// **'minute'**
-  String get minute;
+  /// **'Journey'**
+  String get journey;
 
-  /// No description provided for @minutes.
+  /// No description provided for @subliminals.
   ///
   /// In en, this message translates to:
-  /// **'minutes'**
-  String get minutes;
+  /// **'subliminals'**
+  String get subliminals;
+
+  /// No description provided for @personalInformation.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Information'**
+  String get personalInformation;
+
+  /// No description provided for @gender.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get gender;
+
+  /// No description provided for @male.
+  ///
+  /// In en, this message translates to:
+  /// **'Male'**
+  String get male;
+
+  /// No description provided for @female.
+  ///
+  /// In en, this message translates to:
+  /// **'Female'**
+  String get female;
+
+  /// No description provided for @totalListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Listening'**
+  String get totalListening;
+
+  /// No description provided for @totalSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Sessions'**
+  String get totalSessions;
+
+  /// No description provided for @currentStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Streak'**
+  String get currentStreak;
+
+  /// No description provided for @noGoalsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No goals set yet'**
+  String get noGoalsYet;
+
+  /// No description provided for @goalProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal Progress'**
+  String get goalProgress;
+
+  /// No description provided for @weeklyActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly Activity'**
+  String get weeklyActivity;
+
+  /// No description provided for @averageSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Session'**
+  String get averageSession;
+
+  /// No description provided for @editMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Mode'**
+  String get editMode;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @personalInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Info'**
+  String get personalInfo;
+
+  /// No description provided for @yourPersonalizedProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personalized wellness profile'**
+  String get yourPersonalizedProfile;
+
+  /// No description provided for @birthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth Date'**
+  String get birthDate;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @notSpecified.
+  ///
+  /// In en, this message translates to:
+  /// **'Not specified'**
+  String get notSpecified;
+
+  /// No description provided for @personalityInsights.
+  ///
+  /// In en, this message translates to:
+  /// **'Personality Insights'**
+  String get personalityInsights;
+
+  /// No description provided for @ageGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Age Group'**
+  String get ageGroup;
+
+  /// No description provided for @wellnessFocus.
+  ///
+  /// In en, this message translates to:
+  /// **'Wellness Focus'**
+  String get wellnessFocus;
+
+  /// No description provided for @recommendedSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended Sessions'**
+  String get recommendedSessions;
+
+  /// No description provided for @yourWellnessGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Wellness Goals'**
+  String get yourWellnessGoals;
+
+  /// No description provided for @daysActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Days Active'**
+  String get daysActive;
+
+  /// No description provided for @sessionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get sessionsLabel;
+
+  /// No description provided for @minutesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get minutesLabel;
+
+  /// No description provided for @streakLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak'**
+  String get streakLabel;
+
+  /// No description provided for @minTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'min total'**
+  String get minTotal;
+
+  /// No description provided for @sessionStats.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Stats'**
+  String get sessionStats;
+
+  /// No description provided for @longestSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Longest Session'**
+  String get longestSession;
+
+  /// No description provided for @favoriteTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite Time'**
+  String get favoriteTime;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @yourWellnessJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Wellness Journey'**
+  String get yourWellnessJourney;
+
+  /// No description provided for @trackMilestones.
+  ///
+  /// In en, this message translates to:
+  /// **'Track your milestones and achievements'**
+  String get trackMilestones;
+
+  /// No description provided for @firstSession.
+  ///
+  /// In en, this message translates to:
+  /// **'First Session'**
+  String get firstSession;
+
+  /// No description provided for @notStartedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not started yet'**
+  String get notStartedYet;
+
+  /// No description provided for @sevenDayStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'7 Day Streak'**
+  String get sevenDayStreak;
+
+  /// No description provided for @achieved.
+  ///
+  /// In en, this message translates to:
+  /// **'Achieved!'**
+  String get achieved;
+
+  /// No description provided for @daysToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'days to go'**
+  String get daysToGo;
+
+  /// No description provided for @tenSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Sessions'**
+  String get tenSessions;
+
+  /// No description provided for @completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed!'**
+  String get completed;
+
+  /// No description provided for @sessionsToGo.
+  ///
+  /// In en, this message translates to:
+  /// **'sessions to go'**
+  String get sessionsToGo;
+
+  /// No description provided for @thirtyDayStreak.
+  ///
+  /// In en, this message translates to:
+  /// **'30 Day Streak'**
+  String get thirtyDayStreak;
+
+  /// No description provided for @amazingAchievement.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazing achievement!'**
+  String get amazingAchievement;
+
+  /// No description provided for @keepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going!'**
+  String get keepGoing;
+
+  /// No description provided for @fiftySessions.
+  ///
+  /// In en, this message translates to:
+  /// **'50 Sessions'**
+  String get fiftySessions;
+
+  /// No description provided for @powerUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Power user!'**
+  String get powerUser;
+
+  /// No description provided for @longTermGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Long term goal'**
+  String get longTermGoal;
+
+  /// No description provided for @years.
+  ///
+  /// In en, this message translates to:
+  /// **'years'**
+  String get years;
+
+  /// No description provided for @yourAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Age'**
+  String get yourAge;
+
+  /// No description provided for @active.
+  ///
+  /// In en, this message translates to:
+  /// **'active'**
+  String get active;
+
+  /// No description provided for @goalsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Goals'**
+  String get goalsLabel;
+
+  /// No description provided for @member.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get member;
+
+  /// No description provided for @morning.
+  ///
+  /// In en, this message translates to:
+  /// **'Morning'**
+  String get morning;
+
+  /// No description provided for @afternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Afternoon'**
+  String get afternoon;
+
+  /// No description provided for @evening.
+  ///
+  /// In en, this message translates to:
+  /// **'Evening'**
+  String get evening;
+
+  /// No description provided for @night.
+  ///
+  /// In en, this message translates to:
+  /// **'Night'**
+  String get night;
+
+  /// No description provided for @youngAdult.
+  ///
+  /// In en, this message translates to:
+  /// **'Young Adult'**
+  String get youngAdult;
+
+  /// No description provided for @earlyTwenties.
+  ///
+  /// In en, this message translates to:
+  /// **'Early Twenties'**
+  String get earlyTwenties;
+
+  /// No description provided for @lateTwenties.
+  ///
+  /// In en, this message translates to:
+  /// **'Late Twenties'**
+  String get lateTwenties;
+
+  /// No description provided for @thirties.
+  ///
+  /// In en, this message translates to:
+  /// **'Thirties'**
+  String get thirties;
+
+  /// No description provided for @matureAdult.
+  ///
+  /// In en, this message translates to:
+  /// **'Mature Adult'**
+  String get matureAdult;
+
+  /// No description provided for @sleepQuality.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Quality'**
+  String get sleepQuality;
+
+  /// No description provided for @mentalPeace.
+  ///
+  /// In en, this message translates to:
+  /// **'Mental Peace'**
+  String get mentalPeace;
+
+  /// No description provided for @vitality.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitality'**
+  String get vitality;
+
+  /// No description provided for @generalWellness.
+  ///
+  /// In en, this message translates to:
+  /// **'General Wellness'**
+  String get generalWellness;
+
+  /// No description provided for @sleepSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Sessions'**
+  String get sleepSessions;
+
+  /// No description provided for @meditation.
+  ///
+  /// In en, this message translates to:
+  /// **'Meditation'**
+  String get meditation;
+
+  /// No description provided for @focusSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus Sessions'**
+  String get focusSessions;
+
+  /// No description provided for @editGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Goals'**
+  String get editGoals;
+
+  /// No description provided for @goalEditingComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal editing feature coming soon!'**
+  String get goalEditingComingSoon;
+
+  /// No description provided for @profileUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdatedSuccessfully;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @continueButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// No description provided for @tellUsAboutYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about yourself'**
+  String get tellUsAboutYourself;
+
+  /// No description provided for @thisHelpsPersonalize.
+  ///
+  /// In en, this message translates to:
+  /// **'This helps us personalize your experience'**
+  String get thisHelpsPersonalize;
+
+  /// No description provided for @answerQuickQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Answer a few quick questions to get personalized recommendations'**
+  String get answerQuickQuestions;
+
+  /// No description provided for @whatAreYourGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'What are your current goals'**
+  String get whatAreYourGoals;
+
+  /// No description provided for @health.
+  ///
+  /// In en, this message translates to:
+  /// **'Health'**
+  String get health;
+
+  /// No description provided for @confidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Confidence'**
+  String get confidence;
+
+  /// No description provided for @energy.
+  ///
+  /// In en, this message translates to:
+  /// **'Energy'**
+  String get energy;
+
+  /// No description provided for @betterSleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Better Sleep'**
+  String get betterSleep;
+
+  /// No description provided for @anxietyRelief.
+  ///
+  /// In en, this message translates to:
+  /// **'Anxiety Relief'**
+  String get anxietyRelief;
+
+  /// No description provided for @emotionalBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional Balance'**
+  String get emotionalBalance;
+
+  /// No description provided for @dateOfBirth.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of Birth'**
+  String get dateOfBirth;
+
+  /// No description provided for @selectYourBirthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your birth date'**
+  String get selectYourBirthDate;
+
+  /// No description provided for @youMustBeAtLeast18.
+  ///
+  /// In en, this message translates to:
+  /// **'You must be at least 18 years old'**
+  String get youMustBeAtLeast18;
+
+  /// No description provided for @pleaseSelectBirthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select your birth date'**
+  String get pleaseSelectBirthDate;
+
+  /// No description provided for @errorSavingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving data. Please try again.'**
+  String get errorSavingData;
+
+  /// No description provided for @yourInformationIsSecure.
+  ///
+  /// In en, this message translates to:
+  /// **'Your information is secure and will never be shared'**
+  String get yourInformationIsSecure;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @yearsOld.
+  ///
+  /// In en, this message translates to:
+  /// **'years old'**
+  String get yearsOld;
 }
 
 class _AppLocalizationsDelegate

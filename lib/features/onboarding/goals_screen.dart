@@ -8,6 +8,7 @@ import '../../core/routes/app_routes.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../services/analytics_service.dart';
 import '../../shared/models/user_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import 'gender_screen.dart';
 
 class GoalsScreen extends StatefulWidget {
@@ -57,6 +58,24 @@ class _GoalsScreenState extends State<GoalsScreen>
     );
   }
 
+  String _getLocalizedGoalTitle(UserGoal goal) {
+    final l10n = AppLocalizations.of(context);
+    switch (goal) {
+      case UserGoal.health:
+        return l10n.health;
+      case UserGoal.confidence:
+        return l10n.confidence;
+      case UserGoal.energy:
+        return l10n.energy;
+      case UserGoal.betterSleep:
+        return l10n.betterSleep;
+      case UserGoal.anxietyRelief:
+        return l10n.anxietyRelief;
+      case UserGoal.emotionalBalance:
+        return l10n.emotionalBalance;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -98,7 +117,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: Text(
-                  'Skip',
+                  AppLocalizations.of(context).skip,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -124,7 +143,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         _buildProgressIndicator(),
                         SizedBox(height: 24.h),
                         Text(
-                          'Tell us about yourself',
+                          AppLocalizations.of(context).tellUsAboutYourself,
                           style: GoogleFonts.inter(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w700,
@@ -133,7 +152,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Answer a few quick questions to get personalized recommendations',
+                          AppLocalizations.of(context).answerQuickQuestions,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
@@ -142,7 +161,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         ),
                         SizedBox(height: 24.h),
                         Text(
-                          'What are your current goals',
+                          AppLocalizations.of(context).whatAreYourGoals,
                           style: GoogleFonts.inter(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w600,
@@ -173,6 +192,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         return _GoalCard(
                           goal: goal,
                           isSelected: isSelected,
+                          localizedTitle: _getLocalizedGoalTitle(goal),
                           onTap: () {
                             setState(() {
                               if (isSelected) {
@@ -238,8 +258,12 @@ class _GoalCard extends StatelessWidget {
   final UserGoal goal;
   final bool isSelected;
   final VoidCallback onTap;
+  final String localizedTitle;
   const _GoalCard(
-      {required this.goal, required this.isSelected, required this.onTap});
+      {required this.goal,
+      required this.isSelected,
+      required this.onTap,
+      required this.localizedTitle});
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +320,7 @@ class _GoalCard extends StatelessWidget {
                 ConstrainedBox(
                   constraints: BoxConstraints(maxWidth: 140.w),
                   child: Text(
-                    goal.title,
+                    localizedTitle,
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -341,7 +365,7 @@ class _BottomBar extends StatelessWidget {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
           ),
-          child: Text('Continue',
+          child: Text(AppLocalizations.of(context).continueButton,
               style: GoogleFonts.inter(
                   fontSize: 16.sp, fontWeight: FontWeight.w700)),
         ),

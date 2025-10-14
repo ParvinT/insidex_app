@@ -8,7 +8,6 @@ import '../../features/onboarding/goals_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/profile/profile_screen.dart';
 import '../../features/player/audio_player_screen.dart';
-import '../../features/library/session_detail_screen.dart';
 import '../../features/admin/admin_dashboard_screen.dart';
 import '../../features/admin/add_session_screen.dart';
 import '../../features/admin/category_management_screen.dart';
@@ -49,7 +48,6 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String myInsights = '/profile/my-insights';
   static const String player = '/player';
-  static const String sessionDetail = '/session-detail';
   static const String adminDashboard = '/admin/dashboard';
 
   static const String privacyPolicy = '/legal/privacy-policy';
@@ -97,11 +95,6 @@ class AppRoutes {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
           return AudioPlayerScreen(sessionData: args);
-        },
-        sessionDetail: (context) {
-          final args = ModalRoute.of(context)?.settings.arguments
-              as Map<String, dynamic>?;
-          return SessionDetailScreen(sessionData: args ?? {});
         },
       };
 

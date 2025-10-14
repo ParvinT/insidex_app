@@ -18,7 +18,6 @@
   "notificationsSubtitle": "Manage your notification preferences",
   
   "language": "Language",
-  "languageSubtitle": "Language / Язык",
   
   "supportAndFeedback": "Support & Feedback",
   "sendFeedback": "Send Feedback",
@@ -35,12 +34,8 @@
   "version": "Version",
   
   "ok": "OK",
-  "yes": "Yes",
-  "no": "No",
   "save": "Save",
-  "delete": "Delete",
   "edit": "Edit",
-  "close": "Close",
 
   "home": "Home",
   "playlist": "Playlist",
@@ -70,7 +65,6 @@
   "untitled": "Untitled",
   "addedToPlaylist": "Added to playlist",
 
-  "savingProfile": "Saving profile...",
   "profileUpdated": "Profile updated successfully!",
   "errorUpdatingProfile": "Error updating profile",
   
@@ -95,13 +89,10 @@
   "manageUsersAndSessions": "Manage users, sessions and app settings",
   
   "changePassword": "Change Password",
-  "helpAndSupport": "Help & Support",
 
-  "totalListening": "Total Listening",
-  "totalSessions": "Total Sessions",
-  "currentStreak": "Current Streak",
+  
+  
   "min": "min",
-  "subliminals": "subliminals",
   "days": "days",
   
   "analytics": "Analytics",
@@ -133,11 +124,128 @@
   "errorLoadingSessions": "Error loading sessions",
   "noSessionsAvailable": "No sessions available",
   "checkBackLater": "Check back later for new content",
-  "durationNotSet": "Duration not set",
-  "hour": "hour",
-  "hours": "hours",
-  "minute": "minute",
-  "minutes": "minutes"
+
+
+  "overview": "Overview",
+  "goalsTab": "Goals",
+  "stats": "Stats",
+  "journey": "Journey",
+  "subliminals": "subliminals",
+  
+  "personalInformation": "Personal Information",
+  "gender": "Gender",
+  "male": "Male",
+  "female": "Female",
+  
+  "totalListening": "Total Listening",
+  "totalSessions": "Total Sessions",
+  "currentStreak": "Current Streak",
+  
+  "noGoalsYet": "No goals set yet",
+  "goalProgress": "Goal Progress",
+  
+  "weeklyActivity": "Weekly Activity",
+  "averageSession": "Average Session",
+  
+  "editMode": "Edit Mode",
+  "saveChanges": "Save Changes",
+  "personalInfo": "Personal Info",
+
+  "yourPersonalizedProfile": "Your personalized wellness profile",
+  "birthDate": "Birth Date",
+  "email": "Email",
+  "notSpecified": "Not specified",
+  
+  "personalityInsights": "Personality Insights",
+  "ageGroup": "Age Group",
+  "wellnessFocus": "Wellness Focus",
+  "recommendedSessions": "Recommended Sessions",
+  
+  "yourWellnessGoals": "Your Wellness Goals",
+  
+  "daysActive": "Days Active",
+  "sessionsLabel": "Sessions",
+  "minutesLabel": "Minutes",
+  "streakLabel": "Streak",
+  
+  "minTotal": "min total",
+  
+  "sessionStats": "Session Stats",
+  "longestSession": "Longest Session",
+  "favoriteTime": "Favorite Time",
+  "loading": "Loading...",
+  
+  "yourWellnessJourney": "Your Wellness Journey",
+  "trackMilestones": "Track your milestones and achievements",
+  
+  "firstSession": "First Session",
+  "notStartedYet": "Not started yet",
+  "sevenDayStreak": "7 Day Streak",
+  "achieved": "Achieved!",
+  "daysToGo": "days to go",
+  "tenSessions": "10 Sessions",
+  "completed": "Completed!",
+  "sessionsToGo": "sessions to go",
+  "thirtyDayStreak": "30 Day Streak",
+  "amazingAchievement": "Amazing achievement!",
+  "keepGoing": "Keep going!",
+  "fiftySessions": "50 Sessions",
+  "powerUser": "Power user!",
+  "longTermGoal": "Long term goal",
+  
+  "years": "years",
+  "yourAge": "Your Age",
+  "active": "active",
+  "goalsLabel": "Goals",
+  "member": "Member",
+  
+  "morning": "Morning",
+  "afternoon": "Afternoon",
+  "evening": "Evening",
+  "night": "Night",
+  
+  "youngAdult": "Young Adult",
+  "earlyTwenties": "Early Twenties",
+  "lateTwenties": "Late Twenties",
+  "thirties": "Thirties",
+  "matureAdult": "Mature Adult",
+  
+  "sleepQuality": "Sleep Quality",
+  "mentalPeace": "Mental Peace",
+  "vitality": "Vitality",
+  "generalWellness": "General Wellness",
+  
+  "sleepSessions": "Sleep Sessions",
+  "meditation": "Meditation",
+  "focusSessions": "Focus Sessions",
+  
+  "editGoals": "Edit Goals",
+  "goalEditingComingSoon": "Goal editing feature coming soon!",
+  "profileUpdatedSuccessfully": "Profile updated successfully",
+
+  "skip": "Skip",
+  "continueButton": "Continue",
+  "tellUsAboutYourself": "Tell us about yourself",
+  "thisHelpsPersonalize": "This helps us personalize your experience",
+  "answerQuickQuestions": "Answer a few quick questions to get personalized recommendations",
+
+  "whatAreYourGoals": "What are your current goals",
+
+  "health": "Health",
+  "confidence": "Confidence",
+  "energy": "Energy",
+  "betterSleep": "Better Sleep",
+  "anxietyRelief": "Anxiety Relief",
+  "emotionalBalance": "Emotional Balance",
+
+  "dateOfBirth": "Date of Birth",
+  "selectYourBirthDate": "Select your birth date",
+  "youMustBeAtLeast18": "You must be at least 18 years old",
+  "pleaseSelectBirthDate": "Please select your birth date",
+  "errorSavingData": "Error saving data. Please try again.",
+  "yourInformationIsSecure": "Your information is secure and will never be shared",
+  "age": "Age",
+  "yearsOld": "years old"
 
   
 }

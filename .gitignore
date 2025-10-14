@@ -55,3 +55,7 @@ firebase.json
 functions/.env
 functions/node_modules/
 .firebase/
+
+
+lib/l10n/app_localizations.dart
+lib/l10n/app_localizations_*.dart

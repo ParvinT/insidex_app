@@ -18,7 +18,6 @@
   "notificationsSubtitle": "Управление уведомлениями",
   
   "language": "Язык",
-  "languageSubtitle": "Language / Язык",
   
   "supportAndFeedback": "Поддержка и обратная связь",
   "sendFeedback": "Отправить отзыв",
@@ -35,12 +34,9 @@
   "version": "Версия",
   
   "ok": "ОК",
-  "yes": "Да",
-  "no": "Нет",
   "save": "Сохранить",
-  "delete": "Удалить",
   "edit": "Изменить",
-  "close": "Закрыть",
+  
 
   "home": "Главная",
   "playlist": "Плейлист",
@@ -70,7 +66,7 @@
   "untitled": "Без названия",
   "addedToPlaylist": "Добавлено в плейлист",
 
-  "savingProfile": "Сохранение профиля...",
+  
   "profileUpdated": "Профиль успешно обновлен!",
   "errorUpdatingProfile": "Ошибка обновления профиля",
   
@@ -95,9 +91,8 @@
   "manageUsersAndSessions": "Управление пользователями, сессиями и настройками приложения",
   
   "changePassword": "Изменить пароль",
-  "helpAndSupport": "Помощь и поддержка",
 
-   "totalListening": "Общее прослушивание",
+  "totalListening": "Общее прослушивание",
   "totalSessions": "Всего сессий",
   "currentStreak": "Текущая серия",
   "min": "мин",
@@ -133,11 +128,124 @@
   "errorLoadingSessions": "Ошибка загрузки сессий",
   "noSessionsAvailable": "Нет доступных сессий",
   "checkBackLater": "Вернитесь позже за новым контентом",
-  "durationNotSet": "Длительность не установлена",
-  "hour": "час",
-  "hours": "часов",
-  "minute": "минута",
-  "minutes": "минут"
+
+  "overview": "Обзор",
+  "goalsTab": "Цели",
+  "stats": "Статистика",
+  "journey": "Путь",
+  
+  "personalInformation": "Личная информация",
+  "gender": "Пол",
+  "male": "Мужской",
+  "female": "Женский",
+  "other": "Другое",
+  "preferNotToSay": "Не указан",
+  
+  
+  "noGoalsYet": "Целей пока нет",
+  "goalProgress": "Прогресс целей",
+  
+  "weeklyActivity": "Недельная активность",
+  "editMode": "Режим редактирования",
+  "saveChanges": "Сохранить изменения",
+  "personalInfo": "Личная информация",
+
+  "yourPersonalizedProfile": "Ваш персонализированный профиль здоровья",
+  "birthDate": "Дата рождения",
+  "email": "Электронная почта",
+  "notSpecified": "Не указано",
+  
+  "personalityInsights": "Личные особенности",
+  "ageGroup": "Возрастная группа",
+  "wellnessFocus": "Фокус здоровья",
+  "recommendedSessions": "Рекомендуемые сессии",
+  
+  "yourWellnessGoals": "Ваши цели здоровья",
+  
+  "daysActive": "Дней активности",
+  "sessionsLabel": "Сессий",
+  "minutesLabel": "Минут",
+  "streakLabel": "Серия",
+  
+  "minTotal": "мин всего",
+  
+  "sessionStats": "Статистика сессий",
+  "averageSession": "Средняя сессия",
+  "longestSession": "Самая долгая сессия",
+  "favoriteTime": "Любимое время",
+  "loading": "Загрузка...",
+  
+  "yourWellnessJourney": "Ваш путь здоровья",
+  "trackMilestones": "Отслеживайте свои достижения и вехи",
+  
+  "firstSession": "Первая сессия",
+  "notStartedYet": "Еще не начато",
+  "sevenDayStreak": "7-дневная серия",
+  "achieved": "Достигнуто!",
+  "daysToGo": "дней осталось",
+  "tenSessions": "10 сессий",
+  "completed": "Завершено!",
+  "sessionsToGo": "сессий осталось",
+  "thirtyDayStreak": "30-дневная серия",
+  "amazingAchievement": "Потрясающее достижение!",
+  "keepGoing": "Продолжайте!",
+  "fiftySessions": "50 сессий",
+  "powerUser": "Опытный пользователь!",
+  "longTermGoal": "Долгосрочная цель",
+  
+  "years": "лет",
+  "yourAge": "Ваш возраст",
+  "active": "активных",
+  "goalsLabel": "Целей",
+  "member": "Участник",
+  
+  "morning": "Утро",
+  "afternoon": "День",
+  "evening": "Вечер",
+  "night": "Ночь",
+  
+  "youngAdult": "Молодой взрослый",
+  "earlyTwenties": "Начало двадцатых",
+  "lateTwenties": "Конец двадцатых",
+  "thirties": "Тридцатые",
+  "matureAdult": "Зрелый взрослый",
+  
+  "sleepQuality": "Качество сна",
+  "mentalPeace": "Душевное спокойствие",
+  "vitality": "Жизненная энергия",
+  "generalWellness": "Общее здоровье",
+  
+  "sleepSessions": "Сессии сна",
+  "meditation": "Медитация",
+  "focusSessions": "Сессии фокуса",
+  
+  "editGoals": "Редактировать цели",
+  "goalEditingComingSoon": "Функция редактирования целей скоро появится!",
+  "profileUpdatedSuccessfully": "Профиль успешно обновлен",
+
+  "skip": "Пропустить",
+  "continueButton": "Продолжить",
+  "tellUsAboutYourself": "Расскажите нам о себе",
+  "thisHelpsPersonalize": "Это помогает нам персонализировать ваш опыт",
+  "answerQuickQuestions": "Ответьте на несколько быстрых вопросов, чтобы получить персонализированные рекомендации",
+
+  "whatAreYourGoals": "Каковы ваши текущие цели",
+
+  "health": "Здоровье",
+  "confidence": "Уверенность",
+  "energy": "Энергия",
+  "betterSleep": "Лучший сон",
+  "anxietyRelief": "Снятие тревоги",
+  "emotionalBalance": "Эмоциональный баланс",
+
+  "dateOfBirth": "Дата рождения",
+  "selectYourBirthDate": "Выберите дату рождения",
+  "youMustBeAtLeast18": "Вам должно быть не менее 18 лет",
+  "pleaseSelectBirthDate": "Пожалуйста, выберите дату рождения",
+  "errorSavingData": "Ошибка сохранения данных. Пожалуйста, попробуйте еще раз.",
+  "yourInformationIsSecure": "Ваша информация в безопасности и никогда не будет передана",
+  "age": "Возраст",
+  "yearsOld": "лет"
 
   
 }

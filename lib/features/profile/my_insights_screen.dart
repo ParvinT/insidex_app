@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../l10n/app_localizations.dart';
 
 class MyInsightsScreen extends StatefulWidget {
   const MyInsightsScreen({super.key});
@@ -21,13 +22,21 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   bool _isLoading = true;
   bool _isEditMode = false;
 
-  final List<String> _tabs = ['Overview', 'Goals', 'Stats', 'Journey'];
-
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadUserData();
+  }
+
+  List<String> get _tabs {
+    final l10n = AppLocalizations.of(context);
+    return [
+      l10n.overview,
+      l10n.goalsTab,
+      l10n.stats,
+      l10n.journey,
+    ];
   }
 
   @override
@@ -73,7 +82,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'My Insights',
+          AppLocalizations.of(context).myInsights,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
@@ -107,7 +116,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Your personalized wellness profile',
+                        AppLocalizations.of(context).yourPersonalizedProfile,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: Colors.grey[600],
@@ -218,7 +227,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Personal Information',
+                  AppLocalizations.of(context).personalInformation,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -227,20 +236,19 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 SizedBox(height: 20.h),
                 _buildInfoRow(
                   icon: Icons.person_outline,
-                  label: 'Gender',
-                  value:
-                      _capitalizeFirst(_userData['gender'] ?? 'Not specified'),
+                  label: AppLocalizations.of(context).gender,
+                  value: _getLocalizedGender(_userData['gender'] ?? ''),
                 ),
                 Divider(height: 24.h, color: Colors.grey[200]),
                 _buildInfoRow(
                   icon: Icons.cake_outlined,
-                  label: 'Birth Date',
+                  label: AppLocalizations.of(context).birthDate,
                   value: _formatBirthDate(),
                 ),
                 Divider(height: 24.h, color: Colors.grey[200]),
                 _buildInfoRow(
                   icon: Icons.email_outlined,
-                  label: 'Email',
+                  label: AppLocalizations.of(context).email,
                   value: FirebaseAuth.instance.currentUser?.email ?? '',
                 ),
               ],
@@ -265,25 +273,33 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Personality Insights',
+                  AppLocalizations.of(context).personalityInsights,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 SizedBox(height: 16.h),
-                _buildInsightRow('Age Group', _getAgeGroup()),
+                _buildInsightRow(
+                    AppLocalizations.of(context).ageGroup, _getAgeGroup()),
                 SizedBox(height: 12.h),
-                _buildInsightRow('Wellness Focus', _getWellnessFocus()),
+                _buildInsightRow(AppLocalizations.of(context).wellnessFocus,
+                    _getWellnessFocus()),
                 SizedBox(height: 12.h),
                 _buildInsightRow(
-                    'Recommended Sessions', _getRecommendedCategory()),
+                    AppLocalizations.of(context).recommendedSessions,
+                    _getRecommendedCategory()),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _getLocalizedGender(String gender) {
+    final l10n = AppLocalizations.of(context);
+    return gender.toLowerCase() == 'male' ? l10n.male : l10n.female;
   }
 
   // GOALS TAB
@@ -315,7 +331,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Your Wellness Goals',
+                      AppLocalizations.of(context).yourWellnessGoals,
                       style: GoogleFonts.inter(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
@@ -341,7 +357,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                         ),
                         SizedBox(height: 12.h),
                         Text(
-                          'No goals set yet',
+                          AppLocalizations.of(context).noGoalsYet,
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
                             color: Colors.grey[600],
@@ -417,7 +433,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Goal Progress',
+                  AppLocalizations.of(context).goalProgress,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -489,26 +505,26 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             children: [
               _buildStatCard(
                 icon: Icons.calendar_today,
-                label: 'Days Active',
+                label: AppLocalizations.of(context).daysActive,
                 value: '${_calculateMemberDays()}',
                 color: const Color(0xFF7DB9B6),
               ),
               _buildStatCard(
                 icon: Icons.headphones,
-                label: 'Sessions',
+                label: AppLocalizations.of(context).sessionsLabel,
                 value:
                     '${(_userData['completedSessionIds'] as List?)?.length ?? 0}',
                 color: const Color(0xFFE8C5A0),
               ),
               _buildStatCard(
                 icon: Icons.timer,
-                label: 'Minutes',
+                label: AppLocalizations.of(context).minutesLabel,
                 value: '${_userData['totalListeningMinutes'] ?? 0}',
                 color: const Color(0xFFB8A6D9),
               ),
               _buildStatCard(
                 icon: Icons.local_fire_department,
-                label: 'Streak',
+                label: AppLocalizations.of(context).streakLabel,
                 value: '${_userData['currentStreak'] ?? 0}',
                 color: Colors.orange,
               ),
@@ -556,14 +572,14 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Weekly Activity',
+                          AppLocalizations.of(context).weeklyActivity,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
-                          '${_getTotalWeeklyMinutes(weeklyData)} min total',
+                          '${_getTotalWeeklyMinutes(weeklyData)} ${AppLocalizations.of(context).minTotal}',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             color: Colors.grey[600],
@@ -615,7 +631,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Session Stats',
+                  AppLocalizations.of(context).sessionStats,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -625,7 +641,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
                 // Average Session - Synchronous, works
                 _buildStatRow(
-                  label: 'Average Session',
+                  label: AppLocalizations.of(context).averageSession,
                   value: _calculateAverageSession(),
                   icon: Icons.av_timer,
                 ),
@@ -636,8 +652,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   future: _getLongestSessionAsync(),
                   builder: (context, snapshot) {
                     return _buildStatRow(
-                      label: 'Longest Session',
-                      value: snapshot.data ?? 'Loading...',
+                      label: AppLocalizations.of(context).longestSession,
+                      value:
+                          snapshot.data ?? AppLocalizations.of(context).loading,
                       icon: Icons.trending_up,
                     );
                   },
@@ -649,8 +666,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   future: _getFavoriteTimeAsync(),
                   builder: (context, snapshot) {
                     return _buildStatRow(
-                      label: 'Favorite Time',
-                      value: snapshot.data ?? 'Loading...',
+                      label: AppLocalizations.of(context).favoriteTime,
+                      value:
+                          snapshot.data ?? AppLocalizations.of(context).loading,
                       icon: Icons.access_time,
                     );
                   },
@@ -671,36 +689,37 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     final createdAt = _userData['createdAt'] as Timestamp?;
     final firstSessionDate = _userData['firstSessionDate'] as Timestamp?;
 
+    final l10n = AppLocalizations.of(context);
     final milestones = [
       {
-        'title': 'First Session',
+        'title': l10n.firstSession,
         'date': firstSessionDate != null
             ? _formatDate(firstSessionDate.toDate())
-            : 'Not started yet',
+            : l10n.notStartedYet,
         'completed': completedSessions > 0,
       },
       {
-        'title': '7 Day Streak',
+        'title': l10n.sevenDayStreak,
         'date': currentStreak >= 7
-            ? 'Achieved!'
-            : '${7 - currentStreak} days to go',
+            ? l10n.achieved
+            : '${7 - currentStreak} ${l10n.daysToGo}',
         'completed': currentStreak >= 7,
       },
       {
-        'title': '10 Sessions',
+        'title': l10n.tenSessions,
         'date': completedSessions >= 10
-            ? 'Completed!'
-            : '${10 - completedSessions} sessions to go',
+            ? l10n.completed
+            : '${10 - completedSessions} ${l10n.sessionsToGo}',
         'completed': completedSessions >= 10,
       },
       {
-        'title': '30 Day Streak',
-        'date': currentStreak >= 30 ? 'Amazing achievement!' : 'Keep going!',
+        'title': l10n.thirtyDayStreak,
+        'date': currentStreak >= 30 ? l10n.amazingAchievement : l10n.keepGoing,
         'completed': currentStreak >= 30,
       },
       {
-        'title': '50 Sessions',
-        'date': completedSessions >= 50 ? 'Power user!' : 'Long term goal',
+        'title': l10n.fiftySessions,
+        'date': completedSessions >= 50 ? l10n.powerUser : l10n.longTermGoal,
         'completed': completedSessions >= 50,
       },
     ];
@@ -719,7 +738,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Your Wellness Journey',
+                  AppLocalizations.of(context).yourWellnessJourney,
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -727,7 +746,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 ),
                 SizedBox(height: 8.h),
                 Text(
-                  'Track your milestones and achievements',
+                  AppLocalizations.of(context).trackMilestones,
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
                     color: Colors.grey[600],
@@ -804,14 +823,15 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     final age = _userData['age'] ?? 0;
     final goalsCount = (_userData['goals'] as List?)?.length ?? 0;
     final memberDays = _calculateMemberDays();
+    final l10n = AppLocalizations.of(context);
 
     return Row(
       children: [
         Expanded(
           child: _buildTopStatCard(
             value: '$age',
-            unit: 'years',
-            label: 'Your Age',
+            unit: l10n.years,
+            label: l10n.yourAge,
             color: const Color(0xFFE8C5A0),
           ),
         ),
@@ -819,8 +839,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         Expanded(
           child: _buildTopStatCard(
             value: '$goalsCount',
-            unit: 'active',
-            label: 'Goals',
+            unit: l10n.active,
+            label: l10n.goalsLabel,
             color: const Color(0xFF7DB9B6),
           ),
         ),
@@ -828,8 +848,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         Expanded(
           child: _buildTopStatCard(
             value: '$memberDays',
-            unit: 'days',
-            label: 'Member',
+            unit: l10n.days,
+            label: l10n.member,
             color: const Color(0xFFB8A6D9),
           ),
         ),
@@ -1217,7 +1237,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   String _formatBirthDate() {
     final birthDate = _userData['birthDate'] as Timestamp?;
-    if (birthDate == null) return 'Not specified';
+    if (birthDate == null) return AppLocalizations.of(context).notSpecified;
 
     final date = birthDate.toDate();
     return '${date.day}/${date.month}/${date.year}';
@@ -1304,7 +1324,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   Future<String> _getFavoriteTimeAsync() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return 'Not set';
+      final l10n = AppLocalizations.of(context);
+      if (user == null) return l10n.notSpecified;
 
       final history = await FirebaseFirestore.instance
           .collection('users')
@@ -1312,7 +1333,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           .collection('listening_history')
           .get();
 
-      if (history.docs.isEmpty) return 'Not set';
+      if (history.docs.isEmpty) return l10n.notSpecified;
 
       // Group by time slots
       Map<String, int> timeSlots = {
@@ -1349,47 +1370,63 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           favoriteTime = time;
         }
       });
-
-      return favoriteTime;
+      switch (favoriteTime) {
+        case 'Morning':
+          return l10n.morning;
+        case 'Afternoon':
+          return l10n.afternoon;
+        case 'Evening':
+          return l10n.evening;
+        case 'Night':
+          return l10n.night;
+        default:
+          return l10n.evening;
+      }
     } catch (e) {
-      return 'Evening'; // Fallback
+      final l10n = AppLocalizations.of(context);
+      debugPrint('Error getting favorite time: $e');
+      return l10n.evening; // Fallback
     }
   }
 
   String _getAgeGroup() {
+    final l10n = AppLocalizations.of(context);
     final age = _userData['age'] ?? 0;
-    if (age < 18) return 'Young Adult';
-    if (age < 25) return 'Early Twenties';
-    if (age < 35) return 'Late Twenties';
-    if (age < 45) return 'Thirties';
-    return 'Mature Adult';
+    if (age < 18) return l10n.youngAdult;
+    if (age < 25) return l10n.earlyTwenties;
+    if (age < 35) return l10n.lateTwenties;
+    if (age < 45) return l10n.thirties;
+    return l10n.matureAdult;
   }
 
   String _getWellnessFocus() {
+    final l10n = AppLocalizations.of(context);
     final goals = (_userData['goals'] as List?) ?? [];
-    if (goals.contains('Better Sleep')) return 'Sleep Quality';
-    if (goals.contains('Anxiety Relief')) return 'Mental Peace';
-    if (goals.contains('Energy')) return 'Vitality';
-    return 'General Wellness';
+    if (goals.contains('Better Sleep')) return l10n.sleepQuality;
+    if (goals.contains('Anxiety Relief')) return l10n.mentalPeace;
+    if (goals.contains('Energy')) return l10n.vitality;
+    return l10n.generalWellness;
   }
 
   String _getRecommendedCategory() {
+    final l10n = AppLocalizations.of(context);
     final goals = (_userData['goals'] as List?) ?? [];
-    if (goals.contains('Better Sleep')) return 'Sleep Sessions';
-    if (goals.contains('Anxiety Relief')) return 'Meditation';
-    return 'Focus Sessions';
+    if (goals.contains('Better Sleep')) return l10n.sleepSessions;
+    if (goals.contains('Anxiety Relief')) return l10n.meditation;
+    return l10n.focusSessions;
   }
 
   void _editGoals() {
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Goals'),
-        content: const Text('Goal editing feature coming soon!'),
+        title: Text(l10n.editGoals),
+        content: Text(l10n.goalEditingComingSoon),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -1409,7 +1446,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context).profileUpdatedSuccessfully)),
       );
     } catch (e) {
       print('Error saving data: $e');

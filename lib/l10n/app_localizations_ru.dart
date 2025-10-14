@@ -51,9 +51,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get language => 'Язык';
 
   @override
-  String get languageSubtitle => 'Language / Язык';
-
-  @override
   String get supportAndFeedback => 'Поддержка и обратная связь';
 
   @override
@@ -90,22 +87,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get ok => 'ОК';
 
   @override
-  String get yes => 'Да';
-
-  @override
-  String get no => 'Нет';
-
-  @override
   String get save => 'Сохранить';
 
   @override
-  String get delete => 'Удалить';
-
-  @override
   String get edit => 'Изменить';
-
-  @override
-  String get close => 'Закрыть';
 
   @override
   String get home => 'Главная';
@@ -182,9 +167,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addedToPlaylist => 'Добавлено в плейлист';
 
   @override
-  String get savingProfile => 'Сохранение профиля...';
-
-  @override
   String get profileUpdated => 'Профиль успешно обновлен!';
 
   @override
@@ -249,22 +231,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get changePassword => 'Изменить пароль';
 
   @override
-  String get helpAndSupport => 'Помощь и поддержка';
-
-  @override
-  String get totalListening => 'Общее прослушивание';
-
-  @override
-  String get totalSessions => 'Всего сессий';
-
-  @override
-  String get currentStreak => 'Текущая серия';
-
-  @override
   String get min => 'мин';
-
-  @override
-  String get subliminals => 'сублиминалов';
 
   @override
   String get days => 'дней';
@@ -345,17 +312,299 @@ class AppLocalizationsRu extends AppLocalizations {
   String get checkBackLater => 'Вернитесь позже за новым контентом';
 
   @override
-  String get durationNotSet => 'Длительность не установлена';
+  String get overview => 'Обзор';
 
   @override
-  String get hour => 'час';
+  String get goalsTab => 'Цели';
 
   @override
-  String get hours => 'часов';
+  String get stats => 'Статистика';
 
   @override
-  String get minute => 'минута';
+  String get journey => 'Путь';
 
   @override
-  String get minutes => 'минут';
+  String get subliminals => 'сублиминалов';
+
+  @override
+  String get personalInformation => 'Личная информация';
+
+  @override
+  String get gender => 'Пол';
+
+  @override
+  String get male => 'Мужской';
+
+  @override
+  String get female => 'Женский';
+
+  @override
+  String get totalListening => 'Общее прослушивание';
+
+  @override
+  String get totalSessions => 'Всего сессий';
+
+  @override
+  String get currentStreak => 'Текущая серия';
+
+  @override
+  String get noGoalsYet => 'Целей пока нет';
+
+  @override
+  String get goalProgress => 'Прогресс целей';
+
+  @override
+  String get weeklyActivity => 'Недельная активность';
+
+  @override
+  String get averageSession => 'Средняя сессия';
+
+  @override
+  String get editMode => 'Режим редактирования';
+
+  @override
+  String get saveChanges => 'Сохранить изменения';
+
+  @override
+  String get personalInfo => 'Личная информация';
+
+  @override
+  String get yourPersonalizedProfile =>
+      'Ваш персонализированный профиль здоровья';
+
+  @override
+  String get birthDate => 'Дата рождения';
+
+  @override
+  String get email => 'Электронная почта';
+
+  @override
+  String get notSpecified => 'Не указано';
+
+  @override
+  String get personalityInsights => 'Личные особенности';
+
+  @override
+  String get ageGroup => 'Возрастная группа';
+
+  @override
+  String get wellnessFocus => 'Фокус здоровья';
+
+  @override
+  String get recommendedSessions => 'Рекомендуемые сессии';
+
+  @override
+  String get yourWellnessGoals => 'Ваши цели здоровья';
+
+  @override
+  String get daysActive => 'Дней активности';
+
+  @override
+  String get sessionsLabel => 'Сессий';
+
+  @override
+  String get minutesLabel => 'Минут';
+
+  @override
+  String get streakLabel => 'Серия';
+
+  @override
+  String get minTotal => 'мин всего';
+
+  @override
+  String get sessionStats => 'Статистика сессий';
+
+  @override
+  String get longestSession => 'Самая долгая сессия';
+
+  @override
+  String get favoriteTime => 'Любимое время';
+
+  @override
+  String get loading => 'Загрузка...';
+
+  @override
+  String get yourWellnessJourney => 'Ваш путь здоровья';
+
+  @override
+  String get trackMilestones => 'Отслеживайте свои достижения и вехи';
+
+  @override
+  String get firstSession => 'Первая сессия';
+
+  @override
+  String get notStartedYet => 'Еще не начато';
+
+  @override
+  String get sevenDayStreak => '7-дневная серия';
+
+  @override
+  String get achieved => 'Достигнуто!';
+
+  @override
+  String get daysToGo => 'дней осталось';
+
+  @override
+  String get tenSessions => '10 сессий';
+
+  @override
+  String get completed => 'Завершено!';
+
+  @override
+  String get sessionsToGo => 'сессий осталось';
+
+  @override
+  String get thirtyDayStreak => '30-дневная серия';
+
+  @override
+  String get amazingAchievement => 'Потрясающее достижение!';
+
+  @override
+  String get keepGoing => 'Продолжайте!';
+
+  @override
+  String get fiftySessions => '50 сессий';
+
+  @override
+  String get powerUser => 'Опытный пользователь!';
+
+  @override
+  String get longTermGoal => 'Долгосрочная цель';
+
+  @override
+  String get years => 'лет';
+
+  @override
+  String get yourAge => 'Ваш возраст';
+
+  @override
+  String get active => 'активных';
+
+  @override
+  String get goalsLabel => 'Целей';
+
+  @override
+  String get member => 'Участник';
+
+  @override
+  String get morning => 'Утро';
+
+  @override
+  String get afternoon => 'День';
+
+  @override
+  String get evening => 'Вечер';
+
+  @override
+  String get night => 'Ночь';
+
+  @override
+  String get youngAdult => 'Молодой взрослый';
+
+  @override
+  String get earlyTwenties => 'Начало двадцатых';
+
+  @override
+  String get lateTwenties => 'Конец двадцатых';
+
+  @override
+  String get thirties => 'Тридцатые';
+
+  @override
+  String get matureAdult => 'Зрелый взрослый';
+
+  @override
+  String get sleepQuality => 'Качество сна';
+
+  @override
+  String get mentalPeace => 'Душевное спокойствие';
+
+  @override
+  String get vitality => 'Жизненная энергия';
+
+  @override
+  String get generalWellness => 'Общее здоровье';
+
+  @override
+  String get sleepSessions => 'Сессии сна';
+
+  @override
+  String get meditation => 'Медитация';
+
+  @override
+  String get focusSessions => 'Сессии фокуса';
+
+  @override
+  String get editGoals => 'Редактировать цели';
+
+  @override
+  String get goalEditingComingSoon =>
+      'Функция редактирования целей скоро появится!';
+
+  @override
+  String get profileUpdatedSuccessfully => 'Профиль успешно обновлен';
+
+  @override
+  String get skip => 'Пропустить';
+
+  @override
+  String get continueButton => 'Продолжить';
+
+  @override
+  String get tellUsAboutYourself => 'Расскажите нам о себе';
+
+  @override
+  String get thisHelpsPersonalize =>
+      'Это помогает нам персонализировать ваш опыт';
+
+  @override
+  String get answerQuickQuestions =>
+      'Ответьте на несколько быстрых вопросов, чтобы получить персонализированные рекомендации';
+
+  @override
+  String get whatAreYourGoals => 'Каковы ваши текущие цели';
+
+  @override
+  String get health => 'Здоровье';
+
+  @override
+  String get confidence => 'Уверенность';
+
+  @override
+  String get energy => 'Энергия';
+
+  @override
+  String get betterSleep => 'Лучший сон';
+
+  @override
+  String get anxietyRelief => 'Снятие тревоги';
+
+  @override
+  String get emotionalBalance => 'Эмоциональный баланс';
+
+  @override
+  String get dateOfBirth => 'Дата рождения';
+
+  @override
+  String get selectYourBirthDate => 'Выберите дату рождения';
+
+  @override
+  String get youMustBeAtLeast18 => 'Вам должно быть не менее 18 лет';
+
+  @override
+  String get pleaseSelectBirthDate => 'Пожалуйста, выберите дату рождения';
+
+  @override
+  String get errorSavingData =>
+      'Ошибка сохранения данных. Пожалуйста, попробуйте еще раз.';
+
+  @override
+  String get yourInformationIsSecure =>
+      'Ваша информация в безопасности и никогда не будет передана';
+
+  @override
+  String get age => 'Возраст';
+
+  @override
+  String get yearsOld => 'лет';
 }

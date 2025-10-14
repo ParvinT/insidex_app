@@ -51,9 +51,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get language => 'Language';
 
   @override
-  String get languageSubtitle => 'Language / Язык';
-
-  @override
   String get supportAndFeedback => 'Support & Feedback';
 
   @override
@@ -90,22 +87,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ok => 'OK';
 
   @override
-  String get yes => 'Yes';
-
-  @override
-  String get no => 'No';
-
-  @override
   String get save => 'Save';
 
   @override
-  String get delete => 'Delete';
-
-  @override
   String get edit => 'Edit';
-
-  @override
-  String get close => 'Close';
 
   @override
   String get home => 'Home';
@@ -182,9 +167,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addedToPlaylist => 'Added to playlist';
 
   @override
-  String get savingProfile => 'Saving profile...';
-
-  @override
   String get profileUpdated => 'Profile updated successfully!';
 
   @override
@@ -248,22 +230,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePassword => 'Change Password';
 
   @override
-  String get helpAndSupport => 'Help & Support';
-
-  @override
-  String get totalListening => 'Total Listening';
-
-  @override
-  String get totalSessions => 'Total Sessions';
-
-  @override
-  String get currentStreak => 'Current Streak';
-
-  @override
   String get min => 'min';
-
-  @override
-  String get subliminals => 'subliminals';
 
   @override
   String get days => 'days';
@@ -344,17 +311,296 @@ class AppLocalizationsEn extends AppLocalizations {
   String get checkBackLater => 'Check back later for new content';
 
   @override
-  String get durationNotSet => 'Duration not set';
+  String get overview => 'Overview';
 
   @override
-  String get hour => 'hour';
+  String get goalsTab => 'Goals';
 
   @override
-  String get hours => 'hours';
+  String get stats => 'Stats';
 
   @override
-  String get minute => 'minute';
+  String get journey => 'Journey';
 
   @override
-  String get minutes => 'minutes';
+  String get subliminals => 'subliminals';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get totalListening => 'Total Listening';
+
+  @override
+  String get totalSessions => 'Total Sessions';
+
+  @override
+  String get currentStreak => 'Current Streak';
+
+  @override
+  String get noGoalsYet => 'No goals set yet';
+
+  @override
+  String get goalProgress => 'Goal Progress';
+
+  @override
+  String get weeklyActivity => 'Weekly Activity';
+
+  @override
+  String get averageSession => 'Average Session';
+
+  @override
+  String get editMode => 'Edit Mode';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get personalInfo => 'Personal Info';
+
+  @override
+  String get yourPersonalizedProfile => 'Your personalized wellness profile';
+
+  @override
+  String get birthDate => 'Birth Date';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get notSpecified => 'Not specified';
+
+  @override
+  String get personalityInsights => 'Personality Insights';
+
+  @override
+  String get ageGroup => 'Age Group';
+
+  @override
+  String get wellnessFocus => 'Wellness Focus';
+
+  @override
+  String get recommendedSessions => 'Recommended Sessions';
+
+  @override
+  String get yourWellnessGoals => 'Your Wellness Goals';
+
+  @override
+  String get daysActive => 'Days Active';
+
+  @override
+  String get sessionsLabel => 'Sessions';
+
+  @override
+  String get minutesLabel => 'Minutes';
+
+  @override
+  String get streakLabel => 'Streak';
+
+  @override
+  String get minTotal => 'min total';
+
+  @override
+  String get sessionStats => 'Session Stats';
+
+  @override
+  String get longestSession => 'Longest Session';
+
+  @override
+  String get favoriteTime => 'Favorite Time';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get yourWellnessJourney => 'Your Wellness Journey';
+
+  @override
+  String get trackMilestones => 'Track your milestones and achievements';
+
+  @override
+  String get firstSession => 'First Session';
+
+  @override
+  String get notStartedYet => 'Not started yet';
+
+  @override
+  String get sevenDayStreak => '7 Day Streak';
+
+  @override
+  String get achieved => 'Achieved!';
+
+  @override
+  String get daysToGo => 'days to go';
+
+  @override
+  String get tenSessions => '10 Sessions';
+
+  @override
+  String get completed => 'Completed!';
+
+  @override
+  String get sessionsToGo => 'sessions to go';
+
+  @override
+  String get thirtyDayStreak => '30 Day Streak';
+
+  @override
+  String get amazingAchievement => 'Amazing achievement!';
+
+  @override
+  String get keepGoing => 'Keep going!';
+
+  @override
+  String get fiftySessions => '50 Sessions';
+
+  @override
+  String get powerUser => 'Power user!';
+
+  @override
+  String get longTermGoal => 'Long term goal';
+
+  @override
+  String get years => 'years';
+
+  @override
+  String get yourAge => 'Your Age';
+
+  @override
+  String get active => 'active';
+
+  @override
+  String get goalsLabel => 'Goals';
+
+  @override
+  String get member => 'Member';
+
+  @override
+  String get morning => 'Morning';
+
+  @override
+  String get afternoon => 'Afternoon';
+
+  @override
+  String get evening => 'Evening';
+
+  @override
+  String get night => 'Night';
+
+  @override
+  String get youngAdult => 'Young Adult';
+
+  @override
+  String get earlyTwenties => 'Early Twenties';
+
+  @override
+  String get lateTwenties => 'Late Twenties';
+
+  @override
+  String get thirties => 'Thirties';
+
+  @override
+  String get matureAdult => 'Mature Adult';
+
+  @override
+  String get sleepQuality => 'Sleep Quality';
+
+  @override
+  String get mentalPeace => 'Mental Peace';
+
+  @override
+  String get vitality => 'Vitality';
+
+  @override
+  String get generalWellness => 'General Wellness';
+
+  @override
+  String get sleepSessions => 'Sleep Sessions';
+
+  @override
+  String get meditation => 'Meditation';
+
+  @override
+  String get focusSessions => 'Focus Sessions';
+
+  @override
+  String get editGoals => 'Edit Goals';
+
+  @override
+  String get goalEditingComingSoon => 'Goal editing feature coming soon!';
+
+  @override
+  String get profileUpdatedSuccessfully => 'Profile updated successfully';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get tellUsAboutYourself => 'Tell us about yourself';
+
+  @override
+  String get thisHelpsPersonalize =>
+      'This helps us personalize your experience';
+
+  @override
+  String get answerQuickQuestions =>
+      'Answer a few quick questions to get personalized recommendations';
+
+  @override
+  String get whatAreYourGoals => 'What are your current goals';
+
+  @override
+  String get health => 'Health';
+
+  @override
+  String get confidence => 'Confidence';
+
+  @override
+  String get energy => 'Energy';
+
+  @override
+  String get betterSleep => 'Better Sleep';
+
+  @override
+  String get anxietyRelief => 'Anxiety Relief';
+
+  @override
+  String get emotionalBalance => 'Emotional Balance';
+
+  @override
+  String get dateOfBirth => 'Date of Birth';
+
+  @override
+  String get selectYourBirthDate => 'Select your birth date';
+
+  @override
+  String get youMustBeAtLeast18 => 'You must be at least 18 years old';
+
+  @override
+  String get pleaseSelectBirthDate => 'Please select your birth date';
+
+  @override
+  String get errorSavingData => 'Error saving data. Please try again.';
+
+  @override
+  String get yourInformationIsSecure =>
+      'Your information is secure and will never be shared';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get yearsOld => 'years old';
 }
