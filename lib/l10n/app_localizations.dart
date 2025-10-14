@@ -1981,6 +1981,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An unexpected error occurred. Please try again.'**
   String get unexpectedErrorOccurred;
+
+  /// No description provided for @stayOnTrack.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay on Track'**
+  String get stayOnTrack;
+
+  /// No description provided for @dailyRemindersDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Get daily reminders to maintain your wellness routine and achieve your goals'**
+  String get dailyRemindersDescription;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Now'**
+  String get notNow;
+
+  /// No description provided for @enable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get enable;
+
+  /// No description provided for @notificationsEnabledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications enabled! 🔔'**
+  String get notificationsEnabledSuccess;
 }
 
 class _AppLocalizationsDelegate

@@ -971,4 +971,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unexpectedErrorOccurred =>
       'An unexpected error occurred. Please try again.';
+
+  @override
+  String get stayOnTrack => 'Stay on Track';
+
+  @override
+  String get dailyRemindersDescription =>
+      'Get daily reminders to maintain your wellness routine and achieve your goals';
+
+  @override
+  String get notNow => 'Not Now';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get notificationsEnabledSuccess => 'Notifications enabled! 🔔';
 }

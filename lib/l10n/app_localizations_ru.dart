@@ -978,4 +978,20 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get unexpectedErrorOccurred =>
       'Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get stayOnTrack => 'Оставайтесь на верном пути';
+
+  @override
+  String get dailyRemindersDescription =>
+      'Получайте ежедневные напоминания для поддержания режима благополучия и достижения целей';
+
+  @override
+  String get notNow => 'Не сейчас';
+
+  @override
+  String get enable => 'Включить';
+
+  @override
+  String get notificationsEnabledSuccess => 'Уведомления включены! 🔔';
 }
