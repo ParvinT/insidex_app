@@ -834,5 +834,141 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thankYouForFeedback => '✅ Thank you for your feedback!';
 
   @override
-  String get error => 'Error: ';
+  String get error => 'Error';
+
+  @override
+  String get allNotifications => 'All Notifications';
+
+  @override
+  String get masterControlNotifications =>
+      'Master control for all app notifications';
+
+  @override
+  String get dailyReminders => 'Daily Reminders';
+
+  @override
+  String get achievementNotifications => 'Achievement Notifications';
+
+  @override
+  String get streakMilestones => 'Streak Milestones';
+
+  @override
+  String get celebrateConsistency => 'Celebrate your consistency achievements';
+
+  @override
+  String get testNotificationSent => 'Test notification sent! 🔔';
+
+  @override
+  String get sendTestNotification => 'Send Test Notification';
+
+  @override
+  String get notificationsDisabled => 'Notifications Disabled';
+
+  @override
+  String get enableNotificationsMessage =>
+      'Enable notifications to receive daily reminders for your wellness routine';
+
+  @override
+  String get pleaseEnableNotifications =>
+      'Please enable notifications in system settings';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get enableNotifications => 'Enable Notifications';
+
+  @override
+  String get dailyReminder => 'Daily Reminder';
+
+  @override
+  String get getRemindedDaily => 'Get reminded to practice daily';
+
+  @override
+  String get reminderTime => 'Reminder Time';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get enterCurrentPassword => 'Enter your current password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get minCharacters => 'Min. 8 characters';
+
+  @override
+  String get newPasswordMustBeDifferent =>
+      'New password must be different from current';
+
+  @override
+  String get mustBeDifferent => 'Must be different';
+
+  @override
+  String get passwordStrength => 'Password Strength';
+
+  @override
+  String get weak => 'Weak';
+
+  @override
+  String get fair => 'Fair';
+
+  @override
+  String get good => 'Good';
+
+  @override
+  String get strong => 'Strong';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get reenterNewPassword => 'Re-enter your new password';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get passwordRequirements => 'Password Requirements';
+
+  @override
+  String get atLeast8Characters => 'At least 8 characters';
+
+  @override
+  String get oneUppercaseLetter => 'One uppercase letter';
+
+  @override
+  String get oneLowercaseLetter => 'One lowercase letter';
+
+  @override
+  String get oneNumber => 'One number';
+
+  @override
+  String get differentFromCurrent => 'Different from current';
+
+  @override
+  String get passwordChanged => 'Password Changed!';
+
+  @override
+  String get passwordChangedSuccess =>
+      'Your password has been changed successfully.';
+
+  @override
+  String get changePasswordTitle => 'Change Password';
+
+  @override
+  String get createStrongPassword =>
+      'Create a strong password for your account';
+
+  @override
+  String get failedToChangePassword => 'Failed to change password';
+
+  @override
+  String get unexpectedErrorOccurred =>
+      'An unexpected error occurred. Please try again.';
 }

@@ -840,5 +840,142 @@ class AppLocalizationsRu extends AppLocalizations {
   String get thankYouForFeedback => '✅ Спасибо за ваш отзыв!';
 
   @override
-  String get error => 'Ошибка: ';
+  String get error => 'Ошибка';
+
+  @override
+  String get allNotifications => 'Все уведомления';
+
+  @override
+  String get masterControlNotifications =>
+      'Главный контроль всех уведомлений приложения';
+
+  @override
+  String get dailyReminders => 'Ежедневные напоминания';
+
+  @override
+  String get achievementNotifications => 'Уведомления о достижениях';
+
+  @override
+  String get streakMilestones => 'Вехи серии';
+
+  @override
+  String get celebrateConsistency =>
+      'Празднуйте свои достижения последовательности';
+
+  @override
+  String get testNotificationSent => 'Тестовое уведомление отправлено! 🔔';
+
+  @override
+  String get sendTestNotification => 'Отправить тестовое уведомление';
+
+  @override
+  String get notificationsDisabled => 'Уведомления отключены';
+
+  @override
+  String get enableNotificationsMessage =>
+      'Включите уведомления, чтобы получать ежедневные напоминания о вашем здоровье';
+
+  @override
+  String get pleaseEnableNotifications =>
+      'Пожалуйста, включите уведомления в настройках системы';
+
+  @override
+  String get openSettings => 'Открыть настройки';
+
+  @override
+  String get enableNotifications => 'Включить уведомления';
+
+  @override
+  String get dailyReminder => 'Ежедневное напоминание';
+
+  @override
+  String get getRemindedDaily =>
+      'Получайте ежедневные напоминания для практики';
+
+  @override
+  String get reminderTime => 'Время напоминания';
+
+  @override
+  String get selectTime => 'Выбрать время';
+
+  @override
+  String get currentPassword => 'Текущий пароль';
+
+  @override
+  String get enterCurrentPassword => 'Введите текущий пароль';
+
+  @override
+  String get newPassword => 'Новый пароль';
+
+  @override
+  String get minCharacters => 'Мин. 8 символов';
+
+  @override
+  String get newPasswordMustBeDifferent =>
+      'Новый пароль должен отличаться от текущего';
+
+  @override
+  String get mustBeDifferent => 'Должен отличаться';
+
+  @override
+  String get passwordStrength => 'Сила пароля';
+
+  @override
+  String get weak => 'Слабый';
+
+  @override
+  String get fair => 'Средний';
+
+  @override
+  String get good => 'Хороший';
+
+  @override
+  String get strong => 'Сильный';
+
+  @override
+  String get confirmNewPassword => 'Подтвердите новый пароль';
+
+  @override
+  String get reenterNewPassword => 'Введите новый пароль повторно';
+
+  @override
+  String get updatePassword => 'Обновить пароль';
+
+  @override
+  String get passwordRequirements => 'Требования к паролю';
+
+  @override
+  String get atLeast8Characters => 'Минимум 8 символов';
+
+  @override
+  String get oneUppercaseLetter => 'Одна заглавная буква';
+
+  @override
+  String get oneLowercaseLetter => 'Одна строчная буква';
+
+  @override
+  String get oneNumber => 'Одна цифра';
+
+  @override
+  String get differentFromCurrent => 'Отличается от текущего';
+
+  @override
+  String get passwordChanged => 'Пароль изменён!';
+
+  @override
+  String get passwordChangedSuccess => 'Ваш пароль успешно изменён.';
+
+  @override
+  String get changePasswordTitle => 'Изменить пароль';
+
+  @override
+  String get createStrongPassword =>
+      'Создайте надёжный пароль для вашей учётной записи';
+
+  @override
+  String get failedToChangePassword => 'Не удалось изменить пароль';
+
+  @override
+  String get unexpectedErrorOccurred =>
+      'Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.';
 }

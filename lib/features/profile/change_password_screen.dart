@@ -3,7 +3,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/form_validators.dart';
@@ -12,6 +11,7 @@ import '../../shared/widgets/primary_button.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../services/firebase_service.dart';
 import '../../shared/widgets/animated_background.dart';
+import '../../l10n/app_localizations.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -92,16 +92,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     // Determine strength text and color
     if (strength <= 0.25) {
-      strengthText = 'Weak';
+      strengthText = AppLocalizations.of(context).weak;
       strengthColor = const Color(0xFFE74C3C);
     } else if (strength <= 0.5) {
-      strengthText = 'Fair';
+      strengthText = AppLocalizations.of(context).fair;
       strengthColor = const Color(0xFFE67E22);
     } else if (strength <= 0.75) {
-      strengthText = 'Good';
+      strengthText = AppLocalizations.of(context).good;
       strengthColor = const Color(0xFFF39C12);
     } else {
-      strengthText = 'Strong';
+      strengthText = AppLocalizations.of(context).strong;
       strengthColor = const Color(0xFF27AE60);
     }
 
@@ -129,10 +129,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (result['success']) {
         _showSuccessDialog();
       } else {
-        _showErrorDialog(result['error'] ?? 'Failed to change password');
+        _showErrorDialog(
+          result['error'] ??
+              AppLocalizations.of(context).failedToChangePassword,
+        );
       }
     } catch (e) {
-      _showErrorDialog('An unexpected error occurred. Please try again.');
+      _showErrorDialog(
+        AppLocalizations.of(context).unexpectedErrorOccurred,
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -153,7 +158,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             SizedBox(width: 12.w),
             Flexible(
               child: Text(
-                'Error',
+                AppLocalizations.of(context).error,
                 style: GoogleFonts.inter(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -171,7 +176,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'OK',
+              AppLocalizations.of(context).ok,
               style: GoogleFonts.inter(
                 color: AppColors.primaryGold,
                 fontWeight: FontWeight.w600,
@@ -209,7 +214,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Password Changed!',
+              AppLocalizations.of(context).passwordChanged,
               style: GoogleFonts.inter(
                 fontSize: 18.sp.clamp(18.0, 22.0),
                 fontWeight: FontWeight.w700,
@@ -218,7 +223,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Your password has been changed successfully.',
+              AppLocalizations.of(context).passwordChangedSuccess,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
@@ -243,7 +248,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 borderRadius: BorderRadius.circular(25.r),
               ),
               child: Text(
-                'Done',
+                AppLocalizations.of(context).done,
                 style: GoogleFonts.inter(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -417,7 +422,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               SizedBox(height: 12.h),
 
                               Text(
-                                'Change Password',
+                                AppLocalizations.of(context)
+                                    .changePasswordTitle,
                                 style: GoogleFonts.inter(
                                   fontSize: titleSize,
                                   fontWeight: FontWeight.w700,
@@ -428,7 +434,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               SizedBox(height: 8.h),
 
                               Text(
-                                'Create a strong password for your account',
+                                AppLocalizations.of(context)
+                                    .createStrongPassword,
                                 style: GoogleFonts.inter(
                                   fontSize: bodyTextSize,
                                   color: AppColors.textSecondary,
@@ -465,8 +472,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 // Current Password
                                 CustomTextField(
                                   controller: _currentPasswordController,
-                                  label: 'Current Password',
-                                  hint: 'Enter your current password',
+                                  label: AppLocalizations.of(context)
+                                      .currentPassword,
+                                  hint: AppLocalizations.of(context)
+                                      .enterCurrentPassword,
                                   obscureText: !_isCurrentPasswordVisible,
                                   validator: FormValidators.validatePassword,
                                   suffixIcon: IconButton(
@@ -489,8 +498,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 // New Password
                                 CustomTextField(
                                   controller: _newPasswordController,
-                                  label: 'New Password',
-                                  hint: 'Min. 8 characters',
+                                  label:
+                                      AppLocalizations.of(context).newPassword,
+                                  hint: AppLocalizations.of(context)
+                                      .minCharacters,
                                   obscureText: !_isNewPasswordVisible,
                                   onChanged: (value) {
                                     _checkPasswordStrength(value);
@@ -510,7 +521,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               const SizedBox(width: 8),
                                               Flexible(
                                                 child: Text(
-                                                  'New password must be different from current',
+                                                  AppLocalizations.of(context)
+                                                      .newPasswordMustBeDifferent,
                                                   style: GoogleFonts.inter(
                                                       fontSize: 13.sp),
                                                 ),
@@ -534,7 +546,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     if (value != null &&
                                         value ==
                                             _currentPasswordController.text) {
-                                      return 'Must be different'; // Short message
+                                      return AppLocalizations.of(context)
+                                          .mustBeDifferent; // Short message
                                     }
                                     // Then apply strong password validation
                                     return FormValidators
@@ -567,7 +580,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                             MainAxisAlignment.spaceBetween,
                                         children: [
                                           Text(
-                                            'Password Strength',
+                                            AppLocalizations.of(context)
+                                                .passwordStrength,
                                             style: GoogleFonts.inter(
                                               fontSize: 11.sp.clamp(10.0, 12.0),
                                               color: AppColors.textSecondary,
@@ -605,8 +619,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 // Confirm Password
                                 CustomTextField(
                                   controller: _confirmPasswordController,
-                                  label: 'Confirm New Password',
-                                  hint: 'Re-enter your new password',
+                                  label: AppLocalizations.of(context)
+                                      .confirmNewPassword,
+                                  hint: AppLocalizations.of(context)
+                                      .reenterNewPassword,
                                   obscureText: !_isConfirmPasswordVisible,
                                   validator: (value) =>
                                       FormValidators.validateConfirmPassword(
@@ -632,7 +648,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                                 // Submit Button
                                 PrimaryButton(
-                                  text: 'Update Password',
+                                  text: AppLocalizations.of(context)
+                                      .updatePassword,
                                   onPressed: _handleChangePassword,
                                   isLoading: _isLoading,
                                   height: isTablet
@@ -667,7 +684,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                           ),
                                           SizedBox(width: 6.w),
                                           Text(
-                                            'Password Requirements',
+                                            AppLocalizations.of(context)
+                                                .passwordRequirements,
                                             style: GoogleFonts.inter(
                                               fontSize: 12.sp.clamp(11.0, 13.0),
                                               fontWeight: FontWeight.w600,
@@ -677,16 +695,25 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                         ],
                                       ),
                                       SizedBox(height: 8.h),
-                                      _buildRequirement('At least 8 characters',
+                                      _buildRequirement(
+                                          AppLocalizations.of(context)
+                                              .atLeast8Characters,
                                           isMet: _hasMinLength),
-                                      _buildRequirement('One uppercase letter',
+                                      _buildRequirement(
+                                          AppLocalizations.of(context)
+                                              .oneUppercaseLetter,
                                           isMet: _hasUppercase),
-                                      _buildRequirement('One lowercase letter',
+                                      _buildRequirement(
+                                          AppLocalizations.of(context)
+                                              .oneLowercaseLetter,
                                           isMet: _hasLowercase),
-                                      _buildRequirement('One number',
+                                      _buildRequirement(
+                                          AppLocalizations.of(context)
+                                              .oneNumber,
                                           isMet: _hasNumber),
                                       _buildRequirement(
-                                          'Different from current',
+                                          AppLocalizations.of(context)
+                                              .differentFromCurrent,
                                           isMet: _isDifferent),
                                     ],
                                   ),

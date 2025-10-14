@@ -302,6 +302,27 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     return gender.toLowerCase() == 'male' ? l10n.male : l10n.female;
   }
 
+  String _getLocalizedGoalName(String goal) {
+    final l10n = AppLocalizations.of(context);
+
+    switch (goal) {
+      case 'Health':
+        return l10n.health;
+      case 'Confidence':
+        return l10n.confidence;
+      case 'Energy':
+        return l10n.energy;
+      case 'Better Sleep':
+        return l10n.betterSleep;
+      case 'Anxiety Relief':
+        return l10n.anxietyRelief;
+      case 'Emotional Balance':
+        return l10n.emotionalBalance;
+      default:
+        return goal;
+    }
+  }
+
   // GOALS TAB
   Widget _buildGoalsTab() {
     final goals = (_userData['goals'] as List?) ?? [];
@@ -404,7 +425,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              goal,
+                              _getLocalizedGoalName(goal),
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
@@ -452,7 +473,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    goal,
+                                    _getLocalizedGoalName(goal),
                                     style: GoogleFonts.inter(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.w500,

@@ -1721,8 +1721,266 @@ abstract class AppLocalizations {
   /// No description provided for @error.
   ///
   /// In en, this message translates to:
-  /// **'Error: '**
+  /// **'Error'**
   String get error;
+
+  /// No description provided for @allNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'All Notifications'**
+  String get allNotifications;
+
+  /// No description provided for @masterControlNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Master control for all app notifications'**
+  String get masterControlNotifications;
+
+  /// No description provided for @dailyReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reminders'**
+  String get dailyReminders;
+
+  /// No description provided for @achievementNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement Notifications'**
+  String get achievementNotifications;
+
+  /// No description provided for @streakMilestones.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak Milestones'**
+  String get streakMilestones;
+
+  /// No description provided for @celebrateConsistency.
+  ///
+  /// In en, this message translates to:
+  /// **'Celebrate your consistency achievements'**
+  String get celebrateConsistency;
+
+  /// No description provided for @testNotificationSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Test notification sent! 🔔'**
+  String get testNotificationSent;
+
+  /// No description provided for @sendTestNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test Notification'**
+  String get sendTestNotification;
+
+  /// No description provided for @notificationsDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications Disabled'**
+  String get notificationsDisabled;
+
+  /// No description provided for @enableNotificationsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable notifications to receive daily reminders for your wellness routine'**
+  String get enableNotificationsMessage;
+
+  /// No description provided for @pleaseEnableNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable notifications in system settings'**
+  String get pleaseEnableNotifications;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @enableNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable Notifications'**
+  String get enableNotifications;
+
+  /// No description provided for @dailyReminder.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Reminder'**
+  String get dailyReminder;
+
+  /// No description provided for @getRemindedDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Get reminded to practice daily'**
+  String get getRemindedDaily;
+
+  /// No description provided for @reminderTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminder Time'**
+  String get reminderTime;
+
+  /// No description provided for @selectTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Time'**
+  String get selectTime;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @enterCurrentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your current password'**
+  String get enterCurrentPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @minCharacters.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. 8 characters'**
+  String get minCharacters;
+
+  /// No description provided for @newPasswordMustBeDifferent.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be different from current'**
+  String get newPasswordMustBeDifferent;
+
+  /// No description provided for @mustBeDifferent.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be different'**
+  String get mustBeDifferent;
+
+  /// No description provided for @passwordStrength.
+  ///
+  /// In en, this message translates to:
+  /// **'Password Strength'**
+  String get passwordStrength;
+
+  /// No description provided for @weak.
+  ///
+  /// In en, this message translates to:
+  /// **'Weak'**
+  String get weak;
+
+  /// No description provided for @fair.
+  ///
+  /// In en, this message translates to:
+  /// **'Fair'**
+  String get fair;
+
+  /// No description provided for @good.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get good;
+
+  /// No description provided for @strong.
+  ///
+  /// In en, this message translates to:
+  /// **'Strong'**
+  String get strong;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @reenterNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your new password'**
+  String get reenterNewPassword;
+
+  /// No description provided for @updatePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePassword;
+
+  /// No description provided for @passwordRequirements.
+  ///
+  /// In en, this message translates to:
+  /// **'Password Requirements'**
+  String get passwordRequirements;
+
+  /// No description provided for @atLeast8Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 8 characters'**
+  String get atLeast8Characters;
+
+  /// No description provided for @oneUppercaseLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'One uppercase letter'**
+  String get oneUppercaseLetter;
+
+  /// No description provided for @oneLowercaseLetter.
+  ///
+  /// In en, this message translates to:
+  /// **'One lowercase letter'**
+  String get oneLowercaseLetter;
+
+  /// No description provided for @oneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'One number'**
+  String get oneNumber;
+
+  /// No description provided for @differentFromCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Different from current'**
+  String get differentFromCurrent;
+
+  /// No description provided for @passwordChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Password Changed!'**
+  String get passwordChanged;
+
+  /// No description provided for @passwordChangedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your password has been changed successfully.'**
+  String get passwordChangedSuccess;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @createStrongPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a strong password for your account'**
+  String get createStrongPassword;
+
+  /// No description provided for @failedToChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to change password'**
+  String get failedToChangePassword;
+
+  /// No description provided for @unexpectedErrorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred. Please try again.'**
+  String get unexpectedErrorOccurred;
 }
 
 class _AppLocalizationsDelegate

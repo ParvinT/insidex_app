@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../providers/notification_provider.dart';
+import '../../l10n/app_localizations.dart';
 import 'notification_models.dart';
 
 class NotificationSettingsScreen extends StatefulWidget {
@@ -35,7 +36,6 @@ class _NotificationSettingsScreenState
     // Responsive values
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
-    final isCompact = context.isCompactH;
 
     // Adaptive sizing
     final double horizontalPadding =
@@ -69,7 +69,7 @@ class _NotificationSettingsScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Notifications',
+          AppLocalizations.of(context).notifications,
           style: GoogleFonts.inter(
             fontSize: titleSize,
             fontWeight: FontWeight.w600,
@@ -114,8 +114,9 @@ class _NotificationSettingsScreenState
                     // All Notifications Toggle
                     _buildNotificationCard(
                       context: context,
-                      title: 'All Notifications',
-                      subtitle: 'Master control for all app notifications',
+                      title: AppLocalizations.of(context).allNotifications,
+                      subtitle: AppLocalizations.of(context)
+                          .masterControlNotifications,
                       icon: Icons.notifications_outlined,
                       value: provider.allNotificationsEnabled,
                       onChanged: provider.hasPermission
@@ -130,7 +131,9 @@ class _NotificationSettingsScreenState
                     SizedBox(height: 16.h),
 
                     // Daily Reminders Section
-                    _buildSectionHeader('Daily Reminders', sectionTitleSize),
+                    _buildSectionHeader(
+                        AppLocalizations.of(context).dailyReminders,
+                        sectionTitleSize),
                     SizedBox(height: 12.h),
 
                     _buildDailyReminderCard(
@@ -144,13 +147,15 @@ class _NotificationSettingsScreenState
                     SizedBox(height: 24.h),
 
                     _buildSectionHeader(
-                        'Achievement Notifications', sectionTitleSize),
+                        AppLocalizations.of(context).achievementNotifications,
+                        sectionTitleSize),
                     SizedBox(height: 12.h),
 
                     _buildNotificationCard(
                         context: context,
-                        title: 'Streak Milestones',
-                        subtitle: 'Celebrate your consistency achievements',
+                        title: AppLocalizations.of(context).streakMilestones,
+                        subtitle:
+                            AppLocalizations.of(context).celebrateConsistency,
                         icon: Icons.local_fire_department,
                         value: provider.settings.streakNotificationsEnabled,
                         onChanged: provider.hasPermission &&
@@ -159,7 +164,7 @@ class _NotificationSettingsScreenState
                                 await provider.toggleStreakNotifications(value);
                               }
                             : null,
-                        bodyTextSize: bodyTextSize, 
+                        bodyTextSize: bodyTextSize,
                         sectionTitleSize: sectionTitleSize),
 
                     SizedBox(height: 24.h),
@@ -173,8 +178,9 @@ class _NotificationSettingsScreenState
                             await provider.sendTestNotification();
                             if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Test notification sent! 🔔'),
+                                SnackBar(
+                                  content: Text(AppLocalizations.of(context)
+                                      .testNotificationSent),
                                   duration: Duration(seconds: 2),
                                 ),
                               );
@@ -186,7 +192,7 @@ class _NotificationSettingsScreenState
                             color: AppColors.textLight,
                           ),
                           label: Text(
-                            'Send Test Notification',
+                            AppLocalizations.of(context).sendTestNotification,
                             style: GoogleFonts.inter(
                               fontSize: bodyTextSize,
                               color: AppColors.textLight,
@@ -231,7 +237,7 @@ class _NotificationSettingsScreenState
           ),
           SizedBox(height: 12.h),
           Text(
-            'Notifications Disabled',
+            AppLocalizations.of(context).notificationsDisabled,
             style: GoogleFonts.inter(
               fontSize: textSize + 2,
               fontWeight: FontWeight.w600,
@@ -240,7 +246,7 @@ class _NotificationSettingsScreenState
           ),
           SizedBox(height: 8.h),
           Text(
-            'Enable notifications to receive daily reminders for your wellness routine',
+            AppLocalizations.of(context).enableNotificationsMessage,
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: textSize,
@@ -255,10 +261,10 @@ class _NotificationSettingsScreenState
               if (mounted && !granted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text(
-                        'Please enable notifications in system settings'),
+                    content: Text(
+                        AppLocalizations.of(context).pleaseEnableNotifications),
                     action: SnackBarAction(
-                      label: 'Open Settings',
+                      label: AppLocalizations.of(context).openSettings,
                       onPressed: () => provider.openSystemSettings(),
                     ),
                   ),
@@ -276,7 +282,7 @@ class _NotificationSettingsScreenState
               ),
             ),
             child: Text(
-              'Enable Notifications',
+              AppLocalizations.of(context).enableNotifications,
               style: GoogleFonts.inter(
                 fontSize: textSize,
                 fontWeight: FontWeight.w600,
@@ -324,7 +330,7 @@ class _NotificationSettingsScreenState
           TextButton(
             onPressed: provider.openSystemSettings,
             child: Text(
-              'Settings',
+              AppLocalizations.of(context).settings,
               style: GoogleFonts.inter(
                 fontSize: textSize,
                 color: AppColors.primaryGold,
@@ -472,7 +478,7 @@ class _NotificationSettingsScreenState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Daily Reminder',
+                      AppLocalizations.of(context).dailyReminder,
                       style: GoogleFonts.inter(
                         fontSize: sectionTitleSize,
                         fontWeight: FontWeight.w600,
@@ -481,7 +487,7 @@ class _NotificationSettingsScreenState
                     ),
                     SizedBox(height: 4.h),
                     Text(
-                      'Get reminded to practice daily',
+                      AppLocalizations.of(context).getRemindedDaily,
                       style: GoogleFonts.inter(
                         fontSize: bodyTextSize,
                         color: AppColors.textSecondary,
@@ -529,7 +535,7 @@ class _NotificationSettingsScreenState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Reminder Time',
+                      AppLocalizations.of(context).reminderTime,
                       style: GoogleFonts.inter(
                         fontSize: bodyTextSize,
                         color: AppColors.textPrimary,
@@ -629,7 +635,7 @@ class _NotificationSettingsScreenState
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context).cancel,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       color: AppColors.textSecondary,
@@ -637,7 +643,7 @@ class _NotificationSettingsScreenState
                   ),
                 ),
                 Text(
-                  'Select Time',
+                  AppLocalizations.of(context).selectTime,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -650,7 +656,7 @@ class _NotificationSettingsScreenState
                     if (context.mounted) Navigator.pop(context);
                   },
                   child: Text(
-                    'Done',
+                    AppLocalizations.of(context).done,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
