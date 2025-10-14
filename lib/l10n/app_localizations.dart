@@ -1273,6 +1273,456 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'years old'**
   String get yearsOld;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t worry! It happens. Please enter the email associated with your account.'**
+  String get forgotPasswordDescription;
+
+  /// No description provided for @emailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Address'**
+  String get emailAddress;
+
+  /// No description provided for @enterYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get enterYourEmail;
+
+  /// No description provided for @sendResetLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Reset Link'**
+  String get sendResetLink;
+
+  /// No description provided for @backToLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Login'**
+  String get backToLogin;
+
+  /// No description provided for @securityReasonNote.
+  ///
+  /// In en, this message translates to:
+  /// **'For security reasons, we will send a password reset link to your registered email if it exists in our system.'**
+  String get securityReasonNote;
+
+  /// No description provided for @checkYourEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Your Email'**
+  String get checkYourEmail;
+
+  /// No description provided for @resetLinkSentMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'We have sent a password reset link to your email address. Please check your inbox and follow the instructions.'**
+  String get resetLinkSentMessage;
+
+  /// No description provided for @didntReceiveEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t receive the email?'**
+  String get didntReceiveEmail;
+
+  /// No description provided for @checkSpamFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check your spam folder or try resending the email after a few minutes.'**
+  String get checkSpamFolder;
+
+  /// No description provided for @tryDifferentEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Different Email'**
+  String get tryDifferentEmail;
+
+  /// No description provided for @accountNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Not Found'**
+  String get accountNotFound;
+
+  /// No description provided for @noAccountExistsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No account exists with this email address.\n\nWould you like to create a new account instead?'**
+  String get noAccountExistsMessage;
+
+  /// No description provided for @signUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Up'**
+  String get signUp;
+
+  /// No description provided for @failedToSendResetEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send reset email'**
+  String get failedToSendResetEmail;
+
+  /// No description provided for @errorOccurred.
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred. Please try again.'**
+  String get errorOccurred;
+
+  /// No description provided for @welcomeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome Back!'**
+  String get welcomeBack;
+
+  /// No description provided for @signInToContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to continue your healing journey'**
+  String get signInToContinue;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get password;
+
+  /// No description provided for @enterYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your password'**
+  String get enterYourPassword;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password?'**
+  String get forgotPassword;
+
+  /// No description provided for @signIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get signIn;
+
+  /// No description provided for @or.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get or;
+
+  /// No description provided for @dontHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t have an account? '**
+  String get dontHaveAccount;
+
+  /// No description provided for @loginFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Login failed'**
+  String get loginFailed;
+
+  /// No description provided for @verifyEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify Email'**
+  String get verifyEmail;
+
+  /// No description provided for @weSentPasswordTo.
+  ///
+  /// In en, this message translates to:
+  /// **'We sent a password to:'**
+  String get weSentPasswordTo;
+
+  /// No description provided for @enterSixDigitPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the 6-digit password:'**
+  String get enterSixDigitPassword;
+
+  /// No description provided for @verify.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify'**
+  String get verify;
+
+  /// No description provided for @youCanResendIn.
+  ///
+  /// In en, this message translates to:
+  /// **'You can resend in'**
+  String get youCanResendIn;
+
+  /// No description provided for @seconds.
+  ///
+  /// In en, this message translates to:
+  /// **'s'**
+  String get seconds;
+
+  /// No description provided for @didntGetIt.
+  ///
+  /// In en, this message translates to:
+  /// **'Didn\'t get it?'**
+  String get didntGetIt;
+
+  /// No description provided for @resend.
+  ///
+  /// In en, this message translates to:
+  /// **'Resend'**
+  String get resend;
+
+  /// No description provided for @newCodeSentTo.
+  ///
+  /// In en, this message translates to:
+  /// **'New code sent to'**
+  String get newCodeSentTo;
+
+  /// No description provided for @failedToSendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send code'**
+  String get failedToSendCode;
+
+  /// No description provided for @pleaseEnterSixDigitCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the 6-digit code.'**
+  String get pleaseEnterSixDigitCode;
+
+  /// No description provided for @verificationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed'**
+  String get verificationFailed;
+
+  /// No description provided for @accountCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created successfully!'**
+  String get accountCreatedSuccessfully;
+
+  /// No description provided for @createAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccount;
+
+  /// No description provided for @startYourHealingJourney.
+  ///
+  /// In en, this message translates to:
+  /// **'Start your healing journey today'**
+  String get startYourHealingJourney;
+
+  /// No description provided for @enterYourFullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get enterYourFullName;
+
+  /// No description provided for @createAPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a password'**
+  String get createAPassword;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @reenterYourPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get reenterYourPassword;
+
+  /// No description provided for @pleaseConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm your password'**
+  String get pleaseConfirmPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @iAgreeToThe.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the '**
+  String get iAgreeToThe;
+
+  /// No description provided for @termsAndConditions.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Conditions'**
+  String get termsAndConditions;
+
+  /// No description provided for @and.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get and;
+
+  /// No description provided for @pleaseAgreeToTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Please agree to the terms and conditions'**
+  String get pleaseAgreeToTerms;
+
+  /// No description provided for @verificationCodeSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code sent! Please check your email.'**
+  String get verificationCodeSent;
+
+  /// No description provided for @registrationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration failed'**
+  String get registrationFailed;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? '**
+  String get alreadyHaveAccount;
+
+  /// No description provided for @welcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome'**
+  String get welcome;
+
+  /// No description provided for @createYourPersonalProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your personal profile\nto get custom subliminal sessions'**
+  String get createYourPersonalProfile;
+
+  /// No description provided for @emailPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Email + Password'**
+  String get emailPassword;
+
+  /// No description provided for @suggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'💡 Suggestion'**
+  String get suggestion;
+
+  /// No description provided for @bugReport.
+  ///
+  /// In en, this message translates to:
+  /// **'🐛 Bug Report'**
+  String get bugReport;
+
+  /// No description provided for @featureRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'✨ Feature Request'**
+  String get featureRequest;
+
+  /// No description provided for @complaint.
+  ///
+  /// In en, this message translates to:
+  /// **'😔 Complaint'**
+  String get complaint;
+
+  /// No description provided for @other.
+  ///
+  /// In en, this message translates to:
+  /// **'📝 Other'**
+  String get other;
+
+  /// No description provided for @type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get type;
+
+  /// No description provided for @rateYourExperience.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate your experience'**
+  String get rateYourExperience;
+
+  /// No description provided for @title.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get title;
+
+  /// No description provided for @briefSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Brief summary'**
+  String get briefSummary;
+
+  /// No description provided for @details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get details;
+
+  /// No description provided for @tellUsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us more...'**
+  String get tellUsMore;
+
+  /// No description provided for @pleaseEnterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title'**
+  String get pleaseEnterTitle;
+
+  /// No description provided for @pleaseDescribeFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe your feedback'**
+  String get pleaseDescribeFeedback;
+
+  /// No description provided for @emailOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get emailOptional;
+
+  /// No description provided for @forFollowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'For follow-up'**
+  String get forFollowUp;
+
+  /// No description provided for @submitFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Feedback'**
+  String get submitFeedback;
+
+  /// No description provided for @thankYouForFeedback.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Thank you for your feedback!'**
+  String get thankYouForFeedback;
+
+  /// No description provided for @error.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: '**
+  String get error;
 }
 
 class _AppLocalizationsDelegate

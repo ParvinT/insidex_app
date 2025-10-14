@@ -3,11 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/responsive/auth_scaffold.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../../l10n/app_localizations.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -60,7 +61,7 @@ class WelcomeScreen extends StatelessWidget {
                             width: logoWidth,
                             height: logoHeight,
                             fit: BoxFit.contain,
-                            colorFilter: ColorFilter.mode(
+                            colorFilter: const ColorFilter.mode(
                               AppColors.textPrimary,
                               BlendMode.srcIn,
                             ),
@@ -73,7 +74,7 @@ class WelcomeScreen extends StatelessWidget {
 
                     // Title
                     Text(
-                      'Welcome',
+                      AppLocalizations.of(context).welcome,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize:
@@ -88,7 +89,7 @@ class WelcomeScreen extends StatelessWidget {
 
                     // Subtitle
                     Text(
-                      'Create your personal profile\nto get custom subliminal sessions',
+                      AppLocalizations.of(context).createYourPersonalProfile,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
@@ -104,7 +105,7 @@ class WelcomeScreen extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: _OutlinedBigButton(
-                        label: 'Email + Password',
+                        label: AppLocalizations.of(context).emailPassword,
                         onTap: () {
                           // Preserve original navigation
                           Navigator.of(context).pushNamed(AppRoutes.login);
@@ -114,8 +115,6 @@ class WelcomeScreen extends StatelessWidget {
 
                     SizedBox(height: 12.h),
 
-                
-
                     SizedBox(height: 32.h),
 
                     // Sign Up
@@ -124,7 +123,7 @@ class WelcomeScreen extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          "Don't have an account? ",
+                          AppLocalizations.of(context).dontHaveAccount,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
@@ -138,7 +137,7 @@ class WelcomeScreen extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
                             child: Text(
-                              'Sign Up',
+                              AppLocalizations.of(context).signUp,
                               style: GoogleFonts.inter(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,

@@ -10,11 +10,10 @@ import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
-import '../../shared/widgets/social_login_button.dart';
 import '../../services/firebase_service.dart';
 import 'otp_verification_screen.dart';
 import '../../core/responsive/auth_scaffold.dart';
-import '../../core/responsive/context_ext.dart';
+import '../../l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -55,8 +54,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Check if passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwords do not match'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).passwordsDoNotMatch),
           backgroundColor: Colors.red,
         ),
       );
@@ -66,8 +65,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Check terms and conditions agreement
     if (!_agreeToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please agree to the terms and conditions'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseAgreeToTerms),
           backgroundColor: Colors.orange,
         ),
       );
@@ -90,8 +89,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (result['success']) {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Verification code sent! Please check your email.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).verificationCodeSent),
           backgroundColor: Colors.green,
           duration: Duration(seconds: 3),
         ),
@@ -110,149 +109,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['error'] ?? 'Registration failed'),
+          content: Text(result['error'] ??
+              AppLocalizations.of(context).registrationFailed),
           backgroundColor: Colors.red,
         ),
       );
     }
-  }
-
-  Future<void> _handleGoogleSignUp() async {
-    setState(() => _isGoogleLoading = true);
-
-    try {
-      // Show coming soon dialog
-      _showComingSoonDialog('Google Sign Up');
-    } finally {
-      setState(() => _isGoogleLoading = false);
-    }
-  }
-
-  Future<void> _handleAppleSignUp() async {
-    setState(() => _isAppleLoading = true);
-
-    try {
-      // Show coming soon dialog
-      _showComingSoonDialog('Apple ID Sign Up');
-    } finally {
-      setState(() => _isAppleLoading = false);
-    }
-  }
-
-  void _showComingSoonDialog(String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: AppColors.backgroundWhite,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Icon
-              Container(
-                width: 64.w,
-                height: 64.w,
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.construction,
-                  color: AppColors.textPrimary,
-                  size: 32.sp,
-                ),
-              ),
-              SizedBox(height: 16.h),
-
-              // Title
-              Text(
-                'Coming Soon!',
-                style: GoogleFonts.inter(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(height: 8.h),
-
-              // Message
-              Text(
-                '$feature will be available soon.\nStay tuned for updates!',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-              SizedBox(height: 24.h),
-
-              // OK Button
-              SizedBox(
-                width: double.infinity,
-                height: 44.h, // Fixed height
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
-                    padding: EdgeInsets.zero, // Remove padding
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'OK',
-                      style: GoogleFonts.inter(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        height: 1.0, // Line height
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDivider() {
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            color: AppColors.greyBorder,
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Text(
-            'OR',
-            style: GoogleFonts.inter(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Container(
-            height: 1,
-            color: AppColors.greyBorder,
-          ),
-        ),
-      ],
-    );
   }
 
   @override
@@ -298,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 // Create Account Title
                 Text(
-                  'Create Account',
+                  AppLocalizations.of(context).createAccount,
                   style: GoogleFonts.inter(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
@@ -310,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 // Subtitle
                 Text(
-                  'Start your healing journey today',
+                  AppLocalizations.of(context).startYourHealingJourney,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     color: AppColors.textSecondary,
@@ -322,8 +184,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Full Name Input Field
                 CustomTextField(
                   controller: _nameController,
-                  label: 'Full Name',
-                  hint: 'Enter your full name',
+                  label: AppLocalizations.of(context).fullName,
+                  hint: AppLocalizations.of(context).enterYourFullName,
                   validator: FormValidators.validateName,
                   suffixIcon: Icon(
                     Icons.person_outline,
@@ -337,8 +199,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Email Input Field
                 CustomTextField(
                   controller: _emailController,
-                  label: 'Email',
-                  hint: 'Enter your email',
+                  label: AppLocalizations.of(context).email,
+                  hint: AppLocalizations.of(context).enterYourEmail,
                   keyboardType: TextInputType.emailAddress,
                   validator: FormValidators.validateEmail,
                   suffixIcon: Icon(
@@ -353,8 +215,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Password Input Field
                 CustomTextField(
                   controller: _passwordController,
-                  label: 'Password',
-                  hint: 'Create a password',
+                  label: AppLocalizations.of(context).password,
+                  hint: AppLocalizations.of(context).createAPassword,
                   obscureText: !_isPasswordVisible,
                   validator: FormValidators.validatePassword,
                   suffixIcon: IconButton(
@@ -376,15 +238,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 // Confirm Password Input Field
                 CustomTextField(
                   controller: _confirmPasswordController,
-                  label: 'Confirm Password',
-                  hint: 'Re-enter your password',
+                  label: AppLocalizations.of(context).confirmPassword,
+                  hint: AppLocalizations.of(context).reenterYourPassword,
                   obscureText: !_isConfirmPasswordVisible,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please confirm your password';
+                      return AppLocalizations.of(context).pleaseConfirmPassword;
                     }
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return AppLocalizations.of(context).passwordsDoNotMatch;
                     }
                     return null;
                   },
@@ -431,9 +293,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: AppColors.textSecondary,
                           ),
                           children: [
-                            const TextSpan(text: 'I agree to the '),
                             TextSpan(
-                              text: 'Terms & Conditions',
+                                text: AppLocalizations.of(context).iAgreeToThe),
+                            TextSpan(
+                              text: AppLocalizations.of(context)
+                                  .termsAndConditions,
                               style: GoogleFonts.inter(
                                 color: AppColors.primaryGold,
                                 fontWeight: FontWeight.w500,
@@ -445,9 +309,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       context, AppRoutes.termsOfService);
                                 },
                             ),
-                            const TextSpan(text: ' and '),
+                            TextSpan(text: AppLocalizations.of(context).and),
                             TextSpan(
-                              text: 'Privacy Policy',
+                              text: AppLocalizations.of(context).privacyPolicy,
                               style: GoogleFonts.inter(
                                 color: AppColors.primaryGold,
                                 fontWeight: FontWeight.w500,
@@ -470,45 +334,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                 // Sign Up Button
                 PrimaryButton(
-                  text: 'Sign Up',
+                  text: AppLocalizations.of(context).signUp,
                   onPressed: _handleRegister,
                   isLoading: _isEmailLoading,
                 ),
 
                 SizedBox(height: 24.h),
 
-                /* // OR Divider
-                _buildDivider(),
-
-                SizedBox(height: 24.h),
-
-                // Google Sign Up Button
-                SocialLoginButton(
-                  onTap: _handleGoogleSignUp,
-                  label: 'Sign up with Google',
-                  isLoading: _isGoogleLoading,
-                  isDisabled: _isEmailLoading || _isAppleLoading,
-                ),
-
-                SizedBox(height: 12.h),
-
-                // Apple Sign Up Button
-                SocialLoginButton(
-                  onTap: _handleAppleSignUp,
-                  label: 'Sign up with Apple',
-                  isDark: true,
-                  isLoading: _isAppleLoading,
-                  isDisabled: _isEmailLoading || _isGoogleLoading,
-                ),
-
-                SizedBox(height: 32.h),*/
-
                 // Sign In Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      AppLocalizations.of(context).alreadyHaveAccount,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: AppColors.textSecondary,
@@ -522,7 +360,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   context, AppRoutes.login);
                             },
                       child: Text(
-                        'Sign In',
+                        AppLocalizations.of(context).signIn,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading

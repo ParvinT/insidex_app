@@ -607,4 +607,238 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get yearsOld => 'лет';
+
+  @override
+  String get forgotPasswordTitle => 'Забыли пароль?';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Не волнуйтесь! Такое бывает. Пожалуйста, введите email, связанный с вашей учетной записью.';
+
+  @override
+  String get emailAddress => 'Адрес электронной почты';
+
+  @override
+  String get enterYourEmail => 'Введите ваш email';
+
+  @override
+  String get sendResetLink => 'Отправить ссылку для сброса';
+
+  @override
+  String get backToLogin => 'Вернуться к входу';
+
+  @override
+  String get securityReasonNote =>
+      'В целях безопасности мы отправим ссылку для сброса пароля на вашу зарегистрированную электронную почту, если она существует в нашей системе.';
+
+  @override
+  String get checkYourEmail => 'Проверьте вашу почту';
+
+  @override
+  String get resetLinkSentMessage =>
+      'Мы отправили ссылку для сброса пароля на ваш адрес электронной почты. Пожалуйста, проверьте входящие и следуйте инструкциям.';
+
+  @override
+  String get didntReceiveEmail => 'Не получили письмо?';
+
+  @override
+  String get checkSpamFolder =>
+      'Пожалуйста, проверьте папку со спамом или попробуйте отправить письмо повторно через несколько минут.';
+
+  @override
+  String get tryDifferentEmail => 'Попробовать другой email';
+
+  @override
+  String get accountNotFound => 'Аккаунт не найден';
+
+  @override
+  String get noAccountExistsMessage =>
+      'Аккаунт с этим адресом электронной почты не существует.\n\nХотите создать новую учетную запись?';
+
+  @override
+  String get signUp => 'Зарегистрироваться';
+
+  @override
+  String get failedToSendResetEmail => 'Не удалось отправить письмо для сброса';
+
+  @override
+  String get errorOccurred =>
+      'Произошла ошибка. Пожалуйста, попробуйте еще раз.';
+
+  @override
+  String get welcomeBack => 'С возвращением!';
+
+  @override
+  String get signInToContinue =>
+      'Войдите, чтобы продолжить свой путь к исцелению';
+
+  @override
+  String get password => 'Пароль';
+
+  @override
+  String get enterYourPassword => 'Введите ваш пароль';
+
+  @override
+  String get forgotPassword => 'Забыли пароль?';
+
+  @override
+  String get signIn => 'Войти';
+
+  @override
+  String get or => 'ИЛИ';
+
+  @override
+  String get dontHaveAccount => 'Нет аккаунта? ';
+
+  @override
+  String get loginFailed => 'Ошибка входа';
+
+  @override
+  String get verifyEmail => 'Подтвердить Email';
+
+  @override
+  String get weSentPasswordTo => 'Мы отправили пароль на:';
+
+  @override
+  String get enterSixDigitPassword => 'Введите 6-значный пароль:';
+
+  @override
+  String get verify => 'Подтвердить';
+
+  @override
+  String get youCanResendIn => 'Можно отправить повторно через';
+
+  @override
+  String get seconds => 'сек';
+
+  @override
+  String get didntGetIt => 'Не получили?';
+
+  @override
+  String get resend => 'Отправить повторно';
+
+  @override
+  String get newCodeSentTo => 'Новый код отправлен на';
+
+  @override
+  String get failedToSendCode => 'Не удалось отправить код';
+
+  @override
+  String get pleaseEnterSixDigitCode => 'Пожалуйста, введите 6-значный код.';
+
+  @override
+  String get verificationFailed => 'Ошибка подтверждения';
+
+  @override
+  String get accountCreatedSuccessfully => 'Аккаунт успешно создан!';
+
+  @override
+  String get createAccount => 'Создать аккаунт';
+
+  @override
+  String get startYourHealingJourney => 'Начните свой путь к исцелению сегодня';
+
+  @override
+  String get enterYourFullName => 'Введите ваше полное имя';
+
+  @override
+  String get createAPassword => 'Создайте пароль';
+
+  @override
+  String get confirmPassword => 'Подтвердите пароль';
+
+  @override
+  String get reenterYourPassword => 'Введите пароль повторно';
+
+  @override
+  String get pleaseConfirmPassword => 'Пожалуйста, подтвердите ваш пароль';
+
+  @override
+  String get passwordsDoNotMatch => 'Пароли не совпадают';
+
+  @override
+  String get iAgreeToThe => 'Я согласен с ';
+
+  @override
+  String get termsAndConditions => 'Условиями использования';
+
+  @override
+  String get and => ' и ';
+
+  @override
+  String get pleaseAgreeToTerms => 'Пожалуйста, примите условия использования';
+
+  @override
+  String get verificationCodeSent =>
+      'Код подтверждения отправлен! Проверьте вашу почту.';
+
+  @override
+  String get registrationFailed => 'Ошибка регистрации';
+
+  @override
+  String get alreadyHaveAccount => 'Уже есть аккаунт? ';
+
+  @override
+  String get welcome => 'Добро пожаловать';
+
+  @override
+  String get createYourPersonalProfile =>
+      'Создайте свой личный профиль\nчтобы получить персональные сублиминальные сессии';
+
+  @override
+  String get emailPassword => 'Email + Пароль';
+
+  @override
+  String get suggestion => '💡 Предложение';
+
+  @override
+  String get bugReport => '🐛 Сообщить об ошибке';
+
+  @override
+  String get featureRequest => '✨ Запрос функции';
+
+  @override
+  String get complaint => '😔 Жалоба';
+
+  @override
+  String get other => '📝 Другое';
+
+  @override
+  String get type => 'Тип';
+
+  @override
+  String get rateYourExperience => 'Оцените свой опыт';
+
+  @override
+  String get title => 'Заголовок';
+
+  @override
+  String get briefSummary => 'Краткое описание';
+
+  @override
+  String get details => 'Детали';
+
+  @override
+  String get tellUsMore => 'Расскажите подробнее...';
+
+  @override
+  String get pleaseEnterTitle => 'Пожалуйста, введите заголовок';
+
+  @override
+  String get pleaseDescribeFeedback => 'Пожалуйста, опишите ваш отзыв';
+
+  @override
+  String get emailOptional => 'Email (необязательно)';
+
+  @override
+  String get forFollowUp => 'Для связи';
+
+  @override
+  String get submitFeedback => 'Отправить отзыв';
+
+  @override
+  String get thankYouForFeedback => '✅ Спасибо за ваш отзыв!';
+
+  @override
+  String get error => 'Ошибка: ';
 }

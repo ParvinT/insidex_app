@@ -603,4 +603,236 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yearsOld => 'years old';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot Password?';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Don\'t worry! It happens. Please enter the email associated with your account.';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get enterYourEmail => 'Enter your email';
+
+  @override
+  String get sendResetLink => 'Send Reset Link';
+
+  @override
+  String get backToLogin => 'Back to Login';
+
+  @override
+  String get securityReasonNote =>
+      'For security reasons, we will send a password reset link to your registered email if it exists in our system.';
+
+  @override
+  String get checkYourEmail => 'Check Your Email';
+
+  @override
+  String get resetLinkSentMessage =>
+      'We have sent a password reset link to your email address. Please check your inbox and follow the instructions.';
+
+  @override
+  String get didntReceiveEmail => 'Didn\'t receive the email?';
+
+  @override
+  String get checkSpamFolder =>
+      'Please check your spam folder or try resending the email after a few minutes.';
+
+  @override
+  String get tryDifferentEmail => 'Try Different Email';
+
+  @override
+  String get accountNotFound => 'Account Not Found';
+
+  @override
+  String get noAccountExistsMessage =>
+      'No account exists with this email address.\n\nWould you like to create a new account instead?';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get failedToSendResetEmail => 'Failed to send reset email';
+
+  @override
+  String get errorOccurred => 'An error occurred. Please try again.';
+
+  @override
+  String get welcomeBack => 'Welcome Back!';
+
+  @override
+  String get signInToContinue => 'Sign in to continue your healing journey';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get or => 'OR';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account? ';
+
+  @override
+  String get loginFailed => 'Login failed';
+
+  @override
+  String get verifyEmail => 'Verify Email';
+
+  @override
+  String get weSentPasswordTo => 'We sent a password to:';
+
+  @override
+  String get enterSixDigitPassword => 'Enter the 6-digit password:';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get youCanResendIn => 'You can resend in';
+
+  @override
+  String get seconds => 's';
+
+  @override
+  String get didntGetIt => 'Didn\'t get it?';
+
+  @override
+  String get resend => 'Resend';
+
+  @override
+  String get newCodeSentTo => 'New code sent to';
+
+  @override
+  String get failedToSendCode => 'Failed to send code';
+
+  @override
+  String get pleaseEnterSixDigitCode => 'Please enter the 6-digit code.';
+
+  @override
+  String get verificationFailed => 'Verification failed';
+
+  @override
+  String get accountCreatedSuccessfully => 'Account created successfully!';
+
+  @override
+  String get createAccount => 'Create Account';
+
+  @override
+  String get startYourHealingJourney => 'Start your healing journey today';
+
+  @override
+  String get enterYourFullName => 'Enter your full name';
+
+  @override
+  String get createAPassword => 'Create a password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get reenterYourPassword => 'Re-enter your password';
+
+  @override
+  String get pleaseConfirmPassword => 'Please confirm your password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get iAgreeToThe => 'I agree to the ';
+
+  @override
+  String get termsAndConditions => 'Terms & Conditions';
+
+  @override
+  String get and => ' and ';
+
+  @override
+  String get pleaseAgreeToTerms => 'Please agree to the terms and conditions';
+
+  @override
+  String get verificationCodeSent =>
+      'Verification code sent! Please check your email.';
+
+  @override
+  String get registrationFailed => 'Registration failed';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get welcome => 'Welcome';
+
+  @override
+  String get createYourPersonalProfile =>
+      'Create your personal profile\nto get custom subliminal sessions';
+
+  @override
+  String get emailPassword => 'Email + Password';
+
+  @override
+  String get suggestion => '💡 Suggestion';
+
+  @override
+  String get bugReport => '🐛 Bug Report';
+
+  @override
+  String get featureRequest => '✨ Feature Request';
+
+  @override
+  String get complaint => '😔 Complaint';
+
+  @override
+  String get other => '📝 Other';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get rateYourExperience => 'Rate your experience';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get briefSummary => 'Brief summary';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get tellUsMore => 'Tell us more...';
+
+  @override
+  String get pleaseEnterTitle => 'Please enter a title';
+
+  @override
+  String get pleaseDescribeFeedback => 'Please describe your feedback';
+
+  @override
+  String get emailOptional => 'Email (optional)';
+
+  @override
+  String get forFollowUp => 'For follow-up';
+
+  @override
+  String get submitFeedback => 'Submit Feedback';
+
+  @override
+  String get thankYouForFeedback => '✅ Thank you for your feedback!';
+
+  @override
+  String get error => 'Error: ';
 }

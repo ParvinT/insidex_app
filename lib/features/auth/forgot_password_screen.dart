@@ -11,6 +11,7 @@ import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -59,7 +60,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Icon(Icons.person_off, color: Colors.orange, size: 24.sp),
                   SizedBox(width: 12.w),
                   Text(
-                    'Account Not Found',
+                    AppLocalizations.of(context).accountNotFound,
                     style: GoogleFonts.inter(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -68,14 +69,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ],
               ),
               content: Text(
-                'No account exists with this email address.\n\nWould you like to create a new account instead?',
+                AppLocalizations.of(context).noAccountExistsMessage,
                 style: GoogleFonts.inter(fontSize: 14.sp, height: 1.5),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'Cancel',
+                    AppLocalizations.of(context).cancel,
                     style: GoogleFonts.inter(color: AppColors.textSecondary),
                   ),
                 ),
@@ -91,7 +92,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                   ),
                   child: Text(
-                    'Sign Up',
+                    AppLocalizations.of(context).signUp,
                     style: GoogleFonts.inter(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -105,7 +106,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           // Diğer hatalar için normal SnackBar
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['error'] ?? 'Failed to send reset email'),
+              content: Text(result['error'] ??
+                  AppLocalizations.of(context).failedToSendResetEmail),
               backgroundColor: Colors.red,
             ),
           );
@@ -114,8 +116,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('An error occurred. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).errorOccurred),
           backgroundColor: Colors.red,
         ),
       );
@@ -161,6 +163,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
     final isCompact = context.isCompactH;
+    final l10n = AppLocalizations.of(context);
 
     return Form(
       key: _formKey,
@@ -209,7 +212,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
           // Title
           Text(
-            'Forgot Password?',
+            l10n.forgotPasswordTitle,
             style: GoogleFonts.inter(
               fontSize:
                   isTablet ? 32.sp.clamp(28.0, 36.0) : 28.sp.clamp(24.0, 32.0),
@@ -227,7 +230,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               horizontal: context.isDesktop ? 60.w : 0,
             ),
             child: Text(
-              'Don\'t worry! It happens. Please enter the email associated with your account.',
+              l10n.forgotPasswordDescription,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 17.sp : 16.sp,
                 color: AppColors.textSecondary,
@@ -246,8 +249,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
             child: CustomTextField(
               controller: _emailController,
-              label: 'Email Address',
-              hint: 'Enter your email',
+              label: l10n.emailAddress,
+              hint: l10n.enterYourEmail,
               keyboardType: TextInputType.emailAddress,
               validator: FormValidators.validateEmail,
               readOnly: _isLoading,
@@ -267,7 +270,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               maxWidth: context.isDesktop ? 500 : double.infinity,
             ),
             child: PrimaryButton(
-              text: 'Send Reset Link',
+              text: l10n.sendResetLink,
               onPressed: _handleResetPassword,
               isLoading: _isLoading,
               height: isTablet ? 56 : 48,
@@ -291,7 +294,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
                 SizedBox(width: 8.w),
                 Text(
-                  'Back to Login',
+                  l10n.backToLogin,
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 15.sp : 14.sp,
                     color: _isLoading
@@ -332,7 +335,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      'For security reasons, we will send a password reset link to your registered email if it exists in our system.',
+                      l10n.securityReasonNote,
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 13.sp : 12.sp,
                         color: AppColors.textSecondary,
@@ -355,6 +358,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     // Context extension kullanımı (daha basit ve çalışıyor)
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
+    final l10n = AppLocalizations.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -401,7 +405,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
         // Success Title
         Text(
-          'Check Your Email',
+          l10n.checkYourEmail,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 32.sp : 28.sp,
             fontWeight: FontWeight.w700,
@@ -443,7 +447,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     : 20.w,
           ),
           child: Text(
-            'We have sent a password reset link to your email address. Please check your inbox and follow the instructions.',
+            l10n.resetLinkSentMessage,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 17.sp : 16.sp,
               color: AppColors.textSecondary,
@@ -487,7 +491,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Didn\'t receive the email?',
+                        l10n.didntReceiveEmail,
                         style: GoogleFonts.inter(
                           fontSize: isTablet ? 15.sp : 14.sp,
                           fontWeight: FontWeight.w600,
@@ -496,7 +500,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Please check your spam folder or try resending the email after a few minutes.',
+                        l10n.checkSpamFolder,
                         style: GoogleFonts.inter(
                           fontSize: isTablet ? 13.sp : 12.sp,
                           color: AppColors.textSecondary,
@@ -523,7 +527,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               horizontal: isTablet ? 32.w : 0,
             ),
             child: PrimaryButton(
-              text: 'Back to Login',
+              text: l10n.backToLogin,
               onPressed: _handleBackToLogin,
               height: isTablet ? 56 : 48,
             ),
@@ -540,7 +544,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   setState(() => _isEmailSent = false);
                 },
           child: Text(
-            'Try Different Email',
+            l10n.tryDifferentEmail,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 15.sp : 14.sp,
               color: AppColors.primaryGold,
