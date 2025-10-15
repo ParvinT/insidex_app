@@ -987,4 +987,131 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationsEnabledSuccess => 'Notifications enabled! 🔔';
+
+  @override
+  String get notificationDailyReminderTitle => 'Time for Your Daily Session 🎧';
+
+  @override
+  String get notificationDailyReminderMessage =>
+      'Take a moment to relax and heal with INSIDEX';
+
+  @override
+  String get notificationStreak3Title => '🎉 Congratulations!';
+
+  @override
+  String get notificationStreak3Message => '🔥 3 day streak! Great start!';
+
+  @override
+  String get notificationStreak7Title => '🎯 One Week Achievement!';
+
+  @override
+  String get notificationStreak7Message =>
+      '7 days in a row! You\'re doing amazing!';
+
+  @override
+  String get notificationStreak14Title => '💪 Two Weeks Strong!';
+
+  @override
+  String get notificationStreak14Message =>
+      '14 day streak! The habit is forming.';
+
+  @override
+  String get notificationStreak21Title => '🌟 21 Days - Habit Formed!';
+
+  @override
+  String get notificationStreak21Message =>
+      'Science says you\'ve built a new habit!';
+
+  @override
+  String get notificationStreak30Title => '🏆 30 Day Legend!';
+
+  @override
+  String get notificationStreak30Message =>
+      'One full month! Incredible dedication!';
+
+  @override
+  String get notificationStreak50Title => '💎 50 Day Diamond Streak!';
+
+  @override
+  String get notificationStreak50Message =>
+      'Half a century! You\'re a true INSIDEX master!';
+
+  @override
+  String get notificationStreak100Title => '👑 100 Day Champion!';
+
+  @override
+  String get notificationStreak100Message =>
+      'One hundred days! You\'re absolutely legendary! 🎊';
+
+  @override
+  String get notificationStreakLostTitle => '😔 Streak Ended';
+
+  @override
+  String notificationStreakLostMessage(Object days) {
+    return 'Your $days day streak has ended. But don\'t worry, you can start fresh today!';
+  }
+
+  @override
+  String get nowPlaying => 'NOW PLAYING';
+
+  @override
+  String get intro => 'Intro';
+
+  @override
+  String get subliminal => 'Subliminal';
+
+  @override
+  String get sessionDetails => 'Session Details';
+
+  @override
+  String get aboutThisSession => 'ABOUT THIS SESSION';
+
+  @override
+  String get loopEnabled => 'Loop enabled';
+
+  @override
+  String get loopDisabled => 'Loop disabled';
+
+  @override
+  String get shuffleOn => 'Shuffle ON';
+
+  @override
+  String get shuffleOff => 'Shuffle OFF';
+
+  @override
+  String get errorUpdatingPlaylist => 'Error updating playlist';
+
+  @override
+  String get errorUpdatingFavorites => 'Error updating favorites';
+
+  @override
+  String get premiumFeature => 'Premium feature';
+
+  @override
+  String get autoPlayEnabled => 'Auto-play enabled';
+
+  @override
+  String get autoPlayDisabled => 'Auto-play disabled';
+
+  @override
+  String get sleepTimer => 'Sleep Timer';
+
+  @override
+  String get noTimerSet => 'No timer set';
+
+  @override
+  String currentMinutes(String minutes) {
+    return 'Current: $minutes minutes';
+  }
+
+  @override
+  String get cancelTimer => 'Cancel timer';
+
+  @override
+  String get set => 'Set';
+
+  @override
+  String setMinutes(String minutes) {
+    return 'Set ${minutes}m';
+  }
 }

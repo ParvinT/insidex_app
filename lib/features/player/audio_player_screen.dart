@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marquee/marquee.dart';
 import 'widgets/session_info_modal.dart';
 import '../../services/listening_tracker_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -516,7 +517,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             onPressed: () => Navigator.pop(context),
           ),
           Text(
-            'NOW PLAYING',
+            AppLocalizations.of(context).nowPlaying,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
@@ -629,7 +630,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  'Intro',
+                  AppLocalizations.of(context).intro,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -654,7 +655,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
-                  'Subliminal',
+                  AppLocalizations.of(context).subliminal,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
@@ -794,7 +795,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(_isLooping ? 'Loop enabled' : 'Loop disabled'),
+                  content: Text(_isLooping
+                      ? AppLocalizations.of(context).loopEnabled
+                      : AppLocalizations.of(context).loopDisabled),
                   backgroundColor: Colors.black,
                   duration: const Duration(seconds: 1),
                 ),
@@ -824,8 +827,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Added to playlist ✓'),
+                      SnackBar(
+                        content:
+                            Text(AppLocalizations.of(context).addedToPlaylist),
                         backgroundColor: Colors.green,
                         duration: Duration(seconds: 1),
                       ),
@@ -842,8 +846,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
                     if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Removed from playlist'),
+                      SnackBar(
+                        content: Text(
+                            AppLocalizations.of(context).removedFromPlaylist),
                         backgroundColor: Colors.orange,
                         duration: Duration(seconds: 1),
                       ),
@@ -855,8 +860,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
                   if (!mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Error updating playlist'),
+                    SnackBar(
+                      content: Text(
+                          AppLocalizations.of(context).errorUpdatingPlaylist),
                       backgroundColor: Colors.red,
                       duration: Duration(seconds: 2),
                     ),
@@ -958,8 +964,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 SnackBar(
                   content: Text(
                     _autoPlayEnabled
-                        ? 'Auto-play enabled'
-                        : 'Auto-play disabled',
+                        ? AppLocalizations.of(context).autoPlayEnabled
+                        : AppLocalizations.of(context).autoPlayDisabled,
                   ),
                   backgroundColor: Colors.black,
                   duration: const Duration(seconds: 1),

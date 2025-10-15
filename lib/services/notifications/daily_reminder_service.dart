@@ -6,6 +6,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../../features/notifications/notification_models.dart';
 import 'notification_service.dart';
 import 'notification_reliability_service.dart';
+import 'notification_localization_helper.dart';
 
 class DailyReminderService {
   static final DailyReminderService _instance =
@@ -31,6 +32,11 @@ class DailyReminderService {
         debugPrint('❌ Exact alarm permission denied - cannot schedule');
         return;
       }
+
+      final localizedTexts =
+          await NotificationLocalizationHelper.getDailyReminderTexts();
+      final localizedTitle = localizedTexts['title']!;
+      final localizedMessage = localizedTexts['message']!;
       // Cancel existing reminder first
       await cancelDailyReminder();
 
@@ -85,8 +91,8 @@ class DailyReminderService {
       if (Platform.isAndroid) {
         await _notifications.zonedSchedule(
           NotificationConstants.dailyReminderId,
-          reminder.title,
-          reminder.message,
+          localizedTitle,
+          localizedMessage,
           scheduledDate,
           notificationDetails,
           androidScheduleMode:
@@ -100,8 +106,8 @@ class DailyReminderService {
         // iOS için normal schedule
         await _notifications.zonedSchedule(
           NotificationConstants.dailyReminderId,
-          reminder.title,
-          reminder.message,
+          localizedTitle,
+          localizedMessage,
           scheduledDate,
           notificationDetails,
           uiLocalNotificationDateInterpretation:

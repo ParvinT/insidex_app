@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:ui' as ui;
 
+import '../services/notifications/daily_reminder_service.dart';
+import '../services/notifications/notification_sync_service.dart';
+
 class LocaleProvider extends ChangeNotifier {
   Locale _locale = const Locale('en'); // Varsayılan İngilizce
 
@@ -65,7 +68,26 @@ class LocaleProvider extends ChangeNotifier {
     await prefs.setString('language_code', locale.languageCode);
 
     debugPrint('✅ Language changed: ${locale.languageCode}');
+    await _rescheduleNotifications();
     notifyListeners();
+  }
+
+  Future<void> _rescheduleNotifications() async {
+    try {
+      // Load current notification settings
+      final settings =
+          await NotificationSyncService().loadSettingsFromFirebase();
+
+      if (settings != null && settings.dailyReminder.enabled) {
+        // Reschedule with new language
+        await DailyReminderService()
+            .scheduleDailyReminder(settings.dailyReminder);
+        debugPrint('✅ Daily reminder rescheduled with new language');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error rescheduling notifications: $e');
+      // Don't throw - language change should still work
+    }
   }
 
   // Dil adını al (UI'da göstermek için)

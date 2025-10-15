@@ -2011,6 +2011,234 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Notifications enabled! 🔔'**
   String get notificationsEnabledSuccess;
+
+  /// No description provided for @notificationDailyReminderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time for Your Daily Session 🎧'**
+  String get notificationDailyReminderTitle;
+
+  /// No description provided for @notificationDailyReminderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a moment to relax and heal with INSIDEX'**
+  String get notificationDailyReminderMessage;
+
+  /// No description provided for @notificationStreak3Title.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 Congratulations!'**
+  String get notificationStreak3Title;
+
+  /// No description provided for @notificationStreak3Message.
+  ///
+  /// In en, this message translates to:
+  /// **'🔥 3 day streak! Great start!'**
+  String get notificationStreak3Message;
+
+  /// No description provided for @notificationStreak7Title.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 One Week Achievement!'**
+  String get notificationStreak7Title;
+
+  /// No description provided for @notificationStreak7Message.
+  ///
+  /// In en, this message translates to:
+  /// **'7 days in a row! You\'re doing amazing!'**
+  String get notificationStreak7Message;
+
+  /// No description provided for @notificationStreak14Title.
+  ///
+  /// In en, this message translates to:
+  /// **'💪 Two Weeks Strong!'**
+  String get notificationStreak14Title;
+
+  /// No description provided for @notificationStreak14Message.
+  ///
+  /// In en, this message translates to:
+  /// **'14 day streak! The habit is forming.'**
+  String get notificationStreak14Message;
+
+  /// No description provided for @notificationStreak21Title.
+  ///
+  /// In en, this message translates to:
+  /// **'🌟 21 Days - Habit Formed!'**
+  String get notificationStreak21Title;
+
+  /// No description provided for @notificationStreak21Message.
+  ///
+  /// In en, this message translates to:
+  /// **'Science says you\'ve built a new habit!'**
+  String get notificationStreak21Message;
+
+  /// No description provided for @notificationStreak30Title.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 30 Day Legend!'**
+  String get notificationStreak30Title;
+
+  /// No description provided for @notificationStreak30Message.
+  ///
+  /// In en, this message translates to:
+  /// **'One full month! Incredible dedication!'**
+  String get notificationStreak30Message;
+
+  /// No description provided for @notificationStreak50Title.
+  ///
+  /// In en, this message translates to:
+  /// **'💎 50 Day Diamond Streak!'**
+  String get notificationStreak50Title;
+
+  /// No description provided for @notificationStreak50Message.
+  ///
+  /// In en, this message translates to:
+  /// **'Half a century! You\'re a true INSIDEX master!'**
+  String get notificationStreak50Message;
+
+  /// No description provided for @notificationStreak100Title.
+  ///
+  /// In en, this message translates to:
+  /// **'👑 100 Day Champion!'**
+  String get notificationStreak100Title;
+
+  /// No description provided for @notificationStreak100Message.
+  ///
+  /// In en, this message translates to:
+  /// **'One hundred days! You\'re absolutely legendary! 🎊'**
+  String get notificationStreak100Message;
+
+  /// No description provided for @notificationStreakLostTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'😔 Streak Ended'**
+  String get notificationStreakLostTitle;
+
+  /// No description provided for @notificationStreakLostMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your {days} day streak has ended. But don\'t worry, you can start fresh today!'**
+  String notificationStreakLostMessage(Object days);
+
+  /// No description provided for @nowPlaying.
+  ///
+  /// In en, this message translates to:
+  /// **'NOW PLAYING'**
+  String get nowPlaying;
+
+  /// No description provided for @intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Intro'**
+  String get intro;
+
+  /// No description provided for @subliminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Subliminal'**
+  String get subliminal;
+
+  /// No description provided for @sessionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Details'**
+  String get sessionDetails;
+
+  /// No description provided for @aboutThisSession.
+  ///
+  /// In en, this message translates to:
+  /// **'ABOUT THIS SESSION'**
+  String get aboutThisSession;
+
+  /// No description provided for @loopEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Loop enabled'**
+  String get loopEnabled;
+
+  /// No description provided for @loopDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Loop disabled'**
+  String get loopDisabled;
+
+  /// No description provided for @shuffleOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle ON'**
+  String get shuffleOn;
+
+  /// No description provided for @shuffleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Shuffle OFF'**
+  String get shuffleOff;
+
+  /// No description provided for @errorUpdatingPlaylist.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating playlist'**
+  String get errorUpdatingPlaylist;
+
+  /// No description provided for @errorUpdatingFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating favorites'**
+  String get errorUpdatingFavorites;
+
+  /// No description provided for @premiumFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium feature'**
+  String get premiumFeature;
+
+  /// No description provided for @autoPlayEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-play enabled'**
+  String get autoPlayEnabled;
+
+  /// No description provided for @autoPlayDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-play disabled'**
+  String get autoPlayDisabled;
+
+  /// No description provided for @sleepTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep Timer'**
+  String get sleepTimer;
+
+  /// No description provided for @noTimerSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No timer set'**
+  String get noTimerSet;
+
+  /// No description provided for @currentMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Current: {minutes} minutes'**
+  String currentMinutes(String minutes);
+
+  /// No description provided for @cancelTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel timer'**
+  String get cancelTimer;
+
+  /// No description provided for @set.
+  ///
+  /// In en, this message translates to:
+  /// **'Set'**
+  String get set;
+
+  /// No description provided for @setMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Set {minutes}m'**
+  String setMinutes(String minutes);
 }
 
 class _AppLocalizationsDelegate

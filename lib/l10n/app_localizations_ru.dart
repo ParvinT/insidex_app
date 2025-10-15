@@ -994,4 +994,130 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notificationsEnabledSuccess => 'Уведомления включены! 🔔';
+
+  @override
+  String get notificationDailyReminderTitle => 'Время для вашей сессии 🎧';
+
+  @override
+  String get notificationDailyReminderMessage =>
+      'Найдите минутку расслабиться и исцелиться с INSIDEX';
+
+  @override
+  String get notificationStreak3Title => '🎉 Поздравляем!';
+
+  @override
+  String get notificationStreak3Message => '🔥 3 дня подряд! Отличное начало!';
+
+  @override
+  String get notificationStreak7Title => '🎯 Достижение недели!';
+
+  @override
+  String get notificationStreak7Message => '7 дней подряд! Вы великолепны!';
+
+  @override
+  String get notificationStreak14Title => '💪 Две недели силы!';
+
+  @override
+  String get notificationStreak14Message =>
+      '14 дней подряд! Привычка формируется.';
+
+  @override
+  String get notificationStreak21Title => '🌟 21 День - Привычка сформирована!';
+
+  @override
+  String get notificationStreak21Message =>
+      'Наука говорит, что вы создали новую привычку!';
+
+  @override
+  String get notificationStreak30Title => '🏆 Легенда 30 дней!';
+
+  @override
+  String get notificationStreak30Message =>
+      'Целый месяц! Невероятная преданность!';
+
+  @override
+  String get notificationStreak50Title => '💎 Алмазная серия 50 дней!';
+
+  @override
+  String get notificationStreak50Message =>
+      'Полвека! Вы настоящий мастер INSIDEX!';
+
+  @override
+  String get notificationStreak100Title => '👑 Чемпион 100 дней!';
+
+  @override
+  String get notificationStreak100Message =>
+      'Сто дней! Вы абсолютно легендарны! 🎊';
+
+  @override
+  String get notificationStreakLostTitle => '😔 Серия прервана';
+
+  @override
+  String notificationStreakLostMessage(Object days) {
+    return 'Ваша серия в $days дней прервана. Но не волнуйтесь, вы можете начать заново сегодня!';
+  }
+
+  @override
+  String get nowPlaying => 'СЕЙЧАС ИГРАЕТ';
+
+  @override
+  String get intro => 'Вступление';
+
+  @override
+  String get subliminal => 'Сублиминал';
+
+  @override
+  String get sessionDetails => 'Детали сессии';
+
+  @override
+  String get aboutThisSession => 'ОБ ЭТОЙ СЕССИИ';
+
+  @override
+  String get loopEnabled => 'Повтор включен';
+
+  @override
+  String get loopDisabled => 'Повтор выключен';
+
+  @override
+  String get shuffleOn => 'Случайный порядок ВКЛ';
+
+  @override
+  String get shuffleOff => 'Случайный порядок ВЫКЛ';
+
+  @override
+  String get errorUpdatingPlaylist => 'Ошибка обновления плейлиста';
+
+  @override
+  String get errorUpdatingFavorites => 'Ошибка обновления избранного';
+
+  @override
+  String get premiumFeature => 'Премиум функция';
+
+  @override
+  String get autoPlayEnabled => 'Автовоспроизведение включено';
+
+  @override
+  String get autoPlayDisabled => 'Автовоспроизведение выключено';
+
+  @override
+  String get sleepTimer => 'Таймер сна';
+
+  @override
+  String get noTimerSet => 'Таймер не установлен';
+
+  @override
+  String currentMinutes(String minutes) {
+    return 'Текущий: $minutes минут';
+  }
+
+  @override
+  String get cancelTimer => 'Отменить таймер';
+
+  @override
+  String get set => 'Установить';
+
+  @override
+  String setMinutes(String minutes) {
+    return 'Установить $minutesм';
+  }
 }

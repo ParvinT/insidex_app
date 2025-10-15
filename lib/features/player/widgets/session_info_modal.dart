@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../l10n/app_localizations.dart';
+
 class SessionInfoModal {
   static void show({
     required BuildContext context,
@@ -107,8 +109,9 @@ class _SessionInfoContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSessionTitle(),
-                        if (session['description'] != null) _buildDescription(),
-                        _buildNowPlayingCard(),
+                        if (session['description'] != null)
+                          _buildDescription(context),
+                        _buildNowPlayingCard(context),
                         if (session['howToListen'] != null ||
                             session['listeningTips'] != null)
                           _buildListeningGuide(),
@@ -155,7 +158,7 @@ class _SessionInfoContent extends StatelessWidget {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'Session Details',
+              AppLocalizations.of(context).sessionDetails,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
@@ -212,7 +215,7 @@ class _SessionInfoContent extends StatelessWidget {
     );
   }
 
-  Widget _buildDescription() {
+  Widget _buildDescription(BuildContext context) {
     // Description'ı temizle - HTML/Markdown tag'lerini kaldır
     String cleanDescription = session['description'] ?? '';
 
@@ -231,7 +234,7 @@ class _SessionInfoContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'ABOUT THIS SESSION',
+          AppLocalizations.of(context).aboutThisSession,
           style: GoogleFonts.inter(
             fontSize: 11.sp,
             fontWeight: FontWeight.w600,
@@ -255,7 +258,7 @@ class _SessionInfoContent extends StatelessWidget {
     );
   }
 
-  Widget _buildNowPlayingCard() {
+  Widget _buildNowPlayingCard(BuildContext context) {
     final trackData =
         currentTrack == 'intro' ? session['intro'] : session['subliminal'];
 
@@ -316,7 +319,7 @@ class _SessionInfoContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'NOW PLAYING',
+                  AppLocalizations.of(context).nowPlaying,
                   style: GoogleFonts.inter(
                     fontSize: 10.sp,
                     color: Colors.grey[400],

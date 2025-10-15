@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'notification_service.dart';
 import '../../features/notifications/notification_models.dart';
+import 'notification_localization_helper.dart';
 
 class StreakNotificationService {
   static final StreakNotificationService _instance =
@@ -70,38 +71,10 @@ class StreakNotificationService {
 
   /// Milestone bildirimi göster
   static Future<void> _showMilestoneNotification(int milestone) async {
-    String title = '🎉 Congratulations!';
-    String body = '';
-
-    switch (milestone) {
-      case 3:
-        body = '🔥 3 day streak! Great start!';
-        break;
-      case 7:
-        title = '🎯 One Week Achievement!';
-        body = '7 days in a row! You\'re doing amazing!';
-        break;
-      case 14:
-        title = '💪 Two Weeks Strong!';
-        body = '14 day streak! The habit is forming.';
-        break;
-      case 21:
-        title = '🌟 21 Days - Habit Formed!';
-        body = 'Science says you\'ve built a new habit!';
-        break;
-      case 30:
-        title = '🏆 30 Day Legend!';
-        body = 'One full month! Incredible dedication!';
-        break;
-      case 50:
-        title = '💎 50 Day Diamond Streak!';
-        body = 'Half a century! You\'re a true INSIDEX master!';
-        break;
-      case 100:
-        title = '👑 100 Day Champion!';
-        body = 'One hundred days! You\'re absolutely legendary! 🎊';
-        break;
-    }
+    final localizedTexts =
+        await NotificationLocalizationHelper.getStreakMilestoneTexts(milestone);
+    final title = localizedTexts['title']!;
+    final body = localizedTexts['message']!;
 
     // Bildirimi göster
     await NotificationService().showNotification(
@@ -114,11 +87,15 @@ class StreakNotificationService {
 
   /// Streak kaybı bildirimi
   static Future<void> _showStreakLostNotification(int lostStreak) async {
+    final localizedTexts =
+        await NotificationLocalizationHelper.getStreakLostTexts(lostStreak);
+    final title = localizedTexts['title']!;
+    final body = localizedTexts['message']!;
+
     await NotificationService().showNotification(
       id: 5999,
-      title: '😔 Streak Ended',
-      body:
-          'Your $lostStreak day streak has ended. But don\'t worry, you can start fresh today!',
+      title: title,
+      body: body,
       channelId: NotificationConstants.generalChannelId,
     );
   }
