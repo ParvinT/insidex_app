@@ -30,6 +30,11 @@ class NotificationLocalizationHelper {
         'title': 'Время для вашей сессии 🎧',
         'message': 'Найдите минутку расслабиться и исцелиться с INSIDEX',
       },
+      'tr': {
+        'title': 'Günlük Seans Zamanı 🎧',
+        'message':
+            'INSIDEX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın',
+      },
     };
 
     return texts[lang] ?? texts['en']!;
@@ -45,9 +50,13 @@ class NotificationLocalizationHelper {
     // Russian texts
     final ru = _getRussianStreakTexts(days);
 
+    //Turkish texts
+    final tr = _getTurkishStreakTexts(days);
+
     final allTexts = {
       'en': en,
       'ru': ru,
+      'tr': tr,
     };
 
     return allTexts[lang] ?? en;
@@ -67,6 +76,11 @@ class NotificationLocalizationHelper {
         'title': '😔 Серия прервана',
         'message':
             'Ваша серия в $lostDays дней прервана. Но не волнуйтесь, вы можете начать заново сегодня!',
+      },
+      'tr': {
+        'title': '😔 Seri Sona Erdi',
+        'message':
+            '$lostDays günlük seriniz sona erdi. Ama endişelenmeyin, bugün yeniden başlayabilirsiniz!',
       },
     };
 
@@ -163,6 +177,52 @@ class NotificationLocalizationHelper {
         return {
           'title': '🎉 Поздравляем!',
           'message': 'Серия $days дней! Продолжайте!',
+        };
+    }
+  }
+
+  /// Turkish streak milestone texts
+  static Map<String, String> _getTurkishStreakTexts(int days) {
+    switch (days) {
+      case 3:
+        return {
+          'title': '🎉 Tebrikler!',
+          'message': '🔥 3 günlük seri! Harika bir başlangıç!',
+        };
+      case 7:
+        return {
+          'title': '🎯 Bir Haftalık Başarı!',
+          'message': '7 gün üst üste! Harika gidiyorsun!',
+        };
+      case 14:
+        return {
+          'title': '💪 İki Hafta Güçlü!',
+          'message': '14 günlük seri! Alışkanlık oluşuyor.',
+        };
+      case 21:
+        return {
+          'title': '🌟 21 Gün - Alışkanlık Oluştu!',
+          'message': 'Bilim yeni bir alışkanlık oluşturduğunuzu söylüyor!',
+        };
+      case 30:
+        return {
+          'title': '🏆 30 Günlük Efsane!',
+          'message': 'Tam bir ay! İnanılmaz bir bağlılık!',
+        };
+      case 50:
+        return {
+          'title': '💎 50 Günlük Elmas Seri!',
+          'message': 'Yarım yüzyıl! Gerçek bir INSIDEX ustasısın!',
+        };
+      case 100:
+        return {
+          'title': '👑 100 Günlük Şampiyon!',
+          'message': 'Yüz gün! Kesinlikle efsanesin! 🎊',
+        };
+      default:
+        return {
+          'title': '🎉 Tebrikler!',
+          'message': '$days günlük harika bir seri!',
         };
     }
   }

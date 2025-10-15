@@ -55,7 +55,8 @@ class PlayerModals {
                   children: [
                     for (final m in options)
                       ChoiceChip(
-                        label: Text('${m}m'),
+                        label: Text(AppLocalizations.of(context)
+                            .setMinutes(m.toString())),
                         selected: selected == m,
                         onSelected: (_) => setState(() => selected = m),
                         selectedColor: Colors.black,

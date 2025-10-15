@@ -422,24 +422,24 @@
   "autoPlayDisabled": "Auto-play disabled",
 
   "sleepTimer": "Sleep Timer",
-"noTimerSet": "No timer set",
-"currentMinutes": "Current: {minutes} minutes",
-"@currentMinutes": {
+  "noTimerSet": "No timer set",
+  "currentMinutes": "Current: {minutes} minutes",
+  "@currentMinutes": {
   "placeholders": {
     "minutes": {
       "type": "String"
     }
-  }
-},
-"cancelTimer": "Cancel timer",
-"set": "Set",
-"setMinutes": "Set {minutes}m",
-"@setMinutes": {
+   }
+  },
+  "cancelTimer": "Cancel timer",
+  "set": "Set",
+  "setMinutes": "{minutes}m",
+  "@setMinutes": {
   "placeholders": {
     "minutes": {
       "type": "String"
     }
+   }
   }
-}
   
 }

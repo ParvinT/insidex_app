@@ -1118,6 +1118,6 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String setMinutes(String minutes) {
-    return 'Установить $minutesм';
+    return '$minutesм';
   }
 }

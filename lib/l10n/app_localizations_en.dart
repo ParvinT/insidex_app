@@ -1112,6 +1112,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String setMinutes(String minutes) {
-    return 'Set ${minutes}m';
+    return '${minutes}m';
   }
 }

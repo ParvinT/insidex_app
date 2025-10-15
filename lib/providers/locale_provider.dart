@@ -14,8 +14,9 @@ class LocaleProvider extends ChangeNotifier {
 
   // Desteklenen diller
   static const List<Locale> supportedLocales = [
-    Locale('en'), // İngilizce
-    Locale('ru'), // Rusça
+    Locale('en'),
+    Locale('ru'),
+    Locale('tr'),
   ];
 
   // Provider başlatıldığında kaydedilmiş dili yükle
@@ -97,6 +98,8 @@ class LocaleProvider extends ChangeNotifier {
         return 'English';
       case 'ru':
         return 'Русский';
+      case 'tr':
+        return 'Türkçe';
       default:
         return languageCode.toUpperCase();
     }
@@ -109,6 +112,8 @@ class LocaleProvider extends ChangeNotifier {
         return '🇬🇧';
       case 'ru':
         return '🇷🇺';
+      case 'tr':
+        return '🇹🇷';
       default:
         return '🌍';
     }

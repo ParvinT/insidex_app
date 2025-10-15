@@ -422,11 +422,11 @@
   "autoPlayDisabled": "Автовоспроизведение выключено",
 
   "sleepTimer": "Таймер сна",
-"noTimerSet": "Таймер не установлен",
-"currentMinutes": "Текущий: {minutes} минут",
-"cancelTimer": "Отменить таймер",
-"set": "Установить",
-"setMinutes": "Установить {minutes}м"
+  "noTimerSet": "Таймер не установлен",
+  "currentMinutes": "Текущий: {minutes} минут",
+  "cancelTimer": "Отменить таймер",
+  "set": "Установить",
+  "setMinutes": "{minutes}м"
 
 
   
