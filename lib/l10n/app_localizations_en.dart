@@ -1114,4 +1114,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String setMinutes(String minutes) {
     return '${minutes}m';
   }
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get searchSessions => 'Search...';
+
+  @override
+  String get searchResults => 'Search Results';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get tryDifferentKeywords => 'Try different keywords';
+
+  @override
+  String get searchCategories => 'Categories';
+
+  @override
+  String get searchSessionsTab => 'Sessions';
+
+  @override
+  String get allResults => 'All';
+
+  @override
+  String foundResults(String count) {
+    return '$count results found';
+  }
+
+  @override
+  String get recentSearches => 'Recent Searches';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get clearSearchHistory => 'Clear Search History';
+
+  @override
+  String get clearSearchHistoryConfirmation =>
+      'Are you sure you want to clear all search history?';
+
+  @override
+  String get searchHistoryCleared => 'Search history cleared';
 }

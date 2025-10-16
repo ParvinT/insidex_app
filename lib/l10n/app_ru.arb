@@ -426,7 +426,24 @@
   "currentMinutes": "Текущий: {minutes} минут",
   "cancelTimer": "Отменить таймер",
   "set": "Установить",
-  "setMinutes": "{minutes}м"
+  "setMinutes": "{minutes}м",
+
+  "search": "Поиск",
+  "searchSessions": "Поиск...",
+  "searchResults": "Результаты поиска",
+  "noResultsFound": "Результаты не найдены",
+  "tryDifferentKeywords": "Попробуйте другие ключевые слова",
+  "searchCategories": "Категории",
+  "searchSessionsTab": "Сессии",
+  "allResults": "Все",
+  "foundResults": "Найдено {count} результатов",
+
+  "recentSearches": "Недавние поиски",
+  "clearAll": "Очистить все",
+  "clear": "Очистить",
+  "clearSearchHistory": "Очистить историю поиска",
+  "clearSearchHistoryConfirmation": "Вы уверены, что хотите очистить всю историю поиска?",
+  "searchHistoryCleared": "История поиска очищена"
 
 
   

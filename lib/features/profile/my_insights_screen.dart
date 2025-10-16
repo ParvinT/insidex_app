@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
 
 class MyInsightsScreen extends StatefulWidget {
@@ -617,13 +618,20 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          _buildDayBar('M', weeklyData['Mon'] ?? 0),
-                          _buildDayBar('T', weeklyData['Tue'] ?? 0),
-                          _buildDayBar('W', weeklyData['Wed'] ?? 0),
-                          _buildDayBar('T', weeklyData['Thu'] ?? 0),
-                          _buildDayBar('F', weeklyData['Fri'] ?? 0),
-                          _buildDayBar('S', weeklyData['Sat'] ?? 0),
-                          _buildDayBar('S', weeklyData['Sun'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).mon[0],
+                              weeklyData['Mon'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).tue[0],
+                              weeklyData['Tue'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).wed[0],
+                              weeklyData['Wed'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).thu[0],
+                              weeklyData['Thu'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).fri[0],
+                              weeklyData['Fri'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).sat[0],
+                              weeklyData['Sat'] ?? 0),
+                          _buildDayBar(AppLocalizations.of(context).sun[0],
+                              weeklyData['Sun'] ?? 0),
                         ],
                       ),
                     ),
@@ -1195,7 +1203,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   // Helper methods
   String _capitalizeFirst(String text) {
     if (text.isEmpty) return text;
-    return text[0].toUpperCase() + text.substring(1).toLowerCase();
+    return text[0].toUpperCase() + text.substring(1);
   }
 
   IconData _getGoalIcon(String goal) {
@@ -1265,42 +1273,15 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   String _formatDate(DateTime date) {
-    final months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    final locale = Localizations.localeOf(context).languageCode;
+    final formatted = DateFormat('MMM d, y', locale).format(date);
+    return _capitalizeFirst(formatted);
   }
 
   String _getDayNameShort(int weekday) {
-    switch (weekday) {
-      case 1:
-        return 'Mon';
-      case 2:
-        return 'Tue';
-      case 3:
-        return 'Wed';
-      case 4:
-        return 'Thu';
-      case 5:
-        return 'Fri';
-      case 6:
-        return 'Sat';
-      case 7:
-        return 'Sun';
-      default:
-        return '';
-    }
+    final locale = Localizations.localeOf(context).languageCode;
+    final date = DateTime(2025, 1, weekday);
+    return DateFormat('E', locale).format(date);
   }
 
   int _getTotalWeeklyMinutes(Map<String, int> weeklyData) {

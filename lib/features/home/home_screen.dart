@@ -13,6 +13,8 @@ import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../search/search_screen.dart';
+import '../search/widgets/search_bar_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -149,7 +151,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ],
               ),
               const Spacer(),
-              SizedBox(height: 12.h),
+              SearchBarWidget(
+                onTap: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return const SearchScreen();
+                      },
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+
+                        var tween = Tween(begin: begin, end: end).chain(
+                          CurveTween(curve: curve),
+                        );
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      transitionDuration: const Duration(milliseconds: 400),
+                    ),
+                  );
+                },
+              ),
+              const Spacer(),
             ],
           ),
         ),
@@ -279,6 +308,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       height: height,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PlaylistScreen()));
+        },
         onVerticalDragStart: (_) => setState(() => _isDraggingPl = true),
         onVerticalDragUpdate: (d) {
           setState(() {
@@ -288,10 +321,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             if (_readyPl && !wasReady) HapticFeedback.lightImpact();
           });
         },
-        onVerticalDragEnd: (details) async {
+        onVerticalDragEnd: (details) {
           final v = details.primaryVelocity ?? 0.0;
           if (_readyPl || v > 500) {
-            await Navigator.push(context,
+            Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const PlaylistScreen()));
           }
           setState(() {

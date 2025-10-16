@@ -68,6 +68,8 @@ class LocaleProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language_code', locale.languageCode);
 
+    await Future.delayed(const Duration(seconds: 1));
+
     debugPrint('✅ Language changed: ${locale.languageCode}');
     await _rescheduleNotifications();
     notifyListeners();

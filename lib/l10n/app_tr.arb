@@ -422,6 +422,23 @@
   "currentMinutes": "Mevcut: {minutes} dakika",
   "cancelTimer": "Zamanlayıcıyı iptal et",
   "set": "Ayarla",
-  "setMinutes": "{minutes}dk"
+  "setMinutes": "{minutes}dk",
+
+  "search": "Ara",
+  "searchSessions": "Ara...",
+  "searchResults": "Arama Sonuçları",
+  "noResultsFound": "Sonuç bulunamadı",
+  "tryDifferentKeywords": "Farklı anahtar kelimeler deneyin",
+  "searchCategories": "Kategoriler",
+  "searchSessionsTab": "Seanslar",
+  "allResults": "Tümü",
+  "foundResults": "{count} sonuç bulundu",
+
+  "recentSearches": "Son Aramalar",
+  "clearAll": "Tümünü Temizle",
+  "clear": "Temizle",
+  "clearSearchHistory": "Arama Geçmişini Temizle",
+  "clearSearchHistoryConfirmation": "Tüm arama geçmişini temizlemek istediğinizden emin misiniz?",
+  "searchHistoryCleared": "Arama geçmişi temizlendi"
   
 }

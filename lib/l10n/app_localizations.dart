@@ -2241,6 +2241,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{minutes}m'**
   String setMinutes(String minutes);
+
+  /// No description provided for @search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// No description provided for @searchSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get searchSessions;
+
+  /// No description provided for @searchResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Results'**
+  String get searchResults;
+
+  /// No description provided for @noResultsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No results found'**
+  String get noResultsFound;
+
+  /// No description provided for @tryDifferentKeywords.
+  ///
+  /// In en, this message translates to:
+  /// **'Try different keywords'**
+  String get tryDifferentKeywords;
+
+  /// No description provided for @searchCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories'**
+  String get searchCategories;
+
+  /// No description provided for @searchSessionsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Sessions'**
+  String get searchSessionsTab;
+
+  /// No description provided for @allResults.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get allResults;
+
+  /// No description provided for @foundResults.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} results found'**
+  String foundResults(String count);
+
+  /// No description provided for @recentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Searches'**
+  String get recentSearches;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAll;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @clearSearchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Search History'**
+  String get clearSearchHistory;
+
+  /// No description provided for @clearSearchHistoryConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all search history?'**
+  String get clearSearchHistoryConfirmation;
+
+  /// No description provided for @searchHistoryCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Search history cleared'**
+  String get searchHistoryCleared;
 }
 
 class _AppLocalizationsDelegate

@@ -440,6 +440,32 @@
       "type": "String"
     }
    }
-  }
+  },
+
+  "search": "Search",
+  "searchSessions": "Search...",
+  "searchResults": "Search Results",
+  "noResultsFound": "No results found",
+  "tryDifferentKeywords": "Try different keywords",
+  "searchCategories": "Categories",
+  "searchSessionsTab": "Sessions",
+  "allResults": "All",
+  "foundResults": "{count} results found",
+  "@foundResults": {
+  "placeholders": {
+    "count": {
+      "type": "String"
+    }
+   }
+  },
+
+  "recentSearches": "Recent Searches",
+  "clearAll": "Clear All",
+  "clear": "Clear",
+  "clearSearchHistory": "Clear Search History",
+  "clearSearchHistoryConfirmation": "Are you sure you want to clear all search history?",
+  "searchHistoryCleared": "Search history cleared"
+
+  
   
 }

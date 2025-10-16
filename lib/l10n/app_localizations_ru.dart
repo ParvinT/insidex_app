@@ -1120,4 +1120,52 @@ class AppLocalizationsRu extends AppLocalizations {
   String setMinutes(String minutes) {
     return '$minutesм';
   }
+
+  @override
+  String get search => 'Поиск';
+
+  @override
+  String get searchSessions => 'Поиск...';
+
+  @override
+  String get searchResults => 'Результаты поиска';
+
+  @override
+  String get noResultsFound => 'Результаты не найдены';
+
+  @override
+  String get tryDifferentKeywords => 'Попробуйте другие ключевые слова';
+
+  @override
+  String get searchCategories => 'Категории';
+
+  @override
+  String get searchSessionsTab => 'Сессии';
+
+  @override
+  String get allResults => 'Все';
+
+  @override
+  String foundResults(String count) {
+    return 'Найдено $count результатов';
+  }
+
+  @override
+  String get recentSearches => 'Недавние поиски';
+
+  @override
+  String get clearAll => 'Очистить все';
+
+  @override
+  String get clear => 'Очистить';
+
+  @override
+  String get clearSearchHistory => 'Очистить историю поиска';
+
+  @override
+  String get clearSearchHistoryConfirmation =>
+      'Вы уверены, что хотите очистить всю историю поиска?';
+
+  @override
+  String get searchHistoryCleared => 'История поиска очищена';
 }
