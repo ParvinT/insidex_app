@@ -14,6 +14,7 @@ import '../../providers/user_provider.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/device_session_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -74,6 +75,9 @@ class _LoginScreenState extends State<LoginScreen> {
         print('After save - Email: ${prefs.getString('user_email')}');
         print(
             'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
+        print('💾 Saving active device session...');
+        await DeviceSessionService().saveActiveDevice(user.uid);
+        print('✅ Active device saved, other devices will be logged out');
 
         await context.read<UserProvider>().loadUserData(user.uid);
       }

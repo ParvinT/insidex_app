@@ -1168,4 +1168,23 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get searchHistoryCleared => 'История поиска очищена';
+
+  @override
+  String get accountOpenedOnAnotherDevice =>
+      'Аккаунт открыт на другом устройстве';
+
+  @override
+  String get accountOpenedMessage =>
+      'Для вашей безопасности вы будете автоматически выведены из системы.';
+
+  @override
+  String get securityWarningUnauthorized =>
+      'If this wasn\'t you, please change your password immediately!';
+
+  @override
+  String get loggingOut => 'Выход из системы...';
+
+  @override
+  String get deviceSecurityWarning =>
+      'Ваш аккаунт может быть активен только на одном устройстве одновременно в целях безопасности.';
 }

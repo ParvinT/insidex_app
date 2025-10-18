@@ -443,7 +443,12 @@
   "clear": "Очистить",
   "clearSearchHistory": "Очистить историю поиска",
   "clearSearchHistoryConfirmation": "Вы уверены, что хотите очистить всю историю поиска?",
-  "searchHistoryCleared": "История поиска очищена"
+  "searchHistoryCleared": "История поиска очищена",
+
+  "accountOpenedOnAnotherDevice": "Аккаунт открыт на другом устройстве",
+  "accountOpenedMessage": "Для вашей безопасности вы будете автоматически выведены из системы.",
+  "loggingOut": "Выход из системы...",
+  "deviceSecurityWarning": "Ваш аккаунт может быть активен только на одном устройстве одновременно в целях безопасности."
 
 
   

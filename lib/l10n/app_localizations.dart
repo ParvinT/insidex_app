@@ -2331,6 +2331,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search history cleared'**
   String get searchHistoryCleared;
+
+  /// No description provided for @accountOpenedOnAnotherDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Opened on Another Device'**
+  String get accountOpenedOnAnotherDevice;
+
+  /// No description provided for @accountOpenedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'For your security, you will be automatically logged out from this device.'**
+  String get accountOpenedMessage;
+
+  /// No description provided for @securityWarningUnauthorized.
+  ///
+  /// In en, this message translates to:
+  /// **'If this wasn\'t you, please change your password immediately!'**
+  String get securityWarningUnauthorized;
+
+  /// No description provided for @loggingOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging out...'**
+  String get loggingOut;
+
+  /// No description provided for @deviceSecurityWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account can only be active on one device at a time for security purposes.'**
+  String get deviceSecurityWarning;
 }
 
 class _AppLocalizationsDelegate

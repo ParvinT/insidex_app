@@ -439,6 +439,11 @@
   "clear": "Temizle",
   "clearSearchHistory": "Arama Geçmişini Temizle",
   "clearSearchHistoryConfirmation": "Tüm arama geçmişini temizlemek istediğinizden emin misiniz?",
-  "searchHistoryCleared": "Arama geçmişi temizlendi"
+  "searchHistoryCleared": "Arama geçmişi temizlendi",
+
+  "accountOpenedOnAnotherDevice": "Hesabınız Başka Cihazdan Açıldı",
+  "accountOpenedMessage": "Güvenliğiniz için bu cihazdan otomatik olarak çıkış yapılacak.",
+  "loggingOut": "Çıkış yapılıyor...",
+  "deviceSecurityWarning": "Hesabınız güvenlik amaçlı aynı anda sadece bir cihazda aktif olabilir."
   
 }

@@ -13,6 +13,7 @@ import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/analytics_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/device_session_service.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -124,6 +125,10 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       if (mounted) {
         await context.read<UserProvider>().loadUserData(user.uid);
       }
+
+      debugPrint('💾 Saving active device for new user...');
+      await DeviceSessionService().saveActiveDevice(user.uid);
+      debugPrint('✅ Active device saved for new user');
 
       _toast(AppLocalizations.of(context).accountCreatedSuccessfully);
 

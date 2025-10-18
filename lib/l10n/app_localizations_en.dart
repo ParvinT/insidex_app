@@ -1162,4 +1162,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchHistoryCleared => 'Search history cleared';
+
+  @override
+  String get accountOpenedOnAnotherDevice => 'Account Opened on Another Device';
+
+  @override
+  String get accountOpenedMessage =>
+      'For your security, you will be automatically logged out from this device.';
+
+  @override
+  String get securityWarningUnauthorized =>
+      'If this wasn\'t you, please change your password immediately!';
+
+  @override
+  String get loggingOut => 'Logging out...';
+
+  @override
+  String get deviceSecurityWarning =>
+      'Your account can only be active on one device at a time for security purposes.';
 }

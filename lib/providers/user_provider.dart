@@ -3,6 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
+import '../app.dart';
+import '../services/device_session_service.dart';
+import '../shared/widgets/device_logout_dialog.dart';
+import '../services/auth_persistence_service.dart';
 
 class UserProvider extends ChangeNotifier {
   User? _firebaseUser;
@@ -10,6 +15,8 @@ class UserProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _isAdmin = false; // Admin flag
 
+  StreamSubscription<DocumentSnapshot>? _deviceSessionSubscription;
+  bool _isShowingLogoutDialog = false;
   // Getters
   User? get firebaseUser => _firebaseUser;
   Map<String, dynamic>? get userData => _userData;
@@ -76,9 +83,124 @@ class UserProvider extends ChangeNotifier {
       } else {
         _userData = null;
         _isAdmin = false;
-        notifyListeners();
+        _stopDeviceSessionMonitoring();
       }
+      notifyListeners();
     });
+  }
+
+  void _startDeviceSessionMonitoring(String userId) {
+    _stopDeviceSessionMonitoring();
+
+    debugPrint('🔍 Starting device session monitoring for: $userId');
+
+    // 🔧 FIX: Biraz gecikme ekle ki context hazır olsun
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      _deviceSessionSubscription = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots()
+          .listen((snapshot) async {
+        if (!snapshot.exists) {
+          debugPrint('❌ User document does not exist');
+          return;
+        }
+
+        final data = snapshot.data();
+        if (data == null) {
+          debugPrint('❌ User data is null');
+          return;
+        }
+
+        debugPrint('📡 Firestore snapshot received');
+
+        final activeDevice = data['activeDevice'] as Map<String, dynamic>?;
+        if (activeDevice == null) {
+          debugPrint('⚠️ No activeDevice field found');
+          return;
+        }
+
+        debugPrint(
+            '🔑 Active device token: ${activeDevice['token']?.substring(0, 20)}...');
+
+        // Check if current device is still the active one
+        final isActive =
+            await DeviceSessionService().isCurrentDeviceActive(userId);
+
+        debugPrint('🔍 Is current device active? $isActive');
+
+        if (!isActive && !_isShowingLogoutDialog) {
+          debugPrint(
+              '⚠️ This device is no longer active! Starting logout countdown...');
+          _showDeviceLogoutDialog();
+        }
+      }, onError: (error) {
+        debugPrint('❌ Firestore listener error: $error');
+      });
+
+      debugPrint('✅ Device session monitoring started');
+    });
+  }
+
+  // ⭐ NEW: Stop monitoring device session
+  void _stopDeviceSessionMonitoring() {
+    _deviceSessionSubscription?.cancel();
+    _deviceSessionSubscription = null;
+    debugPrint('🛑 Stopped device session monitoring');
+  }
+
+  // ⭐ NEW: Show logout dialog
+  void _showDeviceLogoutDialog() {
+    if (_isShowingLogoutDialog) return;
+
+    // Use GlobalKey from InsidexApp
+    final navigatorState = InsidexApp.navigatorKey.currentState;
+
+    if (navigatorState == null) {
+      debugPrint('❌ Navigator state is null! Cannot show dialog');
+      return;
+    }
+
+    final context = navigatorState.context;
+
+    _isShowingLogoutDialog = true;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => DeviceLogoutDialog(
+        onLogout: () {
+          Navigator.of(context).pop();
+          _performLogout();
+        },
+        countdownSeconds: 30,
+      ),
+    );
+  }
+
+  // ⭐ NEW: Perform actual logout
+  Future<void> _performLogout() async {
+    _isShowingLogoutDialog = false;
+
+    // Clear device session
+    if (_firebaseUser != null) {
+      await DeviceSessionService().clearActiveDevice(_firebaseUser!.uid);
+    }
+
+    // Sign out
+    await signOut();
+
+    // ✅ Navigate using GlobalKey
+    final navigatorState = InsidexApp.navigatorKey.currentState;
+
+    if (navigatorState != null) {
+      navigatorState.pushNamedAndRemoveUntil(
+        '/auth/login',
+        (route) => false,
+      );
+    } else {
+      debugPrint('❌ Cannot navigate to login - Navigator state is null');
+    }
   }
 
   // Load user data from Firestore
@@ -126,6 +248,9 @@ class UserProvider extends ChangeNotifier {
 
       // Check admin status separately
       await checkAdminStatus(uid);
+
+      debugPrint('🎯 User data loaded, starting monitoring...');
+      _startDeviceSessionMonitoring(uid);
     } catch (e) {
       print('Error loading user data: $e');
     } finally {
@@ -263,10 +388,15 @@ class UserProvider extends ChangeNotifier {
 
   // Sign out
   Future<void> signOut() async {
+    if (_firebaseUser != null) {
+      await DeviceSessionService().clearActiveDevice(_firebaseUser!.uid);
+    }
+    await AuthPersistenceService.clearSession();
     await FirebaseAuth.instance.signOut();
     _firebaseUser = null;
     _userData = null;
     _isAdmin = false;
+    _stopDeviceSessionMonitoring();
     notifyListeners();
   }
 
@@ -320,5 +450,11 @@ class UserProvider extends ChangeNotifier {
     } catch (e) {
       print('Error updating marketing consent: $e');
     }
+  }
+
+  @override
+  void dispose() {
+    _stopDeviceSessionMonitoring();
+    super.dispose();
   }
 }
