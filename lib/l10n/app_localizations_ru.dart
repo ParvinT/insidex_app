@@ -709,7 +709,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get youCanResendIn => 'Можно отправить повторно через';
 
   @override
-  String get seconds => 'сек';
+  String get seconds => 'секунд';
 
   @override
   String get didntGetIt => 'Не получили?';
@@ -1179,7 +1179,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get securityWarningUnauthorized =>
-      'If this wasn\'t you, please change your password immediately!';
+      'Если это были не вы, пожалуйста, немедленно измените пароль!';
 
   @override
   String get loggingOut => 'Выход из системы...';
@@ -1187,4 +1187,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get deviceSecurityWarning =>
       'Ваш аккаунт может быть активен только на одном устройстве одновременно в целях безопасности.';
+
+  @override
+  String get second => 'секунда';
 }

@@ -171,7 +171,7 @@ class UserProvider extends ChangeNotifier {
       builder: (context) => DeviceLogoutDialog(
         onLogout: () {
           Navigator.of(context).pop();
-          _performLogout();
+          _performLogout(forcedByOtherDevice: true);
         },
         countdownSeconds: 30,
       ),
@@ -179,12 +179,15 @@ class UserProvider extends ChangeNotifier {
   }
 
   // ⭐ NEW: Perform actual logout
-  Future<void> _performLogout() async {
+  Future<void> _performLogout({bool forcedByOtherDevice = false}) async {
     _isShowingLogoutDialog = false;
 
     // Clear device session
-    if (_firebaseUser != null) {
+    if (_firebaseUser != null && !forcedByOtherDevice) {
+      debugPrint('🧹 Clearing active device (user initiated logout)');
       await DeviceSessionService().clearActiveDevice(_firebaseUser!.uid);
+    } else if (forcedByOtherDevice) {
+      debugPrint('⏭️ Skipping clearActiveDevice (forced by other device)');
     }
 
     // Sign out
@@ -195,7 +198,7 @@ class UserProvider extends ChangeNotifier {
 
     if (navigatorState != null) {
       navigatorState.pushNamedAndRemoveUntil(
-        '/auth/login',
+        '/auth/welcome',
         (route) => false,
       );
     } else {
@@ -248,6 +251,9 @@ class UserProvider extends ChangeNotifier {
 
       // Check admin status separately
       await checkAdminStatus(uid);
+
+      debugPrint('🔄 Checking for pending device updates...');
+      await DeviceSessionService().processPendingDeviceUpdates();
 
       debugPrint('🎯 User data loaded, starting monitoring...');
       _startDeviceSessionMonitoring(uid);

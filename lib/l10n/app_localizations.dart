@@ -1465,7 +1465,7 @@ abstract class AppLocalizations {
   /// No description provided for @seconds.
   ///
   /// In en, this message translates to:
-  /// **'s'**
+  /// **'seconds'**
   String get seconds;
 
   /// No description provided for @didntGetIt.
@@ -2361,6 +2361,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your account can only be active on one device at a time for security purposes.'**
   String get deviceSecurityWarning;
+
+  /// No description provided for @second.
+  ///
+  /// In en, this message translates to:
+  /// **'second'**
+  String get second;
 }
 
 class _AppLocalizationsDelegate

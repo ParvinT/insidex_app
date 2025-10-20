@@ -470,7 +470,9 @@
   "accountOpenedMessage": "For your security, you will be automatically logged out from this device.",
   "securityWarningUnauthorized": "If this wasn't you, please change your password immediately!",
   "loggingOut": "Logging out...",
-  "deviceSecurityWarning": "Your account can only be active on one device at a time for security purposes."
+  "deviceSecurityWarning": "Your account can only be active on one device at a time for security purposes.",
+  "seconds": "seconds",
+  "second": "second"
 
   
   

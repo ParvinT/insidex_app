@@ -113,7 +113,7 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
 
                 // Title
                 Text(
-                  _getTitle(context),
+                  AppLocalizations.of(context).accountOpenedOnAnotherDevice,
                   style: GoogleFonts.inter(
                     fontSize: titleSize,
                     fontWeight: FontWeight.w700,
@@ -126,7 +126,7 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
 
                 // Message
                 Text(
-                  _getMessage(context),
+                  AppLocalizations.of(context).accountOpenedMessage,
                   style: GoogleFonts.inter(
                     fontSize: bodySize,
                     color: AppColors.textSecondary,
@@ -159,7 +159,8 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
-                          _getSecurityWarning(context),
+                          AppLocalizations.of(context)
+                              .securityWarningUnauthorized,
                           style: GoogleFonts.inter(
                             fontSize: warningSize,
                             color: Colors.red.shade700,
@@ -202,7 +203,9 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
 
                 // Seconds text
                 Text(
-                  _getSecondsText(context),
+                  _remainingSeconds == 1
+                      ? AppLocalizations.of(context).second
+                      : AppLocalizations.of(context).seconds,
                   style: GoogleFonts.inter(
                     fontSize: bodySize * 0.9,
                     color: AppColors.textSecondary,
@@ -220,53 +223,5 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
     if (_remainingSeconds <= 10) return Colors.red;
     if (_remainingSeconds <= 20) return Colors.orange;
     return AppColors.primaryGold;
-  }
-
-  String _getTitle(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
-    switch (languageCode) {
-      case 'tr':
-        return 'Hesabınız Başka Cihazdan Açıldı';
-      case 'ru':
-        return 'Ваш аккаунт открыт на другом устройстве';
-      default:
-        return 'Account Opened on Another Device';
-    }
-  }
-
-  String _getMessage(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
-    switch (languageCode) {
-      case 'tr':
-        return 'Güvenliğiniz için bu cihazdan otomatik olarak çıkış yapılacak.';
-      case 'ru':
-        return 'Для вашей безопасности вы будете автоматически выведены из системы.';
-      default:
-        return 'For your security, you will be automatically logged out from this device.';
-    }
-  }
-
-  String _getSecurityWarning(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
-    switch (languageCode) {
-      case 'tr':
-        return 'Eğer giriş yapan siz değilseniz, lütfen hemen şifrenizi değiştirin!';
-      case 'ru':
-        return 'Если это были не вы, пожалуйста, немедленно измените пароль!';
-      default:
-        return 'If this wasn\'t you, please change your password immediately!';
-    }
-  }
-
-  String _getSecondsText(BuildContext context) {
-    final languageCode = Localizations.localeOf(context).languageCode;
-    switch (languageCode) {
-      case 'tr':
-        return 'saniye';
-      case 'ru':
-        return _remainingSeconds == 1 ? 'секунда' : 'секунд';
-      default:
-        return _remainingSeconds == 1 ? 'second' : 'seconds';
-    }
   }
 }

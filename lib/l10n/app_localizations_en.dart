@@ -703,7 +703,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youCanResendIn => 'You can resend in';
 
   @override
-  String get seconds => 's';
+  String get seconds => 'seconds';
 
   @override
   String get didntGetIt => 'Didn\'t get it?';
@@ -1180,4 +1180,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deviceSecurityWarning =>
       'Your account can only be active on one device at a time for security purposes.';
+
+  @override
+  String get second => 'second';
 }

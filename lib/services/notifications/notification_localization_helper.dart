@@ -1,6 +1,7 @@
 // lib/services/notifications/notification_localization_helper.dart
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:ui' as ui;
 
 /// Helper for returning notification texts based on user's language
 /// Does not touch existing notification system, only provides texts
@@ -11,7 +12,16 @@ class NotificationLocalizationHelper {
       final prefs = await SharedPreferences.getInstance();
       // Same key used by LocaleProvider
       final languageCode = prefs.getString('language_code');
-      return languageCode ?? 'en'; // Default: English
+      if (languageCode != null) {
+        return languageCode;
+      }
+      final deviceLocale = ui.PlatformDispatcher.instance.locale;
+      final deviceLanguageCode = deviceLocale.languageCode;
+      const supportedLanguages = ['en', 'tr', 'ru'];
+      if (supportedLanguages.contains(deviceLanguageCode)) {
+        return deviceLanguageCode;
+      }
+      return 'en'; // Default: English
     } catch (e) {
       return 'en'; // Fallback to English on error
     }

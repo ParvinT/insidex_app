@@ -443,7 +443,10 @@
 
   "accountOpenedOnAnotherDevice": "Hesabınız Başka Cihazdan Açıldı",
   "accountOpenedMessage": "Güvenliğiniz için bu cihazdan otomatik olarak çıkış yapılacak.",
+  "securityWarningUnauthorized": "Eğer giriş yapan siz değilseniz, lütfen hemen şifrenizi değiştirin!",
   "loggingOut": "Çıkış yapılıyor...",
-  "deviceSecurityWarning": "Hesabınız güvenlik amaçlı aynı anda sadece bir cihazda aktif olabilir."
+  "deviceSecurityWarning": "Hesabınız güvenlik amaçlı aynı anda sadece bir cihazda aktif olabilir.",
+  "seconds": "saniye",
+  "second": "saniye"
   
 }
