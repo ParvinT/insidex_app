@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../services/firebase_service.dart';
@@ -129,10 +130,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (result['success']) {
         _showSuccessDialog();
       } else {
-        _showErrorDialog(
-          result['error'] ??
-              AppLocalizations.of(context).failedToChangePassword,
+        final errorMessage = FirebaseErrorHandler.getErrorMessage(
+          result['code'],
+          context,
         );
+        _showErrorDialog(errorMessage);
       }
     } catch (e) {
       _showErrorDialog(
@@ -477,7 +479,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   hint: AppLocalizations.of(context)
                                       .enterCurrentPassword,
                                   obscureText: !_isCurrentPasswordVisible,
-                                  validator: FormValidators.validatePassword,
+                                  validator: (value) =>
+                                      FormValidators.validatePassword(
+                                          value, context),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       _isCurrentPasswordVisible
@@ -551,7 +555,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     }
                                     // Then apply strong password validation
                                     return FormValidators
-                                        .validateStrongPassword(value);
+                                        .validateStrongPassword(value, context);
                                   },
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -628,6 +632,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       FormValidators.validateConfirmPassword(
                                     value,
                                     _newPasswordController.text,
+                                    context,
                                   ),
                                   suffixIcon: IconButton(
                                     icon: Icon(

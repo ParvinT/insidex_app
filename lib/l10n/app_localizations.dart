@@ -2367,6 +2367,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'second'**
   String get second;
+
+  /// No description provided for @pleaseEnterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your email'**
+  String get pleaseEnterEmail;
+
+  /// No description provided for @pleaseEnterValidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email'**
+  String get pleaseEnterValidEmail;
+
+  /// No description provided for @pleaseEnterPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your password'**
+  String get pleaseEnterPassword;
+
+  /// No description provided for @passwordMustBeAtLeast6Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordMustBeAtLeast6Characters;
+
+  /// No description provided for @passwordMustBeAtLeast8Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 8 characters'**
+  String get passwordMustBeAtLeast8Characters;
+
+  /// No description provided for @passwordMustContainUppercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one uppercase letter'**
+  String get passwordMustContainUppercase;
+
+  /// No description provided for @passwordMustContainLowercase.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one lowercase letter'**
+  String get passwordMustContainLowercase;
+
+  /// No description provided for @passwordMustContainNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must contain at least one number'**
+  String get passwordMustContainNumber;
+
+  /// No description provided for @pleaseEnterName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your name'**
+  String get pleaseEnterName;
+
+  /// No description provided for @nameMustBeAtLeast2Characters.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 2 characters'**
+  String get nameMustBeAtLeast2Characters;
+
+  /// No description provided for @nameCanOnlyContainLetters.
+  ///
+  /// In en, this message translates to:
+  /// **'Name can only contain letters and spaces'**
+  String get nameCanOnlyContainLetters;
+
+  /// No description provided for @pleaseEnterPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter your phone number'**
+  String get pleaseEnterPhone;
+
+  /// No description provided for @pleaseEnterValidPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid phone number'**
+  String get pleaseEnterValidPhone;
+
+  /// No description provided for @currentPasswordIncorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password is incorrect'**
+  String get currentPasswordIncorrect;
+
+  /// No description provided for @newPasswordSameAsCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'New password must be different from current password'**
+  String get newPasswordSameAsCurrent;
+
+  /// No description provided for @noUserSignedIn.
+  ///
+  /// In en, this message translates to:
+  /// **'No user is currently signed in'**
+  String get noUserSignedIn;
+
+  /// No description provided for @authenticationFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication failed'**
+  String get authenticationFailed;
+
+  /// No description provided for @passwordTooWeak.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is too weak'**
+  String get passwordTooWeak;
+
+  /// No description provided for @pleaseSignInAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign out and sign in again before changing your password'**
+  String get pleaseSignInAgain;
+
+  /// No description provided for @networkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Network error. Please check your connection'**
+  String get networkError;
+
+  /// No description provided for @tooManyAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please try again later'**
+  String get tooManyAttempts;
+
+  /// No description provided for @emailAlreadyInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'This email is already registered. Please sign in instead'**
+  String get emailAlreadyInUse;
+
+  /// No description provided for @invalidEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'The email address is not valid'**
+  String get invalidEmail;
+
+  /// No description provided for @weakPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'The password is too weak. Please use at least 6 characters'**
+  String get weakPassword;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No account found with this email'**
+  String get userNotFound;
+
+  /// No description provided for @incorrectPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect password. Please try again'**
+  String get incorrectPassword;
+
+  /// No description provided for @accountDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'This account has been disabled'**
+  String get accountDisabled;
+
+  /// No description provided for @tooManyFailedAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many failed attempts. Please try again later'**
+  String get tooManyFailedAttempts;
+
+  /// No description provided for @invalidCredential.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid email or password'**
+  String get invalidCredential;
+
+  /// No description provided for @operationNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Email/password sign-in is not enabled. Please contact support'**
+  String get operationNotAllowed;
+
+  /// No description provided for @invalidEmailAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email address'**
+  String get invalidEmailAddress;
+
+  /// No description provided for @nameTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Name must be at least 2 characters'**
+  String get nameTooShort;
+
+  /// No description provided for @failedToResendCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to resend code. Please try again'**
+  String get failedToResendCode;
+
+  /// No description provided for @noPendingVerification.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending verification found. Please sign up again'**
+  String get noPendingVerification;
+
+  /// No description provided for @verificationCodeNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code not found. Please sign up again.'**
+  String get verificationCodeNotFound;
+
+  /// No description provided for @verificationCodeAlreadyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'This code has already been used.'**
+  String get verificationCodeAlreadyUsed;
+
+  /// No description provided for @verificationCodeExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification code has expired. Please sign up again.'**
+  String get verificationCodeExpired;
+
+  /// No description provided for @tooManyVerificationAttempts.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many failed attempts. Please sign up again.'**
+  String get tooManyVerificationAttempts;
+
+  /// No description provided for @invalidVerificationCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid verification code. Please try again.'**
+  String get invalidVerificationCode;
 }
 
 class _AppLocalizationsDelegate

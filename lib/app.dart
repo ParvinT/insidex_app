@@ -8,7 +8,6 @@ import 'providers/theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
-import 'providers/user_provider.dart';
 
 class InsidexApp extends StatelessWidget {
   const InsidexApp({super.key});

@@ -1183,4 +1183,139 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get second => 'second';
+
+  @override
+  String get pleaseEnterEmail => 'Please enter your email';
+
+  @override
+  String get pleaseEnterValidEmail => 'Please enter a valid email';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter your password';
+
+  @override
+  String get passwordMustBeAtLeast6Characters =>
+      'Password must be at least 6 characters';
+
+  @override
+  String get passwordMustBeAtLeast8Characters =>
+      'Password must be at least 8 characters';
+
+  @override
+  String get passwordMustContainUppercase =>
+      'Password must contain at least one uppercase letter';
+
+  @override
+  String get passwordMustContainLowercase =>
+      'Password must contain at least one lowercase letter';
+
+  @override
+  String get passwordMustContainNumber =>
+      'Password must contain at least one number';
+
+  @override
+  String get pleaseEnterName => 'Please enter your name';
+
+  @override
+  String get nameMustBeAtLeast2Characters =>
+      'Name must be at least 2 characters';
+
+  @override
+  String get nameCanOnlyContainLetters =>
+      'Name can only contain letters and spaces';
+
+  @override
+  String get pleaseEnterPhone => 'Please enter your phone number';
+
+  @override
+  String get pleaseEnterValidPhone => 'Please enter a valid phone number';
+
+  @override
+  String get currentPasswordIncorrect => 'Current password is incorrect';
+
+  @override
+  String get newPasswordSameAsCurrent =>
+      'New password must be different from current password';
+
+  @override
+  String get noUserSignedIn => 'No user is currently signed in';
+
+  @override
+  String get authenticationFailed => 'Authentication failed';
+
+  @override
+  String get passwordTooWeak => 'The password is too weak';
+
+  @override
+  String get pleaseSignInAgain =>
+      'Please sign out and sign in again before changing your password';
+
+  @override
+  String get networkError => 'Network error. Please check your connection';
+
+  @override
+  String get tooManyAttempts => 'Too many attempts. Please try again later';
+
+  @override
+  String get emailAlreadyInUse =>
+      'This email is already registered. Please sign in instead';
+
+  @override
+  String get invalidEmail => 'The email address is not valid';
+
+  @override
+  String get weakPassword =>
+      'The password is too weak. Please use at least 6 characters';
+
+  @override
+  String get userNotFound => 'No account found with this email';
+
+  @override
+  String get incorrectPassword => 'Incorrect password. Please try again';
+
+  @override
+  String get accountDisabled => 'This account has been disabled';
+
+  @override
+  String get tooManyFailedAttempts =>
+      'Too many failed attempts. Please try again later';
+
+  @override
+  String get invalidCredential => 'Invalid email or password';
+
+  @override
+  String get operationNotAllowed =>
+      'Email/password sign-in is not enabled. Please contact support';
+
+  @override
+  String get invalidEmailAddress => 'Please enter a valid email address';
+
+  @override
+  String get nameTooShort => 'Name must be at least 2 characters';
+
+  @override
+  String get failedToResendCode => 'Failed to resend code. Please try again';
+
+  @override
+  String get noPendingVerification =>
+      'No pending verification found. Please sign up again';
+
+  @override
+  String get verificationCodeNotFound =>
+      'Verification code not found. Please sign up again.';
+
+  @override
+  String get verificationCodeAlreadyUsed => 'This code has already been used.';
+
+  @override
+  String get verificationCodeExpired =>
+      'Verification code has expired. Please sign up again.';
+
+  @override
+  String get tooManyVerificationAttempts =>
+      'Too many failed attempts. Please sign up again.';
+
+  @override
+  String get invalidVerificationCode =>
+      'Invalid verification code. Please try again.';
 }

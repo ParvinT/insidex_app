@@ -1190,4 +1190,141 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get second => 'секунда';
+
+  @override
+  String get pleaseEnterEmail => 'Пожалуйста, введите ваш email';
+
+  @override
+  String get pleaseEnterValidEmail => 'Пожалуйста, введите корректный email';
+
+  @override
+  String get pleaseEnterPassword => 'Пожалуйста, введите ваш пароль';
+
+  @override
+  String get passwordMustBeAtLeast6Characters => 'Минимум 6 символов';
+
+  @override
+  String get passwordMustBeAtLeast8Characters => 'Минимум 8 символов';
+
+  @override
+  String get passwordMustContainUppercase =>
+      'Пароль должен содержать хотя бы одну заглавную букву';
+
+  @override
+  String get passwordMustContainLowercase =>
+      'Пароль должен содержать хотя бы одну строчную букву';
+
+  @override
+  String get passwordMustContainNumber =>
+      'Пароль должен содержать хотя бы одну цифру';
+
+  @override
+  String get pleaseEnterName => 'Пожалуйста, введите ваше имя';
+
+  @override
+  String get nameMustBeAtLeast2Characters =>
+      'Имя должно содержать не менее 2 символов';
+
+  @override
+  String get nameCanOnlyContainLetters =>
+      'Имя может содержать только буквы и пробелы';
+
+  @override
+  String get pleaseEnterPhone => 'Пожалуйста, введите ваш номер телефона';
+
+  @override
+  String get pleaseEnterValidPhone =>
+      'Пожалуйста, введите корректный номер телефона';
+
+  @override
+  String get currentPasswordIncorrect => 'Текущий пароль неверен';
+
+  @override
+  String get newPasswordSameAsCurrent =>
+      'Новый пароль должен отличаться от текущего';
+
+  @override
+  String get noUserSignedIn =>
+      'В данный момент ни один пользователь не вошел в систему';
+
+  @override
+  String get authenticationFailed => 'Ошибка аутентификации';
+
+  @override
+  String get passwordTooWeak => 'Пароль слишком слабый';
+
+  @override
+  String get pleaseSignInAgain =>
+      'Пожалуйста, выйдите и войдите снова перед изменением пароля';
+
+  @override
+  String get networkError => 'Ошибка сети. Проверьте подключение';
+
+  @override
+  String get tooManyAttempts => 'Слишком много попыток. Попробуйте позже';
+
+  @override
+  String get emailAlreadyInUse =>
+      'Этот email уже зарегистрирован. Пожалуйста, войдите';
+
+  @override
+  String get invalidEmail => 'Неверный адрес электронной почты';
+
+  @override
+  String get weakPassword =>
+      'Пароль слишком слабый. Используйте минимум 6 символов';
+
+  @override
+  String get userNotFound => 'Аккаунт с этим email не найден';
+
+  @override
+  String get incorrectPassword => 'Неверный пароль. Попробуйте еще раз';
+
+  @override
+  String get accountDisabled => 'Этот аккаунт отключен';
+
+  @override
+  String get tooManyFailedAttempts =>
+      'Слишком много неудачных попыток. Попробуйте позже';
+
+  @override
+  String get invalidCredential => 'Неверный email или пароль';
+
+  @override
+  String get operationNotAllowed =>
+      'Вход по email/паролю не включен. Обратитесь в поддержку';
+
+  @override
+  String get invalidEmailAddress =>
+      'Пожалуйста, введите корректный адрес электронной почты';
+
+  @override
+  String get nameTooShort => 'Имя должно содержать не менее 2 символов';
+
+  @override
+  String get failedToResendCode =>
+      'Не удалось повторно отправить код. Попробуйте еще раз';
+
+  @override
+  String get noPendingVerification =>
+      'Ожидающая проверка не найдена. Зарегистрируйтесь снова';
+
+  @override
+  String get verificationCodeNotFound =>
+      'Код подтверждения не найден. Пожалуйста, зарегистрируйтесь снова.';
+
+  @override
+  String get verificationCodeAlreadyUsed => 'Этот код уже был использован.';
+
+  @override
+  String get verificationCodeExpired =>
+      'Срок действия кода подтверждения истёк. Пожалуйста, зарегистрируйтесь снова.';
+
+  @override
+  String get tooManyVerificationAttempts =>
+      'Слишком много неудачных попыток. Пожалуйста, зарегистрируйтесь снова.';
+
+  @override
+  String get invalidVerificationCode =>
+      'Неверный код подтверждения. Пожалуйста, попробуйте снова.';
 }

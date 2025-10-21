@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -86,8 +87,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         _toast('${AppLocalizations.of(context).newCodeSentTo} ${widget.email}');
         _countdown();
       } else {
-        _toast(result['error'] ?? AppLocalizations.of(context).failedToSendCode,
-            bg: Colors.red);
+        final errorMessage = FirebaseErrorHandler.getErrorMessage(
+          result['code'],
+          context,
+        );
+        _toast(errorMessage, bg: Colors.red);
       }
     } catch (e) {
       _toast('${AppLocalizations.of(context).failedToSendCode}. $e',
@@ -113,9 +117,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       );
 
       if (!result['success']) {
-        _toast(
-            result['error'] ?? AppLocalizations.of(context).verificationFailed,
-            bg: Colors.red);
+        final errorMessage = FirebaseErrorHandler.getErrorMessage(
+          result['code'],
+          context,
+        );
+        _toast(errorMessage, bg: Colors.red);
         setState(() => _busy = false);
         return;
       }
@@ -266,12 +272,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Text(
+                Expanded(
+                  child: Text(
                     _left > 0
                         ? '${AppLocalizations.of(context).youCanResendIn} $_left ${AppLocalizations.of(context).seconds}'
                         : AppLocalizations.of(context).didntGetIt,
-                    style: label),
-                const Spacer(),
+                    style: label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: (_left > 0 || _resending) ? null : _resend,
                   child: _resending

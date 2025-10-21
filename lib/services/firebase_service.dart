@@ -30,7 +30,7 @@ class FirebaseService {
       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
         return {
           'success': false,
-          'error': 'Please enter a valid email address',
+          'code': 'invalid-email-address',
         };
       }
 
@@ -38,7 +38,7 @@ class FirebaseService {
       if (name.isEmpty || name.length < 2) {
         return {
           'success': false,
-          'error': 'Name must be at least 2 characters',
+          'code': 'name-too-short',
         };
       }
 
@@ -87,26 +87,16 @@ class FirebaseService {
       print(
         'Firebase Auth Error in signUp (unexpected): ${e.code} - ${e.message}',
       );
-      return {'success': false, 'error': _getAuthErrorMessage(e.code)};
+      return {'success': false, 'code': e.code};
     } on FirebaseException catch (e) {
-      // Firestore permission errors
       print('Firebase Exception in signUp: ${e.code} - ${e.message}');
-      String errorMessage = 'Failed to send verification code.';
-
-      if (e.code == 'permission-denied') {
-        errorMessage = 'Permission denied. Please check Firestore rules.';
-      } else if (e.code == 'unavailable') {
-        errorMessage = 'Service unavailable. Please try again.';
-      }
-
-      return {'success': false, 'error': errorMessage, 'details': e.message};
+      return {'success': false, 'code': e.code};
     } catch (e) {
       print('Unexpected error during sign up: $e');
       print('Error type: ${e.runtimeType}');
       return {
         'success': false,
-        'error': 'Failed to send verification code. Please try again.',
-        'details': e.toString(),
+        'code': 'unknown',
       };
     }
   }
@@ -126,7 +116,7 @@ class FirebaseService {
       if (!otpDoc.exists) {
         return {
           'success': false,
-          'error': 'Verification code not found. Please sign up again.',
+          'code': 'verification-code-not-found',
         };
       }
 
@@ -134,7 +124,10 @@ class FirebaseService {
 
       // Check if already verified
       if (data['verified'] == true) {
-        return {'success': false, 'error': 'This code has already been used.'};
+        return {
+          'success': false,
+          'code': 'verification-code-already-used',
+        };
       }
 
       // Check expiration
@@ -142,7 +135,7 @@ class FirebaseService {
       if (DateTime.now().isAfter(expiresAt)) {
         return {
           'success': false,
-          'error': 'Verification code has expired. Please sign up again.',
+          'code': 'verification-code-expired',
         };
       }
 
@@ -151,7 +144,7 @@ class FirebaseService {
       if (attempts >= 5) {
         return {
           'success': false,
-          'error': 'Too many failed attempts. Please sign up again.',
+          'code': 'too-many-verification-attempts',
         };
       }
 
@@ -161,7 +154,7 @@ class FirebaseService {
         await otpDoc.reference.update({'attempts': FieldValue.increment(1)});
         return {
           'success': false,
-          'error': 'Invalid verification code. Please try again.',
+          'code': 'invalid-verification-code',
         };
       }
 
@@ -224,14 +217,12 @@ class FirebaseService {
       };
     } on FirebaseAuthException catch (e) {
       // Handle specific Firebase Auth errors
-      String errorMessage = _getAuthErrorMessage(e.code);
-      return {'success': false, 'error': errorMessage, 'code': e.code};
+      return {'success': false, 'code': e.code};
     } catch (e) {
       print('Error verifying OTP: $e');
       return {
         'success': false,
-        'error': 'Verification failed. Please try again.',
-        'details': e.toString(),
+        'code': 'unknown',
       };
     }
   }
@@ -263,14 +254,12 @@ class FirebaseService {
         'message': 'Signed in successfully',
       };
     } on FirebaseAuthException catch (e) {
-      String errorMessage = _getAuthErrorMessage(e.code);
-      return {'success': false, 'error': errorMessage, 'code': e.code};
+      return {'success': false, 'code': e.code};
     } catch (e) {
       print('Unexpected error during sign in: $e');
       return {
         'success': false,
-        'error': 'An unexpected error occurred. Please try again.',
-        'details': e.toString(),
+        'code': 'unknown',
       };
     }
   }
@@ -310,7 +299,7 @@ class FirebaseService {
       print('Unexpected error: $e');
       return {
         'success': false,
-        'error': 'Failed to send reset email. Please try again.',
+        'code': 'unknown',
       };
     }
   }
@@ -326,7 +315,6 @@ class FirebaseService {
       if (currentPassword == newPassword) {
         return {
           'success': false,
-          'error': 'New password must be different from current password',
           'code': 'same-password',
         };
       }
@@ -335,7 +323,6 @@ class FirebaseService {
       if (user == null) {
         return {
           'success': false,
-          'error': 'No user is currently signed in',
           'code': 'no-user',
         };
       }
@@ -352,14 +339,12 @@ class FirebaseService {
         if (e.code == 'wrong-password' || e.code == 'invalid-credential') {
           return {
             'success': false,
-            'error': 'Current password is incorrect',
             'code': 'wrong-password',
           };
         } else {
           return {
             'success': false,
-            'error': 'Authentication failed: ${e.message}',
-            'code': e.code,
+            'code': 'auth-failed',
           };
         }
       }
@@ -378,37 +363,15 @@ class FirebaseService {
         'message': 'Password changed successfully',
       };
     } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Failed to change password';
-
-      switch (e.code) {
-        case 'weak-password':
-          errorMessage = 'The password is too weak.';
-          break;
-        case 'requires-recent-login':
-          errorMessage =
-              'Please sign out and sign in again before changing your password.';
-          break;
-        case 'network-request-failed':
-          errorMessage = 'Network error. Please check your connection.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many attempts. Please try again later.';
-          break;
-        default:
-          errorMessage = e.message ?? errorMessage;
-      }
-
       return {
         'success': false,
-        'error': errorMessage,
         'code': e.code,
       };
     } catch (e) {
       print('Unexpected error changing password: $e');
       return {
         'success': false,
-        'error': 'An unexpected error occurred. Please try again.',
-        'details': e.toString(),
+        'code': 'unknown',
       };
     }
   }
@@ -436,7 +399,7 @@ class FirebaseService {
       if (!otpDoc.exists) {
         return {
           'success': false,
-          'error': 'No pending verification found. Please sign up again.',
+          'code': 'no-pending-verification',
         };
       }
 
@@ -476,38 +439,8 @@ class FirebaseService {
       print('Error resending OTP: $e');
       return {
         'success': false,
-        'error': 'Failed to resend code. Please try again.',
+        'code': 'failed-to-resend',
       };
-    }
-  }
-
-  // =========================
-  // Helper: Get readable error messages
-  // =========================
-  static String _getAuthErrorMessage(String code) {
-    switch (code) {
-      case 'email-already-in-use':
-        return 'This email is already registered. Please sign in instead.';
-      case 'invalid-email':
-        return 'The email address is not valid.';
-      case 'weak-password':
-        return 'The password is too weak. Please use at least 6 characters.';
-      case 'user-not-found':
-        return 'No account found with this email.';
-      case 'wrong-password':
-        return 'Incorrect password. Please try again.';
-      case 'user-disabled':
-        return 'This account has been disabled.';
-      case 'too-many-requests':
-        return 'Too many failed attempts. Please try again later.';
-      case 'network-request-failed':
-        return 'Network error. Please check your internet connection.';
-      case 'invalid-credential':
-        return 'Invalid email or password.';
-      case 'operation-not-allowed':
-        return 'Email/password sign-in is not enabled. Please contact support.';
-      default:
-        return 'An error occurred. Please try again.';
     }
   }
 

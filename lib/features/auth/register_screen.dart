@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
@@ -106,11 +107,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       );
     } else {
+      final errorMessage = FirebaseErrorHandler.getErrorMessage(
+        result['code'],
+        context,
+      );
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['error'] ??
-              AppLocalizations.of(context).registrationFailed),
+          content: Text(errorMessage),
           backgroundColor: Colors.red,
         ),
       );

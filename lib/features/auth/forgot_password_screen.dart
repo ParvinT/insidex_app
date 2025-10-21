@@ -8,6 +8,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/utils/form_validators.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
@@ -103,11 +104,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
           );
         } else {
-          // Diğer hatalar için normal SnackBar
+          final errorMessage = FirebaseErrorHandler.getErrorMessage(
+            result['code'],
+            context,
+          );
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['error'] ??
-                  AppLocalizations.of(context).failedToSendResetEmail),
+              content: Text(errorMessage),
               backgroundColor: Colors.red,
             ),
           );
