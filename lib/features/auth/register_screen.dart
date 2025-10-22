@@ -15,6 +15,7 @@ import '../../services/firebase_service.dart';
 import 'otp_verification_screen.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/password_requirements_widget.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -32,6 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+  bool _showPasswordRequirements = false;
   bool _agreeToTerms = false;
 
   // Separate loading states for each button
@@ -190,7 +192,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _nameController,
                   label: AppLocalizations.of(context).fullName,
                   hint: AppLocalizations.of(context).enterYourFullName,
-                  validator: FormValidators.validateName,
+                  validator: (value) =>
+                      FormValidators.validateName(value, context),
                   suffixIcon: Icon(
                     Icons.person_outline,
                     color: AppColors.textSecondary,
@@ -206,7 +209,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: AppLocalizations.of(context).email,
                   hint: AppLocalizations.of(context).enterYourEmail,
                   keyboardType: TextInputType.emailAddress,
-                  validator: FormValidators.validateEmail,
+                  validator: (value) =>
+                      FormValidators.validateEmail(value, context),
                   suffixIcon: Icon(
                     Icons.email_outlined,
                     color: AppColors.textSecondary,
@@ -222,7 +226,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   label: AppLocalizations.of(context).password,
                   hint: AppLocalizations.of(context).createAPassword,
                   obscureText: !_isPasswordVisible,
-                  validator: FormValidators.validatePassword,
+                  validator: (value) =>
+                      FormValidators.validateStrongPassword(value, context),
+                  onChanged: (value) {
+                    setState(() {
+                      _showPasswordRequirements = value.isNotEmpty;
+                    });
+                  },
                   suffixIcon: IconButton(
                     icon: Icon(
                       _isPasswordVisible
@@ -236,7 +246,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                 ),
-
+                if (_showPasswordRequirements) ...[
+                  SizedBox(height: 12.h),
+                  PasswordRequirementsWidget(
+                    password: _passwordController.text,
+                  ),
+                ],
                 SizedBox(height: 16.h),
 
                 // Confirm Password Input Field

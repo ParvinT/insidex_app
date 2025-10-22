@@ -13,6 +13,7 @@ import '../../core/responsive/context_ext.dart';
 import '../../services/firebase_service.dart';
 import '../../shared/widgets/animated_background.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/password_requirements_widget.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -32,18 +33,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
 
-  // Password strength tracking
-  double _passwordStrength = 0.0;
-  String _passwordStrengthText = '';
-  Color _passwordStrengthColor = Colors.red;
-
-  // Password requirements tracking
-  bool _hasMinLength = false;
-  bool _hasUppercase = false;
-  bool _hasLowercase = false;
-  bool _hasNumber = false;
-  bool _isDifferent = true;
-
   @override
   void initState() {
     super.initState();
@@ -55,62 +44,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  void _checkPasswordStrength(String password) {
-    // Update requirement checks
-    setState(() {
-      _hasMinLength = password.length >= 8;
-      _hasUppercase = password.contains(RegExp(r'[A-Z]'));
-      _hasLowercase = password.contains(RegExp(r'[a-z]'));
-      _hasNumber = password.contains(RegExp(r'[0-9]'));
-      _isDifferent =
-          password.isEmpty || password != _currentPasswordController.text;
-    });
-
-    double strength = 0;
-    String strengthText = '';
-    Color strengthColor = Colors.red;
-
-    if (password.isEmpty) {
-      setState(() {
-        _passwordStrength = 0;
-        _passwordStrengthText = '';
-        _passwordStrengthColor = Colors.red;
-      });
-      return;
-    }
-
-    // Check criteria
-    if (password.length >= 8) strength += 0.2;
-    if (password.length >= 12) strength += 0.1;
-    if (password.contains(RegExp(r'[A-Z]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[a-z]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[0-9]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength += 0.1;
-
-    strength = strength.clamp(0.0, 1.0);
-
-    // Determine strength text and color
-    if (strength <= 0.25) {
-      strengthText = AppLocalizations.of(context).weak;
-      strengthColor = const Color(0xFFE74C3C);
-    } else if (strength <= 0.5) {
-      strengthText = AppLocalizations.of(context).fair;
-      strengthColor = const Color(0xFFE67E22);
-    } else if (strength <= 0.75) {
-      strengthText = AppLocalizations.of(context).good;
-      strengthColor = const Color(0xFFF39C12);
-    } else {
-      strengthText = AppLocalizations.of(context).strong;
-      strengthColor = const Color(0xFF27AE60);
-    }
-
-    setState(() {
-      _passwordStrength = strength;
-      _passwordStrengthText = strengthText;
-      _passwordStrengthColor = strengthColor;
-    });
   }
 
   Future<void> _handleChangePassword() async {
@@ -508,41 +441,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                       .minCharacters,
                                   obscureText: !_isNewPasswordVisible,
                                   onChanged: (value) {
-                                    _checkPasswordStrength(value);
-                                    // Check if same as current password for warning
-                                    if (value.isNotEmpty &&
-                                        value ==
-                                            _currentPasswordController.text) {
-                                      // Show snackbar instead of inline error for better UX
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            children: [
-                                              const Icon(Icons.warning,
-                                                  color: Colors.white,
-                                                  size: 20),
-                                              const SizedBox(width: 8),
-                                              Flexible(
-                                                child: Text(
-                                                  AppLocalizations.of(context)
-                                                      .newPasswordMustBeDifferent,
-                                                  style: GoogleFonts.inter(
-                                                      fontSize: 13.sp),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          backgroundColor: Colors.orange,
-                                          duration: const Duration(seconds: 3),
-                                          behavior: SnackBarBehavior.floating,
-                                          margin: EdgeInsets.all(20.w),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10.r),
-                                          ),
-                                        ),
-                                      );
+                                    setState(() {});
+                                    if (_confirmPasswordController
+                                        .text.isNotEmpty) {
+                                      _formKey.currentState?.validate();
                                     }
                                   },
                                   validator: (value) {
@@ -572,49 +474,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   ),
                                 ),
 
-                                // Password Strength Indicator
-                                if (_passwordStrength > 0) ...[
+                                if (_newPasswordController.text.isNotEmpty) ...[
                                   SizedBox(height: 12.h),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(context)
-                                                .passwordStrength,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 11.sp.clamp(10.0, 12.0),
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                          Text(
-                                            _passwordStrengthText,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 11.sp.clamp(10.0, 12.0),
-                                              color: _passwordStrengthColor,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(4.r),
-                                        child: LinearProgressIndicator(
-                                          value: _passwordStrength,
-                                          backgroundColor: AppColors.greyLight,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  _passwordStrengthColor),
-                                          minHeight: 5.h.clamp(4.0, 6.0),
-                                        ),
-                                      ),
-                                    ],
+                                  PasswordRequirementsWidget(
+                                    password: _newPasswordController.text,
+                                    excludePassword:
+                                        _currentPasswordController.text,
+                                    showDifferentCheck: true,
                                   ),
                                 ],
 
@@ -663,66 +529,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ),
 
                                 SizedBox(height: 16.h),
-
-                                // Password Requirements
-                                Container(
-                                  padding:
-                                      EdgeInsets.all(12.w.clamp(10.0, 16.0)),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.greyLight.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    border: Border.all(
-                                      color: AppColors.greyBorder,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.info_outline,
-                                            color: AppColors.textSecondary,
-                                            size: 14.sp.clamp(12.0, 16.0),
-                                          ),
-                                          SizedBox(width: 6.w),
-                                          Text(
-                                            AppLocalizations.of(context)
-                                                .passwordRequirements,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp.clamp(11.0, 13.0),
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 8.h),
-                                      _buildRequirement(
-                                          AppLocalizations.of(context)
-                                              .atLeast8Characters,
-                                          isMet: _hasMinLength),
-                                      _buildRequirement(
-                                          AppLocalizations.of(context)
-                                              .oneUppercaseLetter,
-                                          isMet: _hasUppercase),
-                                      _buildRequirement(
-                                          AppLocalizations.of(context)
-                                              .oneLowercaseLetter,
-                                          isMet: _hasLowercase),
-                                      _buildRequirement(
-                                          AppLocalizations.of(context)
-                                              .oneNumber,
-                                          isMet: _hasNumber),
-                                      _buildRequirement(
-                                          AppLocalizations.of(context)
-                                              .differentFromCurrent,
-                                          isMet: _isDifferent),
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
                           ),
@@ -737,50 +543,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildRequirement(String text, {bool? isMet}) {
-    final bool showStatus =
-        isMet != null && _newPasswordController.text.isNotEmpty;
-    final Color iconColor = showStatus
-        ? (isMet! ? const Color(0xFF27AE60) : const Color(0xFFE74C3C))
-        : AppColors.textLight;
-
-    final IconData iconData = showStatus
-        ? (isMet! ? Icons.check_circle : Icons.cancel)
-        : Icons.circle_outlined;
-
-    return Padding(
-      padding: EdgeInsets.only(top: 3.h),
-      child: Row(
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Icon(
-              iconData,
-              key: ValueKey(iconData),
-              color: iconColor,
-              size: 12.sp.clamp(11.0, 14.0),
-            ),
-          ),
-          SizedBox(width: 6.w),
-          Flexible(
-            child: Text(
-              text,
-              style: GoogleFonts.inter(
-                fontSize: 11.sp.clamp(10.0, 12.0),
-                color: showStatus && isMet!
-                    ? const Color(0xFF27AE60)
-                    : AppColors.textSecondary,
-                fontWeight:
-                    showStatus && isMet! ? FontWeight.w500 : FontWeight.normal,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }

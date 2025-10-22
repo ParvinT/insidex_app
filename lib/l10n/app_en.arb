@@ -506,6 +506,7 @@
   "invalidCredential": "Invalid email or password",
   "operationNotAllowed": "Email/password sign-in is not enabled. Please contact support",
   "invalidEmailAddress": "Please enter a valid email address",
+  "emailAlreadyExists": "This email is already registered. Please sign in or use forgot password.",
   "nameTooShort": "Name must be at least 2 characters",
   "failedToResendCode": "Failed to resend code. Please try again",
   "noPendingVerification": "No pending verification found. Please sign up again",

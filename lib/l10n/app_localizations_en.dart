@@ -1291,6 +1291,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invalidEmailAddress => 'Please enter a valid email address';
 
   @override
+  String get emailAlreadyExists =>
+      'This email is already registered. Please sign in or use forgot password.';
+
+  @override
   String get nameTooShort => 'Name must be at least 2 characters';
 
   @override

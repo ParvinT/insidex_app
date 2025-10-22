@@ -32,8 +32,12 @@ class FirebaseErrorHandler {
 
     switch (code) {
       // Password errors
-      case 'wrong-password':
       case 'invalid-credential':
+      case 'user-not-found':
+        return l10n.invalidCredential; // "Invalid email or password"
+
+      // Change Password errors - Specific context
+      case 'wrong-password':
         return l10n.currentPasswordIncorrect;
 
       case 'same-password':
@@ -49,15 +53,15 @@ class FirebaseErrorHandler {
       case 'no-user':
         return l10n.noUserSignedIn;
 
-      case 'user-not-found':
-        return l10n.userNotFound;
-
       case 'user-disabled':
         return l10n.accountDisabled;
 
       // Email errors
       case 'email-already-in-use':
         return l10n.emailAlreadyInUse;
+
+      case 'email-already-exists':
+        return l10n.emailAlreadyExists;
 
       case 'invalid-email':
         return l10n.invalidEmail;
@@ -107,7 +111,7 @@ class FirebaseErrorHandler {
 
       case 'too-many-verification-attempts':
         return l10n.tooManyVerificationAttempts;
-        
+
       case 'invalid-verification-code':
         return l10n.invalidVerificationCode;
 

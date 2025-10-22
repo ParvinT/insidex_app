@@ -766,3 +766,54 @@ exports.customPasswordReset = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', 'Failed to send reset email');
   }
 });
+
+exports.checkEmailExists = functions.https.onCall(async (data, context) => {
+  const { email } = data;
+  
+  console.log('checkEmailExists called for:', email);
+  
+  // Validation
+  if (!email || !isValidEmail(email)) {
+    throw new functions.https.HttpsError('invalid-argument', 'Valid email required');
+  }
+  
+  try {
+    // 1. Check Firebase Auth
+    try {
+      await admin.auth().getUserByEmail(email);
+      console.log('Email found in Firebase Auth');
+      return { 
+        exists: true, 
+        location: 'firebase_auth' 
+      };
+    } catch (authError) {
+      if (authError.code !== 'auth/user-not-found') {
+        console.error('Firebase Auth error:', authError);
+        throw authError;
+      }
+      console.log('Email not in Firebase Auth');
+    }
+    
+    // 2. Check Firestore users collection
+    const userQuery = await admin.firestore()
+      .collection('users')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+      
+    if (!userQuery.empty) {
+      console.log('Email found in Firestore users');
+      return { 
+        exists: true, 
+        location: 'firestore_users' 
+      };
+    }
+    
+    console.log('Email not found anywhere');
+    return { exists: false };
+    
+  } catch (error) {
+    console.error('Error checking email:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to check email');
+  }
+});

@@ -1299,6 +1299,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Пожалуйста, введите корректный адрес электронной почты';
 
   @override
+  String get emailAlreadyExists =>
+      'Этот email уже зарегистрирован. Пожалуйста, войдите или используйте восстановление пароля.';
+
+  @override
   String get nameTooShort => 'Имя должно содержать не менее 2 символов';
 
   @override

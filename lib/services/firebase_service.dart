@@ -27,6 +27,25 @@ class FirebaseService {
       print('Email: $email');
       print('Name: $name');
 
+      print('Checking if email exists via Cloud Function...');
+      try {
+        final callable =
+            FirebaseFunctions.instance.httpsCallable('checkEmailExists');
+        final result = await callable.call({'email': email});
+
+        if (result.data['exists'] == true) {
+          print('Email already registered: ${result.data['location']}');
+          return {
+            'success': false,
+            'code': 'email-already-exists',
+          };
+        }
+        print('Email is available');
+      } catch (e) {
+        print('Error checking email via Cloud Function: $e');
+        // Devam et, en kötü duplicate error alırız
+      }
+
       if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
         return {
           'success': false,

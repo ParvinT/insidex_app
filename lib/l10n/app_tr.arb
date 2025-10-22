@@ -481,6 +481,7 @@
   "invalidCredential": "Geçersiz e-posta veya şifre",
   "operationNotAllowed": "E-posta/şifre girişi etkin değil. Lütfen destekle iletişime geçin",
   "invalidEmailAddress": "Lütfen geçerli bir e-posta adresi girin",
+  "emailAlreadyExists": "Bu e-posta zaten kayıtlı. Lütfen giriş yapın veya şifremi unuttum'u kullanın.",
   "nameTooShort": "Ad en az 2 karakter olmalı",
   "failedToResendCode": "Kod tekrar gönderilemedi. Lütfen tekrar deneyin",
   "noPendingVerification": "Bekleyen doğrulama bulunamadı. Lütfen tekrar kayıt olun",
