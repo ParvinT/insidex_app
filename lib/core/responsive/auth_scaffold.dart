@@ -54,8 +54,10 @@ class _AuthScaffoldState extends State<AuthScaffold> {
     final needsScrollWrapper =
         !bodyIsScrollable && (shortHeight || kbInset > 0);
 
-    final bottomVisual =
-        (_measuredBottomH ?? widget.bottomAreaVisualHeight).clamp(48.0, 160.0);
+    final bottomVisual = widget.bottomAreaVisualHeight == 0.0
+        ? 0.0
+        : (_measuredBottomH ?? widget.bottomAreaVisualHeight)
+            .clamp(48.0, 160.0);
 
     Widget content = widget.body;
 
