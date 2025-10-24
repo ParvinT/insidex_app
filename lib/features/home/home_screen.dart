@@ -12,6 +12,9 @@ import '../../features/playlist/playlist_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
+import '../../l10n/app_localizations.dart';
+import '../search/search_screen.dart';
+import '../search/widgets/search_bar_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -144,11 +147,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         AppColors.textPrimary, BlendMode.srcIn),
                   ),
                   const Spacer(),
-                  _buildHeaderButton('Menu', true),
+                  _buildHeaderButton(AppLocalizations.of(context).menu, true),
                 ],
               ),
               const Spacer(),
-              SizedBox(height: 12.h),
+              SearchBarWidget(
+                onTap: () {
+                  Navigator.of(context).push(
+                    PageRouteBuilder(
+                      pageBuilder: (context, animation, secondaryAnimation) {
+                        return const SearchScreen();
+                      },
+                      transitionsBuilder:
+                          (context, animation, secondaryAnimation, child) {
+                        const begin = Offset(0.0, 1.0);
+                        const end = Offset.zero;
+                        const curve = Curves.easeInOut;
+
+                        var tween = Tween(begin: begin, end: end).chain(
+                          CurveTween(curve: curve),
+                        );
+
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
+                      transitionDuration: const Duration(milliseconds: 400),
+                    ),
+                  );
+                },
+              ),
+              const Spacer(),
             ],
           ),
         ),
@@ -214,7 +244,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 right: 20.w,
                 bottom: 20.h,
                 child: Text(
-                  'All Subliminals',
+                  AppLocalizations.of(context).allSubliminals,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -278,6 +308,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       height: height,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
+        onTap: () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const PlaylistScreen()));
+        },
         onVerticalDragStart: (_) => setState(() => _isDraggingPl = true),
         onVerticalDragUpdate: (d) {
           setState(() {
@@ -287,10 +321,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             if (_readyPl && !wasReady) HapticFeedback.lightImpact();
           });
         },
-        onVerticalDragEnd: (details) async {
+        onVerticalDragEnd: (details) {
           final v = details.primaryVelocity ?? 0.0;
           if (_readyPl || v > 500) {
-            await Navigator.push(context,
+            Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const PlaylistScreen()));
           }
           setState(() {
@@ -321,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 right: 20.w,
                 bottom: 20.h,
                 child: Text(
-                  'Your Playlist',
+                  AppLocalizations.of(context).yourPlaylist,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -456,107 +490,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       );
     }
 
+    final l10n = AppLocalizations.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        item(Icons.home_outlined, 'Home', 0, () {}),
-        item(Icons.play_circle_outline, 'Playlist', 1, () {
+        item(Icons.home_outlined, l10n.home, 0, () {}),
+        item(Icons.play_circle_outline, l10n.playlist, 1, () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const PlaylistScreen()));
         }),
-        item(Icons.chat_bubble_outline, 'AI Chat', 2, () {
-          _showComingSoonDialog('AI Psychologist');
-        }),
-        item(Icons.person_outline, 'Profile', 3, () {
+        item(Icons.person_outline, l10n.profile, 2, () {
           AppRoutes.navigateToProfile(context);
         }),
       ],
-    );
-  }
-
-  void _showComingSoonDialog(String feature) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20.r),
-        ),
-        child: Container(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Icon
-              Container(
-                width: 72.w,
-                height: 72.w,
-                decoration: BoxDecoration(
-                  color: AppColors.greyLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.construction_rounded,
-                  color: AppColors.textPrimary,
-                  size: 36.sp,
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Title
-              Text(
-                'Coming Soon!',
-                style: GoogleFonts.inter(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-
-              SizedBox(height: 12.h),
-
-              // Message
-              Text(
-                '$feature is under development.\nWe\'re working hard to bring it to you!',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.inter(
-                  fontSize: 14.sp,
-                  color: AppColors.textSecondary,
-                  height: 1.5,
-                ),
-              ),
-
-              SizedBox(height: 24.h),
-
-              // OK Button
-              SizedBox(
-                width: double.infinity,
-                height: 48.h,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    'Got it!',
-                    style: GoogleFonts.inter(
-                      fontSize: (16.sp).clamp(16.0, 20.0),
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

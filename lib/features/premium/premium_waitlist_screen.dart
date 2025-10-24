@@ -9,7 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
-import '../legal/privacy_policy_screen.dart';
+import '../../core/routes/app_routes.dart';
 import 'dart:math' as math;
 
 class PremiumWaitlistScreen extends StatefulWidget {
@@ -301,13 +301,8 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                                           ),
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      const PrivacyPolicyScreen(),
-                                                ),
-                                              );
+                                              Navigator.pushNamed(context,
+                                                  AppRoutes.privacyPolicy);
                                             },
                                         ),
                                         const TextSpan(

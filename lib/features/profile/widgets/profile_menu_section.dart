@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../feedback/feedback_dialog.dart';
 import '../change_password_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileMenuSection extends StatelessWidget {
   const ProfileMenuSection({super.key});
@@ -15,7 +15,7 @@ class ProfileMenuSection extends StatelessWidget {
         _buildMenuItem(
           context: context,
           icon: Icons.lock_outline,
-          title: 'Change Password',
+          title: AppLocalizations.of(context).changePassword,
           onTap: () {
             Navigator.push(
               context,
@@ -28,29 +28,21 @@ class ProfileMenuSection extends StatelessWidget {
         _buildMenuItem(
           context: context,
           icon: Icons.settings,
-          title: 'Settings',
+          title: AppLocalizations.of(context).settings,
           onTap: () => Navigator.pushNamed(context, '/settings'),
         ),
         _buildMenuItem(
           context: context,
           icon: Icons.privacy_tip_outlined,
-          title: 'Privacy Policy',
+          title: AppLocalizations.of(context).privacyPolicy,
           onTap: () => Navigator.pushNamed(context, '/legal/privacy-policy'),
         ),
         _buildMenuItem(
           context: context,
           icon: Icons.description_outlined,
-          title: 'Terms of Service',
+          title: AppLocalizations.of(context).termsOfService,
           onTap: () => Navigator.pushNamed(context, '/legal/terms-of-service'),
         ),
-        /* _buildMenuItem(
-          context: context,
-          icon: Icons.help_outline,
-          title: 'Help & Support',
-          onTap: () {
-            FeedbackDialog.show(context);
-          },
-        ),*/
       ],
     );
   }

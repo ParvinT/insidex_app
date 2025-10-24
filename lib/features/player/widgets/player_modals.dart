@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../services/audio_player_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PlayerModals {
   // PlayerModals.showSleepTimer — shows current value, lets select & cancel
@@ -31,7 +32,7 @@ class PlayerModals {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Sleep Timer',
+                Text(AppLocalizations.of(context).sleepTimer,
                     style: GoogleFonts.inter(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -39,8 +40,9 @@ class PlayerModals {
                 const SizedBox(height: 8),
                 Text(
                   selected != null
-                      ? 'Current: $selected minutes'
-                      : 'No timer set',
+                      ? AppLocalizations.of(context)
+                          .currentMinutes(selected.toString())
+                      : AppLocalizations.of(context).noTimerSet,
                   style:
                       GoogleFonts.inter(fontSize: 13, color: Color(0xFF6E6E6E)),
                 ),
@@ -53,7 +55,8 @@ class PlayerModals {
                   children: [
                     for (final m in options)
                       ChoiceChip(
-                        label: Text('${m}m'),
+                        label: Text(AppLocalizations.of(context)
+                            .setMinutes(m.toString())),
                         selected: selected == m,
                         onSelected: (_) => setState(() => selected = m),
                         selectedColor: Colors.black,
@@ -82,7 +85,7 @@ class PlayerModals {
                             foregroundColor: Colors.black,
                             side: const BorderSide(color: Colors.black),
                           ),
-                          child: const Text('Cancel timer'),
+                          child: Text(AppLocalizations.of(context).cancelTimer),
                         ),
                       ),
                     if (currentMinutes != null) const SizedBox(width: 12),
@@ -99,8 +102,10 @@ class PlayerModals {
                           backgroundColor: Colors.black,
                           foregroundColor: Colors.white,
                         ),
-                        child:
-                            Text(selected == null ? 'Set' : 'Set ${selected}m'),
+                        child: Text(selected == null
+                            ? AppLocalizations.of(context).set
+                            : AppLocalizations.of(context)
+                                .setMinutes(selected.toString())),
                       ),
                     ),
                   ],
@@ -279,7 +284,9 @@ class PlayerModals {
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Premium feature')),
+                  SnackBar(
+                      content:
+                          Text(AppLocalizations.of(context).premiumFeature)),
                 );
               },
             ),

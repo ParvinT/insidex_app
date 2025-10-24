@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:marquee/marquee.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../services/analytics_service.dart';
 import '../../shared/models/user_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import 'gender_screen.dart';
 
 class GoalsScreen extends StatefulWidget {
@@ -57,6 +59,24 @@ class _GoalsScreenState extends State<GoalsScreen>
     );
   }
 
+  String _getLocalizedGoalTitle(UserGoal goal) {
+    final l10n = AppLocalizations.of(context);
+    switch (goal) {
+      case UserGoal.health:
+        return l10n.health;
+      case UserGoal.confidence:
+        return l10n.confidence;
+      case UserGoal.energy:
+        return l10n.energy;
+      case UserGoal.betterSleep:
+        return l10n.betterSleep;
+      case UserGoal.anxietyRelief:
+        return l10n.anxietyRelief;
+      case UserGoal.emotionalBalance:
+        return l10n.emotionalBalance;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -65,17 +85,18 @@ class _GoalsScreenState extends State<GoalsScreen>
     final bool isNarrowWidth = size.width <= 420;
 
     final clamped = mq.copyWith(textScaler: const TextScaler.linear(1.0));
-    final bool isWideOrShort = size.width >= 1024 || size.height <= 740;
-    final double bottomVisual = isWideOrShort ? 96.0 : 80.0;
     return MediaQuery(
       data: isCompactHeight ? clamped : mq,
       child: AuthScaffold(
         bodyIsScrollable: true,
         backgroundColor: AppColors.backgroundWhite,
-        bottomAreaVisualHeight: bottomVisual,
-        bottomArea: _BottomBar(
-          enabled: _selectedGoals.isNotEmpty,
-          onPressed: _onContinue,
+        bottomAreaVisualHeight: 0.0,
+        bottomArea: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+          child: _BottomBar(
+            enabled: _selectedGoals.isNotEmpty,
+            onPressed: _onContinue,
+          ),
         ),
         appBar: AppBar(
           backgroundColor: AppColors.backgroundWhite,
@@ -98,7 +119,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: Text(
-                  'Skip',
+                  AppLocalizations.of(context).skip,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -124,7 +145,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         _buildProgressIndicator(),
                         SizedBox(height: 24.h),
                         Text(
-                          'Tell us about yourself',
+                          AppLocalizations.of(context).tellUsAboutYourself,
                           style: GoogleFonts.inter(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w700,
@@ -133,7 +154,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Answer a few quick questions to get personalized recommendations',
+                          AppLocalizations.of(context).answerQuickQuestions,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
@@ -142,7 +163,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         ),
                         SizedBox(height: 24.h),
                         Text(
-                          'What are your current goals',
+                          AppLocalizations.of(context).whatAreYourGoals,
                           style: GoogleFonts.inter(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w600,
@@ -160,11 +181,11 @@ class _GoalsScreenState extends State<GoalsScreen>
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: isNarrowWidth ? 210 : 260,
-                      crossAxisSpacing: 16.w,
-                      mainAxisSpacing: 16.h,
-                      // bir miktar daha yüksek tile: emojiler kesilmesin
-                      childAspectRatio: isCompactHeight ? 1.0 : 1.20,
+                      maxCrossAxisExtent:
+                          isNarrowWidth ? 180 : 220, // ← Daha kompakt
+                      crossAxisSpacing: 12.w, // ← Az spacing
+                      mainAxisSpacing: 12.h, // ← Az spacing
+                      childAspectRatio: 0.95,
                     ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -173,6 +194,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                         return _GoalCard(
                           goal: goal,
                           isSelected: isSelected,
+                          localizedTitle: _getLocalizedGoalTitle(goal),
                           onTap: () {
                             setState(() {
                               if (isSelected) {
@@ -188,7 +210,6 @@ class _GoalsScreenState extends State<GoalsScreen>
                     ),
                   ),
                 ),
-                SliverToBoxAdapter(child: SizedBox(height: 24.h)),
               ],
             ),
           ),
@@ -238,13 +259,23 @@ class _GoalCard extends StatelessWidget {
   final UserGoal goal;
   final bool isSelected;
   final VoidCallback onTap;
+  final String localizedTitle;
   const _GoalCard(
-      {required this.goal, required this.isSelected, required this.onTap});
+      {required this.goal,
+      required this.isSelected,
+      required this.onTap,
+      required this.localizedTitle});
 
   @override
   Widget build(BuildContext context) {
-    // Emojilerin/ikonların kesilmesini ve 1–2 satır metnin sığmamasını
-    // FittedBox yaklaşımıyla kesin olarak önlüyoruz.
+    // Ekran boyutuna göre responsive icon size
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isTablet = screenWidth >= 600;
+
+    final iconSize = isTablet ? 52.0 : 48.0;
+    final iconInnerSize = isTablet ? 26.0 : 24.0;
+    final textSize = isTablet ? 14.0 : 13.0;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -267,51 +298,89 @@ class _GoalCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Icon bubble
-                Container(
-                  width: 44.w,
-                  height: 44.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected
-                        ? Colors.white.withOpacity(0.2)
-                        : goal.color.withOpacity(0.1),
-                  ),
-                  child: Icon(
-                    goal.icon,
-                    size: 22.sp,
-                    color: isSelected ? Colors.white : goal.color,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                // Title (2 lines max)
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxWidth: 140.w),
-                  child: Text(
-                    goal.title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
+        padding: EdgeInsets.all(12.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon bubble - SABİT BOYUT
+            Container(
+              width: iconSize,
+              height: iconSize,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected
+                    ? Colors.white.withOpacity(0.2)
+                    : goal.color.withOpacity(0.1),
+              ),
+              child: Icon(
+                goal.icon,
+                size: iconInnerSize,
+                color: isSelected ? Colors.white : goal.color,
+              ),
             ),
-          ),
+
+            SizedBox(height: 10.h),
+
+            // Text - Marquee ile
+            Flexible(
+              child: _buildScrollingGoalText(
+                localizedTitle,
+                GoogleFonts.inter(
+                  fontSize: textSize,
+                  fontWeight: FontWeight.w600,
+                  height: 1.3,
+                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildScrollingGoalText(String text, TextStyle style) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Text genişliğini hesapla
+        final textPainter = TextPainter(
+          text: TextSpan(text: text, style: style),
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
+        )..layout(maxWidth: double.infinity);
+
+        final availableWidth = constraints.maxWidth;
+
+        // Text sığıyorsa normal Text
+        if (textPainter.width <= availableWidth) {
+          return Text(
+            text,
+            style: style,
+            maxLines: 1,
+            textAlign: TextAlign.center,
+          );
+        }
+
+        // Sığmıyorsa Marquee
+        return SizedBox(
+          height: style.fontSize! * 1.4,
+          child: Marquee(
+            text: text,
+            style: style,
+            scrollAxis: Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            blankSpace: 30.0, // Boşluk
+            velocity: 25.0, // Hız
+            pauseAfterRound: const Duration(seconds: 1),
+            startPadding: 5.0,
+            accelerationDuration: const Duration(milliseconds: 800),
+            accelerationCurve: Curves.easeInOut,
+            decelerationDuration: const Duration(milliseconds: 400),
+            decelerationCurve: Curves.easeOut,
+          ),
+        );
+      },
     );
   }
 }
@@ -323,15 +392,12 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final bool isWideOrShort = size.width >= 1024 || size.height <= 740;
-    final double buttonHeight = isWideOrShort ? 100.h : 56.h;
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 12.h),
+      padding: EdgeInsets.zero,
       child: SizedBox(
         width: double.infinity,
-        height: buttonHeight,
+        height: 52.h,
         child: ElevatedButton(
           onPressed: enabled ? onPressed : null,
           style: ElevatedButton.styleFrom(
@@ -340,10 +406,13 @@ class _BottomBar extends StatelessWidget {
             disabledBackgroundColor: AppColors.greyLight,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
+            elevation: 0, // ← EKLE: Gölge kaldır
+            shadowColor: Colors.transparent,
           ),
-          child: Text('Continue',
+          child: Text(AppLocalizations.of(context).continueButton,
               style: GoogleFonts.inter(
-                  fontSize: 16.sp, fontWeight: FontWeight.w700)),
+                  fontSize: 16.sp.clamp(16.0, 18.0),
+                  fontWeight: FontWeight.w700)),
         ),
       ),
     );

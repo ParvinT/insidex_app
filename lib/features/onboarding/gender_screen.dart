@@ -9,6 +9,7 @@ import '../../core/routes/app_routes.dart';
 import '../../services/analytics_service.dart';
 import '../../shared/models/user_preferences.dart';
 import 'birth_date_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class GenderScreen extends StatefulWidget {
   final List<UserGoal> selectedGoals;
@@ -89,7 +90,7 @@ class _GenderScreenState extends State<GenderScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: Text(
-                  'Skip',
+                  AppLocalizations.of(context).skip,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -113,7 +114,7 @@ class _GenderScreenState extends State<GenderScreen> {
                       _buildProgressIndicator(),
                       SizedBox(height: 24.h),
                       Text(
-                        'Tell us about yourself',
+                        AppLocalizations.of(context).tellUsAboutYourself,
                         style: GoogleFonts.inter(
                           fontSize: 28.sp,
                           fontWeight: FontWeight.w700,
@@ -122,7 +123,7 @@ class _GenderScreenState extends State<GenderScreen> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'This helps us personalize your experience',
+                        AppLocalizations.of(context).thisHelpsPersonalize,
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
@@ -131,7 +132,7 @@ class _GenderScreenState extends State<GenderScreen> {
                       ),
                       SizedBox(height: 24.h),
                       Text(
-                        'Gender',
+                        AppLocalizations.of(context).gender,
                         style: GoogleFonts.inter(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w600,
@@ -147,9 +148,9 @@ class _GenderScreenState extends State<GenderScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _genderOption(Gender.male, 'Male'),
+                    _genderOption(Gender.male, AppLocalizations.of(context).male),
                     SizedBox(height: 16.h),
-                    _genderOption(Gender.female, 'Female'),
+                    _genderOption(Gender.female, AppLocalizations.of(context).female),
                     SizedBox(height: 24.h),
                   ]),
                 ),
@@ -276,7 +277,7 @@ class _BottomBar extends StatelessWidget {
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
           ),
-          child: Text('Continue',
+          child: Text(AppLocalizations.of(context).continueButton,
               style: GoogleFonts.inter(
                   fontSize: 16.sp, fontWeight: FontWeight.w700)),
         ),

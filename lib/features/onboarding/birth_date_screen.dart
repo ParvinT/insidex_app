@@ -5,12 +5,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/analytics_service.dart';
 import '../../shared/models/user_preferences.dart';
+import '../../l10n/app_localizations.dart';
 import '../auth/welcome_screen.dart';
 
 class BirthDateScreen extends StatefulWidget {
@@ -52,12 +54,13 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
 
   Future<void> _saveAndContinue() async {
     if (_selectedDate == null) {
-      setState(() => _errorMessage = 'Please select your birth date');
+      setState(() =>
+          _errorMessage = AppLocalizations.of(context).pleaseSelectBirthDate);
       return;
     }
     if (!_isAgeValid) {
-      setState(() => _errorMessage =
-          'You must be at least $minimumAge years old to use this app');
+      setState(() =>
+          _errorMessage = AppLocalizations.of(context).youMustBeAtLeast18);
       return;
     }
 
@@ -103,10 +106,10 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Error saving data. Please try again.';
+        _errorMessage = AppLocalizations.of(context).errorSavingData;
       });
       // ignore: avoid_print
-      print('Error saving birth date: $e');
+      debugPrint('Error saving birth date: $e');
     }
   }
 
@@ -162,7 +165,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                 ),
                 child: Text(
-                  'Skip',
+                  AppLocalizations.of(context).skip,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -186,7 +189,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                       _buildProgressIndicator(),
                       SizedBox(height: 24.h),
                       Text(
-                        'Tell us about yourself',
+                        AppLocalizations.of(context).tellUsAboutYourself,
                         style: GoogleFonts.inter(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w700,
@@ -194,7 +197,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'This helps us personalize your experience',
+                        AppLocalizations.of(context).thisHelpsPersonalize,
                         style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
@@ -202,7 +205,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                       ),
                       SizedBox(height: 24.h),
                       Text(
-                        'Date of Birth',
+                        AppLocalizations.of(context).dateOfBirth,
                         style: GoogleFonts.inter(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w600,
@@ -254,7 +257,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
             Text(
               _selectedDate != null
                   ? _formatDate(_selectedDate!)
-                  : 'Select your birth date',
+                  : AppLocalizations.of(context).selectYourBirthDate,
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
@@ -303,8 +306,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
           Expanded(
             child: Text(
               _isAgeValid
-                  ? 'Age: ${_userAge} years old'
-                  : 'You must be at least 18 years old',
+                  ? '${AppLocalizations.of(context).age}: $_userAge ${AppLocalizations.of(context).yearsOld}'
+                  : AppLocalizations.of(context).youMustBeAtLeast18,
               style: GoogleFonts.inter(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -350,7 +353,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
-              'Your information is secure and will never be shared',
+              AppLocalizations.of(context).yourInformationIsSecure,
               style: GoogleFonts.inter(
                   fontSize: 11.sp, color: AppColors.textSecondary),
             ),
@@ -395,13 +398,13 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('Cancel',
+                    child: Text(AppLocalizations.of(context).cancel,
                         style: GoogleFonts.inter(
                             color: AppColors.textSecondary, fontSize: 16.sp)),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: Text('Done',
+                    child: Text(AppLocalizations.of(context).done,
                         style: GoogleFonts.inter(
                             color: AppColors.textPrimary,
                             fontSize: 16.sp,
@@ -428,21 +431,10 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
   }
 
   String _formatDate(DateTime date) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    // Locale'e göre otomatik format
+    final locale = Localizations.localeOf(context).languageCode;
+    final DateFormat formatter = DateFormat('MMMM d, y', locale);
+    return formatter.format(date);
   }
 }
 
@@ -479,7 +471,7 @@ class _BottomBar extends StatelessWidget {
                   height: 24.w,
                   child: const CircularProgressIndicator(
                       color: Colors.white, strokeWidth: 2))
-              : Text('Continue',
+              : Text(AppLocalizations.of(context).continueButton,
                   style: GoogleFonts.inter(
                       fontSize: 16.sp, fontWeight: FontWeight.w700)),
         ),

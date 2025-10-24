@@ -3,15 +3,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../services/firebase_service.dart';
 import '../../shared/widgets/animated_background.dart';
+import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/password_requirements_widget.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -31,18 +33,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _isConfirmPasswordVisible = false;
   bool _isLoading = false;
 
-  // Password strength tracking
-  double _passwordStrength = 0.0;
-  String _passwordStrengthText = '';
-  Color _passwordStrengthColor = Colors.red;
-
-  // Password requirements tracking
-  bool _hasMinLength = false;
-  bool _hasUppercase = false;
-  bool _hasLowercase = false;
-  bool _hasNumber = false;
-  bool _isDifferent = true;
-
   @override
   void initState() {
     super.initState();
@@ -54,62 +44,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
-  }
-
-  void _checkPasswordStrength(String password) {
-    // Update requirement checks
-    setState(() {
-      _hasMinLength = password.length >= 8;
-      _hasUppercase = password.contains(RegExp(r'[A-Z]'));
-      _hasLowercase = password.contains(RegExp(r'[a-z]'));
-      _hasNumber = password.contains(RegExp(r'[0-9]'));
-      _isDifferent =
-          password.isEmpty || password != _currentPasswordController.text;
-    });
-
-    double strength = 0;
-    String strengthText = '';
-    Color strengthColor = Colors.red;
-
-    if (password.isEmpty) {
-      setState(() {
-        _passwordStrength = 0;
-        _passwordStrengthText = '';
-        _passwordStrengthColor = Colors.red;
-      });
-      return;
-    }
-
-    // Check criteria
-    if (password.length >= 8) strength += 0.2;
-    if (password.length >= 12) strength += 0.1;
-    if (password.contains(RegExp(r'[A-Z]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[a-z]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[0-9]'))) strength += 0.2;
-    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength += 0.1;
-
-    strength = strength.clamp(0.0, 1.0);
-
-    // Determine strength text and color
-    if (strength <= 0.25) {
-      strengthText = 'Weak';
-      strengthColor = const Color(0xFFE74C3C);
-    } else if (strength <= 0.5) {
-      strengthText = 'Fair';
-      strengthColor = const Color(0xFFE67E22);
-    } else if (strength <= 0.75) {
-      strengthText = 'Good';
-      strengthColor = const Color(0xFFF39C12);
-    } else {
-      strengthText = 'Strong';
-      strengthColor = const Color(0xFF27AE60);
-    }
-
-    setState(() {
-      _passwordStrength = strength;
-      _passwordStrengthText = strengthText;
-      _passwordStrengthColor = strengthColor;
-    });
   }
 
   Future<void> _handleChangePassword() async {
@@ -129,10 +63,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (result['success']) {
         _showSuccessDialog();
       } else {
-        _showErrorDialog(result['error'] ?? 'Failed to change password');
+        final errorMessage = FirebaseErrorHandler.getErrorMessage(
+          result['code'],
+          context,
+        );
+        _showErrorDialog(errorMessage);
       }
     } catch (e) {
-      _showErrorDialog('An unexpected error occurred. Please try again.');
+      _showErrorDialog(
+        AppLocalizations.of(context).unexpectedErrorOccurred,
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -153,7 +93,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             SizedBox(width: 12.w),
             Flexible(
               child: Text(
-                'Error',
+                AppLocalizations.of(context).error,
                 style: GoogleFonts.inter(
                   fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
@@ -171,7 +111,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'OK',
+              AppLocalizations.of(context).ok,
               style: GoogleFonts.inter(
                 color: AppColors.primaryGold,
                 fontWeight: FontWeight.w600,
@@ -209,7 +149,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 20.h),
             Text(
-              'Password Changed!',
+              AppLocalizations.of(context).passwordChanged,
               style: GoogleFonts.inter(
                 fontSize: 18.sp.clamp(18.0, 22.0),
                 fontWeight: FontWeight.w700,
@@ -218,7 +158,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Your password has been changed successfully.',
+              AppLocalizations.of(context).passwordChangedSuccess,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
@@ -243,7 +183,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 borderRadius: BorderRadius.circular(25.r),
               ),
               child: Text(
-                'Done',
+                AppLocalizations.of(context).done,
                 style: GoogleFonts.inter(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
@@ -417,7 +357,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               SizedBox(height: 12.h),
 
                               Text(
-                                'Change Password',
+                                AppLocalizations.of(context)
+                                    .changePasswordTitle,
                                 style: GoogleFonts.inter(
                                   fontSize: titleSize,
                                   fontWeight: FontWeight.w700,
@@ -428,7 +369,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               SizedBox(height: 8.h),
 
                               Text(
-                                'Create a strong password for your account',
+                                AppLocalizations.of(context)
+                                    .createStrongPassword,
                                 style: GoogleFonts.inter(
                                   fontSize: bodyTextSize,
                                   color: AppColors.textSecondary,
@@ -465,10 +407,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 // Current Password
                                 CustomTextField(
                                   controller: _currentPasswordController,
-                                  label: 'Current Password',
-                                  hint: 'Enter your current password',
+                                  label: AppLocalizations.of(context)
+                                      .currentPassword,
+                                  hint: AppLocalizations.of(context)
+                                      .enterCurrentPassword,
                                   obscureText: !_isCurrentPasswordVisible,
-                                  validator: FormValidators.validatePassword,
+                                  validator: (value) =>
+                                      FormValidators.validatePassword(
+                                          value, context),
                                   suffixIcon: IconButton(
                                     icon: Icon(
                                       _isCurrentPasswordVisible
@@ -489,44 +435,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 // New Password
                                 CustomTextField(
                                   controller: _newPasswordController,
-                                  label: 'New Password',
-                                  hint: 'Min. 8 characters',
+                                  label:
+                                      AppLocalizations.of(context).newPassword,
+                                  hint: AppLocalizations.of(context)
+                                      .minCharacters,
                                   obscureText: !_isNewPasswordVisible,
                                   onChanged: (value) {
-                                    _checkPasswordStrength(value);
-                                    // Check if same as current password for warning
-                                    if (value.isNotEmpty &&
-                                        value ==
-                                            _currentPasswordController.text) {
-                                      // Show snackbar instead of inline error for better UX
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Row(
-                                            children: [
-                                              const Icon(Icons.warning,
-                                                  color: Colors.white,
-                                                  size: 20),
-                                              const SizedBox(width: 8),
-                                              Flexible(
-                                                child: Text(
-                                                  'New password must be different from current',
-                                                  style: GoogleFonts.inter(
-                                                      fontSize: 13.sp),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          backgroundColor: Colors.orange,
-                                          duration: const Duration(seconds: 3),
-                                          behavior: SnackBarBehavior.floating,
-                                          margin: EdgeInsets.all(20.w),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10.r),
-                                          ),
-                                        ),
-                                      );
+                                    setState(() {});
+                                    if (_confirmPasswordController
+                                        .text.isNotEmpty) {
+                                      _formKey.currentState?.validate();
                                     }
                                   },
                                   validator: (value) {
@@ -534,11 +452,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     if (value != null &&
                                         value ==
                                             _currentPasswordController.text) {
-                                      return 'Must be different'; // Short message
+                                      return AppLocalizations.of(context)
+                                          .mustBeDifferent; // Short message
                                     }
                                     // Then apply strong password validation
                                     return FormValidators
-                                        .validateStrongPassword(value);
+                                        .validateStrongPassword(value, context);
                                   },
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -555,48 +474,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                   ),
                                 ),
 
-                                // Password Strength Indicator
-                                if (_passwordStrength > 0) ...[
+                                if (_newPasswordController.text.isNotEmpty) ...[
                                   SizedBox(height: 12.h),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Password Strength',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 11.sp.clamp(10.0, 12.0),
-                                              color: AppColors.textSecondary,
-                                            ),
-                                          ),
-                                          Text(
-                                            _passwordStrengthText,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 11.sp.clamp(10.0, 12.0),
-                                              color: _passwordStrengthColor,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 6.h),
-                                      ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(4.r),
-                                        child: LinearProgressIndicator(
-                                          value: _passwordStrength,
-                                          backgroundColor: AppColors.greyLight,
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  _passwordStrengthColor),
-                                          minHeight: 5.h.clamp(4.0, 6.0),
-                                        ),
-                                      ),
-                                    ],
+                                  PasswordRequirementsWidget(
+                                    password: _newPasswordController.text,
+                                    excludePassword:
+                                        _currentPasswordController.text,
+                                    showDifferentCheck: true,
                                   ),
                                 ],
 
@@ -605,13 +489,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 // Confirm Password
                                 CustomTextField(
                                   controller: _confirmPasswordController,
-                                  label: 'Confirm New Password',
-                                  hint: 'Re-enter your new password',
+                                  label: AppLocalizations.of(context)
+                                      .confirmNewPassword,
+                                  hint: AppLocalizations.of(context)
+                                      .reenterNewPassword,
                                   obscureText: !_isConfirmPasswordVisible,
                                   validator: (value) =>
                                       FormValidators.validateConfirmPassword(
                                     value,
                                     _newPasswordController.text,
+                                    context,
                                   ),
                                   suffixIcon: IconButton(
                                     icon: Icon(
@@ -632,7 +519,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
                                 // Submit Button
                                 PrimaryButton(
-                                  text: 'Update Password',
+                                  text: AppLocalizations.of(context)
+                                      .updatePassword,
                                   onPressed: _handleChangePassword,
                                   isLoading: _isLoading,
                                   height: isTablet
@@ -641,56 +529,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ),
 
                                 SizedBox(height: 16.h),
-
-                                // Password Requirements
-                                Container(
-                                  padding:
-                                      EdgeInsets.all(12.w.clamp(10.0, 16.0)),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.greyLight.withOpacity(0.5),
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    border: Border.all(
-                                      color: AppColors.greyBorder,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.info_outline,
-                                            color: AppColors.textSecondary,
-                                            size: 14.sp.clamp(12.0, 16.0),
-                                          ),
-                                          SizedBox(width: 6.w),
-                                          Text(
-                                            'Password Requirements',
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp.clamp(11.0, 13.0),
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 8.h),
-                                      _buildRequirement('At least 8 characters',
-                                          isMet: _hasMinLength),
-                                      _buildRequirement('One uppercase letter',
-                                          isMet: _hasUppercase),
-                                      _buildRequirement('One lowercase letter',
-                                          isMet: _hasLowercase),
-                                      _buildRequirement('One number',
-                                          isMet: _hasNumber),
-                                      _buildRequirement(
-                                          'Different from current',
-                                          isMet: _isDifferent),
-                                    ],
-                                  ),
-                                ),
                               ],
                             ),
                           ),
@@ -705,50 +543,6 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildRequirement(String text, {bool? isMet}) {
-    final bool showStatus =
-        isMet != null && _newPasswordController.text.isNotEmpty;
-    final Color iconColor = showStatus
-        ? (isMet! ? const Color(0xFF27AE60) : const Color(0xFFE74C3C))
-        : AppColors.textLight;
-
-    final IconData iconData = showStatus
-        ? (isMet! ? Icons.check_circle : Icons.cancel)
-        : Icons.circle_outlined;
-
-    return Padding(
-      padding: EdgeInsets.only(top: 3.h),
-      child: Row(
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: Icon(
-              iconData,
-              key: ValueKey(iconData),
-              color: iconColor,
-              size: 12.sp.clamp(11.0, 14.0),
-            ),
-          ),
-          SizedBox(width: 6.w),
-          Flexible(
-            child: Text(
-              text,
-              style: GoogleFonts.inter(
-                fontSize: 11.sp.clamp(10.0, 12.0),
-                color: showStatus && isMet!
-                    ? const Color(0xFF27AE60)
-                    : AppColors.textSecondary,
-                fontWeight:
-                    showStatus && isMet! ? FontWeight.w500 : FontWeight.normal,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }

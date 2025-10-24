@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/user_provider.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileInfoSection extends StatelessWidget {
   final UserProvider userProvider;
@@ -16,7 +18,10 @@ class ProfileInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final userData = userProvider.userData ?? {};
     final createdAt = userData['createdAt']?.toDate() ?? DateTime.now();
-    final memberSince = '${_getMonthName(createdAt.month)} ${createdAt.year}';
+    final locale = Localizations.localeOf(context).languageCode;
+    final memberSinceRaw = DateFormat('MMMM y', locale).format(createdAt);
+
+    final memberSince = _capitalizeFirst(memberSinceRaw);
 
     return Container(
       padding: EdgeInsets.all(20.w),
@@ -36,7 +41,7 @@ class ProfileInfoSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Account Information',
+            AppLocalizations.of(context).accountInformation,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -44,20 +49,29 @@ class ProfileInfoSection extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          _buildInfoRow('Member Since', memberSince),
+          _buildInfoRow(AppLocalizations.of(context).memberSince, memberSince),
           SizedBox(height: 12.h),
           _buildInfoRow(
-            'Account Type',
-            userProvider.isPremium ? 'Premium' : 'Free',
+            AppLocalizations.of(context).accountType,
+            userProvider.isPremium
+                ? AppLocalizations.of(context).premium
+                : AppLocalizations.of(context).free,
             isPremium: userProvider.isPremium,
           ),
           if (userProvider.isAdmin) ...[
             SizedBox(height: 12.h),
-            _buildInfoRow('Role', 'Administrator', isAdmin: true),
+            _buildInfoRow(AppLocalizations.of(context).role,
+                AppLocalizations.of(context).administrator,
+                isAdmin: true),
           ],
         ],
       ),
     );
+  }
+
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 
   Widget _buildInfoRow(String label, String value,
@@ -103,13 +117,5 @@ class ProfileInfoSection extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
-    ];
-    return months[month - 1];
   }
 }

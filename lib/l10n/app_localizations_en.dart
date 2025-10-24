@@ -1,0 +1,1325 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get appName => 'INSIDEX';
+
+  @override
+  String get appTagline => 'Sound Healing & Subliminal';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get account => 'Account';
+
+  @override
+  String get editProfile => 'Edit Profile';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get signOutConfirmTitle => 'Sign Out';
+
+  @override
+  String get signOutConfirmMessage => 'Are you sure you want to sign out?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
+  String get app => 'App';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get notificationsSubtitle => 'Manage your notification preferences';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get supportAndFeedback => 'Support & Feedback';
+
+  @override
+  String get sendFeedback => 'Send Feedback';
+
+  @override
+  String get sendFeedbackSubtitle => 'Help us improve INSIDEX';
+
+  @override
+  String get reportBug => 'Report a Bug';
+
+  @override
+  String get reportBugSubtitle => 'Something not working?';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get aboutApp => 'About';
+
+  @override
+  String get disclaimer => 'Disclaimer';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String get edit => 'Edit';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get playlist => 'Playlist';
+
+  @override
+  String get profile => 'Profile';
+
+  @override
+  String get allSubliminals => 'All Subliminals';
+
+  @override
+  String get yourPlaylist => 'Your Playlist';
+
+  @override
+  String get menu => 'Menu';
+
+  @override
+  String get myPlaylists => 'My Playlists';
+
+  @override
+  String get myPlaylist => 'My Playlist';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get recent => 'Recent';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get noSessionsInPlaylist => 'No Sessions in Playlist';
+
+  @override
+  String get addSessionsToPlaylist =>
+      'Add sessions to create your perfect healing journey';
+
+  @override
+  String get noFavoriteSessions => 'No Favorite Sessions';
+
+  @override
+  String get markSessionsAsFavorite =>
+      'Mark sessions as favorite to find them quickly';
+
+  @override
+  String get noRecentSessions => 'No Recent Sessions';
+
+  @override
+  String get sessionsWillAppearHere => 'Sessions you play will appear here';
+
+  @override
+  String get removedFromFavorites => 'Removed from favorites';
+
+  @override
+  String get addedToFavorites => 'Added to favorites';
+
+  @override
+  String get removedFromPlaylist => 'Removed from playlist';
+
+  @override
+  String get untitledSession => 'Untitled Session';
+
+  @override
+  String get general => 'General';
+
+  @override
+  String get untitled => 'Untitled';
+
+  @override
+  String get addedToPlaylist => 'Added to playlist';
+
+  @override
+  String get profileUpdated => 'Profile updated successfully!';
+
+  @override
+  String get errorUpdatingProfile => 'Error updating profile';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get enterYourName => 'Enter your name';
+
+  @override
+  String get accountInformation => 'Account Information';
+
+  @override
+  String get memberSince => 'Member Since';
+
+  @override
+  String get accountType => 'Account Type';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get free => 'Free';
+
+  @override
+  String get role => 'Role';
+
+  @override
+  String get administrator => 'Administrator';
+
+  @override
+  String get yourProgress => 'Your Progress';
+
+  @override
+  String get trackYourListening =>
+      'Track your listening habits and improvements';
+
+  @override
+  String get myInsights => 'My Insights';
+
+  @override
+  String get viewPersonalizedWellness =>
+      'View your personalized wellness profile';
+
+  @override
+  String get premiumWaitlist => 'Premium Waitlist';
+
+  @override
+  String get joinEarlyAccess => 'Join early access for premium features';
+
+  @override
+  String get adminDashboard => 'Admin Dashboard';
+
+  @override
+  String get manageUsersAndSessions =>
+      'Manage users, sessions and app settings';
+
+  @override
+  String get changePassword => 'Change Password';
+
+  @override
+  String get min => 'min';
+
+  @override
+  String get days => 'days';
+
+  @override
+  String get analytics => 'Analytics';
+
+  @override
+  String get year => 'Year';
+
+  @override
+  String get month => 'Month';
+
+  @override
+  String get week => 'Week';
+
+  @override
+  String get day => 'Day';
+
+  @override
+  String get thisWeek => 'This Week';
+
+  @override
+  String get topSessions => 'Top Sessions';
+
+  @override
+  String get minutesToday => 'minutes today';
+
+  @override
+  String get total => 'total';
+
+  @override
+  String get noSessionsYet => 'No sessions yet';
+
+  @override
+  String get mon => 'Mon';
+
+  @override
+  String get tue => 'Tue';
+
+  @override
+  String get wed => 'Wed';
+
+  @override
+  String get thu => 'Thu';
+
+  @override
+  String get fri => 'Fri';
+
+  @override
+  String get sat => 'Sat';
+
+  @override
+  String get sun => 'Sun';
+
+  @override
+  String get categories => 'Categories';
+
+  @override
+  String get allSessions => 'All Sessions';
+
+  @override
+  String get chooseCategory => 'Choose a Category';
+
+  @override
+  String get selectCategoryExplore => 'Select a category to explore sessions';
+
+  @override
+  String get sessions => 'sessions';
+
+  @override
+  String get errorLoadingSessions => 'Error loading sessions';
+
+  @override
+  String get noSessionsAvailable => 'No sessions available';
+
+  @override
+  String get checkBackLater => 'Check back later for new content';
+
+  @override
+  String get overview => 'Overview';
+
+  @override
+  String get goalsTab => 'Goals';
+
+  @override
+  String get stats => 'Stats';
+
+  @override
+  String get journey => 'Journey';
+
+  @override
+  String get subliminals => 'subliminals';
+
+  @override
+  String get personalInformation => 'Personal Information';
+
+  @override
+  String get gender => 'Gender';
+
+  @override
+  String get male => 'Male';
+
+  @override
+  String get female => 'Female';
+
+  @override
+  String get totalListening => 'Total Listening';
+
+  @override
+  String get totalSessions => 'Total Sessions';
+
+  @override
+  String get currentStreak => 'Current Streak';
+
+  @override
+  String get noGoalsYet => 'No goals set yet';
+
+  @override
+  String get goalProgress => 'Goal Progress';
+
+  @override
+  String get weeklyActivity => 'Weekly Activity';
+
+  @override
+  String get averageSession => 'Average Session';
+
+  @override
+  String get editMode => 'Edit Mode';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get personalInfo => 'Personal Info';
+
+  @override
+  String get yourPersonalizedProfile => 'Your personalized wellness profile';
+
+  @override
+  String get birthDate => 'Birth Date';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get notSpecified => 'Not specified';
+
+  @override
+  String get personalityInsights => 'Personality Insights';
+
+  @override
+  String get ageGroup => 'Age Group';
+
+  @override
+  String get wellnessFocus => 'Wellness Focus';
+
+  @override
+  String get recommendedSessions => 'Recommended Sessions';
+
+  @override
+  String get yourWellnessGoals => 'Your Wellness Goals';
+
+  @override
+  String get daysActive => 'Days Active';
+
+  @override
+  String get sessionsLabel => 'Sessions';
+
+  @override
+  String get minutesLabel => 'Minutes';
+
+  @override
+  String get streakLabel => 'Streak';
+
+  @override
+  String get minTotal => 'min total';
+
+  @override
+  String get sessionStats => 'Session Stats';
+
+  @override
+  String get longestSession => 'Longest Session';
+
+  @override
+  String get favoriteTime => 'Favorite Time';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get yourWellnessJourney => 'Your Wellness Journey';
+
+  @override
+  String get trackMilestones => 'Track your milestones and achievements';
+
+  @override
+  String get firstSession => 'First Session';
+
+  @override
+  String get notStartedYet => 'Not started yet';
+
+  @override
+  String get sevenDayStreak => '7 Day Streak';
+
+  @override
+  String get achieved => 'Achieved!';
+
+  @override
+  String get daysToGo => 'days to go';
+
+  @override
+  String get tenSessions => '10 Sessions';
+
+  @override
+  String get completed => 'Completed!';
+
+  @override
+  String get sessionsToGo => 'sessions to go';
+
+  @override
+  String get thirtyDayStreak => '30 Day Streak';
+
+  @override
+  String get amazingAchievement => 'Amazing achievement!';
+
+  @override
+  String get keepGoing => 'Keep going!';
+
+  @override
+  String get fiftySessions => '50 Sessions';
+
+  @override
+  String get powerUser => 'Power user!';
+
+  @override
+  String get longTermGoal => 'Long term goal';
+
+  @override
+  String get years => 'years';
+
+  @override
+  String get yourAge => 'Your Age';
+
+  @override
+  String get active => 'active';
+
+  @override
+  String get goalsLabel => 'Goals';
+
+  @override
+  String get member => 'Member';
+
+  @override
+  String get morning => 'Morning';
+
+  @override
+  String get afternoon => 'Afternoon';
+
+  @override
+  String get evening => 'Evening';
+
+  @override
+  String get night => 'Night';
+
+  @override
+  String get youngAdult => 'Young Adult';
+
+  @override
+  String get earlyTwenties => 'Early Twenties';
+
+  @override
+  String get lateTwenties => 'Late Twenties';
+
+  @override
+  String get thirties => 'Thirties';
+
+  @override
+  String get matureAdult => 'Mature Adult';
+
+  @override
+  String get sleepQuality => 'Sleep Quality';
+
+  @override
+  String get mentalPeace => 'Mental Peace';
+
+  @override
+  String get vitality => 'Vitality';
+
+  @override
+  String get generalWellness => 'General Wellness';
+
+  @override
+  String get sleepSessions => 'Sleep Sessions';
+
+  @override
+  String get meditation => 'Meditation';
+
+  @override
+  String get focusSessions => 'Focus Sessions';
+
+  @override
+  String get editGoals => 'Edit Goals';
+
+  @override
+  String get goalEditingComingSoon => 'Goal editing feature coming soon!';
+
+  @override
+  String get profileUpdatedSuccessfully => 'Profile updated successfully';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get tellUsAboutYourself => 'Tell us about yourself';
+
+  @override
+  String get thisHelpsPersonalize =>
+      'This helps us personalize your experience';
+
+  @override
+  String get answerQuickQuestions =>
+      'Answer a few quick questions to get personalized recommendations';
+
+  @override
+  String get whatAreYourGoals => 'What are your current goals';
+
+  @override
+  String get health => 'Health';
+
+  @override
+  String get confidence => 'Confidence';
+
+  @override
+  String get energy => 'Energy';
+
+  @override
+  String get betterSleep => 'Better Sleep';
+
+  @override
+  String get anxietyRelief => 'Anxiety Relief';
+
+  @override
+  String get emotionalBalance => 'Emotional Balance';
+
+  @override
+  String get dateOfBirth => 'Date of Birth';
+
+  @override
+  String get selectYourBirthDate => 'Select your birth date';
+
+  @override
+  String get youMustBeAtLeast18 => 'You must be at least 18 years old';
+
+  @override
+  String get pleaseSelectBirthDate => 'Please select your birth date';
+
+  @override
+  String get errorSavingData => 'Error saving data. Please try again.';
+
+  @override
+  String get yourInformationIsSecure =>
+      'Your information is secure and will never be shared';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get yearsOld => 'years old';
+
+  @override
+  String get forgotPasswordTitle => 'Forgot Password?';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Don\'t worry! It happens. Please enter the email associated with your account.';
+
+  @override
+  String get emailAddress => 'Email Address';
+
+  @override
+  String get enterYourEmail => 'Enter your email';
+
+  @override
+  String get sendResetLink => 'Send Reset Link';
+
+  @override
+  String get backToLogin => 'Back to Login';
+
+  @override
+  String get securityReasonNote =>
+      'For security reasons, we will send a password reset link to your registered email if it exists in our system.';
+
+  @override
+  String get checkYourEmail => 'Check Your Email';
+
+  @override
+  String get resetLinkSentMessage =>
+      'We have sent a password reset link to your email address. Please check your inbox and follow the instructions.';
+
+  @override
+  String get didntReceiveEmail => 'Didn\'t receive the email?';
+
+  @override
+  String get checkSpamFolder =>
+      'Please check your spam folder or try resending the email after a few minutes.';
+
+  @override
+  String get tryDifferentEmail => 'Try Different Email';
+
+  @override
+  String get accountNotFound => 'Account Not Found';
+
+  @override
+  String get noAccountExistsMessage =>
+      'No account exists with this email address.\n\nWould you like to create a new account instead?';
+
+  @override
+  String get signUp => 'Sign Up';
+
+  @override
+  String get failedToSendResetEmail => 'Failed to send reset email';
+
+  @override
+  String get errorOccurred => 'An error occurred. Please try again.';
+
+  @override
+  String get welcomeBack => 'Welcome Back!';
+
+  @override
+  String get signInToContinue => 'Sign in to continue your healing journey';
+
+  @override
+  String get password => 'Password';
+
+  @override
+  String get enterYourPassword => 'Enter your password';
+
+  @override
+  String get forgotPassword => 'Forgot Password?';
+
+  @override
+  String get signIn => 'Sign In';
+
+  @override
+  String get or => 'OR';
+
+  @override
+  String get dontHaveAccount => 'Don\'t have an account? ';
+
+  @override
+  String get loginFailed => 'Login failed';
+
+  @override
+  String get verifyEmail => 'Verify Email';
+
+  @override
+  String get weSentPasswordTo => 'We sent a password to:';
+
+  @override
+  String get enterSixDigitPassword => 'Enter the 6-digit password:';
+
+  @override
+  String get verify => 'Verify';
+
+  @override
+  String get youCanResendIn => 'You can resend in';
+
+  @override
+  String get seconds => 'seconds';
+
+  @override
+  String get didntGetIt => 'Didn\'t get it?';
+
+  @override
+  String get resend => 'Resend';
+
+  @override
+  String get newCodeSentTo => 'New code sent to';
+
+  @override
+  String get failedToSendCode => 'Failed to send code';
+
+  @override
+  String get pleaseEnterSixDigitCode => 'Please enter the 6-digit code.';
+
+  @override
+  String get verificationFailed => 'Verification failed';
+
+  @override
+  String get accountCreatedSuccessfully => 'Account created successfully!';
+
+  @override
+  String get createAccount => 'Create Account';
+
+  @override
+  String get startYourHealingJourney => 'Start your healing journey today';
+
+  @override
+  String get enterYourFullName => 'Enter your full name';
+
+  @override
+  String get createAPassword => 'Create a password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get reenterYourPassword => 'Re-enter your password';
+
+  @override
+  String get pleaseConfirmPassword => 'Please confirm your password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get iAgreeToThe => 'I agree to the ';
+
+  @override
+  String get termsAndConditions => 'Terms & Conditions';
+
+  @override
+  String get and => ' and ';
+
+  @override
+  String get pleaseAgreeToTerms => 'Please agree to the terms and conditions';
+
+  @override
+  String get verificationCodeSent =>
+      'Verification code sent! Please check your email.';
+
+  @override
+  String get registrationFailed => 'Registration failed';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
+
+  @override
+  String get welcome => 'Welcome';
+
+  @override
+  String get createYourPersonalProfile =>
+      'Create your personal profile\nto get custom subliminal sessions';
+
+  @override
+  String get emailPassword => 'Email + Password';
+
+  @override
+  String get suggestion => '💡 Suggestion';
+
+  @override
+  String get bugReport => '🐛 Bug Report';
+
+  @override
+  String get featureRequest => '✨ Feature Request';
+
+  @override
+  String get complaint => '😔 Complaint';
+
+  @override
+  String get other => '📝 Other';
+
+  @override
+  String get type => 'Type';
+
+  @override
+  String get rateYourExperience => 'Rate your experience';
+
+  @override
+  String get title => 'Title';
+
+  @override
+  String get briefSummary => 'Brief summary';
+
+  @override
+  String get details => 'Details';
+
+  @override
+  String get tellUsMore => 'Tell us more...';
+
+  @override
+  String get pleaseEnterTitle => 'Please enter a title';
+
+  @override
+  String get pleaseDescribeFeedback => 'Please describe your feedback';
+
+  @override
+  String get emailOptional => 'Email (optional)';
+
+  @override
+  String get forFollowUp => 'For follow-up';
+
+  @override
+  String get submitFeedback => 'Submit Feedback';
+
+  @override
+  String get thankYouForFeedback => '✅ Thank you for your feedback!';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get allNotifications => 'All Notifications';
+
+  @override
+  String get masterControlNotifications =>
+      'Master control for all app notifications';
+
+  @override
+  String get dailyReminders => 'Daily Reminders';
+
+  @override
+  String get achievementNotifications => 'Achievement Notifications';
+
+  @override
+  String get streakMilestones => 'Streak Milestones';
+
+  @override
+  String get celebrateConsistency => 'Celebrate your consistency achievements';
+
+  @override
+  String get testNotificationSent => 'Test notification sent! 🔔';
+
+  @override
+  String get sendTestNotification => 'Send Test Notification';
+
+  @override
+  String get notificationsDisabled => 'Notifications Disabled';
+
+  @override
+  String get enableNotificationsMessage =>
+      'Enable notifications to receive daily reminders for your wellness routine';
+
+  @override
+  String get pleaseEnableNotifications =>
+      'Please enable notifications in system settings';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get enableNotifications => 'Enable Notifications';
+
+  @override
+  String get dailyReminder => 'Daily Reminder';
+
+  @override
+  String get getRemindedDaily => 'Get reminded to practice daily';
+
+  @override
+  String get reminderTime => 'Reminder Time';
+
+  @override
+  String get selectTime => 'Select Time';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get enterCurrentPassword => 'Enter your current password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get minCharacters => 'Min. 8 characters';
+
+  @override
+  String get newPasswordMustBeDifferent =>
+      'New password must be different from current';
+
+  @override
+  String get mustBeDifferent => 'Must be different';
+
+  @override
+  String get passwordStrength => 'Password Strength';
+
+  @override
+  String get weak => 'Weak';
+
+  @override
+  String get fair => 'Fair';
+
+  @override
+  String get good => 'Good';
+
+  @override
+  String get strong => 'Strong';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get reenterNewPassword => 'Re-enter your new password';
+
+  @override
+  String get updatePassword => 'Update Password';
+
+  @override
+  String get passwordRequirements => 'Password Requirements';
+
+  @override
+  String get atLeast8Characters => 'At least 8 characters';
+
+  @override
+  String get oneUppercaseLetter => 'One uppercase letter';
+
+  @override
+  String get oneLowercaseLetter => 'One lowercase letter';
+
+  @override
+  String get oneNumber => 'One number';
+
+  @override
+  String get differentFromCurrent => 'Different from current';
+
+  @override
+  String get passwordChanged => 'Password Changed!';
+
+  @override
+  String get passwordChangedSuccess =>
+      'Your password has been changed successfully.';
+
+  @override
+  String get changePasswordTitle => 'Change Password';
+
+  @override
+  String get createStrongPassword =>
+      'Create a strong password for your account';
+
+  @override
+  String get failedToChangePassword => 'Failed to change password';
+
+  @override
+  String get unexpectedErrorOccurred =>
+      'An unexpected error occurred. Please try again.';
+
+  @override
+  String get stayOnTrack => 'Stay on Track';
+
+  @override
+  String get dailyRemindersDescription =>
+      'Get daily reminders to maintain your wellness routine and achieve your goals';
+
+  @override
+  String get notNow => 'Not Now';
+
+  @override
+  String get enable => 'Enable';
+
+  @override
+  String get notificationsEnabledSuccess => 'Notifications enabled! 🔔';
+
+  @override
+  String get notificationDailyReminderTitle => 'Time for Your Daily Session 🎧';
+
+  @override
+  String get notificationDailyReminderMessage =>
+      'Take a moment to relax and heal with INSIDEX';
+
+  @override
+  String get notificationStreak3Title => '🎉 Congratulations!';
+
+  @override
+  String get notificationStreak3Message => '🔥 3 day streak! Great start!';
+
+  @override
+  String get notificationStreak7Title => '🎯 One Week Achievement!';
+
+  @override
+  String get notificationStreak7Message =>
+      '7 days in a row! You\'re doing amazing!';
+
+  @override
+  String get notificationStreak14Title => '💪 Two Weeks Strong!';
+
+  @override
+  String get notificationStreak14Message =>
+      '14 day streak! The habit is forming.';
+
+  @override
+  String get notificationStreak21Title => '🌟 21 Days - Habit Formed!';
+
+  @override
+  String get notificationStreak21Message =>
+      'Science says you\'ve built a new habit!';
+
+  @override
+  String get notificationStreak30Title => '🏆 30 Day Legend!';
+
+  @override
+  String get notificationStreak30Message =>
+      'One full month! Incredible dedication!';
+
+  @override
+  String get notificationStreak50Title => '💎 50 Day Diamond Streak!';
+
+  @override
+  String get notificationStreak50Message =>
+      'Half a century! You\'re a true INSIDEX master!';
+
+  @override
+  String get notificationStreak100Title => '👑 100 Day Champion!';
+
+  @override
+  String get notificationStreak100Message =>
+      'One hundred days! You\'re absolutely legendary! 🎊';
+
+  @override
+  String get notificationStreakLostTitle => '😔 Streak Ended';
+
+  @override
+  String notificationStreakLostMessage(Object days) {
+    return 'Your $days day streak has ended. But don\'t worry, you can start fresh today!';
+  }
+
+  @override
+  String get nowPlaying => 'NOW PLAYING';
+
+  @override
+  String get intro => 'Intro';
+
+  @override
+  String get subliminal => 'Subliminal';
+
+  @override
+  String get sessionDetails => 'Session Details';
+
+  @override
+  String get aboutThisSession => 'ABOUT THIS SESSION';
+
+  @override
+  String get loopEnabled => 'Loop enabled';
+
+  @override
+  String get loopDisabled => 'Loop disabled';
+
+  @override
+  String get shuffleOn => 'Shuffle ON';
+
+  @override
+  String get shuffleOff => 'Shuffle OFF';
+
+  @override
+  String get errorUpdatingPlaylist => 'Error updating playlist';
+
+  @override
+  String get errorUpdatingFavorites => 'Error updating favorites';
+
+  @override
+  String get premiumFeature => 'Premium feature';
+
+  @override
+  String get autoPlayEnabled => 'Auto-play enabled';
+
+  @override
+  String get autoPlayDisabled => 'Auto-play disabled';
+
+  @override
+  String get sleepTimer => 'Sleep Timer';
+
+  @override
+  String get noTimerSet => 'No timer set';
+
+  @override
+  String currentMinutes(String minutes) {
+    return 'Current: $minutes minutes';
+  }
+
+  @override
+  String get cancelTimer => 'Cancel timer';
+
+  @override
+  String get set => 'Set';
+
+  @override
+  String setMinutes(String minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get searchSessions => 'Search...';
+
+  @override
+  String get searchResults => 'Search Results';
+
+  @override
+  String get noResultsFound => 'No results found';
+
+  @override
+  String get tryDifferentKeywords => 'Try different keywords';
+
+  @override
+  String get searchCategories => 'Categories';
+
+  @override
+  String get searchSessionsTab => 'Sessions';
+
+  @override
+  String get allResults => 'All';
+
+  @override
+  String foundResults(String count) {
+    return '$count results found';
+  }
+
+  @override
+  String get recentSearches => 'Recent Searches';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get clearSearchHistory => 'Clear Search History';
+
+  @override
+  String get clearSearchHistoryConfirmation =>
+      'Are you sure you want to clear all search history?';
+
+  @override
+  String get searchHistoryCleared => 'Search history cleared';
+
+  @override
+  String get accountOpenedOnAnotherDevice => 'Account Opened on Another Device';
+
+  @override
+  String get accountOpenedMessage =>
+      'For your security, you will be automatically logged out from this device.';
+
+  @override
+  String get securityWarningUnauthorized =>
+      'If this wasn\'t you, please change your password immediately!';
+
+  @override
+  String get loggingOut => 'Logging out...';
+
+  @override
+  String get deviceSecurityWarning =>
+      'Your account can only be active on one device at a time for security purposes.';
+
+  @override
+  String get second => 'second';
+
+  @override
+  String get pleaseEnterEmail => 'Please enter your email';
+
+  @override
+  String get pleaseEnterValidEmail => 'Please enter a valid email';
+
+  @override
+  String get pleaseEnterPassword => 'Please enter your password';
+
+  @override
+  String get passwordMustBeAtLeast6Characters =>
+      'Password must be at least 6 characters';
+
+  @override
+  String get passwordMustBeAtLeast8Characters =>
+      'Password must be at least 8 characters';
+
+  @override
+  String get passwordMustContainUppercase =>
+      'Password must contain at least one uppercase letter';
+
+  @override
+  String get passwordMustContainLowercase =>
+      'Password must contain at least one lowercase letter';
+
+  @override
+  String get passwordMustContainNumber =>
+      'Password must contain at least one number';
+
+  @override
+  String get pleaseEnterName => 'Please enter your name';
+
+  @override
+  String get nameMustBeAtLeast2Characters =>
+      'Name must be at least 2 characters';
+
+  @override
+  String get nameCanOnlyContainLetters =>
+      'Name can only contain letters and spaces';
+
+  @override
+  String get pleaseEnterPhone => 'Please enter your phone number';
+
+  @override
+  String get pleaseEnterValidPhone => 'Please enter a valid phone number';
+
+  @override
+  String get currentPasswordIncorrect => 'Current password is incorrect';
+
+  @override
+  String get newPasswordSameAsCurrent =>
+      'New password must be different from current password';
+
+  @override
+  String get noUserSignedIn => 'No user is currently signed in';
+
+  @override
+  String get authenticationFailed => 'Authentication failed';
+
+  @override
+  String get passwordTooWeak => 'The password is too weak';
+
+  @override
+  String get pleaseSignInAgain =>
+      'Please sign out and sign in again before changing your password';
+
+  @override
+  String get networkError => 'Network error. Please check your connection';
+
+  @override
+  String get tooManyAttempts => 'Too many attempts. Please try again later';
+
+  @override
+  String get emailAlreadyInUse =>
+      'This email is already registered. Please sign in instead';
+
+  @override
+  String get invalidEmail => 'The email address is not valid';
+
+  @override
+  String get weakPassword =>
+      'The password is too weak. Please use at least 6 characters';
+
+  @override
+  String get userNotFound => 'No account found with this email';
+
+  @override
+  String get incorrectPassword => 'Incorrect password. Please try again';
+
+  @override
+  String get accountDisabled => 'This account has been disabled';
+
+  @override
+  String get tooManyFailedAttempts =>
+      'Too many failed attempts. Please try again later';
+
+  @override
+  String get invalidCredential => 'Invalid email or password';
+
+  @override
+  String get operationNotAllowed =>
+      'Email/password sign-in is not enabled. Please contact support';
+
+  @override
+  String get invalidEmailAddress => 'Please enter a valid email address';
+
+  @override
+  String get emailAlreadyExists =>
+      'This email is already registered. Please sign in or use forgot password.';
+
+  @override
+  String get nameTooShort => 'Name must be at least 2 characters';
+
+  @override
+  String get failedToResendCode => 'Failed to resend code. Please try again';
+
+  @override
+  String get noPendingVerification =>
+      'No pending verification found. Please sign up again';
+
+  @override
+  String get verificationCodeNotFound =>
+      'Verification code not found. Please sign up again.';
+
+  @override
+  String get verificationCodeAlreadyUsed => 'This code has already been used.';
+
+  @override
+  String get verificationCodeExpired =>
+      'Verification code has expired. Please sign up again.';
+
+  @override
+  String get tooManyVerificationAttempts =>
+      'Too many failed attempts. Please sign up again.';
+
+  @override
+  String get invalidVerificationCode =>
+      'Invalid verification code. Please try again.';
+}

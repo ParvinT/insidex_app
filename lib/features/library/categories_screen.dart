@@ -10,6 +10,7 @@ import '../player/audio_player_screen.dart'; // AUDIO PLAYER IMPORT
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../l10n/app_localizations.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -157,7 +158,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: Text(
-                        'All Subliminals',
+                        AppLocalizations.of(context).allSubliminals,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
@@ -194,9 +195,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               fontSize: (14.sp).clamp(12.0, 18.0),
               fontWeight: FontWeight.w500,
             ),
-            tabs: const [
-              Tab(text: 'Categories'),
-              Tab(text: 'All Sessions'),
+            tabs: [
+              Tab(text: AppLocalizations.of(context).categories),
+              Tab(text: AppLocalizations.of(context).allSessions),
             ],
           ),
         ),
@@ -230,7 +231,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Choose a Category',
+                AppLocalizations.of(context).chooseCategory,
                 style: GoogleFonts.inter(
                   fontSize: 24.sp.clamp(22.0, 34.0),
                   fontWeight: FontWeight.w700,
@@ -239,7 +240,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               ),
               SizedBox(height: 8.h),
               Text(
-                'Select a category to explore sessions',
+                AppLocalizations.of(context).selectCategoryExplore,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
@@ -384,7 +385,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '$count sessions',
+                            '$count  ${AppLocalizations.of(context).sessions}',
                             style: GoogleFonts.inter(
                               fontSize: 12.sp,
                               color: Colors.white.withOpacity(0.8),
@@ -421,7 +422,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         if (snapshot.hasError) {
           return Center(
             child: Text(
-              'Error loading sessions',
+              AppLocalizations.of(context).errorLoadingSessions,
               style: GoogleFonts.inter(
                 fontSize: 16.sp.clamp(14.0, 22.0),
                 color: AppColors.textSecondary,
@@ -444,7 +445,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'No sessions available',
+                  AppLocalizations.of(context).noSessionsAvailable,
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -616,7 +617,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   // Title
                   Expanded(
                     child: Text(
-                      session['title'] ?? 'Untitled Session',
+                      session['title'] ??
+                          AppLocalizations.of(context).untitledSession,
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w700,
@@ -640,7 +642,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Text(
-                      session['category'] ?? 'General',
+                      session['category'] ??
+                          AppLocalizations.of(context).general,
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
@@ -655,19 +658,5 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         ),
       ),
     );
-  }
-
-// Helper method for formatting duration (if not already present)
-  String _formatDuration(int totalSeconds) {
-    if (totalSeconds == 0) return 'Duration not set';
-
-    final hours = totalSeconds ~/ 3600;
-    final minutes = (totalSeconds % 3600) ~/ 60;
-
-    if (hours > 0) {
-      return '$hours ${hours == 1 ? 'hour' : 'hours'} ${minutes > 0 ? '$minutes ${minutes == 1 ? 'minute' : 'minutes'}' : ''}';
-    } else {
-      return '$minutes ${minutes == 1 ? 'minute' : 'minutes'}';
-    }
   }
 }

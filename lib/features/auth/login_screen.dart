@@ -7,12 +7,15 @@ import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
 import '../../providers/user_provider.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../services/auth_persistence_service.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/device_session_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -73,54 +76,26 @@ class _LoginScreenState extends State<LoginScreen> {
         print('After save - Email: ${prefs.getString('user_email')}');
         print(
             'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
+        print('💾 Saving active device session...');
+        await DeviceSessionService().saveActiveDevice(user.uid);
+        print('✅ Active device saved, other devices will be logged out');
 
         await context.read<UserProvider>().loadUserData(user.uid);
       }
 
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
+      final errorMessage = FirebaseErrorHandler.getErrorMessage(
+        result['code'],
+        context,
+      );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['error'] ?? 'Login failed'),
+          content:
+              Text(errorMessage),
           backgroundColor: Colors.red,
         ),
       );
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isGoogleLoading = true);
-
-    try {
-      // TODO: Implement Google Sign In with Firebase
-      await Future.delayed(const Duration(seconds: 2)); // Simüle
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google Sign In coming soon!'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    } finally {
-      setState(() => _isGoogleLoading = false);
-    }
-  }
-
-  Future<void> _handleAppleSignIn() async {
-    setState(() => _isAppleLoading = true);
-
-    try {
-      // TODO: Implement Apple Sign In with Firebase
-      await Future.delayed(const Duration(seconds: 2)); // Simüle
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Apple Sign In coming soon!'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-    } finally {
-      setState(() => _isAppleLoading = false);
     }
   }
 
@@ -140,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Text(
-            'OR',
+            AppLocalizations.of(context).or,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               fontWeight: FontWeight.w500,
@@ -162,6 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     // Herhangi biri loading durumundaysa diğer butonları disable et
     final isAnyLoading = _isEmailLoading || _isGoogleLoading || _isAppleLoading;
+    final l10n = AppLocalizations.of(context);
 
     return AuthScaffold(
       backgroundColor: AppColors.backgroundWhite,
@@ -185,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Title
                 Text(
-                  'Welcome Back!',
+                  l10n.welcomeBack,
                   style: GoogleFonts.inter(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
@@ -197,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Subtitle
                 Text(
-                  'Sign in to continue your healing journey',
+                  l10n.signInToContinue,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     color: AppColors.textSecondary,
@@ -209,8 +185,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Email Field
                 CustomTextField(
                   controller: _emailController,
-                  label: 'Email',
-                  hint: 'Enter your email',
+                  label: l10n.email,
+                  hint: l10n.enterYourEmail,
                   keyboardType: TextInputType.emailAddress,
                   validator: FormValidators.validateEmail,
                   readOnly: isAnyLoading,
@@ -221,8 +197,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Password Field
                 CustomTextField(
                   controller: _passwordController,
-                  label: 'Password',
-                  hint: 'Enter your password',
+                  label: l10n.password,
+                  hint: l10n.enterYourPassword,
                   obscureText: !_isPasswordVisible,
                   validator: FormValidators.validatePassword,
                   readOnly: isAnyLoading,
@@ -250,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: TextButton(
                     onPressed: isAnyLoading ? null : _handleForgotPassword,
                     child: Text(
-                      'Forgot Password?',
+                      l10n.forgotPassword,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: isAnyLoading
@@ -266,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 // Sign In Button
                 PrimaryButton(
-                  text: 'Sign In',
+                  text: l10n.signIn,
                   onPressed: _handleLogin,
                   isLoading: _isEmailLoading,
                 ),
@@ -276,25 +252,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 // OR Divider
                 _buildDivider(),
 
-                /* // Google Sign In Button
-                SocialLoginButton(
-                  onTap: _handleGoogleSignIn,
-                  label: 'Continue with Google',
-                  isLoading: _isGoogleLoading,
-                ),
-
-                SizedBox(height: 12.h),
-
-                // Apple Sign In Button
-                SocialLoginButton(
-                  onTap: _handleAppleSignIn,
-                  label: 'Continue with Apple',
-                  isDark: true,
-                  isLoading: _isAppleLoading,
-                ),
-
-                SizedBox(height: 24.h),*/
-
                 SizedBox(height: 20.h),
 
                 // Sign Up Link
@@ -302,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      l10n.dontHaveAccount,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: AppColors.textSecondary,
@@ -315,7 +272,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Navigator.pushNamed(context, AppRoutes.register);
                             },
                       child: Text(
-                        'Sign Up',
+                        l10n.signUp,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading

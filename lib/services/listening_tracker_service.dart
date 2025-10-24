@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../services/notifications/streak_notification_service.dart';
 
 class ListeningTrackerService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -204,6 +205,8 @@ class ListeningTrackerService {
         completedSessions.add(_currentSessionId!);
       }
 
+      final previousStreak = userData.data()?['currentStreak'] ?? 0;
+
       // Update stats
       await userDoc.update({
         'totalListeningMinutes': currentTotal + minutesListened,
@@ -213,6 +216,19 @@ class ListeningTrackerService {
       });
 
       print('Updated user stats: +$minutesListened minutes');
+      final newStreak = await calculateStreak();
+
+      // Streak değişti mi kontrol et
+      if (newStreak != previousStreak) {
+        // Firebase'i güncelle
+        await StreakNotificationService.updateStreakInFirebase(newStreak);
+
+        // Bildirim kontrolü yap
+        await StreakNotificationService.checkAndNotifyStreak(
+          currentStreak: newStreak,
+          previousStreak: previousStreak,
+        );
+      }
     } catch (e) {
       print('Error updating user stats: $e');
     }

@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../l10n/app_localizations.dart';
 
 class PlayerControls extends StatelessWidget {
   final bool isPlaying;
@@ -43,7 +44,9 @@ class PlayerControls extends StatelessWidget {
               onToggleShuffle();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(isShuffled ? 'Shuffle OFF' : 'Shuffle ON'),
+                  content: Text(isShuffled
+                      ? AppLocalizations.of(context).shuffleOff
+                      : AppLocalizations.of(context).shuffleOn),
                   duration: const Duration(seconds: 1),
                 ),
               );
@@ -102,7 +105,9 @@ class PlayerControls extends StatelessWidget {
               onToggleLoop();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(isLooping ? 'Loop OFF' : 'Loop ON'),
+                  content: Text(isLooping
+                      ? AppLocalizations.of(context).loopDisabled
+                      : AppLocalizations.of(context).loopEnabled),
                   duration: const Duration(seconds: 1),
                 ),
               );

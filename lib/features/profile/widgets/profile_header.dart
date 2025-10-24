@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/user_provider.dart';
 import '../../../shared/widgets/custom_text_field.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileHeader extends StatelessWidget {
   final UserProvider userProvider;
@@ -77,8 +78,8 @@ class ProfileHeader extends StatelessWidget {
             width: 200.w,
             child: CustomTextField(
               controller: nameController,
-              label: 'Full Name',
-              hint: 'Enter your name',
+              label: AppLocalizations.of(context).fullName,
+              hint: AppLocalizations.of(context).enterYourName,
             ),
           )
         else

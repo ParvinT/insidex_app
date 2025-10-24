@@ -13,6 +13,9 @@ import 'app.dart';
 import 'providers/notification_provider.dart';
 import 'services/notifications/notification_service.dart';
 import 'services/notifications/notification_reliability_service.dart';
+import 'services/device_session_service.dart';
+import 'providers/locale_provider.dart';
+import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
@@ -32,15 +35,23 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-  await NotificationReliabilityService.initialize();
-
+  if (!kIsWeb) {
+    BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+    await NotificationReliabilityService.initialize();
+  }
   // Notification Service
   try {
     await NotificationService().initialize();
     print('Notification Service initialized successfully');
   } catch (e) {
     print('Notification Service initialization error: $e');
+  }
+
+  try {
+    DeviceSessionService().initializeTokenRefreshListener();
+    print('FCM Token Refresh Listener initialized');
+  } catch (e) {
+    print('FCM Token Refresh error: $e');
   }
 
   // Audio Service'i başlat - Basit versiyon
@@ -67,6 +78,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(
             create: (_) => UserProvider()..initAuthListener()),
         ChangeNotifierProvider(

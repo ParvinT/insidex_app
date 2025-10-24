@@ -8,11 +8,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/utils/firebase_error_handler.dart';
 import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/analytics_service.dart';
-import '../../core/responsive/auth_scaffold.dart';
+import '../../l10n/app_localizations.dart';
+import '../../services/device_session_service.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -82,13 +84,18 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       final result = await FirebaseService.resendOTP(widget.email);
 
       if (result['success']) {
-        _toast('New code sent to ${widget.email}');
+        _toast('${AppLocalizations.of(context).newCodeSentTo} ${widget.email}');
         _countdown();
       } else {
-        _toast(result['error'] ?? 'Failed to send code', bg: Colors.red);
+        final errorMessage = FirebaseErrorHandler.getErrorMessage(
+          result['code'],
+          context,
+        );
+        _toast(errorMessage, bg: Colors.red);
       }
     } catch (e) {
-      _toast('Failed to send code. $e', bg: Colors.red);
+      _toast('${AppLocalizations.of(context).failedToSendCode}. $e',
+          bg: Colors.red);
     } finally {
       if (mounted) setState(() => _resending = false);
     }
@@ -97,7 +104,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   Future<void> _verify() async {
     final input = _codeCtrl.text.trim();
     if (input.length != 6) {
-      _toast('Please enter the 6-digit code.');
+      _toast(AppLocalizations.of(context).pleaseEnterSixDigitCode);
       return;
     }
     setState(() => _busy = true);
@@ -110,7 +117,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       );
 
       if (!result['success']) {
-        _toast(result['error'] ?? 'Verification failed', bg: Colors.red);
+        final errorMessage = FirebaseErrorHandler.getErrorMessage(
+          result['code'],
+          context,
+        );
+        _toast(errorMessage, bg: Colors.red);
         setState(() => _busy = false);
         return;
       }
@@ -121,7 +132,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         await context.read<UserProvider>().loadUserData(user.uid);
       }
 
-      _toast('Account created successfully!');
+      debugPrint('💾 Saving active device for new user...');
+      await DeviceSessionService().saveActiveDevice(user.uid);
+      debugPrint('✅ Active device saved for new user');
+
+      _toast(AppLocalizations.of(context).accountCreatedSuccessfully);
 
       try {
         final prefs = await SharedPreferences.getInstance();
@@ -178,7 +193,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       if (!mounted) return;
       Navigator.pushNamedAndRemoveUntil(context, AppRoutes.home, (_) => false);
     } catch (e) {
-      _toast('Verification failed. $e', bg: Colors.red);
+      _toast('${AppLocalizations.of(context).verificationFailed}. $e',
+          bg: Colors.red);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -192,7 +208,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Verify Email'),
+        title: Text(AppLocalizations.of(context).verifyEmail),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0.5,
@@ -203,13 +219,13 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('We sent a password to:', style: label),
+            Text(AppLocalizations.of(context).weSentPasswordTo, style: label),
             const SizedBox(height: 4),
             Text(widget.email,
                 style: GoogleFonts.inter(
                     fontSize: 16, fontWeight: FontWeight.w700)),
             const SizedBox(height: 16),
-            Text('Enter the 6-digit password:',
+            Text(AppLocalizations.of(context).enterSixDigitPassword,
                 style: GoogleFonts.inter(
                     fontSize: 14, fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -250,16 +266,23 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation(Colors.white)))
-                    : const Text('Verify'),
+                    : Text(AppLocalizations.of(context).verify),
               ),
             ),
             const SizedBox(height: 12),
             Row(
               children: [
-                Text(
-                    _left > 0 ? 'You can resend in $_left s' : "Didn't get it?",
-                    style: label),
-                const Spacer(),
+                Expanded(
+                  child: Text(
+                    _left > 0
+                        ? '${AppLocalizations.of(context).youCanResendIn} $_left ${AppLocalizations.of(context).seconds}'
+                        : AppLocalizations.of(context).didntGetIt,
+                    style: label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 8),
                 TextButton(
                   onPressed: (_left > 0 || _resending) ? null : _resend,
                   child: _resending
@@ -267,7 +290,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                           height: 16,
                           width: 16,
                           child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Text('Resend'),
+                      : Text(AppLocalizations.of(context).resend),
                 ),
               ],
             ),

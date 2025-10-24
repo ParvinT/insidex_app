@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # UI & Responsive
   flutter_screenutil: ^5.9.0
@@ -25,6 +27,11 @@ dependencies:
 
   # Storage
   shared_preferences: ^2.2.2
+
+  # Localization
+  intl: ^0.20.2
+  flutter_markdown: ^0.6.23
+  url_launcher: ^6.3.1
 
   # Icons
   cupertino_icons: ^1.0.8
@@ -68,9 +75,13 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
-#flutter_icons:
-#android: true
-#ios: true
-#image_path: "assets/icons/app_icon.png"
-#adaptive_icon_background: "#FFFFFF"
-#adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+    - assets/legal/en/
+    - assets/legal/ru/
+    - assets/legal/tr/
+  #flutter_icons:
+  #android: true
+  #ios: true
+  #image_path: "assets/icons/app_icon.png"
+  #adaptive_icon_background: "#FFFFFF"
+  #adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"
+  generate: true

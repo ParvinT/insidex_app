@@ -16,6 +16,7 @@ import '../../providers/notification_provider.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import '../../app.dart';
 import '../../core/routes/app_routes.dart';
+import '../../l10n/app_localizations.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -345,11 +346,11 @@ class NotificationService {
     debugPrint('Notification tapped with payload: ${response.payload}');
     final navigatorKey = InsidexApp.navigatorKey;
     if (navigatorKey.currentState != null) {
-    navigatorKey.currentState!.pushNamedAndRemoveUntil(
-      AppRoutes.home,
-      (route) => false, 
-    );
-  }
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+        AppRoutes.home,
+        (route) => false,
+      );
+    }
   }
 
   /// Check if Android 13 or higher
@@ -432,7 +433,8 @@ class NotificationService {
 
             // Title
             Text(
-              'Stay on Track',
+              AppLocalizations.of(context).stayOnTrack,
+              textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 22.sp,
                 fontWeight: FontWeight.w700,
@@ -444,7 +446,7 @@ class NotificationService {
 
             // Description
             Text(
-              'Get daily reminders to maintain your wellness routine and achieve your goals',
+              AppLocalizations.of(context).dailyRemindersDescription,
               textAlign: TextAlign.center,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
@@ -472,7 +474,7 @@ class NotificationService {
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                     ),
                     child: Text(
-                      'Not Now',
+                      AppLocalizations.of(context).notNow,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: AppColors.textSecondary,
@@ -500,7 +502,8 @@ class NotificationService {
                         if (granted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: const Text('Notifications enabled! 🔔'),
+                              content: Text(AppLocalizations.of(context)
+                                  .notificationsEnabledSuccess),
                               backgroundColor: AppColors.primaryGold,
                               duration: const Duration(seconds: 2),
                             ),
@@ -516,7 +519,7 @@ class NotificationService {
                       ),
                     ),
                     child: Text(
-                      'Enable',
+                      AppLocalizations.of(context).enable,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: Colors.white,

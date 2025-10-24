@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class FeedbackDialog extends StatefulWidget {
   final bool isBugReport;
@@ -35,14 +36,6 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
   String _selectedType = 'suggestion';
   int _rating = 4;
   bool _isSubmitting = false;
-
-  final Map<String, String> _typeLabels = {
-    'suggestion': '💡 Suggestion',
-    'bug': '🐛 Bug Report',
-    'feature_request': '✨ Feature Request',
-    'complaint': '😔 Complaint',
-    'other': '📝 Other',
-  };
 
   @override
   void initState() {
@@ -105,7 +98,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '✅ Thank you for your feedback!',
+              AppLocalizations.of(context).thankYouForFeedback,
               style: GoogleFonts.inter(color: Colors.white),
             ),
             backgroundColor: Colors.green,
@@ -119,7 +112,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Error: ${e.toString()}',
+              '${AppLocalizations.of(context).error}${e.toString()}',
               style: GoogleFonts.inter(color: Colors.white),
             ),
             backgroundColor: Colors.red,
@@ -134,6 +127,14 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final Map<String, String> typeLabels = {
+      'suggestion': l10n.suggestion,
+      'bug': l10n.bugReport,
+      'feature_request': l10n.featureRequest,
+      'complaint': l10n.complaint,
+      'other': l10n.other,
+    };
     return Dialog(
       backgroundColor: AppColors.backgroundWhite,
       shape: RoundedRectangleBorder(
@@ -157,7 +158,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.isBugReport ? 'Report a Bug' : 'Send Feedback',
+                      widget.isBugReport ? l10n.reportBug : l10n.sendFeedback,
                       style: GoogleFonts.inter(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
@@ -189,7 +190,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           child: DropdownButtonFormField<String>(
                             value: _selectedType,
                             decoration: InputDecoration(
-                              labelText: 'Type',
+                              labelText: l10n.type,
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
                                   horizontal: 16.w, vertical: 12.h),
@@ -198,7 +199,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                               fontSize: 14.sp,
                               color: AppColors.textPrimary,
                             ),
-                            items: _typeLabels.entries.map((entry) {
+                            items: typeLabels.entries.map((entry) {
                               return DropdownMenuItem(
                                 value: entry.key,
                                 child: Text(entry.value),
@@ -214,7 +215,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         if (_selectedType != 'bug') ...[
                           SizedBox(height: 20.h),
                           Text(
-                            'Rate your experience',
+                            l10n.rateYourExperience,
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -247,8 +248,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           controller: _titleController,
                           style: GoogleFonts.inter(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            labelText: 'Title',
-                            hintText: 'Brief summary',
+                            labelText: l10n.title,
+                            hintText: l10n.briefSummary,
                             labelStyle: GoogleFonts.inter(
                               color: AppColors.textSecondary,
                               fontSize: 14.sp,
@@ -275,7 +276,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter a title';
+                              return l10n.pleaseEnterTitle;
                             }
                             return null;
                           },
@@ -289,8 +290,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           maxLines: 4,
                           style: GoogleFonts.inter(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            labelText: 'Details',
-                            hintText: 'Tell us more...',
+                            labelText: l10n.details,
+                            hintText: l10n.tellUsMore,
                             alignLabelWithHint: true,
                             labelStyle: GoogleFonts.inter(
                               color: AppColors.textSecondary,
@@ -318,7 +319,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please describe your feedback';
+                              return l10n.pleaseDescribeFeedback;
                             }
                             return null;
                           },
@@ -332,8 +333,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                           keyboardType: TextInputType.emailAddress,
                           style: GoogleFonts.inter(fontSize: 14.sp),
                           decoration: InputDecoration(
-                            labelText: 'Email (optional)',
-                            hintText: 'For follow-up',
+                            labelText: l10n.emailOptional,
+                            hintText: l10n.forFollowUp,
                             labelStyle: GoogleFonts.inter(
                               color: AppColors.textSecondary,
                               fontSize: 14.sp,
@@ -389,7 +390,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             ),
                           )
                         : Text(
-                            'Submit Feedback',
+                            l10n.submitFeedback,
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,

@@ -10,6 +10,8 @@ import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'widgets/language_selector.dart';
+import '../../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -21,7 +23,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   // Settings states
 
-  String _selectedLanguage = 'English';
   String _selectedTheme = 'Light';
 
   @override
@@ -50,7 +51,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Settings',
+          AppLocalizations.of(context).settings,
           style: GoogleFonts.inter(
             fontSize: 24.sp.clamp(24.0, 28.0),
             fontWeight: FontWeight.w700,
@@ -67,18 +68,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Account Section
-                _buildSectionHeader('Account'),
+                _buildSectionHeader(AppLocalizations.of(context).account),
                 SizedBox(height: 12.h),
                 _buildSettingsCard([
                   _buildSettingItem(
                     icon: Icons.person_outline,
-                    title: 'Edit Profile',
+                    title: AppLocalizations.of(context).editProfile,
                     onTap: () => _handleProfileEdit(),
                   ),
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.logout_outlined,
-                    title: 'Sign Out',
+                    title: AppLocalizations.of(context).signOut,
                     isDestructive: true,
                     onTap: () => _handleSignOut(),
                   ),
@@ -86,13 +87,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 SizedBox(height: 32.h),
 
-                _buildSectionHeader('App'),
+                _buildSectionHeader(AppLocalizations.of(context).app),
                 SizedBox(height: 12.h),
                 _buildSettingsCard([
                   _buildSettingItem(
                     icon: Icons.notifications_outlined,
-                    title: 'Notifications',
-                    subtitle: 'Manage your notification preferences',
+                    title: AppLocalizations.of(context).notifications,
+                    subtitle:
+                        AppLocalizations.of(context).notificationsSubtitle,
                     onTap: () {
                       Navigator.push(
                         context,
@@ -107,54 +109,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                 SizedBox(height: 32.h),
 
-                // App Section
-                /* _buildSectionHeader('App'),
+                _buildSectionHeader(AppLocalizations.of(context).language),
                 SizedBox(height: 12.h),
-                _buildSettingsCard([
-                  _buildSwitchItem(
-                    icon: Icons.notifications_outlined,
-                    title: 'Notifications',
-                    subtitle: 'Receive reminders and updates',
-                    value: _notificationsEnabled,
-                    onChanged: (value) {
-                      setState(() {
-                        _notificationsEnabled = value;
-                      });
-                    },
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.language_outlined,
-                    title: 'Language',
-                    subtitle: _selectedLanguage,
-                    onTap: () => _showLanguageDialog(),
-                  ),
-                  _buildDivider(),
-                  _buildSettingItem(
-                    icon: Icons.palette_outlined,
-                    title: 'Theme',
-                    subtitle: _selectedTheme,
-                    onTap: () => _showThemeDialog(),
-                  ),
-                ]),
-
-                SizedBox(height: 32.h),*/
+                const LanguageSelector(),
 
                 SizedBox(height: 32.h),
-                _buildSectionHeader('Support & Feedback'),
+                _buildSectionHeader(
+                    AppLocalizations.of(context).supportAndFeedback),
                 SizedBox(height: 12.h),
                 _buildSettingsCard([
                   _buildSettingItem(
                     icon: Icons.feedback_outlined,
-                    title: 'Send Feedback',
-                    subtitle: 'Help us improve INSIDEX',
+                    title: AppLocalizations.of(context).sendFeedback,
+                    subtitle: AppLocalizations.of(context).sendFeedbackSubtitle,
                     onTap: () => _showFeedbackDialog(),
                   ),
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.bug_report_outlined,
-                    title: 'Report a Bug',
-                    subtitle: 'Something not working?',
+                    title: AppLocalizations.of(context).reportBug,
+                    subtitle: AppLocalizations.of(context).reportBugSubtitle,
                     onTap: () => _showFeedbackDialog(isBugReport: true),
                   ),
                 ]),
@@ -162,25 +136,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 SizedBox(height: 32.h),
 
                 // About Section
-                _buildSectionHeader('About'),
+                _buildSectionHeader(AppLocalizations.of(context).about),
                 SizedBox(height: 12.h),
                 _buildSettingsCard([
                   _buildSettingItem(
                     icon: Icons.info_outline,
-                    title: 'About',
+                    title: AppLocalizations.of(context).aboutApp,
                     onTap: () => Navigator.pushNamed(context, AppRoutes.about),
                   ),
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.warning_amber_rounded,
-                    title: 'Disclaimer',
+                    title: AppLocalizations.of(context).disclaimer,
                     onTap: () =>
                         Navigator.pushNamed(context, AppRoutes.disclaimer),
                   ),
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.privacy_tip_outlined,
-                    title: 'Privacy Policy',
+                    title: AppLocalizations.of(context).privacyPolicy,
                     onTap: () {
                       // Navigate to Privacy Policy screen
                       Navigator.pushNamed(context, AppRoutes.privacyPolicy);
@@ -189,7 +163,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   _buildDivider(),
                   _buildSettingItem(
                     icon: Icons.description_outlined,
-                    title: 'Terms of Service',
+                    title: AppLocalizations.of(context).termsOfService,
                     onTap: () {
                       // Navigate to Terms of Service screen
                       Navigator.pushNamed(context, AppRoutes.termsOfService);
@@ -200,7 +174,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Version info
                 Center(
                   child: Text(
-                    'Version 1.0.0',
+                    '${AppLocalizations.of(context).version} 1.0.0',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       color: AppColors.textLight,
@@ -403,7 +377,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           borderRadius: BorderRadius.circular(16.r),
         ),
         title: Text(
-          'Sign Out',
+          AppLocalizations.of(context).signOutConfirmTitle,
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -411,7 +385,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         content: Text(
-          'Are you sure you want to sign out?',
+          AppLocalizations.of(context).signOutConfirmMessage,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             color: AppColors.textSecondary,
@@ -421,7 +395,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, false),
             child: Text(
-              'Cancel',
+              AppLocalizations.of(context).cancel,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
@@ -431,7 +405,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(
-              'Sign Out',
+              AppLocalizations.of(context).confirm,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: Colors.red,
@@ -476,56 +450,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     }
-  }
-
-  void _showLanguageDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          'Select Language',
-          style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildLanguageOption('English'),
-            _buildLanguageOption('Turkish', isDisabled: true),
-            _buildLanguageOption('Spanish', isDisabled: true),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLanguageOption(String language, {bool isDisabled = false}) {
-    return ListTile(
-      title: Text(
-        language,
-        style: GoogleFonts.inter(
-          fontSize: 14.sp,
-          color: isDisabled ? AppColors.textLight : AppColors.textPrimary,
-        ),
-      ),
-      trailing: _selectedLanguage == language && !isDisabled
-          ? Icon(Icons.check, color: AppColors.textPrimary, size: 20.sp)
-          : null,
-      onTap: isDisabled
-          ? null
-          : () {
-              setState(() {
-                _selectedLanguage = language;
-              });
-              Navigator.pop(context);
-            },
-    );
   }
 
   void _showThemeDialog() {

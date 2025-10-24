@@ -1,115 +1,94 @@
-# Flutter
--keep class io.flutter.** { *; }
+# ===== INSIDEX APP - PROGUARD RULES =====
+# AGP 8.x + R8 için optimize edilmiş kurallar
+
 -keep class io.flutter.plugins.** { *; }
--keep class io.flutter.util.** { *; }
--keep class io.flutter.view.** { *; }
--keep class io.flutter.* { *; }
+-keep class com.baseflow.** { *; }  # permission_handler
+-keep class com.ryanheise.** { *; }  # just_audio & audio_service
+-keep class io.flutter.plugins.firebase.** { *; }  # tüm firebase plugin'leri
+
+# ===== 1. GOOGLE PLAY CORE (Missing classes fix) =====
+-dontwarn com.google.android.play.core.**
+-keep class com.google.android.play.core.** { *; }
+-keep class io.flutter.embedding.engine.deferredcomponents.** { *; }
+
+# ===== 2. FLUTTER CORE =====
+-keep class io.flutter.** { *; }
 -keep class io.flutter.embedding.** { *; }
+-keep class io.flutter.plugin.** { *; }
+-keep class io.flutter.plugins.** { *; }
 
-# Kotlin
--keep class kotlin.** { *; }
--keep class kotlin.Metadata { *; }
--dontwarn kotlin.**
--keepclassmembers class **$WhenMappings {
-    <fields>;
-}
-
-# Local Notifications - KRİTİK!
+# ===== 3. NOTIFICATION SYSTEM (EN KRİTİK!) =====
+# Flutter Local Notifications
 -keep class com.dexterous.** { *; }
 -keep class com.dexterous.flutterlocalnotifications.** { *; }
--dontwarn com.dexterous.flutterlocalnotifications.**
--keep interface com.dexterous.** { *; }
--keep enum com.dexterous.** { *; }
--keepclassmembers class com.dexterous.** { *; }
--keepattributes *Annotation*
+-keepclassmembers class com.dexterous.flutterlocalnotifications.** { 
+    <fields>;
+    <methods>;
+}
 
-# Android System Classes
--keep class android.app.** { *; }
--keep class android.content.** { *; }
--keep class androidx.** { *; }
--keepclassmembers class androidx.** { *; }
+# Scheduled Notifications (ARKA PLAN İÇİN!)
+-keep class com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver { *; }
+-keep class com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver { *; }
+-keep class com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsPlugin { *; }
+-keep class com.dexterous.flutterlocalnotifications.ForegroundService { *; }
 
-# Timezone - ÇOK ÖNEMLİ!
--keep class org.joda.time.** { *; }
--keep interface org.joda.time.** { *; }
+# ===== 4. BACKGROUND FETCH (6 saatte bir kontrol) =====
+-keep class com.transistorsoft.tsbackgroundfetch.** { *; }
+-keep interface com.transistorsoft.tsbackgroundfetch.** { *; }
+
+# ===== 5. ANDROID SYSTEM CLASSES =====
+# Notifications
+-keep class android.app.Notification** { *; }
+-keep class android.app.NotificationChannel { *; }
+-keep class android.app.NotificationManager { *; }
+-keep class androidx.core.app.NotificationCompat** { *; }
+
+# Alarm Manager (zamanlama için)
+-keep class android.app.AlarmManager { *; }
+-keep class android.app.PendingIntent { *; }
+
+# Broadcast Receivers
+-keep public class * extends android.content.BroadcastReceiver {
+    public void onReceive(android.content.Context, android.content.Intent);
+}
+-keep public class * extends android.app.Service
+-keep public class * extends android.app.Activity
+
+# ===== 6. TIMEZONE (bildirim zamanlaması için) =====
 -keep class com.flutter.timezone.** { *; }
+-keep class org.joda.time.** { *; }
 -dontwarn org.joda.time.**
 
-# Firebase
+# ===== 7. FIREBASE =====
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
--dontwarn com.google.firebase.**
--dontwarn com.google.android.gms.**
 
-# Google Play Core
--keep class com.google.android.play.core.** { *; }
--dontwarn com.google.android.play.core.**
+# ===== 8. WORKMANAGER =====
+-keep class androidx.work.** { *; }
+-keep class androidx.work.impl.** { *; }
 
-# Serialization
--keepattributes Signature
+# ===== 9. SHARED PREFERENCES (ayarlar için) =====
+-keep class androidx.preference.** { *; }
+
+# ===== 10. REFLECTION & ANNOTATIONS =====
 -keepattributes *Annotation*
--keepattributes EnclosingMethod
--keepattributes InnerClasses
--keepattributes Exceptions
-
-# Reflection kullanan class'lar için
--keepclassmembers class * {
-    @com.google.gson.annotations.SerializedName <fields>;
-}
+-keepattributes SourceFile,LineNumberTable
+-keepattributes InnerClasses,EnclosingMethod
 
 # Native methods
 -keepclasseswithmembernames class * {
     native <methods>;
 }
 
-# Enum'lar için
+# Enums
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);
 }
 
-# Parcelable
--keepclassmembers class * implements android.os.Parcelable {
-    public static final android.os.Parcelable$Creator CREATOR;
-}
+# ===== 11. R8 AYARLARI =====
+-ignorewarnings
+-dontwarn **
 
-# R class
--keepclassmembers class **.R$* {
-    public static <fields>;
-}
-
-# Broadcast Receivers - SÜPER KRİTİK!
--keep public class * extends android.content.BroadcastReceiver
--keep public class * extends android.app.Service
--keep public class * extends android.app.Activity
-
-# Notification specific
--keep class android.app.NotificationChannel { *; }
--keep class android.app.NotificationChannelGroup { *; }
--keep class android.app.Notification { *; }
--keep class android.app.NotificationManager { *; }
--keep class android.service.notification.** { *; }
-
-# PendingIntent
--keep class android.app.PendingIntent { *; }
--keep class android.content.Intent { *; }
-
-# AlarmManager
--keep class android.app.AlarmManager { *; }
--keep class android.app.AlarmManager$* { *; }
-
-# PowerManager
--keep class android.os.PowerManager { *; }
--keep class android.os.PowerManager$* { *; }
-
-# WorkManager
--keep class androidx.work.** { *; }
--keep class androidx.work.impl.** { *; }
--dontwarn androidx.work.**
-
-# Android support media (gerekirse)
--keep class android.support.v4.media.** { *; }
-
-# Flutter Local Notifications Plugin specific classes
--keep class com.dexterous.flutterlocalnotifications.models.** { *; }
--keep class com.dexterous.flutterlocalnotifications.ForegroundService { *; }
+# Debug için (production'da kaldırabilirsin)
+-dontobfuscate
