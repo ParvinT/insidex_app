@@ -806,8 +806,11 @@ class _ProgressScreenState extends State<ProgressScreen>
       children: [
         Icon(Icons.circle, size: isCompact ? 6.sp : 8.sp, color: color),
         SizedBox(width: 8.w),
-        SizedBox(
-          width: 40.w,
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: 40.w,
+            maxWidth: 70.w,
+          ),
           child: Text(
             label,
             style: GoogleFonts.inter(

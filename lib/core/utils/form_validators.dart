@@ -115,11 +115,19 @@ class FormValidators {
           : 'Name must be at least 2 characters';
     }
 
-    // Only allow letters and spaces
-    if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
+    if (!RegExp(
+            '^[\\u0020-\\u007E\\u00C0-\\u024F\\u0400-\\u04FF\\s\\-\'\\.]+\$')
+        .hasMatch(value)) {
       return context != null
-        ? AppLocalizations.of(context).nameCanOnlyContainLetters
-        : 'Name can only contain letters and spaces';
+          ? AppLocalizations.of(context).nameCanOnlyContainLetters
+          : 'Name can only contain letters and spaces';
+    }
+
+    // Prevent names that are only whitespace
+    if (value.trim().isEmpty) {
+      return context != null
+          ? AppLocalizations.of(context).pleaseEnterName
+          : 'Please enter your name';
     }
 
     return null;
@@ -129,8 +137,8 @@ class FormValidators {
   static String? validatePhone(String? value, [BuildContext? context]) {
     if (value == null || value.isEmpty) {
       return context != null
-        ? AppLocalizations.of(context).pleaseEnterPhone
-        : 'Please enter your phone number';
+          ? AppLocalizations.of(context).pleaseEnterPhone
+          : 'Please enter your phone number';
     }
 
     // Remove all non-digit characters for validation
@@ -138,8 +146,8 @@ class FormValidators {
 
     if (digits.length < 10) {
       return context != null
-        ? AppLocalizations.of(context).pleaseEnterValidPhone
-        : 'Please enter a valid phone number';
+          ? AppLocalizations.of(context).pleaseEnterValidPhone
+          : 'Please enter a valid phone number';
     }
 
     return null;

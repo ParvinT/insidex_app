@@ -165,6 +165,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
       ),
       child: TabBar(
         controller: _tabController,
+        tabAlignment: TabAlignment.start,
+        isScrollable: true,
         indicator: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -186,19 +188,23 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         labelColor: Colors.white,
         unselectedLabelColor: Colors.grey[600],
         labelStyle: GoogleFonts.inter(
-          fontSize: 13.sp,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: 13.sp,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w500,
         ),
-        labelPadding: EdgeInsets.symmetric(horizontal: 8.w),
+        labelPadding: EdgeInsets.symmetric(horizontal: 12.w),
         tabs: _tabs
             .map((tab) => Tab(
                   height: 36.h,
                   child: Center(
-                    child: Text(tab),
+                    child: Text(
+                      tab,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ))
             .toList(),

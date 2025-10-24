@@ -145,7 +145,6 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
         return AppLocalizations.of(context).good;
       case PasswordStrengthLevel.strong:
         return AppLocalizations.of(context).strong;
-      case PasswordStrengthLevel.none:
       default:
         return '';
     }
