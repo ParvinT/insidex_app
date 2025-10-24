@@ -1,0 +1,1331 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for Turkish (`tr`).
+class AppLocalizationsTr extends AppLocalizations {
+  AppLocalizationsTr([String locale = 'tr']) : super(locale);
+
+  @override
+  String get appName => 'INSIDEX';
+
+  @override
+  String get appTagline => 'Ses İyileştirme ve Bilinçaltı';
+
+  @override
+  String get settings => 'Ayarlar';
+
+  @override
+  String get account => 'Hesap';
+
+  @override
+  String get editProfile => 'Profili Düzenle';
+
+  @override
+  String get signOut => 'Çıkış Yap';
+
+  @override
+  String get signOutConfirmTitle => 'Çıkış Yap';
+
+  @override
+  String get signOutConfirmMessage =>
+      'Çıkış yapmak istediğinizden emin misiniz?';
+
+  @override
+  String get cancel => 'İptal';
+
+  @override
+  String get confirm => 'Onayla';
+
+  @override
+  String get app => 'Uygulama';
+
+  @override
+  String get notifications => 'Bildirimler';
+
+  @override
+  String get notificationsSubtitle => 'Bildirim tercihlerinizi yönetin';
+
+  @override
+  String get language => 'Dil';
+
+  @override
+  String get supportAndFeedback => 'Destek ve Geri Bildirim';
+
+  @override
+  String get sendFeedback => 'Geri Bildirim Gönder';
+
+  @override
+  String get sendFeedbackSubtitle => 'INSIDEX\'i geliştirmemize yardımcı olun';
+
+  @override
+  String get reportBug => 'Hata Bildir';
+
+  @override
+  String get reportBugSubtitle => 'Bir şeyler çalışmıyor mu?';
+
+  @override
+  String get about => 'Hakkında';
+
+  @override
+  String get aboutApp => 'Hakkında';
+
+  @override
+  String get disclaimer => 'Sorumluluk Reddi';
+
+  @override
+  String get privacyPolicy => 'Gizlilik Politikası';
+
+  @override
+  String get termsOfService => 'Kullanım Koşulları';
+
+  @override
+  String get version => 'Sürüm';
+
+  @override
+  String get ok => 'Tamam';
+
+  @override
+  String get save => 'Kaydet';
+
+  @override
+  String get edit => 'Düzenle';
+
+  @override
+  String get home => 'Ana Sayfa';
+
+  @override
+  String get playlist => 'Çalma Listesi';
+
+  @override
+  String get profile => 'Profil';
+
+  @override
+  String get allSubliminals => 'Tüm Bilinçaltılar';
+
+  @override
+  String get yourPlaylist => 'Çalma Listeniz';
+
+  @override
+  String get menu => 'Menü';
+
+  @override
+  String get myPlaylists => 'Çalma Listelerim';
+
+  @override
+  String get myPlaylist => 'Çalma Listem';
+
+  @override
+  String get favorites => 'Favoriler';
+
+  @override
+  String get recent => 'Son Dinlenenler';
+
+  @override
+  String get done => 'Tamam';
+
+  @override
+  String get noSessionsInPlaylist => 'Çalma Listesinde Seans Yok';
+
+  @override
+  String get addSessionsToPlaylist =>
+      'Mükemmel iyileşme yolculuğunuzu oluşturmak için seans ekleyin';
+
+  @override
+  String get noFavoriteSessions => 'Favori Seans Yok';
+
+  @override
+  String get markSessionsAsFavorite =>
+      'Hızlıca bulmak için seansları favori olarak işaretleyin';
+
+  @override
+  String get noRecentSessions => 'Son Dinlenen Seans Yok';
+
+  @override
+  String get sessionsWillAppearHere => 'Dinlediğiniz seanslar burada görünecek';
+
+  @override
+  String get removedFromFavorites => 'Favorilerden kaldırıldı';
+
+  @override
+  String get addedToFavorites => 'Favorilere eklendi';
+
+  @override
+  String get removedFromPlaylist => 'Çalma listesinden kaldırıldı';
+
+  @override
+  String get untitledSession => 'İsimsiz Seans';
+
+  @override
+  String get general => 'Genel';
+
+  @override
+  String get untitled => 'İsimsiz';
+
+  @override
+  String get addedToPlaylist => 'Çalma listesine eklendi';
+
+  @override
+  String get profileUpdated => 'Profil başarıyla güncellendi!';
+
+  @override
+  String get errorUpdatingProfile => 'Profil güncellenirken hata oluştu';
+
+  @override
+  String get fullName => 'Ad Soyad';
+
+  @override
+  String get enterYourName => 'Adınızı girin';
+
+  @override
+  String get accountInformation => 'Hesap Bilgileri';
+
+  @override
+  String get memberSince => 'Üyelik Tarihi';
+
+  @override
+  String get accountType => 'Hesap Türü';
+
+  @override
+  String get premium => 'Premium';
+
+  @override
+  String get free => 'Ücretsiz';
+
+  @override
+  String get role => 'Rol';
+
+  @override
+  String get administrator => 'Yönetici';
+
+  @override
+  String get yourProgress => 'İlerlemeniz';
+
+  @override
+  String get trackYourListening =>
+      'Dinleme alışkanlıklarınızı ve gelişimlerinizi takip edin';
+
+  @override
+  String get myInsights => 'İçgörülerim';
+
+  @override
+  String get viewPersonalizedWellness =>
+      'Kişiselleştirilmiş sağlıklı yaşam profilinizi görüntüleyin';
+
+  @override
+  String get premiumWaitlist => 'Premium Bekleme Listesi';
+
+  @override
+  String get joinEarlyAccess => 'Premium özelliklere erken erişim için katılın';
+
+  @override
+  String get adminDashboard => 'Yönetici Paneli';
+
+  @override
+  String get manageUsersAndSessions =>
+      'Kullanıcıları, seansları ve uygulama ayarlarını yönetin';
+
+  @override
+  String get changePassword => 'Şifre Değiştir';
+
+  @override
+  String get min => 'dk';
+
+  @override
+  String get days => 'gün';
+
+  @override
+  String get analytics => 'Analitik';
+
+  @override
+  String get year => 'Yıl';
+
+  @override
+  String get month => 'Ay';
+
+  @override
+  String get week => 'Hafta';
+
+  @override
+  String get day => 'Gün';
+
+  @override
+  String get thisWeek => 'Bu Hafta';
+
+  @override
+  String get topSessions => 'En Çok Dinlenenler';
+
+  @override
+  String get minutesToday => 'dakika bugün';
+
+  @override
+  String get total => 'toplam';
+
+  @override
+  String get noSessionsYet => 'Henüz seans yok';
+
+  @override
+  String get mon => 'Pzt';
+
+  @override
+  String get tue => 'Sal';
+
+  @override
+  String get wed => 'Çar';
+
+  @override
+  String get thu => 'Per';
+
+  @override
+  String get fri => 'Cum';
+
+  @override
+  String get sat => 'Cmt';
+
+  @override
+  String get sun => 'Paz';
+
+  @override
+  String get categories => 'Kategoriler';
+
+  @override
+  String get allSessions => 'Tüm Seanslar';
+
+  @override
+  String get chooseCategory => 'Bir Kategori Seçin';
+
+  @override
+  String get selectCategoryExplore =>
+      'Seansları keşfetmek için bir kategori seçin';
+
+  @override
+  String get sessions => 'seans';
+
+  @override
+  String get errorLoadingSessions => 'Seanslar yüklenirken hata oluştu';
+
+  @override
+  String get noSessionsAvailable => 'Kullanılabilir seans yok';
+
+  @override
+  String get checkBackLater =>
+      'Yeni içerik için daha sonra tekrar kontrol edin';
+
+  @override
+  String get overview => 'Genel Bakış';
+
+  @override
+  String get goalsTab => 'Hedefler';
+
+  @override
+  String get stats => 'İstatistikler';
+
+  @override
+  String get journey => 'Yolculuk';
+
+  @override
+  String get subliminals => 'bilinçaltı';
+
+  @override
+  String get personalInformation => 'Kişisel Bilgiler';
+
+  @override
+  String get gender => 'Cinsiyet';
+
+  @override
+  String get male => 'Erkek';
+
+  @override
+  String get female => 'Kadın';
+
+  @override
+  String get totalListening => 'Toplam Dinleme';
+
+  @override
+  String get totalSessions => 'Toplam Seans';
+
+  @override
+  String get currentStreak => 'Mevcut Seri';
+
+  @override
+  String get noGoalsYet => 'Henüz hedef belirlenmedi';
+
+  @override
+  String get goalProgress => 'Hedef İlerlemesi';
+
+  @override
+  String get weeklyActivity => 'Haftalık Aktivite';
+
+  @override
+  String get averageSession => 'Ortalama Seans';
+
+  @override
+  String get editMode => 'Düzenleme Modu';
+
+  @override
+  String get saveChanges => 'Değişiklikleri Kaydet';
+
+  @override
+  String get personalInfo => 'Kişisel Bilgiler';
+
+  @override
+  String get yourPersonalizedProfile =>
+      'Kişiselleştirilmiş sağlıklı yaşam profiliniz';
+
+  @override
+  String get birthDate => 'Doğum Tarihi';
+
+  @override
+  String get email => 'E-posta';
+
+  @override
+  String get notSpecified => 'Belirtilmedi';
+
+  @override
+  String get personalityInsights => 'Kişilik İçgörüleri';
+
+  @override
+  String get ageGroup => 'Yaş Grubu';
+
+  @override
+  String get wellnessFocus => 'Sağlıklı Yaşam Odağı';
+
+  @override
+  String get recommendedSessions => 'Önerilen Seanslar';
+
+  @override
+  String get yourWellnessGoals => 'Sağlıklı Yaşam Hedefleriniz';
+
+  @override
+  String get daysActive => 'Aktif Gün';
+
+  @override
+  String get sessionsLabel => 'Seans';
+
+  @override
+  String get minutesLabel => 'Dakika';
+
+  @override
+  String get streakLabel => 'Seri';
+
+  @override
+  String get minTotal => 'dk toplam';
+
+  @override
+  String get sessionStats => 'Seans İstatistikleri';
+
+  @override
+  String get longestSession => 'En Uzun Seans';
+
+  @override
+  String get favoriteTime => 'Favori Zaman';
+
+  @override
+  String get loading => 'Yükleniyor...';
+
+  @override
+  String get yourWellnessJourney => 'Sağlıklı Yaşam Yolculuğunuz';
+
+  @override
+  String get trackMilestones =>
+      'Dönüm noktalarınızı ve başarılarınızı takip edin';
+
+  @override
+  String get firstSession => 'İlk Seans';
+
+  @override
+  String get notStartedYet => 'Henüz başlamadı';
+
+  @override
+  String get sevenDayStreak => '7 Günlük Seri';
+
+  @override
+  String get achieved => 'Başarıldı!';
+
+  @override
+  String get daysToGo => 'gün kaldı';
+
+  @override
+  String get tenSessions => '10 Seans';
+
+  @override
+  String get completed => 'Tamamlandı!';
+
+  @override
+  String get sessionsToGo => 'seans kaldı';
+
+  @override
+  String get thirtyDayStreak => '30 Günlük Seri';
+
+  @override
+  String get amazingAchievement => 'Muhteşem başarı!';
+
+  @override
+  String get keepGoing => 'Devam et!';
+
+  @override
+  String get fiftySessions => '50 Seans';
+
+  @override
+  String get powerUser => 'Güçlü kullanıcı!';
+
+  @override
+  String get longTermGoal => 'Uzun vadeli hedef';
+
+  @override
+  String get years => 'yıl';
+
+  @override
+  String get yourAge => 'Yaşınız';
+
+  @override
+  String get active => 'aktif';
+
+  @override
+  String get goalsLabel => 'Hedefler';
+
+  @override
+  String get member => 'Üye';
+
+  @override
+  String get morning => 'Sabah';
+
+  @override
+  String get afternoon => 'Öğleden Sonra';
+
+  @override
+  String get evening => 'Akşam';
+
+  @override
+  String get night => 'Gece';
+
+  @override
+  String get youngAdult => 'Genç Yetişkin';
+
+  @override
+  String get earlyTwenties => 'Yirmili Yaşların Başı';
+
+  @override
+  String get lateTwenties => 'Yirmili Yaşların Sonu';
+
+  @override
+  String get thirties => 'Otuzlu Yaşlar';
+
+  @override
+  String get matureAdult => 'Olgun Yetişkin';
+
+  @override
+  String get sleepQuality => 'Uyku Kalitesi';
+
+  @override
+  String get mentalPeace => 'Zihinsel Huzur';
+
+  @override
+  String get vitality => 'Canlılık';
+
+  @override
+  String get generalWellness => 'Genel Sağlık';
+
+  @override
+  String get sleepSessions => 'Uyku Seansları';
+
+  @override
+  String get meditation => 'Meditasyon';
+
+  @override
+  String get focusSessions => 'Odaklanma Seansları';
+
+  @override
+  String get editGoals => 'Hedefleri Düzenle';
+
+  @override
+  String get goalEditingComingSoon => 'Hedef düzenleme özelliği yakında!';
+
+  @override
+  String get profileUpdatedSuccessfully => 'Profil başarıyla güncellendi';
+
+  @override
+  String get skip => 'Atla';
+
+  @override
+  String get continueButton => 'Devam Et';
+
+  @override
+  String get tellUsAboutYourself => 'Bize kendinizden bahsedin';
+
+  @override
+  String get thisHelpsPersonalize =>
+      'Bu, deneyiminizi kişiselleştirmemize yardımcı olur';
+
+  @override
+  String get answerQuickQuestions =>
+      'Kişiselleştirilmiş öneriler almak için birkaç hızlı soruyu yanıtlayın';
+
+  @override
+  String get whatAreYourGoals => 'Mevcut hedefleriniz neler';
+
+  @override
+  String get health => 'Sağlık';
+
+  @override
+  String get confidence => 'Özgüven';
+
+  @override
+  String get energy => 'Enerji';
+
+  @override
+  String get betterSleep => 'Daha İyi Uyku';
+
+  @override
+  String get anxietyRelief => 'Anksiyete Rahatlaması';
+
+  @override
+  String get emotionalBalance => 'Duygusal Denge';
+
+  @override
+  String get dateOfBirth => 'Doğum Tarihi';
+
+  @override
+  String get selectYourBirthDate => 'Doğum tarihinizi seçin';
+
+  @override
+  String get youMustBeAtLeast18 => 'En az 18 yaşında olmalısınız';
+
+  @override
+  String get pleaseSelectBirthDate => 'Lütfen doğum tarihinizi seçin';
+
+  @override
+  String get errorSavingData =>
+      'Veri kaydedilirken hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get yourInformationIsSecure =>
+      'Bilgileriniz güvende ve asla paylaşılmayacak';
+
+  @override
+  String get age => 'Yaş';
+
+  @override
+  String get yearsOld => 'yaşında';
+
+  @override
+  String get forgotPasswordTitle => 'Şifrenizi mi Unuttunuz?';
+
+  @override
+  String get forgotPasswordDescription =>
+      'Sorun değil! Olur böyle şeyler. Lütfen hesabınızla ilişkili e-posta adresini girin.';
+
+  @override
+  String get emailAddress => 'E-posta Adresi';
+
+  @override
+  String get enterYourEmail => 'E-postanızı girin';
+
+  @override
+  String get sendResetLink => 'Sıfırlama Bağlantısı Gönder';
+
+  @override
+  String get backToLogin => 'Giriş Sayfasına Dön';
+
+  @override
+  String get securityReasonNote =>
+      'Güvenlik nedeniyle, sistemimizde kayıtlı ise e-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.';
+
+  @override
+  String get checkYourEmail => 'E-postanızı Kontrol Edin';
+
+  @override
+  String get resetLinkSentMessage =>
+      'E-posta adresinize şifre sıfırlama bağlantısı gönderdik. Lütfen gelen kutunuzu kontrol edin ve talimatları izleyin.';
+
+  @override
+  String get didntReceiveEmail => 'E-postayı almadınız mı?';
+
+  @override
+  String get checkSpamFolder =>
+      'Lütfen spam klasörünüzü kontrol edin veya birkaç dakika sonra e-postayı yeniden göndermeyi deneyin.';
+
+  @override
+  String get tryDifferentEmail => 'Farklı E-posta Dene';
+
+  @override
+  String get accountNotFound => 'Hesap Bulunamadı';
+
+  @override
+  String get noAccountExistsMessage =>
+      'Bu e-posta adresiyle kayıtlı hesap bulunamadı.\n\nBunun yerine yeni hesap oluşturmak ister misiniz?';
+
+  @override
+  String get signUp => 'Kayıt Ol';
+
+  @override
+  String get failedToSendResetEmail => 'Sıfırlama e-postası gönderilemedi';
+
+  @override
+  String get errorOccurred => 'Bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get welcomeBack => 'Tekrar Hoş Geldiniz!';
+
+  @override
+  String get signInToContinue =>
+      'İyileşme yolculuğunuza devam etmek için giriş yapın';
+
+  @override
+  String get password => 'Şifre';
+
+  @override
+  String get enterYourPassword => 'Şifrenizi girin';
+
+  @override
+  String get forgotPassword => 'Şifremi Unuttum';
+
+  @override
+  String get signIn => 'Giriş Yap';
+
+  @override
+  String get or => 'VEYA';
+
+  @override
+  String get dontHaveAccount => 'Hesabınız yok mu? ';
+
+  @override
+  String get loginFailed => 'Giriş başarısız';
+
+  @override
+  String get verifyEmail => 'E-postayı Doğrula';
+
+  @override
+  String get weSentPasswordTo => 'Şu adrese şifre gönderdik:';
+
+  @override
+  String get enterSixDigitPassword => '6 haneli şifreyi girin:';
+
+  @override
+  String get verify => 'Doğrula';
+
+  @override
+  String get youCanResendIn => 'Yeniden gönderebilirsiniz:';
+
+  @override
+  String get seconds => 'saniye';
+
+  @override
+  String get didntGetIt => 'Almadınız mı?';
+
+  @override
+  String get resend => 'Yeniden Gönder';
+
+  @override
+  String get newCodeSentTo => 'Yeni kod gönderildi:';
+
+  @override
+  String get failedToSendCode => 'Kod gönderilemedi';
+
+  @override
+  String get pleaseEnterSixDigitCode => 'Lütfen 6 haneli kodu girin.';
+
+  @override
+  String get verificationFailed => 'Doğrulama başarısız';
+
+  @override
+  String get accountCreatedSuccessfully => 'Hesap başarıyla oluşturuldu!';
+
+  @override
+  String get createAccount => 'Hesap Oluştur';
+
+  @override
+  String get startYourHealingJourney => 'İyileşme yolculuğunuza bugün başlayın';
+
+  @override
+  String get enterYourFullName => 'Adınızı ve soyadınızı girin';
+
+  @override
+  String get createAPassword => 'Şifre oluşturun';
+
+  @override
+  String get confirmPassword => 'Şifreyi Onayla';
+
+  @override
+  String get reenterYourPassword => 'Şifrenizi tekrar girin';
+
+  @override
+  String get pleaseConfirmPassword => 'Lütfen şifrenizi onaylayın';
+
+  @override
+  String get passwordsDoNotMatch => 'Şifreler eşleşmiyor';
+
+  @override
+  String get iAgreeToThe => 'Kabul ediyorum: ';
+
+  @override
+  String get termsAndConditions => 'Şartlar ve Koşullar';
+
+  @override
+  String get and => ' ve ';
+
+  @override
+  String get pleaseAgreeToTerms => 'Lütfen şartları ve koşulları kabul edin';
+
+  @override
+  String get verificationCodeSent =>
+      'Doğrulama kodu gönderildi! Lütfen e-postanızı kontrol edin.';
+
+  @override
+  String get registrationFailed => 'Kayıt başarısız';
+
+  @override
+  String get alreadyHaveAccount => 'Zaten hesabınız var mı? ';
+
+  @override
+  String get welcome => 'Hoş Geldiniz';
+
+  @override
+  String get createYourPersonalProfile =>
+      'Özel bilinçaltı seansları almak için\nkişisel profilinizi oluşturun';
+
+  @override
+  String get emailPassword => 'E-posta + Şifre';
+
+  @override
+  String get suggestion => '💡 Öneri';
+
+  @override
+  String get bugReport => '🐛 Hata Raporu';
+
+  @override
+  String get featureRequest => '✨ Özellik İsteği';
+
+  @override
+  String get complaint => '😔 Şikayet';
+
+  @override
+  String get other => '📝 Diğer';
+
+  @override
+  String get type => 'Tür';
+
+  @override
+  String get rateYourExperience => 'Deneyiminizi değerlendirin';
+
+  @override
+  String get title => 'Başlık';
+
+  @override
+  String get briefSummary => 'Kısa özet';
+
+  @override
+  String get details => 'Detaylar';
+
+  @override
+  String get tellUsMore => 'Bize daha fazla anlatın...';
+
+  @override
+  String get pleaseEnterTitle => 'Lütfen bir başlık girin';
+
+  @override
+  String get pleaseDescribeFeedback => 'Lütfen geri bildiriminizi açıklayın';
+
+  @override
+  String get emailOptional => 'E-posta (opsiyonel)';
+
+  @override
+  String get forFollowUp => 'Takip için';
+
+  @override
+  String get submitFeedback => 'Geri Bildirim Gönder';
+
+  @override
+  String get thankYouForFeedback => '✅ Geri bildiriminiz için teşekkürler!';
+
+  @override
+  String get error => 'Hata: ';
+
+  @override
+  String get allNotifications => 'Tüm Bildirimler';
+
+  @override
+  String get masterControlNotifications =>
+      'Tüm uygulama bildirimlerinin ana kontrolü';
+
+  @override
+  String get dailyReminders => 'Günlük Hatırlatıcılar';
+
+  @override
+  String get achievementNotifications => 'Başarı Bildirimleri';
+
+  @override
+  String get streakMilestones => 'Seri Dönüm Noktaları';
+
+  @override
+  String get celebrateConsistency => 'Düzenlilik başarılarınızı kutlayın';
+
+  @override
+  String get testNotificationSent => 'Test bildirimi gönderildi! 🔔';
+
+  @override
+  String get sendTestNotification => 'Test Bildirimi Gönder';
+
+  @override
+  String get notificationsDisabled => 'Bildirimler Kapalı';
+
+  @override
+  String get enableNotificationsMessage =>
+      'Sağlıklı yaşam rutininiz için günlük hatırlatıcılar almak üzere bildirimleri etkinleştirin';
+
+  @override
+  String get pleaseEnableNotifications =>
+      'Lütfen sistem ayarlarından bildirimleri etkinleştirin';
+
+  @override
+  String get openSettings => 'Ayarları Aç';
+
+  @override
+  String get enableNotifications => 'Bildirimleri Etkinleştir';
+
+  @override
+  String get dailyReminder => 'Günlük Hatırlatıcı';
+
+  @override
+  String get getRemindedDaily => 'Her gün pratik yapmak için hatırlatıcı al';
+
+  @override
+  String get reminderTime => 'Hatırlatıcı Saati';
+
+  @override
+  String get selectTime => 'Saat Seç';
+
+  @override
+  String get currentPassword => 'Mevcut Şifre';
+
+  @override
+  String get enterCurrentPassword => 'Mevcut şifrenizi girin';
+
+  @override
+  String get newPassword => 'Yeni Şifre';
+
+  @override
+  String get minCharacters => 'En az 8 karakter';
+
+  @override
+  String get newPasswordMustBeDifferent =>
+      'Yeni şifre mevcut şifreden farklı olmalı';
+
+  @override
+  String get mustBeDifferent => 'Farklı olmalı';
+
+  @override
+  String get passwordStrength => 'Şifre Gücü';
+
+  @override
+  String get weak => 'Zayıf';
+
+  @override
+  String get fair => 'Orta';
+
+  @override
+  String get good => 'İyi';
+
+  @override
+  String get strong => 'Güçlü';
+
+  @override
+  String get confirmNewPassword => 'Yeni Şifreyi Onayla';
+
+  @override
+  String get reenterNewPassword => 'Yeni şifrenizi tekrar girin';
+
+  @override
+  String get updatePassword => 'Şifreyi Güncelle';
+
+  @override
+  String get passwordRequirements => 'Şifre Gereksinimleri';
+
+  @override
+  String get atLeast8Characters => 'En az 8 karakter';
+
+  @override
+  String get oneUppercaseLetter => 'Bir büyük harf';
+
+  @override
+  String get oneLowercaseLetter => 'Bir küçük harf';
+
+  @override
+  String get oneNumber => 'Bir rakam';
+
+  @override
+  String get differentFromCurrent => 'Mevcut şifreden farklı';
+
+  @override
+  String get passwordChanged => 'Şifre Değiştirildi!';
+
+  @override
+  String get passwordChangedSuccess => 'Şifreniz başarıyla değiştirildi.';
+
+  @override
+  String get changePasswordTitle => 'Şifre Değiştir';
+
+  @override
+  String get createStrongPassword => 'Hesabınız için güçlü bir şifre oluşturun';
+
+  @override
+  String get failedToChangePassword => 'Şifre değiştirilemedi';
+
+  @override
+  String get unexpectedErrorOccurred =>
+      'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get stayOnTrack => 'Yolunda Kal';
+
+  @override
+  String get dailyRemindersDescription =>
+      'Sağlıklı yaşam rutininizi sürdürmek ve hedeflerinize ulaşmak için günlük hatırlatıcılar alın';
+
+  @override
+  String get notNow => 'Şimdi Değil';
+
+  @override
+  String get enable => 'Etkinleştir';
+
+  @override
+  String get notificationsEnabledSuccess => 'Bildirimler etkinleştirildi! 🔔';
+
+  @override
+  String get notificationDailyReminderTitle => 'Günlük Seans Zamanı 🎧';
+
+  @override
+  String get notificationDailyReminderMessage =>
+      'INSIDEX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın';
+
+  @override
+  String get notificationStreak3Title => '🎉 Tebrikler!';
+
+  @override
+  String get notificationStreak3Message =>
+      '🔥 3 günlük seri! Harika bir başlangıç!';
+
+  @override
+  String get notificationStreak7Title => '🎯 Bir Haftalık Başarı!';
+
+  @override
+  String get notificationStreak7Message => '7 gün üst üste! Harika gidiyorsun!';
+
+  @override
+  String get notificationStreak14Title => '💪 İki Hafta Güçlü!';
+
+  @override
+  String get notificationStreak14Message =>
+      '14 günlük seri! Alışkanlık oluşuyor.';
+
+  @override
+  String get notificationStreak21Title => '🌟 21 Gün - Alışkanlık Oluştu!';
+
+  @override
+  String get notificationStreak21Message =>
+      'Bilim yeni bir alışkanlık oluşturduğunuzu söylüyor!';
+
+  @override
+  String get notificationStreak30Title => '🏆 30 Günlük Efsane!';
+
+  @override
+  String get notificationStreak30Message =>
+      'Tam bir ay! İnanılmaz bir bağlılık!';
+
+  @override
+  String get notificationStreak50Title => '💎 50 Günlük Elmas Seri!';
+
+  @override
+  String get notificationStreak50Message =>
+      'Yarım yüzyıl! Gerçek bir INSIDEX ustasısın!';
+
+  @override
+  String get notificationStreak100Title => '👑 100 Günlük Şampiyon!';
+
+  @override
+  String get notificationStreak100Message =>
+      'Yüz gün! Kesinlikle efsanesin! 🎊';
+
+  @override
+  String get notificationStreakLostTitle => '😔 Seri Sona Erdi';
+
+  @override
+  String notificationStreakLostMessage(Object days) {
+    return '$days günlük seriniz sona erdi. Ama endişelenmeyin, bugün yeniden başlayabilirsiniz!';
+  }
+
+  @override
+  String get nowPlaying => 'ŞİMDİ OYNATILIYOR';
+
+  @override
+  String get intro => 'Giriş';
+
+  @override
+  String get subliminal => 'Bilinçaltı';
+
+  @override
+  String get sessionDetails => 'Seans Detayları';
+
+  @override
+  String get aboutThisSession => 'BU SEANS HAKKINDA';
+
+  @override
+  String get loopEnabled => 'Döngü etkin';
+
+  @override
+  String get loopDisabled => 'Döngü kapalı';
+
+  @override
+  String get shuffleOn => 'Karıştır AÇIK';
+
+  @override
+  String get shuffleOff => 'Karıştır KAPALI';
+
+  @override
+  String get errorUpdatingPlaylist =>
+      'Çalma listesi güncellenirken hata oluştu';
+
+  @override
+  String get errorUpdatingFavorites => 'Favoriler güncellenirken hata oluştu';
+
+  @override
+  String get premiumFeature => 'Premium özellik';
+
+  @override
+  String get autoPlayEnabled => 'Otomatik oynatma etkin';
+
+  @override
+  String get autoPlayDisabled => 'Otomatik oynatma kapalı';
+
+  @override
+  String get sleepTimer => 'Uyku Zamanlayıcısı';
+
+  @override
+  String get noTimerSet => 'Zamanlayıcı ayarlanmadı';
+
+  @override
+  String currentMinutes(String minutes) {
+    return 'Mevcut: $minutes dakika';
+  }
+
+  @override
+  String get cancelTimer => 'Zamanlayıcıyı iptal et';
+
+  @override
+  String get set => 'Ayarla';
+
+  @override
+  String setMinutes(String minutes) {
+    return '${minutes}dk';
+  }
+
+  @override
+  String get search => 'Ara';
+
+  @override
+  String get searchSessions => 'Ara...';
+
+  @override
+  String get searchResults => 'Arama Sonuçları';
+
+  @override
+  String get noResultsFound => 'Sonuç bulunamadı';
+
+  @override
+  String get tryDifferentKeywords => 'Farklı anahtar kelimeler deneyin';
+
+  @override
+  String get searchCategories => 'Kategoriler';
+
+  @override
+  String get searchSessionsTab => 'Seanslar';
+
+  @override
+  String get allResults => 'Tümü';
+
+  @override
+  String foundResults(String count) {
+    return '$count sonuç bulundu';
+  }
+
+  @override
+  String get recentSearches => 'Son Aramalar';
+
+  @override
+  String get clearAll => 'Tümünü Temizle';
+
+  @override
+  String get clear => 'Temizle';
+
+  @override
+  String get clearSearchHistory => 'Arama Geçmişini Temizle';
+
+  @override
+  String get clearSearchHistoryConfirmation =>
+      'Tüm arama geçmişini temizlemek istediğinizden emin misiniz?';
+
+  @override
+  String get searchHistoryCleared => 'Arama geçmişi temizlendi';
+
+  @override
+  String get accountOpenedOnAnotherDevice => 'Hesabınız Başka Cihazdan Açıldı';
+
+  @override
+  String get accountOpenedMessage =>
+      'Güvenliğiniz için bu cihazdan otomatik olarak çıkış yapılacak.';
+
+  @override
+  String get securityWarningUnauthorized =>
+      'Eğer giriş yapan siz değilseniz, lütfen hemen şifrenizi değiştirin!';
+
+  @override
+  String get loggingOut => 'Çıkış yapılıyor...';
+
+  @override
+  String get deviceSecurityWarning =>
+      'Hesabınız güvenlik amaçlı aynı anda sadece bir cihazda aktif olabilir.';
+
+  @override
+  String get second => 'saniye';
+
+  @override
+  String get pleaseEnterEmail => 'Lütfen e-postanızı girin';
+
+  @override
+  String get pleaseEnterValidEmail => 'Lütfen geçerli bir e-posta girin';
+
+  @override
+  String get pleaseEnterPassword => 'Lütfen şifrenizi girin';
+
+  @override
+  String get passwordMustBeAtLeast6Characters =>
+      'Şifre en az 6 karakter olmalı';
+
+  @override
+  String get passwordMustBeAtLeast8Characters =>
+      'Şifre en az 8 karakter olmalı';
+
+  @override
+  String get passwordMustContainUppercase =>
+      'Şifre en az bir büyük harf içermeli';
+
+  @override
+  String get passwordMustContainLowercase =>
+      'Şifre en az bir küçük harf içermeli';
+
+  @override
+  String get passwordMustContainNumber => 'Şifre en az bir rakam içermeli';
+
+  @override
+  String get pleaseEnterName => 'Lütfen adınızı girin';
+
+  @override
+  String get nameMustBeAtLeast2Characters => 'Ad en az 2 karakter olmalı';
+
+  @override
+  String get nameCanOnlyContainLetters => 'Ad sadece harf ve boşluk içerebilir';
+
+  @override
+  String get pleaseEnterPhone => 'Lütfen telefon numaranızı girin';
+
+  @override
+  String get pleaseEnterValidPhone =>
+      'Lütfen geçerli bir telefon numarası girin';
+
+  @override
+  String get currentPasswordIncorrect => 'Mevcut şifre yanlış';
+
+  @override
+  String get newPasswordSameAsCurrent =>
+      'Yeni şifre mevcut şifreden farklı olmalı';
+
+  @override
+  String get noUserSignedIn => 'Şu anda oturum açmış kullanıcı yok';
+
+  @override
+  String get authenticationFailed => 'Kimlik doğrulama başarısız';
+
+  @override
+  String get passwordTooWeak => 'Şifre çok zayıf';
+
+  @override
+  String get pleaseSignInAgain =>
+      'Şifrenizi değiştirmeden önce lütfen çıkış yapıp tekrar giriş yapın';
+
+  @override
+  String get networkError => 'Ağ hatası. Lütfen bağlantınızı kontrol edin';
+
+  @override
+  String get tooManyAttempts =>
+      'Çok fazla deneme. Lütfen daha sonra tekrar deneyin';
+
+  @override
+  String get emailAlreadyInUse =>
+      'Bu e-posta zaten kayıtlı. Lütfen giriş yapın';
+
+  @override
+  String get invalidEmail => 'E-posta adresi geçersiz';
+
+  @override
+  String get weakPassword =>
+      'Şifre çok zayıf. Lütfen en az 6 karakter kullanın';
+
+  @override
+  String get userNotFound => 'Bu e-posta ile kayıtlı hesap bulunamadı';
+
+  @override
+  String get incorrectPassword => 'Yanlış şifre. Lütfen tekrar deneyin';
+
+  @override
+  String get accountDisabled => 'Bu hesap devre dışı bırakılmış';
+
+  @override
+  String get tooManyFailedAttempts =>
+      'Çok fazla başarısız deneme. Lütfen daha sonra tekrar deneyin';
+
+  @override
+  String get invalidCredential => 'Geçersiz e-posta veya şifre';
+
+  @override
+  String get operationNotAllowed =>
+      'E-posta/şifre girişi etkin değil. Lütfen destekle iletişime geçin';
+
+  @override
+  String get invalidEmailAddress => 'Lütfen geçerli bir e-posta adresi girin';
+
+  @override
+  String get emailAlreadyExists =>
+      'Bu e-posta zaten kayıtlı. Lütfen giriş yapın veya şifremi unuttum\'u kullanın.';
+
+  @override
+  String get nameTooShort => 'Ad en az 2 karakter olmalı';
+
+  @override
+  String get failedToResendCode =>
+      'Kod tekrar gönderilemedi. Lütfen tekrar deneyin';
+
+  @override
+  String get noPendingVerification =>
+      'Bekleyen doğrulama bulunamadı. Lütfen tekrar kayıt olun';
+
+  @override
+  String get verificationCodeNotFound =>
+      'Verification code not found. Please sign up again.';
+
+  @override
+  String get verificationCodeAlreadyUsed => 'This code has already been used.';
+
+  @override
+  String get verificationCodeExpired =>
+      'Verification code has expired. Please sign up again.';
+
+  @override
+  String get tooManyVerificationAttempts =>
+      'Too many failed attempts. Please sign up again.';
+
+  @override
+  String get invalidVerificationCode =>
+      'Invalid verification code. Please try again.';
+}
