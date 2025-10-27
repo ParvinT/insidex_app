@@ -389,15 +389,19 @@ class _BottomBar extends StatelessWidget {
   final bool enabled;
   final VoidCallback onPressed;
   const _BottomBar({required this.enabled, required this.onPressed});
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.zero,
+      color: Colors.transparent,
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        12.h,
+        20.w,
+        MediaQuery.of(context).padding.bottom + 12.h, // Safe area
+      ),
       child: SizedBox(
         width: double.infinity,
-        height: 52.h,
+        height: 48.h, // 52'den 48'e düşürdük
         child: ElevatedButton(
           onPressed: enabled ? onPressed : null,
           style: ElevatedButton.styleFrom(
@@ -405,14 +409,23 @@ class _BottomBar extends StatelessWidget {
             foregroundColor: Colors.white,
             disabledBackgroundColor: AppColors.greyLight,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.r)),
-            elevation: 0, // ← EKLE: Gölge kaldır
+              borderRadius: BorderRadius.circular(12.r), // 16'dan 12'ye
+            ),
+            elevation: 0,
             shadowColor: Colors.transparent,
+            padding: EdgeInsets.symmetric(horizontal: 16.w), // Padding ekledik
           ),
-          child: Text(AppLocalizations.of(context).continueButton,
+          child: FittedBox(
+            // Yazı sığmazsa küçültsün
+            fit: BoxFit.scaleDown,
+            child: Text(
+              AppLocalizations.of(context).continueButton,
               style: GoogleFonts.inter(
-                  fontSize: 16.sp.clamp(16.0, 18.0),
-                  fontWeight: FontWeight.w700)),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
       ),
     );

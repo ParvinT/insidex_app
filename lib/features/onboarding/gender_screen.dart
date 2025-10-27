@@ -148,9 +148,11 @@ class _GenderScreenState extends State<GenderScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate.fixed([
-                    _genderOption(Gender.male, AppLocalizations.of(context).male),
+                    _genderOption(
+                        Gender.male, AppLocalizations.of(context).male),
                     SizedBox(height: 16.h),
-                    _genderOption(Gender.female, AppLocalizations.of(context).female),
+                    _genderOption(
+                        Gender.female, AppLocalizations.of(context).female),
                     SizedBox(height: 24.h),
                   ]),
                 ),
@@ -259,15 +261,17 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final bool isWideOrShort = size.width >= 1024 || size.height <= 740;
-    final double buttonHeight = isWideOrShort ? 100.h : 56.h;
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 12.h),
+      color: Colors.transparent,
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        12.h,
+        20.w,
+        MediaQuery.of(context).padding.bottom + 12.h, // Safe area
+      ),
       child: SizedBox(
         width: double.infinity,
-        height: buttonHeight,
+        height: 48.h,
         child: ElevatedButton(
           onPressed: enabled ? onPressed : null,
           style: ElevatedButton.styleFrom(
@@ -276,10 +280,21 @@ class _BottomBar extends StatelessWidget {
             disabledBackgroundColor: AppColors.greyLight,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
-          child: Text(AppLocalizations.of(context).continueButton,
+          child: FittedBox(
+            // Yazı sığmazsa küçültsün
+            fit: BoxFit.scaleDown,
+            child: Text(
+              AppLocalizations.of(context).continueButton,
               style: GoogleFonts.inter(
-                  fontSize: 16.sp, fontWeight: FontWeight.w700)),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ),
       ),
     );
