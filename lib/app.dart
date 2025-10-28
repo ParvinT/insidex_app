@@ -6,6 +6,7 @@ import 'core/themes/app_theme.dart';
 import 'core/routes/app_routes.dart';
 import 'providers/theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:device_preview/device_preview.dart';
 import 'l10n/app_localizations.dart';
 import 'providers/locale_provider.dart';
 
@@ -27,7 +28,8 @@ class InsidexApp extends StatelessWidget {
               return MaterialApp(
                 title: 'INSIDEX',
                 debugShowCheckedModeBanner: false,
-                locale: localeProvider.locale,
+                useInheritedMediaQuery: true,
+                locale: DevicePreview.locale(context) ?? localeProvider.locale,
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,
@@ -42,6 +44,7 @@ class InsidexApp extends StatelessWidget {
                 initialRoute: AppRoutes.splash,
                 routes: AppRoutes.routes,
                 builder: (context, child) {
+                  child = DevicePreview.appBuilder(context, child);
                   return ResponsiveBreakpoints.builder(
                     child: child!,
                     breakpoints: [
