@@ -17,6 +17,7 @@ import 'services/device_session_service.dart';
 import 'providers/locale_provider.dart';
 import 'package:flutter/foundation.dart';
 
+
 @pragma('vm:entry-point')
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   debugPrint('[BackgroundFetch] Headless çalışıyor');

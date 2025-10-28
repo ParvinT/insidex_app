@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_colors.dart';
+import '../../shared/widgets/session_card.dart';
 import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -177,7 +177,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
             }
 
             if (snapshot.hasError) {
-              print('Error: ${snapshot.error}');
+              debugPrint('Error: ${snapshot.error}');
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -252,191 +252,24 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
     required String sessionId,
     required Map<String, dynamic> sessionData,
   }) {
-    return GestureDetector(
+    // Yeni SessionCard widget'ını kullan
+    return SessionCard(
+      session: sessionData,
       onTap: () {
-        // Prepare complete session data for audio player
-        final completeSessionData = {
-          'id': sessionId,
-          ...sessionData,
-        };
+        // Prepare complete session data with ID
+        final completeSessionData = Map<String, dynamic>.from(sessionData);
+        completeSessionData['id'] = sessionId;
 
-        // Navigate to Audio Player
+        // Navigate to audio player
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AudioPlayerScreen(
+            builder: (_) => AudioPlayerScreen(
               sessionData: completeSessionData,
             ),
           ),
         );
       },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Image Section
-            Container(
-              height: 180.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16.r),
-                  topRight: Radius.circular(16.r),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.textPrimary.withOpacity(0.8),
-                    AppColors.textPrimary.withOpacity(0.4),
-                  ],
-                ),
-              ),
-              child: Stack(
-                children: [
-                  // Background Image or Emoji - ESKİSİ GİBİ
-                  if (sessionData['backgroundImage'] != null &&
-                      sessionData['backgroundImage'].toString().isNotEmpty)
-                    ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16.r),
-                        topRight: Radius.circular(16.r),
-                      ),
-                      child: CachedNetworkImage(
-                        imageUrl: sessionData['backgroundImage'],
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.textPrimary.withOpacity(0.8),
-                                AppColors.textPrimary.withOpacity(0.4),
-                              ],
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.textPrimary.withOpacity(0.8),
-                                AppColors.textPrimary.withOpacity(0.4),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    // Resim yoksa sadece gradient göster, emoji yok
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(16.r),
-                          topRight: Radius.circular(16.r),
-                        ),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.textPrimary.withOpacity(0.8),
-                            AppColors.textPrimary.withOpacity(0.4),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // Play Button Overlay
-                  Center(
-                    child: Container(
-                      width: 56.w,
-                      height: 56.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.play_arrow,
-                        size: 32.sp,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Content Section - SADECE BAŞLIK VE KATEGORİ
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Row(
-                children: [
-                  // Title
-                  Expanded(
-                    child: Text(
-                      sessionData['title'] ??
-                          AppLocalizations.of(context).untitledSession,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(width: 8.w),
-
-                  // Category Badge
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.textPrimary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Text(
-                      sessionData['category'] ??
-                          AppLocalizations.of(context).general,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

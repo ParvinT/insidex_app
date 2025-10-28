@@ -7,12 +7,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
 import 'dart:async';
 import '../../core/constants/app_colors.dart';
 import '../player/audio_player_screen.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/session_card.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -88,7 +88,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         _recentSessions = await _fetchSessions(recentIds);
       }
     } catch (e) {
-      print('Error loading playlists: $e');
+      debugPrint('Error loading playlists: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -149,7 +149,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           sessions.add(data);
         }
       } catch (e) {
-        print('Error fetching session $sessionId: $e');
+        debugPrint('Error fetching session $sessionId: $e');
       }
     }
     return sessions;
@@ -185,7 +185,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         ),
       );
     } catch (e) {
-      print('Error adding to playlist: $e');
+      debugPrint('Error adding to playlist: $e');
 
       setState(() {
         _myPlaylistSessions.removeWhere((s) => s['id'] == sessionId);
@@ -213,7 +213,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         ),
       );
     } catch (e) {
-      print('Error removing from playlist: $e');
+      debugPrint('Error removing from playlist: $e');
     }
   }
 
@@ -263,7 +263,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         ),
       );
     } catch (e) {
-      print('Error toggling favorite: $e');
+      debugPrint('Error toggling favorite: $e');
 
       setState(() {
         if (!isCurrentlyFavorite) {
@@ -303,7 +303,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         'playlistSessionIds': newOrder,
       });
     } catch (e) {
-      print('Error reordering playlist: $e');
+      debugPrint('Error reordering playlist: $e');
     }
   }
 
@@ -660,250 +660,27 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     VoidCallback? onToggleFavorite,
     VoidCallback? onAddToPlaylist,
   }) {
-    return GestureDetector(
+    // Yeni SessionCard widget'ını kullan
+    return SessionCard(
+      session: session,
+      index: index,
+      showIndex: index != null,
+      isFavorite: isFavorite,
+      showFavoriteButton: onToggleFavorite != null,
+      showRemoveButton: showRemoveButton && onRemove != null,
+      showAddToPlaylist: showAddToPlaylist && onAddToPlaylist != null,
+      onToggleFavorite: onToggleFavorite,
+      onRemove: onRemove,
+      onAddToPlaylist: onAddToPlaylist,
       onTap: () {
+        // Navigate to audio player
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AudioPlayerScreen(sessionData: session),
+            builder: (_) => AudioPlayerScreen(sessionData: session),
           ),
         );
       },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Image Section with Actions
-            Container(
-              height: 180.h,
-              child: Stack(
-                children: [
-                  // Background Image or Gradient
-                  ClipRRect(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16.r),
-                      topRight: Radius.circular(16.r),
-                    ),
-                    child: session['backgroundImage'] != null &&
-                            session['backgroundImage'].toString().isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: session['backgroundImage'],
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.textPrimary.withOpacity(0.8),
-                                    AppColors.textPrimary.withOpacity(0.4),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            errorWidget: (context, url, error) => Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    AppColors.textPrimary.withOpacity(0.8),
-                                    AppColors.textPrimary.withOpacity(0.4),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          )
-                        : Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  AppColors.textPrimary.withOpacity(0.8),
-                                  AppColors.textPrimary.withOpacity(0.4),
-                                ],
-                              ),
-                            ),
-                          ),
-                  ),
-
-                  // Dark overlay for better contrast
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16.r),
-                        topRight: Radius.circular(16.r),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.3),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Play Button
-                  Center(
-                    child: Container(
-                      width: 56.w,
-                      height: 56.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.play_arrow,
-                        size: 32.sp,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-
-                  // Action Buttons (Top Right)
-                  Positioned(
-                    top: 12.h,
-                    right: 12.w,
-                    child: Row(
-                      children: [
-                        // Favorite Button
-                        if (onToggleFavorite != null)
-                          _buildActionButton(
-                            icon: isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: isFavorite ? Colors.redAccent : Colors.white,
-                            onTap: onToggleFavorite,
-                          ),
-
-                        if (onToggleFavorite != null &&
-                            (showRemoveButton || showAddToPlaylist))
-                          SizedBox(width: 8.w),
-
-                        // Remove from Playlist
-                        if (showRemoveButton && onRemove != null)
-                          _buildActionButton(
-                            icon: Icons.remove_circle_outline,
-                            color: Colors.white,
-                            onTap: onRemove,
-                          ),
-
-                        // Add to Playlist
-                        if (showAddToPlaylist && onAddToPlaylist != null)
-                          _buildActionButton(
-                            icon: Icons.playlist_add,
-                            color: Colors.white,
-                            onTap: onAddToPlaylist,
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Content Section
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title and Category
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          session['title'] ??
-                              AppLocalizations.of(context).untitledSession,
-                          style: GoogleFonts.inter(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      // Category Badge
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 12.w,
-                          vertical: 6.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.textPrimary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: Text(
-                          session['category'] ??
-                              AppLocalizations.of(context).general,
-                          style: GoogleFonts.inter(
-                            fontSize: 12.sp,
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18.r),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-          child: Container(
-            width: 36.w,
-            height: 36.w,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.3),
-            ),
-            child: Icon(
-              icon,
-              size: 20.sp,
-              color: color,
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -912,108 +689,28 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     required Map<String, dynamic> session,
     required int index,
   }) {
+    final isFavorite = _favoriteSessions.any((s) => s['id'] == session['id']);
+
     return ReorderableDragStartListener(
       key: key,
       index: index,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: AppColors.textPrimary, // Siyaha değiştirildi
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1), // Siyah gölge
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+      child: SessionCard(
+        session: session,
+        index: index + 1,
+        showIndex: true,
+        isFavorite: isFavorite,
+        showFavoriteButton: true,
+        showRemoveButton: true,
+        onToggleFavorite: () => _toggleFavorite(session['id'], isFavorite),
+        onRemove: () => _removeFromPlaylist(session['id']),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => AudioPlayerScreen(sessionData: session),
             ),
-          ],
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(16.w),
-          child: Row(
-            children: [
-              // Drag handle
-              Icon(
-                Icons.drag_handle,
-                color: AppColors.textPrimary, // Siyah
-                size: 24.sp,
-              ),
-              SizedBox(width: 12.w),
-
-              // Index
-              Container(
-                width: 32.w,
-                height: 32.w,
-                decoration: BoxDecoration(
-                  color: AppColors.greyLight,
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Center(
-                  child: Text(
-                    '${index + 1}',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(width: 12.w),
-
-              // Session info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      session['title'] ?? AppLocalizations.of(context).untitled,
-                      style: GoogleFonts.inter(
-                        fontSize: 15.sp, // Biraz küçültüldü
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: 2.h),
-                    Text(
-                      session['category'] ??
-                          AppLocalizations.of(context).general,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(width: 12.w), // Ekstra boşluk
-              // Remove button
-              GestureDetector(
-                onTap: () => _removeFromPlaylist(session['id']),
-                child: Container(
-                  width: 36.w,
-                  height: 36.w,
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Icon(
-                    Icons.delete_outline,
-                    size: 18.sp,
-                    color: Colors.red,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+          );
+        },
       ),
     );
   }

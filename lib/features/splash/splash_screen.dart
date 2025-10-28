@@ -10,6 +10,7 @@ import '../../core/constants/app_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/auth_persistence_service.dart';
+import '../../services/image_prefetch_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -32,7 +33,8 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _initAnimations();
     _startAnimations();
-    _checkAuthAndNavigate(); // sadece yönlendirme mantığı güncellendi
+    _checkAuthAndNavigate();
+    ImagePrefetchService.prefetchPopularSessions(limit: 20);
   }
 
   void _initAnimations() {
@@ -80,74 +82,74 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
 
-      print('========== AUTH CHECK START ==========');
+      debugPrint('========== AUTH CHECK START ==========');
 
       try {
         // Firebase user kontrolü
         User? firebaseUser = FirebaseAuth.instance.currentUser;
-        print('Firebase User: ${firebaseUser?.email ?? "NULL"}');
+        debugPrint('Firebase User: ${firebaseUser?.email ?? "NULL"}');
 
         // Saved session kontrolü
         final hasSession = await AuthPersistenceService.hasValidSession();
-        print('Has Valid Session: $hasSession');
+        debugPrint('Has Valid Session: $hasSession');
 
         // SharedPreferences'ı direkt kontrol et
         final prefs = await SharedPreferences.getInstance();
-        print('Saved Email: ${prefs.getString('user_email') ?? "NULL"}');
-        print(
+        debugPrint('Saved Email: ${prefs.getString('user_email') ?? "NULL"}');
+        debugPrint(
             'Saved Token: ${prefs.getString('fb_auth_token')?.substring(0, 20) ?? "NULL"}...');
-        print('Token Timestamp: ${prefs.getInt('token_timestamp') ?? 0}');
+        debugPrint('Token Timestamp: ${prefs.getInt('token_timestamp') ?? 0}');
 
         if (hasSession) {
-          print('Valid session found, checking Firebase user...');
+          debugPrint('Valid session found, checking Firebase user...');
 
           if (firebaseUser != null) {
-            print('Firebase user exists, refreshing token...');
+            debugPrint('Firebase user exists, refreshing token...');
 
             try {
               await firebaseUser.reload();
               final token = await firebaseUser.getIdToken();
-              print('Token refresh successful');
+              debugPrint('Token refresh successful');
 
               if (mounted) {
-                print('Navigating to HOME');
+                debugPrint('Navigating to HOME');
                 Navigator.pushReplacementNamed(context, AppRoutes.home);
                 return;
               }
             } catch (e) {
-              print('Token refresh failed: $e');
+              debugPrint('Token refresh failed: $e');
             }
           } else {
-            print('No Firebase user, trying auto login...');
+            debugPrint('No Firebase user, trying auto login...');
           }
         }
 
         // Auto login dene
-        print('Attempting auto sign-in...');
+        debugPrint('Attempting auto sign-in...');
         final user = await AuthPersistenceService.autoSignIn();
 
         if (user != null) {
-          print('Auto login successful: ${user.email}');
+          debugPrint('Auto login successful: ${user.email}');
           if (mounted) {
-            print('Navigating to HOME after auto login');
+            debugPrint('Navigating to HOME after auto login');
             Navigator.pushReplacementNamed(context, AppRoutes.home);
           }
         } else {
-          print('Auto login failed, going to onboarding');
+          debugPrint('Auto login failed, going to onboarding');
           if (mounted) {
-            print('Navigating to GOALS SCREEN');
+            debugPrint('Navigating to GOALS SCREEN');
             Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
           }
         }
       } catch (e) {
-        print('ERROR in auth check: $e');
-        print(e.toString());
+        debugPrint('ERROR in auth check: $e');
+        debugPrint(e.toString());
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
         }
       }
 
-      print('========== AUTH CHECK END ==========');
+      debugPrint('========== AUTH CHECK END ==========');
     });
   }
 

@@ -5,10 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
-import 'category_sessions_screen.dart'; // YENİ IMPORT
-import '../player/audio_player_screen.dart'; // AUDIO PLAYER IMPORT
+import 'category_sessions_screen.dart'; 
+import '../player/audio_player_screen.dart'; 
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import '../../shared/widgets/session_card.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -86,20 +86,16 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
     final bool isDesktop = width >= Breakpoints.desktopMin;
 
-// Geri ok alanı
     final double leadingWidth = isTablet ? 64 : 56;
     final double leadingPad = isTablet ? 12 : 8;
 
-// AppBar yüksekliği (logo rahat sığsın)
     final double toolbarH = isDesktop ? 64.0 : (isTablet ? 60.0 : 56.0);
 
-// WORDMARK için genişlik odaklı ölçüler (KARE DEĞİL!)
     final double logoW = isDesktop ? 120.0 : (isTablet ? 104.0 : 92.0);
-    final double logoH = toolbarH * 0.70; // yüksekliği AppBar’a göre türet
+    final double logoH = toolbarH * 0.70;
     final double dividerH = (logoH * 0.9).clamp(18.0, 36.0);
 
     final double _ts = mq.textScaleFactor.clamp(1.0, 1.2);
-    final double gutter = isDesktop ? 32 : (isTablet ? 24 : 16);
 
     return MediaQuery(
       data: mq.copyWith(textScaleFactor: _ts),
@@ -481,7 +477,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       session['id'] = sessionDoc.id;
     }
 
-    return GestureDetector(
+    return SessionCard(
+      session: session,
       onTap: () {
         // Navigate to Audio Player
         Navigator.push(
@@ -493,170 +490,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         );
       },
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16.h),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            // Image Section
-            Container(
-              height: 180.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16.r),
-                  topRight: Radius.circular(16.r),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.textPrimary.withOpacity(0.8),
-                    AppColors.textPrimary.withOpacity(0.4),
-                  ],
-                ),
-              ),
-              child: Stack(
-                children: [
-                  // Background Image
-                  if (session['backgroundImage'] != null &&
-                      session['backgroundImage'].toString().isNotEmpty)
-                    ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(16.r),
-                        topRight: Radius.circular(16.r),
-                      ),
-                      child: CachedNetworkImage(
-                        imageUrl: session['backgroundImage'],
-                        width: double.infinity,
-                        height: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.textPrimary.withOpacity(0.8),
-                                AppColors.textPrimary.withOpacity(0.4),
-                              ],
-                            ),
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [
-                                AppColors.textPrimary.withOpacity(0.8),
-                                AppColors.textPrimary.withOpacity(0.4),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            AppColors.textPrimary.withOpacity(0.8),
-                            AppColors.textPrimary.withOpacity(0.4),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                  // Play Button Overlay
-                  Positioned(
-                    bottom: 12.h,
-                    right: 12.w,
-                    child: Container(
-                      width: 48.w,
-                      height: 48.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.play_arrow_rounded,
-                        color: AppColors.textPrimary,
-                        size: 28.sp,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Info Section - SIMPLIFIED
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Row(
-                children: [
-                  // Title
-                  Expanded(
-                    child: Text(
-                      session['title'] ??
-                          AppLocalizations.of(context).untitledSession,
-                      style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-
-                  SizedBox(width: 8.w),
-
-                  // Category Badge
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 10.w,
-                      vertical: 4.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.textPrimary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Text(
-                      session['category'] ??
-                          AppLocalizations.of(context).general,
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

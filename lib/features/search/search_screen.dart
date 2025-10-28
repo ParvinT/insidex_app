@@ -9,6 +9,7 @@ import '../../core/responsive/context_ext.dart';
 import 'search_service.dart';
 import '../library/category_sessions_screen.dart';
 import '../player/audio_player_screen.dart';
+import '../../shared/widgets/session_card.dart';
 import 'search_history_service.dart';
 import 'widgets/search_history_view.dart';
 
@@ -533,17 +534,17 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildSessionCard(Map<String, dynamic> session, bool isTablet) {
-    // Get session data - use 'title' not 'name'
-    final sessionTitle = session['title']?.toString() ?? 'Untitled';
-    final sessionDescription = session['description']?.toString() ?? '';
-    final sessionDuration = session['duration'] ?? 0;
-
-    return GestureDetector(
+    // Yeni SessionCard widget'ını kullan
+    return SessionCard(
+      session: session,
       onTap: () async {
+        // Save search query to history
         if (_searchController.text.trim().isNotEmpty) {
           await _historyService.saveSearchQuery(_searchController.text.trim());
           await _loadSearchHistory();
         }
+
+        // Navigate to audio player
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -551,79 +552,6 @@ class _SearchScreenState extends State<SearchScreen>
           ),
         );
       },
-      child: Container(
-        padding: EdgeInsets.all(isTablet ? 16.w : 14.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
-          border: Border.all(
-            color: AppColors.greyBorder,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            // Session Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    sessionTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 16.sp : 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (sessionDescription.isNotEmpty) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      sessionDescription,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 13.sp : 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                  // Only show duration if > 0
-                  if (sessionDuration > 0) ...[
-                    SizedBox(height: 6.h),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: isTablet ? 14.sp : 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '$sessionDuration min',
-                          style: GoogleFonts.inter(
-                            fontSize: isTablet ? 12.sp : 11.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            // Play Icon
-            Icon(
-              Icons.play_circle_filled,
-              color: AppColors.textPrimary,
-              size: isTablet ? 36.sp : 32.sp,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
