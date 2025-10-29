@@ -9,9 +9,11 @@ import 'widgets/player_modals.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:marquee/marquee.dart';
+import 'package:provider/provider.dart';
 import 'widgets/session_info_modal.dart';
 import '../../services/listening_tracker_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/mini_player_provider.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -31,6 +33,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   // Service
   final AudioPlayerService _audioService = AudioPlayerService();
+
+  MiniPlayerProvider? _miniPlayerProvider;
 
   // UI State
   bool _isPlaying = false;
@@ -61,6 +65,38 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   StreamSubscription<int?>? _sleepTimerSub;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (_miniPlayerProvider == null) {
+      _miniPlayerProvider = context.read<MiniPlayerProvider>();
+
+      // ✅ SMOOTH TRANSITION: Sadece AYNI session için state yükle
+      final miniPlayer = _miniPlayerProvider!;
+      final isSameSession = miniPlayer.hasActiveSession &&
+          miniPlayer.currentSession?['id'] == widget.sessionData?['id'];
+
+      if (isSameSession && miniPlayer.position > Duration.zero) {
+        _currentTrack = miniPlayer.currentTrack;
+        _currentPosition = miniPlayer.position;
+        _totalDuration = miniPlayer.duration;
+        _isPlaying = miniPlayer.isPlaying;
+
+        if (_totalDuration.inMilliseconds > 0) {
+          _currentProgress =
+              (_currentPosition.inMilliseconds / _totalDuration.inMilliseconds)
+                  .clamp(0.0, 1.0);
+        }
+
+        debugPrint(
+            '✨ Pre-loaded state for same session: ${_currentPosition.inSeconds}s');
+      } else {
+        debugPrint('🆕 New session or no mini player state');
+      }
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
 
@@ -79,6 +115,84 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _addToRecentSessions();
     _checkFavoriteStatus();
     _checkPlaylistStatus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MiniPlayerProvider>().hide();
+
+      _restoreStateFromMiniPlayer();
+    });
+  }
+
+  Future<void> _restoreStateFromMiniPlayer() async {
+    final miniPlayer = _miniPlayerProvider;
+
+    if (miniPlayer == null || !miniPlayer.hasActiveSession) {
+      await _playCurrentTrack();
+      return;
+    }
+
+    final isSameSession =
+        miniPlayer.currentSession?['id'] == widget.sessionData?['id'];
+
+    if (!isSameSession) {
+      debugPrint('🆕 Different session, starting fresh');
+      await _playCurrentTrack();
+      return;
+    }
+
+    final miniPlayerPosition = miniPlayer.position;
+    final miniPlayerDuration = miniPlayer.duration;
+    final miniPlayerTrack = miniPlayer.currentTrack;
+    final wasPlaying = miniPlayer.isPlaying;
+
+    debugPrint('🔄 Restoring from mini player:');
+    debugPrint('   Position: ${miniPlayerPosition.inSeconds}s');
+    debugPrint('   Track: $miniPlayerTrack');
+    debugPrint('   Was playing: $wasPlaying');
+
+    // Set current track
+    setState(() {
+      _currentTrack = miniPlayerTrack;
+      _currentPosition = miniPlayerPosition;
+      _totalDuration = miniPlayerDuration;
+    });
+
+    // Get audio URL for current track
+    final String? audioUrl = _audioUrlFor(_currentTrack);
+
+    if (audioUrl == null || audioUrl.isEmpty) {
+      debugPrint('⚠️ No audio URL, starting fresh');
+      await _playCurrentTrack();
+      return;
+    }
+
+    try {
+      final resolved = await _audioService.playFromUrl(
+        audioUrl,
+        title: _titleFor(
+          _currentTrack,
+          fallback: _currentTrack == 'intro' ? 'Introduction' : 'Subliminal',
+        ),
+        artist: 'INSIDEX',
+      );
+
+      if (mounted && resolved != null) {
+        setState(() => _totalDuration = resolved);
+      }
+
+      if (miniPlayerPosition > Duration.zero) {
+        await _audioService.seek(miniPlayerPosition);
+        debugPrint('✅ Seeked to ${miniPlayerPosition.inSeconds}s');
+      }
+
+      if (!wasPlaying) {
+        await _audioService.pause();
+        debugPrint('⏸️ Paused (was paused in mini player)');
+      }
+    } catch (e) {
+      debugPrint('❌ Error restoring state: $e');
+      // Fallback: start fresh
+      await _playCurrentTrack();
+    }
   }
 
   Widget _buildScrollingText(String text, TextStyle style,
@@ -226,6 +340,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     _playingSub = _audioService.isPlaying.listen((playing) {
       if (!mounted) return;
+      context.read<MiniPlayerProvider>().setPlayingState(playing);
       setState(() => _isPlaying = playing);
       if (playing) {
         _eqController.repeat();
@@ -236,6 +351,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     _positionSub = _audioService.position.listen((pos) {
       if (!mounted) return;
+      context.read<MiniPlayerProvider>().updatePosition(pos);
       setState(() {
         _currentPosition = pos;
         final totalMs = _totalDuration.inMilliseconds;
@@ -256,7 +372,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     _durationSub = _audioService.duration.listen((d) {
       if (!mounted) return;
-      if (d != null) setState(() => _totalDuration = d);
+      if (d != null) {
+        context.read<MiniPlayerProvider>().updateDuration(d);
+        setState(() => _totalDuration = d);
+      }
     });
 
     _playerStateSub = _audioService.playerState.listen((state) {
@@ -282,6 +401,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _isTracking = false;
       }
     });
+    _playCurrentTrack();
   }
 
   Future<void> _togglePlayPause() async {
@@ -427,20 +547,34 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _durationSub?.cancel();
     _playerStateSub?.cancel();
     _eqController.dispose();
-    _audioService.dispose();
     _sleepTimerSub?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) return;
+
+        debugPrint('🔙 [AudioPlayer] PopScope triggered');
+
         if (_isTracking) {
           await ListeningTrackerService.endSession();
-          print('Session tracking ended on back press');
+          debugPrint('Session tracking ended on back press');
         }
-        return true;
+
+        if (_miniPlayerProvider != null) {
+          debugPrint(
+              '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}');
+          _miniPlayerProvider!.playSession(_session);
+          _miniPlayerProvider!.show();
+          debugPrint(
+              '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}');
+        } else {
+          debugPrint('❌ Mini player provider is null');
+        }
       },
       child: Scaffold(
         backgroundColor: Colors.white,

@@ -8,6 +8,7 @@ import 'package:background_fetch/background_fetch.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/mini_player_provider.dart';
 import 'services/audio_player_service.dart';
 import 'app.dart';
 import 'providers/notification_provider.dart';
@@ -43,24 +44,24 @@ void main() async {
   // Notification Service
   try {
     await NotificationService().initialize();
-    print('Notification Service initialized successfully');
+    debugPrint('Notification Service initialized successfully');
   } catch (e) {
-    print('Notification Service initialization error: $e');
+    debugPrint('Notification Service initialization error: $e');
   }
 
   try {
     DeviceSessionService().initializeTokenRefreshListener();
-    print('FCM Token Refresh Listener initialized');
+    debugPrint('FCM Token Refresh Listener initialized');
   } catch (e) {
-    print('FCM Token Refresh error: $e');
+    debugPrint('FCM Token Refresh error: $e');
   }
 
   // Audio Service'i başlat - Basit versiyon
   try {
     await AudioPlayerService().initialize();
-    print('Audio Service initialized successfully');
+    debugPrint('Audio Service initialized successfully');
   } catch (e) {
-    print('Audio Service initialization error: $e');
+    debugPrint('Audio Service initialization error: $e');
   }
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -86,6 +87,7 @@ void main() async {
               create: (_) => UserProvider()..initAuthListener()),
           ChangeNotifierProvider(
               create: (_) => NotificationProvider()..initialize()),
+          ChangeNotifierProvider(create: (_) => MiniPlayerProvider()),
         ],
         child: const InsidexApp(),
       ),

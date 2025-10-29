@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'core/themes/app_theme.dart';
 import 'core/routes/app_routes.dart';
+import 'core/navigation/main_navigation_wrapper.dart';
 import 'providers/theme_provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:device_preview/device_preview.dart';
@@ -45,8 +46,9 @@ class InsidexApp extends StatelessWidget {
                 routes: AppRoutes.routes,
                 builder: (context, child) {
                   child = DevicePreview.appBuilder(context, child);
+                  child = MainNavigationWrapper(child: child);
                   return ResponsiveBreakpoints.builder(
-                    child: child!,
+                    child: child,
                     breakpoints: [
                       const Breakpoint(start: 0, end: 450, name: MOBILE),
                       const Breakpoint(start: 451, end: 800, name: TABLET),

@@ -8,6 +8,9 @@ import 'package:just_audio/just_audio.dart';
 /// - Built-in sleep timer (set/cancel + stream)
 /// - Transient network errors are retried once (e.g., "Connection aborted")
 class AudioPlayerService {
+  static final AudioPlayerService _instance = AudioPlayerService._internal();
+  factory AudioPlayerService() => _instance;
+  AudioPlayerService._internal();
   final AudioPlayer _player = AudioPlayer();
 
   // Race guard for async loads: only the latest load may win.
