@@ -6,15 +6,15 @@ import 'dart:io';
 
 class AppCacheManager {
   static const key = 'insidexImageCache';
-  
+
   static CacheManager? _instance;
 
   static CacheManager get instance {
     _instance ??= CacheManager(
       Config(
         key,
-        stalePeriod: const Duration(days: 7), // 7 gün cache
-        maxNrOfCacheObjects: 200, // Max 200 image
+        stalePeriod: const Duration(days: 20),
+        maxNrOfCacheObjects: 300,
         repo: JsonCacheInfoRepository(databaseName: key),
         fileService: HttpFileService(),
       ),
@@ -25,7 +25,7 @@ class AppCacheManager {
   /// Tek bir image'ı cache'e al
   static Future<void> precacheImage(String? imageUrl) async {
     if (imageUrl == null || imageUrl.isEmpty) return;
-    
+
     try {
       await instance.downloadFile(imageUrl);
     } catch (e) {
@@ -61,16 +61,16 @@ class AppCacheManager {
     try {
       final directory = await getTemporaryDirectory();
       final cacheDir = Directory('${directory.path}/$key');
-      
+
       if (!await cacheDir.exists()) return '0 MB';
-      
+
       int totalSize = 0;
       await for (final file in cacheDir.list(recursive: true)) {
         if (file is File) {
           totalSize += await file.length();
         }
       }
-      
+
       final sizeInMB = totalSize / (1024 * 1024);
       return '${sizeInMB.toStringAsFixed(2)} MB';
     } catch (e) {

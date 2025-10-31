@@ -279,13 +279,12 @@ class SessionCard extends StatelessWidget {
               ),
             ),
 
-            // 3. PLAY BUTTON (en üstte - centered!)
+            // 3. PLAY BUTTON
             Center(
-              // ← Artık SizedBox height var, Center çalışacak!
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () {},
+                  onTap: onTap,
                   borderRadius: BorderRadius.circular(100),
                   splashColor: Colors.white.withOpacity(0.3),
                   child: Container(
@@ -353,27 +352,35 @@ class SessionCard extends StatelessWidget {
             ),
             // Play button
             Center(
-              child: Container(
-                width: playButtonSize,
-                height: playButtonSize,
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: onTap, 
+                  borderRadius: BorderRadius.circular(100),
+                  splashColor: Colors.white.withOpacity(0.3),
+                  child: Container(
+                    width: playButtonSize,
+                    height: playButtonSize,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.play_arrow,
-                  size: playIconSize,
-                  color: AppColors.textPrimary,
+                    child: Icon(
+                      Icons.play_arrow,
+                      size: playIconSize,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
               ),
-            ),
+            )
           ],
         ),
       ),

@@ -111,7 +111,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           },
         };
 
-    _initializeAudio();
+    _setupStreamListeners();
     _addToRecentSessions();
     _checkFavoriteStatus();
     _checkPlaylistStatus();
@@ -126,7 +126,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     final miniPlayer = _miniPlayerProvider;
 
     if (miniPlayer == null || !miniPlayer.hasActiveSession) {
-      await _playCurrentTrack();
+      await _initializeAudio(); // ← İLK KEZ BAŞLATIYORUZ
       return;
     }
 
@@ -135,64 +135,39 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     if (!isSameSession) {
       debugPrint('🆕 Different session, starting fresh');
-      await _playCurrentTrack();
+      await _initializeAudio(); // ← FARKLI SESSION, YENİ BAŞLAT
       return;
     }
 
+    // ✅ AYNI SESSION - SADECE STATE'İ RESTORE ET, AUDIO'YU DOKUNMA!
     final miniPlayerPosition = miniPlayer.position;
     final miniPlayerDuration = miniPlayer.duration;
     final miniPlayerTrack = miniPlayer.currentTrack;
     final wasPlaying = miniPlayer.isPlaying;
 
-    debugPrint('🔄 Restoring from mini player:');
+    debugPrint('🔄 Restoring from mini player (SMOOTH):');
     debugPrint('   Position: ${miniPlayerPosition.inSeconds}s');
     debugPrint('   Track: $miniPlayerTrack');
     debugPrint('   Was playing: $wasPlaying');
 
-    // Set current track
     setState(() {
       _currentTrack = miniPlayerTrack;
       _currentPosition = miniPlayerPosition;
       _totalDuration = miniPlayerDuration;
+      _isPlaying = wasPlaying;
+      if (_totalDuration.inMilliseconds > 0) {
+        _currentProgress =
+            (_currentPosition.inMilliseconds / _totalDuration.inMilliseconds)
+                .clamp(0.0, 1.0);
+      }
     });
 
-    // Get audio URL for current track
-    final String? audioUrl = _audioUrlFor(_currentTrack);
-
-    if (audioUrl == null || audioUrl.isEmpty) {
-      debugPrint('⚠️ No audio URL, starting fresh');
-      await _playCurrentTrack();
-      return;
+    // ✅ Equalizer'ı sync et
+    if (wasPlaying) {
+      _eqController.repeat();
     }
 
-    try {
-      final resolved = await _audioService.playFromUrl(
-        audioUrl,
-        title: _titleFor(
-          _currentTrack,
-          fallback: _currentTrack == 'intro' ? 'Introduction' : 'Subliminal',
-        ),
-        artist: 'INSIDEX',
-      );
-
-      if (mounted && resolved != null) {
-        setState(() => _totalDuration = resolved);
-      }
-
-      if (miniPlayerPosition > Duration.zero) {
-        await _audioService.seek(miniPlayerPosition);
-        debugPrint('✅ Seeked to ${miniPlayerPosition.inSeconds}s');
-      }
-
-      if (!wasPlaying) {
-        await _audioService.pause();
-        debugPrint('⏸️ Paused (was paused in mini player)');
-      }
-    } catch (e) {
-      debugPrint('❌ Error restoring state: $e');
-      // Fallback: start fresh
-      await _playCurrentTrack();
-    }
+    debugPrint('✅ Smooth transition completed - NO audio interruption');
   }
 
   Widget _buildScrollingText(String text, TextStyle style,
@@ -335,8 +310,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         : const Duration(hours: 2);
   }
 
-  Future<void> _initializeAudio() async {
-    await _audioService.initialize();
+  Future<void> _setupStreamListeners() async {
+    // Cancel existing subscriptions first
+    await _playingSub?.cancel();
+    await _positionSub?.cancel();
+    await _durationSub?.cancel();
+    await _playerStateSub?.cancel();
+    await _sleepTimerSub?.cancel();
 
     _playingSub = _audioService.isPlaying.listen((playing) {
       if (!mounted) return;
@@ -356,16 +336,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _currentPosition = pos;
         final totalMs = _totalDuration.inMilliseconds;
         if (totalMs > 0) {
-          _currentProgress = (_currentPosition.inMilliseconds / totalMs).clamp(
-            0.0,
-            1.0,
-          );
-        } else {
-          final fb = _fallbackDurationFor(_currentTrack);
-          _currentProgress = (pos.inMilliseconds / fb.inMilliseconds).clamp(
-            0.0,
-            1.0,
-          );
+          _currentProgress =
+              (_currentPosition.inMilliseconds / totalMs).clamp(0.0, 1.0);
         }
       });
     });
@@ -393,15 +365,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _sleepTimerSub = _audioService.sleepTimer.listen((m) {
       if (!mounted) return;
       setState(() => _sleepTimerMinutes = m);
-
       if (m == null && _isTracking) {
-        ListeningTrackerService.endSession().then((_) {
-          print('Session ended due to sleep timer');
-        });
+        ListeningTrackerService.endSession();
         _isTracking = false;
       }
     });
-    _playCurrentTrack();
+  }
+
+  Future<void> _initializeAudio() async {
+    await _audioService.initialize();
+    await _setupStreamListeners();
+    await _playCurrentTrack();
   }
 
   Future<void> _togglePlayPause() async {

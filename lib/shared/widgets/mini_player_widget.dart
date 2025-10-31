@@ -149,21 +149,23 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       onVerticalDragUpdate: (details) {
         setState(() {
           _dragOffset += details.delta.dy;
-          final screenHeight = MediaQuery.of(context).size.height;
-          _dragOffset = _dragOffset.clamp(-screenHeight + 200.0, 250.0);
+          _dragOffset = _dragOffset.clamp(-200.0, 200.0);
         });
       },
       onVerticalDragEnd: (details) {
         _handleDragEnd(context, details);
       },
-      child: SlideTransition(
-        position: _slideAnimation,
-        child: Container(
-          width: double.infinity,
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: _buildMiniPlayerContent(context, miniPlayer, height, isTablet),
-        ),
-      ),
+      child: Transform.translate(
+          offset: Offset(0, _dragOffset),
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Container(
+              width: double.infinity,
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: _buildMiniPlayerContent(
+                  context, miniPlayer, height, isTablet),
+            ),
+          )),
     );
   }
 
@@ -299,38 +301,45 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   Widget _buildSessionImage(MiniPlayerProvider miniPlayer) {
     final imageUrl = miniPlayer.sessionImageUrl;
 
-    return Container(
-      width: 48.w,
-      height: 48.w,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.r),
-        color: AppColors.greyLight,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8.r),
-        child: imageUrl != null
-            ? CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (_, __) => Container(
-                  color: AppColors.greyLight,
-                  child: Icon(
+    return GestureDetector(
+      // ← EKLENDI
+      onTap: () {
+        debugPrint('🎯 [MiniPlayer] Image tapped - opening full player');
+        _openFullPlayer(context);
+      },
+      child: Container(
+        width: 48.w,
+        height: 48.w,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.r),
+          color: AppColors.greyLight,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.r),
+          child: imageUrl != null
+              ? CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(
+                    color: AppColors.greyLight,
+                    child: Icon(
+                      Icons.music_note,
+                      size: 24.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  errorWidget: (_, __, ___) => Icon(
                     Icons.music_note,
                     size: 24.sp,
                     color: AppColors.textSecondary,
                   ),
-                ),
-                errorWidget: (_, __, ___) => Icon(
+                )
+              : Icon(
                   Icons.music_note,
                   size: 24.sp,
                   color: AppColors.textSecondary,
                 ),
-              )
-            : Icon(
-                Icons.music_note,
-                size: 24.sp,
-                color: AppColors.textSecondary,
-              ),
+        ),
       ),
     );
   }

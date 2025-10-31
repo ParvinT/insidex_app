@@ -7,7 +7,7 @@ import 'cache_manager_service.dart';
 class ImagePrefetchService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  static Future<void> prefetchPopularSessions({int limit = 20}) async {
+  static Future<void> prefetchPopularSessions({int limit = 50}) async {
     try {
       debugPrint('🔄 Starting image prefetch...');
 
@@ -57,7 +57,7 @@ class ImagePrefetchService {
       final snapshot = await _firestore
           .collection('sessions')
           .where('category', isEqualTo: categoryTitle)
-          .limit(15)
+          .limit(30)
           .get();
 
       final imageUrls = snapshot.docs

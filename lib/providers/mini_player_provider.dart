@@ -229,7 +229,7 @@ class MiniPlayerProvider extends ChangeNotifier {
 
   /// Get session image URL safely
   String? get sessionImageUrl {
-    return _currentSession?['imageUrl'];
+    return _currentSession?['backgroundImage'];
   }
 
   /// Check if session is active
