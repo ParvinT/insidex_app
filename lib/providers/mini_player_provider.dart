@@ -14,6 +14,9 @@ class MiniPlayerProvider extends ChangeNotifier {
   bool _isPlaying = false;
   bool get isPlaying => _isPlaying;
 
+  bool _isAtTop = false;
+  bool get isAtTop => _isAtTop;
+
   Duration _position = Duration.zero;
   Duration get position => _position;
 
@@ -132,6 +135,7 @@ class MiniPlayerProvider extends ChangeNotifier {
     _currentSession = null;
     _isVisible = false;
     _isExpanded = false;
+    _isAtTop = false;
     _position = Duration.zero;
     _duration = Duration.zero;
     _isPlaying = false;
@@ -155,6 +159,21 @@ class MiniPlayerProvider extends ChangeNotifier {
   /// Collapse mini player controls
   void collapse() {
     _isExpanded = false;
+    notifyListeners();
+  }
+
+  // =================== POSITION CONTROL ===================  // ✅ YENİ BÖLÜM
+
+  /// Set mini player at top
+  void setAtTop(bool value) {
+    _isAtTop = value;
+    debugPrint('[MiniPlayer] Position: ${value ? "TOP" : "BOTTOM"}');
+    notifyListeners();
+  }
+
+  /// Toggle position (top/bottom)
+  void togglePosition() {
+    _isAtTop = !_isAtTop;
     notifyListeners();
   }
 

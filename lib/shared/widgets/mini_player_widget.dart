@@ -40,7 +40,6 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   // Drag state
   double _dragOffset = 0.0;
   bool _isDragging = false;
-  bool _isAtTop = false;
 
   @override
   void initState() {
@@ -151,27 +150,18 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         setState(() {
           _dragOffset += details.delta.dy;
           final screenHeight = MediaQuery.of(context).size.height;
-          _dragOffset = _dragOffset.clamp(-screenHeight + 200.0, 0.0);
+          _dragOffset = _dragOffset.clamp(-screenHeight + 200.0, 250.0);
         });
       },
       onVerticalDragEnd: (details) {
-        _handleDragEnd(context);
+        _handleDragEnd(context, details);
       },
-      child: AnimatedAlign(
-        duration: Duration(milliseconds: _isDragging ? 0 : 300),
-        curve: Curves.easeOut,
-        alignment: _isAtTop ? Alignment.topCenter : Alignment.bottomCenter,
-        child: Transform.translate(
-          offset: Offset(0, _isDragging ? _dragOffset : 0),
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Container(
-              width: double.infinity,
-              constraints: BoxConstraints(maxWidth: maxWidth),
-              child: _buildMiniPlayerContent(
-                  context, miniPlayer, height, isTablet),
-            ),
-          ),
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Container(
+          width: double.infinity,
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: _buildMiniPlayerContent(context, miniPlayer, height, isTablet),
         ),
       ),
     );
@@ -196,8 +186,8 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       margin: EdgeInsets.only(
         left: isTablet ? 16.w : 8.w,
         right: isTablet ? 16.w : 8.w,
-        top: _isAtTop ? MediaQuery.of(context).padding.top + 8.h : 0,
-        bottom: _isAtTop ? 0 : 8.h,
+        top: miniPlayer.isAtTop ? MediaQuery.of(context).padding.top + 8.h : 0,
+        bottom: miniPlayer.isAtTop ? 0 : 8.h,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -206,7 +196,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
           BoxShadow(
               color: Colors.black.withOpacity(0.15),
               blurRadius: 12,
-              offset: Offset(0, _isAtTop ? 2 : -2)),
+              offset: Offset(0, miniPlayer.isAtTop ? 2 : -2)),
         ],
       ),
       child: Material(
@@ -268,7 +258,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
               if (miniPlayer.isExpanded)
                 AnimatedOpacity(
                   duration: const Duration(milliseconds: 200),
-                  opacity: miniPlayer.isExpanded ? 1.0 : 0.0,
+                  opacity: _isDragging && _dragOffset > 0
+                      ? (1.0 - (_dragOffset / 200.0)).clamp(0.0, 1.0)
+                      : 1.0,
                   child: Padding(
                     padding: EdgeInsets.only(
                       left: 12.w,
@@ -574,28 +566,45 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     }
   }
 
-  void _handleDragEnd(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final threshold = screenHeight * 0.4; // %40 ekran yüksekliği
+  void _handleDragEnd(BuildContext context, DragEndDetails details) {
+    const upThreshold = 150.0;
+    const downThreshold = 100.0;
+    final provider = _miniPlayerProvider;
+
+    if (provider == null) return;
+
+    final velocity = details.primaryVelocity ?? 0.0;
+    final fastSwipeDown = velocity > 300;
+    final fastSwipeUp = velocity < -300;
+
+    final bool draggedUp = _dragOffset < -upThreshold || fastSwipeUp;
+    final bool draggedDown = _dragOffset > downThreshold || fastSwipeDown;
 
     setState(() {
       _isDragging = false;
-
-      if (_dragOffset < -threshold) {
-        // Yukarı sürüklendi, üste sabitle
-        _isAtTop = true;
-        _dragOffset = 0.0;
-        debugPrint('🔼 Mini player moved to TOP');
-      } else if (_dragOffset > -threshold && _dragOffset < 0) {
-        // Ortada bırakıldı, alta geri dön
-        _isAtTop = false;
-        _dragOffset = 0.0;
-        debugPrint('🔽 Mini player returned to BOTTOM');
-      } else {
-        // Zaten altta
-        _isAtTop = false;
-        _dragOffset = 0.0;
-      }
+      _dragOffset = 0.0;
     });
+
+    if (draggedDown && !provider.isAtTop) {
+      setState(() {
+        _isDragging = true;
+        _dragOffset = 300.0;
+      });
+
+      Future.delayed(const Duration(milliseconds: 300), () async {
+        if (mounted) {
+          await _audioService.stop();
+          provider.dismiss();
+          setState(() {
+            _isDragging = false;
+            _dragOffset = 0.0;
+          });
+        }
+      });
+    } else if (draggedUp && !provider.isAtTop) {
+      provider.setAtTop(true);
+    } else if (draggedDown && provider.isAtTop) {
+      provider.setAtTop(false);
+    } else {}
   }
 }
