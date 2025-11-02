@@ -15,6 +15,8 @@ import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
+import '../../services/audio_player_service.dart';
+import '../../providers/mini_player_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -156,6 +158,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldSignOut == true) {
+      debugPrint('🎵 [Profile] Stopping audio before logout...');
+      try {
+        final audioService = AudioPlayerService();
+        await audioService.stop();
+        debugPrint('✅ [Profile] Audio stopped');
+      } catch (e) {
+        debugPrint('⚠️ [Profile] Audio stop error: $e');
+      }
+
+      debugPrint('🎵 [Profile] Dismissing mini player...');
+      try {
+        final miniPlayerProvider = context.read<MiniPlayerProvider>();
+        miniPlayerProvider.dismiss();
+        debugPrint('✅ [Profile] Mini player dismissed');
+      } catch (e) {
+        debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
+      }
       await AuthPersistenceService.clearSession();
       await FirebaseAuth.instance.signOut();
       if (mounted) {

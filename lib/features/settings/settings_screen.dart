@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
 import '../../services/auth_persistence_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/audio_player_service.dart';
+import '../../providers/mini_player_provider.dart';
 import 'widgets/language_selector.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -23,8 +26,6 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   // Settings states
 
-  String _selectedTheme = 'Light';
-
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -35,7 +36,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final bool isShortWide =
         screenWidth >= 1024 && screenHeight <= 800; // Nest Hub (Max)
     final bool isDesktop = screenWidth >= 1024 && !isShortWide;
-    final currentUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -285,69 +285,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSwitchItem({
-    required IconData icon,
-    required String title,
-    String? subtitle,
-    required bool value,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      child: Row(
-        children: [
-          Container(
-            width: 40.w,
-            height: 40.w,
-            decoration: BoxDecoration(
-              color: AppColors.greyLight,
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Icon(
-              icon,
-              color: AppColors.textPrimary,
-              size: 20.sp,
-            ),
-          ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                if (subtitle != null) ...[
-                  SizedBox(height: 2.h),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w400,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: AppColors.textPrimary,
-            inactiveThumbColor: AppColors.textSecondary,
-            inactiveTrackColor: AppColors.greyLight,
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildDivider() {
     return Padding(
       padding: EdgeInsets.only(left: 76.w),
@@ -419,13 +356,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (shouldSignOut == true) {
       try {
-        // Her iki session sistemini de temizle
-        await AuthPersistenceService.clearSession(); // Token ve şifre temizliği
+        debugPrint('🎵 [Settings] Stopping audio before logout...');
+        try {
+          final audioService = AudioPlayerService();
+          await audioService.stop();
+          debugPrint('✅ [Settings] Audio stopped');
+        } catch (e) {
+          debugPrint('⚠️ [Settings] Audio stop error: $e');
+        }
 
-        // Firebase'den çıkış
+        debugPrint('🎵 [Settings] Dismissing mini player...');
+        try {
+          final miniPlayerProvider = context.read<MiniPlayerProvider>();
+          miniPlayerProvider.dismiss();
+          debugPrint('✅ [Settings] Mini player dismissed');
+        } catch (e) {
+          debugPrint('⚠️ [Settings] Mini player dismiss error: $e');
+        }
+
+        await AuthPersistenceService.clearSession();
+
         await FirebaseAuth.instance.signOut();
 
-        // Eski cache'leri de temizle (uyumluluk için)
         final prefs = await SharedPreferences.getInstance();
         await prefs.remove('has_logged_in');
         await prefs.remove('cached_user_id');
@@ -450,53 +402,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
       }
     }
-  }
-
-  void _showThemeDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          'Select Theme',
-          style: GoogleFonts.inter(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildThemeOption('Light'),
-            _buildThemeOption('Dark'),
-            _buildThemeOption('System'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThemeOption(String theme) {
-    return ListTile(
-      title: Text(
-        theme,
-        style: GoogleFonts.inter(
-          fontSize: 14.sp,
-          color: AppColors.textPrimary,
-        ),
-      ),
-      trailing: _selectedTheme == theme
-          ? Icon(Icons.check, color: AppColors.textPrimary, size: 20.sp)
-          : null,
-      onTap: () {
-        setState(() {
-          _selectedTheme = theme;
-        });
-        Navigator.pop(context);
-      },
-    );
   }
 }

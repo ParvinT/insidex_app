@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
 import '../app.dart';
 import '../services/device_session_service.dart';
 import '../shared/widgets/device_logout_dialog.dart';
 import '../services/auth_persistence_service.dart';
+import '../services/audio_player_service.dart';
+import 'mini_player_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   User? _firebaseUser;
@@ -182,6 +185,15 @@ class UserProvider extends ChangeNotifier {
   Future<void> _performLogout({bool forcedByOtherDevice = false}) async {
     _isShowingLogoutDialog = false;
 
+    debugPrint('🎵 [UserProvider] Stopping audio before logout...');
+    try {
+      final audioService = AudioPlayerService();
+      await audioService.stop();
+      debugPrint('✅ [UserProvider] Audio stopped');
+    } catch (e) {
+      debugPrint('⚠️ [UserProvider] Audio stop error: $e');
+    }
+
     // Clear device session
     if (_firebaseUser != null && !forcedByOtherDevice) {
       debugPrint('🧹 Clearing active device (user initiated logout)');
@@ -201,6 +213,19 @@ class UserProvider extends ChangeNotifier {
         '/auth/welcome',
         (route) => false,
       );
+      Future.delayed(const Duration(milliseconds: 100), () {
+        try {
+          final context = navigatorState.context;
+          final miniPlayerProvider = Provider.of<MiniPlayerProvider>(
+            context,
+            listen: false,
+          );
+          miniPlayerProvider.dismiss();
+          debugPrint('✅ [UserProvider] Mini player dismissed after logout');
+        } catch (e) {
+          debugPrint('⚠️ [UserProvider] Mini player dismiss error: $e');
+        }
+      });
     } else {
       debugPrint('❌ Cannot navigate to login - Navigator state is null');
     }
