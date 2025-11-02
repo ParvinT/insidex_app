@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
+import 'package:audio_session/audio_session.dart';
 
 /// Single-responsibility audio service.
 /// - Single AudioPlayer instance (prevents overlapping sounds)
@@ -30,6 +31,7 @@ class AudioPlayerService {
 
   Future<void> initialize() async {
     await _player.setVolume(0.7);
+    await _setupAudioSession();
   }
 
   Future<void> setVolume(double value) async =>
@@ -104,9 +106,54 @@ class AudioPlayerService {
     _sleepTimerCtrl.add(null);
   }
 
-  void dispose() {
+  // ---- Audio Session & Interruption Handling ----
+  Future<void> _setupAudioSession() async {
+    final session = await AudioSession.instance;
+
+    // Configure audio session for music playback
+    await session.configure(const AudioSessionConfiguration.music());
+
+    // Handle phone calls, alarms, other apps
+    session.interruptionEventStream.listen((event) {
+      if (event.begin) {
+        // Interruption started (phone call, alarm, etc.)
+        switch (event.type) {
+          case AudioInterruptionType.duck:
+            _player.setVolume(0.3);
+            break;
+          case AudioInterruptionType.pause:
+          case AudioInterruptionType.unknown:
+            // Pause playback
+            _player.pause();
+            break;
+        }
+      } else {
+        // Interruption ended
+        switch (event.type) {
+          case AudioInterruptionType.duck:
+            _player.setVolume(0.7);
+            break;
+          case AudioInterruptionType.pause:
+            break;
+          case AudioInterruptionType.unknown:
+            break;
+        }
+      }
+    });
+
+    // Handle headphone disconnection
+    session.becomingNoisyEventStream.listen((_) {
+      _player.pause();
+    });
+  }
+
+  Future<void> dispose() async {
     _sleepTimer?.cancel();
     _sleepTimerCtrl.close();
-    _player.dispose();
+
+    final session = await AudioSession.instance;
+    await session.setActive(false);
+
+    await _player.dispose();
   }
 }

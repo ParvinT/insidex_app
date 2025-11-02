@@ -57,6 +57,7 @@ dependencies:
   just_audio: ^0.10.4
   audio_service: ^0.18.18
   audio_video_progress_bar: ^2.0.3
+  audio_session: ^0.1.21
   rxdart: ^0.27.7
   cached_network_image: ^3.4.1
   flutter_cache_manager: ^3.4.1
