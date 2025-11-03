@@ -8,69 +8,64 @@ import '../services/notifications/daily_reminder_service.dart';
 import '../services/notifications/notification_sync_service.dart';
 
 class LocaleProvider extends ChangeNotifier {
-  Locale _locale = const Locale('en'); // Varsayılan İngilizce
+  Locale _locale = const Locale('en');
 
   Locale get locale => _locale;
 
-  // Desteklenen diller
   static const List<Locale> supportedLocales = [
     Locale('en'),
     Locale('ru'),
     Locale('tr'),
+    Locale('hi'),
   ];
 
-  // Provider başlatıldığında kaydedilmiş dili yükle
   LocaleProvider() {
     _loadSavedLocale();
   }
 
-  // Kaydedilmiş dili yükle
   Future<void> _loadSavedLocale() async {
     final prefs = await SharedPreferences.getInstance();
     final languageCode = prefs.getString('language_code');
 
     if (languageCode != null) {
-      // Kaydedilmiş dil varsa onu kullan
       _locale = Locale(languageCode);
+      debugPrint('🔵 Loaded saved language: $languageCode');
     } else {
-      // Yoksa sistem dilini kontrol et
       _locale = _getDeviceLocale();
+      debugPrint('🔵 Using device language: ${_locale.languageCode}');
     }
 
     notifyListeners();
   }
 
-  // Cihazın dilini al (destekleniyorsa)
   Locale _getDeviceLocale() {
-    // Platformun dilini al
     final deviceLocale = ui.PlatformDispatcher.instance.locale;
 
-    // Desteklenen diller arasında var mı kontrol et
     final isSupported = supportedLocales.any(
       (locale) => locale.languageCode == deviceLocale.languageCode,
     );
 
-    // Destekleniyorsa cihaz dilini, yoksa İngilizce kullan
     return isSupported ? Locale(deviceLocale.languageCode) : const Locale('en');
   }
 
-  // Dil değiştir ve kaydet
   Future<void> setLocale(Locale locale) async {
-    // Desteklenen bir dil mi kontrol et
+    debugPrint('🟡 setLocale called with: ${locale.languageCode}');
     if (!supportedLocales.contains(locale)) {
       debugPrint('⚠️ Unsupported Language: ${locale.languageCode}');
       return;
     }
 
     _locale = locale;
+    debugPrint('🟢 _locale set to: ${_locale.languageCode}');
 
-    // SharedPreferences'a kaydet
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language_code', locale.languageCode);
+    debugPrint('🟢 Saved to SharedPreferences: ${locale.languageCode}');
 
     await Future.delayed(const Duration(seconds: 1));
 
     debugPrint('✅ Language changed: ${locale.languageCode}');
+    debugPrint('🔔 Calling notifyListeners()...');
     await _rescheduleNotifications();
     notifyListeners();
   }
@@ -93,7 +88,6 @@ class LocaleProvider extends ChangeNotifier {
     }
   }
 
-  // Dil adını al (UI'da göstermek için)
   String getLanguageName(String languageCode) {
     switch (languageCode) {
       case 'en':
@@ -102,12 +96,13 @@ class LocaleProvider extends ChangeNotifier {
         return 'Русский';
       case 'tr':
         return 'Türkçe';
+      case 'hi':
+        return 'हिन्दी';
       default:
         return languageCode.toUpperCase();
     }
   }
 
-  // Dil emoji'si al (UI'da göstermek için)
   String getLanguageFlag(String languageCode) {
     switch (languageCode) {
       case 'en':
@@ -116,6 +111,8 @@ class LocaleProvider extends ChangeNotifier {
         return '🇷🇺';
       case 'tr':
         return '🇹🇷';
+      case 'hi':
+        return '🇮🇳';
       default:
         return '🌍';
     }

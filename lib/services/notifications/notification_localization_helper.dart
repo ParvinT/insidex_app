@@ -17,7 +17,7 @@ class NotificationLocalizationHelper {
       }
       final deviceLocale = ui.PlatformDispatcher.instance.locale;
       final deviceLanguageCode = deviceLocale.languageCode;
-      const supportedLanguages = ['en', 'tr', 'ru'];
+      const supportedLanguages = ['en', 'tr', 'ru', 'hi'];
       if (supportedLanguages.contains(deviceLanguageCode)) {
         return deviceLanguageCode;
       }
@@ -45,6 +45,10 @@ class NotificationLocalizationHelper {
         'message':
             'INSIDEX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın',
       },
+      'hi': {
+        'title': 'आपके दैनिक सत्र का समय 🎧',
+        'message': 'INSIDEX के साथ आराम करने और ठीक होने के लिए एक पल लें',
+      },
     };
 
     return texts[lang] ?? texts['en']!;
@@ -63,10 +67,14 @@ class NotificationLocalizationHelper {
     //Turkish texts
     final tr = _getTurkishStreakTexts(days);
 
+    // Hindi texts
+    final hi = _getHindiStreakTexts(days);
+
     final allTexts = {
       'en': en,
       'ru': ru,
       'tr': tr,
+      'hi': hi,
     };
 
     return allTexts[lang] ?? en;
@@ -91,6 +99,11 @@ class NotificationLocalizationHelper {
         'title': '😔 Seri Sona Erdi',
         'message':
             '$lostDays günlük seriniz sona erdi. Ama endişelenmeyin, bugün yeniden başlayabilirsiniz!',
+      },
+      'hi': {
+        'title': '😔 स्ट्रीक समाप्त',
+        'message':
+            'आपकी $lostDays दिन की स्ट्रीक समाप्त हो गई है। लेकिन चिंता न करें, आप आज से नई शुरुआत कर सकते हैं!',
       },
     };
 
@@ -235,5 +248,39 @@ class NotificationLocalizationHelper {
           'message': '$days günlük harika bir seri!',
         };
     }
+  }
+
+  // =================== HINDI TEXTS - 🇮🇳 YENİ! ===================
+  static Map<String, String> _getHindiStreakTexts(int days) {
+    String title;
+    String message;
+
+    if (days == 3) {
+      title = '🔥 3 दिन की स्ट्रीक!';
+      message = 'बढ़िया शुरुआत! आप बहुत अच्छा कर रहे हैं!';
+    } else if (days == 7) {
+      title = '🔥 7 दिन की स्ट्रीक!';
+      message = 'एक सप्ताह पूरा! आप अद्भुत हैं!';
+    } else if (days == 14) {
+      title = '🔥 14 दिन की स्ट्रीक!';
+      message = 'दो सप्ताह! आपकी समर्पण प्रेरणादायक है!';
+    } else if (days == 21) {
+      title = '🔥 21 दिन की स्ट्रीक!';
+      message = '3 सप्ताह! आपने एक नई आदत बना ली है!';
+    } else if (days == 30) {
+      title = '🔥 30 दिन की स्ट्रीक!';
+      message = 'एक महीना! आप अविश्वसनीय हैं!';
+    } else if (days == 50) {
+      title = '🔥 50 दिन की स्ट्रीक!';
+      message = 'आधी शताब्दी! आप एक किंवदंती हैं!';
+    } else if (days == 100) {
+      title = '🔥 100 दिन की स्ट्रीक!';
+      message = 'शतक! आपने इतिहास रच दिया है!';
+    } else {
+      title = '🔥 $days दिन की स्ट्रीक!';
+      message = 'अद्भुत! आपने $days दिन पूरे किए हैं!';
+    }
+
+    return {'title': title, 'message': message};
   }
 }

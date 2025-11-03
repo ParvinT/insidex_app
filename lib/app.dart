@@ -30,7 +30,7 @@ class InsidexApp extends StatelessWidget {
                 title: 'INSIDEX',
                 debugShowCheckedModeBanner: false,
                 useInheritedMediaQuery: true,
-                locale: DevicePreview.locale(context) ?? localeProvider.locale,
+                locale: localeProvider.locale,
                 localizationsDelegates: const [
                   AppLocalizations.delegate,
                   GlobalMaterialLocalizations.delegate,

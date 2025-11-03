@@ -81,6 +81,7 @@ flutter:
     - assets/legal/en/
     - assets/legal/ru/
     - assets/legal/tr/
+    - assets/legal/hi/
   #flutter_icons:
   #android: true
   #ios: true

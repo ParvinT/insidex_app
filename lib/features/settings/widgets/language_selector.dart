@@ -95,6 +95,8 @@ class LanguageSelector extends StatelessWidget {
         return 'Язык';
       case 'tr':
         return 'Dil';
+      case 'hi':
+        return 'भाषा';
       default:
         return 'Language';
     }
