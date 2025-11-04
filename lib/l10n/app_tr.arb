@@ -404,6 +404,12 @@
 
   "nowPlaying": "ŞİMDİ OYNATILIYOR",
   "intro": "Giriş",
+  "introduction": "Giriş",
+  "subliminalSession": "Bilinçaltı Seans",
+  "noIntroductionAvailable": "Giriş mevcut değil",
+  "unknownSession": "Bilinmeyen Seans",
+  "audioFileNotFound": "Ses dosyası bulunamadı",
+  "failedToPlayAudio": "Ses çalınamadı",
   "subliminal": "Bilinçaltı",
   "sessionDetails": "Seans Detayları",
   "aboutThisSession": "BU SEANS HAKKINDA",

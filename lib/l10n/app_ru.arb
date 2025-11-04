@@ -408,6 +408,12 @@
 
   "nowPlaying": "СЕЙЧАС ИГРАЕТ",
   "intro": "Вступление",
+  "introduction": "Введение",
+  "subliminalSession": "Сублиминальная сессия",
+  "noIntroductionAvailable": "Введение недоступно",
+  "unknownSession": "Неизвестная сессия",
+  "audioFileNotFound": "Аудиофайл не найден",
+  "failedToPlayAudio": "Не удалось воспроизвести аудио",
   "subliminal": "Сублиминал",
   "sessionDetails": "Детали сессии",
   "aboutThisSession": "ОБ ЭТОЙ СЕССИИ",

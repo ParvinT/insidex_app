@@ -365,6 +365,12 @@
 
   "nowPlaying": "अभी चल रहा है",
   "intro": "परिचय",
+  "introduction": "परिचय",
+  "subliminalSession": "सबलिमिनल सत्र",
+  "noIntroductionAvailable": "परिचय उपलब्ध नहीं है",
+  "failedToPlayAudio": "ऑडियो चलाने में विफल",
+  "audioFileNotFound": "ऑडियो फ़ाइल नहीं मिली",
+  "unknownSession": "अज्ञात सत्र",
   "subliminal": "सबलिमिनल",
   "sessionDetails": "सत्र विवरण",
   "aboutThisSession": "इस सत्र के बारे में",

@@ -1058,6 +1058,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get intro => 'Intro';
 
   @override
+  String get introduction => 'Introduction';
+
+  @override
+  String get subliminalSession => 'Subliminal Session';
+
+  @override
+  String get noIntroductionAvailable => 'No introduction available';
+
+  @override
+  String get unknownSession => 'Unknown Session';
+
+  @override
+  String get audioFileNotFound => 'Audio file not found';
+
+  @override
+  String get failedToPlayAudio => 'Failed to play audio';
+
+  @override
   String get subliminal => 'Subliminal';
 
   @override

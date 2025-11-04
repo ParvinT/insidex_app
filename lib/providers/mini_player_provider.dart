@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'dart:async';
+import '../services/language_helper_service.dart';
 
 /// Global state provider for mini player
 /// Manages session data, playback state, and UI state
@@ -66,7 +67,7 @@ class MiniPlayerProvider extends ChangeNotifier {
     _isVisible = true;
     _isExpanded = false;
     _position = Duration.zero;
-    _currentTrack = 'intro';
+    _currentTrack = 'subliminal';
 
     debugPrint('[MiniPlayer] Session started: ${sessionData['title']}');
     notifyListeners();
@@ -228,8 +229,59 @@ class MiniPlayerProvider extends ChangeNotifier {
   }
 
   /// Get session image URL safely
+  String? _cachedImageUrl;
+  String? _cachedImageSessionId;
+
   String? get sessionImageUrl {
-    return _currentSession?['backgroundImage'];
+    if (_currentSession == null) return null;
+
+    final sessionId = _currentSession!['id'];
+
+    // Return cached if same session
+    if (_cachedImageUrl != null && _cachedImageSessionId == sessionId) {
+      return _cachedImageUrl;
+    }
+
+    // Calculate image URL
+    final backgroundImages = _currentSession!['backgroundImages'];
+    String? imageUrl;
+
+    if (backgroundImages is Map) {
+      // Try to get from current language (sync - may not be accurate but fast)
+      // We'll use a default priority: en > tr > ru > hi
+      imageUrl = backgroundImages['en'] ??
+          backgroundImages['tr'] ??
+          backgroundImages['ru'] ??
+          backgroundImages['hi'] ??
+          backgroundImages.values.first;
+    } else {
+      // Fallback to old structure
+      imageUrl = _currentSession!['backgroundImage'];
+    }
+
+    // Cache it
+    _cachedImageUrl = imageUrl;
+    _cachedImageSessionId = sessionId;
+
+    return imageUrl;
+  }
+
+  /// Call this when session changes to load correct language image
+  Future<void> updateImageUrlForLanguage() async {
+    if (_currentSession == null) return;
+
+    final backgroundImages = _currentSession!['backgroundImages'];
+    if (backgroundImages is Map) {
+      final userLanguage = await LanguageHelperService.getCurrentLanguage();
+      final imageUrl = backgroundImages[userLanguage] ??
+          backgroundImages['en'] ??
+          backgroundImages.values.first;
+
+      if (_cachedImageUrl != imageUrl) {
+        _cachedImageUrl = imageUrl;
+        notifyListeners();
+      }
+    }
   }
 
   /// Check if session is active

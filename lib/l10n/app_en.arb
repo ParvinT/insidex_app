@@ -408,6 +408,12 @@
 
   "nowPlaying": "NOW PLAYING",
   "intro": "Intro",
+  "introduction": "Introduction",
+  "subliminalSession": "Subliminal Session",
+  "noIntroductionAvailable": "No introduction available",
+  "unknownSession": "Unknown Session",
+  "audioFileNotFound": "Audio file not found",
+  "failedToPlayAudio": "Failed to play audio",
   "subliminal": "Subliminal",
   "sessionDetails": "Session Details",
   "aboutThisSession": "ABOUT THIS SESSION",

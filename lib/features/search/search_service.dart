@@ -1,6 +1,7 @@
 // lib/features/search/search_service.dart
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../services/session_filter_service.dart';
 
 class SearchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -68,7 +69,8 @@ class SearchService {
     try {
       final snapshot = await _firestore.collection('sessions').get();
 
-      final matches = snapshot.docs.where((doc) {
+      // First, filter by search query
+      final searchMatches = snapshot.docs.where((doc) {
         final data = doc.data();
 
         // Search in main title
@@ -78,66 +80,39 @@ class SearchService {
         final description =
             (data['description'] ?? '').toString().toLowerCase();
 
-        // Search in intro title
+        // Search in intro title (old structure for backward compatibility)
         final introTitle = data['intro'] is Map
             ? ((data['intro'] as Map)['title'] ?? '').toString().toLowerCase()
+            : '';
+
+        // Search in introduction content (new structure)
+        final introContent = data['introduction'] is Map
+            ? ((data['introduction'] as Map)['content'] ?? '')
+                .toString()
+                .toLowerCase()
             : '';
 
         // Search in subliminal affirmations
         final affirmations = data['subliminal'] is Map &&
                 (data['subliminal'] as Map)['affirmations'] is List
             ? (data['subliminal'] as Map)['affirmations']
+                .map((a) => a.toString().toLowerCase())
                 .join(' ')
-                .toLowerCase()
             : '';
 
+        // Match if any field contains the query
         return title.contains(query) ||
             description.contains(query) ||
             introTitle.contains(query) ||
+            introContent.contains(query) ||
             affirmations.contains(query);
-      }).map((doc) {
-        final data = doc.data();
-
-        // Calculate total duration (intro + subliminal in minutes)
-        int totalDuration = 0;
-        if (data['intro'] is Map) {
-          final introDuration = (data['intro'] as Map)['duration'];
-          if (introDuration is num) {
-            final minutes = introDuration > 300
-                ? (introDuration / 60).round()
-                : introDuration.round();
-            totalDuration += minutes;
-          }
-        }
-        if (data['subliminal'] is Map) {
-          final subliminalDuration = (data['subliminal'] as Map)['duration'];
-          if (subliminalDuration is num) {
-            final minutes = subliminalDuration > 300
-                ? (subliminalDuration / 60).round()
-                : subliminalDuration.round();
-            totalDuration += minutes;
-          }
-        }
-
-        // Build session data matching AudioPlayerScreen format
-        return {
-          'id': doc.id,
-          'title': data['title'] ?? 'Untitled',
-          'description': data['description'] ?? '',
-          'duration': totalDuration,
-          'category': data['category'] ?? '',
-          'categoryId': data['categoryId'] ?? '',
-          'emoji': data['emoji'] ?? '🎵',
-          'coverImageUrl': data['coverImageUrl'] ?? '',
-          'backgroundImage': data['backgroundImage'] ?? '',
-          'intro': data['intro'] ?? {},
-          'subliminal': data['subliminal'] ?? {},
-          'playCount': data['playCount'] ?? 0,
-          'rating': data['rating'] ?? 0.0,
-        };
       }).toList();
 
-      return matches;
+      // ✅ LANGUAGE FILTER - Apply after search
+      final filteredMatches =
+          await SessionFilterService.filterSessionsByLanguage(searchMatches);
+
+      return filteredMatches;
     } catch (e) {
       // Silent fail - return empty list
       return [];

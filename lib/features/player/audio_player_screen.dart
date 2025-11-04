@@ -1,19 +1,19 @@
 import 'dart:async';
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
-import '../../services/audio_player_service.dart';
-import 'widgets/player_modals.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:marquee/marquee.dart';
 import 'package:provider/provider.dart';
+import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
+import 'widgets/player_widgets.dart';
 import '../../services/listening_tracker_service.dart';
+import '../../services/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../services/language_helper_service.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -41,11 +41,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isFavorite = false;
   bool _isInPlaylist = false;
   bool _isLooping = false;
-  bool _autoPlayEnabled = true;
   bool _isTracking = false;
 
-  // Track state
-  String _currentTrack = 'intro'; // 'intro' | 'subliminal'
+  //Audio State
+  String _currentLanguage = 'en';
+  String? _audioUrl;
+  String? _backgroundImageUrl;
   double _currentProgress = 0.0;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
@@ -77,7 +78,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           miniPlayer.currentSession?['id'] == widget.sessionData?['id'];
 
       if (isSameSession && miniPlayer.position > Duration.zero) {
-        _currentTrack = miniPlayer.currentTrack;
         _currentPosition = miniPlayer.position;
         _totalDuration = miniPlayer.duration;
         _isPlaying = miniPlayer.isPlaying;
@@ -103,14 +103,17 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _session = widget.sessionData ??
         {
           'title': 'Session',
-          'intro': {'title': 'Introduction', 'audioUrl': '', 'duration': 120},
-          'subliminal': {
-            'title': 'Subliminal',
-            'audioUrl': '',
-            'duration': 3600,
+          'introduction': {
+            'title': AppLocalizations.of(context).aboutThisSession,
+            'content': ''
           },
+          'subliminal': {
+            'audioUrls': {},
+            'durations': {},
+          },
+          'backgroundImages': {},
         };
-
+    _loadLanguageAndUrls();
     _setupStreamListeners();
     _addToRecentSessions();
     _checkFavoriteStatus();
@@ -120,6 +123,41 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
       _restoreStateFromMiniPlayer();
     });
+  }
+
+  Future<void> _loadLanguageAndUrls() async {
+    final language = await LanguageHelperService.getCurrentLanguage();
+
+    setState(() {
+      _currentLanguage = language;
+
+      // Get audio URL for current language
+      _audioUrl = LanguageHelperService.getAudioUrl(
+        _session['subliminal']?['audioUrls'],
+        language,
+      );
+
+      // Get background image URL for current language
+      _backgroundImageUrl = LanguageHelperService.getImageUrl(
+        _session['backgroundImages'],
+        language,
+      );
+
+      // Get duration for current language
+      final duration = LanguageHelperService.getDuration(
+        _session['subliminal']?['durations'],
+        language,
+      );
+
+      if (duration > 0) {
+        _totalDuration = Duration(seconds: duration);
+      }
+    });
+
+    debugPrint('🌐 [AudioPlayer] Language: $language');
+    debugPrint('🎵 [AudioPlayer] Audio URL: $_audioUrl');
+    debugPrint('🖼️ [AudioPlayer] Image URL: $_backgroundImageUrl');
+    debugPrint('⏱️ [AudioPlayer] Duration: ${_totalDuration.inSeconds}s');
   }
 
   Future<void> _restoreStateFromMiniPlayer() async {
@@ -151,7 +189,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     debugPrint('   Was playing: $wasPlaying');
 
     setState(() {
-      _currentTrack = miniPlayerTrack;
       _currentPosition = miniPlayerPosition;
       _totalDuration = miniPlayerDuration;
       _isPlaying = wasPlaying;
@@ -168,52 +205,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     }
 
     debugPrint('✅ Smooth transition completed - NO audio interruption');
-  }
-
-  Widget _buildScrollingText(String text, TextStyle style,
-      {double maxWidth = double.infinity}) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate text width
-        final textPainter = TextPainter(
-          text: TextSpan(text: text, style: style),
-          maxLines: 1,
-          textDirection: TextDirection.ltr,
-        )..layout(maxWidth: double.infinity);
-
-        final availableWidth =
-            maxWidth != double.infinity ? maxWidth : constraints.maxWidth;
-
-        // If text fits, return normal Text
-        if (textPainter.width <= availableWidth) {
-          return Text(
-            text,
-            style: style,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-          );
-        }
-
-        // If doesn't fit, return Marquee
-        return SizedBox(
-          height: style.fontSize! * 1.5,
-          child: Marquee(
-            text: text,
-            style: style,
-            scrollAxis: Axis.horizontal,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            blankSpace: 50.0,
-            velocity: 30.0,
-            pauseAfterRound: const Duration(seconds: 2),
-            startPadding: 10.0,
-            accelerationDuration: const Duration(seconds: 1),
-            accelerationCurve: Curves.linear,
-            decelerationDuration: const Duration(milliseconds: 500),
-            decelerationCurve: Curves.easeOut,
-          ),
-        );
-      },
-    );
   }
 
   void _checkFavoriteStatus() async {
@@ -282,34 +273,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     }
   }
 
-  // --------- safe session helpers ----------
-  Map<String, dynamic>? _section(String name) {
-    final v = _session[name];
-    if (v is Map) return Map<String, dynamic>.from(v as Map);
-    return null;
-  }
-
-  T? _val<T>(String sectionName, String key) {
-    final s = _section(sectionName);
-    final v = s?[key];
-    if (v is T) return v;
-    return null;
-  }
-
-  String? _audioUrlFor(String sectionName) =>
-      _val<String>(sectionName, 'audioUrl');
-
-  String _titleFor(String sectionName, {required String fallback}) =>
-      _val<String>(sectionName, 'title') ?? fallback;
-
-  Duration _fallbackDurationFor(String section) {
-    final secs = _val<int>(section, 'duration');
-    if (secs != null && secs > 0) return Duration(seconds: secs);
-    return section == 'intro'
-        ? const Duration(seconds: 120)
-        : const Duration(hours: 2);
-  }
-
   Future<void> _setupStreamListeners() async {
     // Cancel existing subscriptions first
     await _playingSub?.cancel();
@@ -356,8 +319,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         if (_isLooping) {
           _audioService.seek(Duration.zero);
           _audioService.play();
-        } else if (_autoPlayEnabled && _currentTrack == 'intro') {
-          _switchToTrack('subliminal');
         }
       }
     });
@@ -413,7 +374,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         await ListeningTrackerService.startSession(
           sessionId: _session['id'],
-          sessionTitle: _session['title'] ?? 'Unknown Session',
+          sessionTitle:
+              _session['title'] ?? AppLocalizations.of(context).unknownSession,
           categoryId: _session['categoryId'],
         );
       } else if (_isTracking) {
@@ -430,13 +392,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _playCurrentTrack() async {
-    final String? audioUrl = _audioUrlFor(_currentTrack);
-
-    if (audioUrl == null || audioUrl.isEmpty) {
+    if (_audioUrl == null || _audioUrl!.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Audio file not found for current track'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).audioFileNotFound),
           backgroundColor: Colors.red,
         ),
       );
@@ -447,50 +407,31 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       setState(() {
         _currentPosition = Duration.zero;
         _currentProgress = 0.0;
-        _totalDuration =
-            Duration.zero; // will be set by durationStream or setUrl
+        // _totalDuration already set in _loadLanguageAndUrls
       });
 
       final resolved = await _audioService.playFromUrl(
-        audioUrl,
-        title: _titleFor(
-          _currentTrack,
-          fallback: _currentTrack == 'intro' ? 'Introduction' : 'Subliminal',
-        ),
+        _audioUrl!,
+        title:
+            _session['title'] ?? AppLocalizations.of(context).subliminalSession,
         artist: 'INSIDEX',
       );
 
       if (mounted && resolved != null) {
         setState(() => _totalDuration = resolved);
       }
+
+      debugPrint('🎵 Playing: ${_session['title']}');
     } catch (e) {
       if (!mounted) return;
-      // Only shown if both attempts fail (transient errors are retried in service)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to play audio. ($e)'),
+          content:
+              Text('${AppLocalizations.of(context).failedToPlayAudio} ($e)'),
           backgroundColor: Colors.red,
         ),
       );
     }
-  }
-
-  Future<void> _switchToTrack(String next) async {
-    if (_currentTrack == next) return;
-
-    if (_isTracking && next == 'subliminal') {
-      print('User switched from intro to subliminal');
-    }
-
-    setState(() {
-      _currentTrack = next;
-      _currentPosition = Duration.zero;
-      _currentProgress = 0.0;
-      _totalDuration = Duration.zero; // refresh from player
-    });
-
-    await _audioService.stop();
-    await _playCurrentTrack();
   }
 
   Future<void> _replay10() async {
@@ -501,7 +442,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Future<void> _forward10() async {
     final total = _totalDuration.inMilliseconds > 0
         ? _totalDuration
-        : _fallbackDurationFor(_currentTrack);
+        : const Duration(minutes: 10);
     final newPos = _currentPosition + const Duration(seconds: 10);
     await _audioService.seek(
       newPos < total ? newPos : total - const Duration(milliseconds: 500),
@@ -559,23 +500,59 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               child: SafeArea(
                 child: Column(
                   children: [
-                    _buildHeader(),
+                    PlayerHeader(
+                      onBack: () => Navigator.pop(context),
+                      onInfo: () {
+                        SessionInfoModal.show(
+                          context: context,
+                          session: _session,
+                        );
+                      },
+                    ),
                     Expanded(child: LayoutBuilder(
                       builder: (context, constraints) {
                         final Widget _inner = Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildCenterVisualizer(),
+                            PlayerVisualizer(
+                              controller: _eqController,
+                              isPlaying: _isPlaying,
+                            ),
                             SizedBox(height: 40.h),
-                            _buildSessionInfo(),
+                            PlayerSessionInfo(
+                              title: _session['title'] ??
+                                  AppLocalizations.of(context).untitledSession,
+                              subtitle: AppLocalizations.of(context)
+                                  .subliminalSession,
+                            ),
                             SizedBox(height: 30.h),
-                            _buildTrackSelector(),
+                            IntroductionButton(
+                              onTap: _showIntroductionModal,
+                            ),
                             SizedBox(height: 30.h),
-                            _buildProgressBar(),
+                            PlayerProgressBar(
+                              position: _currentPosition,
+                              duration: _totalDuration,
+                              onSeek: (duration) =>
+                                  _audioService.seek(duration),
+                            ),
                             SizedBox(height: 30.h),
-                            _buildControls(),
+                            PlayerPlayControls(
+                              isPlaying: _isPlaying,
+                              onPlayPause: _togglePlayPause,
+                              onReplay10: _replay10,
+                              onForward10: _forward10,
+                            ),
                             SizedBox(height: 25.h),
-                            _buildBottomActions(),
+                            PlayerBottomActions(
+                              isLooping: _isLooping,
+                              isFavorite: _isFavorite,
+                              isInPlaylist: _isInPlaylist,
+                              onLoop: _toggleLoop,
+                              onFavorite: _toggleFavorite,
+                              onPlaylist: _togglePlaylist,
+                              onTimer: _showSleepTimerModal,
+                            ),
                           ],
                         );
                         final bool _isSmallPhone =
@@ -608,523 +585,205 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
-  // ---------------- UI blocks (Variant B colors) ----------------
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              color: Colors.black,
-              size: 30.sp,
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          Text(
-            AppLocalizations.of(context).nowPlaying,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF5A5A5A),
-              letterSpacing: 1.2,
-            ),
-          ),
-          IconButton(
-            icon: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.info_outline,
-                color: Colors.black,
-                size: 22.sp,
-              ),
-            ),
-            onPressed: () {
-              SessionInfoModal.show(
-                context: context,
-                session: _session,
-                currentTrack: _currentTrack,
-              );
-            },
-          ),
-        ],
+  void _toggleLoop() {
+    setState(() => _isLooping = !_isLooping);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(_isLooping
+            ? AppLocalizations.of(context).loopEnabled
+            : AppLocalizations.of(context).loopDisabled),
+        backgroundColor: Colors.black,
+        duration: const Duration(seconds: 1),
       ),
     );
   }
 
-  /// Modern equalizer animation inside a subtle ring (replaces rotating note)
-  Widget _buildCenterVisualizer() {
-    return SizedBox(
-      width: 220.w,
-      height: 220.w,
-      child: AnimatedBuilder(
-        animation: _eqController,
-        builder: (context, _) {
-          final t = _eqController.value;
-          final phases = [0.00, 0.22, 0.44, 0.66, 0.88];
-          final bars = phases.map((p) {
-            final s = 0.5 * (1 + math.sin(2 * math.pi * (t + p)));
-            return 60 + 60 * s; // 60..120 px
-          }).toList();
+  Future<void> _togglePlaylist() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _session['id'] != null) {
+      setState(() => _isInPlaylist = !_isInPlaylist);
 
-          return CustomPaint(painter: _EqPainter(bars));
-        },
-      ),
-    );
-  }
+      try {
+        if (_isInPlaylist) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({
+            'playlistSessionIds': FieldValue.arrayUnion([_session['id']]),
+          });
 
-  Widget _buildSessionInfo() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: _buildScrollingText(
-              _session['title'] ?? 'Untitled Session',
-              GoogleFonts.inter(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.black87,
-              ),
-              maxWidth: MediaQuery.of(context).size.width - 40.w,
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).addedToPlaylist),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 1),
             ),
-          ),
-          SizedBox(height: 8.h),
-          SizedBox(
-            width: 150.w,
-            child: _buildScrollingText(
-              _titleFor(_currentTrack,
-                  fallback:
-                      _currentTrack == 'intro' ? 'Introduction' : 'Subliminal'),
-              GoogleFonts.inter(
-                fontSize: 14.sp,
-                color: const Color(0xFF7A7A7A),
-              ),
-              maxWidth: 150.w,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTrackSelector() {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 60.w),
-      padding: EdgeInsets.all(4.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5), // light gray capsule
-        borderRadius: BorderRadius.circular(25.r),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _switchToTrack('intro'),
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: _currentTrack == 'intro'
-                      ? const Color(0xFF191919) // selected: near-black
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Text(
-                  AppLocalizations.of(context).intro,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: _currentTrack == 'intro'
-                        ? Colors.white
-                        : const Color(0xFF7A7A7A),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _switchToTrack('subliminal'),
-              child: Container(
-                padding: EdgeInsets.symmetric(vertical: 10.h),
-                decoration: BoxDecoration(
-                  color: _currentTrack == 'subliminal'
-                      ? const Color(0xFF191919)
-                      : Colors.transparent,
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Text(
-                  AppLocalizations.of(context).subliminal,
-                  style: GoogleFonts.inter(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: _currentTrack == 'subliminal'
-                        ? Colors.white
-                        : const Color(0xFF7A7A7A),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProgressBar() {
-    final total = _totalDuration.inMilliseconds > 0
-        ? _totalDuration
-        : _fallbackDurationFor(_currentTrack);
-
-    final value = total.inMilliseconds == 0
-        ? 0.0
-        : (_currentPosition.inMilliseconds / total.inMilliseconds).clamp(
-            0.0,
-            1.0,
           );
+        } else {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({
+            'playlistSessionIds': FieldValue.arrayRemove([_session['id']]),
+          });
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 30.w),
-      child: Column(
-        children: [
-          SliderTheme(
-            data: SliderTheme.of(context).copyWith(
-              activeTrackColor: Colors.black,
-              inactiveTrackColor: const Color(0xFFE6E6E6),
-              thumbColor: Colors.black,
-              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
-              trackHeight: 3.h,
-              overlayShape: RoundSliderOverlayShape(overlayRadius: 12.r),
-              overlayColor: Colors.black.withOpacity(0.1),
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).removedFromPlaylist),
+              backgroundColor: Colors.orange,
+              duration: const Duration(seconds: 1),
             ),
-            child: Slider(
-              value: value,
-              onChanged: (v) {
-                final newMs = (total.inMilliseconds * v).round();
-                _audioService.seek(Duration(milliseconds: newMs));
-              },
+          );
+        }
+      } catch (e) {
+        debugPrint('Error updating playlist: $e');
+      }
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _session['id'] != null) {
+      setState(() => _isFavorite = !_isFavorite);
+
+      try {
+        if (_isFavorite) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({
+            'favoriteSessionIds': FieldValue.arrayUnion([_session['id']]),
+          });
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).addedToFavorites),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 1),
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _formatDuration(_currentPosition),
-                  style: GoogleFonts.inter(
-                    fontSize: 11.sp,
-                    color: const Color(0xFF6E6E6E),
-                  ),
-                ),
-                Text(
-                  _totalDuration.inMilliseconds > 0
-                      ? _formatDuration(_totalDuration)
-                      : '--:--',
-                  style: GoogleFonts.inter(
-                    fontSize: 11.sp,
-                    color: const Color(0xFF6E6E6E),
-                  ),
-                ),
-              ],
+          );
+        } else {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({
+            'favoriteSessionIds': FieldValue.arrayRemove([_session['id']]),
+          });
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context).removedFromFavorites),
+              backgroundColor: Colors.grey,
+              duration: const Duration(seconds: 1),
             ),
-          ),
-        ],
-      ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Error updating favorites: $e');
+      }
+    }
+  }
+
+  void _showSleepTimerModal() {
+    PlayerModals.showSleepTimer(
+      context,
+      _sleepTimerMinutes,
+      _audioService,
+      (minutes) {
+        if (mounted) {
+          setState(() => _sleepTimerMinutes = minutes);
+        }
+      },
     );
   }
 
-  Widget _buildControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        IconButton(
-          icon: const Icon(Icons.replay_10, color: Color(0xFF353535)),
-          iconSize: 32.sp,
-          onPressed: _replay10,
+  void _showIntroductionModal() {
+    final introduction = _session['introduction'];
+    final title =
+        introduction?['title'] ?? AppLocalizations.of(context).introduction;
+    final content = introduction?['content'] ?? '';
+
+    if (content.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).noIntroductionAvailable),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 2),
         ),
-        SizedBox(width: 20.w),
-        GestureDetector(
-          onTap: _togglePlayPause,
-          child: Container(
-            width: 70.w,
-            height: 70.w,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
-                  blurRadius: 20,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Icon(
-              _isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
-              size: 35.sp,
-            ),
-          ),
+      );
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
-        SizedBox(width: 20.w),
-        IconButton(
-          icon: const Icon(Icons.forward_10, color: Color(0xFF353535)),
-          iconSize: 32.sp,
-          onPressed: _forward10,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBottomActions() {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50.w),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          IconButton(
-            icon: Icon(
-              Icons.loop,
-              color: _isLooping ? Colors.black : const Color(0xFFBDBDBD),
-            ),
-            onPressed: () {
-              setState(() => _isLooping = !_isLooping);
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(_isLooping
-                      ? AppLocalizations.of(context).loopEnabled
-                      : AppLocalizations.of(context).loopDisabled),
-                  backgroundColor: Colors.black,
-                  duration: const Duration(seconds: 1),
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              _isInPlaylist ? Icons.playlist_add_check : Icons.playlist_add,
-              color: _isInPlaylist ? Colors.black : const Color(0xFFBDBDBD),
-            ),
-            onPressed: () async {
-              final user = FirebaseAuth.instance.currentUser;
-              if (user != null && _session['id'] != null) {
-                setState(() => _isInPlaylist = !_isInPlaylist);
-
-                try {
-                  if (_isInPlaylist) {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(user.uid)
-                        .update({
-                      'playlistSessionIds': FieldValue.arrayUnion([
-                        _session['id'],
-                      ]),
-                    });
-
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content:
-                            Text(AppLocalizations.of(context).addedToPlaylist),
-                        backgroundColor: Colors.green,
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  } else {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(user.uid)
-                        .update({
-                      'playlistSessionIds': FieldValue.arrayRemove([
-                        _session['id'],
-                      ]),
-                    });
-
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                            AppLocalizations.of(context).removedFromPlaylist),
-                        backgroundColor: Colors.orange,
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  print('Error toggling playlist: $e');
-                  setState(() => _isInPlaylist = !_isInPlaylist);
-
-                  if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                          AppLocalizations.of(context).errorUpdatingPlaylist),
-                      backgroundColor: Colors.red,
-                      duration: Duration(seconds: 2),
-                    ),
-                  );
-                }
-              }
-            },
-          ),
-          IconButton(
-            icon: Icon(
-              _isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _isFavorite ? Colors.redAccent : const Color(0xFFBDBDBD),
-            ),
-            onPressed: () async {
-              final user = FirebaseAuth.instance.currentUser;
-              if (user != null && _session['id'] != null) {
-                setState(() => _isFavorite = !_isFavorite);
-
-                try {
-                  if (_isFavorite) {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(user.uid)
-                        .update({
-                      'favoriteSessionIds': FieldValue.arrayUnion([
-                        _session['id'],
-                      ]),
-                    });
-                  } else {
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(user.uid)
-                        .update({
-                      'favoriteSessionIds': FieldValue.arrayRemove([
-                        _session['id'],
-                      ]),
-                    });
-                  }
-                } catch (e) {
-                  print('Error toggling favorite: $e');
-                  setState(() => _isFavorite = !_isFavorite);
-                }
-              }
-            },
-          ),
-          Stack(
-            children: [
-              IconButton(
-                icon: Icon(
-                  Icons.bedtime,
-                  color: _sleepTimerMinutes != null
-                      ? Colors.black
-                      : const Color(0xFFBDBDBD),
-                ),
-                onPressed: () {
-                  PlayerModals.showSleepTimer(
-                    context,
-                    _sleepTimerMinutes, // mevcut değer
-                    _audioService, // servis
-                    (minutes) => setState(
-                      () => _sleepTimerMinutes = minutes,
-                    ), // callback
-                  );
-                },
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              margin: EdgeInsets.only(top: 12.h),
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2.r),
               ),
-              if (_sleepTimerMinutes != null)
-                Positioned(
-                  right: 6,
-                  top: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+            ),
+
+            // Header
+            Padding(
+              padding: EdgeInsets.all(20.w),
+              child: Row(
+                children: [
+                  Expanded(
                     child: Text(
-                      '${_sleepTimerMinutes}m',
+                      title,
                       style: GoogleFonts.inter(
-                        fontSize: 10,
-                        color: Colors.white,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
                       ),
                     ),
                   ),
-                ),
-            ],
-          ),
-          IconButton(
-            icon: Icon(
-              _autoPlayEnabled ? Icons.queue_music : Icons.music_off,
-              color: _autoPlayEnabled ? Colors.black : const Color(0xFFBDBDBD),
-            ),
-            onPressed: () {
-              setState(() => _autoPlayEnabled = !_autoPlayEnabled);
-              if (!mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    _autoPlayEnabled
-                        ? AppLocalizations.of(context).autoPlayEnabled
-                        : AppLocalizations.of(context).autoPlayDisabled,
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  backgroundColor: Colors.black,
-                  duration: const Duration(seconds: 1),
+                ],
+              ),
+            ),
+
+            Divider(height: 1, color: Colors.grey[300]),
+
+            // Content
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20.w),
+                child: Text(
+                  content,
+                  style: GoogleFonts.inter(
+                    fontSize: 16.sp,
+                    height: 1.6,
+                    color: Colors.black87,
+                  ),
                 ),
-              );
-            },
-          ),
-        ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
-
-  String _formatDuration(Duration duration) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    if (duration.inHours > 0) {
-      return '${duration.inHours}:${two(duration.inMinutes.remainder(60))}:${two(duration.inSeconds.remainder(60))}';
-    }
-    return '${two(duration.inMinutes.remainder(60))}:${two(duration.inSeconds.remainder(60))}';
-  }
-}
-
-// ---- painter for the equalizer bars ----
-class _EqPainter extends CustomPainter {
-  final List<double> bars; // heights (px)
-  _EqPainter(this.bars);
-
-  @override
-  void paint(Canvas c, Size s) {
-    final center = Offset(s.width / 2, s.height / 2);
-
-    // subtle outer ring
-    final ringPaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3
-      ..color = const Color(0xFFE6E6E6);
-    c.drawCircle(center, s.width / 2 - 4, ringPaint);
-
-    // bars
-    final barPaint = Paint()..color = const Color(0xFF191919);
-    const barW = 14.0, gap = 12.0;
-    final baseY = center.dy + 60;
-    double startX = center.dx - (2 * barW + 2 * gap);
-
-    for (int i = 0; i < bars.length; i++) {
-      final h = bars[i];
-      final rect = Rect.fromLTWH(startX + i * (barW + gap), baseY - h, barW, h);
-      final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(6));
-      c.drawRRect(rrect, barPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _EqPainter old) => true;
 }

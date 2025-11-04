@@ -7,12 +7,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:ui';
+import 'package:provider/provider.dart';
 import 'dart:async';
+import '../../providers/locale_provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../player/audio_player_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/session_card.dart';
+import '../../services/session_filter_service.dart';
 
 class PlaylistScreen extends StatefulWidget {
   const PlaylistScreen({super.key});
@@ -42,6 +44,15 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     _tabController = TabController(length: 3, vsync: this);
     _listenToUserData();
     _loadAllPlaylists();
+    _listenToLanguageChanges();
+  }
+
+  void _listenToLanguageChanges() {
+    context.read<LocaleProvider>().addListener(() {
+      if (mounted) {
+        _loadAllPlaylists();
+      }
+    });
   }
 
   @override
@@ -152,7 +163,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         debugPrint('Error fetching session $sessionId: $e');
       }
     }
-    return sessions;
+    return await SessionFilterService.filterFetchedSessions(sessions);
   }
 
   Future<void> _addToPlaylist(String sessionId) async {

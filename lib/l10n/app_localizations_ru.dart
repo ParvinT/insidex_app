@@ -1064,6 +1064,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get intro => 'Вступление';
 
   @override
+  String get introduction => 'Введение';
+
+  @override
+  String get subliminalSession => 'Сублиминальная сессия';
+
+  @override
+  String get noIntroductionAvailable => 'Введение недоступно';
+
+  @override
+  String get unknownSession => 'Неизвестная сессия';
+
+  @override
+  String get audioFileNotFound => 'Аудиофайл не найден';
+
+  @override
+  String get failedToPlayAudio => 'Не удалось воспроизвести аудио';
+
+  @override
   String get subliminal => 'Сублиминал';
 
   @override

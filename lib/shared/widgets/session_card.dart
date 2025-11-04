@@ -5,10 +5,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/cache_manager_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../services/language_helper_service.dart';
+import '../../providers/locale_provider.dart';
 
 class SessionCard extends StatelessWidget {
   final Map<String, dynamic> session;
@@ -40,8 +43,10 @@ class SessionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint('🔍 SESSION DATA: ${session.toString()}');
-    debugPrint('🖼️ backgroundImage: ${session['backgroundImage']}');
+    debugPrint('🔍 SESSION DATA: ${session['id']}');
+    debugPrint('🖼️ backgroundImages: ${session['backgroundImages']}');
+    debugPrint(
+        '🖼️ OLD backgroundImage: ${session['backgroundImage']}'); 
     debugPrint('📝 title: ${session['title']}');
     debugPrint('🏷️ category: ${session['category']}');
     final mq = MediaQuery.of(context);
@@ -65,11 +70,29 @@ class SessionCard extends StatelessWidget {
     final double playButtonSize = isTablet ? 60.w : 56.w;
     final double playIconSize = isTablet ? 34.sp : 32.sp;
 
-    final backgroundImageRaw = session['backgroundImage'];
-    final imageUrl =
-        (backgroundImageRaw != null && backgroundImageRaw.toString().isNotEmpty)
-            ? backgroundImageRaw.toString()
-            : '';
+    final currentLanguage = context.watch<LocaleProvider>().locale.languageCode;
+
+// Get language-specific image URL
+    String imageUrl = '';
+
+// Try multi-language images first
+    if (session['backgroundImages'] is Map) {
+      imageUrl = LanguageHelperService.getImageUrl(
+        session['backgroundImages'],
+        currentLanguage,
+      );
+    }
+
+// Fallback: old single image format (backward compatibility)
+    if (imageUrl.isEmpty && session['backgroundImage'] != null) {
+      final backgroundImageRaw = session['backgroundImage'];
+      imageUrl = (backgroundImageRaw != null &&
+              backgroundImageRaw.toString().isNotEmpty)
+          ? backgroundImageRaw.toString()
+          : '';
+    }
+
+    debugPrint('🖼️ [SessionCard] Image URL for $currentLanguage: $imageUrl');
     final title =
         session['title'] ?? AppLocalizations.of(context).untitledSession;
     final category =
@@ -355,7 +378,7 @@ class SessionCard extends StatelessWidget {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: onTap, 
+                  onTap: onTap,
                   borderRadius: BorderRadius.circular(100),
                   splashColor: Colors.white.withOpacity(0.3),
                   child: Container(

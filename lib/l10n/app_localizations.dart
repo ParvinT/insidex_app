@@ -2136,6 +2136,42 @@ abstract class AppLocalizations {
   /// **'Intro'**
   String get intro;
 
+  /// No description provided for @introduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction'**
+  String get introduction;
+
+  /// No description provided for @subliminalSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Subliminal Session'**
+  String get subliminalSession;
+
+  /// No description provided for @noIntroductionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No introduction available'**
+  String get noIntroductionAvailable;
+
+  /// No description provided for @unknownSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Session'**
+  String get unknownSession;
+
+  /// No description provided for @audioFileNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio file not found'**
+  String get audioFileNotFound;
+
+  /// No description provided for @failedToPlayAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to play audio'**
+  String get failedToPlayAudio;
+
   /// No description provided for @subliminal.
   ///
   /// In en, this message translates to:

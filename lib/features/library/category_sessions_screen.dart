@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/widgets/session_card.dart';
 import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/session_filter_service.dart';
 
 class CategorySessionsScreen extends StatefulWidget {
   final String categoryTitle;
@@ -160,90 +161,95 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
 
         // ⬇️ Aşağısı senin orijinal akışın
         body: StreamBuilder<QuerySnapshot>(
-          stream: widget.showAllSessions
-              ? FirebaseFirestore.instance
-                  .collection('sessions')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots()
-              : FirebaseFirestore.instance
-                  .collection('sessions')
-                  .where('category', isEqualTo: widget.categoryTitle)
-                  .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(color: AppColors.textPrimary),
-              );
-            }
-
-            if (snapshot.hasError) {
-              debugPrint('Error: ${snapshot.error}');
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error_outline, size: 48.sp, color: Colors.red),
-                    SizedBox(height: 16.h),
-                    Text(
-                      AppLocalizations.of(context).errorLoadingSessions,
-                      style: GoogleFonts.inter(
-                          fontSize: 16.sp, color: AppColors.textSecondary),
-                    ),
-                    Text(
-                      '${snapshot.error}',
-                      style:
-                          GoogleFonts.inter(fontSize: 12.sp, color: Colors.red),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            final sessions = snapshot.data?.docs ?? [];
-
-            if (sessions.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.music_off,
-                        size: 64.sp, color: AppColors.greyLight),
-                    SizedBox(height: 16.h),
-                    Text(
-                      AppLocalizations.of(context).noSessionsAvailable,
-                      style: GoogleFonts.inter(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    SizedBox(height: 8.h),
-                    Text(
-                      AppLocalizations.of(context).checkBackLater,
-                      style: GoogleFonts.inter(
-                          fontSize: 14.sp, color: AppColors.textSecondary),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return ListView.builder(
-              padding: EdgeInsets.all(20.w),
-              itemCount: sessions.length,
-              itemBuilder: (context, index) {
-                final sessionDoc = sessions[index];
-                final session = sessionDoc.data() as Map<String, dynamic>;
-                final sessionId = sessionDoc.id;
-
-                return _buildSessionCard(
-                  sessionId: sessionId,
-                  sessionData: session,
+            stream: widget.showAllSessions
+                ? FirebaseFirestore.instance
+                    .collection('sessions')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots()
+                : FirebaseFirestore.instance
+                    .collection('sessions')
+                    .where('category', isEqualTo: widget.categoryTitle)
+                    .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child:
+                      CircularProgressIndicator(color: AppColors.textPrimary),
                 );
-              },
-            );
-          },
-        ),
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    AppLocalizations.of(context).errorLoadingSessions,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                );
+              }
+
+              final allDocs = snapshot.data?.docs ?? [];
+
+              // ✅ LANGUAGE FILTER
+              return FutureBuilder<List<Map<String, dynamic>>>(
+                future: SessionFilterService.filterSessionsByLanguage(allDocs),
+                builder: (context, filteredSnapshot) {
+                  if (filteredSnapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                          color: AppColors.textPrimary),
+                    );
+                  }
+
+                  final sessions = filteredSnapshot.data ?? [];
+
+                  if (sessions.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.music_off,
+                              size: 64.sp, color: AppColors.greyLight),
+                          SizedBox(height: 16.h),
+                          Text(
+                            AppLocalizations.of(context).noSessionsAvailable,
+                            style: GoogleFonts.inter(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            AppLocalizations.of(context).checkBackLater,
+                            style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: EdgeInsets.all(20.w),
+                    itemCount: sessions.length,
+                    itemBuilder: (context, index) {
+                      final session = sessions[index]; 
+                      final sessionId = session['id'];
+
+                      return _buildSessionCard(
+                        sessionId: sessionId,
+                        sessionData: session,
+                      );
+                    },
+                  );
+                },
+              );
+            }),
       ),
     );
   }

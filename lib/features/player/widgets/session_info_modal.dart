@@ -8,7 +8,6 @@ class SessionInfoModal {
   static void show({
     required BuildContext context,
     required Map<String, dynamic> session,
-    required String currentTrack,
   }) {
     showGeneralDialog(
       context: context,
@@ -31,7 +30,6 @@ class SessionInfoModal {
             ),
             child: _SessionInfoContent(
               session: session,
-              currentTrack: currentTrack,
               animation: animation,
             ),
           ),
@@ -43,12 +41,10 @@ class SessionInfoModal {
 
 class _SessionInfoContent extends StatelessWidget {
   final Map<String, dynamic> session;
-  final String currentTrack;
   final Animation<double> animation;
 
   const _SessionInfoContent({
     required this.session,
-    required this.currentTrack,
     required this.animation,
   });
 
@@ -118,8 +114,7 @@ class _SessionInfoContent extends StatelessWidget {
                         if (session['benefits'] != null &&
                             (session['benefits'] as List).isNotEmpty)
                           _buildBenefits(),
-                        if (currentTrack == 'subliminal' &&
-                            session['affirmations'] != null)
+                        if (session['subliminal']?['affirmations'] != null)
                           _buildAffirmations(),
                         SizedBox(height: 8.h),
                       ],
@@ -259,12 +254,10 @@ class _SessionInfoContent extends StatelessWidget {
   }
 
   Widget _buildNowPlayingCard(BuildContext context) {
-    final trackData =
-        currentTrack == 'intro' ? session['intro'] : session['subliminal'];
+    final trackData = session['subliminal'];
 
     // Track title ve description'ı temizle
-    String cleanTrackTitle = (trackData?['title'] ??
-            (currentTrack == 'intro' ? 'Introduction' : 'Subliminal'))
+    String cleanTrackTitle = (trackData?['title'] ?? 'Subliminal')
         .replaceAll(RegExp(r'<[^>]*>'), '')
         .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
         .replaceAll(RegExp(r'__([^_]*)__'), '\$1')

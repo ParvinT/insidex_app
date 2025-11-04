@@ -5,12 +5,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
-import 'category_sessions_screen.dart'; 
-import '../player/audio_player_screen.dart'; 
+import 'category_sessions_screen.dart';
+import '../player/audio_player_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
+import '../../services/session_filter_service.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -371,23 +372,53 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         .where('category', isEqualTo: category['title'])
                         .snapshots(),
                     builder: (context, snapshot) {
-                      int count = snapshot.data?.docs.length ?? 0;
-                      return Row(
-                        children: [
-                          Icon(
-                            Icons.play_circle_filled,
-                            color: Colors.white.withOpacity(0.8),
-                            size: 16.sp,
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            '$count  ${AppLocalizations.of(context).sessions}',
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Row(
+                          children: [
+                            Icon(
+                              Icons.play_circle_filled,
                               color: Colors.white.withOpacity(0.8),
+                              size: 16.sp,
                             ),
-                          ),
-                        ],
+                            SizedBox(width: 4.w),
+                            Text(
+                              '...  ${AppLocalizations.of(context).sessions}',
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: Colors.white.withOpacity(0.8),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+
+                      final allDocs = snapshot.data?.docs ?? [];
+
+                      // ✅ LANGUAGE FILTER
+                      return FutureBuilder<List<Map<String, dynamic>>>(
+                        future: SessionFilterService.filterSessionsByLanguage(
+                            allDocs),
+                        builder: (context, filteredSnapshot) {
+                          final count = filteredSnapshot.data?.length ?? 0;
+
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.play_circle_filled,
+                                color: Colors.white.withOpacity(0.8),
+                                size: 16.sp,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                '$count  ${AppLocalizations.of(context).sessions}',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  color: Colors.white.withOpacity(0.8),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
                       );
                     },
                   ),
@@ -427,42 +458,56 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           );
         }
 
-        final sessions = snapshot.data?.docs ?? [];
+        final allDocs = snapshot.data?.docs ?? [];
 
-        if (sessions.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.library_music,
-                  size: 64.sp,
-                  color: AppColors.greyLight,
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  AppLocalizations.of(context).noSessionsAvailable,
-                  style: GoogleFonts.inter(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+        // ✅ LANGUAGE FILTER
+        return FutureBuilder<List<Map<String, dynamic>>>(
+            future: SessionFilterService.filterSessionsByLanguage(allDocs),
+            builder: (context, filteredSnapshot) {
+              if (filteredSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: AppColors.textPrimary,
                   ),
-                ),
-              ],
-            ),
-          );
-        }
+                );
+              }
 
-        return ListView.builder(
-          padding: EdgeInsets.all(20.w),
-          itemCount: sessions.length,
-          itemBuilder: (context, index) {
-            final sessionDoc = sessions[index];
-            final session = sessionDoc.data() as Map<String, dynamic>;
-            session['id'] = sessionDoc.id;
-            return _buildSessionItem(context, session);
-          },
-        );
+              final sessions = filteredSnapshot.data ?? [];
+
+              if (sessions.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.library_music,
+                        size: 64.sp,
+                        color: AppColors.greyLight,
+                      ),
+                      SizedBox(height: 16.h),
+                      Text(
+                        AppLocalizations.of(context).noSessionsAvailable,
+                        style: GoogleFonts.inter(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              return ListView.builder(
+                padding: EdgeInsets.all(20.w),
+                itemCount: sessions.length,
+                itemBuilder: (context, index) {
+                  final session = sessions[index]; // Already filtered Map
+                  final sessionId = session['id'];
+                  return _buildSessionItem(context, session);
+                },
+              );
+            });
       },
     );
   }

@@ -21,9 +21,18 @@ class ImagePrefetchService {
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        final imageUrl = data['backgroundImage'];
-        if (imageUrl != null && imageUrl.toString().isNotEmpty) {
-          imageUrls.add(imageUrl.toString());
+        final backgroundImages = data['backgroundImages'];
+        if (backgroundImages is Map) {
+          for (final url in backgroundImages.values) {
+            if (url != null && url.toString().isNotEmpty) {
+              imageUrls.add(url.toString());
+            }
+          }
+        }
+
+        final singleImage = data['backgroundImage'];
+        if (singleImage != null && singleImage.toString().isNotEmpty) {
+          imageUrls.add(singleImage.toString());
         }
       }
 
