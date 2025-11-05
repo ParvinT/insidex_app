@@ -28,6 +28,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  VoidCallback? _localeListener;
+
   late TabController _tabController;
   List<Map<String, dynamic>> _myPlaylistSessions = [];
   List<Map<String, dynamic>> _favoriteSessions = [];
@@ -57,6 +59,13 @@ class _PlaylistScreenState extends State<PlaylistScreen>
 
   @override
   void dispose() {
+    if (_localeListener != null) {
+      try {
+        context.read<LocaleProvider>().removeListener(_localeListener!);
+      } catch (e) {
+        debugPrint('Error removing locale listener: $e');
+      }
+    }
     _userDataSubscription?.cancel();
     _tabController.dispose();
     super.dispose();

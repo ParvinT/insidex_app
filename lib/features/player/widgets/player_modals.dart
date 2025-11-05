@@ -23,7 +23,7 @@ class PlayerModals {
       ),
       builder: (_) {
         int? selected = currentMinutes;
-        final options = <int>[10, 15, 20, 30, 45, 60, 90];
+        final options = <int>[5, 10, 15, 20, 30, 45];
 
         return StatefulBuilder(builder: (context, setState) {
           return Padding(

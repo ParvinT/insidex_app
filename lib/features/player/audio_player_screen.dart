@@ -45,6 +45,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   //Audio State
   String _currentLanguage = 'en';
+  String? _loadedLanguage;
   String? _audioUrl;
   String? _backgroundImageUrl;
   double _currentProgress = 0.0;
@@ -128,8 +129,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Future<void> _loadLanguageAndUrls() async {
     final language = await LanguageHelperService.getCurrentLanguage();
 
+    if (_loadedLanguage == language && _audioUrl != null) {
+      debugPrint('⏭️ [AudioPlayer] Language already loaded: $language');
+      return;
+    }
+
     setState(() {
       _currentLanguage = language;
+      _loadedLanguage = language;
 
       // Get audio URL for current language
       _audioUrl = LanguageHelperService.getAudioUrl(

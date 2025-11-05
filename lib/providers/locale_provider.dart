@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import '../services/notifications/daily_reminder_service.dart';
 import '../services/notifications/notification_sync_service.dart';
+import '../services/language_helper_service.dart';
 
 class LocaleProvider extends ChangeNotifier {
   Locale _locale = const Locale('en');
@@ -61,6 +62,8 @@ class LocaleProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language_code', locale.languageCode);
     debugPrint('🟢 Saved to SharedPreferences: ${locale.languageCode}');
+
+    LanguageHelperService.clearCache();
 
     await Future.delayed(const Duration(seconds: 1));
 

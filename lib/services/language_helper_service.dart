@@ -11,9 +11,18 @@ class LanguageHelperService {
   static const List<String> supportedLanguages = ['en', 'tr', 'ru', 'hi'];
   static const String defaultLanguage = 'en';
 
+  static String? _cachedLanguage;
+  static DateTime? _cacheTime;
+  static const _cacheDuration = Duration(minutes: 5);
+
   /// Get user's current language code
   /// Priority: 1) Saved preference 2) Device language 3) Default (en)
   static Future<String> getCurrentLanguage() async {
+    if (_cachedLanguage != null &&
+        _cacheTime != null &&
+        DateTime.now().difference(_cacheTime!) < _cacheDuration) {
+      return _cachedLanguage!; // Return cached (no log spam!)
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
 
@@ -21,6 +30,8 @@ class LanguageHelperService {
       final savedLanguage = prefs.getString('language_code');
       if (savedLanguage != null && supportedLanguages.contains(savedLanguage)) {
         debugPrint('🌐 [LanguageHelper] Using saved language: $savedLanguage');
+        _cachedLanguage = savedLanguage;
+        _cacheTime = DateTime.now();
         return savedLanguage;
       }
 
@@ -31,12 +42,16 @@ class LanguageHelperService {
       if (supportedLanguages.contains(deviceLanguageCode)) {
         debugPrint(
             '🌐 [LanguageHelper] Using device language: $deviceLanguageCode');
+        _cachedLanguage = deviceLanguageCode;
+        _cacheTime = DateTime.now();
         return deviceLanguageCode;
       }
 
       // 3. Fallback to default
       debugPrint(
           '🌐 [LanguageHelper] Using default language: $defaultLanguage');
+      _cachedLanguage = defaultLanguage;
+      _cacheTime = DateTime.now();
       return defaultLanguage;
     } catch (e) {
       debugPrint('⚠️ [LanguageHelper] Error getting language: $e');
@@ -206,5 +221,11 @@ class LanguageHelperService {
         .toList();
 
     debugPrint('📋 [$resourceType] Available languages: $available');
+  }
+
+  static void clearCache() {
+    _cachedLanguage = null;
+    _cacheTime = null;
+    debugPrint('🗑️ [LanguageHelper] Cache cleared');
   }
 }
