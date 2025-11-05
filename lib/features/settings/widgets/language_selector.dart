@@ -35,12 +35,15 @@ class LanguageSelector extends StatelessWidget {
                   height: 40.w,
                   decoration: BoxDecoration(
                     color: AppColors.greyLight,
-                    borderRadius: BorderRadius.circular(10.r),
+                    shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.language,
-                    color: AppColors.textPrimary, // ← SİYAH
-                    size: 20.sp,
+                  child: Center(
+                    child: Text(
+                      localeProvider.getLanguageFlag(
+                        localeProvider.locale.languageCode,
+                      ),
+                      style: TextStyle(fontSize: 20.sp),
+                    ),
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -109,13 +112,6 @@ class LanguageSelector extends StatelessWidget {
   ) {
     // Responsive değerler
     final isTablet = context.isTablet;
-    final isDesktop = context.isDesktop;
-
-    final double modalWidth = isDesktop
-        ? 400
-        : (isTablet
-            ? MediaQuery.of(context).size.width * 0.7
-            : double.infinity);
 
     final double titleSize =
         isTablet ? 20.sp.clamp(18.0, 22.0) : 18.sp.clamp(16.0, 20.0);
@@ -123,74 +119,90 @@ class LanguageSelector extends StatelessWidget {
     final double itemSize =
         isTablet ? 16.sp.clamp(15.0, 17.0) : 15.sp.clamp(14.0, 16.0);
 
-    showModalBottomSheet(
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
+      barrierDismissible: true,
       builder: (context) {
-        return Container(
-          width: modalWidth,
-          margin: isDesktop || isTablet
-              ? EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.15,
-                )
-              : EdgeInsets.zero,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(24.r),
-              topRight: Radius.circular(24.r),
+        return Dialog(
+            backgroundColor: Colors.transparent,
+            insetPadding: EdgeInsets.symmetric(
+              horizontal: 20.w,
+              vertical: 100.h,
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Handle bar
-              Container(
-                margin: EdgeInsets.only(top: 12.h),
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: AppColors.greyBorder,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: 400.w,
+                maxHeight: 500.h, // ← Max yükseklik ekle (overflow önlenir)
               ),
-
-              // Title
-              Padding(
-                padding: EdgeInsets.all(20.w),
-                child: Text(
-                  _getLocalizedTitle(localeProvider.locale.languageCode),
-                  style: GoogleFonts.inter(
-                    fontSize: titleSize,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius:
+                    BorderRadius.circular(24.r), // ← Tüm köşeler yuvarlak
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
                   ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Title
+                    Padding(
+                      padding: EdgeInsets.all(20.w),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _getLocalizedTitle(
+                                  localeProvider.locale.languageCode),
+                              style: GoogleFonts.inter(
+                                fontSize: titleSize,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: Icon(
+                              Icons.close,
+                              color: AppColors.textSecondary,
+                              size: 24.sp,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    Divider(height: 1, color: AppColors.greyBorder),
+
+                    // Language Options
+                    ...LocaleProvider.supportedLocales.map((locale) {
+                      final isSelected = localeProvider.locale == locale;
+                      return _buildLanguageOption(
+                        context: context,
+                        locale: locale,
+                        isSelected: isSelected,
+                        onTap: () {
+                          localeProvider.setLocale(locale);
+                          Navigator.pop(context);
+                        },
+                        localeProvider: localeProvider,
+                        itemSize: itemSize,
+                      );
+                    }).toList(),
+
+                    SizedBox(height: 20.h),
+                  ],
                 ),
               ),
-
-              Divider(height: 1, color: AppColors.greyBorder),
-
-              // Language Options
-              ...LocaleProvider.supportedLocales.map((locale) {
-                final isSelected = localeProvider.locale == locale;
-                return _buildLanguageOption(
-                  context: context,
-                  locale: locale,
-                  isSelected: isSelected,
-                  onTap: () {
-                    localeProvider.setLocale(locale);
-                    Navigator.pop(context);
-                  },
-                  localeProvider: localeProvider,
-                  itemSize: itemSize,
-                );
-              }).toList(),
-
-              SizedBox(height: 20.h),
-            ],
-          ),
-        );
+            ));
       },
     );
   }
@@ -215,9 +227,19 @@ class LanguageSelector extends StatelessWidget {
         child: Row(
           children: [
             // Flag emoji
-            Text(
-              localeProvider.getLanguageFlag(locale.languageCode),
-              style: TextStyle(fontSize: 28.sp),
+            Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  localeProvider.getLanguageFlag(locale.languageCode),
+                  style: TextStyle(fontSize: 18.sp),
+                ),
+              ),
             ),
             SizedBox(width: 12.w),
 

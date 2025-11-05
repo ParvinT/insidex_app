@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
+import 'widgets/player_album_art.dart';
 import '../../services/listening_tracker_service.dart';
 import '../../services/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -521,8 +522,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                         final Widget _inner = Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            PlayerVisualizer(
-                              controller: _eqController,
+                            PlayerAlbumArt(
+                              imageUrl: _backgroundImageUrl,
+                              equalizerController: _eqController,
                               isPlaying: _isPlaying,
                             ),
                             SizedBox(height: 40.h),

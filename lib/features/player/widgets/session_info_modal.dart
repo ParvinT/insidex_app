@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marquee/marquee.dart';
 
 import '../../../l10n/app_localizations.dart';
 
@@ -254,32 +255,6 @@ class _SessionInfoContent extends StatelessWidget {
   }
 
   Widget _buildNowPlayingCard(BuildContext context) {
-    final trackData = session['subliminal'];
-
-    // Track title ve description'ı temizle
-    String cleanTrackTitle = (trackData?['title'] ?? 'Subliminal')
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-        .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-        .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-        .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-        .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
-        .trim();
-
-    String? cleanTrackDescription;
-    if (trackData?['description'] != null) {
-      cleanTrackDescription = trackData['description']
-          .replaceAll(RegExp(r'<[^>]*>'), '')
-          .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-          .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-          .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-          .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-          .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-          .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
-          .trim();
-    }
-
     return Container(
       margin: EdgeInsets.only(bottom: 24.h),
       padding: EdgeInsets.all(16.w),
@@ -311,6 +286,7 @@ class _SessionInfoContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // "NOW PLAYING" üst yazı
                 Text(
                   AppLocalizations.of(context).nowPlaying,
                   style: GoogleFonts.inter(
@@ -322,26 +298,8 @@ class _SessionInfoContent extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4.h),
-                Text(
-                  cleanTrackTitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                if (cleanTrackDescription != null)
-                  Text(
-                    cleanTrackDescription,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: Colors.grey[500],
-                      decoration: TextDecoration.none,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+
+                _buildSessionTitleWithMarquee(context),
               ],
             ),
           ),
@@ -417,6 +375,75 @@ class _SessionInfoContent extends StatelessWidget {
         ),
         SizedBox(height: 24.h),
       ],
+    );
+  }
+
+  Widget _buildSessionTitleWithMarquee(BuildContext context) {
+    // Session title'ı temizle
+    String sessionTitle = (session['title'] ?? 'Unknown Session')
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
+        .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
+        .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
+        .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
+        .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
+        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
+        .trim();
+
+    // Text uzunluğunu hesapla (basit kontrol)
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: sessionTitle,
+        style: GoogleFonts.inter(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: double.infinity);
+
+    final textWidth = textPainter.size.width;
+    final availableWidth =
+        MediaQuery.of(context).size.width * 0.5; // Yaklaşık alan
+
+    // ✅ Eğer text uzunsa → Marquee
+    if (textWidth > availableWidth) {
+      return SizedBox(
+        height: 24.h,
+        child: Marquee(
+          text: sessionTitle,
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            decoration: TextDecoration.none,
+          ),
+          scrollAxis: Axis.horizontal,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          blankSpace: 40.0, // Boşluk
+          velocity: 30.0, // Hız (px/saniye)
+          pauseAfterRound: const Duration(seconds: 1), // Durakla
+          startPadding: 0.0,
+          accelerationDuration: const Duration(milliseconds: 500),
+          accelerationCurve: Curves.linear,
+          decelerationDuration: const Duration(milliseconds: 500),
+          decelerationCurve: Curves.linear,
+        ),
+      );
+    }
+
+    // ✅ Text kısa → Normal text
+    return Text(
+      sessionTitle,
+      style: GoogleFonts.inter(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+        decoration: TextDecoration.none,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 
