@@ -7,7 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/responsive/context_ext.dart';
 import 'search_service.dart';
-import '../library/category_sessions_screen.dart';
+import '../library/sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
 import 'search_history_service.dart';
@@ -450,7 +450,7 @@ class _SearchScreenState extends State<SearchScreen>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => CategorySessionsScreen(
+            builder: (_) => SessionsListScreen(
               categoryTitle: category['title'],
               categoryEmoji: category['emoji'],
               categoryId: category['id'],

@@ -25,12 +25,6 @@ class SessionFilterService {
           'id': doc.id,
           ...data,
         });
-      } else if (audioUrls is Map && audioUrls.containsKey('en')) {
-        // Fallback to English if available
-        filteredSessions.add({
-          'id': doc.id,
-          ...data,
-        });
       }
       // Else: Skip this session (no compatible audio)
     }
@@ -46,7 +40,7 @@ class SessionFilterService {
     final audioUrls = session['subliminal']?['audioUrls'];
 
     if (audioUrls is Map) {
-      return audioUrls.containsKey(userLanguage) || audioUrls.containsKey('en');
+      return audioUrls.containsKey(userLanguage);
     }
 
     return false;
@@ -66,9 +60,6 @@ class SessionFilterService {
 
       if (audioUrls is Map && audioUrls.containsKey(userLanguage)) {
         // Has audio for this language
-        filteredSessions.add(session);
-      } else if (audioUrls is Map && audioUrls.containsKey('en')) {
-        // Fallback to English if available
         filteredSessions.add(session);
       }
       // Else: Skip this session (no compatible audio)

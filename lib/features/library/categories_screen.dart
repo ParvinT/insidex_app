@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
-import 'category_sessions_screen.dart';
+import 'sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/widgets/session_card.dart';
@@ -90,9 +90,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     final double leadingWidth = isTablet ? 64 : 56;
     final double leadingPad = isTablet ? 12 : 8;
 
-    final double toolbarH = isDesktop ? 64.0 : (isTablet ? 60.0 : 56.0);
+    final double toolbarH = isDesktop ? 64.0 : (isTablet ? 60.0 : 40.0);
 
-    final double logoW = isDesktop ? 120.0 : (isTablet ? 104.0 : 92.0);
+    final double logoW = isDesktop ? 100.0 : (isTablet ? 88.0 : 68.0);
     final double logoH = toolbarH * 0.70;
     final double dividerH = (logoH * 0.9).clamp(18.0, 36.0);
 
@@ -123,41 +123,38 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               return Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  SizedBox(
-                    width: logoW,
-                    height: logoH,
-                    child: SvgPicture.asset(
-                      'assets/images/logo.svg',
-                      width: logoW,
-                      height: logoH,
-                      fit: BoxFit.contain,
-                      alignment: Alignment.centerLeft,
-                      colorFilter: ColorFilter.mode(
-                        AppColors.textPrimary,
-                        BlendMode.srcIn,
+                  Expanded(
+                    child: Center(
+                      // ← ORTALAMA EKLE
+                      child: SvgPicture.asset(
+                        'assets/images/logo.svg',
+                        width: logoW,
+                        height: logoH,
+                        fit: BoxFit.contain,
+                        colorFilter: ColorFilter.mode(
+                          AppColors.textPrimary,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),
 
                   // ORTA: Ayraç tam ortada
-                  Expanded(
-                    child: Center(
-                      child: Container(
-                        height: dividerH,
-                        width: 1.5,
-                        color: AppColors.textPrimary.withOpacity(0.2),
-                      ),
-                    ),
+                  Container(
+                    height: dividerH,
+                    width: 1.5,
+                    color: AppColors.textPrimary.withOpacity(0.2),
+                    margin: EdgeInsets.symmetric(
+                        horizontal: 8.w), // ← Biraz margin ekle
                   ),
 
-                  // SAĞ: Başlık – sağa yapışık ve tek satır
-                  Flexible(
-                    child: Align(
-                      alignment: Alignment.centerRight,
+                  Expanded(
+                    child: Center(
                       child: Text(
                         AppLocalizations.of(context).allSubliminals,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: (15.sp).clamp(14.0, 20.0),
                           fontWeight: FontWeight.w600,
@@ -165,20 +162,19 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         ),
                       ),
                     ),
-                  ),
+                  )
                 ],
               );
             },
           ),
           bottom: TabBar(
-            isScrollable: true,
-            padding: EdgeInsets.symmetric(
-                horizontal: isDesktop ? 12 : (isTablet ? 10 : 6)),
+            isScrollable: false,
+            padding: EdgeInsets.zero,
             labelPadding: EdgeInsets.symmetric(
-              horizontal: isDesktop ? 24 : (isTablet ? 20 : 14),
+              horizontal: isDesktop ? 32 : (isTablet ? 28 : 20),
             ),
             indicatorPadding:
-                EdgeInsets.symmetric(horizontal: isTablet ? 8 : 4),
+                EdgeInsets.symmetric(horizontal: isTablet ? 10 : 6),
             controller: _tabController,
             indicatorColor: AppColors.textPrimary,
             indicatorWeight: 3,
@@ -287,7 +283,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CategorySessionsScreen(
+            builder: (context) => SessionsListScreen(
               categoryTitle: category['title'],
               categoryEmoji: category['emoji'],
               categoryId: category['id'],
@@ -503,7 +499,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 itemCount: sessions.length,
                 itemBuilder: (context, index) {
                   final session = sessions[index]; // Already filtered Map
-                  final sessionId = session['id'];
                   return _buildSessionItem(context, session);
                 },
               );

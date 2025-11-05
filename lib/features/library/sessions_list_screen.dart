@@ -1,4 +1,4 @@
-// lib/features/library/category_sessions_screen.dart
+// lib/features/library/session_list_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -12,25 +12,25 @@ import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
 
-class CategorySessionsScreen extends StatefulWidget {
+class SessionsListScreen extends StatefulWidget {
   final String categoryTitle;
   final String categoryEmoji;
   final String? categoryId;
-  final bool showAllSessions;
+  final bool isShowingAllSessions;
 
-  const CategorySessionsScreen({
+  const SessionsListScreen({
     super.key,
     required this.categoryTitle,
     required this.categoryEmoji,
     this.categoryId,
-    this.showAllSessions = false,
+    this.isShowingAllSessions = false,
   });
 
   @override
-  State<CategorySessionsScreen> createState() => _CategorySessionsScreenState();
+  State<SessionsListScreen> createState() => _SessionsListScreenState();
 }
 
-class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
+class _SessionsListScreenState extends State<SessionsListScreen> {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -43,16 +43,16 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
     final double leadingWidth = isTablet ? 64 : 56;
     final double leadingPad = isTablet ? 12 : 8;
 
-    final double toolbarH = isDesktop ? 64.0 : (isTablet ? 60.0 : 56.0);
+    final double toolbarH = isDesktop ? 64.0 : (isTablet ? 60.0 : 40.0);
 
-    final double logoW = isDesktop ? 120.0 : (isTablet ? 104.0 : 92.0);
+    final double logoW = isDesktop ? 100.0 : (isTablet ? 88.0 : 68.0);
     final double logoH = toolbarH * 0.70;
     final double dividerH = (logoH * 0.9).clamp(18.0, 36.0);
 
     // Sadece bu ekranda font şişmesini yumuşat
     final double _ts = mq.textScaleFactor.clamp(1.0, 1.2);
 
-    final String rightTitleText = widget.showAllSessions
+    final String rightTitleText = widget.isShowingAllSessions
         ? AppLocalizations.of(context).allSubliminals
         : widget.categoryTitle;
 
@@ -65,7 +65,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
           backgroundColor: AppColors.backgroundWhite,
           elevation: 0,
           leadingWidth: leadingWidth,
-          titleSpacing: isTablet ? 8 : 4,
+          titleSpacing: isTablet ? 4 : 0,
 
           leading: IconButton(
             icon: Icon(
@@ -85,42 +85,38 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   // SOL: Logo
-                  SizedBox(
-                    width: logoW,
-                    height: logoH,
-                    child: SvgPicture.asset(
-                      'assets/images/logo.svg',
-                      width: logoW,
-                      height: logoH,
-                      fit: BoxFit.contain,
-                      alignment: Alignment.centerLeft,
-                      colorFilter: ColorFilter.mode(
-                        AppColors.textPrimary,
-                        BlendMode.srcIn,
+                  Expanded(
+                    child: Center(
+                      child: SvgPicture.asset(
+                        'assets/images/logo.svg',
+                        width: logoW,
+                        height: logoH,
+                        fit: BoxFit.contain,
+                        colorFilter: ColorFilter.mode(
+                          AppColors.textPrimary,
+                          BlendMode.srcIn,
+                        ),
                       ),
                     ),
                   ),
 
                   // ORTA: Ayraç
-                  Expanded(
-                    child: Center(
-                      child: Container(
-                        height: dividerH,
-                        width: 1.5,
-                        color: AppColors.textPrimary.withOpacity(0.2),
-                      ),
-                    ),
+                  Container(
+                    height: dividerH,
+                    width: 1.5,
+                    color: AppColors.textPrimary.withOpacity(0.2),
+                    margin: EdgeInsets.symmetric(horizontal: 8.w),
                   ),
 
                   // SAĞ: Başlık varyantı
-                  Flexible(
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: widget.showAllSessions
+                  Expanded(
+                    child: Center(
+                      child: widget.isShowingAllSessions
                           ? Text(
                               rightTitleText,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
                               style: GoogleFonts.inter(
                                 fontSize: (15.sp).clamp(14.0, 20.0),
                                 fontWeight: FontWeight.w600,
@@ -142,6 +138,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                                     rightTitleText,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                    textAlign: TextAlign.center,
                                     style: GoogleFonts.inter(
                                       fontSize: (18.sp).clamp(16.0, 22.0),
                                       fontWeight: FontWeight.w700,
@@ -161,7 +158,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
 
         // ⬇️ Aşağısı senin orijinal akışın
         body: StreamBuilder<QuerySnapshot>(
-            stream: widget.showAllSessions
+            stream: widget.isShowingAllSessions
                 ? FirebaseFirestore.instance
                     .collection('sessions')
                     .orderBy('createdAt', descending: true)
@@ -238,7 +235,7 @@ class _CategorySessionsScreenState extends State<CategorySessionsScreen> {
                     padding: EdgeInsets.all(20.w),
                     itemCount: sessions.length,
                     itemBuilder: (context, index) {
-                      final session = sessions[index]; 
+                      final session = sessions[index];
                       final sessionId = session['id'];
 
                       return _buildSessionCard(

@@ -630,42 +630,54 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     required String title,
     required String subtitle,
   }) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 100.w,
-            height: 100.w,
-            decoration: BoxDecoration(
-              color: AppColors.greyLight,
-              shape: BoxShape.circle,
+    return SingleChildScrollView(
+      physics: AlwaysScrollableScrollPhysics(),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).size.height - 300.h,
+          maxWidth: 600.w,
+        ),
+        child: Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.w, vertical: 40.h),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 100.w,
+                  height: 100.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.greyLight,
+                    shape: BoxShape.circle,
+                  ),
+                  child:
+                      Icon(icon, size: 50.sp, color: AppColors.textSecondary),
+                ),
+                SizedBox(height: 24.h),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.inter(
+                    fontSize: 14.sp,
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
-            child: Icon(icon, size: 50.sp, color: AppColors.textSecondary),
           ),
-          SizedBox(height: 24.h),
-          Text(
-            title,
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40.w),
-            child: Text(
-              subtitle,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -680,7 +692,6 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     VoidCallback? onToggleFavorite,
     VoidCallback? onAddToPlaylist,
   }) {
-    // Yeni SessionCard widget'ını kullan
     return SessionCard(
       session: session,
       index: index,
@@ -693,7 +704,6 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       onRemove: onRemove,
       onAddToPlaylist: onAddToPlaylist,
       onTap: () {
-        // Navigate to audio player
         Navigator.push(
           context,
           MaterialPageRoute(

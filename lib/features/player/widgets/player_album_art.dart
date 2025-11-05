@@ -171,7 +171,7 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   Widget _buildAnimatedEqualizer() {
     // ✅ Use dedicated continuous controller
     final t =
-        _continuousController.value * 10000; // Scale up for visible movement
+        _continuousController.value * 5000; // Scale up for visible movement
 
     final bars = List.generate(5, (i) {
       // Each bar has different speed
@@ -207,46 +207,110 @@ class _EqualizerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // 1. Glow effect paint
-    final glowPaint = Paint()
-      ..color = Colors.grey.shade400.withOpacity(0.2)
-      ..strokeWidth = 5
-      ..strokeCap = StrokeCap.round
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-
-    // 2. Main bar paint
-    final paint = Paint()
-      ..color = Colors.grey.shade400.withOpacity(0.8)
-      ..strokeWidth = 4
-      ..strokeCap = StrokeCap.round;
-
-    final barWidth = size.width / (barHeights.length * 2 - 1);
+    final barWidth = 4.0;
+    final spacing = 7.0;
     final centerY = size.height / 2;
 
+    final totalWidth =
+        (barHeights.length * barWidth) + ((barHeights.length - 1) * spacing);
+    var startX = (size.width - totalWidth) / 2;
+
     for (int i = 0; i < barHeights.length; i++) {
-      final x = barWidth * i * 2 + barWidth / 2;
       final barHeight = barHeights[i];
       final y1 = centerY - barHeight / 2;
-      final y2 = centerY + barHeight / 2;
 
-      // Draw glow first (behind)
-      canvas.drawLine(
-        Offset(x, y1),
-        Offset(x, y2),
-        glowPaint,
+      // Gradient paint
+      final gradientPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white.withOpacity(0.6),
+            Colors.grey.shade400.withOpacity(0.4),
+          ],
+        ).createShader(Rect.fromLTWH(startX, y1, barWidth, barHeight))
+        ..style = PaintingStyle.fill;
+
+      // Yuvarlatılmış köşeler
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(startX, y1, barWidth, barHeight),
+        const Radius.circular(2.0),
       );
 
-      // Draw main bar on top
-      canvas.drawLine(
-        Offset(x, y1),
-        Offset(x, y2),
-        paint,
-      );
+      canvas.drawRRect(rect, gradientPaint);
+
+      startX += barWidth + spacing;
     }
   }
 
   @override
-  bool shouldRepaint(_EqualizerPainter oldDelegate) {
-    return true;
-  }
+  bool shouldRepaint(_EqualizerPainter oldDelegate) => true;
 }
+
+// Another good version for equalizer.
+/*class _EqualizerPainter extends CustomPainter {
+  final List<double> barHeights;
+
+  _EqualizerPainter(this.barHeights);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final barWidth = 3.5;
+    final spacing = 8.0;
+    final centerY = size.height / 2;
+    
+    final totalWidth = (barHeights.length * barWidth) + 
+                       ((barHeights.length - 1) * spacing);
+    var startX = (size.width - totalWidth) / 2;
+
+    for (int i = 0; i < barHeights.length; i++) {
+      final barHeight = barHeights[i];
+      final y1 = centerY - barHeight / 2;
+
+      // 1. Outer glow (çok hafif)
+      final glowPaint = Paint()
+        ..color = Colors.white.withOpacity(0.1)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+      final glowRect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(startX - 1, y1 - 1, barWidth + 2, barHeight + 2),
+        const Radius.circular(2.0),
+      );
+      canvas.drawRRect(glowRect, glowPaint);
+
+      // 2. Main bar with frosted glass effect
+      final glassPaint = Paint()
+        ..color = Colors.white.withOpacity(0.25)
+        ..style = PaintingStyle.fill;
+
+      final rect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(startX, y1, barWidth, barHeight),
+        const Radius.circular(2.0),
+      );
+      canvas.drawRRect(rect, glassPaint);
+
+      // 3. Inner highlight (cam parlama efekti)
+      final highlightPaint = Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [
+            Colors.white.withOpacity(0.4),
+            Colors.white.withOpacity(0.0),
+          ],
+        ).createShader(Rect.fromLTWH(startX, y1, barWidth * 0.5, barHeight))
+        ..style = PaintingStyle.fill;
+
+      final highlightRect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(startX, y1, barWidth * 0.4, barHeight),
+        const Radius.circular(2.0),
+      );
+      canvas.drawRRect(highlightRect, highlightPaint);
+
+      startX += barWidth + spacing;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_EqualizerPainter oldDelegate) => true;
+}*/
