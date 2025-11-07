@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/routes/app_routes.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -205,6 +206,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       },
                       isCompact: isSmallScreen,
                     ),
+
+                    _buildCompactMenuItem(
+                      icon: Icons.home_outlined,
+                      title: 'Home Cards',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/home-cards');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
                     _buildCompactMenuItem(
                       icon: Icons.music_note,
                       title: 'Sessions',
@@ -348,182 +359,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 fontSize: isCompact ? 14.sp : 15.sp,
                 fontWeight: FontWeight.w500,
                 color: color ?? AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDesktopSidebar() {
-    return Container(
-      width: 250.w,
-      decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        border: Border(
-          right: BorderSide(
-            color: AppColors.greyBorder.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Admin Header
-          Container(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.admin_panel_settings,
-                  color: AppColors.primaryGold,
-                  size: 48.sp,
-                ),
-                SizedBox(height: 12.h),
-                Text(
-                  'Admin Panel',
-                  style: GoogleFonts.inter(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                if (_currentUser != null)
-                  Column(
-                    children: [
-                      SizedBox(height: 8.h),
-                      Text(
-                        _currentUser!.email ?? '',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-
-          Divider(color: AppColors.greyBorder.withOpacity(0.5)),
-
-          // Menu Items
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: Column(
-                children: [
-                  _buildSidebarItem(
-                    icon: Icons.dashboard,
-                    title: 'Dashboard',
-                    isActive: true,
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.category,
-                    title: 'Categories',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/categories'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.music_note,
-                    title: 'Sessions',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/sessions'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.add_circle,
-                    title: 'Add Session',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/add-session'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.people,
-                    title: 'Users',
-                    onTap: () => Navigator.pushNamed(context, '/admin/users'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.settings,
-                    title: 'Settings',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/settings'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom Actions
-          Container(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              children: [
-                Divider(color: AppColors.greyBorder.withOpacity(0.5)),
-                _buildSidebarItem(
-                  icon: Icons.logout,
-                  title: 'Sign Out',
-                  onTap: () async {
-                    await _auth.signOut();
-                    if (mounted) {
-                      Navigator.pushReplacementNamed(context, '/auth/login');
-                    }
-                  },
-                  isDestructive: true,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSidebarItem({
-    required IconData icon,
-    required String title,
-    VoidCallback? onTap,
-    bool isActive = false,
-    bool isDestructive = false,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.primaryGold.withOpacity(0.1)
-              : Colors.transparent,
-          border: isActive
-              ? const Border(
-                  left: BorderSide(
-                    color: AppColors.primaryGold,
-                    width: 3,
-                  ),
-                )
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isDestructive
-                  ? Colors.red
-                  : isActive
-                      ? AppColors.primaryGold
-                      : AppColors.textSecondary,
-              size: 20.sp,
-            ),
-            SizedBox(width: 12.w),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                color: isDestructive
-                    ? Colors.red
-                    : isActive
-                        ? AppColors.primaryGold
-                        : AppColors.textPrimary,
               ),
             ),
           ],
@@ -1129,9 +964,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 768;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: SafeArea(

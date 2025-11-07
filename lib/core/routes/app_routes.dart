@@ -13,6 +13,7 @@ import '../../features/admin/add_session_screen.dart';
 import '../../features/admin/category_management_screen.dart';
 import '../../features/admin/session_management_screen.dart';
 import '../../features/admin/user_management_screen.dart';
+import '../../features/admin/home_cards_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
 import '../../features/premium/premium_waitlist_screen.dart';
 import '../../features/auth/forgot_password_screen.dart';
@@ -47,6 +48,7 @@ class AppRoutes {
   static const String myInsights = '/profile/my-insights';
   static const String player = '/player';
   static const String adminDashboard = '/admin/dashboard';
+  static const String homeCardsManagement = '/admin/home-cards';
 
   static const String privacyPolicy = '/legal/privacy-policy';
   static const String termsOfService = '/legal/terms-of-service';
@@ -76,6 +78,7 @@ class AppRoutes {
         '/admin/add-session': (_) => const AddSessionScreen(),
         '/admin/categories': (_) => const CategoryManagementScreen(),
         '/admin/sessions': (_) => const SessionManagementScreen(),
+        '/admin/home-cards': (_) => const HomeCardsManagementScreen(),
         '/admin/users': (_) => const UserManagementScreen(),
         '/admin/settings': (_) => const AdminSettingsScreen(),
 

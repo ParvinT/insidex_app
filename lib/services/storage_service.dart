@@ -346,4 +346,84 @@ class StorageService {
       return 0;
     }
   }
+
+  static Future<String?> uploadHomeCardImage({
+    required String cardId,
+    required PlatformFile file,
+    Function(double)? onProgress,
+  }) async {
+    try {
+      // Create filename with timestamp
+      final String fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${file.name}';
+
+      // Path: home_cards/{cardId}/filename
+      final String path = 'home_cards/$cardId/$fileName';
+
+      debugPrint('====== HOME CARD IMAGE UPLOAD ======');
+      debugPrint('Card ID: $cardId');
+      debugPrint('File name: $fileName');
+      debugPrint('Full path: $path');
+      debugPrint('===================================');
+
+      Reference ref = _storage.ref().child(path);
+
+      // Upload file
+      late UploadTask uploadTask;
+
+      if (kIsWeb) {
+        // Web platform
+        if (file.bytes == null) {
+          debugPrint('Error: File bytes are null for web platform');
+          return null;
+        }
+        uploadTask = ref.putData(file.bytes!);
+      } else {
+        // Mobile platform
+        if (file.path == null) {
+          debugPrint('Error: File path is null for mobile platform');
+          return null;
+        }
+        File fileToUpload = File(file.path!);
+        uploadTask = ref.putFile(fileToUpload);
+      }
+
+      // Monitor upload progress
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        double progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        debugPrint('Upload progress: ${progress.toStringAsFixed(2)}%');
+
+        // Call progress callback if provided
+        if (onProgress != null) {
+          onProgress(progress / 100); // Convert to 0-1 range
+        }
+      });
+
+      // Wait for upload to complete
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Get download URL
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      debugPrint('✅ Home card image uploaded successfully: $downloadUrl');
+
+      return downloadUrl;
+    } catch (e) {
+      debugPrint('❌ Error uploading home card image: $e');
+      return null;
+    }
+  }
+
+  /// Delete home card image
+  static Future<bool> deleteHomeCardImage(String imageUrl) async {
+    try {
+      Reference ref = _storage.refFromURL(imageUrl);
+      await ref.delete();
+      debugPrint('✅ Home card image deleted successfully');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error deleting home card image: $e');
+      return false;
+    }
+  }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -12,6 +11,8 @@ import '../../features/playlist/playlist_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
+import '../../services/home_card_service.dart';
+import 'widgets/home_card_button.dart';
 import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
 import '../search/widgets/search_bar_widget.dart';
@@ -28,30 +29,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   bool _isMenuOpen = false;
   void _toggleMenu() => setState(() => _isMenuOpen = !_isMenuOpen);
 
-  // Drag states (All & Playlist)
-  bool _isDraggingAll = false;
-  double _dragAll = 0.0;
-  bool _readyAll = false;
-
-  bool _isDraggingPl = false;
-  double _dragPl = 0.0;
-  bool _readyPl = false;
-
-  final double _dragThreshold = 60.0;
-
-  late final AnimationController _pulseAll = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
-
-  late final AnimationController _pulsePl = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
+  List<Map<String, dynamic>> _homeCards = [];
+  bool _isLoadingCards = true;
 
   @override
   void initState() {
     super.initState();
+    _loadHomeCards();
+    _startSmartPrefetch();
 
     // Check notification permission after screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -59,10 +44,32 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
   }
 
+  Future<void> _loadHomeCards() async {
+    try {
+      final cards = await HomeCardService.fetchHomeCards();
+
+      if (mounted) {
+        setState(() {
+          _homeCards = cards;
+          _isLoadingCards = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading home cards: $e');
+      if (mounted) {
+        setState(() => _isLoadingCards = false);
+      }
+    }
+  }
+
+  void _startSmartPrefetch() {
+    Future.microtask(() {
+      HomeCardService.smartPrefetch();
+    });
+  }
+
   @override
   void dispose() {
-    _pulseAll.dispose();
-    _pulsePl.dispose();
     super.dispose();
   }
 
@@ -97,8 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // background
           Positioned.fill(child: _buildBackground()),
           // content
-          _buildPlaylistCard(top: topPlaylist, height: cardH),
-          _buildAllSubliminalsCard(top: topAll, height: cardH),
+          ..._buildHomeCards(headerH, cardH),
           _buildHeader(height: headerH),
           // overlay
           if (_isMenuOpen)
@@ -109,6 +115,112 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       bottomNav: _buildBottomNavContent(),
     );
+  }
+
+  List<Widget> _buildHomeCards(double headerH, double cardH) {
+    if (_isLoadingCards) {
+      return [
+        Positioned(
+          top: headerH + 16.h,
+          left: 0,
+          right: 0,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      ];
+    }
+
+    if (_homeCards.isEmpty) {
+      return [];
+    }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive column count
+    int crossAxisCount;
+    if (screenWidth > 1200) {
+      crossAxisCount = 4; // Large tablets / Desktop
+    } else if (screenWidth > 800) {
+      crossAxisCount = 3; // Medium tablets
+    } else if (screenWidth > 600) {
+      crossAxisCount = 3; // Small tablets
+    } else {
+      crossAxisCount = 2; // Phones
+    }
+
+    // Calculate card dimensions
+    final totalPadding = 24.w * 2; // Left + Right padding
+    final totalGaps = 12.w * (crossAxisCount - 1); // Gaps between cards
+    final availableWidth = screenWidth - totalPadding - totalGaps;
+    final cardWidth = availableWidth / crossAxisCount;
+    final cardHeight = cardWidth * 1.0; // Aspect ratio
+
+    return [
+      Positioned(
+        top: headerH + 16.h,
+        left: 24.w,
+        right: 24.w,
+        child: GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 12.h,
+            childAspectRatio: cardWidth / cardHeight,
+          ),
+          itemCount: _homeCards.length,
+          itemBuilder: (context, index) {
+            final card = _homeCards[index];
+            final title = HomeCardService.getLocalizedTitleFromKey(
+              context,
+              card['cardType'],
+            );
+
+            return HomeCardButton(
+              imageUrl: card['randomImage'],
+              title: title,
+              icon: _getIconData(card['icon']),
+              onTap: () => _navigateToCard(card['navigateTo']),
+              height: cardHeight,
+            );
+          },
+        ),
+      ),
+    ];
+  }
+
+  IconData _getIconData(String? iconName) {
+    switch (iconName) {
+      case 'home_outlined':
+        return Icons.home_outlined;
+      case 'playlist_play':
+        return Icons.playlist_play;
+      case 'music_note':
+        return Icons.music_note;
+      default:
+        return Icons.music_note;
+    }
+  }
+
+  void _navigateToCard(String? navigateTo) {
+    if (navigateTo == null) return;
+
+    switch (navigateTo) {
+      case 'categories':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const CategoriesScreen()),
+        );
+        break;
+      case 'playlist':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PlaylistScreen()),
+        );
+        break;
+    }
   }
 
   // ---------- UI parts ----------
@@ -179,229 +291,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 },
               ),
               const Spacer(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAllSubliminalsCard(
-      {required double top, required double height}) {
-    final progress = (_dragAll / _dragThreshold).clamp(0.0, 1.0);
-
-    return Positioned(
-      top: top,
-      left: 0,
-      right: 0,
-      height: height,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const CategoriesScreen()));
-        },
-        onVerticalDragStart: (_) => setState(() => _isDraggingAll = true),
-        onVerticalDragUpdate: (d) {
-          setState(() {
-            _dragAll = (_dragAll + d.delta.dy).clamp(0.0, _dragThreshold);
-            final wasReady = _readyAll;
-            _readyAll = _dragAll >= _dragThreshold;
-            if (_readyAll && !wasReady) HapticFeedback.lightImpact();
-          });
-        },
-        onVerticalDragEnd: (details) {
-          final v = details.primaryVelocity ?? 0.0;
-          if (_readyAll || v > 500) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const CategoriesScreen()));
-          }
-          setState(() {
-            _isDraggingAll = false;
-            _readyAll = false;
-            _dragAll = 0.0;
-          });
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          transform: Matrix4.identity()..scale(_isDraggingAll ? 0.97 : 1.0),
-          decoration: BoxDecoration(
-            color: _readyAll ? AppColors.textPrimary : const Color(0xFFCCCBCB),
-            borderRadius: BorderRadius.circular(30.r),
-            boxShadow: [
-              BoxShadow(
-                color: _readyAll
-                    ? AppColors.textPrimary.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.1),
-                blurRadius: _isDraggingAll ? 25 : 20,
-                offset: Offset(0, _isDraggingAll ? 12 : 10),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: 20.w,
-                bottom: 20.h,
-                child: Text(
-                  AppLocalizations.of(context).allSubliminals,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _readyAll ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 8.h,
-                left: 0,
-                right: 0,
-                child: Column(
-                  children: [
-                    ScaleTransition(
-                      scale: Tween(begin: 0.9, end: 1.0).animate(
-                          CurvedAnimation(
-                              parent: _pulseAll, curve: Curves.easeInOut)),
-                      child: Icon(
-                        _readyAll ? Icons.lock_open : Icons.keyboard_arrow_down,
-                        color: _readyAll
-                            ? Colors.white.withOpacity(0.8)
-                            : AppColors.textPrimary.withOpacity(0.5),
-                        size: 20.sp,
-                      ),
-                    ),
-                    Container(
-                      width: 50.w,
-                      height: 5.h,
-                      decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(3.r),
-                      ),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: progress,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3.r),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlaylistCard({required double top, required double height}) {
-    final progress = (_dragPl / _dragThreshold).clamp(0.0, 1.0);
-
-    return Positioned(
-      top: top,
-      left: 0,
-      right: 0,
-      height: height,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const PlaylistScreen()));
-        },
-        onVerticalDragStart: (_) => setState(() => _isDraggingPl = true),
-        onVerticalDragUpdate: (d) {
-          setState(() {
-            _dragPl = (_dragPl + d.delta.dy).clamp(0.0, _dragThreshold);
-            final wasReady = _readyPl;
-            _readyPl = _dragPl >= _dragThreshold;
-            if (_readyPl && !wasReady) HapticFeedback.lightImpact();
-          });
-        },
-        onVerticalDragEnd: (details) {
-          final v = details.primaryVelocity ?? 0.0;
-          if (_readyPl || v > 500) {
-            Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const PlaylistScreen()));
-          }
-          setState(() {
-            _isDraggingPl = false;
-            _readyPl = false;
-            _dragPl = 0.0;
-          });
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          transform: Matrix4.identity()..scale(_isDraggingPl ? 0.97 : 1.0),
-          decoration: BoxDecoration(
-            color: _readyPl ? AppColors.textPrimary : const Color(0xFFCCCBCB),
-            borderRadius: BorderRadius.circular(30.r),
-            boxShadow: [
-              BoxShadow(
-                color: _readyPl
-                    ? AppColors.textPrimary.withOpacity(0.3)
-                    : Colors.black.withOpacity(0.08),
-                blurRadius: _isDraggingPl ? 25 : 15,
-                offset: Offset(0, _isDraggingPl ? 12 : 8),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: 20.w,
-                bottom: 20.h,
-                child: Text(
-                  AppLocalizations.of(context).yourPlaylist,
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w600,
-                    color: _readyPl ? Colors.white : AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 8.h,
-                left: 0,
-                right: 0,
-                child: Column(
-                  children: [
-                    ScaleTransition(
-                      scale: Tween(begin: 0.9, end: 1.0).animate(
-                          CurvedAnimation(
-                              parent: _pulsePl, curve: Curves.easeInOut)),
-                      child: Icon(
-                        _readyPl ? Icons.lock_open : Icons.keyboard_arrow_down,
-                        size: 20.sp,
-                        color: _readyPl
-                            ? Colors.white.withOpacity(0.85)
-                            : AppColors.textPrimary.withOpacity(0.5),
-                      ),
-                    ),
-                    Container(
-                      width: 50.w,
-                      height: 5.h,
-                      decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withOpacity(0.4),
-                        borderRadius: BorderRadius.circular(3.r),
-                      ),
-                      child: FractionallySizedBox(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: progress,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(3.r),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             ],
           ),
         ),
