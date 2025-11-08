@@ -1340,4 +1340,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invalidVerificationCode =>
       'Invalid verification code. Please try again.';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get noImageAvailable => 'No image available';
 }

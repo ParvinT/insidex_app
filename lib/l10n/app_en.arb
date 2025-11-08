@@ -521,7 +521,10 @@
   "verificationCodeAlreadyUsed": "This code has already been used.",
   "verificationCodeExpired": "Verification code has expired. Please sign up again.",
   "tooManyVerificationAttempts": "Too many failed attempts. Please sign up again.",
-  "invalidVerificationCode": "Invalid verification code. Please try again."
+  "invalidVerificationCode": "Invalid verification code. Please try again.",
+
+  "offline": "Offline",
+  "noImageAvailable": "No image available"
 
   
   

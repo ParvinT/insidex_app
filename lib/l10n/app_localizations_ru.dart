@@ -1349,4 +1349,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get invalidVerificationCode =>
       'Неверный код подтверждения. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get offline => 'Оффлайн';
+
+  @override
+  String get noImageAvailable => 'Изображение недоступно';
 }

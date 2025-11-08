@@ -97,23 +97,26 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       topPlaylist = (topPlaylist - shiftUp).clamp(topAll + 8.0, maxY - cardH);
     }
 
-    return ResponsiveScaffold(
-      appBar: null,
-      body: Stack(
-        children: [
-          // background
-          Positioned.fill(child: _buildBackground()),
-          // content
-          ..._buildHomeCards(headerH, cardH),
-          _buildHeader(height: headerH),
-          // overlay
-          if (_isMenuOpen)
-            Positioned.fill(
-              child: MenuOverlay(onClose: _toggleMenu),
-            ),
-        ],
+    return PopScope(
+      canPop: true,
+      child: ResponsiveScaffold(
+        appBar: null,
+        body: Stack(
+          children: [
+            // background
+            Positioned.fill(child: _buildBackground()),
+            // content
+            ..._buildHomeCards(headerH, cardH),
+            _buildHeader(height: headerH),
+            // overlay
+            if (_isMenuOpen)
+              Positioned.fill(
+                child: MenuOverlay(onClose: _toggleMenu),
+              ),
+          ],
+        ),
+        bottomNav: _buildBottomNavContent(),
       ),
-      bottomNav: _buildBottomNavContent(),
     );
   }
 

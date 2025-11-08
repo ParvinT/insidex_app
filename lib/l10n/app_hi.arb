@@ -478,7 +478,10 @@
   "verificationCodeAlreadyUsed": "यह कोड पहले ही उपयोग किया जा चुका है।",
   "verificationCodeExpired": "सत्यापन कोड समाप्त हो गया है। कृपया फिर से साइन अप करें।",
   "tooManyVerificationAttempts": "बहुत अधिक विफल प्रयास। कृपया फिर से साइन अप करें।",
-  "invalidVerificationCode": "अमान्य सत्यापन कोड। कृपया पुनः प्रयास करें।"
+  "invalidVerificationCode": "अमान्य सत्यापन कोड। कृपया पुनः प्रयास करें।",
+
+  "offline": "ऑफ़लाइन",
+  "noImageAvailable": "छवि उपलब्ध नहीं है"
 
   
   

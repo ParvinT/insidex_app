@@ -2645,6 +2645,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid verification code. Please try again.'**
   String get invalidVerificationCode;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @noImageAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No image available'**
+  String get noImageAvailable;
 }
 
 class _AppLocalizationsDelegate

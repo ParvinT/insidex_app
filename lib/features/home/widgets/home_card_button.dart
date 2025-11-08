@@ -7,6 +7,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../services/cache_manager_service.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Home Card Button Widget
 /// A beautiful card with background image, overlay, and smooth tap animations
@@ -123,17 +124,8 @@ class _HomeCardButtonState extends State<HomeCardButton>
 
   /// Background image with fade-in animation
   Widget _buildBackgroundImage() {
-    // Fallback to local asset if no image URL
     if (widget.imageUrl == null || widget.imageUrl!.isEmpty) {
-      return Image.asset(
-        'assets/images/home_card_fallback.jpg',
-        fit: BoxFit.cover,
-        width: double.infinity,
-        height: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildFallbackGradient();
-        },
-      );
+      return _buildBrandPlaceholder(showOfflineBadge: false);
     }
 
     return CachedNetworkImage(
@@ -143,7 +135,14 @@ class _HomeCardButtonState extends State<HomeCardButton>
       width: double.infinity,
       height: double.infinity,
       placeholder: (context, url) => _buildShimmerPlaceholder(),
-      errorWidget: (context, url, error) => _buildFallbackGradient(),
+      errorWidget: (context, url, error) {
+        // 👈 BURASI YENİ - Network error detection
+        final isNetworkError = error.toString().contains('SocketException') ||
+            error.toString().contains('Failed host lookup') ||
+            error.toString().contains('NetworkImageLoadException');
+
+        return _buildBrandPlaceholder(showOfflineBadge: isNetworkError);
+      },
       fadeInDuration: const Duration(milliseconds: 500),
       fadeOutDuration: const Duration(milliseconds: 300),
     );
@@ -238,26 +237,148 @@ class _HomeCardButtonState extends State<HomeCardButton>
     );
   }
 
-  /// Fallback gradient if no image
-  Widget _buildFallbackGradient() {
+  Widget _buildBrandPlaceholder({required bool showOfflineBadge}) {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            const Color(0xFFCCCBCB),
-            const Color(0xFFE0E0E0),
+            AppColors.primaryGoldLight.withOpacity(0.8),
+            AppColors.primaryGold.withOpacity(0.85),
           ],
         ),
       ),
-      child: Center(
-        child: Icon(
-          widget.icon ?? Icons.music_note,
-          size: 48.sp,
-          color: AppColors.textPrimary.withOpacity(0.3),
-        ),
+      child: Stack(
+        children: [
+          // Subtle dot pattern
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _DotPatternPainter(),
+            ),
+          ),
+
+          // Main content
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Animated icon
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.92, end: 1.0),
+                  duration: const Duration(milliseconds: 1500),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: Container(
+                        padding: EdgeInsets.all(20.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.3),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          widget.icon ?? Icons.music_note_rounded,
+                          size: 42.sp,
+                          color: Colors.white.withOpacity(0.95),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+
+                SizedBox(height: 16.h),
+
+                // Brand name
+                Text(
+                  'INSIDEX',
+                  style: GoogleFonts.inter(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white.withOpacity(0.95),
+                    letterSpacing: 3,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Offline badge
+          if (showOfflineBadge)
+            Positioned(
+              bottom: 12.h,
+              right: 12.w,
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 6.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.25),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.cloud_off_rounded,
+                      size: 14.sp,
+                      color: Colors.white.withOpacity(0.95),
+                    ),
+                    SizedBox(width: 6.w),
+                    Text(
+                      AppLocalizations.of(context).offline,
+                      style: GoogleFonts.inter(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withOpacity(0.95),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
+}
+
+class _DotPatternPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.08)
+      ..style = PaintingStyle.fill;
+
+    const spacing = 25.0;
+    const dotSize = 1.5;
+
+    for (double x = 0; x < size.width; x += spacing) {
+      for (double y = 0; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), dotSize, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
