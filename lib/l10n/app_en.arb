@@ -524,7 +524,8 @@
   "invalidVerificationCode": "Invalid verification code. Please try again.",
 
   "offline": "Offline",
-  "noImageAvailable": "No image available"
+  "noImageAvailable": "No image available",
+  "noDescriptionAvailable": "No description available"
 
   
   

@@ -1346,4 +1346,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noImageAvailable => 'No image available';
+
+  @override
+  String get noDescriptionAvailable => 'No description available';
 }

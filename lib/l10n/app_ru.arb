@@ -503,7 +503,8 @@
   "invalidVerificationCode": "Неверный код подтверждения. Пожалуйста, попробуйте снова.",
 
   "offline": "Оффлайн",
-  "noImageAvailable": "Изображение недоступно"
+  "noImageAvailable": "Изображение недоступно",
+  "noDescriptionAvailable": "Описание недоступно"
 
 
   

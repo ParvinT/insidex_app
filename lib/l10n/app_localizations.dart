@@ -2657,6 +2657,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No image available'**
   String get noImageAvailable;
+
+  /// No description provided for @noDescriptionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No description available'**
+  String get noDescriptionAvailable;
 }
 
 class _AppLocalizationsDelegate

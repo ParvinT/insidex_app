@@ -4,12 +4,42 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:marquee/marquee.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../services/session_localization_service.dart';
+import '../../../services/language_helper_service.dart';
 
 class SessionInfoModal {
-  static void show({
+  static Future<void> show({
+    // 🆕 async yapıldı
     required BuildContext context,
     required Map<String, dynamic> session,
-  }) {
+  }) async {
+    // 🆕 async
+    // 🆕 Prepare localized content BEFORE showing modal
+    final language = await LanguageHelperService.getCurrentLanguage();
+    final localizedContent = SessionLocalizationService.getLocalizedContent(
+      session,
+      language,
+    );
+
+// Build title with session number
+    final localizedSession = Map<String, dynamic>.from(session);
+
+    final title = localizedContent.title.isNotEmpty
+        ? localizedContent.title
+        : (session['title'] ?? 'Untitled Session');
+
+    final sessionNumber = session['sessionNumber'];
+    if (sessionNumber != null) {
+      localizedSession['_displayTitle'] =
+          '$sessionNumber • $title'; // ← • kullan
+    } else {
+      localizedSession['_displayTitle'] = title;
+    }
+    localizedSession['_displayDescription'] =
+        localizedContent.description.isNotEmpty
+            ? localizedContent.description
+            : (session['description'] ?? '');
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -30,7 +60,7 @@ class SessionInfoModal {
               ),
             ),
             child: _SessionInfoContent(
-              session: session,
+              session: localizedSession, // 🆕 localized session
               animation: animation,
             ),
           ),
@@ -187,20 +217,21 @@ class _SessionInfoContent extends StatelessWidget {
 
   Widget _buildSessionTitle() {
     // Title'ı temizle
-    String cleanTitle = (session['title'] ?? 'Untitled Session')
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-        .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-        .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-        .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-        .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
-        .trim();
+    String displayTitle =
+        (session['_displayTitle'] ?? session['title'] ?? 'Untitled Session')
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
+            .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
+            .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
+            .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
+            .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
+            .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
+            .trim();
 
     return Padding(
       padding: EdgeInsets.only(top: 20.h, bottom: 16.h),
       child: Text(
-        cleanTitle,
+        displayTitle,
         style: GoogleFonts.inter(
           fontSize: (24.sp).clamp(18.sp, 30.sp),
           fontWeight: FontWeight.w700,
@@ -213,10 +244,12 @@ class _SessionInfoContent extends StatelessWidget {
 
   Widget _buildDescription(BuildContext context) {
     // Description'ı temizle - HTML/Markdown tag'lerini kaldır
-    String cleanDescription = session['description'] ?? '';
+    String rawDescription = session['_displayDescription'] ??
+        (session['description'] ??
+            AppLocalizations.of(context).noDescriptionAvailable);
 
     // Basit HTML tag temizleme
-    cleanDescription = cleanDescription
+    String cleanDescription = rawDescription
         .replaceAll(RegExp(r'<[^>]*>'), '') // HTML tags
         .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1') // Bold markdown
         .replaceAll(RegExp(r'__([^_]*)__'), '\$1') // Bold markdown
@@ -379,15 +412,17 @@ class _SessionInfoContent extends StatelessWidget {
   }
 
   Widget _buildSessionTitleWithMarquee(BuildContext context) {
-    // Session title'ı temizle
-    String sessionTitle = (session['title'] ?? 'Unknown Session')
+    String rawTitle =
+        session['_displayTitle'] ?? (session['title'] ?? 'Unknown Session');
+
+    String sessionTitle = rawTitle
         .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-        .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-        .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-        .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-        .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
+        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), r'$1')
+        .replaceAll(RegExp(r'__([^_]*)__'), r'$1')
+        .replaceAll(RegExp(r'\*([^\*]*)\*'), r'$1')
+        .replaceAll(RegExp(r'_([^_]*)_'), r'$1')
+        .replaceAll(RegExp(r'<u>([^<]*)</u>'), r'$1')
+        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), r'$1')
         .trim();
 
     // Text uzunluğunu hesapla (basit kontrol)

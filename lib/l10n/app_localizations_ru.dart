@@ -1355,4 +1355,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noImageAvailable => 'Изображение недоступно';
+
+  @override
+  String get noDescriptionAvailable => 'Описание недоступно';
 }

@@ -11,6 +11,7 @@ import '../../services/cache_manager_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../services/language_helper_service.dart';
+import '../../services/session_localization_service.dart';
 import '../../providers/locale_provider.dart';
 
 class SessionCard extends StatelessWidget {
@@ -45,8 +46,7 @@ class SessionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     debugPrint('🔍 SESSION DATA: ${session['id']}');
     debugPrint('🖼️ backgroundImages: ${session['backgroundImages']}');
-    debugPrint(
-        '🖼️ OLD backgroundImage: ${session['backgroundImage']}'); 
+    debugPrint('🖼️ OLD backgroundImage: ${session['backgroundImage']}');
     debugPrint('📝 title: ${session['title']}');
     debugPrint('🏷️ category: ${session['category']}');
     final mq = MediaQuery.of(context);
@@ -71,6 +71,10 @@ class SessionCard extends StatelessWidget {
     final double playIconSize = isTablet ? 34.sp : 32.sp;
 
     final currentLanguage = context.watch<LocaleProvider>().locale.languageCode;
+    final localizedContent = SessionLocalizationService.getLocalizedContent(
+      session,
+      currentLanguage,
+    );
 
 // Get language-specific image URL
     String imageUrl = '';
@@ -93,8 +97,13 @@ class SessionCard extends StatelessWidget {
     }
 
     debugPrint('🖼️ [SessionCard] Image URL for $currentLanguage: $imageUrl');
+    final baseTitle = localizedContent.title.isNotEmpty
+        ? localizedContent.title
+        : AppLocalizations.of(context).untitledSession;
+
+    final sessionNumber = session['sessionNumber'];
     final title =
-        session['title'] ?? AppLocalizations.of(context).untitledSession;
+        sessionNumber != null ? '$sessionNumber • $baseTitle' : baseTitle;
     final category =
         session['category'] ?? AppLocalizations.of(context).general;
 

@@ -481,7 +481,8 @@
   "invalidVerificationCode": "अमान्य सत्यापन कोड। कृपया पुनः प्रयास करें।",
 
   "offline": "ऑफ़लाइन",
-  "noImageAvailable": "छवि उपलब्ध नहीं है"
+  "noImageAvailable": "छवि उपलब्ध नहीं है",
+  "noDescriptionAvailable": "विवरण उपलब्ध नहीं है"
 
   
   

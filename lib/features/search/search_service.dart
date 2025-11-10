@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/session_filter_service.dart';
+import '../../services/language_helper_service.dart'; // 🆕 IMPORT
 
 class SearchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -64,29 +65,59 @@ class SearchService {
   }
 
   /// Search sessions by title and description
-  /// Search sessions by title and description
+  /// Searches ONLY in current app language content
   Future<List<Map<String, dynamic>>> _searchSessions(String query) async {
     try {
       final snapshot = await _firestore.collection('sessions').get();
 
-      // First, filter by search query
-      final searchMatches = snapshot.docs.where((doc) {
-        final data = doc.data();
+      // ✅ LANGUAGE FILTER - Apply FIRST to get only sessions with current language
+      final languageFilteredSessions =
+          await SessionFilterService.filterSessionsByLanguage(snapshot.docs);
 
-        // Search in main title
-        final title = (data['title'] ?? '').toString().toLowerCase();
+      // 🆕 Get current app language ONCE
+      final currentLanguage = await LanguageHelperService.getCurrentLanguage();
 
-        // Search in description
-        final description =
-            (data['description'] ?? '').toString().toLowerCase();
+      // Then filter by search query in CURRENT LANGUAGE ONLY
+      final searchMatches = languageFilteredSessions.where((session) {
+        final data = session;
 
-        // Search in intro title (old structure for backward compatibility)
-        final introTitle = data['intro'] is Map
+        String title = '';
+        String description = '';
+        String introTitle = '';
+        String introContent = '';
+
+        // Try NEW structure first (content.{lang})
+        if (data['content'] is Map) {
+          final content = data['content'] as Map;
+
+          // 🆕 ONLY search in CURRENT language
+          if (content[currentLanguage] is Map) {
+            final langContent = content[currentLanguage] as Map;
+            title = (langContent['title'] ?? '').toString().toLowerCase();
+            description =
+                (langContent['description'] ?? '').toString().toLowerCase();
+
+            if (langContent['introduction'] is Map) {
+              final intro = langContent['introduction'] as Map;
+              introTitle = (intro['title'] ?? '').toString().toLowerCase();
+              introContent = (intro['content'] ?? '').toString().toLowerCase();
+            }
+          }
+        }
+
+        // ✅ Backward compatibility: OLD structure
+        if (title.isEmpty) {
+          title = (data['title'] ?? '').toString().toLowerCase();
+        }
+        if (description.isEmpty) {
+          description = (data['description'] ?? '').toString().toLowerCase();
+        }
+
+        final oldIntroTitle = data['intro'] is Map
             ? ((data['intro'] as Map)['title'] ?? '').toString().toLowerCase()
             : '';
 
-        // Search in introduction content (new structure)
-        final introContent = data['introduction'] is Map
+        final oldIntroContent = data['introduction'] is Map
             ? ((data['introduction'] as Map)['content'] ?? '')
                 .toString()
                 .toLowerCase()
@@ -100,19 +131,17 @@ class SearchService {
                 .join(' ')
             : '';
 
-        // Match if any field contains the query
+        // ✅ Match ONLY in current language content
         return title.contains(query) ||
             description.contains(query) ||
             introTitle.contains(query) ||
             introContent.contains(query) ||
+            oldIntroTitle.contains(query) ||
+            oldIntroContent.contains(query) ||
             affirmations.contains(query);
       }).toList();
 
-      // ✅ LANGUAGE FILTER - Apply after search
-      final filteredMatches =
-          await SessionFilterService.filterSessionsByLanguage(searchMatches);
-
-      return filteredMatches;
+      return searchMatches;
     } catch (e) {
       // Silent fail - return empty list
       return [];

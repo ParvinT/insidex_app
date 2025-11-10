@@ -225,7 +225,19 @@ class MiniPlayerProvider extends ChangeNotifier {
 
   /// Get session title safely
   String get sessionTitle {
-    return _currentSession?['title'] ?? 'Unknown Session';
+    if (_currentSession == null) return 'Unknown Session';
+
+    // Try localized title first (WITHOUT number - clean for mini player)
+    if (_currentSession!.containsKey('_localizedTitle')) {
+      final localizedTitle = _currentSession!['_localizedTitle'];
+      if (localizedTitle != null && localizedTitle.toString().isNotEmpty) {
+        return localizedTitle
+            .toString(); 
+      }
+    }
+
+    // Fallback: old structure
+    return _currentSession!['title'] ?? 'Unknown Session';
   }
 
   /// Get session image URL safely

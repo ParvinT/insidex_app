@@ -499,6 +499,7 @@
   "invalidVerificationCode": "Invalid verification code. Please try again.",
 
   "offline": "Çevrimdışı",
-  "noImageAvailable": "Görsel mevcut değil"
+  "noImageAvailable": "Görsel mevcut değil",
+  "noDescriptionAvailable": "Açıklama mevcut değil"
   
 }

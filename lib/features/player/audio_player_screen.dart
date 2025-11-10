@@ -15,6 +15,7 @@ import '../../services/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../services/language_helper_service.dart';
+import '../../services/session_localization_service.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -130,10 +131,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Future<void> _loadLanguageAndUrls() async {
     final language = await LanguageHelperService.getCurrentLanguage();
 
-    if (_loadedLanguage == language && _audioUrl != null) {
-      debugPrint('⏭️ [AudioPlayer] Language already loaded: $language');
-      return;
-    }
+    // 🆕 Load localized content
+    final localizedContent = SessionLocalizationService.getLocalizedContent(
+      _session,
+      language,
+    );
 
     setState(() {
       _currentLanguage = language;
@@ -160,12 +162,24 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       if (duration > 0) {
         _totalDuration = Duration(seconds: duration);
       }
-    });
 
-    debugPrint('🌐 [AudioPlayer] Language: $language');
-    debugPrint('🎵 [AudioPlayer] Audio URL: $_audioUrl');
-    debugPrint('🖼️ [AudioPlayer] Image URL: $_backgroundImageUrl');
-    debugPrint('⏱️ [AudioPlayer] Duration: ${_totalDuration.inSeconds}s');
+      // 🆕 Store localized content in session
+      final sessionNumber = _session['sessionNumber'];
+      final title = localizedContent.title;
+
+      if (sessionNumber != null) {
+        _session['_localizedTitle'] =
+            '$sessionNumber • $title'; // ← Mini player için
+        _session['_displayTitle'] = '$sessionNumber • $title'; // ← Player için
+      } else {
+        _session['_localizedTitle'] = title;
+        _session['_displayTitle'] = title;
+      }
+      _session['_localizedDescription'] = localizedContent.description;
+      _session['_localizedIntroTitle'] = localizedContent.introduction.title;
+      _session['_localizedIntroContent'] =
+          localizedContent.introduction.content;
+    });
   }
 
   Future<void> _restoreStateFromMiniPlayer() async {
@@ -529,7 +543,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                             ),
                             SizedBox(height: 40.h),
                             PlayerSessionInfo(
-                              title: _session['title'] ??
+                              title: _session['_displayTitle'] ??
+                                  _session['_localizedTitle'] ??
+                                  _session['title'] ??
                                   AppLocalizations.of(context).untitledSession,
                               subtitle: AppLocalizations.of(context)
                                   .subliminalSession,
@@ -712,10 +728,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _showIntroductionModal() {
-    final introduction = _session['introduction'];
-    final title =
-        introduction?['title'] ?? AppLocalizations.of(context).introduction;
-    final content = introduction?['content'] ?? '';
+    final title = _session['_localizedIntroTitle'] ??
+        _session['introduction']?['title'] ??
+        AppLocalizations.of(context).introduction;
+
+    final content = _session['_localizedIntroContent'] ??
+        _session['introduction']?['content'] ??
+        '';
 
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(

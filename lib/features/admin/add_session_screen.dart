@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
+import 'widgets/multi_language_content_section.dart';
 
 class AddSessionScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionToEdit;
@@ -23,33 +25,24 @@ class AddSessionScreen extends StatefulWidget {
 class _AddSessionScreenState extends State<AddSessionScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Form Controllers
-  final _titleController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _introductionTitleController = TextEditingController();
-  final _introductionContentController = TextEditingController();
+  // Session metadata controllers
+  final _sessionNumberController = TextEditingController();
+  final _emojiController = TextEditingController();
+
+  // 🆕 Multi-language content controllers (DYNAMIC)
+  late final Map<String, Map<String, TextEditingController>>
+      _contentControllers;
 
   // Selected values
   String? _selectedCategory;
   List<String> _categories = [];
 
   // Language selection
-  String _selectedLanguage = 'en';
+  String _selectedLanguage = AppLanguages.defaultLanguage; // 🆕
 
-  // Multi-language file uploads
-  final Map<String, PlatformFile?> _subliminalAudios = {
-    'en': null,
-    'tr': null,
-    'ru': null,
-    'hi': null,
-  };
-
-  final Map<String, PlatformFile?> _backgroundImages = {
-    'en': null,
-    'tr': null,
-    'ru': null,
-    'hi': null,
-  };
+  // 🆕 Multi-language file uploads (DYNAMIC)
+  late final Map<String, PlatformFile?> _subliminalAudios;
+  late final Map<String, PlatformFile?> _backgroundImages;
 
   // Loading states
   bool _isLoading = false;
@@ -59,11 +52,48 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   @override
   void initState() {
     super.initState();
+
+    // 🆕 Initialize controllers dynamically
+    _contentControllers = {
+      for (final lang in AppLanguages.supportedLanguages)
+        lang: {
+          'title': TextEditingController(),
+          'description': TextEditingController(),
+          'introTitle': TextEditingController(),
+          'introContent': TextEditingController(),
+        }
+    };
+
+    // 🆕 Initialize file maps dynamically
+    _subliminalAudios = {
+      for (final lang in AppLanguages.supportedLanguages) lang: null
+    };
+
+    _backgroundImages = {
+      for (final lang in AppLanguages.supportedLanguages) lang: null
+    };
+
     _loadCategories();
 
     if (widget.sessionToEdit != null) {
       _loadExistingData();
     }
+  }
+
+  @override
+  void dispose() {
+    // Dispose session metadata controllers
+    _sessionNumberController.dispose();
+    _emojiController.dispose();
+
+    // Dispose all multi-language content controllers
+    for (final langControllers in _contentControllers.values) {
+      for (final controller in langControllers.values) {
+        controller.dispose();
+      }
+    }
+
+    super.dispose();
   }
 
   void _loadCategories() async {
@@ -83,19 +113,58 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   void _loadExistingData() {
     final session = widget.sessionToEdit!;
-    _titleController.text = session['title'] ?? '';
-    _descriptionController.text = session['description'] ?? '';
-    _selectedCategory = session['category'];
 
-    // Load introduction text
-    if (session['introduction'] != null) {
-      _introductionTitleController.text =
-          session['introduction']['title'] ?? '';
-      _introductionContentController.text =
-          session['introduction']['content'] ?? '';
+    // Load session number
+    if (session['sessionNumber'] != null) {
+      _sessionNumberController.text = session['sessionNumber'].toString();
     }
 
-    // Note: File uploads cannot be loaded from existing session (only URLs available)
+    // Load emoji
+    _emojiController.text = session['emoji'] ?? '';
+
+    // Load category
+    _selectedCategory = session['category'];
+
+    // Load multi-language content
+    final contentMap = session['content'] as Map<String, dynamic>?;
+
+    if (contentMap != null && contentMap.isNotEmpty) {
+      // NEW STRUCTURE: Multi-language content
+      for (final lang in AppLanguages.supportedLanguages) {
+        // 🆕
+        final langContent = contentMap[lang] as Map<String, dynamic>?;
+
+        if (langContent != null) {
+          _contentControllers[lang]!['title']!.text =
+              langContent['title'] ?? '';
+          _contentControllers[lang]!['description']!.text =
+              langContent['description'] ?? '';
+
+          final intro = langContent['introduction'] as Map<String, dynamic>?;
+          if (intro != null) {
+            _contentControllers[lang]!['introTitle']!.text =
+                intro['title'] ?? '';
+            _contentControllers[lang]!['introContent']!.text =
+                intro['content'] ?? '';
+          }
+        }
+      }
+    } else {
+      // OLD STRUCTURE: Single language (backward compatibility)
+      // Load as English content
+      _contentControllers['en']!['title']!.text = session['title'] ?? '';
+      _contentControllers['en']!['description']!.text =
+          session['description'] ?? '';
+
+      final intro = session['introduction'] as Map<String, dynamic>?;
+      if (intro != null) {
+        _contentControllers['en']!['introTitle']!.text = intro['title'] ?? '';
+        _contentControllers['en']!['introContent']!.text =
+            intro['content'] ?? '';
+      }
+
+      debugPrint('⚠️ Loading old structure session as EN content');
+    }
   }
 
   // =================== FILE PICKER METHODS ===================
@@ -173,8 +242,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   // =================== SAVE SESSION ===================
 
   Future<void> _saveSession() async {
-    if (!_formKey.currentState!.validate()) return;
-
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -183,6 +250,43 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         ),
       );
       return;
+    }
+
+    final hasAnyTitle = _contentControllers.values
+        .any((controllers) => controllers['title']!.text.trim().isNotEmpty);
+
+    if (!hasAnyTitle) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a title in at least one language'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Session number uniqueness check
+    if (_sessionNumberController.text.isNotEmpty) {
+      final sessionNumber = int.parse(_sessionNumberController.text.trim());
+      final existingSession = await FirebaseFirestore.instance
+          .collection('sessions')
+          .where('sessionNumber', isEqualTo: sessionNumber)
+          .get();
+
+      // Edit modunda kendi ID'sini skip et
+      if (existingSession.docs.isNotEmpty) {
+        final existingId = existingSession.docs.first.id;
+        if (widget.sessionToEdit == null ||
+            existingId != widget.sessionToEdit!['id']) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('⚠️ Session number $sessionNumber already exists!'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
     }
 
     setState(() {
@@ -198,15 +302,51 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
       debugPrint('====== SAVING SESSION ======');
       debugPrint('Session ID: $sessionId');
-      debugPrint('Title: ${_titleController.text}');
 
-      // Upload files with language support
+      // 🆕 Initialize with existing URLs for edit mode
       final Map<String, String> audioUrls = {};
       final Map<String, String> imageUrls = {};
       final Map<String, int> durations = {};
 
-      // Upload subliminal audios for each language
-      for (final languageCode in ['en', 'tr', 'ru', 'hi']) {
+      // 🆕 Load existing URLs if editing
+      if (widget.sessionToEdit != null) {
+        debugPrint('📦 Edit mode: Loading existing URLs...');
+
+        // Load existing audio URLs
+        final existingAudioUrls = widget.sessionToEdit!['subliminal']
+            ?['audioUrls'] as Map<String, dynamic>?;
+        if (existingAudioUrls != null) {
+          existingAudioUrls.forEach((key, value) {
+            audioUrls[key] = value.toString();
+            debugPrint('  Loaded audio URL for $key: $value');
+          });
+        }
+
+        // Load existing image URLs
+        final existingImageUrls =
+            widget.sessionToEdit!['backgroundImages'] as Map<String, dynamic>?;
+        if (existingImageUrls != null) {
+          existingImageUrls.forEach((key, value) {
+            imageUrls[key] = value.toString();
+            debugPrint('  Loaded image URL for $key: $value');
+          });
+        }
+
+        // Load existing durations
+        final existingDurations = widget.sessionToEdit!['subliminal']
+            ?['durations'] as Map<String, dynamic>?;
+        if (existingDurations != null) {
+          existingDurations.forEach((key, value) {
+            durations[key] = value is int ? value : 0;
+          });
+        }
+
+        debugPrint(
+            '✅ Existing URLs loaded: Audio(${audioUrls.length}), Images(${imageUrls.length})');
+      }
+
+      // 🆕 Upload subliminal audios for each supported language
+      for (final languageCode in AppLanguages.supportedLanguages) {
         final audioFile = _subliminalAudios[languageCode];
 
         if (audioFile != null) {
@@ -236,14 +376,19 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           // Try to get duration (will be 0 if not available)
           durations[languageCode] =
               await StorageService.getAudioDuration(audioUrl);
+        } else {
+          // 🆕 No new file → keep existing URL
+          debugPrint(
+              'ℹ️ $languageCode audio: No new file, keeping existing URL');
         }
       }
 
-      // Upload background images for each language
-      for (final languageCode in ['en', 'tr', 'ru', 'hi']) {
+      // 🆕 Upload background images for each supported language
+      for (final languageCode in AppLanguages.supportedLanguages) {
         final imageFile = _backgroundImages[languageCode];
 
         if (imageFile != null) {
+          // 🆕 New file uploaded → override old URL
           setState(() {
             _uploadStatus = 'Uploading $languageCode background image...';
             _uploadProgress = 0;
@@ -264,8 +409,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             throw Exception('Failed to upload $languageCode image');
           }
 
-          imageUrls[languageCode] = imageUrl;
+          imageUrls[languageCode] = imageUrl; // ← Override with new URL
           debugPrint('✅ $languageCode image uploaded: $imageUrl');
+        } else {
+          // 🆕 No new file → keep existing URL
+          debugPrint(
+              'ℹ️ $languageCode image: No new file, keeping existing URL');
         }
       }
 
@@ -274,32 +423,43 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         _uploadProgress = 100;
       });
 
+      // 🆕 Build multi-language content (DYNAMIC)
+      final content = {
+        for (final lang in AppLanguages.supportedLanguages)
+          lang: {
+            'title': _contentControllers[lang]!['title']!.text.trim(),
+            'description':
+                _contentControllers[lang]!['description']!.text.trim(),
+            'introduction': {
+              'title': _contentControllers[lang]!['introTitle']!.text.trim(),
+              'content':
+                  _contentControllers[lang]!['introContent']!.text.trim(),
+            },
+          }
+      };
+
       // Prepare session data with NEW structure
       final sessionData = {
         'id': sessionId,
-        'title': _titleController.text.trim(),
-        'description': _descriptionController.text.trim(),
+
+        // Session number
+        'sessionNumber': _sessionNumberController.text.isNotEmpty
+            ? int.parse(_sessionNumberController.text.trim())
+            : null,
+
+        'emoji': _emojiController.text.trim(),
         'category': _selectedCategory,
 
-        // Multi-language background images
-        'backgroundImages': audioUrls.isNotEmpty
-            ? imageUrls
-            : (widget.sessionToEdit?['backgroundImages'] ?? {}),
+        // Multi-language content
+        'content': content,
 
-        // Introduction (text only)
-        'introduction': {
-          'title': _introductionTitleController.text.trim(),
-          'content': _introductionContentController.text.trim(),
-        },
+        // Multi-language background images
+        'backgroundImages': imageUrls,
 
         // Subliminal with multi-language support
         'subliminal': {
-          'audioUrls': audioUrls.isNotEmpty
-              ? audioUrls
-              : (widget.sessionToEdit?['subliminal']?['audioUrls'] ?? {}),
-          'durations': durations.isNotEmpty
-              ? durations
-              : (widget.sessionToEdit?['subliminal']?['durations'] ?? {}),
+          'audioUrls': audioUrls,
+          'durations': durations,
         },
 
         'playCount': widget.sessionToEdit?['playCount'] ?? 0,
@@ -358,16 +518,223 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   // =================== BUILD METHODS ===================
 
-  Widget _buildSectionTitle(String title) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Text(
-        title,
-        style: GoogleFonts.inter(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.backgroundWhite,
+      appBar: AppBar(
+        backgroundColor: AppColors.backgroundWhite,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          onPressed: () => Navigator.pop(context),
         ),
+        title: Text(
+          widget.sessionToEdit != null ? 'Edit Session' : 'Add New Session',
+          style: GoogleFonts.inter(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(20.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Loading indicator
+                  if (_isLoading) _buildUploadProgress(),
+
+                  // Session Number
+                  _buildSectionTitle('Session Number'),
+                  SizedBox(height: 12.h),
+                  TextField(
+                    controller: _sessionNumberController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: 'Session Number (№)',
+                      hintText: 'e.g., 17',
+                      helperText: 'Unique number for this session',
+                      prefixIcon:
+                          Icon(Icons.numbers, color: AppColors.primaryGold),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide:
+                            BorderSide(color: AppColors.primaryGold, width: 2),
+                      ),
+                    ),
+                    style: GoogleFonts.inter(fontSize: 16.sp),
+                  ),
+
+                  SizedBox(height: 24.h),
+
+                  // Emoji
+                  _buildSectionTitle('Emoji'),
+                  SizedBox(height: 12.h),
+                  TextField(
+                    controller: _emojiController,
+                    decoration: InputDecoration(
+                      labelText: 'Emoji',
+                      hintText: '🎵',
+                      prefixIcon: Icon(Icons.emoji_emotions,
+                          color: AppColors.primaryGold),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide:
+                            BorderSide(color: AppColors.primaryGold, width: 2),
+                      ),
+                    ),
+                    style: GoogleFonts.inter(fontSize: 24.sp),
+                  ),
+
+                  SizedBox(height: 24.h),
+
+                  // Category Dropdown
+                  _buildSectionTitle('Category'),
+                  SizedBox(height: 12.h),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCategory,
+                    decoration: InputDecoration(
+                      labelText: 'Category',
+                      prefixIcon:
+                          Icon(Icons.category, color: AppColors.primaryGold),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide:
+                            BorderSide(color: AppColors.primaryGold, width: 2),
+                      ),
+                    ),
+                    items: _categories.map((category) {
+                      return DropdownMenuItem(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCategory = value;
+                      });
+                    },
+                  ),
+
+                  SizedBox(height: 32.h),
+
+                  // Multi-Language Content Section (Widget)
+                  MultiLanguageContentSection(
+                    contentControllers: _contentControllers,
+                    selectedLanguage: _selectedLanguage,
+                    onLanguageChanged: (lang) =>
+                        setState(() => _selectedLanguage = lang),
+                    existingAudioUrls: widget.sessionToEdit?['subliminal']
+                        ?['audioUrls'],
+                    uploadedAudios: _subliminalAudios,
+                  ),
+
+                  SizedBox(height: 32.h),
+
+                  // Audio Upload Section
+                  _buildSectionTitle('🎵 Audio Files'),
+                  SizedBox(height: 12.h),
+                  _buildLanguageTabs(),
+                  SizedBox(height: 16.h),
+                  _buildFileUploadCard(
+                    title: 'Subliminal Audio ($_selectedLanguage)',
+                    subtitle: _subliminalAudios[_selectedLanguage] != null
+                        ? _subliminalAudios[_selectedLanguage]!.name
+                        : 'No audio selected',
+                    icon: Icons.audiotrack,
+                    onTap: () =>
+                        _pickSubliminalAudioForLanguage(_selectedLanguage),
+                    hasFile: _subliminalAudios[_selectedLanguage] != null,
+                    languageCode: _selectedLanguage,
+                  ),
+
+                  SizedBox(height: 32.h),
+
+                  // Image Upload Section
+                  _buildSectionTitle('🖼️ Background Images'),
+                  SizedBox(height: 12.h),
+                  _buildFileUploadCard(
+                    title: 'Background Image ($_selectedLanguage)',
+                    subtitle: _backgroundImages[_selectedLanguage] != null
+                        ? _backgroundImages[_selectedLanguage]!.name
+                        : 'No image selected',
+                    icon: Icons.image,
+                    onTap: () =>
+                        _pickBackgroundImageForLanguage(_selectedLanguage),
+                    hasFile: _backgroundImages[_selectedLanguage] != null,
+                    languageCode: _selectedLanguage,
+                  ),
+
+                  SizedBox(height: 40.h),
+
+                  // Save Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56.h,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _saveSession,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryGold,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                      ),
+                      child: Text(
+                        widget.sessionToEdit != null
+                            ? 'Update Session'
+                            : 'Create Session',
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 40.h),
+                ],
+              ),
+            ),
+          ),
+
+          // Loading overlay
+          if (_isLoading)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primaryGold,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: GoogleFonts.inter(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -414,112 +781,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     );
   }
 
-  Widget _buildBasicInfoSection() {
-    return Column(
-      children: [
-        // Title
-        TextFormField(
-          controller: _titleController,
-          decoration: InputDecoration(
-            labelText: 'Session Title',
-            hintText: 'Enter session title',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter a title';
-            }
-            return null;
-          },
-        ),
-
-        SizedBox(height: 16.h),
-
-        // Description
-        TextFormField(
-          controller: _descriptionController,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: 'Description',
-            hintText: 'Enter session description',
-            alignLabelWithHint: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-          validator: (value) {
-            if (value == null || value.isEmpty) {
-              return 'Please enter a description';
-            }
-            return null;
-          },
-        ),
-
-        SizedBox(height: 16.h),
-
-        // Category Dropdown
-        DropdownButtonFormField<String>(
-          value: _selectedCategory,
-          decoration: InputDecoration(
-            labelText: 'Category',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-          items: _categories.map((category) {
-            return DropdownMenuItem(
-              value: category,
-              child: Text(category),
-            );
-          }).toList(),
-          onChanged: (value) {
-            setState(() {
-              _selectedCategory = value;
-            });
-          },
-          validator: (value) {
-            if (value == null) {
-              return 'Please select a category';
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildIntroductionSection() {
-    return Column(
-      children: [
-        TextFormField(
-          controller: _introductionTitleController,
-          decoration: InputDecoration(
-            labelText: 'Introduction Title',
-            hintText: 'Welcome to...',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-        ),
-        SizedBox(height: 16.h),
-        TextFormField(
-          controller: _introductionContentController,
-          maxLines: 8,
-          decoration: InputDecoration(
-            labelText: 'Introduction Content',
-            hintText: 'This session will help you...',
-            alignLabelWithHint: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildLanguageTabs() {
     return Container(
       padding: EdgeInsets.all(4.w),
@@ -528,7 +789,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
-        children: ['en', 'tr', 'ru', 'hi'].map((lang) {
+        children: AppLanguages.supportedLanguages.map((lang) {
+          // 🆕
           final isSelected = _selectedLanguage == lang;
           return Expanded(
             child: GestureDetector(
@@ -579,34 +841,60 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     required bool hasFile,
     String? languageCode,
   }) {
+    String displaySubtitle = subtitle;
+    bool hasExistingFile = false;
+
+    if (languageCode != null && widget.sessionToEdit != null && !hasFile) {
+      // Check for existing audio URL
+      if (title.contains('Audio')) {
+        final existingUrl =
+            widget.sessionToEdit!['subliminal']?['audioUrls']?[languageCode];
+        if (existingUrl != null) {
+          hasExistingFile = true;
+          // Extract filename from URL
+          final uri = Uri.parse(existingUrl.toString());
+          final filename = uri.pathSegments.last.split('?').first;
+          displaySubtitle = '✅ Existing: $filename';
+        }
+      }
+      // Check for existing image URL
+      else if (title.contains('Image')) {
+        final existingUrl =
+            widget.sessionToEdit!['backgroundImages']?[languageCode];
+        if (existingUrl != null) {
+          hasExistingFile = true;
+          final uri = Uri.parse(existingUrl.toString());
+          final filename = uri.pathSegments.last.split('?').first;
+          displaySubtitle = '✅ Existing: $filename';
+        }
+      }
+    }
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12.r),
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          border: Border.all(
-            color: hasFile ? AppColors.primaryGold : AppColors.greyBorder,
-            width: hasFile ? 2 : 1,
-          ),
+          color: (hasFile || hasExistingFile)
+              ? Colors.green.shade50
+              : Colors.grey.shade50,
           borderRadius: BorderRadius.circular(12.r),
-          color:
-              hasFile ? AppColors.primaryGold.withOpacity(0.05) : Colors.white,
+          border: Border.all(
+            color: hasFile ? Colors.green : Colors.grey.shade300,
+            width: 2,
+          ),
         ),
         child: Row(
           children: [
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: hasFile
-                    ? AppColors.primaryGold.withOpacity(0.1)
-                    : AppColors.greyLight,
-                borderRadius: BorderRadius.circular(10.r),
+                color: hasFile ? Colors.green : AppColors.primaryGold,
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
-                icon,
-                color:
-                    hasFile ? AppColors.primaryGold : AppColors.textSecondary,
+                hasFile ? Icons.check : icon,
+                color: Colors.white,
                 size: 24.sp,
               ),
             ),
@@ -615,44 +903,19 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        title,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      if (languageCode != null) ...[
-                        SizedBox(width: 8.w),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 8.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGold.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            languageCode.toUpperCase(),
-                            style: GoogleFonts.inter(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primaryGold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                  Text(
+                    title,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    subtitle,
+                    displaySubtitle,
                     style: GoogleFonts.inter(
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       color: AppColors.textSecondary,
                     ),
                     maxLines: 1,
@@ -662,158 +925,13 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               ),
             ),
             Icon(
-              hasFile ? Icons.check_circle : Icons.add_circle_outline,
-              color: hasFile ? AppColors.primaryGold : AppColors.textSecondary,
+              Icons.upload_file,
+              color: AppColors.primaryGold,
               size: 24.sp,
             ),
           ],
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
-      appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          widget.sessionToEdit != null ? 'Edit Session' : 'Add New Session',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        actions: [
-          if (_isLoading)
-            Center(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                child: SizedBox(
-                  width: 20.w,
-                  height: 20.w,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                ),
-              ),
-            )
-          else
-            TextButton.icon(
-              onPressed: _saveSession,
-              icon: const Icon(Icons.save, color: AppColors.primaryGold),
-              label: Text(
-                'Save',
-                style: GoogleFonts.inter(
-                  color: AppColors.primaryGold,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Upload Progress
-              if (_uploadProgress > 0) _buildUploadProgress(),
-
-              // Basic Information
-              _buildSectionTitle('Basic Information'),
-              _buildBasicInfoSection(),
-
-              SizedBox(height: 32.h),
-
-              // Introduction (Text Only)
-              _buildSectionTitle('Introduction'),
-              _buildIntroductionSection(),
-
-              SizedBox(height: 32.h),
-
-              // Language Tabs
-              _buildSectionTitle('Language & Media Files'),
-              _buildLanguageTabs(),
-
-              SizedBox(height: 16.h),
-
-              // Subliminal Audio for selected language
-              _buildFileUploadCard(
-                title: 'Subliminal Audio',
-                subtitle: _subliminalAudios[_selectedLanguage] != null
-                    ? _subliminalAudios[_selectedLanguage]!.name
-                    : 'No file selected for $_selectedLanguage',
-                icon: Icons.music_note,
-                onTap: () => _pickSubliminalAudioForLanguage(_selectedLanguage),
-                hasFile: _subliminalAudios[_selectedLanguage] != null,
-                languageCode: _selectedLanguage,
-              ),
-
-              SizedBox(height: 16.h),
-
-              // Background Image for selected language
-              _buildFileUploadCard(
-                title: 'Background Image',
-                subtitle: _backgroundImages[_selectedLanguage] != null
-                    ? _backgroundImages[_selectedLanguage]!.name
-                    : 'No file selected for $_selectedLanguage',
-                icon: Icons.image,
-                onTap: () => _pickBackgroundImageForLanguage(_selectedLanguage),
-                hasFile: _backgroundImages[_selectedLanguage] != null,
-                languageCode: _selectedLanguage,
-              ),
-
-              SizedBox(height: 32.h),
-
-              // Info Card
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: Colors.blue.shade50,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: Colors.blue.shade200),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline,
-                        color: Colors.blue.shade700, size: 24.sp),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Text(
-                        'Upload audio and images for each language (EN, TR, RU, HI). Users will see content in their selected language.',
-                        style: GoogleFonts.inter(
-                          fontSize: 13.sp,
-                          color: Colors.blue.shade900,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 80.h),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    _introductionTitleController.dispose();
-    _introductionContentController.dispose();
-    super.dispose();
   }
 }
