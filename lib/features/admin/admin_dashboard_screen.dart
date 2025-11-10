@@ -5,9 +5,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/routes/app_routes.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import '../../core/constants/app_colors.dart';
+import 'symptom_management_screen.dart';
+import 'emotional_map_management_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -203,6 +204,36 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/categories');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+
+                    _buildCompactMenuItem(
+                      icon: Icons.psychology,
+                      title: 'Manage Symptoms',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const SymptomManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.map,
+                      title: 'Manage Emotional Maps',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const EmotionalMapManagementScreen(),
+                          ),
+                        );
                       },
                       isCompact: isSmallScreen,
                     ),
