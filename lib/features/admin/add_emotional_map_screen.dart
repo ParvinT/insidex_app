@@ -10,6 +10,7 @@ import '../../models/emotional_map_model.dart';
 import '../../models/symptom_model.dart';
 import '../../services/emotional_map_service.dart';
 import '../../services/symptom_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class AddEmotionalMapScreen extends StatefulWidget {
   final EmotionalMapModel? mapToEdit;
@@ -135,7 +136,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
         setState(() => _isLoadingData = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading data: $e'),
+            content:
+                Text('${AppLocalizations.of(context).errorLoadingData}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -173,8 +175,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
   Future<void> _saveEmotionalMap() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseFillAllFields),
           backgroundColor: Colors.orange,
         ),
       );
@@ -183,8 +185,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
 
     if (_selectedSymptomId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a symptom'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseSelectSymptom),
           backgroundColor: Colors.orange,
         ),
       );
@@ -193,8 +195,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
 
     if (_selectedSessionId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a session'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseSelectSession),
           backgroundColor: Colors.orange,
         ),
       );
@@ -247,8 +249,10 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
             SnackBar(
               content: Text(
                 widget.mapToEdit != null
-                    ? 'Emotional map updated successfully'
-                    : 'Emotional map created successfully',
+                    ? AppLocalizations.of(context)
+                        .emotionalMapUpdatedSuccessfully
+                    : AppLocalizations.of(context)
+                        .emotionalMapCreatedSuccessfully,
               ),
               backgroundColor: Colors.green,
             ),
@@ -262,7 +266,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content:
+                Text('${AppLocalizations.of(context).errorSavingData}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -288,8 +293,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
           ),
           title: Text(
             widget.mapToEdit != null
-                ? 'Edit Emotional Map'
-                : 'Add Emotional Map',
+                ? AppLocalizations.of(context).editEmotionalMap
+                : AppLocalizations.of(context).addEmotionalMap,
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -311,7 +316,9 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.mapToEdit != null ? 'Edit Emotional Map' : 'Add Emotional Map',
+          widget.mapToEdit != null
+              ? AppLocalizations.of(context).editEmotionalMap
+              : AppLocalizations.of(context).addEmotionalMap,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -381,8 +388,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
     return DropdownButtonFormField<String>(
       value: _selectedSymptomId,
       decoration: InputDecoration(
-        labelText: 'Symptom',
-        hintText: 'Select a symptom',
+        labelText: AppLocalizations.of(context).symptom,
+        hintText: AppLocalizations.of(context).selectASymptom,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
@@ -412,7 +419,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
         setState(() => _selectedSymptomId = value);
       },
       validator: (value) {
-        if (value == null) return 'Please select a symptom';
+        if (value == null)
+          return AppLocalizations.of(context).pleaseSelectSymptom;
         return null;
       },
     );
@@ -422,8 +430,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
     return DropdownButtonFormField<String>(
       value: _selectedSessionId,
       decoration: InputDecoration(
-        labelText: 'Recommended Session',
-        hintText: 'Select a session',
+        labelText: AppLocalizations.of(context).recommendedSession,
+        hintText: AppLocalizations.of(context).selectASession,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
@@ -454,7 +462,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
         });
       },
       validator: (value) {
-        if (value == null) return 'Please select a session';
+        if (value == null)
+          return AppLocalizations.of(context).pleaseSelectSession;
         return null;
       },
     );
@@ -474,9 +483,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
                 maxLines: 10,
                 decoration: InputDecoration(
                   labelText:
-                      'Emotional Map Content (${AppLanguages.getName(langCode)})',
-                  hintText:
-                      'Describe how this symptom affects people and how the session helps...',
+                      '${AppLocalizations.of(context).emotionalMapContent} (${AppLanguages.getName(langCode)})',
+                  hintText: AppLocalizations.of(context).describeSymptomHelp,
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
@@ -494,7 +502,7 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
                   // Only English is required
                   if (langCode == 'en' &&
                       (value == null || value.trim().isEmpty)) {
-                    return 'English content is required';
+                    return AppLocalizations.of(context).englishContentRequired;
                   }
                   return null;
                 },
@@ -522,8 +530,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
                 widget.mapToEdit != null
-                    ? 'Update Emotional Map'
-                    : 'Add Emotional Map',
+                    ? AppLocalizations.of(context).updateEmotionalMap
+                    : AppLocalizations.of(context).addEmotionalMap,
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,

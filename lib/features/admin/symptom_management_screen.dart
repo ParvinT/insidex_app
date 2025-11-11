@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/symptom_model.dart';
 import '../../services/symptom_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'add_symptom_screen.dart';
 
 class SymptomManagementScreen extends StatefulWidget {
@@ -46,7 +47,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading symptoms: $e'),
+            content: Text('${AppLocalizations.of(context).errorLoadingData}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -65,19 +66,19 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Symptom'),
+        title: Text(AppLocalizations.of(context).deleteSymptom),
         content: Text(
-          'Are you sure you want to delete "${symptom.getLocalizedName('en')}"?',
+          '${AppLocalizations.of(context).deleteSymptomConfirm} "${symptom.getLocalizedName('en')}"?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child:  Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -89,16 +90,16 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Symptom deleted successfully'),
+           SnackBar(
+              content: Text(AppLocalizations.of(context).symptomDeletedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
           _loadSymptoms();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to delete symptom'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context).errorDeletingData),
               backgroundColor: Colors.red,
             ),
           );
@@ -132,7 +133,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Symptom Management',
+          AppLocalizations.of(context).manageSymptoms,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -172,7 +173,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
         onPressed: () => _navigateToAddEdit(),
         backgroundColor: AppColors.primaryGold,
         icon: const Icon(Icons.add),
-        label: const Text('Add Symptom'),
+        label: Text(AppLocalizations.of(context).addSymptom),
       ),
     );
   }
@@ -184,13 +185,17 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
         scrollDirection: Axis.horizontal,
         child: Row(
           children: [
-            _buildFilterChip('all', 'All', Icons.apps),
+            _buildFilterChip(
+                'all', AppLocalizations.of(context).all, Icons.apps),
             SizedBox(width: 8.w),
-            _buildFilterChip('physical', 'Physical', Icons.fitness_center),
+            _buildFilterChip('physical', AppLocalizations.of(context).physical,
+                Icons.fitness_center),
             SizedBox(width: 8.w),
-            _buildFilterChip('mental', 'Mental', Icons.psychology),
+            _buildFilterChip('mental', AppLocalizations.of(context).mental,
+                Icons.psychology),
             SizedBox(width: 8.w),
-            _buildFilterChip('emotional', 'Emotional', Icons.favorite),
+            _buildFilterChip('emotional',
+                AppLocalizations.of(context).emotional, Icons.favorite),
           ],
         ),
       ),
@@ -283,7 +288,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        'Order: ${symptom.order}',
+                        '${AppLocalizations.of(context).displayOrder}: ${symptom.order}',
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           color: AppColors.textSecondary,
@@ -336,7 +341,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'No symptoms found',
+            AppLocalizations.of(context).noSymptomsFound,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -345,7 +350,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Tap the + button to add a symptom',
+            AppLocalizations.of(context).tapToAddSymptom,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,

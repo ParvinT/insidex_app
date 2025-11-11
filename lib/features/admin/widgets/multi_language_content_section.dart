@@ -5,7 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_languages.dart'; // 🆕 IMPORT
+import '../../../core/constants/app_languages.dart';
+import '../../../l10n/app_localizations.dart';
 
 class MultiLanguageContentSection extends StatelessWidget {
   final Map<String, Map<String, TextEditingController>> contentControllers;
@@ -29,7 +30,7 @@ class MultiLanguageContentSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section title
-        _buildSectionTitle('📝 Content (Multi-Language)'),
+        _buildSectionTitle(context, AppLocalizations.of(context).contentMultiLanguage),
 
         SizedBox(height: 16.h),
 
@@ -58,7 +59,7 @@ class MultiLanguageContentSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
       style: GoogleFonts.inter(
@@ -145,7 +146,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             borderRadius: BorderRadius.circular(6.r),
           ),
           child: Text(
-            'Editing: ${AppLanguages.getFullLabel(lang)}', // 🆕 Dynamic label
+            '${AppLocalizations.of(context).editing}: ${AppLanguages.getFullLabel(lang)}', 
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -160,8 +161,8 @@ class MultiLanguageContentSection extends StatelessWidget {
         TextField(
           controller: controllers['title']!,
           decoration: InputDecoration(
-            labelText: 'Title ($lang)',
-            hintText: 'Enter session title',
+            labelText: '${AppLocalizations.of(context).title} ($lang)',
+            hintText: AppLocalizations.of(context).enterSessionTitle,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -180,8 +181,8 @@ class MultiLanguageContentSection extends StatelessWidget {
           controller: controllers['description']!,
           maxLines: 3,
           decoration: InputDecoration(
-            labelText: 'Description ($lang)',
-            hintText: 'Enter session description',
+            labelText: '${AppLocalizations.of(context).description} ($lang)',
+            hintText: AppLocalizations.of(context).enterSessionDescription,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -199,8 +200,8 @@ class MultiLanguageContentSection extends StatelessWidget {
         TextField(
           controller: controllers['introTitle']!,
           decoration: InputDecoration(
-            labelText: 'Introduction Title ($lang)',
-            hintText: 'e.g., About This Session',
+            labelText: '${AppLocalizations.of(context).introductionTitle} ($lang)',
+            hintText: AppLocalizations.of(context).aboutThisSession,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -219,8 +220,8 @@ class MultiLanguageContentSection extends StatelessWidget {
           controller: controllers['introContent']!,
           maxLines: 5,
           decoration: InputDecoration(
-            labelText: 'Introduction Content ($lang)',
-            hintText: 'Describe what this session does...',
+            labelText: '${AppLocalizations.of(context).introductionContent} ($lang)',
+            hintText: AppLocalizations.of(context).describeWhatSessionDoes,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),

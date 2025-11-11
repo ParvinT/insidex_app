@@ -522,6 +522,18 @@ abstract class AppLocalizations {
   /// **'Admin Dashboard'**
   String get adminDashboard;
 
+  /// No description provided for @dashboardOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard Overview'**
+  String get dashboardOverview;
+
+  /// No description provided for @welcomeToAdminDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to your admin dashboard'**
+  String get welcomeToAdminDashboard;
+
   /// No description provided for @manageUsersAndSessions.
   ///
   /// In en, this message translates to:
@@ -675,7 +687,7 @@ abstract class AppLocalizations {
   /// No description provided for @sessions.
   ///
   /// In en, this message translates to:
-  /// **'sessions'**
+  /// **'Sessions'**
   String get sessions;
 
   /// No description provided for @errorLoadingSessions.
@@ -1029,7 +1041,7 @@ abstract class AppLocalizations {
   /// No description provided for @active.
   ///
   /// In en, this message translates to:
-  /// **'active'**
+  /// **'Active'**
   String get active;
 
   /// No description provided for @goalsLabel.
@@ -1257,7 +1269,7 @@ abstract class AppLocalizations {
   /// No description provided for @errorSavingData.
   ///
   /// In en, this message translates to:
-  /// **'Error saving data. Please try again.'**
+  /// **'Error saving data'**
   String get errorSavingData;
 
   /// No description provided for @yourInformationIsSecure.
@@ -2553,8 +2565,8 @@ abstract class AppLocalizations {
   /// No description provided for @userNotFound.
   ///
   /// In en, this message translates to:
-  /// **'No account found with this email'**
-  String get userNotFound;
+  /// **'User with email {email} not found'**
+  String userNotFound(Object email);
 
   /// No description provided for @incorrectPassword.
   ///
@@ -2663,6 +2675,1128 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No description available'**
   String get noDescriptionAvailable;
+
+  /// No description provided for @adminPanel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Panel'**
+  String get adminPanel;
+
+  /// No description provided for @manageYourApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage your app'**
+  String get manageYourApp;
+
+  /// No description provided for @dashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboard;
+
+  /// No description provided for @adminMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Menu'**
+  String get adminMenu;
+
+  /// No description provided for @users.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get users;
+
+  /// No description provided for @homeCards.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Cards'**
+  String get homeCards;
+
+  /// No description provided for @addSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Session'**
+  String get addSession;
+
+  /// No description provided for @manageSymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Symptoms'**
+  String get manageSymptoms;
+
+  /// No description provided for @addSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Symptom'**
+  String get addSymptom;
+
+  /// No description provided for @editSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Symptom'**
+  String get editSymptom;
+
+  /// No description provided for @symptomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptom Name'**
+  String get symptomName;
+
+  /// No description provided for @symptomCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get symptomCategory;
+
+  /// No description provided for @physical.
+  ///
+  /// In en, this message translates to:
+  /// **'Physical'**
+  String get physical;
+
+  /// No description provided for @mental.
+  ///
+  /// In en, this message translates to:
+  /// **'Mental'**
+  String get mental;
+
+  /// No description provided for @emotional.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional'**
+  String get emotional;
+
+  /// No description provided for @all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get all;
+
+  /// No description provided for @displayOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Display Order'**
+  String get displayOrder;
+
+  /// No description provided for @lowerNumbersFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Lower numbers appear first'**
+  String get lowerNumbersFirst;
+
+  /// No description provided for @orderRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Order is required'**
+  String get orderRequired;
+
+  /// No description provided for @mustBeNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be a number'**
+  String get mustBeNumber;
+
+  /// No description provided for @englishNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'English name is required'**
+  String get englishNameRequired;
+
+  /// No description provided for @symptomCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptom created successfully'**
+  String get symptomCreatedSuccessfully;
+
+  /// No description provided for @symptomUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptom updated successfully'**
+  String get symptomUpdatedSuccessfully;
+
+  /// No description provided for @symptomDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptom deleted successfully'**
+  String get symptomDeletedSuccessfully;
+
+  /// No description provided for @deletingSymptomKeepsMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Note: Emotional maps for this symptom will NOT be deleted.'**
+  String get deletingSymptomKeepsMaps;
+
+  /// No description provided for @noSymptomsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No symptoms found'**
+  String get noSymptomsFound;
+
+  /// No description provided for @tapToAddSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add a symptom'**
+  String get tapToAddSymptom;
+
+  /// No description provided for @deleteSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Symptom'**
+  String get deleteSymptom;
+
+  /// No description provided for @deleteSymptomConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete'**
+  String get deleteSymptomConfirm;
+
+  /// No description provided for @manageEmotionalMaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Emotional Maps'**
+  String get manageEmotionalMaps;
+
+  /// No description provided for @addEmotionalMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Emotional Map'**
+  String get addEmotionalMap;
+
+  /// No description provided for @editEmotionalMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Emotional Map'**
+  String get editEmotionalMap;
+
+  /// No description provided for @symptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Symptom'**
+  String get symptom;
+
+  /// No description provided for @selectASymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a symptom'**
+  String get selectASymptom;
+
+  /// No description provided for @pleaseSelectSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a symptom'**
+  String get pleaseSelectSymptom;
+
+  /// No description provided for @recommendedSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended Session'**
+  String get recommendedSession;
+
+  /// No description provided for @selectASession.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a session'**
+  String get selectASession;
+
+  /// No description provided for @pleaseSelectSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a session'**
+  String get pleaseSelectSession;
+
+  /// No description provided for @emotionalMapContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional Map Content'**
+  String get emotionalMapContent;
+
+  /// No description provided for @describeSymptomHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe how this symptom affects people and how the session helps...'**
+  String get describeSymptomHelp;
+
+  /// No description provided for @englishContentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'English content is required'**
+  String get englishContentRequired;
+
+  /// No description provided for @emotionalMapCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional map created successfully'**
+  String get emotionalMapCreatedSuccessfully;
+
+  /// No description provided for @emotionalMapUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional map updated successfully'**
+  String get emotionalMapUpdatedSuccessfully;
+
+  /// No description provided for @emotionalMapDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional map deleted successfully'**
+  String get emotionalMapDeletedSuccessfully;
+
+  /// No description provided for @noEmotionalMapsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No emotional maps found'**
+  String get noEmotionalMapsFound;
+
+  /// No description provided for @tapToAddEmotionalMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add an emotional map'**
+  String get tapToAddEmotionalMap;
+
+  /// No description provided for @deleteEmotionalMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Emotional Map'**
+  String get deleteEmotionalMap;
+
+  /// No description provided for @deleteEmotionalMapConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the emotional map for'**
+  String get deleteEmotionalMapConfirm;
+
+  /// No description provided for @forSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'For:'**
+  String get forSymptom;
+
+  /// No description provided for @recommendsSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommends: Session'**
+  String get recommendsSession;
+
+  /// No description provided for @update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get update;
+
+  /// No description provided for @create.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get create;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @pleaseSelectCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a category'**
+  String get pleaseSelectCategory;
+
+  /// No description provided for @pleaseFillAllFields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill all required fields'**
+  String get pleaseFillAllFields;
+
+  /// No description provided for @errorLoadingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading data'**
+  String get errorLoadingData;
+
+  /// No description provided for @errorDeletingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting data'**
+  String get errorDeletingData;
+
+  /// No description provided for @updateSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Session'**
+  String get updateSession;
+
+  /// No description provided for @createSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Session'**
+  String get createSession;
+
+  /// No description provided for @updateSymptom.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Symptom'**
+  String get updateSymptom;
+
+  /// No description provided for @updateEmotionalMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Emotional Map'**
+  String get updateEmotionalMap;
+
+  /// No description provided for @pleaseLoginToAccessAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to access admin panel'**
+  String get pleaseLoginToAccessAdmin;
+
+  /// No description provided for @adminAccessRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin access required'**
+  String get adminAccessRequired;
+
+  /// No description provided for @totalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get totalUsers;
+
+  /// No description provided for @premiumUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Users'**
+  String get premiumUsers;
+
+  /// No description provided for @totalCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Categories'**
+  String get totalCategories;
+
+  /// No description provided for @recentActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Activity'**
+  String get recentActivity;
+
+  /// No description provided for @newSessionAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'New session added to Sleep category'**
+  String get newSessionAdded;
+
+  /// No description provided for @hoursAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'h ago'**
+  String get hoursAgo;
+
+  /// No description provided for @editSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Session'**
+  String get editSession;
+
+  /// No description provided for @addNewSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Session'**
+  String get addNewSession;
+
+  /// No description provided for @sessionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Number'**
+  String get sessionNumber;
+
+  /// No description provided for @sessionNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Number (№)'**
+  String get sessionNumberLabel;
+
+  /// No description provided for @sessionNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g., 17'**
+  String get sessionNumberHint;
+
+  /// No description provided for @sessionNumberHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Unique number for this session'**
+  String get sessionNumberHelper;
+
+  /// No description provided for @sessionNumberAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'Session number already exists!'**
+  String get sessionNumberAlreadyExists;
+
+  /// No description provided for @emoji.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get emoji;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @audioFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio Files'**
+  String get audioFiles;
+
+  /// No description provided for @subliminalAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Subliminal Audio'**
+  String get subliminalAudio;
+
+  /// No description provided for @backgroundImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Images'**
+  String get backgroundImages;
+
+  /// No description provided for @backgroundImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Background Image'**
+  String get backgroundImage;
+
+  /// No description provided for @noAudioSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No audio selected'**
+  String get noAudioSelected;
+
+  /// No description provided for @noImageSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'No image selected'**
+  String get noImageSelected;
+
+  /// No description provided for @existing.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing'**
+  String get existing;
+
+  /// No description provided for @audioFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio file too large! Max 500MB allowed'**
+  String get audioFileTooLarge;
+
+  /// No description provided for @imageFileTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image file too large! Max 10MB allowed'**
+  String get imageFileTooLarge;
+
+  /// No description provided for @errorSelectingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Error selecting audio'**
+  String get errorSelectingAudio;
+
+  /// No description provided for @errorSelectingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error selecting image'**
+  String get errorSelectingImage;
+
+  /// No description provided for @pleaseEnterTitleInOneLang.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a title in at least one language'**
+  String get pleaseEnterTitleInOneLang;
+
+  /// No description provided for @startingUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting upload...'**
+  String get startingUpload;
+
+  /// No description provided for @uploadingAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading audio...'**
+  String get uploadingAudio;
+
+  /// No description provided for @uploadingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading image...'**
+  String get uploadingImage;
+
+  /// No description provided for @savingSessionData.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving session data...'**
+  String get savingSessionData;
+
+  /// No description provided for @sessionSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Session saved successfully!'**
+  String get sessionSavedSuccessfully;
+
+  /// No description provided for @errorSavingSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving session'**
+  String get errorSavingSession;
+
+  /// No description provided for @premiumWaitlistCampaign.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Waitlist Campaign'**
+  String get premiumWaitlistCampaign;
+
+  /// No description provided for @subscribersWithConsent.
+  ///
+  /// In en, this message translates to:
+  /// **'subscribers with marketing consent'**
+  String get subscribersWithConsent;
+
+  /// No description provided for @send.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get send;
+
+  /// No description provided for @addNewAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Admin'**
+  String get addNewAdmin;
+
+  /// No description provided for @userEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'User Email'**
+  String get userEmail;
+
+  /// No description provided for @enterEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter email'**
+  String get enterEmail;
+
+  /// No description provided for @addAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Admin'**
+  String get addAdmin;
+
+  /// No description provided for @currentAdmins.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Admins'**
+  String get currentAdmins;
+
+  /// No description provided for @unknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get unknown;
+
+  /// No description provided for @removeAdminAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Admin Access'**
+  String get removeAdminAccess;
+
+  /// No description provided for @removeAdminConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to remove admin access?'**
+  String get removeAdminConfirm;
+
+  /// No description provided for @remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get remove;
+
+  /// No description provided for @adminAccessRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin access removed'**
+  String get adminAccessRemoved;
+
+  /// No description provided for @adminAccessGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin access granted to {email}'**
+  String adminAccessGranted(Object email);
+
+  /// No description provided for @sendPremiumAnnouncement.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Premium Announcement'**
+  String get sendPremiumAnnouncement;
+
+  /// No description provided for @sendToWaitlist.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to {count} waitlist subscribers'**
+  String sendToWaitlist(Object count);
+
+  /// No description provided for @emailSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Subject'**
+  String get emailSubject;
+
+  /// No description provided for @emailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Title'**
+  String get emailTitle;
+
+  /// No description provided for @message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get message;
+
+  /// No description provided for @sendTestEmailFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Send test email first'**
+  String get sendTestEmailFirst;
+
+  /// No description provided for @testEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Test Email'**
+  String get testEmail;
+
+  /// No description provided for @sendTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Test'**
+  String get sendTest;
+
+  /// No description provided for @sendToAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to All'**
+  String get sendToAll;
+
+  /// No description provided for @emailSentSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Email sent successfully!'**
+  String get emailSentSuccessfully;
+
+  /// No description provided for @errorSendingEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Error sending email'**
+  String get errorSendingEmail;
+
+  /// No description provided for @adminManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Management'**
+  String get adminManagement;
+
+  /// No description provided for @categoryManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Management'**
+  String get categoryManagement;
+
+  /// No description provided for @addNewCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add New Category'**
+  String get addNewCategory;
+
+  /// No description provided for @categoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Name'**
+  String get categoryName;
+
+  /// No description provided for @categoryNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Category name'**
+  String get categoryNameHint;
+
+  /// No description provided for @addCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Category'**
+  String get addCategory;
+
+  /// No description provided for @errorLoadingCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading categories'**
+  String get errorLoadingCategories;
+
+  /// No description provided for @noCategoriesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get noCategoriesYet;
+
+  /// No description provided for @addFirstCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first category above'**
+  String get addFirstCategory;
+
+  /// No description provided for @pleaseEnterCategoryName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a category name'**
+  String get pleaseEnterCategoryName;
+
+  /// No description provided for @categoryAlreadyExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This category already exists'**
+  String get categoryAlreadyExists;
+
+  /// No description provided for @categoryAddedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category added successfully!'**
+  String get categoryAddedSuccessfully;
+
+  /// No description provided for @errorAddingCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Error adding category'**
+  String get errorAddingCategory;
+
+  /// No description provided for @editCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Category'**
+  String get editCategory;
+
+  /// No description provided for @selectEmoji.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Emoji'**
+  String get selectEmoji;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Category'**
+  String get deleteCategory;
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"?\n\nNote: Sessions in this category will NOT be deleted.'**
+  String deleteCategoryConfirm(Object title);
+
+  /// No description provided for @thisCategoryLower.
+  ///
+  /// In en, this message translates to:
+  /// **'this category'**
+  String get thisCategoryLower;
+
+  /// No description provided for @categoryDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category deleted successfully'**
+  String get categoryDeletedSuccessfully;
+
+  /// No description provided for @errorDeletingCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting category'**
+  String get errorDeletingCategory;
+
+  /// No description provided for @justNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Just now'**
+  String get justNow;
+
+  /// No description provided for @daysAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days ago'**
+  String daysAgo(Object count);
+
+  /// No description provided for @hoursAgoFull.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} hours ago'**
+  String hoursAgoFull(Object count);
+
+  /// No description provided for @minutesAgo.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} minutes ago'**
+  String minutesAgo(Object count);
+
+  /// No description provided for @recently.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently'**
+  String get recently;
+
+  /// No description provided for @sessionManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Management'**
+  String get sessionManagement;
+
+  /// No description provided for @deleteSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Session'**
+  String get deleteSession;
+
+  /// No description provided for @deleteSessionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this session?'**
+  String get deleteSessionConfirm;
+
+  /// No description provided for @sessionDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Session deleted successfully'**
+  String get sessionDeletedSuccessfully;
+
+  /// No description provided for @noSessionsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No sessions found'**
+  String get noSessionsFound;
+
+  /// No description provided for @uncategorized.
+  ///
+  /// In en, this message translates to:
+  /// **'Uncategorized'**
+  String get uncategorized;
+
+  /// No description provided for @adminSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Settings'**
+  String get adminSettings;
+
+  /// No description provided for @homeCardsManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Home Cards Management'**
+  String get homeCardsManagement;
+
+  /// No description provided for @inactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get inactive;
+
+  /// No description provided for @imagesRandomRotation.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} images • Random rotation'**
+  String imagesRandomRotation(Object count);
+
+  /// No description provided for @manage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get manage;
+
+  /// No description provided for @manageImagesFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Images for {title}'**
+  String manageImagesFor(Object title);
+
+  /// No description provided for @addImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Images'**
+  String get addImages;
+
+  /// No description provided for @saveImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Images'**
+  String get saveImages;
+
+  /// No description provided for @noImagesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Images Yet'**
+  String get noImagesYet;
+
+  /// No description provided for @addImagesToGetStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Add images to get started'**
+  String get addImagesToGetStarted;
+
+  /// No description provided for @imagesUploadedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'{success} images uploaded successfully'**
+  String imagesUploadedSuccessfully(Object success);
+
+  /// No description provided for @imagesFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'{fail} failed'**
+  String imagesFailed(Object fail);
+
+  /// No description provided for @errorUploadingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Error uploading images'**
+  String get errorUploadingImages;
+
+  /// No description provided for @imageRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Image removed'**
+  String get imageRemoved;
+
+  /// No description provided for @pleaseAddAtLeast3Images.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add at least 3 images'**
+  String get pleaseAddAtLeast3Images;
+
+  /// No description provided for @maximum10ImagesAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum 10 images allowed'**
+  String get maximum10ImagesAllowed;
+
+  /// No description provided for @imagesSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Images saved successfully'**
+  String get imagesSavedSuccessfully;
+
+  /// No description provided for @errorSavingImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving images'**
+  String get errorSavingImages;
+
+  /// No description provided for @loadingText.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading'**
+  String get loadingText;
+
+  /// No description provided for @errorLoadingCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading card'**
+  String get errorLoadingCard;
+
+  /// No description provided for @cardEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Card enabled'**
+  String get cardEnabled;
+
+  /// No description provided for @cardDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Card disabled'**
+  String get cardDisabled;
+
+  /// No description provided for @manageImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Images'**
+  String get manageImages;
+
+  /// No description provided for @randomBackgroundImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Random Background Images'**
+  String get randomBackgroundImages;
+
+  /// No description provided for @addImagesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 3-10 images. One will be randomly selected each time the home screen loads.'**
+  String get addImagesInfo;
+
+  /// No description provided for @imagesUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'images uploaded successfully'**
+  String get imagesUploaded;
+
+  /// No description provided for @failed.
+  ///
+  /// In en, this message translates to:
+  /// **'failed'**
+  String get failed;
+
+  /// No description provided for @contentMultiLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'📝 Content (Multi-Language)'**
+  String get contentMultiLanguage;
+
+  /// No description provided for @editing.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing'**
+  String get editing;
+
+  /// No description provided for @enterSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter session title'**
+  String get enterSessionTitle;
+
+  /// No description provided for @description.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// No description provided for @enterSessionDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter session description'**
+  String get enterSessionDescription;
+
+  /// No description provided for @introductionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction Title'**
+  String get introductionTitle;
+
+  /// No description provided for @introductionContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction Content'**
+  String get introductionContent;
+
+  /// No description provided for @describeWhatSessionDoes.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what this session does...'**
+  String get describeWhatSessionDoes;
 }
 
 class _AppLocalizationsDelegate

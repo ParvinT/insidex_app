@@ -9,6 +9,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import '../../core/constants/app_colors.dart';
 import 'symptom_management_screen.dart';
 import 'emotional_map_management_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -42,8 +43,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         debugPrint('ERROR: No authenticated user found!');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please login to access admin panel'),
+            SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).pleaseLoginToAccessAdmin),
               backgroundColor: Colors.red,
               duration: Duration(seconds: 3),
             ),
@@ -72,8 +74,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               'User ${_currentUser!.email} does not have admin privileges');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Admin access required'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).adminAccessRequired),
                 backgroundColor: Colors.orange,
                 duration: Duration(seconds: 3),
               ),
@@ -175,7 +177,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
             // Menu Title
             Text(
-              'Admin Menu',
+              AppLocalizations.of(context).adminMenu,
               style: GoogleFonts.inter(
                 fontSize: isSmallScreen ? 16.sp : 18.sp,
                 fontWeight: FontWeight.w700,
@@ -194,13 +196,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     _buildCompactMenuItem(
                       icon: Icons.dashboard,
-                      title: 'Dashboard',
+                      title: AppLocalizations.of(context).dashboard,
                       onTap: () => Navigator.pop(context),
                       isCompact: isSmallScreen,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.category,
-                      title: 'Categories',
+                      title: AppLocalizations.of(context).categories,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/categories');
@@ -210,7 +212,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     _buildCompactMenuItem(
                       icon: Icons.psychology,
-                      title: 'Manage Symptoms',
+                      title: AppLocalizations.of(context).manageSymptoms,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -224,7 +226,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.map,
-                      title: 'Manage Emotional Maps',
+                      title: AppLocalizations.of(context).manageEmotionalMaps,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
@@ -240,7 +242,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     _buildCompactMenuItem(
                       icon: Icons.home_outlined,
-                      title: 'Home Cards',
+                      title: AppLocalizations.of(context).homeCards,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/home-cards');
@@ -249,7 +251,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.music_note,
-                      title: 'Sessions',
+                      title: AppLocalizations.of(context).sessions,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/sessions');
@@ -258,7 +260,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.add_circle,
-                      title: 'Add Session',
+                      title: AppLocalizations.of(context).addSession,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/add-session');
@@ -267,7 +269,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.people,
-                      title: 'Users',
+                      title: AppLocalizations.of(context).users,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/users');
@@ -276,7 +278,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.settings,
-                      title: 'Settings',
+                      title: AppLocalizations.of(context).settings,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/settings');
@@ -296,7 +298,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     // Sign Out
                     _buildCompactMenuItem(
                       icon: Icons.logout,
-                      title: 'Sign Out',
+                      title: AppLocalizations.of(context).signOut,
                       onTap: () async {
                         Navigator.pop(context);
                         await _auth.signOut();
@@ -414,7 +416,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           // Header
           Text(
-            'Dashboard Overview',
+            AppLocalizations.of(context).dashboardOverview,
             style: GoogleFonts.inter(
               fontSize: 24.sp,
               fontWeight: FontWeight.w700,
@@ -423,7 +425,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Welcome to your admin dashboard',
+            AppLocalizations.of(context).welcomeToAdminDashboard,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
@@ -457,25 +459,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           childAspectRatio: constraints.maxWidth > 600 ? 1.8 : 1.4,
           children: [
             _buildStatCard(
-              title: 'Total Users',
+              title: AppLocalizations.of(context).totalUsers,
               value: '${_statistics['totalUsers'] ?? 0}',
               icon: Icons.people,
               color: Colors.blue,
             ),
             _buildStatCard(
-              title: 'Premium Users',
+              title: AppLocalizations.of(context).premiumUsers,
               value: '${_statistics['premiumUsers'] ?? 0}',
               icon: Icons.star,
               color: AppColors.primaryGold,
             ),
             _buildStatCard(
-              title: 'Total Sessions',
+              title: AppLocalizations.of(context).totalSessions,
               value: '${_statistics['totalSessions'] ?? 0}',
               icon: Icons.music_note,
               color: Colors.green,
             ),
             _buildStatCard(
-              title: 'Categories',
+              title: AppLocalizations.of(context).totalCategories,
               value: '${_statistics['totalCategories'] ?? 0}',
               icon: Icons.category,
               color: Colors.purple,
@@ -850,7 +852,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Recent Activity',
+            AppLocalizations.of(context).recentActivity,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -946,7 +948,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Admin Panel',
+                  AppLocalizations.of(context).adminPanel,
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -954,7 +956,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 Text(
-                  'Manage your app',
+                  AppLocalizations.of(context).manageYourApp,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,

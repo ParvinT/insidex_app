@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../../core/constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/admin_service.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
@@ -62,7 +63,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     if (users.docs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('User with email $email not found'),
+          content: Text(AppLocalizations.of(context).userNotFound(email)),
           backgroundColor: Colors.red,
         ),
       );
@@ -80,7 +81,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       _loadAdmins();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Admin access granted to $email'),
+          content: Text(AppLocalizations.of(context).adminAccessGranted(email)),
           backgroundColor: Colors.green,
         ),
       );
@@ -107,7 +108,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
           title: Text(
-            'Send Premium Announcement',
+            AppLocalizations.of(context).sendPremiumAnnouncement,
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -122,7 +123,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Send to $_waitlistCount waitlist subscribers',
+                    AppLocalizations.of(context)
+                        .sendToWaitlist(_waitlistCount.toString()),
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       color: AppColors.textSecondary,
@@ -134,7 +136,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   TextField(
                     controller: subjectController,
                     decoration: InputDecoration(
-                      labelText: 'Email Subject',
+                      labelText: AppLocalizations.of(context).emailSubject,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                       ),
@@ -146,7 +148,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(
-                      labelText: 'Email Title',
+                      labelText: AppLocalizations.of(context).emailTitle,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                       ),
@@ -159,7 +161,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     controller: messageController,
                     maxLines: 5,
                     decoration: InputDecoration(
-                      labelText: 'Message',
+                      labelText: AppLocalizations.of(context).message,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(8.r),
                       ),
@@ -173,7 +175,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     onChanged: (value) {
                       setState(() => sendTest = value ?? false);
                     },
-                    title: const Text('Send test email first'),
+                    title:
+                        Text(AppLocalizations.of(context).sendTestEmailFirst),
                     contentPadding: EdgeInsets.zero,
                     dense: true,
                   ),
@@ -182,7 +185,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     TextField(
                       controller: testEmailController,
                       decoration: InputDecoration(
-                        labelText: 'Test Email',
+                        labelText: AppLocalizations.of(context).testEmail,
                         hintText: 'your@email.com',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8.r),
@@ -198,7 +201,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'Cancel',
+                AppLocalizations.of(context).cancel,
                 style: TextStyle(color: AppColors.textSecondary),
               ),
             ),
@@ -216,7 +219,9 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primaryGold,
               ),
-              child: Text(sendTest ? 'Send Test' : 'Send to All'),
+              child: Text(sendTest
+                  ? AppLocalizations.of(context).sendTest
+                  : AppLocalizations.of(context).sendToAll),
             ),
           ],
         ),
@@ -261,7 +266,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result.data['message'] ?? 'Email sent successfully!'),
+          content: Text(result.data['message'] ??
+              AppLocalizations.of(context).emailSentSuccessfully),
           backgroundColor: Colors.green,
         ),
       );
@@ -277,7 +283,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to send email: ${e.toString()}'),
+          content: Text(
+              '${AppLocalizations.of(context).errorSendingEmail}: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );
@@ -292,7 +299,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         title: Text(
-          'Admin Management',
+          AppLocalizations.of(context).adminManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -334,7 +341,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '📧 Premium Waitlist Campaign',
+                              '📧 ${AppLocalizations.of(context).premiumWaitlistCampaign}',
                               style: GoogleFonts.inter(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.w600,
@@ -343,7 +350,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                             ),
                             SizedBox(height: 4.h),
                             Text(
-                              '$_waitlistCount subscribers with marketing consent',
+                              '$_waitlistCount ${AppLocalizations.of(context).subscribersWithConsent}',
                               style: GoogleFonts.inter(
                                 fontSize: 11.sp,
                                 color: AppColors.textSecondary,
@@ -370,7 +377,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           ),
                         ),
                         child: Text(
-                          'Send',
+                          AppLocalizations.of(context).send,
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -397,7 +404,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Add New Admin',
+                    AppLocalizations.of(context).addNewAdmin,
                     style: GoogleFonts.inter(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -411,8 +418,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                         child: TextField(
                           controller: _emailController,
                           decoration: InputDecoration(
-                            labelText: 'User Email',
-                            hintText: 'Enter email',
+                            labelText: AppLocalizations.of(context).userEmail,
+                            hintText: AppLocalizations.of(context).enterEmail,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.r),
                             ),
@@ -439,7 +446,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           ),
                         ),
                         child: Text(
-                          'Add Admin',
+                          AppLocalizations.of(context).addAdmin,
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -456,7 +463,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
             // Admin List - EXISTING CODE
             Text(
-              'Current Admins',
+              AppLocalizations.of(context).currentAdmins,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
@@ -499,7 +506,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  admin['email'] ?? 'Unknown',
+                  admin['email'] ?? AppLocalizations.of(context).unknown,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -507,7 +514,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   ),
                 ),
                 Text(
-                  'Role: ${admin['role'] ?? 'admin'}',
+                  '${AppLocalizations.of(context).role}: ${admin['role'] ?? 'admin'}',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,
@@ -529,16 +536,17 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Admin Access'),
-        content: const Text('Are you sure you want to remove admin access?'),
+        title: Text(AppLocalizations.of(context).removeAdminAccess),
+        content: Text(AppLocalizations.of(context).removeAdminConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context).remove,
+                style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -549,8 +557,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       if (success) {
         _loadAdmins();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Admin access removed'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).adminAccessRemoved),
             backgroundColor: Colors.orange,
           ),
         );

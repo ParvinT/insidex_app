@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/language_helper_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'add_session_screen.dart';
 
 class SessionManagementScreen extends StatefulWidget {
@@ -41,17 +42,17 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Session'),
-        content: const Text('Are you sure you want to delete this session?'),
+        title: Text(AppLocalizations.of(context).deleteSession),
+        content: Text(AppLocalizations.of(context).deleteSessionConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -66,8 +67,9 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Session deleted successfully'),
+            SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).sessionDeletedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
@@ -76,7 +78,8 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error deleting session: $e'),
+              content:
+                  Text('${AppLocalizations.of(context).errorDeletingData}: $e'),
               backgroundColor: Colors.red,
             ),
           );
@@ -93,7 +96,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         title: Text(
-          'Session Management',
+          AppLocalizations.of(context).sessionManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -129,7 +132,9 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                 return Padding(
                   padding: EdgeInsets.only(right: 12.w),
                   child: ChoiceChip(
-                    label: Text(category),
+                    label: Text(category == 'All'
+                        ? AppLocalizations.of(context).all
+                        : category),
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() => _selectedCategory = category);
@@ -177,7 +182,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'No sessions found',
+                          AppLocalizations.of(context).noSessionsFound,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             color: AppColors.textSecondary,
@@ -201,7 +206,8 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       future: _getDisplayTitle(session),
                       builder: (context, titleSnapshot) {
                         // 🆕 Get display title with session number
-                        final displayTitle = titleSnapshot.data ?? 'Loading...';
+                        final displayTitle = titleSnapshot.data ??
+                            AppLocalizations.of(context).loading;
 
                         return Card(
                           margin: EdgeInsets.only(bottom: 16.h),
@@ -236,7 +242,8 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           // Category
                                           Text(
                                             session['category'] ??
-                                                'Uncategorized',
+                                                AppLocalizations.of(context)
+                                                    .uncategorized,
                                             style: GoogleFonts.inter(
                                               fontSize: 12.sp,
                                               color: AppColors.textSecondary,
@@ -247,13 +254,17 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                     ),
                                     PopupMenuButton(
                                       itemBuilder: (context) => [
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'edit',
-                                          child: Text('Edit'),
+                                          child: Text(
+                                              AppLocalizations.of(context)
+                                                  .edit),
                                         ),
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'delete',
-                                          child: Text('Delete',
+                                          child: Text(
+                                              AppLocalizations.of(context)
+                                                  .delete,
                                               style:
                                                   TextStyle(color: Colors.red)),
                                         ),

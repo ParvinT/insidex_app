@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/storage_service.dart';
+import '../../l10n/app_localizations.dart';
 
 /// Simplified Home Cards Management Screen
 /// Admin can only manage images and enable/disable cards
@@ -79,7 +80,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Home Cards Management',
+          AppLocalizations.of(context).homeCardsManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -187,7 +188,9 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         activeColor: AppColors.primaryGold,
                       ),
                       Text(
-                        enabled ? 'Active' : 'Inactive',
+                        enabled
+                            ? AppLocalizations.of(context).active
+                            : AppLocalizations.of(context).inactive,
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -211,7 +214,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Background Images',
+                        AppLocalizations.of(context).backgroundImages,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
@@ -220,7 +223,8 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '${images.length} images • Random rotation',
+                        AppLocalizations.of(context)
+                            .imagesRandomRotation(images.length.toString()),
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           color: AppColors.textSecondary,
@@ -231,7 +235,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                   ElevatedButton.icon(
                     onPressed: () => _showImageManager(cardInfo['id'], images),
                     icon: const Icon(Icons.photo_library, size: 18),
-                    label: const Text('Manage'),
+                    label: Text(AppLocalizations.of(context).manage),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryGold,
                       foregroundColor: Colors.white,
@@ -297,7 +301,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
           Icon(cardInfo['icon'], color: AppColors.textSecondary, size: 28.sp),
           SizedBox(width: 16.w),
           Text(
-            'Loading ${cardInfo['title']}...',
+            '${AppLocalizations.of(context).loadingText} ${cardInfo['title']}...',
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               color: AppColors.textSecondary,
@@ -328,7 +332,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
               SizedBox(width: 16.w),
               Expanded(
                 child: Text(
-                  'Error loading ${cardInfo['title']}',
+                  '${AppLocalizations.of(context).errorLoadingCard}: ${cardInfo['title']}',
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
@@ -361,7 +365,9 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(enabled ? 'Card enabled' : 'Card disabled'),
+            content: Text(enabled
+                ? AppLocalizations.of(context).cardEnabled
+                : AppLocalizations.of(context).cardDisabled),
             backgroundColor: Colors.green,
           ),
         );
@@ -370,7 +376,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('${AppLocalizations.of(context).error}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -429,7 +435,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Manage Images',
+          AppLocalizations.of(context).manageImages,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -441,7 +447,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
             TextButton.icon(
               onPressed: _isLoading ? null : _saveImages,
               icon: const Icon(Icons.save),
-              label: const Text('Save'),
+              label: Text(AppLocalizations.of(context).save),
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.primaryGold,
               ),
@@ -476,7 +482,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Random Background Images',
+                              AppLocalizations.of(context)
+                                  .randomBackgroundImages,
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
@@ -485,7 +492,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                             ),
                             SizedBox(height: 4.h),
                             Text(
-                              'Add 3-10 images. One will be randomly selected each time the home screen loads.',
+                              AppLocalizations.of(context).addImagesInfo,
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
                                 color: AppColors.textSecondary,
@@ -506,7 +513,9 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                     child: ElevatedButton.icon(
                       onPressed: _pickImages,
                       icon: const Icon(Icons.add_photo_alternate),
-                      label: const Text('Add Images'),
+                      label: Text(
+                        AppLocalizations.of(context).addImages,
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryGold,
                         foregroundColor: Colors.white,
@@ -557,7 +566,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'No Images Yet',
+            AppLocalizations.of(context).noImagesYet,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -566,7 +575,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Add images to get started',
+            AppLocalizations.of(context).addImagesToGetStarted,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
@@ -676,8 +685,10 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '$successCount images uploaded successfully' +
-                    (failCount > 0 ? ', $failCount failed' : ''),
+                '$successCount ${AppLocalizations.of(context).imagesUploaded}' +
+                    (failCount > 0
+                        ? ', $failCount ${AppLocalizations.of(context).failed}'
+                        : ''),
               ),
               backgroundColor: successCount > 0 ? Colors.green : Colors.red,
             ),
@@ -689,7 +700,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error uploading images: $e'),
+            content: Text(
+                '${AppLocalizations.of(context).errorUploadingImages}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -703,8 +715,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Image removed'),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).imageRemoved),
         backgroundColor: Colors.green,
       ),
     );
@@ -713,8 +725,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
   Future<void> _saveImages() async {
     if (_images.length < 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please add at least 3 images'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseAddAtLeast3Images),
           backgroundColor: Colors.orange,
         ),
       );
@@ -723,8 +735,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
 
     if (_images.length > 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Maximum 10 images allowed'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).maximum10ImagesAllowed),
           backgroundColor: Colors.orange,
         ),
       );
@@ -742,8 +754,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Images saved successfully'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).imagesSavedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -753,7 +765,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving images: $e'),
+            content:
+                Text('${AppLocalizations.of(context).errorSavingImages}: $e'),
             backgroundColor: Colors.red,
           ),
         );

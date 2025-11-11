@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'widgets/multi_language_content_section.dart';
 
 class AddSessionScreen extends StatefulWidget {
@@ -177,8 +178,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         if (!StorageService.validateFileSize(file, 500)) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Audio file too large! Max 500MB allowed'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).audioFileTooLarge),
                 backgroundColor: Colors.red,
               ),
             );
@@ -196,7 +197,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error selecting audio: ${e.toString()}'),
+            content: Text(
+                '${AppLocalizations.of(context).errorSelectingAudio}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -212,8 +214,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         if (!StorageService.validateFileSize(file, 10)) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Image file too large! Max 10MB allowed'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).imageFileTooLarge),
                 backgroundColor: Colors.red,
               ),
             );
@@ -231,7 +233,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error selecting image: ${e.toString()}'),
+            content: Text(
+                '${AppLocalizations.of(context).errorSelectingImage}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -244,8 +247,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   Future<void> _saveSession() async {
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select a category'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseSelectCategory),
           backgroundColor: Colors.orange,
         ),
       );
@@ -257,8 +260,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
     if (!hasAnyTitle) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a title in at least one language'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseEnterTitleInOneLang),
           backgroundColor: Colors.orange,
         ),
       );
@@ -280,7 +283,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             existingId != widget.sessionToEdit!['id']) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('⚠️ Session number $sessionNumber already exists!'),
+              content: Text(
+                  '⚠️ ${AppLocalizations.of(context).sessionNumberAlreadyExists}'),
               backgroundColor: Colors.red,
             ),
           );
@@ -291,7 +295,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
     setState(() {
       _isLoading = true;
-      _uploadStatus = 'Starting upload...';
+      _uploadStatus = AppLocalizations.of(context).startingUpload;
       _uploadProgress = 0;
     });
 
@@ -351,7 +355,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
         if (audioFile != null) {
           setState(() {
-            _uploadStatus = 'Uploading $languageCode subliminal audio...';
+            _uploadStatus =
+                '${AppLocalizations.of(context).uploadingAudio} ($languageCode)';
             _uploadProgress = 0;
           });
 
@@ -390,7 +395,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         if (imageFile != null) {
           // 🆕 New file uploaded → override old URL
           setState(() {
-            _uploadStatus = 'Uploading $languageCode background image...';
+            _uploadStatus =
+                '${AppLocalizations.of(context).uploadingImage} ($languageCode)';
             _uploadProgress = 0;
           });
 
@@ -419,7 +425,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       }
 
       setState(() {
-        _uploadStatus = 'Saving session data...';
+        _uploadStatus = AppLocalizations.of(context).savingSessionData;
         _uploadProgress = 100;
       });
 
@@ -491,8 +497,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Session saved successfully!'),
+          SnackBar(
+            content:
+                Text(AppLocalizations.of(context).sessionSavedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
@@ -508,7 +515,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving session: ${e.toString()}'),
+            content: Text(
+                '${AppLocalizations.of(context).errorSavingSession}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -530,7 +538,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.sessionToEdit != null ? 'Edit Session' : 'Add New Session',
+          widget.sessionToEdit != null
+              ? AppLocalizations.of(context).editSession
+              : AppLocalizations.of(context).addNewSession,
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
@@ -551,15 +561,18 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   if (_isLoading) _buildUploadProgress(),
 
                   // Session Number
-                  _buildSectionTitle('Session Number'),
+                  _buildSectionTitle(
+                      AppLocalizations.of(context).sessionNumber),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: _sessionNumberController,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      labelText: 'Session Number (№)',
-                      hintText: 'e.g., 17',
-                      helperText: 'Unique number for this session',
+                      labelText:
+                          AppLocalizations.of(context).sessionNumberLabel,
+                      hintText: AppLocalizations.of(context).sessionNumberHint,
+                      helperText:
+                          AppLocalizations.of(context).sessionNumberHelper,
                       prefixIcon:
                           Icon(Icons.numbers, color: AppColors.primaryGold),
                       border: OutlineInputBorder(
@@ -577,12 +590,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   SizedBox(height: 24.h),
 
                   // Emoji
-                  _buildSectionTitle('Emoji'),
+                  _buildSectionTitle(AppLocalizations.of(context).emoji),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: _emojiController,
                     decoration: InputDecoration(
-                      labelText: 'Emoji',
+                      labelText: AppLocalizations.of(context).emoji,
                       hintText: '🎵',
                       prefixIcon: Icon(Icons.emoji_emotions,
                           color: AppColors.primaryGold),
@@ -601,12 +614,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   SizedBox(height: 24.h),
 
                   // Category Dropdown
-                  _buildSectionTitle('Category'),
+                  _buildSectionTitle(AppLocalizations.of(context).category),
                   SizedBox(height: 12.h),
                   DropdownButtonFormField<String>(
                     value: _selectedCategory,
                     decoration: InputDecoration(
-                      labelText: 'Category',
+                      labelText: AppLocalizations.of(context).category,
                       prefixIcon:
                           Icon(Icons.category, color: AppColors.primaryGold),
                       border: OutlineInputBorder(
@@ -647,15 +660,17 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   SizedBox(height: 32.h),
 
                   // Audio Upload Section
-                  _buildSectionTitle('🎵 Audio Files'),
+                  _buildSectionTitle(
+                      '🎵 ${AppLocalizations.of(context).audioFiles}'),
                   SizedBox(height: 12.h),
                   _buildLanguageTabs(),
                   SizedBox(height: 16.h),
                   _buildFileUploadCard(
-                    title: 'Subliminal Audio ($_selectedLanguage)',
+                    title:
+                        '${AppLocalizations.of(context).subliminalAudio} ($_selectedLanguage)',
                     subtitle: _subliminalAudios[_selectedLanguage] != null
                         ? _subliminalAudios[_selectedLanguage]!.name
-                        : 'No audio selected',
+                        : AppLocalizations.of(context).noAudioSelected,
                     icon: Icons.audiotrack,
                     onTap: () =>
                         _pickSubliminalAudioForLanguage(_selectedLanguage),
@@ -666,13 +681,15 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   SizedBox(height: 32.h),
 
                   // Image Upload Section
-                  _buildSectionTitle('🖼️ Background Images'),
+                  _buildSectionTitle(
+                      '🖼️ ${AppLocalizations.of(context).backgroundImages}'),
                   SizedBox(height: 12.h),
                   _buildFileUploadCard(
-                    title: 'Background Image ($_selectedLanguage)',
+                    title:
+                        '${AppLocalizations.of(context).backgroundImage} ($_selectedLanguage)',
                     subtitle: _backgroundImages[_selectedLanguage] != null
                         ? _backgroundImages[_selectedLanguage]!.name
-                        : 'No image selected',
+                        : AppLocalizations.of(context).noImageSelected,
                     icon: Icons.image,
                     onTap: () =>
                         _pickBackgroundImageForLanguage(_selectedLanguage),
@@ -696,8 +713,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       ),
                       child: Text(
                         widget.sessionToEdit != null
-                            ? 'Update Session'
-                            : 'Create Session',
+                            ? AppLocalizations.of(context).updateSession
+                            : AppLocalizations.of(context).createSession,
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -854,7 +871,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           // Extract filename from URL
           final uri = Uri.parse(existingUrl.toString());
           final filename = uri.pathSegments.last.split('?').first;
-          displaySubtitle = '✅ Existing: $filename';
+          displaySubtitle = '✅ ${AppLocalizations.of(context).existing}: $filename';
         }
       }
       // Check for existing image URL
@@ -865,7 +882,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           hasExistingFile = true;
           final uri = Uri.parse(existingUrl.toString());
           final filename = uri.pathSegments.last.split('?').first;
-          displaySubtitle = '✅ Existing: $filename';
+          displaySubtitle = '✅ ${AppLocalizations.of(context).existing}: $filename';
         }
       }
     }

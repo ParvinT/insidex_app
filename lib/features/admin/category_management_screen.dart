@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
@@ -67,7 +68,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Category Management',
+          AppLocalizations.of(context).categoryManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -90,7 +91,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Add New Category',
+                  AppLocalizations.of(context).addNewCategory,
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
@@ -132,8 +133,9 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       child: TextField(
                         controller: _categoryController,
                         decoration: InputDecoration(
-                          hintText: 'Category name',
-                          labelText: 'Category Name',
+                          hintText:
+                              AppLocalizations.of(context).categoryNameHint,
+                          labelText: AppLocalizations.of(context).categoryName,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.r),
                           ),
@@ -174,7 +176,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             ),
                           )
                         : Text(
-                            'Add Category',
+                            AppLocalizations.of(context).addCategory,
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -206,7 +208,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 if (snapshot.hasError) {
                   return Center(
                     child: Text(
-                      'Error loading categories',
+                      AppLocalizations.of(context).errorLoadingCategories,
                       style: GoogleFonts.inter(
                         color: Colors.red,
                       ),
@@ -226,7 +228,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          'No categories yet',
+                          AppLocalizations.of(context).noCategoriesYet,
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             color: AppColors.textSecondary,
@@ -234,7 +236,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         ),
                         SizedBox(height: 8.h),
                         Text(
-                          'Add your first category above',
+                          AppLocalizations.of(context).addFirstCategory,
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
                             color: AppColors.textSecondary,
@@ -436,8 +438,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   Future<void> _addCategory() async {
     if (_categoryController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a category name'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseEnterCategoryName),
           backgroundColor: Colors.orange,
         ),
       );
@@ -455,8 +457,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
       if (existingCategories.docs.isNotEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('This category already exists'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).categoryAlreadyExists),
             backgroundColor: Colors.orange,
           ),
         );
@@ -480,15 +482,15 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Category added successfully!'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).categoryAddedSuccessfully),
           backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error adding category: $e'),
+          content: Text('${AppLocalizations.of(context).errorAddingCategory}: $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -505,7 +507,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit Category'),
+        title: Text(AppLocalizations.of(context).editCategory),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -517,7 +519,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text('Select Emoji'),
+                        title: Text(AppLocalizations.of(context).selectEmoji),
                         content: SizedBox(
                           width: 300.w,
                           height: 200.h,
@@ -571,8 +573,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 Expanded(
                   child: TextField(
                     controller: editController,
-                    decoration: const InputDecoration(
-                      labelText: 'Category Name',
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context).categoryName,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -584,7 +586,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -597,7 +599,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
               });
               Navigator.pop(context);
             },
-            child: const Text('Save'),
+            child: Text(AppLocalizations.of(context).save),
           ),
         ],
       ),
@@ -609,17 +611,17 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Category'),
+        title: Text(AppLocalizations.of(context).deleteCategory),
         content: Text(
             'Are you sure you want to delete "${title ?? 'this category'}"?\n\nNote: Sessions in this category will NOT be deleted.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context).delete, style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -633,15 +635,15 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             .delete();
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Category deleted successfully'),
+           SnackBar(
+            content: Text(AppLocalizations.of(context).categoryDeletedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error deleting category: $e'),
+            content: Text('${AppLocalizations.of(context).errorDeletingCategory}: $e'),
             backgroundColor: Colors.red,
           ),
         );

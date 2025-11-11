@@ -7,6 +7,7 @@ import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_languages.dart';
 import '../../models/symptom_model.dart';
 import '../../services/symptom_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class AddSymptomScreen extends StatefulWidget {
   final SymptomModel? symptomToEdit;
@@ -31,7 +32,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
   final Map<String, TextEditingController> _nameControllers = {};
 
   // Other fields
-  
+
   final TextEditingController _orderController = TextEditingController();
   String _selectedCategory = 'physical';
 
@@ -69,7 +70,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
     });
 
     // Load other fields
-    
+
     _orderController.text = symptom.order.toString();
     _selectedCategory = symptom.category;
 
@@ -87,8 +88,8 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
   Future<void> _saveSymptom() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all required fields'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).pleaseFillAllFields),
           backgroundColor: Colors.orange,
         ),
       );
@@ -141,8 +142,8 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
             SnackBar(
               content: Text(
                 widget.symptomToEdit != null
-                    ? 'Symptom updated successfully'
-                    : 'Symptom created successfully',
+                    ? AppLocalizations.of(context).symptomUpdatedSuccessfully
+                    : AppLocalizations.of(context).symptomCreatedSuccessfully,
               ),
               backgroundColor: Colors.green,
             ),
@@ -156,7 +157,8 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content:
+                Text('${AppLocalizations.of(context).errorSavingData}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -180,7 +182,9 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.symptomToEdit != null ? 'Edit Symptom' : 'Add Symptom',
+          widget.symptomToEdit != null
+              ? AppLocalizations.of(context).editSymptom
+              : AppLocalizations.of(context).addSymptom,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -211,8 +215,6 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
                     _buildCategoryDropdown(),
 
                     SizedBox(height: 16.h),
-
-                    
 
                     // Order
                     _buildOrderField(),
@@ -259,8 +261,8 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
             child: TextFormField(
               controller: _nameControllers[langCode],
               decoration: InputDecoration(
-                labelText: 'Symptom Name (${AppLanguages.getName(langCode)})',
-                hintText: 'e.g., Poor Sleep Quality',
+                labelText:
+                    '${AppLocalizations.of(context).symptomName} (${AppLanguages.getName(langCode)})',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),
@@ -274,7 +276,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
                 // Only English is required
                 if (langCode == 'en' &&
                     (value == null || value.trim().isEmpty)) {
-                  return 'English name is required';
+                  return AppLocalizations.of(context).englishNameRequired;
                 }
                 return null;
               },
@@ -289,15 +291,24 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
     return DropdownButtonFormField<String>(
       value: _selectedCategory,
       decoration: InputDecoration(
-        labelText: 'Category',
+        labelText: AppLocalizations.of(context).symptomCategory,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
       ),
-      items: const [
-        DropdownMenuItem(value: 'physical', child: Text('Physical')),
-        DropdownMenuItem(value: 'mental', child: Text('Mental')),
-        DropdownMenuItem(value: 'emotional', child: Text('Emotional')),
+      items: [
+        DropdownMenuItem(
+          value: 'physical',
+          child: Text(AppLocalizations.of(context).physical),
+        ),
+        DropdownMenuItem(
+          value: 'mental',
+          child: Text(AppLocalizations.of(context).mental),
+        ),
+        DropdownMenuItem(
+          value: 'emotional',
+          child: Text(AppLocalizations.of(context).emotional),
+        ),
       ],
       onChanged: (value) {
         if (value != null) {
@@ -305,32 +316,31 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
         }
       },
       validator: (value) {
-        if (value == null) return 'Please select a category';
+        if (value == null)
+          return AppLocalizations.of(context).pleaseSelectCategory;
         return null;
       },
     );
   }
-
- 
 
   Widget _buildOrderField() {
     return TextFormField(
       controller: _orderController,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
-        labelText: 'Display Order',
+        labelText: AppLocalizations.of(context).displayOrder,
         hintText: '1',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
-        helperText: 'Lower numbers appear first',
+        helperText: AppLocalizations.of(context).lowerNumbersFirst,
       ),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Order is required';
+          return AppLocalizations.of(context).orderRequired;
         }
         if (int.tryParse(value) == null) {
-          return 'Must be a number';
+          return AppLocalizations.of(context).mustBeNumber;
         }
         return null;
       },
@@ -352,7 +362,9 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
-                widget.symptomToEdit != null ? 'Update Symptom' : 'Add Symptom',
+                widget.symptomToEdit != null
+                    ? AppLocalizations.of(context).updateSymptom
+                    : AppLocalizations.of(context).addSymptom,
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,

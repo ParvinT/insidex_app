@@ -224,6 +224,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get adminDashboard => 'Панель администратора';
 
   @override
+  String get dashboardOverview => 'Обзор панели управления';
+
+  @override
+  String get welcomeToAdminDashboard =>
+      'Добро пожаловать в панель администратора';
+
+  @override
   String get manageUsersAndSessions =>
       'Управление пользователями, сессиями и настройками приложения';
 
@@ -300,7 +307,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectCategoryExplore => 'Выберите категорию для просмотра сессий';
 
   @override
-  String get sessions => 'сессий';
+  String get sessions => 'Сессии';
 
   @override
   String get errorLoadingSessions => 'Ошибка загрузки сессий';
@@ -478,7 +485,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yourAge => 'Ваш возраст';
 
   @override
-  String get active => 'активных';
+  String get active => 'Активно';
 
   @override
   String get goalsLabel => 'Целей';
@@ -595,8 +602,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get pleaseSelectBirthDate => 'Пожалуйста, выберите дату рождения';
 
   @override
-  String get errorSavingData =>
-      'Ошибка сохранения данных. Пожалуйста, попробуйте еще раз.';
+  String get errorSavingData => 'Ошибка сохранения данных';
 
   @override
   String get yourInformationIsSecure =>
@@ -1293,7 +1299,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Пароль слишком слабый. Используйте минимум 6 символов';
 
   @override
-  String get userNotFound => 'Аккаунт с этим email не найден';
+  String userNotFound(Object email) {
+    return 'Пользователь с email $email не найден';
+  }
 
   @override
   String get incorrectPassword => 'Неверный пароль. Попробуйте еще раз';
@@ -1358,4 +1366,601 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get noDescriptionAvailable => 'Описание недоступно';
+
+  @override
+  String get adminPanel => 'Панель администратора';
+
+  @override
+  String get manageYourApp => 'Управляйте приложением';
+
+  @override
+  String get dashboard => 'Панель управления';
+
+  @override
+  String get adminMenu => 'Меню администратора';
+
+  @override
+  String get users => 'Пользователи';
+
+  @override
+  String get homeCards => 'Карточки главной';
+
+  @override
+  String get addSession => 'Добавить сессию';
+
+  @override
+  String get manageSymptoms => 'Управление симптомами';
+
+  @override
+  String get addSymptom => 'Добавить симптом';
+
+  @override
+  String get editSymptom => 'Редактировать симптом';
+
+  @override
+  String get symptomName => 'Название симптома';
+
+  @override
+  String get symptomCategory => 'Категория';
+
+  @override
+  String get physical => 'Физический';
+
+  @override
+  String get mental => 'Ментальный';
+
+  @override
+  String get emotional => 'Эмоциональный';
+
+  @override
+  String get all => 'Все';
+
+  @override
+  String get displayOrder => 'Порядок отображения';
+
+  @override
+  String get lowerNumbersFirst => 'Меньшие числа отображаются первыми';
+
+  @override
+  String get orderRequired => 'Порядок обязателен';
+
+  @override
+  String get mustBeNumber => 'Должно быть числом';
+
+  @override
+  String get englishNameRequired => 'Английское название обязательно';
+
+  @override
+  String get symptomCreatedSuccessfully => 'Симптом успешно создан';
+
+  @override
+  String get symptomUpdatedSuccessfully => 'Симптом успешно обновлен';
+
+  @override
+  String get symptomDeletedSuccessfully => 'Симптом успешно удален';
+
+  @override
+  String get deletingSymptomKeepsMaps =>
+      'Примечание: Эмоциональные карты этого симптома НЕ будут удалены.';
+
+  @override
+  String get noSymptomsFound => 'Симптомы не найдены';
+
+  @override
+  String get tapToAddSymptom => 'Нажмите + чтобы добавить симптом';
+
+  @override
+  String get deleteSymptom => 'Удалить симптом';
+
+  @override
+  String get deleteSymptomConfirm => 'Вы уверены, что хотите удалить';
+
+  @override
+  String get manageEmotionalMaps => 'Управление эмоциональными картами';
+
+  @override
+  String get addEmotionalMap => 'Добавить эмоциональную карту';
+
+  @override
+  String get editEmotionalMap => 'Редактировать эмоциональную карту';
+
+  @override
+  String get symptom => 'Симптом';
+
+  @override
+  String get selectASymptom => 'Выберите симптом';
+
+  @override
+  String get pleaseSelectSymptom => 'Пожалуйста, выберите симптом';
+
+  @override
+  String get recommendedSession => 'Рекомендуемая сессия';
+
+  @override
+  String get selectASession => 'Выберите сессию';
+
+  @override
+  String get pleaseSelectSession => 'Пожалуйста, выберите сессию';
+
+  @override
+  String get emotionalMapContent => 'Содержание эмоциональной карты';
+
+  @override
+  String get describeSymptomHelp =>
+      'Опишите, как этот симптом влияет на людей и как сессия помогает...';
+
+  @override
+  String get englishContentRequired => 'Английское содержание обязательно';
+
+  @override
+  String get emotionalMapCreatedSuccessfully =>
+      'Эмоциональная карта успешно создана';
+
+  @override
+  String get emotionalMapUpdatedSuccessfully =>
+      'Эмоциональная карта успешно обновлена';
+
+  @override
+  String get emotionalMapDeletedSuccessfully =>
+      'Эмоциональная карта успешно удалена';
+
+  @override
+  String get noEmotionalMapsFound => 'Эмоциональные карты не найдены';
+
+  @override
+  String get tapToAddEmotionalMap =>
+      'Нажмите + чтобы добавить эмоциональную карту';
+
+  @override
+  String get deleteEmotionalMap => 'Удалить эмоциональную карту';
+
+  @override
+  String get deleteEmotionalMapConfirm =>
+      'Вы уверены, что хотите удалить эмоциональную карту для';
+
+  @override
+  String get forSymptom => 'Для:';
+
+  @override
+  String get recommendsSession => 'Рекомендуется: Сессия';
+
+  @override
+  String get update => 'Обновить';
+
+  @override
+  String get create => 'Создать';
+
+  @override
+  String get delete => 'Удалить';
+
+  @override
+  String get pleaseSelectCategory => 'Пожалуйста, выберите категорию';
+
+  @override
+  String get pleaseFillAllFields =>
+      'Пожалуйста, заполните все обязательные поля';
+
+  @override
+  String get errorLoadingData => 'Ошибка загрузки данных';
+
+  @override
+  String get errorDeletingData => 'Ошибка удаления данных';
+
+  @override
+  String get updateSession => 'Обновить сессию';
+
+  @override
+  String get createSession => 'Создать сессию';
+
+  @override
+  String get updateSymptom => 'Обновить симптом';
+
+  @override
+  String get updateEmotionalMap => 'Обновить эмоциональную карту';
+
+  @override
+  String get pleaseLoginToAccessAdmin =>
+      'Пожалуйста, войдите для доступа к панели администратора';
+
+  @override
+  String get adminAccessRequired => 'Требуется доступ администратора';
+
+  @override
+  String get totalUsers => 'Всего пользователей';
+
+  @override
+  String get premiumUsers => 'Premium пользователей';
+
+  @override
+  String get totalCategories => 'Всего категорий';
+
+  @override
+  String get recentActivity => 'Недавняя активность';
+
+  @override
+  String get newSessionAdded => 'Новая сессия добавлена в категорию Сон';
+
+  @override
+  String get hoursAgo => 'ч назад';
+
+  @override
+  String get editSession => 'Редактировать сессию';
+
+  @override
+  String get addNewSession => 'Добавить новую сессию';
+
+  @override
+  String get sessionNumber => 'Номер сессии';
+
+  @override
+  String get sessionNumberLabel => 'Номер сессии (№)';
+
+  @override
+  String get sessionNumberHint => 'напр., 17';
+
+  @override
+  String get sessionNumberHelper => 'Уникальный номер для этой сессии';
+
+  @override
+  String get sessionNumberAlreadyExists => 'Этот номер сессии уже существует!';
+
+  @override
+  String get emoji => 'Эмодзи';
+
+  @override
+  String get category => 'Категория';
+
+  @override
+  String get audioFiles => 'Аудиофайлы';
+
+  @override
+  String get subliminalAudio => 'Сублиминальный аудио';
+
+  @override
+  String get backgroundImages => 'Фоновые изображения';
+
+  @override
+  String get backgroundImage => 'Фоновое изображение';
+
+  @override
+  String get noAudioSelected => 'Аудио не выбрано';
+
+  @override
+  String get noImageSelected => 'Изображение не выбрано';
+
+  @override
+  String get existing => 'Существующий';
+
+  @override
+  String get audioFileTooLarge => 'Аудиофайл слишком большой! Максимум 500МБ';
+
+  @override
+  String get imageFileTooLarge =>
+      'Файл изображения слишком большой! Максимум 10МБ';
+
+  @override
+  String get errorSelectingAudio => 'Ошибка выбора аудио';
+
+  @override
+  String get errorSelectingImage => 'Ошибка выбора изображения';
+
+  @override
+  String get pleaseEnterTitleInOneLang =>
+      'Пожалуйста, введите заголовок хотя бы на одном языке';
+
+  @override
+  String get startingUpload => 'Начинается загрузка...';
+
+  @override
+  String get uploadingAudio => 'Загрузка аудио...';
+
+  @override
+  String get uploadingImage => 'Загрузка изображения...';
+
+  @override
+  String get savingSessionData => 'Сохранение данных сессии...';
+
+  @override
+  String get sessionSavedSuccessfully => 'Сессия успешно сохранена!';
+
+  @override
+  String get errorSavingSession => 'Ошибка сохранения сессии';
+
+  @override
+  String get premiumWaitlistCampaign => 'Кампания списка ожидания Premium';
+
+  @override
+  String get subscribersWithConsent => 'подписчиков с согласием на маркетинг';
+
+  @override
+  String get send => 'Отправить';
+
+  @override
+  String get addNewAdmin => 'Добавить администратора';
+
+  @override
+  String get userEmail => 'Email пользователя';
+
+  @override
+  String get enterEmail => 'Введите email';
+
+  @override
+  String get addAdmin => 'Добавить администратора';
+
+  @override
+  String get currentAdmins => 'Текущие администраторы';
+
+  @override
+  String get unknown => 'Неизвестно';
+
+  @override
+  String get removeAdminAccess => 'Удалить доступ администратора';
+
+  @override
+  String get removeAdminConfirm =>
+      'Вы уверены, что хотите удалить доступ администратора?';
+
+  @override
+  String get remove => 'Удалить';
+
+  @override
+  String get adminAccessRemoved => 'Доступ администратора удален';
+
+  @override
+  String adminAccessGranted(Object email) {
+    return 'Доступ администратора предоставлен $email';
+  }
+
+  @override
+  String get sendPremiumAnnouncement => 'Отправить объявление Premium';
+
+  @override
+  String sendToWaitlist(Object count) {
+    return 'Отправить $count подписчикам списка ожидания';
+  }
+
+  @override
+  String get emailSubject => 'Тема письма';
+
+  @override
+  String get emailTitle => 'Заголовок письма';
+
+  @override
+  String get message => 'Сообщение';
+
+  @override
+  String get sendTestEmailFirst => 'Сначала отправить тестовое письмо';
+
+  @override
+  String get testEmail => 'Тестовый Email';
+
+  @override
+  String get sendTest => 'Отправить тест';
+
+  @override
+  String get sendToAll => 'Отправить всем';
+
+  @override
+  String get emailSentSuccessfully => 'Письмо успешно отправлено!';
+
+  @override
+  String get errorSendingEmail => 'Ошибка отправки письма';
+
+  @override
+  String get adminManagement => 'Управление администраторами';
+
+  @override
+  String get categoryManagement => 'Управление категориями';
+
+  @override
+  String get addNewCategory => 'Добавить категорию';
+
+  @override
+  String get categoryName => 'Название категории';
+
+  @override
+  String get categoryNameHint => 'Название категории';
+
+  @override
+  String get addCategory => 'Добавить категорию';
+
+  @override
+  String get errorLoadingCategories => 'Ошибка загрузки категорий';
+
+  @override
+  String get noCategoriesYet => 'Категорий пока нет';
+
+  @override
+  String get addFirstCategory => 'Добавьте первую категорию выше';
+
+  @override
+  String get pleaseEnterCategoryName =>
+      'Пожалуйста, введите название категории';
+
+  @override
+  String get categoryAlreadyExists => 'Эта категория уже существует';
+
+  @override
+  String get categoryAddedSuccessfully => 'Категория успешно добавлена!';
+
+  @override
+  String get errorAddingCategory => 'Ошибка добавления категории';
+
+  @override
+  String get editCategory => 'Редактировать категорию';
+
+  @override
+  String get selectEmoji => 'Выберите эмодзи';
+
+  @override
+  String get deleteCategory => 'Удалить категорию';
+
+  @override
+  String deleteCategoryConfirm(Object title) {
+    return 'Вы уверены, что хотите удалить \"$title\"?\n\nПримечание: Сессии в этой категории НЕ будут удалены.';
+  }
+
+  @override
+  String get thisCategoryLower => 'эту категорию';
+
+  @override
+  String get categoryDeletedSuccessfully => 'Категория успешно удалена';
+
+  @override
+  String get errorDeletingCategory => 'Ошибка удаления категории';
+
+  @override
+  String get justNow => 'Только что';
+
+  @override
+  String daysAgo(Object count) {
+    return '$count дн. назад';
+  }
+
+  @override
+  String hoursAgoFull(Object count) {
+    return '$count ч. назад';
+  }
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count мин. назад';
+  }
+
+  @override
+  String get recently => 'Недавно';
+
+  @override
+  String get sessionManagement => 'Управление сессиями';
+
+  @override
+  String get deleteSession => 'Удалить сессию';
+
+  @override
+  String get deleteSessionConfirm =>
+      'Вы уверены, что хотите удалить эту сессию?';
+
+  @override
+  String get sessionDeletedSuccessfully => 'Сессия успешно удалена';
+
+  @override
+  String get noSessionsFound => 'Сессии не найдены';
+
+  @override
+  String get uncategorized => 'Без категории';
+
+  @override
+  String get adminSettings => 'Настройки администратора';
+
+  @override
+  String get homeCardsManagement => 'Управление главными карточками';
+
+  @override
+  String get inactive => 'Неактивно';
+
+  @override
+  String imagesRandomRotation(Object count) {
+    return '$count изображений • Случайная ротация';
+  }
+
+  @override
+  String get manage => 'Управлять';
+
+  @override
+  String manageImagesFor(Object title) {
+    return 'Управление изображениями для $title';
+  }
+
+  @override
+  String get addImages => 'Добавить изображения';
+
+  @override
+  String get saveImages => 'Сохранить изображения';
+
+  @override
+  String get noImagesYet => 'Изображений пока нет';
+
+  @override
+  String get addImagesToGetStarted => 'Добавьте изображения для начала';
+
+  @override
+  String imagesUploadedSuccessfully(Object success) {
+    return '$success изображений успешно загружено';
+  }
+
+  @override
+  String imagesFailed(Object fail) {
+    return '$fail не удалось';
+  }
+
+  @override
+  String get errorUploadingImages => 'Ошибка загрузки изображений';
+
+  @override
+  String get imageRemoved => 'Изображение удалено';
+
+  @override
+  String get pleaseAddAtLeast3Images =>
+      'Пожалуйста, добавьте минимум 3 изображения';
+
+  @override
+  String get maximum10ImagesAllowed => 'Максимум 10 изображений';
+
+  @override
+  String get imagesSavedSuccessfully => 'Изображения успешно сохранены';
+
+  @override
+  String get errorSavingImages => 'Ошибка сохранения изображений';
+
+  @override
+  String get loadingText => 'Загрузка';
+
+  @override
+  String get errorLoadingCard => 'Ошибка загрузки карточки';
+
+  @override
+  String get cardEnabled => 'Карточка включена';
+
+  @override
+  String get cardDisabled => 'Карточка отключена';
+
+  @override
+  String get manageImages => 'Управление изображениями';
+
+  @override
+  String get randomBackgroundImages => 'Случайные фоновые изображения';
+
+  @override
+  String get addImagesInfo =>
+      'Добавьте 3-10 изображений. Одно будет случайно выбрано при каждой загрузке главного экрана.';
+
+  @override
+  String get imagesUploaded => 'изображений успешно загружено';
+
+  @override
+  String get failed => 'не удалось';
+
+  @override
+  String get contentMultiLanguage => '📝 Контент (Мультиязык)';
+
+  @override
+  String get editing => 'Редактирование';
+
+  @override
+  String get enterSessionTitle => 'Введите название сессии';
+
+  @override
+  String get description => 'Описание';
+
+  @override
+  String get enterSessionDescription => 'Введите описание сессии';
+
+  @override
+  String get introductionTitle => 'Заголовок введения';
+
+  @override
+  String get introductionContent => 'Содержание введения';
+
+  @override
+  String get describeWhatSessionDoes => 'Опишите, что делает эта сессия...';
 }

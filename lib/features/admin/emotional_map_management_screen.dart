@@ -8,6 +8,7 @@ import '../../models/emotional_map_model.dart';
 import '../../models/symptom_model.dart';
 import '../../services/emotional_map_service.dart';
 import '../../services/symptom_service.dart';
+import '../../l10n/app_localizations.dart';
 import 'add_emotional_map_screen.dart';
 
 class EmotionalMapManagementScreen extends StatefulWidget {
@@ -55,7 +56,8 @@ class _EmotionalMapManagementScreenState
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading data: $e'),
+            content:
+                Text('${AppLocalizations.of(context).errorLoadingData}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -70,19 +72,18 @@ class _EmotionalMapManagementScreenState
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Emotional Map'),
+        title: Text(AppLocalizations.of(context).deleteEmotionalMap),
         content: Text(
-          'Are you sure you want to delete the emotional map for "$symptomName"?',
-        ),
+            '${AppLocalizations.of(context).deleteEmotionalMapConfirm} "$symptomName"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
@@ -94,16 +95,17 @@ class _EmotionalMapManagementScreenState
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Emotional map deleted successfully'),
+            SnackBar(
+              content: Text(
+                  AppLocalizations.of(context).emotionalMapDeletedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
           _loadData();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to delete emotional map'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context).errorDeletingData),
               backgroundColor: Colors.red,
             ),
           );
@@ -137,7 +139,7 @@ class _EmotionalMapManagementScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Emotional Map Management',
+          AppLocalizations.of(context).manageEmotionalMaps,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -167,7 +169,7 @@ class _EmotionalMapManagementScreenState
         onPressed: () => _navigateToAddEdit(),
         backgroundColor: AppColors.primaryGold,
         icon: const Icon(Icons.add),
-        label: const Text('Add Emotional Map'),
+        label: Text(AppLocalizations.of(context).addEmotionalMap),
       ),
     );
   }
@@ -204,7 +206,7 @@ class _EmotionalMapManagementScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'For: $symptomName',
+                        '${AppLocalizations.of(context).forSymptom} $symptomName',
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -213,7 +215,7 @@ class _EmotionalMapManagementScreenState
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        'Recommends: Session №${map.sessionNumber}',
+                        '${AppLocalizations.of(context).recommendsSession} №${map.sessionNumber}',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: Colors.green[700],
@@ -279,7 +281,7 @@ class _EmotionalMapManagementScreenState
           ),
           SizedBox(height: 16.h),
           Text(
-            'No emotional maps found',
+            AppLocalizations.of(context).noEmotionalMapsFound,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -288,7 +290,7 @@ class _EmotionalMapManagementScreenState
           ),
           SizedBox(height: 8.h),
           Text(
-            'Tap the + button to add an emotional map',
+            AppLocalizations.of(context).tapToAddEmotionalMap,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
