@@ -1,6 +1,6 @@
-// lib/models/symptom_model.dart
+// lib/models/disease_model.dart
 
-class SymptomModel {
+class DiseaseModel {
   final String id;
   final String category; // physical, mental, emotional
   final int order; // Display order
@@ -8,7 +8,7 @@ class SymptomModel {
   final Map<String, String> translations; // Multi-language names
   final DateTime? createdAt;
 
-  SymptomModel({
+  DiseaseModel({
     required this.id,
     required this.category,
     required this.order,
@@ -18,8 +18,8 @@ class SymptomModel {
   });
 
   /// Create from Firestore document
-  factory SymptomModel.fromMap(Map<String, dynamic> map, String documentId) {
-    return SymptomModel(
+  factory DiseaseModel.fromMap(Map<String, dynamic> map, String documentId) {
+    return DiseaseModel(
       id: documentId,
       category: map['category'] ?? 'physical',
       order: map['order'] ?? 0,
@@ -46,7 +46,7 @@ class SymptomModel {
   }
 
   /// Copy with
-  SymptomModel copyWith({
+  DiseaseModel copyWith({
     String? id,
     String? category,
     int? order,
@@ -54,7 +54,7 @@ class SymptomModel {
     Map<String, String>? translations,
     DateTime? createdAt,
   }) {
-    return SymptomModel(
+    return DiseaseModel(
       id: id ?? this.id,
       category: category ?? this.category,
       order: order ?? this.order,

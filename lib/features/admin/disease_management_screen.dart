@@ -1,44 +1,44 @@
-// lib/features/admin/symptom_management_screen.dart
+// lib/features/admin/disease_management_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
-import '../../models/symptom_model.dart';
-import '../../services/symptom_service.dart';
+import '../../models/disease_model.dart';
+import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
-import 'add_symptom_screen.dart';
+import 'add_disease_screen.dart';
 
-class SymptomManagementScreen extends StatefulWidget {
-  const SymptomManagementScreen({super.key});
+class DiseaseManagementScreen extends StatefulWidget {
+  const DiseaseManagementScreen({super.key});
 
   @override
-  State<SymptomManagementScreen> createState() =>
-      _SymptomManagementScreenState();
+  State<DiseaseManagementScreen> createState() =>
+      _DiseaseManagementScreenState();
 }
 
-class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
-  final SymptomService _symptomService = SymptomService();
+class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
+  final DiseaseService _diseaseService = DiseaseService();
 
-  List<SymptomModel> _symptoms = [];
+  List<DiseaseModel> _diseases = [];
   bool _isLoading = true;
-  String _selectedCategory = 'all'; // all, physical, mental, emotional
+  String _selectedCategory = 'all';
 
   @override
   void initState() {
     super.initState();
-    _loadSymptoms();
+    _loadDiseases();
   }
 
-  Future<void> _loadSymptoms() async {
+  Future<void> _loadDiseases() async {
     setState(() => _isLoading = true);
 
     try {
-      final symptoms = await _symptomService.getAllSymptoms(forceRefresh: true);
+      final diseases = await _diseaseService.getAllDiseases(forceRefresh: true);
 
       if (mounted) {
         setState(() {
-          _symptoms = symptoms;
+          _diseases = diseases;
           _isLoading = false;
         });
       }
@@ -47,7 +47,8 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorLoadingData}: $e'),
+            content:
+                Text('${AppLocalizations.of(context).errorLoadingData}: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -55,20 +56,20 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
     }
   }
 
-  List<SymptomModel> get _filteredSymptoms {
+  List<DiseaseModel> get _filteredDiseases {
     if (_selectedCategory == 'all') {
-      return _symptoms;
+      return _diseases;
     }
-    return _symptoms.where((s) => s.category == _selectedCategory).toList();
+    return _diseases.where((s) => s.category == _selectedCategory).toList();
   }
 
-  Future<void> _deleteSymptom(SymptomModel symptom) async {
+  Future<void> _deleteDisease(DiseaseModel disease) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).deleteSymptom),
+        title: Text(AppLocalizations.of(context).deleteDisease),
         content: Text(
-          '${AppLocalizations.of(context).deleteSymptomConfirm} "${symptom.getLocalizedName('en')}"?',
+          '${AppLocalizations.of(context).deleteDiseaseConfirm} "${disease.getLocalizedName('en')}"?',
         ),
         actions: [
           TextButton(
@@ -78,24 +79,25 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child:  Text(AppLocalizations.of(context).delete),
+            child: Text(AppLocalizations.of(context).delete),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
-      final success = await _symptomService.deleteSymptom(symptom.id);
+      final success = await _diseaseService.deleteDisease(disease.id);
 
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-              content: Text(AppLocalizations.of(context).symptomDeletedSuccessfully),
+            SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).diseaseDeletedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
-          _loadSymptoms();
+          _loadDiseases();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -108,16 +110,16 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
     }
   }
 
-  Future<void> _navigateToAddEdit({SymptomModel? symptom}) async {
+  Future<void> _navigateToAddEdit({DiseaseModel? disease}) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AddSymptomScreen(symptomToEdit: symptom),
+        builder: (_) => AddDiseaseScreen(diseaseToEdit: disease),
       ),
     );
 
     if (result == true) {
-      _loadSymptoms();
+      _loadDiseases();
     }
   }
 
@@ -133,7 +135,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          AppLocalizations.of(context).manageSymptoms,
+          AppLocalizations.of(context).manageDiseases,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -143,7 +145,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
-            onPressed: _loadSymptoms,
+            onPressed: _loadDiseases,
           ),
         ],
       ),
@@ -154,16 +156,16 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
                 // Category Filter
                 _buildCategoryFilter(),
 
-                // Symptom List
+                // Disease List
                 Expanded(
-                  child: _filteredSymptoms.isEmpty
+                  child: _filteredDiseases.isEmpty
                       ? _buildEmptyState()
                       : ListView.builder(
                           padding: EdgeInsets.all(20.w),
-                          itemCount: _filteredSymptoms.length,
+                          itemCount: _filteredDiseases.length,
                           itemBuilder: (context, index) {
-                            final symptom = _filteredSymptoms[index];
-                            return _buildSymptomCard(symptom);
+                            final disease = _filteredDiseases[index];
+                            return _buildDiseaseCard(disease);
                           },
                         ),
                 ),
@@ -173,7 +175,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
         onPressed: () => _navigateToAddEdit(),
         backgroundColor: AppColors.primaryGold,
         icon: const Icon(Icons.add),
-        label: Text(AppLocalizations.of(context).addSymptom),
+        label: Text(AppLocalizations.of(context).addDisease),
       ),
     );
   }
@@ -223,7 +225,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
     );
   }
 
-  Widget _buildSymptomCard(SymptomModel symptom) {
+  Widget _buildDiseaseCard(DiseaseModel disease) {
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
       elevation: 2,
@@ -239,12 +241,12 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
               width: 48.w,
               height: 48.w,
               decoration: BoxDecoration(
-                color: _getCategoryColor(symptom.category).withOpacity(0.1),
+                color: _getCategoryColor(disease.category).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               alignment: Alignment.center,
               child: Text(
-                symptom.icon,
+                disease.icon,
                 style: TextStyle(fontSize: 24.sp),
               ),
             ),
@@ -257,7 +259,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    symptom.getLocalizedName('en'),
+                    disease.getLocalizedName('en'),
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
@@ -273,22 +275,22 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
                           vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: _getCategoryColor(symptom.category)
+                          color: _getCategoryColor(disease.category)
                               .withOpacity(0.1),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
-                          symptom.category.toUpperCase(),
+                          disease.category.toUpperCase(),
                           style: GoogleFonts.inter(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
-                            color: _getCategoryColor(symptom.category),
+                            color: _getCategoryColor(disease.category),
                           ),
                         ),
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        '${AppLocalizations.of(context).displayOrder}: ${symptom.order}',
+                        '${AppLocalizations.of(context).displayOrder}: ${disease.order}',
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
                           color: AppColors.textSecondary,
@@ -298,7 +300,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    'TR: ${symptom.getLocalizedName('tr')}',
+                    'TR: ${disease.getLocalizedName('tr')}',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       color: AppColors.textSecondary,
@@ -315,11 +317,11 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit, color: AppColors.primaryGold),
-                  onPressed: () => _navigateToAddEdit(symptom: symptom),
+                  onPressed: () => _navigateToAddEdit(disease: disease),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.red),
-                  onPressed: () => _deleteSymptom(symptom),
+                  onPressed: () => _deleteDisease(disease),
                 ),
               ],
             ),
@@ -341,7 +343,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            AppLocalizations.of(context).noSymptomsFound,
+            AppLocalizations.of(context).noDiseasesFound,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -350,7 +352,7 @@ class _SymptomManagementScreenState extends State<SymptomManagementScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            AppLocalizations.of(context).tapToAddSymptom,
+            AppLocalizations.of(context).tapToAddDisease,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,

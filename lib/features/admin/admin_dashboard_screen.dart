@@ -7,8 +7,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import '../../core/constants/app_colors.dart';
-import 'symptom_management_screen.dart';
-import 'emotional_map_management_screen.dart';
+import 'disease_management_screen.dart';
+import 'disease_cause_management_screen.dart';
 import '../../l10n/app_localizations.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -212,13 +212,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
                     _buildCompactMenuItem(
                       icon: Icons.psychology,
-                      title: AppLocalizations.of(context).manageSymptoms,
+                      title: AppLocalizations.of(context).manageDiseases,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const SymptomManagementScreen(),
+                            builder: (_) => const DiseaseManagementScreen(),
                           ),
                         );
                       },
@@ -226,14 +226,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.map,
-                      title: AppLocalizations.of(context).manageEmotionalMaps,
+                      title: AppLocalizations.of(context).manageDiseaseCauses,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) =>
-                                const EmotionalMapManagementScreen(),
+                                const DiseaseCauseManagementScreen(),
                           ),
                         );
                       },

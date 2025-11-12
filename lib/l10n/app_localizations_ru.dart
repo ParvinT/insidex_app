@@ -1389,19 +1389,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addSession => 'Добавить сессию';
 
   @override
-  String get manageSymptoms => 'Управление симптомами';
+  String get manageDiseases => 'Управление болезнями';
 
   @override
-  String get addSymptom => 'Добавить симптом';
+  String get addDisease => 'Добавить болезнь';
 
   @override
-  String get editSymptom => 'Редактировать симптом';
+  String get editDisease => 'Редактировать болезнь';
 
   @override
-  String get symptomName => 'Название симптома';
-
-  @override
-  String get symptomCategory => 'Категория';
+  String get diseaseName => 'Название болезни';
 
   @override
   String get physical => 'Физический';
@@ -1431,47 +1428,95 @@ class AppLocalizationsRu extends AppLocalizations {
   String get englishNameRequired => 'Английское название обязательно';
 
   @override
-  String get symptomCreatedSuccessfully => 'Симптом успешно создан';
+  String get diseaseCategory => 'Категория';
 
   @override
-  String get symptomUpdatedSuccessfully => 'Симптом успешно обновлен';
+  String get diseaseCreatedSuccessfully => 'Болезнь успешно создана';
 
   @override
-  String get symptomDeletedSuccessfully => 'Симптом успешно удален';
+  String get diseaseUpdatedSuccessfully => 'Болезнь успешно обновлена';
 
   @override
-  String get deletingSymptomKeepsMaps =>
-      'Примечание: Эмоциональные карты этого симптома НЕ будут удалены.';
+  String get diseaseDeletedSuccessfully => 'Болезнь успешно удалена';
 
   @override
-  String get noSymptomsFound => 'Симптомы не найдены';
+  String get deletingDiseaseKeepsCauses =>
+      'Примечание: Причины этой болезни НЕ будут удалены.';
 
   @override
-  String get tapToAddSymptom => 'Нажмите + чтобы добавить симптом';
+  String get noDiseasesFound => 'Болезни не найдены';
 
   @override
-  String get deleteSymptom => 'Удалить симптом';
+  String get tapToAddDisease => 'Нажмите кнопку +, чтобы добавить болезнь';
 
   @override
-  String get deleteSymptomConfirm => 'Вы уверены, что хотите удалить';
+  String get deleteDisease => 'Удалить болезнь';
 
   @override
-  String get manageEmotionalMaps => 'Управление эмоциональными картами';
+  String get deleteDiseaseConfirm => 'Вы уверены, что хотите удалить';
 
   @override
-  String get addEmotionalMap => 'Добавить эмоциональную карту';
+  String get manageDiseaseCauses => 'Управление причинами болезней';
 
   @override
-  String get editEmotionalMap => 'Редактировать эмоциональную карту';
+  String get addDiseaseCause => 'Добавить причину болезни';
 
   @override
-  String get symptom => 'Симптом';
+  String get editDiseaseCause => 'Редактировать причину болезни';
 
   @override
-  String get selectASymptom => 'Выберите симптом';
+  String get disease => 'Болезнь';
 
   @override
-  String get pleaseSelectSymptom => 'Пожалуйста, выберите симптом';
+  String get selectADisease => 'Выберите болезнь';
+
+  @override
+  String get pleaseSelectDisease => 'Пожалуйста, выберите болезнь';
+
+  @override
+  String get diseaseCauseContent => 'Содержание причины болезни';
+
+  @override
+  String get describeDiseaseHelp =>
+      'Опишите коренную причину этой болезни и как сеанс помогает...';
+
+  @override
+  String get diseaseCauseCreatedSuccessfully =>
+      'Причина болезни успешно создана';
+
+  @override
+  String get diseaseCauseUpdatedSuccessfully =>
+      'Причина болезни успешно обновлена';
+
+  @override
+  String get diseaseCauseDeletedSuccessfully =>
+      'Причина болезни успешно удалена';
+
+  @override
+  String get noDiseaseCausesFound => 'Причины болезней не найдены';
+
+  @override
+  String get tapToAddDiseaseCause =>
+      'Нажмите кнопку +, чтобы добавить причину болезни';
+
+  @override
+  String get deleteDiseaseCause => 'Удалить причину болезни';
+
+  @override
+  String get deleteDiseaseCauseConfirm =>
+      'Вы уверены, что хотите удалить причину болезни для';
+
+  @override
+  String get forDisease => 'Для:';
+
+  @override
+  String get updateDisease => 'Обновить болезнь';
+
+  @override
+  String get updateDiseaseCause => 'Обновить причину болезни';
+
+  @override
+  String get recommendsSession => 'Рекомендуется: Сессия';
 
   @override
   String get recommendedSession => 'Рекомендуемая сессия';
@@ -1483,46 +1528,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get pleaseSelectSession => 'Пожалуйста, выберите сессию';
 
   @override
-  String get emotionalMapContent => 'Содержание эмоциональной карты';
-
-  @override
-  String get describeSymptomHelp =>
-      'Опишите, как этот симптом влияет на людей и как сессия помогает...';
-
-  @override
   String get englishContentRequired => 'Английское содержание обязательно';
-
-  @override
-  String get emotionalMapCreatedSuccessfully =>
-      'Эмоциональная карта успешно создана';
-
-  @override
-  String get emotionalMapUpdatedSuccessfully =>
-      'Эмоциональная карта успешно обновлена';
-
-  @override
-  String get emotionalMapDeletedSuccessfully =>
-      'Эмоциональная карта успешно удалена';
-
-  @override
-  String get noEmotionalMapsFound => 'Эмоциональные карты не найдены';
-
-  @override
-  String get tapToAddEmotionalMap =>
-      'Нажмите + чтобы добавить эмоциональную карту';
-
-  @override
-  String get deleteEmotionalMap => 'Удалить эмоциональную карту';
-
-  @override
-  String get deleteEmotionalMapConfirm =>
-      'Вы уверены, что хотите удалить эмоциональную карту для';
-
-  @override
-  String get forSymptom => 'Для:';
-
-  @override
-  String get recommendsSession => 'Рекомендуется: Сессия';
 
   @override
   String get update => 'Обновить';

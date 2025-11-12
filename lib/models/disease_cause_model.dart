@@ -1,16 +1,16 @@
-// lib/models/emotional_map_model.dart
+// lib/models/disease_cause_model.dart
 
-class EmotionalMapModel {
+class DiseaseCauseModel {
   final String id;
-  final String symptomId; // Hangi semptom için
-  final Map<String, String> content; // Multi-language emotional map text
-  final String recommendedSessionId; // Yönlendirilecek session
-  final int? sessionNumber; // Display için (№13)
+  final String diseaseId; 
+  final Map<String, String> content; 
+  final String recommendedSessionId; 
+  final int? sessionNumber; 
   final DateTime? createdAt;
 
-  EmotionalMapModel({
+  DiseaseCauseModel({
     required this.id,
-    required this.symptomId,
+    required this.diseaseId,
     required this.content,
     required this.recommendedSessionId,
     this.sessionNumber,
@@ -18,11 +18,11 @@ class EmotionalMapModel {
   });
 
   /// Create from Firestore document
-  factory EmotionalMapModel.fromMap(
+  factory DiseaseCauseModel.fromMap(
       Map<String, dynamic> map, String documentId) {
-    return EmotionalMapModel(
+    return DiseaseCauseModel(
       id: documentId,
-      symptomId: map['symptomId'] ?? '',
+      diseaseId: map['diseaseId'] ?? '',
       content: Map<String, String>.from(map['content'] ?? {}),
       recommendedSessionId: map['recommendedSessionId'] ?? '',
       sessionNumber: map['sessionNumber'],
@@ -33,7 +33,7 @@ class EmotionalMapModel {
   /// Convert to Firestore document
   Map<String, dynamic> toMap() {
     return {
-      'symptomId': symptomId,
+      'diseaseId': diseaseId,
       'content': content,
       'recommendedSessionId': recommendedSessionId,
       'sessionNumber': sessionNumber,
@@ -47,17 +47,17 @@ class EmotionalMapModel {
   }
 
   /// Copy with
-  EmotionalMapModel copyWith({
+  DiseaseCauseModel copyWith({
     String? id,
-    String? symptomId,
+    String? diseaseId,
     Map<String, String>? content,
     String? recommendedSessionId,
     int? sessionNumber,
     DateTime? createdAt,
   }) {
-    return EmotionalMapModel(
+    return DiseaseCauseModel(
       id: id ?? this.id,
-      symptomId: symptomId ?? this.symptomId,
+      diseaseId: diseaseId ?? this.diseaseId,
       content: content ?? this.content,
       recommendedSessionId: recommendedSessionId ?? this.recommendedSessionId,
       sessionNumber: sessionNumber ?? this.sessionNumber,

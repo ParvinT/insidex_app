@@ -1,31 +1,31 @@
-// lib/features/admin/emotional_map_management_screen.dart
+// lib/features/admin/disease_cause_management_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
-import '../../models/emotional_map_model.dart';
-import '../../models/symptom_model.dart';
-import '../../services/emotional_map_service.dart';
-import '../../services/symptom_service.dart';
+import '../../models/disease_cause_model.dart';
+import '../../models/disease_model.dart';
+import '../../services/disease/disease_cause_service.dart';
+import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
-import 'add_emotional_map_screen.dart';
+import 'add_disease_cause_screen.dart';
 
-class EmotionalMapManagementScreen extends StatefulWidget {
-  const EmotionalMapManagementScreen({super.key});
+class DiseaseCauseManagementScreen extends StatefulWidget {
+  const DiseaseCauseManagementScreen({super.key});
 
   @override
-  State<EmotionalMapManagementScreen> createState() =>
-      _EmotionalMapManagementScreenState();
+  State<DiseaseCauseManagementScreen> createState() =>
+      _DiseaseCauseManagementScreenState();
 }
 
-class _EmotionalMapManagementScreenState
-    extends State<EmotionalMapManagementScreen> {
-  final EmotionalMapService _mapService = EmotionalMapService();
-  final SymptomService _symptomService = SymptomService();
+class _DiseaseCauseManagementScreenState
+    extends State<DiseaseCauseManagementScreen> {
+  final DiseaseCauseService _causeService = DiseaseCauseService();
+  final DiseaseService _diseaseService = DiseaseService();
 
-  List<EmotionalMapModel> _maps = [];
-  Map<String, SymptomModel> _symptomsById = {};
+  List<DiseaseCauseModel> _causes = [];
+  Map<String, DiseaseModel> _diseasesById = {};
   bool _isLoading = true;
 
   @override
@@ -38,16 +38,17 @@ class _EmotionalMapManagementScreenState
     setState(() => _isLoading = true);
 
     try {
-      // Load symptoms first
-      final symptoms = await _symptomService.getAllSymptoms(forceRefresh: true);
-      _symptomsById = {for (var s in symptoms) s.id: s};
+      // Load diseases first
+      final diseases = await _diseaseService.getAllDiseases(forceRefresh: true);
+      _diseasesById = {for (var s in diseases) s.id: s};
 
-      // Load emotional maps
-      final maps = await _mapService.getAllEmotionalMaps(forceRefresh: true);
+      // Load disease causes
+      final causes =
+          await _causeService.getAllDiseaseCauses(forceRefresh: true);
 
       if (mounted) {
         setState(() {
-          _maps = maps;
+          _causes = causes;
           _isLoading = false;
         });
       }
@@ -65,16 +66,16 @@ class _EmotionalMapManagementScreenState
     }
   }
 
-  Future<void> _deleteMap(EmotionalMapModel map) async {
-    final symptom = _symptomsById[map.symptomId];
-    final symptomName = symptom?.getLocalizedName('en') ?? 'Unknown';
+  Future<void> _deleteCause(DiseaseCauseModel cause) async {
+    final disease = _diseasesById[cause.diseaseId];
+    final diseaseName = disease?.getLocalizedName('en') ?? 'Unknown';
 
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).deleteEmotionalMap),
+        title: Text(AppLocalizations.of(context).deleteDiseaseCause),
         content: Text(
-            '${AppLocalizations.of(context).deleteEmotionalMapConfirm} "$symptomName"?'),
+            '${AppLocalizations.of(context).deleteDiseaseCauseConfirm} "$diseaseName"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -90,14 +91,14 @@ class _EmotionalMapManagementScreenState
     );
 
     if (confirm == true) {
-      final success = await _mapService.deleteEmotionalMap(map.id);
+      final success = await _causeService.deleteDiseaseCause(cause.id);
 
       if (mounted) {
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  AppLocalizations.of(context).emotionalMapDeletedSuccessfully),
+                  AppLocalizations.of(context).diseaseCauseDeletedSuccessfully),
               backgroundColor: Colors.green,
             ),
           );
@@ -114,11 +115,11 @@ class _EmotionalMapManagementScreenState
     }
   }
 
-  Future<void> _navigateToAddEdit({EmotionalMapModel? map}) async {
+  Future<void> _navigateToAddEdit({DiseaseCauseModel? cause}) async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AddEmotionalMapScreen(mapToEdit: map),
+        builder: (_) => AddDiseaseCauseScreen(causeToEdit: cause),
       ),
     );
 
@@ -139,7 +140,7 @@ class _EmotionalMapManagementScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          AppLocalizations.of(context).manageEmotionalMaps,
+          AppLocalizations.of(context).manageDiseaseCauses,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -155,30 +156,29 @@ class _EmotionalMapManagementScreenState
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _maps.isEmpty
+          : _causes.isEmpty
               ? _buildEmptyState()
               : ListView.builder(
                   padding: EdgeInsets.all(20.w),
-                  itemCount: _maps.length,
+                  itemCount: _causes.length,
                   itemBuilder: (context, index) {
-                    final map = _maps[index];
-                    return _buildMapCard(map);
+                    final cause = _causes[index];
+                    return _buildCauseCard(cause);
                   },
                 ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToAddEdit(),
         backgroundColor: AppColors.primaryGold,
         icon: const Icon(Icons.add),
-        label: Text(AppLocalizations.of(context).addEmotionalMap),
+        label: Text(AppLocalizations.of(context).addDiseaseCause),
       ),
     );
   }
 
-  Widget _buildMapCard(EmotionalMapModel map) {
-    final symptom = _symptomsById[map.symptomId];
-    final symptomName = symptom?.getLocalizedName('en') ?? 'Unknown Symptom';
-    final symptomIcon = symptom?.icon ?? '❓';
-
+  Widget _buildCauseCard(DiseaseCauseModel cause) {
+    final disease = _diseasesById[cause.diseaseId];
+    final diseaseName = disease?.getLocalizedName('en') ?? 'Unknown Disease';
+    final diseaseIcon = disease?.icon ?? '❓';
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
       elevation: 2,
@@ -192,9 +192,9 @@ class _EmotionalMapManagementScreenState
           children: [
             Row(
               children: [
-                // Symptom Icon
+                // Disease Icon
                 Text(
-                  symptomIcon,
+                  diseaseIcon,
                   style: TextStyle(fontSize: 32.sp),
                 ),
 
@@ -206,7 +206,7 @@ class _EmotionalMapManagementScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '${AppLocalizations.of(context).forSymptom} $symptomName',
+                        '${AppLocalizations.of(context).forDisease} $diseaseName',
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
@@ -215,7 +215,7 @@ class _EmotionalMapManagementScreenState
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        '${AppLocalizations.of(context).recommendsSession} №${map.sessionNumber}',
+                        '${AppLocalizations.of(context).recommendsSession} №${cause.sessionNumber}',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: Colors.green[700],
@@ -232,11 +232,11 @@ class _EmotionalMapManagementScreenState
                     IconButton(
                       icon:
                           const Icon(Icons.edit, color: AppColors.primaryGold),
-                      onPressed: () => _navigateToAddEdit(map: map),
+                      onPressed: () => _navigateToAddEdit(cause: cause),
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _deleteMap(map),
+                      onPressed: () => _deleteCause(cause),
                     ),
                   ],
                 ),
@@ -253,7 +253,7 @@ class _EmotionalMapManagementScreenState
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Text(
-                map.getLocalizedContent('en'),
+                cause.getLocalizedContent('en'),
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
                   color: AppColors.textSecondary,
@@ -275,13 +275,13 @@ class _EmotionalMapManagementScreenState
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.map_outlined,
+            Icons.medical_information_outlined,
             size: 80.sp,
             color: Colors.grey[300],
           ),
           SizedBox(height: 16.h),
           Text(
-            AppLocalizations.of(context).noEmotionalMapsFound,
+            AppLocalizations.of(context).noDiseaseCausesFound,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -290,7 +290,7 @@ class _EmotionalMapManagementScreenState
           ),
           SizedBox(height: 8.h),
           Text(
-            AppLocalizations.of(context).tapToAddEmotionalMap,
+            AppLocalizations.of(context).tapToAddDiseaseCause,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,

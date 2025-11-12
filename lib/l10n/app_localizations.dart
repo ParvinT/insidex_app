@@ -2718,35 +2718,29 @@ abstract class AppLocalizations {
   /// **'Add Session'**
   String get addSession;
 
-  /// No description provided for @manageSymptoms.
+  /// No description provided for @manageDiseases.
   ///
   /// In en, this message translates to:
-  /// **'Manage Symptoms'**
-  String get manageSymptoms;
+  /// **'Manage Diseases'**
+  String get manageDiseases;
 
-  /// No description provided for @addSymptom.
+  /// No description provided for @addDisease.
   ///
   /// In en, this message translates to:
-  /// **'Add Symptom'**
-  String get addSymptom;
+  /// **'Add Disease'**
+  String get addDisease;
 
-  /// No description provided for @editSymptom.
+  /// No description provided for @editDisease.
   ///
   /// In en, this message translates to:
-  /// **'Edit Symptom'**
-  String get editSymptom;
+  /// **'Edit Disease'**
+  String get editDisease;
 
-  /// No description provided for @symptomName.
+  /// No description provided for @diseaseName.
   ///
   /// In en, this message translates to:
-  /// **'Symptom Name'**
-  String get symptomName;
-
-  /// No description provided for @symptomCategory.
-  ///
-  /// In en, this message translates to:
-  /// **'Category'**
-  String get symptomCategory;
+  /// **'Disease Name'**
+  String get diseaseName;
 
   /// No description provided for @physical.
   ///
@@ -2802,89 +2796,173 @@ abstract class AppLocalizations {
   /// **'English name is required'**
   String get englishNameRequired;
 
-  /// No description provided for @symptomCreatedSuccessfully.
+  /// No description provided for @diseaseCategory.
   ///
   /// In en, this message translates to:
-  /// **'Symptom created successfully'**
-  String get symptomCreatedSuccessfully;
+  /// **'Category'**
+  String get diseaseCategory;
 
-  /// No description provided for @symptomUpdatedSuccessfully.
+  /// No description provided for @diseaseCreatedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'Symptom updated successfully'**
-  String get symptomUpdatedSuccessfully;
+  /// **'Disease created successfully'**
+  String get diseaseCreatedSuccessfully;
 
-  /// No description provided for @symptomDeletedSuccessfully.
+  /// No description provided for @diseaseUpdatedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'Symptom deleted successfully'**
-  String get symptomDeletedSuccessfully;
+  /// **'Disease updated successfully'**
+  String get diseaseUpdatedSuccessfully;
 
-  /// No description provided for @deletingSymptomKeepsMaps.
+  /// No description provided for @diseaseDeletedSuccessfully.
   ///
   /// In en, this message translates to:
-  /// **'Note: Emotional maps for this symptom will NOT be deleted.'**
-  String get deletingSymptomKeepsMaps;
+  /// **'Disease deleted successfully'**
+  String get diseaseDeletedSuccessfully;
 
-  /// No description provided for @noSymptomsFound.
+  /// No description provided for @deletingDiseaseKeepsCauses.
   ///
   /// In en, this message translates to:
-  /// **'No symptoms found'**
-  String get noSymptomsFound;
+  /// **'Note: Disease causes for this disease will NOT be deleted.'**
+  String get deletingDiseaseKeepsCauses;
 
-  /// No description provided for @tapToAddSymptom.
+  /// No description provided for @noDiseasesFound.
   ///
   /// In en, this message translates to:
-  /// **'Tap the + button to add a symptom'**
-  String get tapToAddSymptom;
+  /// **'No diseases found'**
+  String get noDiseasesFound;
 
-  /// No description provided for @deleteSymptom.
+  /// No description provided for @tapToAddDisease.
   ///
   /// In en, this message translates to:
-  /// **'Delete Symptom'**
-  String get deleteSymptom;
+  /// **'Tap the + button to add a disease'**
+  String get tapToAddDisease;
 
-  /// No description provided for @deleteSymptomConfirm.
+  /// No description provided for @deleteDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Disease'**
+  String get deleteDisease;
+
+  /// No description provided for @deleteDiseaseConfirm.
   ///
   /// In en, this message translates to:
   /// **'Are you sure you want to delete'**
-  String get deleteSymptomConfirm;
+  String get deleteDiseaseConfirm;
 
-  /// No description provided for @manageEmotionalMaps.
+  /// No description provided for @manageDiseaseCauses.
   ///
   /// In en, this message translates to:
-  /// **'Manage Emotional Maps'**
-  String get manageEmotionalMaps;
+  /// **'Manage Disease Causes'**
+  String get manageDiseaseCauses;
 
-  /// No description provided for @addEmotionalMap.
+  /// No description provided for @addDiseaseCause.
   ///
   /// In en, this message translates to:
-  /// **'Add Emotional Map'**
-  String get addEmotionalMap;
+  /// **'Add Disease Cause'**
+  String get addDiseaseCause;
 
-  /// No description provided for @editEmotionalMap.
+  /// No description provided for @editDiseaseCause.
   ///
   /// In en, this message translates to:
-  /// **'Edit Emotional Map'**
-  String get editEmotionalMap;
+  /// **'Edit Disease Cause'**
+  String get editDiseaseCause;
 
-  /// No description provided for @symptom.
+  /// No description provided for @disease.
   ///
   /// In en, this message translates to:
-  /// **'Symptom'**
-  String get symptom;
+  /// **'Disease'**
+  String get disease;
 
-  /// No description provided for @selectASymptom.
+  /// No description provided for @selectADisease.
   ///
   /// In en, this message translates to:
-  /// **'Select a symptom'**
-  String get selectASymptom;
+  /// **'Select a disease'**
+  String get selectADisease;
 
-  /// No description provided for @pleaseSelectSymptom.
+  /// No description provided for @pleaseSelectDisease.
   ///
   /// In en, this message translates to:
-  /// **'Please select a symptom'**
-  String get pleaseSelectSymptom;
+  /// **'Please select a disease'**
+  String get pleaseSelectDisease;
+
+  /// No description provided for @diseaseCauseContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Disease Cause Content'**
+  String get diseaseCauseContent;
+
+  /// No description provided for @describeDiseaseHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the root cause of this disease and how the session helps...'**
+  String get describeDiseaseHelp;
+
+  /// No description provided for @diseaseCauseCreatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Disease cause created successfully'**
+  String get diseaseCauseCreatedSuccessfully;
+
+  /// No description provided for @diseaseCauseUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Disease cause updated successfully'**
+  String get diseaseCauseUpdatedSuccessfully;
+
+  /// No description provided for @diseaseCauseDeletedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Disease cause deleted successfully'**
+  String get diseaseCauseDeletedSuccessfully;
+
+  /// No description provided for @noDiseaseCausesFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No disease causes found'**
+  String get noDiseaseCausesFound;
+
+  /// No description provided for @tapToAddDiseaseCause.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the + button to add a disease cause'**
+  String get tapToAddDiseaseCause;
+
+  /// No description provided for @deleteDiseaseCause.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Disease Cause'**
+  String get deleteDiseaseCause;
+
+  /// No description provided for @deleteDiseaseCauseConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete the disease cause for'**
+  String get deleteDiseaseCauseConfirm;
+
+  /// No description provided for @forDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'For:'**
+  String get forDisease;
+
+  /// No description provided for @updateDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Disease'**
+  String get updateDisease;
+
+  /// No description provided for @updateDiseaseCause.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Disease Cause'**
+  String get updateDiseaseCause;
+
+  /// No description provided for @recommendsSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommends: Session'**
+  String get recommendsSession;
 
   /// No description provided for @recommendedSession.
   ///
@@ -2904,77 +2982,11 @@ abstract class AppLocalizations {
   /// **'Please select a session'**
   String get pleaseSelectSession;
 
-  /// No description provided for @emotionalMapContent.
-  ///
-  /// In en, this message translates to:
-  /// **'Emotional Map Content'**
-  String get emotionalMapContent;
-
-  /// No description provided for @describeSymptomHelp.
-  ///
-  /// In en, this message translates to:
-  /// **'Describe how this symptom affects people and how the session helps...'**
-  String get describeSymptomHelp;
-
   /// No description provided for @englishContentRequired.
   ///
   /// In en, this message translates to:
   /// **'English content is required'**
   String get englishContentRequired;
-
-  /// No description provided for @emotionalMapCreatedSuccessfully.
-  ///
-  /// In en, this message translates to:
-  /// **'Emotional map created successfully'**
-  String get emotionalMapCreatedSuccessfully;
-
-  /// No description provided for @emotionalMapUpdatedSuccessfully.
-  ///
-  /// In en, this message translates to:
-  /// **'Emotional map updated successfully'**
-  String get emotionalMapUpdatedSuccessfully;
-
-  /// No description provided for @emotionalMapDeletedSuccessfully.
-  ///
-  /// In en, this message translates to:
-  /// **'Emotional map deleted successfully'**
-  String get emotionalMapDeletedSuccessfully;
-
-  /// No description provided for @noEmotionalMapsFound.
-  ///
-  /// In en, this message translates to:
-  /// **'No emotional maps found'**
-  String get noEmotionalMapsFound;
-
-  /// No description provided for @tapToAddEmotionalMap.
-  ///
-  /// In en, this message translates to:
-  /// **'Tap the + button to add an emotional map'**
-  String get tapToAddEmotionalMap;
-
-  /// No description provided for @deleteEmotionalMap.
-  ///
-  /// In en, this message translates to:
-  /// **'Delete Emotional Map'**
-  String get deleteEmotionalMap;
-
-  /// No description provided for @deleteEmotionalMapConfirm.
-  ///
-  /// In en, this message translates to:
-  /// **'Are you sure you want to delete the emotional map for'**
-  String get deleteEmotionalMapConfirm;
-
-  /// No description provided for @forSymptom.
-  ///
-  /// In en, this message translates to:
-  /// **'For:'**
-  String get forSymptom;
-
-  /// No description provided for @recommendsSession.
-  ///
-  /// In en, this message translates to:
-  /// **'Recommends: Session'**
-  String get recommendsSession;
 
   /// No description provided for @update.
   ///

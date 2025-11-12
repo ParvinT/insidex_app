@@ -1,4 +1,4 @@
-// lib/features/admin/add_emotional_map_screen.dart
+// lib/features/admin/add_disease_cause_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,33 +6,33 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_languages.dart';
-import '../../models/emotional_map_model.dart';
-import '../../models/symptom_model.dart';
-import '../../services/emotional_map_service.dart';
-import '../../services/symptom_service.dart';
+import '../../models/disease_cause_model.dart';
+import '../../models/disease_model.dart';
+import '../../services/disease/disease_cause_service.dart';
+import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
 
-class AddEmotionalMapScreen extends StatefulWidget {
-  final EmotionalMapModel? mapToEdit;
+class AddDiseaseCauseScreen extends StatefulWidget {
+  final DiseaseCauseModel? causeToEdit;
 
-  const AddEmotionalMapScreen({
+  const AddDiseaseCauseScreen({
     super.key,
-    this.mapToEdit,
+    this.causeToEdit,
   });
 
   @override
-  State<AddEmotionalMapScreen> createState() => _AddEmotionalMapScreenState();
+  State<AddDiseaseCauseScreen> createState() => _AddDiseaseCauseScreenState();
 }
 
-class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
+class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final EmotionalMapService _mapService = EmotionalMapService();
-  final SymptomService _symptomService = SymptomService();
+  final DiseaseCauseService _causeService = DiseaseCauseService();
+  final DiseaseService _diseaseService = DiseaseService();
 
   late TabController _tabController;
 
-  // Controllers for each language (emotional map content)
+  // Controllers for each language (disease cause content)
   final Map<String, TextEditingController> _contentControllers = {};
 
   // Session dropdown
@@ -40,9 +40,9 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
   String? _selectedSessionId;
   int? _selectedSessionNumber;
 
-  // Symptom dropdown
-  List<SymptomModel> _symptoms = [];
-  String? _selectedSymptomId;
+  // Disease dropdown
+  List<DiseaseModel> _diseases = [];
+  String? _selectedDiseaseId;
 
   bool _isLoading = false;
   bool _isLoadingData = true;
@@ -70,8 +70,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
     setState(() => _isLoadingData = true);
 
     try {
-      // Load symptoms
-      final symptoms = await _symptomService.getAllSymptoms();
+      // Load diseases
+      final diseases = await _diseaseService.getAllDiseases();
 
       // Load sessions
       final sessionsSnapshot =
@@ -121,13 +121,13 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
 
       if (mounted) {
         setState(() {
-          _symptoms = symptoms;
+          _diseases = diseases;
           _sessions = sessions;
           _isLoadingData = false;
         });
 
         // Load existing data if editing
-        if (widget.mapToEdit != null) {
+        if (widget.causeToEdit != null) {
           _loadExistingData();
         }
       }
@@ -146,21 +146,21 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
   }
 
   void _loadExistingData() {
-    final map = widget.mapToEdit!;
+    final cause = widget.causeToEdit!;
 
     // Load content translations
-    map.content.forEach((langCode, content) {
+    cause.content.forEach((langCode, content) {
       if (_contentControllers.containsKey(langCode)) {
         _contentControllers[langCode]!.text = content;
       }
     });
 
-    // Load symptom
-    _selectedSymptomId = map.symptomId;
+    // Load disease
+    _selectedDiseaseId = cause.diseaseId;
 
     // Load session
-    _selectedSessionId = map.recommendedSessionId;
-    _selectedSessionNumber = map.sessionNumber;
+    _selectedSessionId = cause.recommendedSessionId;
+    _selectedSessionNumber = cause.sessionNumber;
 
     setState(() {});
   }
@@ -172,7 +172,7 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
     super.dispose();
   }
 
-  Future<void> _saveEmotionalMap() async {
+  Future<void> _saveDiseaseCause() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -183,10 +183,10 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
       return;
     }
 
-    if (_selectedSymptomId == null) {
+    if (_selectedDiseaseId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseSelectSymptom),
+          content: Text(AppLocalizations.of(context).pleaseSelectDisease),
           backgroundColor: Colors.orange,
         ),
       );
@@ -219,27 +219,27 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
         throw Exception('English content is required');
       }
 
-      // Create emotional map model
-      final emotionalMap = EmotionalMapModel(
-        id: widget.mapToEdit?.id ?? '',
-        symptomId: _selectedSymptomId!,
+      // Create disease cause model
+      final diseaseCause = DiseaseCauseModel(
+        id: widget.causeToEdit?.id ?? '',
+        diseaseId: _selectedDiseaseId!,
         content: content,
         recommendedSessionId: _selectedSessionId!,
         sessionNumber: _selectedSessionNumber,
-        createdAt: widget.mapToEdit?.createdAt ?? DateTime.now(),
+        createdAt: widget.causeToEdit?.createdAt ?? DateTime.now(),
       );
 
       // Save to Firestore
       bool success;
-      if (widget.mapToEdit != null) {
+      if (widget.causeToEdit != null) {
         // Update
-        success = await _mapService.updateEmotionalMap(
-          widget.mapToEdit!.id,
-          emotionalMap,
+        success = await _causeService.updateDiseaseCause(
+          widget.causeToEdit!.id,
+          diseaseCause,
         );
       } else {
         // Create
-        final docId = await _mapService.addEmotionalMap(emotionalMap);
+        final docId = await _causeService.addDiseaseCause(diseaseCause);
         success = docId != null;
       }
 
@@ -248,18 +248,18 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                widget.mapToEdit != null
+                widget.causeToEdit != null
                     ? AppLocalizations.of(context)
-                        .emotionalMapUpdatedSuccessfully
+                        .diseaseCauseUpdatedSuccessfully
                     : AppLocalizations.of(context)
-                        .emotionalMapCreatedSuccessfully,
+                        .diseaseCauseCreatedSuccessfully,
               ),
               backgroundColor: Colors.green,
             ),
           );
           Navigator.pop(context, true);
         } else {
-          throw Exception('Failed to save emotional map');
+          throw Exception('Failed to save disease cause');
         }
       }
     } catch (e) {
@@ -292,9 +292,9 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            widget.mapToEdit != null
-                ? AppLocalizations.of(context).editEmotionalMap
-                : AppLocalizations.of(context).addEmotionalMap,
+            widget.causeToEdit != null
+                ? AppLocalizations.of(context).editDiseaseCause
+                : AppLocalizations.of(context).addDiseaseCause,
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
@@ -316,9 +316,9 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.mapToEdit != null
-              ? AppLocalizations.of(context).editEmotionalMap
-              : AppLocalizations.of(context).addEmotionalMap,
+          widget.causeToEdit != null
+              ? AppLocalizations.of(context).editDiseaseCause
+              : AppLocalizations.of(context).addDiseaseCause,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -340,8 +340,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Symptom Selection
-                    _buildSymptomDropdown(),
+                    // Disease Selection
+                    _buildDiseaseDropdown(),
 
                     SizedBox(height: 16.h),
 
@@ -384,29 +384,29 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
     );
   }
 
-  Widget _buildSymptomDropdown() {
+  Widget _buildDiseaseDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedSymptomId,
+      value: _selectedDiseaseId,
       decoration: InputDecoration(
-        labelText: AppLocalizations.of(context).symptom,
-        hintText: AppLocalizations.of(context).selectASymptom,
+        labelText: AppLocalizations.of(context).disease,
+        hintText: AppLocalizations.of(context).selectADisease,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
-        prefixIcon: const Icon(Icons.psychology),
+        prefixIcon: const Icon(Icons.medical_services),
       ),
       isExpanded: true,
-      items: _symptoms.map((symptom) {
+      items: _diseases.map((disease) {
         return DropdownMenuItem<String>(
-          value: symptom.id,
+          value: disease.id,
           child: Row(
             children: [
-              if (symptom.icon.isNotEmpty)
-                Text(symptom.icon, style: TextStyle(fontSize: 20.sp)),
-              if (symptom.icon.isNotEmpty) SizedBox(width: 8.w),
+              if (disease.icon.isNotEmpty)
+                Text(disease.icon, style: TextStyle(fontSize: 20.sp)),
+              if (disease.icon.isNotEmpty) SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  symptom.getLocalizedName('en'),
+                  disease.getLocalizedName('en'),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -416,11 +416,11 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
         );
       }).toList(),
       onChanged: (value) {
-        setState(() => _selectedSymptomId = value);
+        setState(() => _selectedDiseaseId = value);
       },
       validator: (value) {
         if (value == null)
-          return AppLocalizations.of(context).pleaseSelectSymptom;
+          return AppLocalizations.of(context).pleaseSelectDisease;
         return null;
       },
     );
@@ -483,8 +483,8 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
                 maxLines: 10,
                 decoration: InputDecoration(
                   labelText:
-                      '${AppLocalizations.of(context).emotionalMapContent} (${AppLanguages.getName(langCode)})',
-                  hintText: AppLocalizations.of(context).describeSymptomHelp,
+                      '${AppLocalizations.of(context).diseaseCauseContent} (${AppLanguages.getName(langCode)})',
+                  hintText: AppLocalizations.of(context).describeDiseaseHelp,
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12.r),
@@ -519,7 +519,7 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
       width: double.infinity,
       height: 50.h,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _saveEmotionalMap,
+        onPressed: _isLoading ? null : _saveDiseaseCause,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGold,
           shape: RoundedRectangleBorder(
@@ -529,9 +529,9 @@ class _AddEmotionalMapScreenState extends State<AddEmotionalMapScreen>
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
-                widget.mapToEdit != null
-                    ? AppLocalizations.of(context).updateEmotionalMap
-                    : AppLocalizations.of(context).addEmotionalMap,
+                widget.causeToEdit != null
+                    ? AppLocalizations.of(context).updateDiseaseCause
+                    : AppLocalizations.of(context).addDiseaseCause,
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,

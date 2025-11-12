@@ -1380,19 +1380,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addSession => 'Add Session';
 
   @override
-  String get manageSymptoms => 'Manage Symptoms';
+  String get manageDiseases => 'Manage Diseases';
 
   @override
-  String get addSymptom => 'Add Symptom';
+  String get addDisease => 'Add Disease';
 
   @override
-  String get editSymptom => 'Edit Symptom';
+  String get editDisease => 'Edit Disease';
 
   @override
-  String get symptomName => 'Symptom Name';
-
-  @override
-  String get symptomCategory => 'Category';
+  String get diseaseName => 'Disease Name';
 
   @override
   String get physical => 'Physical';
@@ -1422,47 +1419,94 @@ class AppLocalizationsEn extends AppLocalizations {
   String get englishNameRequired => 'English name is required';
 
   @override
-  String get symptomCreatedSuccessfully => 'Symptom created successfully';
+  String get diseaseCategory => 'Category';
 
   @override
-  String get symptomUpdatedSuccessfully => 'Symptom updated successfully';
+  String get diseaseCreatedSuccessfully => 'Disease created successfully';
 
   @override
-  String get symptomDeletedSuccessfully => 'Symptom deleted successfully';
+  String get diseaseUpdatedSuccessfully => 'Disease updated successfully';
 
   @override
-  String get deletingSymptomKeepsMaps =>
-      'Note: Emotional maps for this symptom will NOT be deleted.';
+  String get diseaseDeletedSuccessfully => 'Disease deleted successfully';
 
   @override
-  String get noSymptomsFound => 'No symptoms found';
+  String get deletingDiseaseKeepsCauses =>
+      'Note: Disease causes for this disease will NOT be deleted.';
 
   @override
-  String get tapToAddSymptom => 'Tap the + button to add a symptom';
+  String get noDiseasesFound => 'No diseases found';
 
   @override
-  String get deleteSymptom => 'Delete Symptom';
+  String get tapToAddDisease => 'Tap the + button to add a disease';
 
   @override
-  String get deleteSymptomConfirm => 'Are you sure you want to delete';
+  String get deleteDisease => 'Delete Disease';
 
   @override
-  String get manageEmotionalMaps => 'Manage Emotional Maps';
+  String get deleteDiseaseConfirm => 'Are you sure you want to delete';
 
   @override
-  String get addEmotionalMap => 'Add Emotional Map';
+  String get manageDiseaseCauses => 'Manage Disease Causes';
 
   @override
-  String get editEmotionalMap => 'Edit Emotional Map';
+  String get addDiseaseCause => 'Add Disease Cause';
 
   @override
-  String get symptom => 'Symptom';
+  String get editDiseaseCause => 'Edit Disease Cause';
 
   @override
-  String get selectASymptom => 'Select a symptom';
+  String get disease => 'Disease';
 
   @override
-  String get pleaseSelectSymptom => 'Please select a symptom';
+  String get selectADisease => 'Select a disease';
+
+  @override
+  String get pleaseSelectDisease => 'Please select a disease';
+
+  @override
+  String get diseaseCauseContent => 'Disease Cause Content';
+
+  @override
+  String get describeDiseaseHelp =>
+      'Describe the root cause of this disease and how the session helps...';
+
+  @override
+  String get diseaseCauseCreatedSuccessfully =>
+      'Disease cause created successfully';
+
+  @override
+  String get diseaseCauseUpdatedSuccessfully =>
+      'Disease cause updated successfully';
+
+  @override
+  String get diseaseCauseDeletedSuccessfully =>
+      'Disease cause deleted successfully';
+
+  @override
+  String get noDiseaseCausesFound => 'No disease causes found';
+
+  @override
+  String get tapToAddDiseaseCause => 'Tap the + button to add a disease cause';
+
+  @override
+  String get deleteDiseaseCause => 'Delete Disease Cause';
+
+  @override
+  String get deleteDiseaseCauseConfirm =>
+      'Are you sure you want to delete the disease cause for';
+
+  @override
+  String get forDisease => 'For:';
+
+  @override
+  String get updateDisease => 'Update Disease';
+
+  @override
+  String get updateDiseaseCause => 'Update Disease Cause';
+
+  @override
+  String get recommendsSession => 'Recommends: Session';
 
   @override
   String get recommendedSession => 'Recommended Session';
@@ -1474,45 +1518,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseSelectSession => 'Please select a session';
 
   @override
-  String get emotionalMapContent => 'Emotional Map Content';
-
-  @override
-  String get describeSymptomHelp =>
-      'Describe how this symptom affects people and how the session helps...';
-
-  @override
   String get englishContentRequired => 'English content is required';
-
-  @override
-  String get emotionalMapCreatedSuccessfully =>
-      'Emotional map created successfully';
-
-  @override
-  String get emotionalMapUpdatedSuccessfully =>
-      'Emotional map updated successfully';
-
-  @override
-  String get emotionalMapDeletedSuccessfully =>
-      'Emotional map deleted successfully';
-
-  @override
-  String get noEmotionalMapsFound => 'No emotional maps found';
-
-  @override
-  String get tapToAddEmotionalMap => 'Tap the + button to add an emotional map';
-
-  @override
-  String get deleteEmotionalMap => 'Delete Emotional Map';
-
-  @override
-  String get deleteEmotionalMapConfirm =>
-      'Are you sure you want to delete the emotional map for';
-
-  @override
-  String get forSymptom => 'For:';
-
-  @override
-  String get recommendsSession => 'Recommends: Session';
 
   @override
   String get update => 'Update';

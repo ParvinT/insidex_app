@@ -1,30 +1,30 @@
-// lib/features/admin/add_symptom_screen.dart
+// lib/features/admin/add_disease_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_languages.dart';
-import '../../models/symptom_model.dart';
-import '../../services/symptom_service.dart';
+import '../../models/disease_model.dart';
+import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
 
-class AddSymptomScreen extends StatefulWidget {
-  final SymptomModel? symptomToEdit;
+class AddDiseaseScreen extends StatefulWidget {
+  final DiseaseModel? diseaseToEdit;
 
-  const AddSymptomScreen({
+  const AddDiseaseScreen({
     super.key,
-    this.symptomToEdit,
+    this.diseaseToEdit,
   });
 
   @override
-  State<AddSymptomScreen> createState() => _AddSymptomScreenState();
+  State<AddDiseaseScreen> createState() => _AddDiseaseScreenState();
 }
 
-class _AddSymptomScreenState extends State<AddSymptomScreen>
+class _AddDiseaseScreenState extends State<AddDiseaseScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
-  final SymptomService _symptomService = SymptomService();
+  final DiseaseService _diseaseService = DiseaseService();
 
   late TabController _tabController;
 
@@ -54,16 +54,16 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
     }
 
     // Load existing data if editing
-    if (widget.symptomToEdit != null) {
+    if (widget.diseaseToEdit != null) {
       _loadExistingData();
     }
   }
 
   void _loadExistingData() {
-    final symptom = widget.symptomToEdit!;
+    final disease = widget.diseaseToEdit!;
 
     // Load translations
-    symptom.translations.forEach((langCode, name) {
+    disease.translations.forEach((langCode, name) {
       if (_nameControllers.containsKey(langCode)) {
         _nameControllers[langCode]!.text = name;
       }
@@ -71,8 +71,8 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
 
     // Load other fields
 
-    _orderController.text = symptom.order.toString();
-    _selectedCategory = symptom.category;
+    _orderController.text = disease.order.toString();
+    _selectedCategory = disease.category;
 
     setState(() {});
   }
@@ -85,7 +85,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
     super.dispose();
   }
 
-  Future<void> _saveSymptom() async {
+  Future<void> _saveDisease() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -112,27 +112,27 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
         throw Exception('English name is required');
       }
 
-      // Create symptom model
-      final symptom = SymptomModel(
-        id: widget.symptomToEdit?.id ?? '',
+      // Create disease model
+      final disease = DiseaseModel(
+        id: widget.diseaseToEdit?.id ?? '',
         category: _selectedCategory,
         order: int.tryParse(_orderController.text) ?? 0,
         icon: '',
         translations: translations,
-        createdAt: widget.symptomToEdit?.createdAt ?? DateTime.now(),
+        createdAt: widget.diseaseToEdit?.createdAt ?? DateTime.now(),
       );
 
       // Save to Firestore
       bool success;
-      if (widget.symptomToEdit != null) {
+      if (widget.diseaseToEdit != null) {
         // Update
-        success = await _symptomService.updateSymptom(
-          widget.symptomToEdit!.id,
-          symptom,
+        success = await _diseaseService.updateDisease(
+          widget.diseaseToEdit!.id,
+          disease,
         );
       } else {
         // Create
-        final docId = await _symptomService.addSymptom(symptom);
+        final docId = await _diseaseService.addDisease(disease);
         success = docId != null;
       }
 
@@ -141,16 +141,16 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                widget.symptomToEdit != null
-                    ? AppLocalizations.of(context).symptomUpdatedSuccessfully
-                    : AppLocalizations.of(context).symptomCreatedSuccessfully,
+                widget.diseaseToEdit != null
+                    ? AppLocalizations.of(context).diseaseUpdatedSuccessfully
+                    : AppLocalizations.of(context).diseaseCreatedSuccessfully,
               ),
               backgroundColor: Colors.green,
             ),
           );
           Navigator.pop(context, true);
         } else {
-          throw Exception('Failed to save symptom');
+          throw Exception('Failed to save disease');
         }
       }
     } catch (e) {
@@ -182,9 +182,9 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          widget.symptomToEdit != null
-              ? AppLocalizations.of(context).editSymptom
-              : AppLocalizations.of(context).addSymptom,
+          widget.diseaseToEdit != null
+              ? AppLocalizations.of(context).editDisease
+              : AppLocalizations.of(context).addDisease,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -262,7 +262,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
               controller: _nameControllers[langCode],
               decoration: InputDecoration(
                 labelText:
-                    '${AppLocalizations.of(context).symptomName} (${AppLanguages.getName(langCode)})',
+                    '${AppLocalizations.of(context).diseaseName} (${AppLanguages.getName(langCode)})',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),
@@ -291,7 +291,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
     return DropdownButtonFormField<String>(
       value: _selectedCategory,
       decoration: InputDecoration(
-        labelText: AppLocalizations.of(context).symptomCategory,
+        labelText: AppLocalizations.of(context).diseaseCategory,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
@@ -352,7 +352,7 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
       width: double.infinity,
       height: 50.h,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _saveSymptom,
+        onPressed: _isLoading ? null : _saveDisease,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primaryGold,
           shape: RoundedRectangleBorder(
@@ -362,9 +362,9 @@ class _AddSymptomScreenState extends State<AddSymptomScreen>
         child: _isLoading
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
-                widget.symptomToEdit != null
-                    ? AppLocalizations.of(context).updateSymptom
-                    : AppLocalizations.of(context).addSymptom,
+                widget.diseaseToEdit != null
+                    ? AppLocalizations.of(context).updateDisease
+                    : AppLocalizations.of(context).addDisease,
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,

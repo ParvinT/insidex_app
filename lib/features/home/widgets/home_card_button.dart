@@ -167,8 +167,9 @@ class _HomeCardButtonState extends State<HomeCardButton>
 
   /// Content: Icon and Title
   Widget _buildContent() {
+    final double dynamicPadding = (widget.height * 0.08).clamp(16.0, 24.0);
     return Padding(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(dynamicPadding),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -177,10 +178,14 @@ class _HomeCardButtonState extends State<HomeCardButton>
             Align(
               alignment: Alignment.topRight,
               child: Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(
+                  (widget.height * 0.04).clamp(8.0, 12.0),
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(
+                    10.r,
+                  ),
                   border: Border.all(
                     color: Colors.white.withOpacity(0.3),
                     width: 1,
@@ -188,7 +193,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
                 ),
                 child: Icon(
                   widget.icon,
-                  size: 16.sp,
+                  size: (widget.height * 0.10).clamp(18.0, 24.0),
                   color: Colors.white,
                 ),
               ),
@@ -199,10 +204,13 @@ class _HomeCardButtonState extends State<HomeCardButton>
           // Title at bottom
           Text(
             widget.title,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
             style: GoogleFonts.inter(
-              fontSize: 16.sp,
+              fontSize: (widget.height * 0.08).clamp(14.0, 18.0),
               fontWeight: FontWeight.w600,
               color: Colors.white,
+              height: 1.2,
               shadows: [
                 Shadow(
                   color: Colors.black.withOpacity(0.5),
@@ -286,7 +294,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
                         ),
                         child: Icon(
                           widget.icon ?? Icons.music_note_rounded,
-                          size: 42.sp,
+                          size: (42.sp).clamp(32.0, 48.0),
                           color: Colors.white.withOpacity(0.95),
                         ),
                       ),
@@ -300,10 +308,10 @@ class _HomeCardButtonState extends State<HomeCardButton>
                 Text(
                   'INSIDEX',
                   style: GoogleFonts.inter(
-                    fontSize: 18.sp,
+                    fontSize: (18.sp).clamp(14.0, 22.0),
                     fontWeight: FontWeight.w800,
                     color: Colors.white.withOpacity(0.95),
-                    letterSpacing: 3,
+                    letterSpacing: 2,
                     shadows: [
                       Shadow(
                         color: Colors.black.withOpacity(0.3),

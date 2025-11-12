@@ -76,25 +76,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final isTablet = context.isTablet;
-    // Referans 844; tablette sabit değerler daha stabil
-    final refH = 844.0;
-    final s = (context.h / refH).clamp(0.85, 1.15);
+    final isDesktop = context.isDesktop;
+    final screenHeight = context.h;
 
-    final double headerH = isTablet ? 280.0 : (240.0 * s).clamp(200.0, 260.0);
-    final double cardH = isTablet ? 210.0 : (200.0 * s).clamp(160.0, 220.0);
-
-    double topAll = headerH - (cardH * 0.35);
-    double topPlaylist = topAll + (cardH * 0.60) + 8.0;
-
-    final double baseBarH =
-        isTablet ? 64.0 : (context.isCompactH ? 56.0 : 60.0);
-    final double maxY = context.h - baseBarH - 16.0;
-    final double bottomOfPlaylist = topPlaylist + cardH;
-
-    if (bottomOfPlaylist > maxY) {
-      final shiftUp = bottomOfPlaylist - maxY;
-      topAll = (topAll - shiftUp).clamp(12.0, headerH - (cardH * 0.25));
-      topPlaylist = (topPlaylist - shiftUp).clamp(topAll + 8.0, maxY - cardH);
+    // 🎯 IMPROVED: Dynamic header height based on device type and screen height
+    final double headerH;
+    if (isDesktop) {
+      headerH = 180.0;
+    } else if (isTablet) {
+      headerH = (screenHeight * 0.18).clamp(160.0, 200.0);
+    } else {
+      // Smart phone height calculation
+      if (screenHeight <= 667) {
+        headerH = 100.0; // iPhone SE, 8
+      } else if (screenHeight <= 736) {
+        headerH = 110.0; // iPhone 8 Plus
+      } else if (screenHeight <= 812) {
+        headerH = 120.0; // iPhone X, 11 Pro
+      } else if (screenHeight <= 896) {
+        headerH = 130.0; // iPhone 11, XR
+      } else {
+        headerH = 140.0; // iPhone 14 Pro Max+
+      }
     }
 
     return PopScope(
@@ -106,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             // background
             Positioned.fill(child: _buildBackground()),
             // content
-            ..._buildHomeCards(headerH, cardH),
+            ..._buildHomeCards(headerH),
             _buildHeader(height: headerH),
             // overlay
             if (_isMenuOpen)
@@ -120,7 +123,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  List<Widget> _buildHomeCards(double headerH, double cardH) {
+  List<Widget> _buildHomeCards(double headerH) {
     if (_isLoadingCards) {
       return [
         Positioned(
@@ -159,36 +162,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final cardWidth = availableWidth / crossAxisCount;
     final cardHeight = cardWidth * 1.0; // Aspect ratio
 
+    // 🎯 IMPROVED: Calculate safe bottom space to prevent overflow
+    final bottomNavHeight = context.isTablet ? 64.0 : 60.0;
+    final safeBottom = MediaQuery.of(context).padding.bottom;
+    final totalBottomSpace = bottomNavHeight + safeBottom + 16.h;
+
     return [
       Positioned(
         top: headerH + 16.h,
         left: 24.w,
         right: 24.w,
-        child: GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 12.w,
-            mainAxisSpacing: 12.h,
-            childAspectRatio: cardWidth / cardHeight,
-          ),
-          itemCount: _homeCards.length,
-          itemBuilder: (context, index) {
-            final card = _homeCards[index];
-            final title = HomeCardService.getLocalizedTitleFromKey(
-              context,
-              card['cardType'],
-            );
+        bottom: totalBottomSpace, // 🎯 FIXED: Add bottom constraint
+        child: SingleChildScrollView(
+          // 🎯 FIXED: Add scroll wrapper for overflow protection
+          physics: const BouncingScrollPhysics(),
+          child: GridView.builder(
+            shrinkWrap: true, // 🎯 FIXED: Let GridView size itself
+            physics:
+                const NeverScrollableScrollPhysics(), // Parent handles scroll
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 12.h,
+              childAspectRatio: cardWidth / cardHeight,
+            ),
+            itemCount: _homeCards.length,
+            itemBuilder: (context, index) {
+              final card = _homeCards[index];
+              final title = HomeCardService.getLocalizedTitleFromKey(
+                context,
+                card['cardType'],
+              );
 
-            return HomeCardButton(
-              imageUrl: card['randomImage'],
-              title: title,
-              icon: _getIconData(card['icon']),
-              onTap: () => _navigateToCard(card['navigateTo']),
-              height: cardHeight,
-            );
-          },
+              return HomeCardButton(
+                imageUrl: card['randomImage'],
+                title: title,
+                icon: _getIconData(card['icon']),
+                onTap: () => _navigateToCard(card['navigateTo']),
+                height: cardHeight,
+              );
+            },
+          ),
         ),
       ),
     ];
@@ -228,74 +242,65 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // ---------- UI parts ----------
   Widget _buildHeader({required double height}) {
+    // 🎯 IMPROVED: Add safe area for notch/status bar
+    final topSafeArea = MediaQuery.of(context).padding.top;
+
     return Positioned(
-      top: 0,
+      top: topSafeArea, // 🎯 FIXED: Respect notch area
       left: 0,
       right: 0,
-      height: height,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 25,
-              offset: const Offset(0, 10),
-            ),
-          ],
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w, // ← Basitleştir
+          vertical: 8.h,
         ),
-        child: Padding(
-          // yatay .w, dikey .h kullan
-          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  // Only logo (no text title as requested)
-                  SvgPicture.asset(
-                    'assets/images/logo.svg',
-                    height: 28.h,
-                    fit: BoxFit.contain,
-                    colorFilter: ColorFilter.mode(
-                        AppColors.textPrimary, BlendMode.srcIn),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                // Logo with safe sizing
+                SvgPicture.asset(
+                  'assets/images/logo.svg',
+                  height: 26.h, // 🎯 IMPROVED: Clamped size
+                  fit: BoxFit.contain,
+                  colorFilter:
+                      ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+                ),
+                const Spacer(),
+                _buildHeaderButton(AppLocalizations.of(context).menu, true),
+              ],
+            ),
+            SizedBox(height: context.isTablet ? 14.h : 12.h),
+            SearchBarWidget(
+              onTap: () {
+                Navigator.of(context).push(
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return const SearchScreen();
+                    },
+                    transitionsBuilder:
+                        (context, animation, secondaryAnimation, child) {
+                      const begin = Offset(0.0, 1.0);
+                      const end = Offset.zero;
+                      const curve = Curves.easeInOut;
+
+                      var tween = Tween(begin: begin, end: end).chain(
+                        CurveTween(curve: curve),
+                      );
+
+                      return SlideTransition(
+                        position: animation.drive(tween),
+                        child: child,
+                      );
+                    },
+                    transitionDuration: const Duration(milliseconds: 400),
                   ),
-                  const Spacer(),
-                  _buildHeaderButton(AppLocalizations.of(context).menu, true),
-                ],
-              ),
-              const Spacer(),
-              SearchBarWidget(
-                onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      pageBuilder: (context, animation, secondaryAnimation) {
-                        return const SearchScreen();
-                      },
-                      transitionsBuilder:
-                          (context, animation, secondaryAnimation, child) {
-                        const begin = Offset(0.0, 1.0);
-                        const end = Offset.zero;
-                        const curve = Curves.easeInOut;
-
-                        var tween = Tween(begin: begin, end: end).chain(
-                          CurveTween(curve: curve),
-                        );
-
-                        return SlideTransition(
-                          position: animation.drive(tween),
-                          child: child,
-                        );
-                      },
-                      transitionDuration: const Duration(milliseconds: 400),
-                    ),
-                  );
-                },
-              ),
-              const Spacer(),
-            ],
-          ),
+                );
+              },
+            ),
+            SizedBox(height: 8.h),
+          ],
         ),
       ),
     );
@@ -320,7 +325,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       onTap: _toggleMenu,
       borderRadius: BorderRadius.circular(20.r),
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(
+          horizontal: (12.w).clamp(10.0, 16.0), // 🎯 IMPROVED: Clamped padding
+          vertical: (8.h).clamp(6.0, 10.0),
+        ),
         decoration: BoxDecoration(
           color: isFilled ? Colors.black : Colors.transparent,
           borderRadius: BorderRadius.circular(20.r),
@@ -332,14 +340,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Text(
               text,
               style: GoogleFonts.inter(
-                fontSize: 12.sp,
+                fontSize:
+                    (12.sp).clamp(11.0, 14.0), // 🎯 IMPROVED: Clamped font size
                 fontWeight: FontWeight.w600,
                 color: isFilled ? Colors.white : Colors.black,
               ),
             ),
             SizedBox(width: 6.w),
-            Icon(Icons.menu,
-                size: 14.sp, color: isFilled ? Colors.white : Colors.black),
+            Icon(
+              Icons.menu,
+              size: (14.sp).clamp(12.0, 16.0), // 🎯 IMPROVED: Clamped icon size
+              color: isFilled ? Colors.white : Colors.black,
+            ),
           ],
         ),
       ),
