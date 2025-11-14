@@ -5,23 +5,25 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
 import '../../core/constants/app_colors.dart';
 import '../../shared/widgets/session_card.dart';
 import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
+import '../../core/constants/app_icons.dart';
 
 class SessionsListScreen extends StatefulWidget {
   final String categoryTitle;
-  final String categoryEmoji;
+  final String? categoryIconName;
   final String? categoryId;
   final bool isShowingAllSessions;
 
   const SessionsListScreen({
     super.key,
     required this.categoryTitle,
-    required this.categoryEmoji,
+    this.categoryIconName,
     this.categoryId,
     this.isShowingAllSessions = false,
   });
@@ -78,7 +80,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
             onPressed: () => Navigator.pop(context),
           ),
 
-          // Sol: logo | Orta: ayraç | Sağ: başlık (All Subliminals) veya emoji+kategori
+          
           title: LayoutBuilder(
             builder: (context, c) {
               return Row(
@@ -126,12 +128,25 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                           : Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  widget.categoryEmoji,
-                                  style: TextStyle(
-                                    fontSize: (24.sp).clamp(18.0, 28.0),
+                                // Icon animation
+                                if (widget.categoryIconName != null)
+                                  SizedBox(
+                                    width: 32.w,
+                                    height: 32.w,
+                                    child: Transform.scale(
+                                      scale: 1.2,
+                                      child: Lottie.asset(
+                                        AppIcons.getAnimationPath(
+                                          AppIcons.getIconByName(widget
+                                                      .categoryIconName!)?[
+                                                  'path'] ??
+                                              'meditation.json',
+                                        ),
+                                        fit: BoxFit.contain,
+                                        repeat: true,
+                                      ),
+                                    ),
                                   ),
-                                ),
                                 SizedBox(width: 6.w),
                                 Flexible(
                                   child: Text(
@@ -165,7 +180,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     .snapshots()
                 : FirebaseFirestore.instance
                     .collection('sessions')
-                    .where('category', isEqualTo: widget.categoryTitle)
+                    .where('categoryId', isEqualTo: widget.categoryId)
                     .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

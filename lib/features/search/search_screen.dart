@@ -3,9 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../../core/constants/app_colors.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/constants/app_icons.dart';
+import '../../l10n/app_localizations.dart';
 import 'search_service.dart';
 import '../library/sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
@@ -439,8 +441,6 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildCategoryCard(Map<String, dynamic> category, bool isTablet) {
-    final color = Color(int.parse(category['color']));
-
     return GestureDetector(
       onTap: () async {
         if (_searchController.text.trim().isNotEmpty) {
@@ -451,8 +451,8 @@ class _SearchScreenState extends State<SearchScreen>
           context,
           MaterialPageRoute(
             builder: (_) => SessionsListScreen(
-              categoryTitle: category['title'],
-              categoryEmoji: category['emoji'],
+              categoryTitle: category['name'],
+              categoryIconName: category['iconName'],
               categoryId: category['id'],
             ),
           ),
@@ -461,59 +461,74 @@ class _SearchScreenState extends State<SearchScreen>
       child: Container(
         padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color, color.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
+          border: Border.all(
+            color: AppColors.greyBorder,
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
+            // Icon with colored background
             Container(
               width: isTablet ? 56.w : 48.w,
               height: isTablet ? 56.w : 48.w,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(isTablet ? 14.r : 12.r),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                category['emoji'],
-                style: TextStyle(fontSize: isTablet ? 32.sp : 28.sp),
+              padding: EdgeInsets.all(8.w),
+              child: Lottie.asset(
+                AppIcons.getAnimationPath(
+                  AppIcons.getIconByName(category['iconName'])?['path'] ??
+                      'meditation.json',
+                ),
+                fit: BoxFit.contain,
+                repeat: true,
               ),
             ),
+
             SizedBox(width: isTablet ? 18.w : 16.w),
+
+            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    category['title'],
+                    category['name'],
                     style: GoogleFonts.inter(
                       fontSize: isTablet ? 18.sp : 16.sp,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  if (category['description'].toString().isNotEmpty) ...[
+                  if ((category['description'] ?? '')
+                      .toString()
+                      .isNotEmpty) ...[
                     SizedBox(height: 4.h),
                     Text(
-                      category['description'],
+                      category['description'] ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 13.sp : 12.sp,
-                        color: Colors.white.withOpacity(0.8),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ],
               ),
             ),
+
+            // Arrow
             Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white,
+              color: AppColors.textSecondary,
               size: isTablet ? 20.sp : 18.sp,
             ),
           ],

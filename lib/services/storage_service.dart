@@ -426,4 +426,81 @@ class StorageService {
       return false;
     }
   }
+
+  /// Upload category background image
+  /// Returns download URL on success, null on failure
+  static Future<String?> uploadCategoryImage({
+    required String categoryId,
+    required PlatformFile file,
+    Function(double)? onProgress,
+  }) async {
+    try {
+      // Generate unique filename
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final extension = file.extension ?? 'jpg';
+      final fileName = 'category_${categoryId}_$timestamp.$extension';
+
+      // Create reference
+      Reference ref = _storage.ref().child('categories/$categoryId/$fileName');
+
+      debugPrint('📤 Uploading category image: $fileName');
+
+      // Upload file
+      UploadTask uploadTask;
+
+      if (kIsWeb) {
+        // Web platform
+        if (file.bytes == null) {
+          debugPrint('Error: File bytes are null for web platform');
+          return null;
+        }
+        uploadTask = ref.putData(file.bytes!);
+      } else {
+        // Mobile platform
+        if (file.path == null) {
+          debugPrint('Error: File path is null for mobile platform');
+          return null;
+        }
+        File fileToUpload = File(file.path!);
+        uploadTask = ref.putFile(fileToUpload);
+      }
+
+      // Monitor upload progress
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        double progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        debugPrint('Upload progress: ${progress.toStringAsFixed(2)}%');
+
+        // Call progress callback if provided
+        if (onProgress != null) {
+          onProgress(progress / 100); // Convert to 0-1 range
+        }
+      });
+
+      // Wait for upload to complete
+      TaskSnapshot snapshot = await uploadTask;
+
+      // Get download URL
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      debugPrint('✅ Category image uploaded successfully: $downloadUrl');
+
+      return downloadUrl;
+    } catch (e) {
+      debugPrint('❌ Error uploading category image: $e');
+      return null;
+    }
+  }
+
+  /// Delete category background image
+  static Future<bool> deleteCategoryImage(String imageUrl) async {
+    try {
+      Reference ref = _storage.refFromURL(imageUrl);
+      await ref.delete();
+      debugPrint('✅ Category image deleted successfully');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Error deleting category image: $e');
+      return false;
+    }
+  }
 }

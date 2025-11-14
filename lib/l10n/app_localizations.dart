@@ -3432,6 +3432,24 @@ abstract class AppLocalizations {
   /// **'Add New Category'**
   String get addNewCategory;
 
+  /// No description provided for @updateCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Category'**
+  String get updateCategory;
+
+  /// No description provided for @categoryUpdatedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Category updated successfully!'**
+  String get categoryUpdatedSuccessfully;
+
+  /// No description provided for @errorUpdatingCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Error updating category'**
+  String get errorUpdatingCategory;
+
   /// No description provided for @categoryName.
   ///
   /// In en, this message translates to:

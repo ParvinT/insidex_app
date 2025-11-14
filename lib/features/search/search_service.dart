@@ -2,7 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../services/session_filter_service.dart';
-import '../../services/language_helper_service.dart'; // 🆕 IMPORT
+import '../../services/language_helper_service.dart';
+import '../../services/category/category_service.dart';
 
 class SearchService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,20 +41,20 @@ class SearchService {
   /// Search categories by name
   Future<List<Map<String, dynamic>>> _searchCategories(String query) async {
     try {
-      final snapshot = await _firestore.collection('categories').get();
+      final categoryService = CategoryService();
+      final userLanguage = await LanguageHelperService.getCurrentLanguage();
+      final categories =
+          await categoryService.getCategoriesByLanguage(userLanguage);
 
-      final matches = snapshot.docs.where((doc) {
-        final data = doc.data();
-        final title = (data['title'] ?? '').toString().toLowerCase();
-        return title.contains(query);
-      }).map((doc) {
-        final data = doc.data();
+      final matches = categories.where((category) {
+        final name = category.getName(userLanguage).toLowerCase();
+        return name.contains(query);
+      }).map((category) {
         return {
-          'id': doc.id,
-          'title': data['title'] ?? 'Untitled',
-          'emoji': data['emoji'] ?? '🎵',
-          'color': data['color'] ?? '0xFF6B5B95',
-          'description': data['description'] ?? '',
+          'id': category.id,
+          'name': category.getName(userLanguage),
+          'iconName': category.iconName,
+          'color': '0xFF6B5B95', // Default color
         };
       }).toList();
 

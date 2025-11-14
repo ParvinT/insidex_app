@@ -47,7 +47,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               content:
                   Text(AppLocalizations.of(context).pleaseLoginToAccessAdmin),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
           // Navigate to login screen

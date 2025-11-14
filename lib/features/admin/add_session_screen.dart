@@ -4,12 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/category_model.dart';
+import '../../services/category/category_service.dart';
+import '../../services/category/category_localization_service.dart';
 import 'widgets/multi_language_content_section.dart';
+import '../../core/constants/app_icons.dart';
 
 class AddSessionScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionToEdit;
@@ -35,8 +40,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       _contentControllers;
 
   // Selected values
-  String? _selectedCategory;
-  List<String> _categories = [];
+  String? _selectedCategoryId;
+  List<CategoryModel> _categories = [];
+  final CategoryService _categoryService = CategoryService();
 
   // Language selection
   String _selectedLanguage = AppLanguages.defaultLanguage; // 🆕
@@ -97,19 +103,22 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     super.dispose();
   }
 
-  void _loadCategories() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('categories').get();
+  Future<void> _loadCategories() async {
+    try {
+      // Get categories filtered by current language
+      final categories = await _categoryService.getCategoriesByLanguage();
 
-    setState(() {
-      _categories =
-          snapshot.docs.map((doc) => doc.data()['title'] as String).toList();
+      setState(() {
+        _categories = categories;
+      });
 
-      // Default categories if empty
-      if (_categories.isEmpty) {
-        _categories = ['Sleep', 'Meditation', 'Focus', 'Relaxation'];
-      }
-    });
+      debugPrint('✅ Loaded ${categories.length} categories');
+    } catch (e) {
+      debugPrint('❌ Error loading categories: $e');
+      setState(() {
+        _categories = [];
+      });
+    }
   }
 
   void _loadExistingData() {
@@ -124,7 +133,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     _emojiController.text = session['emoji'] ?? '';
 
     // Load category
-    _selectedCategory = session['category'];
+    _selectedCategoryId = session['categoryId'];
 
     // Load multi-language content
     final contentMap = session['content'] as Map<String, dynamic>?;
@@ -245,7 +254,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   // =================== SAVE SESSION ===================
 
   Future<void> _saveSession() async {
-    if (_selectedCategory == null) {
+    if (_selectedCategoryId == null || _selectedCategoryId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).pleaseSelectCategory),
@@ -454,7 +463,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             : null,
 
         'emoji': _emojiController.text.trim(),
-        'category': _selectedCategory,
+        'categoryId': _selectedCategoryId,
 
         // Multi-language content
         'content': content,
@@ -617,30 +626,68 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   _buildSectionTitle(AppLocalizations.of(context).category),
                   SizedBox(height: 12.h),
                   DropdownButtonFormField<String>(
-                    value: _selectedCategory,
+                    value: _selectedCategoryId,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).category,
-                      prefixIcon:
-                          Icon(Icons.category, color: AppColors.primaryGold),
+                      prefixIcon: const Icon(Icons.category,
+                          color: AppColors.primaryGold),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide:
-                            BorderSide(color: AppColors.primaryGold, width: 2),
+                        borderSide: const BorderSide(
+                          color: AppColors.primaryGold,
+                          width: 2,
+                        ),
                       ),
                     ),
+                    hint:
+                        Text(AppLocalizations.of(context).pleaseSelectCategory),
                     items: _categories.map((category) {
-                      return DropdownMenuItem(
-                        value: category,
-                        child: Text(category),
+                      return DropdownMenuItem<String>(
+                        value: category.id, // ← ID'yi value olarak kullan
+                        child: FutureBuilder<String>(
+                          future:
+                              CategoryLocalizationService.getLocalizedNameAuto(
+                                  category),
+                          builder: (context, snapshot) {
+                            final name =
+                                snapshot.data ?? category.getName('en');
+                            return Row(
+                              children: [
+                                SizedBox(
+                                  width: 32.w,
+                                  height: 32.w,
+                                  child: Lottie.asset(
+                                    AppIcons.getAnimationPath(
+                                      AppIcons.getIconByName(
+                                              category.iconName)?['path'] ??
+                                          'meditation.json',
+                                    ),
+                                    fit: BoxFit.contain,
+                                    repeat: true,
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(child: Text(name)),
+                              ],
+                            );
+                          },
+                        ),
                       );
                     }).toList(),
                     onChanged: (value) {
                       setState(() {
-                        _selectedCategory = value;
+                        _selectedCategoryId = value;
                       });
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return AppLocalizations.of(context)
+                            .pleaseSelectCategory;
+                      }
+                      return null;
                     },
                   ),
 
@@ -871,7 +918,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           // Extract filename from URL
           final uri = Uri.parse(existingUrl.toString());
           final filename = uri.pathSegments.last.split('?').first;
-          displaySubtitle = '✅ ${AppLocalizations.of(context).existing}: $filename';
+          displaySubtitle =
+              '✅ ${AppLocalizations.of(context).existing}: $filename';
         }
       }
       // Check for existing image URL
@@ -882,7 +930,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           hasExistingFile = true;
           final uri = Uri.parse(existingUrl.toString());
           final filename = uri.pathSegments.last.split('?').first;
-          displaySubtitle = '✅ ${AppLocalizations.of(context).existing}: $filename';
+          displaySubtitle =
+              '✅ ${AppLocalizations.of(context).existing}: $filename';
         }
       }
     }

@@ -1762,6 +1762,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addNewCategory => 'Добавить категорию';
 
   @override
+  String get updateCategory => 'Обновить категорию';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Категория успешно обновлена!';
+
+  @override
+  String get errorUpdatingCategory => 'Ошибка обновления категории';
+
+  @override
   String get categoryName => 'Название категории';
 
   @override

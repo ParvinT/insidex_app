@@ -1749,6 +1749,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addNewCategory => 'Add New Category';
 
   @override
+  String get updateCategory => 'Update Category';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Category updated successfully!';
+
+  @override
+  String get errorUpdatingCategory => 'Error updating category';
+
+  @override
   String get categoryName => 'Category Name';
 
   @override

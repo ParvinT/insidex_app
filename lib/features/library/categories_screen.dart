@@ -4,14 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:lottie/lottie.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/constants/app_colors.dart';
 import 'sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
+import '../../models/category_model.dart';
+import '../../services/category/category_service.dart';
+import '../../services/category/category_localization_service.dart';
+import '../../services/language_helper_service.dart';
+import '../../services/cache_manager_service.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -23,10 +31,11 @@ class CategoriesScreen extends StatefulWidget {
 class _CategoriesScreenState extends State<CategoriesScreen>
     with SingleTickerProviderStateMixin {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final CategoryService _categoryService = CategoryService();
   late TabController _tabController;
 
   // Categories list
-  List<Map<String, dynamic>> _categories = [];
+  List<CategoryModel> _categories = [];
   bool _isLoadingCategories = true;
 
   @override
@@ -34,6 +43,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadCategories();
+    _prefetchImages();
   }
 
   @override
@@ -42,39 +52,35 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     super.dispose();
   }
 
-  Future<void> _loadCategories() async {
-    try {
-      final snapshot = await _firestore.collection('categories').get();
+  Future<void> _prefetchImages() async {
+    await _categoryService.smartPrefetchCategoryImages();
+  }
 
-      if (snapshot.docs.isNotEmpty) {
-        setState(() {
-          _categories = snapshot.docs.map((doc) {
-            final data = doc.data();
-            return {
-              'id': doc.id,
-              'title': data['title'] ?? 'Untitled',
-              'emoji': data['emoji'] ?? '🎵',
-              'color': data['color'] ?? '0xFF6B5B95',
-              'description': data['description'] ?? '',
-            };
-          }).toList();
-          _isLoadingCategories = false;
-        });
-      } else {
-        // Default categories
-        setState(() {
-          _categories = [
-            {'title': 'Sleep', 'emoji': '😴', 'color': '0xFF6B5B95'},
-            {'title': 'Meditation', 'emoji': '🧘', 'color': '0xFF88B0D3'},
-            {'title': 'Focus', 'emoji': '🎯', 'color': '0xFFFFA500'},
-            {'title': 'Relaxation', 'emoji': '🌊', 'color': '0xFF5CDB95'},
-          ];
-          _isLoadingCategories = false;
-        });
-      }
+  Future<void> _loadCategories() async {
+    setState(() => _isLoadingCategories = true);
+
+    try {
+      // Get categories filtered by user's language
+      final categories = await _categoryService.getCategoriesByLanguage();
+      final userLanguage = await LanguageHelperService.getCurrentLanguage();
+      categories.sort((a, b) {
+        final nameA = a.getName(userLanguage).toLowerCase();
+        final nameB = b.getName(userLanguage).toLowerCase();
+        return nameA.compareTo(nameB);
+      });
+
+      setState(() {
+        _categories = categories;
+        _isLoadingCategories = false;
+      });
+
+      debugPrint('✅ Loaded ${categories.length} categories for user language');
     } catch (e) {
-      print('Error loading categories: $e');
-      setState(() => _isLoadingCategories = false);
+      debugPrint('❌ Error loading categories: $e');
+      setState(() {
+        _categories = [];
+        _isLoadingCategories = false;
+      });
     }
   }
 
@@ -213,6 +219,28 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         ),
       );
     }
+    if (_categories.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.category_outlined,
+              size: 64.sp,
+              color: AppColors.greyMedium,
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              AppLocalizations.of(context).noCategoriesYet,
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,166 +293,200 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     );
   }
 
-  Widget _buildCategoryCard(Map<String, dynamic> category) {
+  Widget _buildCategoryCard(CategoryModel category) {
     // Parse color
     Color cardColor = AppColors.textPrimary;
-    try {
-      final colorString = category['color'] ?? '0xFF6B5B95';
-      if (colorString.startsWith('0x') || colorString.startsWith('0X')) {
-        cardColor = Color(int.parse(colorString));
-      }
-    } catch (e) {
-      print('Error parsing color: $e');
-    }
 
-    return GestureDetector(
-      onTap: () {
-        // Navigate to CategorySessionsScreen
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => SessionsListScreen(
-              categoryTitle: category['title'],
-              categoryEmoji: category['emoji'],
-              categoryId: category['id'],
-            ),
-          ),
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              cardColor.withOpacity(0.8),
-              cardColor.withOpacity(0.4),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: cardColor.withOpacity(0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Stack(
-          children: [
-            // Background Pattern
-            Positioned(
-              right: -20.w,
-              bottom: -20.h,
-              child: Icon(
-                Icons.circle,
-                size: 100.sp,
-                color: Colors.white.withOpacity(0.1),
+    return FutureBuilder<String>(
+        future: CategoryLocalizationService.getLocalizedNameAuto(category),
+        builder: (context, snapshot) {
+          final localizedName = snapshot.data ?? category.getName('en');
+
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SessionsListScreen(
+                    categoryTitle: localizedName,
+                    categoryIconName: category.iconName,
+                    categoryId: category.id,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    cardColor.withOpacity(0.8),
+                    cardColor.withOpacity(0.4),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: cardColor.withOpacity(0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
-            ),
-
-            // Content
-            Padding(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Stack(
                 children: [
-                  // Emoji
-                  Container(
-                    width: 50.w,
-                    height: 50.w,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Center(
-                      child: Text(
-                        category['emoji'],
-                        style: TextStyle(fontSize: 28.sp),
+                  if (category.backgroundImages.isNotEmpty)
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(24.r),
+                        child: CachedNetworkImage(
+                          imageUrl: _categoryService
+                                  .getRandomBackgroundImage(category) ??
+                              '',
+                          cacheManager: AppCacheManager.instance,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [cardColor, cardColor.withOpacity(0.7)],
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [cardColor, cardColor.withOpacity(0.7)],
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
 
-                  const Spacer(),
-
-                  // Title
-                  Text(
-                    category['title'],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                    ),
-                  ),
-
-                  SizedBox(height: 4.h),
-
-                  // Session Count
-                  StreamBuilder<QuerySnapshot>(
-                    stream: _firestore
-                        .collection('sessions')
-                        .where('category', isEqualTo: category['title'])
-                        .snapshots(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Row(
-                          children: [
-                            Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white.withOpacity(0.8),
-                              size: 16.sp,
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              '...  ${AppLocalizations.of(context).sessions}',
-                              style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                color: Colors.white.withOpacity(0.8),
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-
-                      final allDocs = snapshot.data?.docs ?? [];
-
-                      // ✅ LANGUAGE FILTER
-                      return FutureBuilder<List<Map<String, dynamic>>>(
-                        future: SessionFilterService.filterSessionsByLanguage(
-                            allDocs),
-                        builder: (context, filteredSnapshot) {
-                          final count = filteredSnapshot.data?.length ?? 0;
-
-                          return Row(
-                            children: [
-                              Icon(
-                                Icons.play_circle_filled,
-                                color: Colors.white.withOpacity(0.8),
-                                size: 16.sp,
-                              ),
-                              SizedBox(width: 4.w),
-                              Text(
-                                '$count  ${AppLocalizations.of(context).sessions}',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: Colors.white.withOpacity(0.8),
-                                ),
-                              ),
+                  // Dark overlay for readability
+                  if (category.backgroundImages.isNotEmpty)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24.r),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.4),
+                              Colors.black.withOpacity(0.6),
                             ],
-                          );
-                        },
-                      );
-                    },
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Content
+                  Padding(
+                    padding: EdgeInsets.all(16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icon
+                        SizedBox(
+                          width: 60.w,
+                          height: 60.w,
+                          child: Lottie.asset(
+                            AppIcons.getAnimationPath(
+                              AppIcons.getIconByName(
+                                      category.iconName)?['path'] ??
+                                  'meditation.json',
+                            ),
+                            fit: BoxFit.contain,
+                            repeat: true,
+                          ),
+                        ),
+
+                        const Spacer(),
+
+                        // Title
+                        Text(
+                          localizedName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+
+                        SizedBox(height: 4.h),
+
+                        // Session Count
+                        StreamBuilder<QuerySnapshot>(
+                          stream: _firestore
+                              .collection('sessions')
+                              .where('category', isEqualTo: category.id)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return Row(
+                                children: [
+                                  Icon(
+                                    Icons.play_circle_filled,
+                                    color: Colors.white.withOpacity(0.8),
+                                    size: 16.sp,
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    '...  ${AppLocalizations.of(context).sessions}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12.sp,
+                                      color: Colors.white.withOpacity(0.8),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            final allDocs = snapshot.data?.docs ?? [];
+
+                            // ✅ LANGUAGE FILTER
+                            return FutureBuilder<List<Map<String, dynamic>>>(
+                              future:
+                                  SessionFilterService.filterSessionsByLanguage(
+                                      allDocs),
+                              builder: (context, filteredSnapshot) {
+                                final count =
+                                    filteredSnapshot.data?.length ?? 0;
+
+                                return Row(
+                                  children: [
+                                    Icon(
+                                      Icons.play_circle_filled,
+                                      color: Colors.white.withOpacity(0.8),
+                                      size: 16.sp,
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Text(
+                                      '$count  ${AppLocalizations.of(context).sessions}',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.sp,
+                                        color: Colors.white.withOpacity(0.8),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 
   Widget _buildAllSessionsTab() {

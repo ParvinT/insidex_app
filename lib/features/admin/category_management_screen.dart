@@ -3,9 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 import '../../core/constants/app_colors.dart';
+import '../../core/constants/app_languages.dart';
+import '../../core/responsive/breakpoints.dart';
+import '../../core/constants/app_icons.dart';
+import '../../models/category_model.dart';
+import '../../services/category/category_service.dart';
+import '../../services/category/category_localization_service.dart';
+import '../../services/category/category_filter_service.dart';
+import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
+import 'add_category_screen.dart';
+import 'category_images_screen.dart';
 
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
@@ -16,48 +26,80 @@ class CategoryManagementScreen extends StatefulWidget {
 }
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
-  final _categoryController = TextEditingController();
-  String _selectedEmoji = '😴';
-  bool _isLoading = false;
+  final CategoryService _categoryService = CategoryService();
 
-  // Emoji listesi
-  final List<String> _emojis = [
-    '😴',
-    '💪',
-    '🎯',
-    '💰',
-    '❤️',
-    '🧠',
-    '✨',
-    '🌟',
-    '🚀',
-    '💡',
-    '🎵',
-    '🧘',
-    '🏃',
-    '📚',
-    '🎨',
-    '🌈',
-    '🔥',
-    '💎',
-    '🌙',
-    '☀️',
-    '🌺',
-    '🍀',
-    '🦋',
-    '🌊',
-    '⚡',
-    '🎭',
-    '🎪',
-    '🎯',
-    '🏆',
-    '💫',
-    '🌸',
-    '🦄'
-  ];
+  List<CategoryModel> _allCategories = [];
+  List<CategoryModel> _filteredCategories = [];
+  bool _isLoading = true;
+  bool _showOnlyUserLanguage = true; // Toggle filter
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final categories =
+          await _categoryService.getAllCategories(forceRefresh: true);
+
+      if (_showOnlyUserLanguage) {
+        final filtered =
+            await CategoryFilterService.filterCategoriesByLanguage(categories);
+        final userLanguage = await LanguageHelperService.getCurrentLanguage();
+        filtered.sort((a, b) {
+          final nameA = a.getName(userLanguage).toLowerCase();
+          final nameB = b.getName(userLanguage).toLowerCase();
+          return nameA.compareTo(nameB);
+        });
+        setState(() {
+          _allCategories = categories;
+          _filteredCategories = filtered;
+          _isLoading = false;
+        });
+      } else {
+        categories.sort((a, b) {
+          final nameA = a.getName('en').toLowerCase();
+          final nameB = b.getName('en').toLowerCase();
+          return nameA.compareTo(nameB);
+        });
+        setState(() {
+          _allCategories = categories;
+          _filteredCategories = categories;
+          _isLoading = false;
+        });
+      }
+
+      // Debug: Print language stats
+      CategoryFilterService.debugPrintLanguageStats(categories);
+    } catch (e) {
+      debugPrint('❌ Error loading categories: $e');
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _toggleLanguageFilter() async {
+    setState(() {
+      _showOnlyUserLanguage = !_showOnlyUserLanguage;
+    });
+    await _loadCategories();
+  }
+
+  // =================== UI BUILDERS ===================
 
   @override
   Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    final width = mq.size.width;
+
+    // Responsive breakpoints
+    final bool isTablet =
+        width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
+    final bool isDesktop = width >= Breakpoints.desktopMin;
+
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -70,550 +112,345 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
         title: Text(
           AppLocalizations.of(context).categoryManagement,
           style: GoogleFonts.inter(
-            fontSize: 20.sp,
+            fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
-      ),
-      body: Column(
-        children: [
-          // Add Category Section
-          Container(
-            padding: EdgeInsets.all(20.w),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(
-                bottom: BorderSide(color: AppColors.greyBorder),
-              ),
+        actions: [
+          // Language filter toggle
+          IconButton(
+            icon: Icon(
+              _showOnlyUserLanguage ? Icons.language : Icons.language_outlined,
+              color: _showOnlyUserLanguage
+                  ? AppColors.primaryGold
+                  : AppColors.textSecondary,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  AppLocalizations.of(context).addNewCategory,
-                  style: GoogleFonts.inter(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                SizedBox(height: 16.h),
+            onPressed: _toggleLanguageFilter,
+            tooltip: _showOnlyUserLanguage
+                ? 'Showing only your language'
+                : 'Showing all languages',
+          ),
+          // Add button
+          IconButton(
+            icon: const Icon(Icons.add_circle, color: AppColors.primaryGold),
+            onPressed: _navigateToAddCategory,
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryGold),
+            )
+          : _filteredCategories.isEmpty
+              ? _buildEmptyState(isTablet, isDesktop)
+              : _buildCategoryList(isTablet, isDesktop),
+    );
+  }
 
-                // Category Name Input
-                Row(
-                  children: [
-                    // Emoji Selector Button
-                    GestureDetector(
-                      onTap: _showEmojiPicker,
-                      child: Container(
-                        width: 60.w,
-                        height: 60.w,
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryGold.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
-                            color: AppColors.primaryGold,
-                            width: 2,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _selectedEmoji,
-                            style: TextStyle(fontSize: 32.sp),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    SizedBox(width: 12.w),
-
-                    // Category Name TextField
-                    Expanded(
-                      child: TextField(
-                        controller: _categoryController,
-                        decoration: InputDecoration(
-                          hintText:
-                              AppLocalizations.of(context).categoryNameHint,
-                          labelText: AppLocalizations.of(context).categoryName,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                            borderSide: const BorderSide(
-                              color: AppColors.primaryGold,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                SizedBox(height: 16.h),
-
-                // Add Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _addCategory,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGold,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                    ),
-                    child: _isLoading
-                        ? SizedBox(
-                            height: 20.h,
-                            width: 20.h,
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            AppLocalizations.of(context).addCategory,
-                            style: GoogleFonts.inter(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
+  Widget _buildEmptyState(bool isTablet, bool isDesktop) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.category_outlined,
+            size: isTablet ? 80.sp : 64.sp,
+            color: AppColors.greyMedium,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            AppLocalizations.of(context).noCategoriesYet,
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 20.sp : 18.sp,
+              color: AppColors.textSecondary,
             ),
           ),
+          SizedBox(height: 8.h),
+          Text(
+            AppLocalizations.of(context).addFirstCategory,
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 16.sp : 14.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+          SizedBox(height: 24.h),
+          ElevatedButton.icon(
+            onPressed: _navigateToAddCategory,
+            icon: const Icon(Icons.add),
+            label: Text(AppLocalizations.of(context).addNewCategory),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primaryGold,
+              padding: EdgeInsets.symmetric(
+                horizontal: isTablet ? 32.w : 24.w,
+                vertical: isTablet ? 16.h : 14.h,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-          // Categories List
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('categories')
-                  .orderBy('createdAt', descending: true)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                    child: CircularProgressIndicator(
-                      color: AppColors.primaryGold,
+  Widget _buildCategoryList(bool isTablet, bool isDesktop) {
+    return ListView.builder(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      itemCount: _filteredCategories.length,
+      itemBuilder: (context, index) {
+        final category = _filteredCategories[index];
+        return _buildCategoryCard(category, isTablet, isDesktop);
+      },
+    );
+  }
+
+  Widget _buildCategoryCard(
+      CategoryModel category, bool isTablet, bool isDesktop) {
+    return FutureBuilder<String>(
+      future: CategoryLocalizationService.getLocalizedNameAuto(category),
+      builder: (context, snapshot) {
+        final localizedName = snapshot.data ?? category.getName('en');
+
+        return Container(
+          margin: EdgeInsets.only(bottom: 16.h),
+          padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(color: AppColors.greyBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Icon
+              Container(
+                width: isTablet ? 60.w : 50.w,
+                height: isTablet ? 60.w : 50.w,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppColors.primaryGold,
+                      AppColors.primaryGold.withOpacity(0.7),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(12.w),
+                  child: Lottie.asset(
+                    AppIcons.getAnimationPath(
+                      AppIcons.getIconByName(category.iconName)?['path'] ??
+                          'meditation.json',
                     ),
-                  );
-                }
+                    fit: BoxFit.contain,
+                    repeat: true,
+                  ),
+                ),
+              ),
+              SizedBox(width: 16.w),
 
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      AppLocalizations.of(context).errorLoadingCategories,
-                      style: GoogleFonts.inter(
-                        color: Colors.red,
-                      ),
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              // Category Info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Name + Language Badges
+                    Row(
                       children: [
-                        Icon(
-                          Icons.category_outlined,
-                          size: 64.sp,
-                          color: AppColors.greyMedium,
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          AppLocalizations.of(context).noCategoriesYet,
-                          style: GoogleFonts.inter(
-                            fontSize: 18.sp,
-                            color: AppColors.textSecondary,
+                        Expanded(
+                          child: Text(
+                            localizedName,
+                            style: GoogleFonts.inter(
+                              fontSize: isTablet ? 18.sp : 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          AppLocalizations.of(context).addFirstCategory,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: AppColors.textSecondary,
+                        SizedBox(width: 8.w),
+                        _buildLanguageBadges(category, isTablet),
+                      ],
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    // Metadata
+                    Row(
+                      children: [
+                        // Session count
+                        Icon(
+                          Icons.play_circle_filled,
+                          size: isTablet ? 18.sp : 16.sp,
+                          color: AppColors.primaryGold,
+                        ),
+                        SizedBox(width: 4.w),
+                        Flexible(
+                          child: Text(
+                            '${category.sessionCount} ${AppLocalizations.of(context).sessions}',
+                            style: GoogleFonts.inter(
+                              fontSize: isTablet ? 14.sp : 12.sp,
+                              color: AppColors.textSecondary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
-                  );
-                }
+                    SizedBox(width: 16.w),
 
-                final categories = snapshot.data!.docs;
-
-                return ListView.builder(
-                  padding: EdgeInsets.all(20.w),
-                  itemCount: categories.length,
-                  itemBuilder: (context, index) {
-                    final category =
-                        categories[index].data() as Map<String, dynamic>;
-                    final docId = categories[index].id;
-
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: AppColors.greyBorder),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.all(16.w),
-                        leading: Container(
-                          width: 50.w,
-                          height: 50.w,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGold.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Center(
-                            child: Text(
-                              category['emoji'] ?? '📁',
-                              style: TextStyle(fontSize: 28.sp),
+// Image count
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.image,
+                          size: isTablet ? 18.sp : 16.sp,
+                          color: AppColors.textSecondary,
+                        ),
+                        SizedBox(width: 4.w),
+                        Flexible(
+                          child: Text(
+                            '${category.backgroundImages.length} images',
+                            style: GoogleFonts.inter(
+                              fontSize: isTablet ? 14.sp : 12.sp,
+                              color: AppColors.textSecondary,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        title: Text(
-                          category['title'] ?? 'Unnamed',
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(height: 4.h),
-                            Text(
-                              'Created: ${_formatDate(category['createdAt'])}',
-                              style: GoogleFonts.inter(
-                                fontSize: 12.sp,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            if (category['sessionCount'] != null)
-                              Text(
-                                '${category['sessionCount']} sessions',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: AppColors.primaryGold,
-                                ),
-                              ),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit,
-                                  color: AppColors.primaryGold),
-                              onPressed: () => _editCategory(docId, category),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () =>
-                                  _deleteCategory(docId, category['title']),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Emoji Picker Bottom Sheet
-  void _showEmojiPicker() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: 400.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.r),
-            topRight: Radius.circular(20.r),
-          ),
-        ),
-        child: Column(
-          children: [
-            // Handle bar
-            Container(
-              margin: EdgeInsets.only(top: 12.h),
-              width: 40.w,
-              height: 4.h,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2.r),
-              ),
-            ),
-
-            // Title
-            Padding(
-              padding: EdgeInsets.all(20.w),
-              child: Text(
-                'Select an Emoji',
-                style: GoogleFonts.inter(
-                  fontSize: 18.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ),
-
-            // Emoji Grid
-            Expanded(
-              child: GridView.builder(
-                padding: EdgeInsets.all(20.w),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 6,
-                  crossAxisSpacing: 12.w,
-                  mainAxisSpacing: 12.h,
-                ),
-                itemCount: _emojis.length,
-                itemBuilder: (context, index) {
-                  final emoji = _emojis[index];
-                  final isSelected = emoji == _selectedEmoji;
-
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedEmoji = emoji;
-                      });
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? AppColors.primaryGold.withOpacity(0.2)
-                            : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: isSelected
-                            ? Border.all(
-                                color: AppColors.primaryGold,
-                                width: 2,
-                              )
-                            : null,
-                      ),
-                      child: Center(
-                        child: Text(
-                          emoji,
-                          style: TextStyle(fontSize: 28.sp),
-                        ),
-                      ),
+                      ],
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  // Add Category Function
-  Future<void> _addCategory() async {
-    if (_categoryController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseEnterCategoryName),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
+              SizedBox(width: 12.w),
 
-    setState(() => _isLoading = true);
-
-    try {
-      // Check if category already exists
-      final existingCategories = await FirebaseFirestore.instance
-          .collection('categories')
-          .where('title', isEqualTo: _categoryController.text.trim())
-          .get();
-
-      if (existingCategories.docs.isNotEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context).categoryAlreadyExists),
-            backgroundColor: Colors.orange,
+              // Action Buttons
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Manage Images button
+                  IconButton(
+                    onPressed: () => _manageImages(category),
+                    icon: Icon(
+                      Icons.photo_library,
+                      color: AppColors.primaryGold,
+                      size: isTablet ? 24.sp : 22.sp,
+                    ),
+                    tooltip: 'Manage Images',
+                  ),
+                  // Edit button
+                  IconButton(
+                    onPressed: () => _navigateToEditCategory(category),
+                    icon: Icon(
+                      Icons.edit,
+                      color: AppColors.primaryGold,
+                      size: isTablet ? 24.sp : 22.sp,
+                    ),
+                    tooltip: AppLocalizations.of(context).editCategory,
+                  ),
+                  // Delete button
+                  IconButton(
+                    onPressed: () => _showDeleteConfirmation(category),
+                    icon: Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                      size: isTablet ? 24.sp : 22.sp,
+                    ),
+                    tooltip: AppLocalizations.of(context).deleteCategory,
+                  ),
+                ],
+              ),
+            ],
           ),
         );
-        setState(() => _isLoading = false);
-        return;
-      }
-
-      // Add new category
-      await FirebaseFirestore.instance.collection('categories').add({
-        'title': _categoryController.text.trim(),
-        'emoji': _selectedEmoji,
-        'createdAt': FieldValue.serverTimestamp(),
-        'sessionCount': 0,
-        'sessions': [],
-      });
-
-      // Clear inputs
-      _categoryController.clear();
-      setState(() {
-        _selectedEmoji = '😴';
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).categoryAddedSuccessfully),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${AppLocalizations.of(context).errorAddingCategory}: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  // Edit Category Function
-  void _editCategory(String docId, Map<String, dynamic> category) {
-    final editController = TextEditingController(text: category['title']);
-    String editEmoji = category['emoji'] ?? '📁';
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(AppLocalizations.of(context).editCategory),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Simple emoji change
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text(AppLocalizations.of(context).selectEmoji),
-                        content: SizedBox(
-                          width: 300.w,
-                          height: 200.h,
-                          child: GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 6,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                            ),
-                            itemCount: _emojis.length,
-                            itemBuilder: (context, index) {
-                              return GestureDetector(
-                                onTap: () {
-                                  editEmoji = _emojis[index];
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                    borderRadius: BorderRadius.circular(8.r),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      _emojis[index],
-                                      style: TextStyle(fontSize: 24.sp),
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 50.w,
-                    height: 50.w,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryGold.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(color: AppColors.primaryGold),
-                    ),
-                    child: Center(
-                      child: Text(editEmoji, style: TextStyle(fontSize: 28.sp)),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: TextField(
-                    controller: editController,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).categoryName,
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(AppLocalizations.of(context).cancel),
-          ),
-          TextButton(
-            onPressed: () async {
-              await FirebaseFirestore.instance
-                  .collection('categories')
-                  .doc(docId)
-                  .update({
-                'title': editController.text.trim(),
-                'emoji': editEmoji,
-              });
-              Navigator.pop(context);
-            },
-            child: Text(AppLocalizations.of(context).save),
-          ),
-        ],
-      ),
+      },
     );
   }
 
-  // Delete Category Function
-  Future<void> _deleteCategory(String docId, String? title) async {
+  Widget _buildLanguageBadges(CategoryModel category, bool isTablet) {
+    final availableLanguages = category.availableLanguages;
+
+    // Show max 3 flags to prevent overflow
+    final displayLanguages = availableLanguages.take(3).toList();
+    final hasMore = availableLanguages.length > 3;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...displayLanguages.map((lang) {
+          return Padding(
+            padding: EdgeInsets.only(right: 2.w),
+            child: Text(
+              AppLanguages.getFlag(lang),
+              style: TextStyle(fontSize: 14.sp),
+            ),
+          );
+        }),
+        if (hasMore)
+          Text(
+            '+${availableLanguages.length - 3}',
+            style: GoogleFonts.inter(
+              fontSize: 11.sp,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+      ],
+    );
+  }
+
+  // =================== ACTIONS ===================
+
+  Future<void> _navigateToAddCategory() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AddCategoryScreen(),
+      ),
+    );
+
+    if (result == true) {
+      // Refresh list
+      _loadCategories();
+    }
+  }
+
+  Future<void> _navigateToEditCategory(CategoryModel category) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddCategoryScreen(categoryToEdit: category),
+      ),
+    );
+
+    if (result == true) {
+      // Refresh list
+      _loadCategories();
+    }
+  }
+
+  Future<void> _showDeleteConfirmation(CategoryModel category) async {
+    final localizedName =
+        await CategoryLocalizationService.getLocalizedNameAuto(category);
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(AppLocalizations.of(context).deleteCategory),
         content: Text(
-            'Are you sure you want to delete "${title ?? 'this category'}"?\n\nNote: Sessions in this category will NOT be deleted.'),
+          AppLocalizations.of(context).deleteCategoryConfirm(localizedName),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -621,62 +458,75 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(AppLocalizations.of(context).delete, style: TextStyle(color: Colors.red)),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: Text(AppLocalizations.of(context).deleteCategory),
           ),
         ],
       ),
     );
 
     if (confirm == true) {
-      try {
-        await FirebaseFirestore.instance
-            .collection('categories')
-            .doc(docId)
-            .delete();
+      _deleteCategory(category);
+    }
+  }
 
+  Future<void> _deleteCategory(CategoryModel category) async {
+    try {
+      final success = await _categoryService.deleteCategory(category.id);
+
+      if (!mounted) return;
+
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-            content: Text(AppLocalizations.of(context).categoryDeletedSuccessfully),
+          SnackBar(
+            content:
+                Text(AppLocalizations.of(context).categoryDeletedSuccessfully),
             backgroundColor: Colors.green,
           ),
         );
-      } catch (e) {
+
+        // Refresh list
+        _loadCategories();
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${AppLocalizations.of(context).errorDeletingCategory}: $e'),
+            content: Text(AppLocalizations.of(context).errorDeletingCategory),
             backgroundColor: Colors.red,
           ),
         );
       }
-    }
-  }
-
-  // Format Date Helper
-  String _formatDate(dynamic timestamp) {
-    if (timestamp == null) return 'Just now';
-
-    try {
-      final date = (timestamp as Timestamp).toDate();
-      final now = DateTime.now();
-      final difference = now.difference(date);
-
-      if (difference.inDays > 0) {
-        return '${difference.inDays} days ago';
-      } else if (difference.inHours > 0) {
-        return '${difference.inHours} hours ago';
-      } else if (difference.inMinutes > 0) {
-        return '${difference.inMinutes} minutes ago';
-      } else {
-        return 'Just now';
-      }
     } catch (e) {
-      return 'Recently';
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content:
+              Text('${AppLocalizations.of(context).errorDeletingCategory}: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
-  @override
-  void dispose() {
-    _categoryController.dispose();
-    super.dispose();
+  /// Navigate to image management screen
+  Future<void> _manageImages(CategoryModel category) async {
+    final userLanguage = await LanguageHelperService.getCurrentLanguage();
+
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategoryImagesScreen(
+          categoryId: category.id,
+          categoryName: category.getName(userLanguage),
+        ),
+      ),
+    );
+
+    // Refresh if images were updated
+    if (result == true) {
+      _loadCategories();
+    }
   }
 }

@@ -8,6 +8,9 @@ import '../../core/constants/app_colors.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/category_model.dart';
+import '../../services/category/category_service.dart';
+import '../../services/category/category_localization_service.dart';
 import 'add_session_screen.dart';
 
 class SessionManagementScreen extends StatefulWidget {
@@ -19,8 +22,9 @@ class SessionManagementScreen extends StatefulWidget {
 }
 
 class _SessionManagementScreenState extends State<SessionManagementScreen> {
-  String _selectedCategory = 'All';
-  List<String> _categories = ['All'];
+  String? _selectedCategoryId;
+  List<CategoryModel> _categories = [];
+  final CategoryService _categoryService = CategoryService();
 
   @override
   void initState() {
@@ -28,14 +32,16 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     _loadCategories();
   }
 
-  void _loadCategories() async {
-    final snapshot =
-        await FirebaseFirestore.instance.collection('categories').get();
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await _categoryService.getCategoriesByLanguage();
 
-    setState(() {
-      _categories = ['All'] +
-          snapshot.docs.map((doc) => doc.data()['title'] as String).toList();
-    });
+      setState(() {
+        _categories = categories;
+      });
+    } catch (e) {
+      debugPrint('❌ Error loading categories: $e');
+    }
   }
 
   Future<void> _deleteSession(String sessionId) async {
@@ -122,45 +128,72 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
           SizedBox(
             height: 50.h,
             child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final isSelected = _selectedCategory == category;
+                // ...
+                itemCount: _categories.length + 1, // +1 for "All"
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    // "All" option
+                    return Padding(
+                      padding: EdgeInsets.only(right: 12.w),
+                      child: ChoiceChip(
+                        label: Text(AppLocalizations.of(context).all),
+                        selected: _selectedCategoryId == null,
+                        onSelected: (selected) {
+                          setState(() => _selectedCategoryId = null);
+                        },
+                        backgroundColor: AppColors.greyLight,
+                        selectedColor: AppColors.primaryGold,
+                        labelStyle: TextStyle(
+                          color: _selectedCategoryId == null
+                              ? Colors.white
+                              : AppColors.textPrimary,
+                        ),
+                      ),
+                    );
+                  }
 
-                return Padding(
-                  padding: EdgeInsets.only(right: 12.w),
-                  child: ChoiceChip(
-                    label: Text(category == 'All'
-                        ? AppLocalizations.of(context).all
-                        : category),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() => _selectedCategory = category);
-                    },
-                    backgroundColor: AppColors.greyLight,
-                    selectedColor: AppColors.primaryGold,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                  final category = _categories[index - 1];
+                  final isSelected = _selectedCategoryId == category.id;
+
+                  return Padding(
+                    padding: EdgeInsets.only(right: 12.w),
+                    child: FutureBuilder<String>(
+                      future: CategoryLocalizationService.getLocalizedNameAuto(
+                          category),
+                      builder: (context, snapshot) {
+                        final name = snapshot.data ?? category.getName('en');
+
+                        return ChoiceChip(
+                          label: Text(name),
+                          selected: isSelected,
+                          onSelected: (selected) {
+                            setState(() => _selectedCategoryId = category.id);
+                          },
+                          backgroundColor: AppColors.greyLight,
+                          selectedColor: AppColors.primaryGold,
+                          labelStyle: TextStyle(
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textPrimary,
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                );
-              },
-            ),
+                  );
+                }),
           ),
 
           // Sessions List
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _selectedCategory == 'All'
+              stream: _selectedCategoryId == null
                   ? FirebaseFirestore.instance
                       .collection('sessions')
                       .orderBy('createdAt', descending: true)
                       .snapshots()
                   : FirebaseFirestore.instance
                       .collection('sessions')
-                      .where('category', isEqualTo: _selectedCategory)
+                      .where('categoryId', isEqualTo: _selectedCategoryId)
                       .orderBy('createdAt', descending: true)
                       .snapshots(),
               builder: (context, snapshot) {
