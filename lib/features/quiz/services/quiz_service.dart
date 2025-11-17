@@ -2,7 +2,6 @@
 
 import 'package:flutter/foundation.dart';
 import '../../../models/disease_model.dart';
-import '../../../models/disease_cause_model.dart';
 import '../../../services/disease/disease_service.dart';
 import '../../../services/disease/disease_cause_service.dart';
 import '../../../services/language_helper_service.dart';
@@ -50,11 +49,15 @@ class QuizService {
     bool forceRefresh = false,
   }) async {
     try {
-      if (gender == 'all') {
-        return await getAllDiseases(forceRefresh: forceRefresh);
-      }
+      // ✅ Force refresh all diseases first
+      final allDiseases = await _diseaseService.getAllDiseases(
+        forceRefresh: forceRefresh,
+      );
 
-      final diseases = await _diseaseService.getDiseasesByGender(gender);
+      // Filter by gender
+      final diseases = gender == 'all'
+          ? allDiseases
+          : allDiseases.where((d) => d.gender == gender).toList();
 
       // Sort alphabetically by current language
       final currentLanguage = await LanguageHelperService.getCurrentLanguage();

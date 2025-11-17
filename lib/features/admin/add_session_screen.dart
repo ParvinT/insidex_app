@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/services.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
@@ -33,7 +34,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   // Session metadata controllers
   final _sessionNumberController = TextEditingController();
-  final _emojiController = TextEditingController();
 
   // 🆕 Multi-language content controllers (DYNAMIC)
   late final Map<String, Map<String, TextEditingController>>
@@ -91,7 +91,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   void dispose() {
     // Dispose session metadata controllers
     _sessionNumberController.dispose();
-    _emojiController.dispose();
 
     // Dispose all multi-language content controllers
     for (final langControllers in _contentControllers.values) {
@@ -128,9 +127,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     if (session['sessionNumber'] != null) {
       _sessionNumberController.text = session['sessionNumber'].toString();
     }
-
-    // Load emoji
-    _emojiController.text = session['emoji'] ?? '';
 
     // Load category
     _selectedCategoryId = session['categoryId'];
@@ -311,7 +307,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     try {
       // Generate unique session ID
       final String sessionId = widget.sessionToEdit?['id'] ??
-          '${DateTime.now().millisecondsSinceEpoch}_${DateTime.now().microsecondsSinceEpoch}';
+          FirebaseFirestore.instance.collection('sessions').doc().id;
 
       debugPrint('====== SAVING SESSION ======');
       debugPrint('Session ID: $sessionId');
@@ -462,7 +458,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             ? int.parse(_sessionNumberController.text.trim())
             : null,
 
-        'emoji': _emojiController.text.trim(),
         'categoryId': _selectedCategoryId,
 
         // Multi-language content
@@ -576,12 +571,16 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   TextField(
                     controller: _sessionNumberController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
                     decoration: InputDecoration(
                       labelText:
                           AppLocalizations.of(context).sessionNumberLabel,
                       hintText: AppLocalizations.of(context).sessionNumberHint,
                       helperText:
                           AppLocalizations.of(context).sessionNumberHelper,
+                      errorText: null,
                       prefixIcon:
                           Icon(Icons.numbers, color: AppColors.primaryGold),
                       border: OutlineInputBorder(
@@ -598,35 +597,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
                   SizedBox(height: 24.h),
 
-                  // Emoji
-                  _buildSectionTitle(AppLocalizations.of(context).emoji),
-                  SizedBox(height: 12.h),
-                  TextField(
-                    controller: _emojiController,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).emoji,
-                      hintText: '🎵',
-                      prefixIcon: Icon(Icons.emoji_emotions,
-                          color: AppColors.primaryGold),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide:
-                            BorderSide(color: AppColors.primaryGold, width: 2),
-                      ),
-                    ),
-                    style: GoogleFonts.inter(fontSize: 24.sp),
-                  ),
-
-                  SizedBox(height: 24.h),
-
                   // Category Dropdown
                   _buildSectionTitle(AppLocalizations.of(context).category),
                   SizedBox(height: 12.h),
                   DropdownButtonFormField<String>(
                     value: _selectedCategoryId,
+                    isExpanded: true,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).category,
                       prefixIcon: const Icon(Icons.category,
@@ -646,7 +622,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                         Text(AppLocalizations.of(context).pleaseSelectCategory),
                     items: _categories.map((category) {
                       return DropdownMenuItem<String>(
-                        value: category.id, // ← ID'yi value olarak kullan
+                        value: category.id,
                         child: FutureBuilder<String>(
                           future:
                               CategoryLocalizationService.getLocalizedNameAuto(

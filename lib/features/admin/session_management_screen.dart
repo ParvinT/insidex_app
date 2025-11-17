@@ -11,6 +11,7 @@ import '../../l10n/app_localizations.dart';
 import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
 import '../../services/category/category_localization_service.dart';
+import '../../services/storage_service.dart';
 import 'add_session_screen.dart';
 
 class SessionManagementScreen extends StatefulWidget {
@@ -66,27 +67,60 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
     if (confirmed == true) {
       try {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  Text('Deleting session and files...'),
+                ],
+              ),
+              duration:
+                  Duration(seconds: 30), // Long duration for delete process
+            ),
+          );
+        }
         await FirebaseFirestore.instance
             .collection('sessions')
             .doc(sessionId)
             .delete();
+        debugPrint('✅ Session deleted from Firestore: $sessionId');
+
+        await StorageService.deleteSessionFiles(sessionId);
+        debugPrint('✅ Session files deleted from Storage: $sessionId');
 
         if (mounted) {
+          // Hide loading snackbar
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
                   Text(AppLocalizations.of(context).sessionDeletedSuccessfully),
               backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
             ),
           );
         }
       } catch (e) {
+        debugPrint('❌ Error deleting session: $e');
         if (mounted) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text('${AppLocalizations.of(context).errorDeletingData}: $e'),
+              content: Text('Error deleting session: $e'),
               backgroundColor: Colors.red,
+              duration: Duration(seconds: 3),
             ),
           );
         }
@@ -251,18 +285,56 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    // Emoji
-                                    Text(
-                                      session['emoji'] ?? '🎵',
-                                      style: TextStyle(fontSize: 32.sp),
-                                    ),
+                                    // Session Number Badge (emoji yerine)
+                                    if (session['sessionNumber'] != null)
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12.w,
+                                          vertical: 6.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primaryGold
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                          border: Border.all(
+                                            color: AppColors.primaryGold
+                                                .withOpacity(0.3),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          '№${session['sessionNumber']}',
+                                          style: GoogleFonts.inter(
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primaryGold,
+                                          ),
+                                        ),
+                                      )
+                                    else
+                                      // Fallback icon if no session number
+                                      Container(
+                                        padding: EdgeInsets.all(8.w),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.textSecondary
+                                              .withOpacity(0.1),
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                        ),
+                                        child: Icon(
+                                          Icons.music_note,
+                                          size: 24.sp,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
                                     SizedBox(width: 12.w),
                                     Expanded(
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // 🆕 Title with session number
+                                          // Title with session number
                                           Text(
                                             displayTitle,
                                             style: GoogleFonts.inter(

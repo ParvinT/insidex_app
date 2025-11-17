@@ -356,7 +356,6 @@ class SessionCard extends StatelessWidget {
     required double playIconSize,
   }) {
     final category = session['category']?.toString() ?? 'General';
-    final emoji = session['emoji']?.toString() ?? '🎵';
     final gradientColors = _getCategoryGradient(category);
 
     return ClipRRect(
@@ -377,9 +376,10 @@ class SessionCard extends StatelessWidget {
           children: [
             // Emoji
             Center(
-              child: Text(
-                emoji,
-                style: TextStyle(fontSize: 80.sp),
+              child: Icon(
+                Icons.music_note_rounded,
+                size: 80.sp,
+                color: Colors.white.withOpacity(0.5),
               ),
             ),
             // Play button
@@ -432,9 +432,6 @@ class SessionCard extends StatelessWidget {
   Widget _buildErrorPlaceholder() {
     // Session'ın category'sine göre renk ve emoji belirle
     final category = session['category']?.toString() ?? 'General';
-    final emoji = session['emoji']?.toString() ?? '🎵';
-
-    // Category'ye göre gradient renkleri
     final gradientColors = _getCategoryGradient(category);
 
     return Container(
@@ -446,11 +443,10 @@ class SessionCard extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: Text(
-          emoji,
-          style: TextStyle(
-            fontSize: 80.sp,
-          ),
+        child: Icon(
+          Icons.music_note_rounded,
+          size: 80.sp,
+          color: Colors.white.withOpacity(0.5),
         ),
       ),
     );

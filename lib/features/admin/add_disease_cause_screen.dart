@@ -10,6 +10,8 @@ import '../../models/disease_cause_model.dart';
 import '../../models/disease_model.dart';
 import '../../services/disease/disease_cause_service.dart';
 import '../../services/disease/disease_service.dart';
+import '../../services/language_helper_service.dart';
+import '../../services/session_localization_service.dart';
 import '../../l10n/app_localizations.dart';
 
 class AddDiseaseCauseScreen extends StatefulWidget {
@@ -77,46 +79,44 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       final sessionsSnapshot =
           await FirebaseFirestore.instance.collection('sessions').get();
 
+      final adminLanguage = await LanguageHelperService.getCurrentLanguage();
+
       final sessions = sessionsSnapshot.docs.map((doc) {
         final data = doc.data();
 
         // Get title from multi-language content
-        String title = 'Untitled';
+        // Get localized title using SessionLocalizationService
+        final localizedContent = SessionLocalizationService.getLocalizedContent(
+          data,
+          adminLanguage,
+        );
 
-        // Try new structure: content.en.title
-        if (data['content'] is Map) {
-          final content = data['content'] as Map<String, dynamic>;
-          if (content['en'] is Map) {
-            final enContent = content['en'] as Map<String, dynamic>;
-            title = enContent['title'] ?? 'Untitled';
-          }
-        }
+        final title = localizedContent.title.isNotEmpty
+            ? localizedContent.title
+            : (data['title'] ?? 'Untitled');
 
-        // Fallback: old structure (single language)
-        if (title == 'Untitled' && data['title'] != null) {
-          title = data['title'] as String;
-        }
+        final sessionNumber = data['sessionNumber'];
 
         return {
           'id': doc.id,
-          'sessionNumber': data['sessionNumber'], // null olabilir
           'title': title,
+          'sessionNumber': sessionNumber,
+          // Store display title for dropdown
+          'displayTitle':
+              sessionNumber != null ? '№$sessionNumber • $title' : title,
         };
       }).toList();
 
+      // Sort by session number
       sessions.sort((a, b) {
-        final aNum = a['sessionNumber'];
-        final bNum = b['sessionNumber'];
+        final numA = a['sessionNumber'] as int?;
+        final numB = b['sessionNumber'] as int?;
 
-        if (aNum != null && bNum != null) {
-          return aNum.compareTo(bNum);
-        } else if (aNum != null) {
-          return -1; // a önce
-        } else if (bNum != null) {
-          return 1; // b önce
-        } else {
-          return a['title'].toString().compareTo(b['title'].toString());
-        }
+        if (numA == null && numB == null) return 0;
+        if (numA == null) return 1;
+        if (numB == null) return -1;
+
+        return numA.compareTo(numB);
       });
 
       if (mounted) {
@@ -453,35 +453,38 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
-        prefixIcon: const Icon(Icons.music_note),
+        prefixIcon: const Icon(Icons.music_note, color: AppColors.primaryGold),
       ),
       isExpanded: true,
       items: _sessions.map((session) {
-        final sessionNumber = session['sessionNumber'];
-        final title = session['title'];
+        // Use pre-formatted display title
+        final displayTitle =
+            session['displayTitle'] ?? session['title'] ?? 'Untitled';
 
         return DropdownMenuItem<String>(
           value: session['id'],
           child: Text(
-            sessionNumber != null ? '№$sessionNumber — $title' : title,
+            displayTitle,
             overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
         );
       }).toList(),
       onChanged: (value) {
         setState(() {
           _selectedSessionId = value;
-          // Find session number
-          final session = _sessions.firstWhere(
+          // Find and store session number
+          final selectedSession = _sessions.firstWhere(
             (s) => s['id'] == value,
             orElse: () => {},
           );
-          _selectedSessionNumber = session['sessionNumber'];
+          _selectedSessionNumber = selectedSession['sessionNumber'];
         });
       },
       validator: (value) {
-        if (value == null)
+        if (value == null) {
           return AppLocalizations.of(context).pleaseSelectSession;
+        }
         return null;
       },
     );

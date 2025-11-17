@@ -11,6 +11,7 @@ import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/language_helper_service.dart';
 import '../services/quiz_service.dart';
+import '../../../services/session_localization_service.dart';
 import '../widgets/disease_cause_card.dart';
 import '../widgets/session_recommendation_card.dart';
 import '../../player/audio_player_screen.dart';
@@ -60,10 +61,23 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
             .get();
 
         if (sessionDoc.exists) {
-          _sessionData = {
+          // Get user's current language
+          final currentLanguage =
+              await LanguageHelperService.getCurrentLanguage();
+
+          // Prepare session data with localized content
+          final rawSessionData = {
             'id': sessionDoc.id,
             ...sessionDoc.data()!,
           };
+
+          _sessionData = SessionLocalizationService.prepareSessionForNavigation(
+            rawSessionData,
+            currentLanguage,
+          );
+
+          debugPrint(
+              '✅ [DiseaseDetail] Session loaded: ${_sessionData!['_displayTitle']}');
         }
       }
 
@@ -182,21 +196,8 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
   }
 
   Widget _buildSessionRecommendation(String currentLanguage) {
-    // Get session title from multi-language structure
-    String sessionTitle = 'Untitled Session';
-
-    if (_sessionData!['content'] is Map) {
-      final content = _sessionData!['content'] as Map<String, dynamic>;
-      if (content[currentLanguage] is Map) {
-        final langContent = content[currentLanguage] as Map<String, dynamic>;
-        sessionTitle = langContent['title'] ?? sessionTitle;
-      }
-    }
-
-    // Fallback to old structure
-    if (sessionTitle == 'Untitled Session' && _sessionData!['title'] != null) {
-      sessionTitle = _sessionData!['title'];
-    }
+    // Session title is already prepared in _sessionData['_localizedTitle']
+    final sessionTitle = _sessionData!['_localizedTitle'] ?? 'Untitled Session';
 
     return SessionRecommendationCard(
       sessionNumber: _cause?.sessionNumber,

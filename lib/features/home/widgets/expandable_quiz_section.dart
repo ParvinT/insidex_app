@@ -25,6 +25,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
   bool _isQuizExpanded = false;
   bool _isLoadingDiseases = false;
   List<DiseaseModel> _diseases = [];
+  String _selectedGender = 'all';
 
   // Pagination state
   int _currentPage = 0;
@@ -74,7 +75,10 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
         _selectedDiseaseIds.clear();
       });
 
-      final diseases = await _quizService.getAllDiseases();
+      final diseases = await _quizService.getDiseasesByGender(
+        _selectedGender,
+        forceRefresh: true,
+      );
 
       if (mounted) {
         setState(() {
@@ -91,6 +95,34 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
           _selectedDiseaseIds.clear();
         }
       });
+    }
+  }
+
+  Future<void> _onGenderChanged(String gender) async {
+    if (_selectedGender == gender) return;
+
+    setState(() {
+      _selectedGender = gender;
+      _isLoadingDiseases = true;
+      _currentPage = 0;
+      _selectedDiseaseIds.clear();
+    });
+
+    final diseases = await _quizService.getDiseasesByGender(
+      gender,
+      forceRefresh: true,
+    );
+
+    if (mounted) {
+      setState(() {
+        _diseases = diseases;
+        _isLoadingDiseases = false;
+      });
+
+      // Reset page controller
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(0);
+      }
     }
   }
 
@@ -284,6 +316,38 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  // Gender filter buttons
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 16.h),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: _buildGenderButton(
+                                            gender: 'male',
+                                            label: "Men's Test",
+                                            isTablet: isTablet,
+                                          ),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: _buildGenderButton(
+                                            gender: 'female',
+                                            label: "Women's Test",
+                                            isTablet: isTablet,
+                                          ),
+                                        ),
+                                        SizedBox(width: 12.w),
+                                        Expanded(
+                                          child: _buildGenderButton(
+                                            gender: 'all',
+                                            label: "All",
+                                            isTablet: isTablet,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
                                   // Horizontal PageView for disease grid
                                   SizedBox(
                                     height: _calculateGridHeight(isTablet),
@@ -504,6 +568,52 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
           onTap: () => _toggleDiseaseSelection(disease.id),
         );
       },
+    );
+  }
+
+  // Gender Button Widget
+  Widget _buildGenderButton({
+    required String gender,
+    required String label,
+    required bool isTablet,
+  }) {
+    final isSelected = _selectedGender == gender;
+
+    return GestureDetector(
+      onTap: () => _onGenderChanged(gender),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 16.w : 14.w,
+          vertical: isTablet ? 14.h : 12.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(100.r),
+          border: Border.all(
+            color: isSelected ? Colors.black : AppColors.greyBorder,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: isTablet ? 14.sp : 13.sp,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
+      ),
     );
   }
 }

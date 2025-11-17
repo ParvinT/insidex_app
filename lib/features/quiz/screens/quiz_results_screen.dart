@@ -10,6 +10,7 @@ import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/disease/disease_cause_service.dart';
 import '../../../services/language_helper_service.dart';
+import '../../../services/session_localization_service.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../player/audio_player_screen.dart';
 
@@ -336,27 +337,38 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Recommended Session',
-                              style: GoogleFonts.inter(
-                                fontSize: isTablet ? 12.sp : 11.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Session №${cause.sessionNumber}',
-                              style: GoogleFonts.inter(
-                                fontSize: isTablet ? 15.sp : 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.primaryGold,
-                              ),
-                            ),
-                          ],
+                        child: FutureBuilder<String>(
+                          future: _getSessionTitle(
+                              cause.recommendedSessionId, currentLanguage),
+                          builder: (context, snapshot) {
+                            final sessionTitle = snapshot.data ??
+                                'Session №${cause.sessionNumber}';
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Recommended Session',
+                                  style: GoogleFonts.inter(
+                                    fontSize: isTablet ? 12.sp : 11.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  sessionTitle,
+                                  style: GoogleFonts.inter(
+                                    fontSize: isTablet ? 15.sp : 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primaryGold,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                       GestureDetector(
@@ -461,6 +473,40 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
     );
   }
 
+  /// Get localized session title for display
+  Future<String> _getSessionTitle(String sessionId, String locale) async {
+    try {
+      final sessionDoc = await FirebaseFirestore.instance
+          .collection('sessions')
+          .doc(sessionId)
+          .get();
+
+      if (!sessionDoc.exists) return 'Session';
+
+      final sessionData = {
+        'id': sessionId,
+        ...sessionDoc.data()!,
+      };
+
+      // Get localized content
+      final localizedContent =
+          SessionLocalizationService.getLocalizedContent(sessionData, locale);
+
+      // Build title with session number
+      final sessionNumber = sessionData['sessionNumber'];
+      if (sessionNumber != null && localizedContent.title.isNotEmpty) {
+        return '№$sessionNumber • ${localizedContent.title}';
+      }
+
+      return localizedContent.title.isNotEmpty
+          ? localizedContent.title
+          : 'Session №$sessionNumber';
+    } catch (e) {
+      debugPrint('❌ Error getting session title: $e');
+      return 'Session';
+    }
+  }
+
   Future<void> _navigateToSession(String sessionId) async {
     debugPrint('🎵 [QuizResults] Opening session: $sessionId');
 
@@ -505,11 +551,23 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
       if (!mounted) return;
 
-      // Prepare complete session data with ID
-      final completeSessionData = Map<String, dynamic>.from(sessionData);
-      completeSessionData['id'] = sessionId;
+      // Get user's current language
+      final currentLanguage = await LanguageHelperService.getCurrentLanguage();
 
-      debugPrint('✅ [QuizResults] Session loaded, navigating...');
+      // Prepare session data with localized content
+      final rawSessionData = {
+        'id': sessionId,
+        ...sessionData,
+      };
+
+      final completeSessionData =
+          SessionLocalizationService.prepareSessionForNavigation(
+        rawSessionData,
+        currentLanguage,
+      );
+
+      debugPrint(
+          '✅ [QuizResults] Session loaded: ${completeSessionData['_displayTitle']}');
 
       // Navigate to audio player
       await Navigator.push(

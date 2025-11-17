@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marquee/marquee.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
@@ -99,21 +100,70 @@ class DiseaseCard extends StatelessWidget {
 
                 // Disease name
                 Expanded(
-                  child: Text(
-                    diseaseName,
-                    style: GoogleFonts.inter(
-                      fontSize: fontSize,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected
-                          ? Colors.white
-                          : (isDisabled
-                              ? Colors.grey[400]
-                              : AppColors.textPrimary),
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Calculate if text needs marquee
+                      final textPainter = TextPainter(
+                        text: TextSpan(
+                          text: diseaseName,
+                          style: GoogleFonts.inter(
+                            fontSize: fontSize,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
+                          ),
+                        ),
+                        maxLines: 2,
+                        textDirection: TextDirection.ltr,
+                      )..layout(maxWidth: constraints.maxWidth);
+
+                      final needsMarquee = textPainter.didExceedMaxLines;
+
+                      return needsMarquee
+                          ? SizedBox(
+                              height: isTablet ? 32.h : 28.h,
+                              child: Marquee(
+                                text: diseaseName,
+                                style: GoogleFonts.inter(
+                                  fontSize: fontSize,
+                                  fontWeight: isSelected
+                                      ? FontWeight.w600
+                                      : FontWeight.w500,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isDisabled
+                                          ? Colors.grey[400]
+                                          : AppColors.textPrimary),
+                                ),
+                                scrollAxis: Axis.horizontal,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                blankSpace: 40.0,
+                                velocity: 30.0,
+                                pauseAfterRound: Duration(seconds: 1),
+                                startPadding: 10.0,
+                                accelerationDuration: Duration(seconds: 1),
+                                accelerationCurve: Curves.linear,
+                                decelerationDuration:
+                                    Duration(milliseconds: 500),
+                                decelerationCurve: Curves.easeOut,
+                              ))
+                          : Text(
+                              diseaseName,
+                              style: GoogleFonts.inter(
+                                fontSize: fontSize,
+                                fontWeight: isSelected
+                                    ? FontWeight.w600
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDisabled
+                                        ? Colors.grey[400]
+                                        : AppColors.textPrimary),
+                              ),
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            );
+                    },
                   ),
                 ),
               ],

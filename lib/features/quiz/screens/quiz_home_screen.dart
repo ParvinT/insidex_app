@@ -10,7 +10,6 @@ import '../../../models/disease_model.dart';
 import '../../../l10n/app_localizations.dart';
 import '../services/quiz_service.dart';
 import '../widgets/disease_card.dart';
-import '../widgets/filter_chip.dart.dart';
 import 'disease_detail_screen.dart';
 
 class QuizHomeScreen extends StatefulWidget {
@@ -253,34 +252,187 @@ class _QuizHomeScreenState extends State<QuizHomeScreen> {
   }
 
   Widget _buildGenderFilters(bool isTablet) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          QuizFilterChip(
-            value: 'all',
-            label: 'All',
-            isSelected: _selectedGender == 'all',
-            onTap: () => _onGenderChanged('all'),
-            count: _categoryCounts['all'],
+    return Column(
+      children: [
+        // Big CTA Button
+        _buildBigCTAButton(isTablet),
+
+        SizedBox(height: 16.h),
+
+        // Gender Test Buttons
+        Row(
+          children: [
+            Expanded(
+              child: _buildGenderTestButton(
+                gender: 'male',
+                label: "Take the Men's Test",
+                isTablet: isTablet,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: _buildGenderTestButton(
+                gender: 'female',
+                label: "Take the Women's Test",
+                isTablet: isTablet,
+              ),
+            ),
+          ],
+        ),
+
+        SizedBox(height: 12.h),
+
+        // Info Text
+        Text(
+          'In 3 minutes you\'ll get:\na personalized map of deep-rooted causes\na 7-day audio plan (morning/day/night)\na 15-second preview tailored to you',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: isTablet ? 12.sp : 11.sp,
+            color: AppColors.textSecondary,
+            height: 1.4,
           ),
-          SizedBox(width: 10.w),
-          QuizFilterChip(
-            value: 'male',
-            label: 'Male',
-            isSelected: _selectedGender == 'male',
-            onTap: () => _onGenderChanged('male'),
-            count: _categoryCounts['male'],
+        ),
+
+        SizedBox(height: 8.h),
+
+        // Disclaimer
+        Text(
+          'Private & free. Not a medical service. Works best with daily listening.',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: isTablet ? 11.sp : 10.sp,
+            color: AppColors.textSecondary.withOpacity(0.7),
+            height: 1.3,
           ),
-          SizedBox(width: 10.w),
-          QuizFilterChip(
-            value: 'female',
-            label: 'Female',
-            isSelected: _selectedGender == 'female',
-            onTap: () => _onGenderChanged('female'),
-            count: _categoryCounts['female'],
+        ),
+      ],
+    );
+  }
+
+  // Big CTA Button (Start My Emotional Test — Free)
+  Widget _buildBigCTAButton(bool isTablet) {
+    return GestureDetector(
+      onTap: () {
+        // Show modal to select gender or just scroll down
+        _showGenderSelectionHint();
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 32.w : 28.w,
+          vertical: isTablet ? 18.h : 16.h,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(100.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 12,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Text(
+          'Start My Emotional Test — Free',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.inter(
+            fontSize: isTablet ? 18.sp : 16.sp,
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+// Gender Test Button
+  Widget _buildGenderTestButton({
+    required String gender,
+    required String label,
+    required bool isTablet,
+  }) {
+    final isSelected = _selectedGender == gender;
+    final count = _categoryCounts[gender] ?? 0;
+    final totalCount = _categoryCounts['all'] ?? 1;
+    final percentage =
+        totalCount > 0 ? ((count / totalCount) * 100).round() : 0;
+
+    return GestureDetector(
+      onTap: () => _onGenderChanged(gender),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 20.w : 16.w,
+          vertical: isTablet ? 16.h : 14.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : Colors.white,
+          borderRadius: BorderRadius.circular(100.r),
+          border: Border.all(
+            color: isSelected ? Colors.black : AppColors.greyBorder,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
+                  ),
+                ]
+              : null,
+        ),
+        child: Column(
+          children: [
+            // Label
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 15.sp : 14.sp,
+                fontWeight: FontWeight.w600,
+                color: isSelected ? Colors.white : AppColors.textPrimary,
+                height: 1.2,
+              ),
+            ),
+
+            if (isSelected) ...[
+              SizedBox(height: 8.h),
+
+              // Percentage Badge
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  '$percentage%',
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 13.sp : 12.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+// Gender Selection Hint (optional)
+  void _showGenderSelectionHint() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please select a test below to get started'),
+        duration: Duration(seconds: 2),
+        backgroundColor: AppColors.textPrimary,
       ),
     );
   }

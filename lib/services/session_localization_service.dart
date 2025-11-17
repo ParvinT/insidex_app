@@ -99,4 +99,37 @@ class SessionLocalizationService {
     final userLocale = await LanguageHelperService.getCurrentLanguage();
     return !hasLanguage(session, userLocale);
   }
+
+  /// Get complete session data with localized title for navigation
+  /// Adds '_displayTitle' key with formatted title (includes session number)
+  static Map<String, dynamic> prepareSessionForNavigation(
+    Map<String, dynamic> sessionData,
+    String languageCode,
+  ) {
+    final completeData = Map<String, dynamic>.from(sessionData);
+
+    // Get localized content
+    final localizedContent = getLocalizedContent(sessionData, languageCode);
+
+    // Build display title
+    final baseTitle = localizedContent.title.isNotEmpty
+        ? localizedContent.title
+        : (sessionData['title'] ?? 'Untitled Session');
+
+    final sessionNumber = sessionData['sessionNumber'];
+    final displayTitle =
+        sessionNumber != null ? '№$sessionNumber • $baseTitle' : baseTitle;
+
+    // Add localized fields to session data
+    completeData['_displayTitle'] = displayTitle;
+    completeData['_localizedTitle'] = baseTitle;
+    completeData['_localizedDescription'] = localizedContent.description;
+    completeData['_localizedIntroTitle'] = localizedContent.introduction.title;
+    completeData['_localizedIntroContent'] =
+        localizedContent.introduction.content;
+
+    debugPrint('✅ [SessionLocalization] Prepared: $displayTitle');
+
+    return completeData;
+  }
 }
