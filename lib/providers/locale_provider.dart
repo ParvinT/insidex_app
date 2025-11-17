@@ -20,8 +20,13 @@ class LocaleProvider extends ChangeNotifier {
     Locale('hi'),
   ];
 
-  LocaleProvider() {
-    _loadSavedLocale();
+  LocaleProvider._internal();
+  static Future<LocaleProvider> initialize() async {
+    final provider = LocaleProvider._internal();
+    await provider._loadSavedLocale();
+    debugPrint(
+        '✅ LocaleProvider initialized with locale: ${provider.locale.languageCode}');
+    return provider;
   }
 
   Future<void> _loadSavedLocale() async {

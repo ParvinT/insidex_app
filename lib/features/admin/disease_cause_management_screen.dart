@@ -178,7 +178,7 @@ class _DiseaseCauseManagementScreenState
   Widget _buildCauseCard(DiseaseCauseModel cause) {
     final disease = _diseasesById[cause.diseaseId];
     final diseaseName = disease?.getLocalizedName('en') ?? 'Unknown Disease';
-    final diseaseIcon = disease?.icon ?? '❓';
+
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
       elevation: 2,
@@ -192,10 +192,26 @@ class _DiseaseCauseManagementScreenState
           children: [
             Row(
               children: [
-                // Disease Icon
-                Text(
-                  diseaseIcon,
-                  style: TextStyle(fontSize: 32.sp),
+                // Gender badge
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: disease?.gender == 'male'
+                        ? Colors.blue.withOpacity(0.1)
+                        : Colors.pink.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8.r),
+                  ),
+                  child: Text(
+                    disease?.gender == 'male' ? 'MALE' : 'FEMALE',
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                      color: disease?.gender == 'male'
+                          ? Colors.blue[700]
+                          : Colors.pink[700],
+                    ),
+                  ),
                 ),
 
                 SizedBox(width: 12.w),

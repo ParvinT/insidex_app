@@ -2,17 +2,13 @@
 
 class DiseaseModel {
   final String id;
-  final String category; // physical, mental, emotional
-  final int order; // Display order
-  final String icon; // Emoji
+  final String gender;
   final Map<String, String> translations; // Multi-language names
   final DateTime? createdAt;
 
   DiseaseModel({
     required this.id,
-    required this.category,
-    required this.order,
-    required this.icon,
+    required this.gender,
     required this.translations,
     this.createdAt,
   });
@@ -21,9 +17,7 @@ class DiseaseModel {
   factory DiseaseModel.fromMap(Map<String, dynamic> map, String documentId) {
     return DiseaseModel(
       id: documentId,
-      category: map['category'] ?? 'physical',
-      order: map['order'] ?? 0,
-      icon: map['icon'] ?? '❓',
+      gender: map['gender'] ?? 'male',
       translations: Map<String, String>.from(map['translations'] ?? {}),
       createdAt: map['createdAt']?.toDate(),
     );
@@ -32,9 +26,7 @@ class DiseaseModel {
   /// Convert to Firestore document
   Map<String, dynamic> toMap() {
     return {
-      'category': category,
-      'order': order,
-      'icon': icon,
+      'gender': gender,
       'translations': translations,
       'createdAt': createdAt,
     };
@@ -48,17 +40,13 @@ class DiseaseModel {
   /// Copy with
   DiseaseModel copyWith({
     String? id,
-    String? category,
-    int? order,
-    String? icon,
+    String? gender,
     Map<String, String>? translations,
     DateTime? createdAt,
   }) {
     return DiseaseModel(
       id: id ?? this.id,
-      category: category ?? this.category,
-      order: order ?? this.order,
-      icon: icon ?? this.icon,
+      gender: gender ?? this.gender,
       translations: translations ?? this.translations,
       createdAt: createdAt ?? this.createdAt,
     );

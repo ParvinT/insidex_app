@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_colors.dart';
 import '../../models/disease_model.dart';
 import '../../services/disease/disease_service.dart';
@@ -22,7 +23,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
 
   List<DiseaseModel> _diseases = [];
   bool _isLoading = true;
-  String _selectedCategory = 'all';
+  String _selectedGender = 'all';
 
   @override
   void initState() {
@@ -57,10 +58,17 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
   }
 
   List<DiseaseModel> get _filteredDiseases {
-    if (_selectedCategory == 'all') {
-      return _diseases;
-    }
-    return _diseases.where((s) => s.category == _selectedCategory).toList();
+    var diseases = _selectedGender == 'all'
+        ? _diseases
+        : _diseases.where((s) => s.gender == _selectedGender).toList();
+
+    diseases.sort((a, b) {
+      final nameA = a.getLocalizedName('en').toLowerCase();
+      final nameB = b.getLocalizedName('en').toLowerCase();
+      return nameA.compareTo(nameB);
+    });
+
+    return diseases;
   }
 
   Future<void> _deleteDisease(DiseaseModel disease) async {
@@ -153,8 +161,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                // Category Filter
-                _buildCategoryFilter(),
+                _buildGenderFilter(),
 
                 // Disease List
                 Expanded(
@@ -180,48 +187,52 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
     );
   }
 
-  Widget _buildCategoryFilter() {
+  Widget _buildGenderFilter() {
+    final isTablet = context.isTablet;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildFilterChip(
-                'all', AppLocalizations.of(context).all, Icons.apps),
-            SizedBox(width: 8.w),
-            _buildFilterChip('physical', AppLocalizations.of(context).physical,
-                Icons.fitness_center),
-            SizedBox(width: 8.w),
-            _buildFilterChip('mental', AppLocalizations.of(context).mental,
-                Icons.psychology),
-            SizedBox(width: 8.w),
-            _buildFilterChip('emotional',
-                AppLocalizations.of(context).emotional, Icons.favorite),
-          ],
-        ),
+      child: Row(
+        children: [
+          _buildFilterChip('all', 'All', isTablet),
+          SizedBox(width: 10.w),
+          _buildFilterChip('male', 'Male', isTablet),
+          SizedBox(width: 10.w),
+          _buildFilterChip('female', 'Female', isTablet),
+        ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String category, String label, IconData icon) {
-    final isSelected = _selectedCategory == category;
+  Widget _buildFilterChip(String value, String label, bool isTablet) {
+    final isSelected = _selectedGender == value;
 
-    return FilterChip(
-      selected: isSelected,
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16.sp),
-          SizedBox(width: 4.w),
-          Text(label),
-        ],
-      ),
-      onSelected: (selected) {
-        setState(() => _selectedCategory = category);
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedGender = value);
       },
-      selectedColor: AppColors.primaryGold.withOpacity(0.2),
-      checkmarkColor: AppColors.primaryGold,
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 18.w : 16.w,
+          vertical: isTablet ? 10.h : 8.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryGold : Colors.white,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryGold : AppColors.greyBorder,
+            width: 1.5,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: isTablet ? 14.sp : 13.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+          ),
+        ),
+      ),
     );
   }
 
@@ -236,28 +247,12 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
         padding: EdgeInsets.all(16.w),
         child: Row(
           children: [
-            // Icon
-            Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: _getCategoryColor(disease.category).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                disease.icon,
-                style: TextStyle(fontSize: 24.sp),
-              ),
-            ),
-
-            SizedBox(width: 16.w),
-
             // Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Disease name (English)
                   Text(
                     disease.getLocalizedName('en'),
                     style: GoogleFonts.inter(
@@ -266,39 +261,36 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  SizedBox(height: 4.h),
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _getCategoryColor(disease.category)
-                              .withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(4.r),
-                        ),
-                        child: Text(
-                          disease.category.toUpperCase(),
-                          style: GoogleFonts.inter(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w600,
-                            color: _getCategoryColor(disease.category),
-                          ),
-                        ),
+                  SizedBox(height: 8.h),
+
+                  // Gender badge
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: disease.gender == 'male'
+                          ? Colors.blue.withOpacity(0.1)
+                          : Colors.pink.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Text(
+                      disease.gender == 'male' ? 'MALE' : 'FEMALE',
+                      style: GoogleFonts.inter(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: disease.gender == 'male'
+                            ? Colors.blue[700]
+                            : Colors.pink[700],
+                        letterSpacing: 0.5,
                       ),
-                      SizedBox(width: 8.w),
-                      Text(
-                        '${AppLocalizations.of(context).displayOrder}: ${disease.order}',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                  SizedBox(height: 4.h),
+
+                  SizedBox(height: 8.h),
+
+                  // Turkish translation
                   Text(
                     'TR: ${disease.getLocalizedName('tr')}',
                     style: GoogleFonts.inter(
@@ -361,18 +353,5 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
         ],
       ),
     );
-  }
-
-  Color _getCategoryColor(String category) {
-    switch (category) {
-      case 'physical':
-        return Colors.blue;
-      case 'mental':
-        return Colors.purple;
-      case 'emotional':
-        return Colors.pink;
-      default:
-        return Colors.grey;
-    }
   }
 }

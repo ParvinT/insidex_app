@@ -13,6 +13,7 @@ import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
 import '../../services/home_card_service.dart';
 import 'widgets/home_card_button.dart';
+import 'widgets/expandable_quiz_section.dart';
 import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
 import '../search/widgets/search_bar_widget.dart';
@@ -106,12 +107,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         appBar: null,
         body: Stack(
           children: [
-            // background
-            Positioned.fill(child: _buildBackground()),
-            // content
-            ..._buildHomeCards(headerH),
-            _buildHeader(height: headerH),
-            // overlay
+            // Background + Main Content
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFFF9F9F9), Color(0xFFEFEFEF)],
+                ),
+              ),
+              child: Column(
+                children: [
+                  // Header (Logo + Search + Quiz)
+                  _buildHeader(),
+
+                  // Scrollable Cards
+                  Expanded(
+                    child: _buildScrollableContent(),
+                  ),
+                ],
+              ),
+            ),
+
+            // Menu overlay
             if (_isMenuOpen)
               Positioned.fill(
                 child: MenuOverlay(onClose: _toggleMenu),
@@ -121,91 +139,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         bottomNav: _buildBottomNavContent(),
       ),
     );
-  }
-
-  List<Widget> _buildHomeCards(double headerH) {
-    if (_isLoadingCards) {
-      return [
-        Positioned(
-          top: headerH + 16.h,
-          left: 0,
-          right: 0,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
-        ),
-      ];
-    }
-
-    if (_homeCards.isEmpty) {
-      return [];
-    }
-
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    // Responsive column count
-    int crossAxisCount;
-    if (screenWidth > 1200) {
-      crossAxisCount = 4; // Large tablets / Desktop
-    } else if (screenWidth > 800) {
-      crossAxisCount = 3; // Medium tablets
-    } else if (screenWidth > 600) {
-      crossAxisCount = 3; // Small tablets
-    } else {
-      crossAxisCount = 2; // Phones
-    }
-
-    // Calculate card dimensions
-    final totalPadding = 24.w * 2; // Left + Right padding
-    final totalGaps = 12.w * (crossAxisCount - 1); // Gaps between cards
-    final availableWidth = screenWidth - totalPadding - totalGaps;
-    final cardWidth = availableWidth / crossAxisCount;
-    final cardHeight = cardWidth * 1.0; // Aspect ratio
-
-    // 🎯 IMPROVED: Calculate safe bottom space to prevent overflow
-    final bottomNavHeight = context.isTablet ? 64.0 : 60.0;
-    final safeBottom = MediaQuery.of(context).padding.bottom;
-    final totalBottomSpace = bottomNavHeight + safeBottom + 16.h;
-
-    return [
-      Positioned(
-        top: headerH + 16.h,
-        left: 24.w,
-        right: 24.w,
-        bottom: totalBottomSpace, // 🎯 FIXED: Add bottom constraint
-        child: SingleChildScrollView(
-          // 🎯 FIXED: Add scroll wrapper for overflow protection
-          physics: const BouncingScrollPhysics(),
-          child: GridView.builder(
-            shrinkWrap: true, // 🎯 FIXED: Let GridView size itself
-            physics:
-                const NeverScrollableScrollPhysics(), // Parent handles scroll
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              crossAxisSpacing: 12.w,
-              mainAxisSpacing: 12.h,
-              childAspectRatio: cardWidth / cardHeight,
-            ),
-            itemCount: _homeCards.length,
-            itemBuilder: (context, index) {
-              final card = _homeCards[index];
-              final title = HomeCardService.getLocalizedTitleFromKey(
-                context,
-                card['cardType'],
-              );
-
-              return HomeCardButton(
-                imageUrl: card['randomImage'],
-                title: title,
-                icon: _getIconData(card['icon']),
-                onTap: () => _navigateToCard(card['navigateTo']),
-                height: cardHeight,
-              );
-            },
-          ),
-        ),
-      ),
-    ];
   }
 
   IconData _getIconData(String? iconName) {
@@ -219,6 +152,86 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       default:
         return Icons.music_note;
     }
+  }
+
+  Widget _buildScrollableContent() {
+    final isTablet = context.isTablet;
+
+    if (_isLoadingCards) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primaryGold,
+        ),
+      );
+    }
+
+    if (_homeCards.isEmpty) {
+      return Center(
+        child: Text(
+          'No cards available',
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            color: AppColors.textSecondary,
+          ),
+        ),
+      );
+    }
+
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive column count
+    int crossAxisCount;
+    if (screenWidth > 1200) {
+      crossAxisCount = 4;
+    } else if (screenWidth > 800) {
+      crossAxisCount = 3;
+    } else if (screenWidth > 600) {
+      crossAxisCount = 3;
+    } else {
+      crossAxisCount = 2;
+    }
+
+    // Calculate card dimensions
+    final horizontalPadding = 24.w;
+    final totalPadding = horizontalPadding * 2;
+    final totalGaps = 12.w * (crossAxisCount - 1);
+    final availableWidth = screenWidth - totalPadding - totalGaps;
+    final cardWidth = availableWidth / crossAxisCount;
+    final cardHeight = cardWidth * 1.0;
+
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        horizontal: horizontalPadding,
+        vertical: 16.h,
+      ),
+      physics: const BouncingScrollPhysics(),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 12.w,
+          mainAxisSpacing: 12.h,
+          childAspectRatio: cardWidth / cardHeight,
+        ),
+        itemCount: _homeCards.length,
+        itemBuilder: (context, index) {
+          final card = _homeCards[index];
+          final title = HomeCardService.getLocalizedTitleFromKey(
+            context,
+            card['cardType'],
+          );
+
+          return HomeCardButton(
+            imageUrl: card['randomImage'],
+            title: title,
+            icon: _getIconData(card['icon']),
+            onTap: () => _navigateToCard(card['navigateTo']),
+            height: cardHeight,
+          );
+        },
+      ),
+    );
   }
 
   void _navigateToCard(String? navigateTo) {
@@ -241,37 +254,42 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   // ---------- UI parts ----------
-  Widget _buildHeader({required double height}) {
-    // 🎯 IMPROVED: Add safe area for notch/status bar
-    final topSafeArea = MediaQuery.of(context).padding.top;
+  Widget _buildHeader() {
+    final isTablet = context.isTablet;
+    final isDesktop = context.isDesktop;
 
-    return Positioned(
-      top: topSafeArea, // 🎯 FIXED: Respect notch area
-      left: 0,
-      right: 0,
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 20.w, // ← Basitleştir
-          vertical: 8.h,
-        ),
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isTablet ? 24.w : 20.w,
+      ),
+      child: SafeArea(
+        bottom: false,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: isTablet ? 20.h : 16.h),
+
+            // Logo + Menu button row
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Logo with safe sizing
+                // Logo
                 SvgPicture.asset(
                   'assets/images/logo.svg',
-                  height: 26.h, // 🎯 IMPROVED: Clamped size
+                  height: isDesktop ? 32.h : (isTablet ? 28.h : 26.h),
                   fit: BoxFit.contain,
-                  colorFilter:
-                      ColorFilter.mode(AppColors.textPrimary, BlendMode.srcIn),
+                  colorFilter: const ColorFilter.mode(
+                    AppColors.textPrimary,
+                    BlendMode.srcIn,
+                  ),
                 ),
-                const Spacer(),
-                _buildHeaderButton(AppLocalizations.of(context).menu, true),
+                // Menu button
+                _buildHeaderButton('Menu', true),
               ],
             ),
-            SizedBox(height: context.isTablet ? 14.h : 12.h),
+
+            SizedBox(height: isTablet ? 14.h : 12.h),
+
+            // Search bar
             SearchBarWidget(
               onTap: () {
                 Navigator.of(context).push(
@@ -299,7 +317,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 );
               },
             ),
-            SizedBox(height: 8.h),
+
+            SizedBox(height: 12.h),
+
+// Quiz section
+            const ExpandableQuizSection(),
+
+            SizedBox(height: 12.h),
           ],
         ),
       ),

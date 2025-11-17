@@ -32,8 +32,7 @@ class DiseaseService {
 
       debugPrint('🔄 [DiseaseService] Fetching diseases from Firestore...');
 
-      final snapshot =
-          await _firestore.collection(_collectionName).orderBy('order').get();
+      final snapshot = await _firestore.collection(_collectionName).get();
 
       final diseases = snapshot.docs
           .map((doc) => DiseaseModel.fromMap(doc.data(), doc.id))
@@ -51,13 +50,13 @@ class DiseaseService {
     }
   }
 
-  /// Get diseases by category
-  Future<List<DiseaseModel>> getDiseasesByCategory(String category) async {
+  /// Get diseases by gender
+  Future<List<DiseaseModel>> getDiseasesByGender(String gender) async {
     try {
       final allDiseases = await getAllDiseases();
-      return allDiseases.where((s) => s.category == category).toList();
+      return allDiseases.where((s) => s.gender == gender).toList();
     } catch (e) {
-      debugPrint('❌ [DiseaseService] Error filtering by category: $e');
+      debugPrint('❌ [DiseaseService] Error filtering by gender: $e');
       return [];
     }
   }

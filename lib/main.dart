@@ -9,6 +9,7 @@ import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/mini_player_provider.dart';
+import 'providers/locale_provider.dart';
 import 'services/audio_player_service.dart';
 import 'app.dart';
 import 'providers/notification_provider.dart';
@@ -16,7 +17,6 @@ import 'package:device_preview/device_preview.dart';
 import 'services/notifications/notification_service.dart';
 import 'services/notifications/notification_reliability_service.dart';
 import 'services/device_session_service.dart';
-import 'providers/locale_provider.dart';
 import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
@@ -76,20 +76,24 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  debugPrint('🌍 Initializing LocaleProvider...');
+  final localeProvider = await LocaleProvider.initialize();
+  debugPrint(
+      '✅ LocaleProvider ready with locale: ${localeProvider.locale.languageCode}');
+
   runApp(
     DevicePreview(
       enabled: !kReleaseMode,
       builder: (context) => MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
-          ChangeNotifierProvider(create: (_) => LocaleProvider()),
           ChangeNotifierProvider(
               create: (_) => UserProvider()..initAuthListener()),
           ChangeNotifierProvider(
               create: (_) => NotificationProvider()..initialize()),
           ChangeNotifierProvider(create: (_) => MiniPlayerProvider()),
         ],
-        child: const InsidexApp(),
+        child: InsidexApp(localeProvider: localeProvider),
       ),
     ),
   );

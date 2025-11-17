@@ -401,9 +401,27 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
           value: disease.id,
           child: Row(
             children: [
-              if (disease.icon.isNotEmpty)
-                Text(disease.icon, style: TextStyle(fontSize: 20.sp)),
-              if (disease.icon.isNotEmpty) SizedBox(width: 8.w),
+              // Gender badge
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: disease.gender == 'male'
+                      ? Colors.blue.withOpacity(0.2)
+                      : Colors.pink.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4.r),
+                ),
+                child: Text(
+                  disease.gender == 'male' ? 'M' : 'F',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: FontWeight.bold,
+                    color: disease.gender == 'male'
+                        ? Colors.blue[700]
+                        : Colors.pink[700],
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   disease.getLocalizedName('en'),

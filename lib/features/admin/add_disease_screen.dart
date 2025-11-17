@@ -33,8 +33,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
 
   // Other fields
 
-  final TextEditingController _orderController = TextEditingController();
-  String _selectedCategory = 'physical';
+  String _selectedGender = 'male';
 
   bool _isLoading = false;
 
@@ -71,8 +70,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
 
     // Load other fields
 
-    _orderController.text = disease.order.toString();
-    _selectedCategory = disease.category;
+    _selectedGender = disease.gender;
 
     setState(() {});
   }
@@ -81,7 +79,6 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
   void dispose() {
     _tabController.dispose();
     _nameControllers.values.forEach((controller) => controller.dispose());
-    _orderController.dispose();
     super.dispose();
   }
 
@@ -115,9 +112,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
       // Create disease model
       final disease = DiseaseModel(
         id: widget.diseaseToEdit?.id ?? '',
-        category: _selectedCategory,
-        order: int.tryParse(_orderController.text) ?? 0,
-        icon: '',
+        gender: _selectedGender,
         translations: translations,
         createdAt: widget.diseaseToEdit?.createdAt ?? DateTime.now(),
       );
@@ -211,13 +206,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
 
                     SizedBox(height: 24.h),
 
-                    // Category
-                    _buildCategoryDropdown(),
-
-                    SizedBox(height: 16.h),
-
-                    // Order
-                    _buildOrderField(),
+                    _buildGenderDropdown(),
 
                     SizedBox(height: 32.h),
 
@@ -287,61 +276,33 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
     );
   }
 
-  Widget _buildCategoryDropdown() {
+  Widget _buildGenderDropdown() {
     return DropdownButtonFormField<String>(
-      value: _selectedCategory,
+      value: _selectedGender,
       decoration: InputDecoration(
-        labelText: AppLocalizations.of(context).diseaseCategory,
+        labelText: 'Gender',
+        hintText: 'Select gender',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
       ),
       items: [
         DropdownMenuItem(
-          value: 'physical',
-          child: Text(AppLocalizations.of(context).physical),
+          value: 'male',
+          child: Text('Male'),
         ),
         DropdownMenuItem(
-          value: 'mental',
-          child: Text(AppLocalizations.of(context).mental),
-        ),
-        DropdownMenuItem(
-          value: 'emotional',
-          child: Text(AppLocalizations.of(context).emotional),
+          value: 'female',
+          child: Text('Female'),
         ),
       ],
       onChanged: (value) {
         if (value != null) {
-          setState(() => _selectedCategory = value);
+          setState(() => _selectedGender = value);
         }
       },
       validator: (value) {
-        if (value == null)
-          return AppLocalizations.of(context).pleaseSelectCategory;
-        return null;
-      },
-    );
-  }
-
-  Widget _buildOrderField() {
-    return TextFormField(
-      controller: _orderController,
-      keyboardType: TextInputType.number,
-      decoration: InputDecoration(
-        labelText: AppLocalizations.of(context).displayOrder,
-        hintText: '1',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        helperText: AppLocalizations.of(context).lowerNumbersFirst,
-      ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return AppLocalizations.of(context).orderRequired;
-        }
-        if (int.tryParse(value) == null) {
-          return AppLocalizations.of(context).mustBeNumber;
-        }
+        if (value == null) return 'Please select gender';
         return null;
       },
     );

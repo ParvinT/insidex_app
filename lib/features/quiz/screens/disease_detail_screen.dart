@@ -1,0 +1,363 @@
+// lib/features/quiz/screens/disease_detail_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/responsive/context_ext.dart';
+import '../../../models/disease_model.dart';
+import '../../../models/disease_cause_model.dart';
+import '../../../services/language_helper_service.dart';
+import '../services/quiz_service.dart';
+import '../widgets/disease_cause_card.dart';
+import '../widgets/session_recommendation_card.dart';
+import '../../player/audio_player_screen.dart';
+
+class DiseaseDetailScreen extends StatefulWidget {
+  final DiseaseModel disease;
+
+  const DiseaseDetailScreen({
+    super.key,
+    required this.disease,
+  });
+
+  @override
+  State<DiseaseDetailScreen> createState() => _DiseaseDetailScreenState();
+}
+
+class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
+  final QuizService _quizService = QuizService();
+
+  bool _isLoading = true;
+  DiseaseCauseModel? _cause;
+  Map<String, dynamic>? _sessionData;
+  bool _hasRecommendation = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecommendation();
+  }
+
+  Future<void> _loadRecommendation() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final recommendation = await _quizService.getDiseaseRecommendation(
+        widget.disease.id,
+      );
+
+      _cause = recommendation['cause'];
+      _hasRecommendation = recommendation['hasRecommendation'] ?? false;
+
+      // Fetch session data if we have a sessionId
+      if (_hasRecommendation && recommendation['sessionId'] != null) {
+        final sessionDoc = await FirebaseFirestore.instance
+            .collection('sessions')
+            .doc(recommendation['sessionId'])
+            .get();
+
+        if (sessionDoc.exists) {
+          _sessionData = {
+            'id': sessionDoc.id,
+            ...sessionDoc.data()!,
+          };
+        }
+      }
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading recommendation: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _navigateToSession() async {
+    if (_sessionData == null) return;
+
+    // TODO: Add premium check here
+    // For now, just navigate to player
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AudioPlayerScreen(
+          sessionData: _sessionData!,
+        ),
+      ),
+    );
+  }
+
+  void _showPremiumModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => _buildPremiumModal(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Responsive values
+    final isTablet = context.isTablet;
+    final isDesktop = context.isDesktop;
+
+    final double horizontalPadding =
+        isDesktop ? 40.w : (isTablet ? 28.w : 24.w);
+    final double titleSize =
+        isTablet ? 26.sp.clamp(24.0, 28.0) : 22.sp.clamp(20.0, 24.0);
+
+    return FutureBuilder<String>(
+      future: LanguageHelperService.getCurrentLanguage(),
+      builder: (context, snapshot) {
+        final currentLanguage = snapshot.data ?? 'en';
+        final diseaseName = widget.disease.getLocalizedName(currentLanguage);
+
+        return Scaffold(
+          backgroundColor: AppColors.backgroundWhite,
+          appBar: AppBar(
+            backgroundColor: AppColors.backgroundWhite,
+            elevation: 0,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          body: _isLoading
+              ? _buildLoadingState()
+              : SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8.h),
+
+                      // Disease Name
+                      Center(
+                        child: Text(
+                          diseaseName,
+                          style: GoogleFonts.inter(
+                            fontSize: titleSize,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      SizedBox(height: 32.h),
+
+                      // Disease Cause Card
+                      if (_cause != null) ...[
+                        DiseaseCauseCard(
+                          causeContent:
+                              _cause!.getLocalizedContent(currentLanguage),
+                        ),
+                        SizedBox(height: 24.h),
+                      ],
+
+                      // Session Recommendation
+                      if (_hasRecommendation && _sessionData != null) ...[
+                        _buildSessionRecommendation(currentLanguage),
+                        SizedBox(height: 32.h),
+                      ],
+
+                      // No Recommendation Message
+                      if (!_hasRecommendation) ...[
+                        _buildNoRecommendationCard(isTablet),
+                        SizedBox(height: 32.h),
+                      ],
+                    ],
+                  ),
+                ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSessionRecommendation(String currentLanguage) {
+    // Get session title from multi-language structure
+    String sessionTitle = 'Untitled Session';
+
+    if (_sessionData!['content'] is Map) {
+      final content = _sessionData!['content'] as Map<String, dynamic>;
+      if (content[currentLanguage] is Map) {
+        final langContent = content[currentLanguage] as Map<String, dynamic>;
+        sessionTitle = langContent['title'] ?? sessionTitle;
+      }
+    }
+
+    // Fallback to old structure
+    if (sessionTitle == 'Untitled Session' && _sessionData!['title'] != null) {
+      sessionTitle = _sessionData!['title'];
+    }
+
+    return SessionRecommendationCard(
+      sessionNumber: _cause?.sessionNumber,
+      sessionTitle: sessionTitle,
+      onTap: _navigateToSession,
+      isPremium: true, // TODO: Get from session data
+      userHasPremium: false, // TODO: Get from UserProvider
+    );
+  }
+
+  Widget _buildNoRecommendationCard(bool isTablet) {
+    return Container(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: Colors.orange.withOpacity(0.3),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.info_outline,
+            color: Colors.orange,
+            size: isTablet ? 28.sp : 24.sp,
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              'No healing session available for this condition yet. Our team is working on it!',
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 14.sp : 13.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            'assets/lottie/loading.json',
+            width: 120.w,
+            height: 120.w,
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Loading recommendation...',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPremiumModal() {
+    final isTablet = context.isTablet;
+
+    return Container(
+      padding: EdgeInsets.all(isTablet ? 32.w : 24.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(24.r),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Lock icon
+          Container(
+            width: 80.w,
+            height: 80.w,
+            decoration: BoxDecoration(
+              color: AppColors.primaryGold.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.lock,
+              color: AppColors.primaryGold,
+              size: 40.sp,
+            ),
+          ),
+
+          SizedBox(height: 20.h),
+
+          Text(
+            'Premium Required',
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 24.sp : 22.sp,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+
+          SizedBox(height: 12.h),
+
+          Text(
+            'Unlock this healing session and access all premium content',
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 15.sp : 14.sp,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          SizedBox(height: 24.h),
+
+          // Upgrade button
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                // TODO: Navigate to premium/paywall screen
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryGold,
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+              ),
+              child: Text(
+                'Upgrade to Premium',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+
+          SizedBox(height: 12.h),
+
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Maybe Later',
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
