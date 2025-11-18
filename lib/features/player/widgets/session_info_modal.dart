@@ -136,7 +136,11 @@ class _SessionInfoContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSessionTitle(),
-                        if (session['description'] != null)
+                        if (session['_displayDescription'] != null &&
+                            session['_displayDescription']
+                                .toString()
+                                .trim()
+                                .isNotEmpty)
                           _buildDescription(context),
                         _buildNowPlayingCard(context),
                         if (session['howToListen'] != null ||

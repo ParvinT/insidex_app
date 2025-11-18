@@ -80,11 +80,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       for (final lang in AppLanguages.supportedLanguages) lang: null
     };
 
-    _loadCategories();
-
-    if (widget.sessionToEdit != null) {
-      _loadExistingData();
-    }
+    _loadCategories().then((_) {
+      if (widget.sessionToEdit != null) {
+        _loadExistingData();
+      }
+    });
   }
 
   @override
@@ -104,14 +104,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      // Get categories filtered by current language
-      final categories = await _categoryService.getCategoriesByLanguage();
+      // ✅ Admin panel - get ALL categories (not filtered)
+      final categories = await _categoryService.getAllCategories();
+
+      // Sort by English name
+      categories.sort((a, b) {
+        final nameA = a.getName('en').toLowerCase();
+        final nameB = b.getName('en').toLowerCase();
+        return nameA.compareTo(nameB);
+      });
 
       setState(() {
         _categories = categories;
       });
 
-      debugPrint('✅ Loaded ${categories.length} categories');
+      debugPrint('✅ Loaded ${categories.length} categories for admin');
     } catch (e) {
       debugPrint('❌ Error loading categories: $e');
       setState(() {
@@ -128,8 +135,37 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       _sessionNumberController.text = session['sessionNumber'].toString();
     }
 
-    // Load category
-    _selectedCategoryId = session['categoryId'];
+    // Load category with validation
+    final categoryId = session['categoryId'];
+    if (categoryId != null) {
+      // ✅ Check if category still exists
+      final categoryExists = _categories.any((cat) => cat.id == categoryId);
+      if (categoryExists) {
+        setState(() {
+          _selectedCategoryId = categoryId;
+        });
+        debugPrint('✅ Category found: $categoryId');
+      } else {
+        setState(() {
+          _selectedCategoryId = null;
+        });
+        debugPrint('⚠️ Category not found: $categoryId - setting to null');
+
+        // Show warning to user
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    '⚠️ Original category was deleted. Please select a new category.'),
+                backgroundColor: Colors.orange,
+                duration: Duration(seconds: 5),
+              ),
+            );
+          }
+        });
+      }
+    }
 
     // Load multi-language content
     final contentMap = session['content'] as Map<String, dynamic>?;

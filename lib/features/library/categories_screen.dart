@@ -423,7 +423,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         StreamBuilder<QuerySnapshot>(
                           stream: _firestore
                               .collection('sessions')
-                              .where('category', isEqualTo: category.id)
+                              .where('categoryId', isEqualTo: category.id)
                               .snapshots(),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==

@@ -180,16 +180,41 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
     // 2 columns -> max 5 rows
     final rows = (itemCount / 2).ceil();
 
-    // Height per row
-    final itemHeight = isTablet ? 58.h : 52.h;
+    // ✅ IMPROVED: Responsive item height
+    final double itemHeight;
+    if (context.isDesktop) {
+      itemHeight = 62.h;
+    } else if (isTablet) {
+      itemHeight = 58.h;
+    } else {
+      itemHeight = 52.h;
+    }
+
     final spacing = 10.h;
     final topBottomPadding = 16.h;
 
     final gridHeight =
         (rows * itemHeight) + ((rows - 1) * spacing) + topBottomPadding;
 
-    // Max 5 rows (10 items) = ~300h
-    return gridHeight.clamp(100.h, 320.h);
+    // ✅ IMPROVED: Dynamic max height based on screen
+    final double maxHeight;
+    if (context.isDesktop) {
+      maxHeight = 400.h;
+    } else if (isTablet) {
+      maxHeight = 350.h;
+    } else {
+      // Adjust for phone height
+      final screenHeight = context.h;
+      if (screenHeight <= 667) {
+        maxHeight = 260.h; // iPhone SE, 8
+      } else if (screenHeight <= 736) {
+        maxHeight = 280.h; // iPhone 8 Plus
+      } else {
+        maxHeight = 300.h; // Modern phones
+      }
+    }
+
+    return gridHeight.clamp(100.h, maxHeight);
   }
 
   @override
@@ -307,69 +332,62 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                             ),
                           ),
                         )
-                      : ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxHeight: 500.h,
-                          ),
-                          child: SingleChildScrollView(
-                              physics: const BouncingScrollPhysics(),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Gender filter buttons
+                            Padding(
+                              padding: EdgeInsets.only(bottom: 10.h),
+                              child: Row(
                                 children: [
-                                  // Gender filter buttons
-                                  Padding(
-                                    padding: EdgeInsets.only(bottom: 16.h),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: _buildGenderButton(
-                                            gender: 'male',
-                                            label: "Men's Test",
-                                            isTablet: isTablet,
-                                          ),
-                                        ),
-                                        SizedBox(width: 12.w),
-                                        Expanded(
-                                          child: _buildGenderButton(
-                                            gender: 'female',
-                                            label: "Women's Test",
-                                            isTablet: isTablet,
-                                          ),
-                                        ),
-                                        SizedBox(width: 12.w),
-                                        Expanded(
-                                          child: _buildGenderButton(
-                                            gender: 'all',
-                                            label: "All",
-                                            isTablet: isTablet,
-                                          ),
-                                        ),
-                                      ],
+                                  Expanded(
+                                    child: _buildGenderButton(
+                                      gender: 'male',
+                                      label: "Men's Test",
+                                      isTablet: isTablet,
                                     ),
                                   ),
-
-                                  // Horizontal PageView for disease grid
-                                  SizedBox(
-                                    height: _calculateGridHeight(isTablet),
-                                    child: PageView.builder(
-                                      controller: _pageController,
-                                      onPageChanged: (page) {
-                                        setState(() => _currentPage = page);
-                                      },
-                                      itemCount: _totalPages,
-                                      itemBuilder: (context, pageIndex) {
-                                        return _buildDiseaseGrid(
-                                            pageIndex, isTablet);
-                                      },
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: _buildGenderButton(
+                                      gender: 'female',
+                                      label: "Women's Test",
+                                      isTablet: isTablet,
                                     ),
                                   ),
-
-                                  _buildPaginationControls(isTablet),
-                                  SizedBox(height: 12.h),
-
-                                  _buildSelectionFooter(isTablet),
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: _buildGenderButton(
+                                      gender: 'all',
+                                      label: "All",
+                                      isTablet: isTablet,
+                                    ),
+                                  ),
                                 ],
-                              ))))
+                              ),
+                            ),
+
+                            // Horizontal PageView for disease grid
+                            SizedBox(
+                              height: _calculateGridHeight(isTablet),
+                              child: PageView.builder(
+                                controller: _pageController,
+                                onPageChanged: (page) {
+                                  setState(() => _currentPage = page);
+                                },
+                                itemCount: _totalPages,
+                                itemBuilder: (context, pageIndex) {
+                                  return _buildDiseaseGrid(pageIndex, isTablet);
+                                },
+                              ),
+                            ),
+
+                            _buildPaginationControls(isTablet),
+                            SizedBox(height: 6.h),
+
+                            _buildSelectionFooter(isTablet),
+                          ],
+                        ))
           : const SizedBox.shrink(),
     );
   }
@@ -378,7 +396,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
     if (_totalPages <= 1) return const SizedBox.shrink();
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
+      padding: EdgeInsets.symmetric(vertical: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: List.generate(_totalPages, (index) {
@@ -427,7 +445,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: isTablet ? 20.w : 16.w,
-        vertical: isTablet ? 16.h : 14.h,
+        vertical: isTablet ? 12.h : 10.h,
       ),
       decoration: BoxDecoration(
         color: AppColors.greyLight.withOpacity(0.5),
@@ -585,7 +603,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(
           horizontal: isTablet ? 16.w : 14.w,
-          vertical: isTablet ? 14.h : 12.h,
+          vertical: isTablet ? 10.h : 8.h,
         ),
         decoration: BoxDecoration(
           color: isSelected ? Colors.black : Colors.white,

@@ -10,7 +10,6 @@ import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
-import '../../services/category/category_localization_service.dart';
 import '../../services/storage_service.dart';
 import 'add_session_screen.dart';
 
@@ -35,13 +34,27 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
   Future<void> _loadCategories() async {
     try {
-      final categories = await _categoryService.getCategoriesByLanguage();
+      // Admin panel - get ALL categories (not filtered by language)
+      final categories =
+          await _categoryService.getAllCategories(forceRefresh: true);
+
+      // Sort by English name for consistency in admin panel
+      categories.sort((a, b) {
+        final nameA = a.getName('en').toLowerCase();
+        final nameB = b.getName('en').toLowerCase();
+        return nameA.compareTo(nameB);
+      });
 
       setState(() {
         _categories = categories;
       });
+
+      debugPrint('✅ Loaded ${categories.length} categories for admin panel');
     } catch (e) {
       debugPrint('❌ Error loading categories: $e');
+      setState(() {
+        _categories = [];
+      });
     }
   }
 
@@ -84,11 +97,11 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                   Text('Deleting session and files...'),
                 ],
               ),
-              duration:
-                  Duration(seconds: 30), // Long duration for delete process
+              duration: Duration(seconds: 30),
             ),
           );
         }
+
         await FirebaseFirestore.instance
             .collection('sessions')
             .doc(sessionId)
@@ -99,10 +112,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         debugPrint('✅ Session files deleted from Storage: $sessionId');
 
         if (mounted) {
-          // Hide loading snackbar
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
@@ -128,6 +138,21 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     }
   }
 
+  // 🆕 Helper: Get category name from ID
+  String _getCategoryName(String? categoryId) {
+    if (categoryId == null || _categories.isEmpty) {
+      return 'Uncategorized';
+    }
+
+    try {
+      final category = _categories.firstWhere((cat) => cat.id == categoryId);
+      return category.getName('en');
+    } catch (e) {
+      debugPrint('⚠️ Category not found: $categoryId');
+      return 'Uncategorized';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,75 +171,72 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add_circle, color: AppColors.primaryGold),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                     builder: (context) => const AddSessionScreen()),
               );
+              // Refresh categories after returning
+              _loadCategories();
             },
           ),
         ],
       ),
       body: Column(
         children: [
-          // Category Filter
-          SizedBox(
+          // Category Filter - Horizontal Scroll
+          Container(
             height: 50.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
             child: ListView.builder(
-                // ...
-                itemCount: _categories.length + 1, // +1 for "All"
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    // "All" option
-                    return Padding(
-                      padding: EdgeInsets.only(right: 12.w),
-                      child: ChoiceChip(
-                        label: Text(AppLocalizations.of(context).all),
-                        selected: _selectedCategoryId == null,
-                        onSelected: (selected) {
-                          setState(() => _selectedCategoryId = null);
-                        },
-                        backgroundColor: AppColors.greyLight,
-                        selectedColor: AppColors.primaryGold,
-                        labelStyle: TextStyle(
-                          color: _selectedCategoryId == null
-                              ? Colors.white
-                              : AppColors.textPrimary,
-                        ),
-                      ),
-                    );
-                  }
-
-                  final category = _categories[index - 1];
-                  final isSelected = _selectedCategoryId == category.id;
-
+              scrollDirection: Axis.horizontal,
+              itemCount: _categories.length + 1,
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  // "All" option
                   return Padding(
                     padding: EdgeInsets.only(right: 12.w),
-                    child: FutureBuilder<String>(
-                      future: CategoryLocalizationService.getLocalizedNameAuto(
-                          category),
-                      builder: (context, snapshot) {
-                        final name = snapshot.data ?? category.getName('en');
-
-                        return ChoiceChip(
-                          label: Text(name),
-                          selected: isSelected,
-                          onSelected: (selected) {
-                            setState(() => _selectedCategoryId = category.id);
-                          },
-                          backgroundColor: AppColors.greyLight,
-                          selectedColor: AppColors.primaryGold,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : AppColors.textPrimary,
-                          ),
-                        );
+                    child: ChoiceChip(
+                      label: Text(AppLocalizations.of(context).all),
+                      selected: _selectedCategoryId == null,
+                      onSelected: (selected) {
+                        setState(() => _selectedCategoryId = null);
                       },
+                      backgroundColor: AppColors.greyLight,
+                      selectedColor: AppColors.primaryGold,
+                      labelStyle: TextStyle(
+                        color: _selectedCategoryId == null
+                            ? Colors.white
+                            : AppColors.textPrimary,
+                      ),
                     ),
                   );
-                }),
+                }
+
+                final category = _categories[index - 1];
+                final isSelected = _selectedCategoryId == category.id;
+
+                return Padding(
+                  padding: EdgeInsets.only(right: 12.w),
+                  child: ChoiceChip(
+                    label: Text(category.getName('en')),
+                    selected: isSelected,
+                    onSelected: (selected) {
+                      setState(() {
+                        // Toggle: if already selected, deselect (null), else select
+                        _selectedCategoryId = isSelected ? null : category.id;
+                      });
+                    },
+                    backgroundColor: AppColors.greyLight,
+                    selectedColor: AppColors.primaryGold,
+                    labelStyle: TextStyle(
+                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
 
           // Sessions List
@@ -228,14 +250,55 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                   : FirebaseFirestore.instance
                       .collection('sessions')
                       .where('categoryId', isEqualTo: _selectedCategoryId)
-                      .orderBy('createdAt', descending: true)
-                      .snapshots(),
+                      .snapshots(), // ✅ orderBy removed to avoid index requirement
               builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.error_outline,
+                            size: 64.sp, color: Colors.red),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'Error: ${snapshot.error}',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: Colors.red,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                final sessions = snapshot.data!.docs;
+                var sessions = snapshot.data!.docs;
+
+                // ✅ Client-side sorting when filtering by category
+                if (_selectedCategoryId != null && sessions.isNotEmpty) {
+                  sessions = sessions.toList()
+                    ..sort((a, b) {
+                      final aData = a.data() as Map<String, dynamic>;
+                      final bData = b.data() as Map<String, dynamic>;
+
+                      final aTime = aData['createdAt'] as Timestamp?;
+                      final bTime = bData['createdAt'] as Timestamp?;
+
+                      if (aTime == null) return 1;
+                      if (bTime == null) return -1;
+
+                      return bTime.compareTo(aTime); // descending
+                    });
+                }
 
                 if (sessions.isEmpty) {
                   return Center(
@@ -264,15 +327,14 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                   padding: EdgeInsets.all(20.w),
                   itemCount: sessions.length,
                   itemBuilder: (context, index) {
-                    final session =
-                        sessions[index].data() as Map<String, dynamic>;
-                    final docId = sessions[index].id;
+                    final sessionDoc = sessions[index];
+                    final session = sessionDoc.data() as Map<String, dynamic>;
+                    final docId = sessionDoc.id;
                     session['id'] = docId;
 
                     return FutureBuilder<String>(
                       future: _getDisplayTitle(session),
                       builder: (context, titleSnapshot) {
-                        // 🆕 Get display title with session number
                         final displayTitle = titleSnapshot.data ??
                             AppLocalizations.of(context).loading;
 
@@ -285,7 +347,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    // Session Number Badge (emoji yerine)
+                                    // Session Number Badge
                                     if (session['sessionNumber'] != null)
                                       Container(
                                         padding: EdgeInsets.symmetric(
@@ -313,7 +375,6 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                         ),
                                       )
                                     else
-                                      // Fallback icon if no session number
                                       Container(
                                         padding: EdgeInsets.all(8.w),
                                         decoration: BoxDecoration(
@@ -334,7 +395,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          // Title with session number
+                                          // Title
                                           Text(
                                             displayTitle,
                                             style: GoogleFonts.inter(
@@ -344,11 +405,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                             ),
                                           ),
                                           SizedBox(height: 4.h),
-                                          // Category
+                                          // Category Name
                                           Text(
-                                            session['category'] ??
-                                                AppLocalizations.of(context)
-                                                    .uncategorized,
+                                            _getCategoryName(
+                                                session['categoryId']),
                                             style: GoogleFonts.inter(
                                               fontSize: 12.sp,
                                               color: AppColors.textSecondary,
@@ -368,26 +428,28 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                         PopupMenuItem(
                                           value: 'delete',
                                           child: Text(
-                                              AppLocalizations.of(context)
-                                                  .delete,
-                                              style:
-                                                  TextStyle(color: Colors.red)),
+                                            AppLocalizations.of(context).delete,
+                                            style: TextStyle(color: Colors.red),
+                                          ),
                                         ),
                                       ],
-                                      onSelected: (value) {
+                                      onSelected: (value) async {
                                         if (value == 'edit') {
-                                          Navigator.push(
+                                          // ✅ Navigate to edit screen
+                                          await Navigator.push(
                                             context,
                                             MaterialPageRoute(
                                               builder: (context) =>
                                                   AddSessionScreen(
                                                 sessionToEdit: {
                                                   ...session,
-                                                  'id': docId
+                                                  'id': docId,
                                                 },
                                               ),
                                             ),
                                           );
+                                          // Refresh categories after returning
+                                          _loadCategories();
                                         } else if (value == 'delete') {
                                           _deleteSession(docId);
                                         }
@@ -396,7 +458,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                   ],
                                 ),
                                 SizedBox(height: 12.h),
-                                // Description (from localized content)
+                                // Description
                                 FutureBuilder<String>(
                                   future: _getDisplayDescription(session),
                                   builder: (context, descSnapshot) {
@@ -412,7 +474,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                   },
                                 ),
                                 SizedBox(height: 12.h),
-                                // Language availability badges
+                                // Language badges
                                 _buildLanguageBadges(session),
                               ],
                             ),
@@ -430,13 +492,12 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     );
   }
 
-  // 🆕 Get display title with session number
+  // Get display title with session number
   Future<String> _getDisplayTitle(Map<String, dynamic> session) async {
     final currentLanguage = await LanguageHelperService.getCurrentLanguage();
     final localizedContent = SessionLocalizationService.getLocalizedContent(
         session, currentLanguage);
 
-    // Build title with session number if exists
     final sessionNumber = session['sessionNumber'];
     if (sessionNumber != null) {
       return '№$sessionNumber — ${localizedContent.title}';
@@ -445,7 +506,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     return localizedContent.title;
   }
 
-  // 🆕 Get display description
+  // Get display description
   Future<String> _getDisplayDescription(Map<String, dynamic> session) async {
     final currentLanguage = await LanguageHelperService.getCurrentLanguage();
     final localizedContent = SessionLocalizationService.getLocalizedContent(
@@ -454,7 +515,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     return localizedContent.description;
   }
 
-  // 🆕 Build language availability badges
+  // Build language availability badges
   Widget _buildLanguageBadges(Map<String, dynamic> session) {
     final availableLanguages =
         SessionLocalizationService.getAvailableLanguages(session);
