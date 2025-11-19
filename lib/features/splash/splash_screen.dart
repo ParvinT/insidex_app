@@ -108,7 +108,6 @@ class _SplashScreenState extends State<SplashScreen>
 
             try {
               await firebaseUser.reload();
-              final token = await firebaseUser.getIdToken();
               debugPrint('Token refresh successful');
 
               if (mounted) {

@@ -8,7 +8,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/constants/app_colors.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
-import '../../models/category_model.dart';
 
 class CategoryImagesScreen extends StatefulWidget {
   final String categoryId;

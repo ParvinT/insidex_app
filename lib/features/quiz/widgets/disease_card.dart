@@ -24,14 +24,13 @@ class DiseaseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive values
     final isTablet = context.isTablet;
 
     final double fontSize =
-        isTablet ? 15.sp.clamp(14.0, 16.0) : 14.sp.clamp(13.0, 15.0);
-    final double borderRadius = isTablet ? 24.r : 22.r;
-    final double horizontalPadding = isTablet ? 18.w : 16.w;
-    final double verticalPadding = isTablet ? 14.h : 12.h;
+        isTablet ? 14.sp.clamp(13.0, 16.0) : 13.sp.clamp(12.0, 15.0);
+    final double borderRadius = isTablet ? 16.r : 14.r;
+    final double horizontalPadding = isTablet ? 14.w : 12.w;
+    final double verticalPadding = isTablet ? 12.h : 10.h;
 
     return FutureBuilder<String>(
       future: LanguageHelperService.getCurrentLanguage(),
@@ -62,84 +61,50 @@ class DiseaseCard extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
+                        color: Colors.black.withOpacity(0.15),
                         blurRadius: 8,
-                        offset: const Offset(0, 3),
+                        offset: const Offset(0, 2),
                       ),
                     ]
                   : null,
             ),
-            child: Row(
-              children: [
-                // Checkbox
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  width: isTablet ? 20.w : 18.w,
-                  height: isTablet ? 20.w : 18.w,
-                  decoration: BoxDecoration(
-                    color: isSelected ? Colors.white : Colors.transparent,
-                    border: Border.all(
-                      color: isSelected
-                          ? Colors.white
-                          : (isDisabled ? Colors.grey[400]! : Colors.black),
-                      width: 2,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth,
+                      minHeight: isTablet ? 36.h : 32.h,
+                      maxHeight: isTablet ? 52.h : 48.h,
                     ),
-                    borderRadius: BorderRadius.circular(4.r),
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          size: isTablet ? 14.sp : 12.sp,
-                          color: Colors.black,
-                        )
-                      : null,
-                ),
-
-                SizedBox(width: 10.w),
-
-                // Disease name with adaptive font size
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      return ConstrainedBox(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: ConstrainedBox(
                         constraints: BoxConstraints(
-                          minHeight: isTablet ? 40.h : 36.h, // Min height
-                          maxHeight:
-                              isTablet ? 48.h : 44.h, // Max 2 satır için height
+                          maxWidth: constraints.maxWidth,
                         ),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth:
-                                  constraints.maxWidth, // Parent width'i kullan
-                            ),
-                            child: Text(
-                              diseaseName,
-                              style: GoogleFonts.inter(
-                                fontSize: fontSize,
-                                fontWeight: isSelected
-                                    ? FontWeight.w600
-                                    : FontWeight.w500,
-                                color: isSelected
-                                    ? Colors.white
-                                    : (isDisabled
-                                        ? Colors.grey[400]
-                                        : AppColors.textPrimary),
-                                height: 1.3, // Line height (satır arası boşluk)
-                              ),
-                              maxLines: 2, // ✅ 2 satıra izin ver
-                              overflow: TextOverflow.visible,
-                              textAlign: TextAlign.left,
-                            ),
+                        child: Text(
+                          diseaseName,
+                          style: GoogleFonts.inter(
+                            fontSize: fontSize,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : (isDisabled
+                                    ? Colors.grey[400]
+                                    : AppColors.textPrimary),
+                            height: 1.3,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         );

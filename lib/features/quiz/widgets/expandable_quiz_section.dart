@@ -5,9 +5,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
-import '../../../features/quiz/services/quiz_service.dart';
-import '../../../features/quiz/widgets/disease_card.dart';
-import '../../../features/quiz/screens/quiz_results_screen.dart';
+import '../services/quiz_service.dart';
+import 'disease_card.dart';
+import '../screens/quiz_results_screen.dart';
 import '../../../models/disease_model.dart';
 
 class ExpandableQuizSection extends StatefulWidget {
@@ -26,6 +26,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
   bool _isLoadingDiseases = false;
   List<DiseaseModel> _diseases = [];
   String _selectedGender = 'all';
+  Locale? _previousLocale;
 
   // Pagination state
   int _currentPage = 0;
@@ -33,6 +34,30 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
   // Selection state
   Set<String> _selectedDiseaseIds = {};
   static const int _maxSelection = 10;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    // Listen to locale changes
+    final currentLocale = Localizations.localeOf(context);
+
+    // If locale changed and quiz is open, close it
+    if (_previousLocale != null &&
+        _previousLocale != currentLocale &&
+        _isQuizExpanded) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _isQuizExpanded = false;
+          _diseases.clear();
+          _selectedDiseaseIds.clear();
+          _currentPage = 0;
+        });
+      });
+    }
+
+    _previousLocale = currentLocale;
+  }
 
   @override
   void initState() {
@@ -180,14 +205,13 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
     // 2 columns -> max 5 rows
     final rows = (itemCount / 2).ceil();
 
-    // ✅ IMPROVED: Responsive item height
     final double itemHeight;
     if (context.isDesktop) {
-      itemHeight = 62.h;
+      itemHeight = 56.h;
     } else if (isTablet) {
-      itemHeight = 58.h;
+      itemHeight = 54.h;
     } else {
-      itemHeight = 52.h;
+      itemHeight = 50.h;
     }
 
     final spacing = 10.h;
@@ -196,21 +220,21 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
     final gridHeight =
         (rows * itemHeight) + ((rows - 1) * spacing) + topBottomPadding;
 
-    // ✅ IMPROVED: Dynamic max height based on screen
     final double maxHeight;
     if (context.isDesktop) {
-      maxHeight = 400.h;
-    } else if (isTablet) {
       maxHeight = 350.h;
+    } else if (isTablet) {
+      maxHeight = 300.h;
     } else {
-      // Adjust for phone height
       final screenHeight = context.h;
       if (screenHeight <= 667) {
-        maxHeight = 260.h; // iPhone SE, 8
+        maxHeight = 220.h;
       } else if (screenHeight <= 736) {
-        maxHeight = 280.h; // iPhone 8 Plus
+        maxHeight = 240.h;
+      } else if (screenHeight <= 812) {
+        maxHeight = 260.h;
       } else {
-        maxHeight = 300.h; // Modern phones
+        maxHeight = 280.h;
       }
     }
 
@@ -239,8 +263,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         padding: EdgeInsets.symmetric(
-          horizontal: isTablet ? 20.w : 18.w,
-          vertical: isTablet ? 16.h : 14.h,
+          horizontal: isTablet ? 20.w : 16.w,
+          vertical: isTablet ? 16.h : 12.h,
         ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -262,24 +286,26 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Start My Emotional Test — Free',
-              style: GoogleFonts.inter(
-                fontSize: isTablet ? 16.sp : 15.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
+            Flexible(
+              child: Text(
+                'Start My Emotional Test — Free',
+                style: GoogleFonts.inter(
+                  fontSize: (isTablet ? 15.sp : 13.sp).clamp(11.0, 16.0),
+                  fontWeight: FontWeight.w700,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(width: 8.w),
-            AnimatedRotation(
-              duration: const Duration(milliseconds: 300),
-              turns: _isQuizExpanded ? 0.5 : 0,
-              child: Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.white,
-                size: isTablet ? 24.sp : 22.sp,
-              ),
+            Icon(
+              Icons.keyboard_arrow_down,
+              color: Colors.white,
+              size: (isTablet ? 22.sp : 20.sp).clamp(18.0, 24.0),
             ),
           ],
         ),
@@ -294,7 +320,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
       child: _isQuizExpanded
           ? Container(
               margin: EdgeInsets.only(top: 12.h),
-              padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+              padding: EdgeInsets.all(isTablet ? 18.w : 14.w),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(isTablet ? 20.r : 16.r),
@@ -442,118 +468,155 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
   }
 
   Widget _buildSelectionFooter(bool isTablet) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? 20.w : 16.w,
-        vertical: isTablet ? 12.h : 10.h,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.greyLight.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Selection counter
-          Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final isCompact = availableWidth < 340;
+
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: isCompact ? 10.w : (isTablet ? 16.w : 12.w),
+            vertical: isCompact ? 8.h : (isTablet ? 12.h : 10.h),
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.greyLight.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: EdgeInsets.all(isTablet ? 8.w : 6.w),
-                decoration: BoxDecoration(
-                  color: _selectionCount > 0 ? Colors.black : Colors.grey[300],
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.check,
-                  size: isTablet ? 16.sp : 14.sp,
-                  color: Colors.white,
+              // Selection counter
+              Flexible(
+                flex: isCompact ? 2 : 3,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(
+                          isCompact ? 5.w : (isTablet ? 8.w : 6.w)),
+                      decoration: BoxDecoration(
+                        color: _selectionCount > 0
+                            ? Colors.black
+                            : Colors.grey[300],
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.check,
+                        size: isCompact ? 12.sp : (isTablet ? 16.sp : 14.sp),
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: isCompact ? 6.w : 10.w),
+                    Flexible(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Selected',
+                            style: GoogleFonts.inter(
+                              fontSize:
+                                  isCompact ? 9.sp : (isTablet ? 12.sp : 10.sp),
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            '$_selectionCount / $_maxSelection',
+                            style: GoogleFonts.inter(
+                              fontSize: isCompact
+                                  ? 12.sp
+                                  : (isTablet ? 16.sp : 14.sp),
+                              fontWeight: FontWeight.w700,
+                              color: _selectionCount > 0
+                                  ? AppColors.textPrimary
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(width: 10.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Selected Conditions',
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 12.sp : 11.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
+
+              SizedBox(width: isCompact ? 6.w : 8.w),
+
+              // Next button
+              Flexible(
+                flex: 2,
+                child: GestureDetector(
+                  onTap: _canProceed ? _proceedToResults : null,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isCompact ? 12.w : (isTablet ? 18.w : 14.w),
+                      vertical: isCompact ? 8.h : (isTablet ? 12.h : 10.h),
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: _canProceed
+                          ? LinearGradient(
+                              colors: [
+                                Colors.black,
+                                Colors.black.withOpacity(0.85)
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      color: _canProceed ? null : Colors.grey[300],
+                      borderRadius: BorderRadius.circular(24.r),
+                      boxShadow: _canProceed
+                          ? [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ]
+                          : null,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Next',
+                            style: GoogleFonts.inter(
+                              fontSize: isCompact
+                                  ? 11.sp
+                                  : (isTablet ? 14.sp : 12.sp),
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  _canProceed ? Colors.white : Colors.grey[500],
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.clip,
+                          ),
+                        ),
+                        SizedBox(width: isCompact ? 4.w : 6.w),
+                        Icon(
+                          Icons.arrow_forward,
+                          size: isCompact ? 12.sp : (isTablet ? 16.sp : 14.sp),
+                          color: _canProceed ? Colors.white : Colors.grey[500],
+                        ),
+                      ],
                     ),
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    '$_selectionCount / $_maxSelection',
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 16.sp : 15.sp,
-                      fontWeight: FontWeight.w700,
-                      color: _selectionCount > 0
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
-
-          // Next button
-          GestureDetector(
-            onTap: _canProceed ? _proceedToResults : null,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: EdgeInsets.symmetric(
-                horizontal: isTablet ? 24.w : 20.w,
-                vertical: isTablet ? 14.h : 12.h,
-              ),
-              decoration: BoxDecoration(
-                gradient: _canProceed
-                    ? LinearGradient(
-                        colors: [Colors.black, Colors.black.withOpacity(0.85)],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      )
-                    : null,
-                color: _canProceed ? null : Colors.grey[300],
-                borderRadius: BorderRadius.circular(24.r),
-                boxShadow: _canProceed
-                    ? [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        ),
-                      ]
-                    : null,
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Next',
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 15.sp : 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: _canProceed ? Colors.white : Colors.grey[500],
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  Icon(
-                    Icons.arrow_forward,
-                    size: isTablet ? 18.sp : 16.sp,
-                    color: _canProceed ? Colors.white : Colors.grey[500],
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildDiseaseGrid(int pageIndex, bool isTablet) {
-    // Calculate diseases for this page
     final startIndex = pageIndex * _itemsPerPage;
     final endIndex = (startIndex + _itemsPerPage).clamp(0, _diseases.length);
 
@@ -563,27 +626,60 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
 
     final pageDiseases = _diseases.sublist(startIndex, endIndex);
 
-    return GridView.builder(
-      shrinkWrap: true,
-      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.w,
-        mainAxisSpacing: 10.h,
-        childAspectRatio: isTablet ? 2.6 : 2.9,
-      ),
-      itemCount: pageDiseases.length,
-      itemBuilder: (context, index) {
-        final disease = pageDiseases[index];
-        final isSelected = _isDiseaseSelected(disease.id);
-        final isDisabled = _isMaxSelected && !isSelected;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final availableWidth = constraints.maxWidth;
+        final availableHeight = constraints.maxHeight;
 
-        return DiseaseCard(
-          disease: disease,
-          isSelected: isSelected,
-          isDisabled: isDisabled,
-          onTap: () => _toggleDiseaseSelection(disease.id),
+        const crossAxisCount = 2;
+        final horizontalPadding = 4.w;
+        final crossAxisSpacing = 10.w;
+
+        final totalHorizontalPadding = horizontalPadding * 2;
+        final totalSpacing = crossAxisSpacing * (crossAxisCount - 1);
+        final itemWidth =
+            (availableWidth - totalHorizontalPadding - totalSpacing) /
+                crossAxisCount;
+
+        final rows = (pageDiseases.length / crossAxisCount).ceil();
+        final mainAxisSpacing = 10.h;
+
+        final verticalPadding = 8.h;
+        final totalVerticalPadding = verticalPadding * 2;
+        final totalVerticalSpacing = mainAxisSpacing * (rows - 1);
+
+        final availableHeightForItems =
+            availableHeight - totalVerticalPadding - totalVerticalSpacing;
+        final itemHeight = availableHeightForItems / rows;
+
+        final childAspectRatio = itemWidth / itemHeight;
+
+        return GridView.builder(
+          shrinkWrap: true,
+          padding: EdgeInsets.symmetric(
+            horizontal: horizontalPadding,
+            vertical: verticalPadding,
+          ),
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: crossAxisSpacing,
+            mainAxisSpacing: mainAxisSpacing,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemCount: pageDiseases.length,
+          itemBuilder: (context, index) {
+            final disease = pageDiseases[index];
+            final isSelected = _isDiseaseSelected(disease.id);
+            final isDisabled = _isMaxSelected && !isSelected;
+
+            return DiseaseCard(
+              disease: disease,
+              isSelected: isSelected,
+              isDisabled: isDisabled,
+              onTap: () => _toggleDiseaseSelection(disease.id),
+            );
+          },
         );
       },
     );
@@ -602,8 +698,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(
-          horizontal: isTablet ? 16.w : 14.w,
-          vertical: isTablet ? 10.h : 8.h,
+          horizontal: isTablet ? 14.w : 12.w,
+          vertical: isTablet ? 9.h : 8.h,
         ),
         decoration: BoxDecoration(
           color: isSelected ? Colors.black : Colors.white,

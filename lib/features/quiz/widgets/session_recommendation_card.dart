@@ -141,7 +141,7 @@ class SessionRecommendationCard extends StatelessWidget {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      '№$sessionNumber',
+                      '$sessionNumber',
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 16.sp : 15.sp,
                         fontWeight: FontWeight.w700,

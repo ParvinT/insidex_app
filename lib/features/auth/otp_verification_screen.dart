@@ -1,7 +1,6 @@
 // lib/features/auth/otp_verification_screen.dart
 
 import 'dart:async';
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +24,9 @@ class OTPVerificationScreen extends StatefulWidget {
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
 
   final _codeCtrl = TextEditingController();
-  final _focusNode = FocusNode(); // ✅ EKLE
+  final _focusNode = FocusNode(); 
   bool _busy = false;
   bool _resending = false;
   Timer? _t;
@@ -59,8 +56,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(m), backgroundColor: bg));
   }
-
-  String _gen() => List.generate(6, (_) => Random.secure().nextInt(10)).join();
 
   void _countdown([int s = 60]) {
     _t?.cancel();

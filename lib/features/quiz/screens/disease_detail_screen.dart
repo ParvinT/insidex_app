@@ -95,7 +95,6 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
   Future<void> _navigateToSession() async {
     if (_sessionData == null) return;
 
-    // TODO: Add premium check here
     // For now, just navigate to player
     Navigator.push(
       context,
@@ -104,15 +103,6 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
           sessionData: _sessionData!,
         ),
       ),
-    );
-  }
-
-  void _showPremiumModal() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildPremiumModal(),
     );
   }
 
@@ -203,8 +193,6 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
       sessionNumber: _cause?.sessionNumber,
       sessionTitle: sessionTitle,
       onTap: _navigateToSession,
-      isPremium: true, // TODO: Get from session data
-      userHasPremium: false, // TODO: Get from UserProvider
     );
   }
 
@@ -257,104 +245,6 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPremiumModal() {
-    final isTablet = context.isTablet;
-
-    return Container(
-      padding: EdgeInsets.all(isTablet ? 32.w : 24.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(24.r),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Lock icon
-          Container(
-            width: 80.w,
-            height: 80.w,
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.lock,
-              color: AppColors.primaryGold,
-              size: 40.sp,
-            ),
-          ),
-
-          SizedBox(height: 20.h),
-
-          Text(
-            'Premium Required',
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 24.sp : 22.sp,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-
-          SizedBox(height: 12.h),
-
-          Text(
-            'Unlock this healing session and access all premium content',
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 15.sp : 14.sp,
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          SizedBox(height: 24.h),
-
-          // Upgrade button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                // TODO: Navigate to premium/paywall screen
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGold,
-                padding: EdgeInsets.symmetric(vertical: 16.h),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              child: Text(
-                'Upgrade to Premium',
-                style: GoogleFonts.inter(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-
-          SizedBox(height: 12.h),
-
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Maybe Later',
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textSecondary,
-              ),
             ),
           ),
         ],

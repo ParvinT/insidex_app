@@ -21,8 +21,7 @@ class DiseaseCauseCard extends StatelessWidget {
     final isDesktop = context.isDesktop;
 
     final double cardPadding = isDesktop ? 24.w : (isTablet ? 20.w : 18.w);
-    final double titleSize =
-        isTablet ? 18.sp.clamp(17.0, 19.0) : 16.sp.clamp(15.0, 17.0);
+
     final double contentSize =
         isTablet ? 15.sp.clamp(14.0, 16.0) : 14.sp.clamp(13.0, 15.0);
     final double borderRadius = isTablet ? 18.r : 16.r;
@@ -56,6 +55,8 @@ class DiseaseCauseCard extends StatelessWidget {
               color: AppColors.textSecondary,
               height: 1.6,
             ),
+            maxLines: 6,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

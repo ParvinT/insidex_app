@@ -47,7 +47,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index].data() as Map<String, dynamic>;
-              final docId = users[index].id;
 
               return Card(
                 margin: EdgeInsets.only(bottom: 12.h),

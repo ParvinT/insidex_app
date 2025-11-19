@@ -2,7 +2,7 @@
 
 class AppIcons {
   static const String animationPath = 'assets/animations/categories/';
-  
+
   static const List<Map<String, dynamic>> categoryIcons = [
     {
       'name': 'brain',
@@ -14,13 +14,18 @@ class AppIcons {
       'label': 'Meditation',
       'path': 'meditation.json',
     },
+    {
+      'name': 'heartbeat',
+      'label': 'Health/Healing',
+      'path': 'heartbeat.json',
+    },
   ];
-  
+
   /// Get full animation path
   static String getAnimationPath(String fileName) {
     return '$animationPath$fileName';
   }
-  
+
   /// Get icon data by name
   static Map<String, dynamic>? getIconByName(String name) {
     try {

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/disease/disease_cause_service.dart';
@@ -30,6 +32,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
   final DiseaseCauseService _causeService = DiseaseCauseService();
 
   Map<String, DiseaseCauseModel> _causes = {};
+  final Map<String, bool> _expandedCauses = {};
   bool _isLoading = true;
   bool _isExpanded = false;
 
@@ -79,6 +82,16 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
     return widget.selectedDiseases.length > _initialDisplayCount;
   }
 
+  bool _isCauseExpanded(String diseaseId) {
+    return _expandedCauses[diseaseId] ?? false;
+  }
+
+  void _toggleCauseExpansion(String diseaseId) {
+    setState(() {
+      _expandedCauses[diseaseId] = !(_expandedCauses[diseaseId] ?? false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final isTablet = context.isTablet;
@@ -122,10 +135,10 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                         disease, index + 1, isTablet);
                   }),
 
-                  // See More button
-                  if (_canExpand && !_isExpanded) ...[
+                  // See More / See Less button
+                  if (_canExpand) ...[
                     SizedBox(height: 16.h),
-                    _buildSeeMoreButton(isTablet),
+                    _buildExpandToggleButton(isTablet),
                   ],
 
                   SizedBox(height: 24.h),
@@ -141,8 +154,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryGold.withOpacity(0.1),
-            AppColors.primaryGold.withOpacity(0.05),
+            AppColors.textPrimary.withOpacity(0.1),
+            AppColors.textPrimary.withOpacity(0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -152,15 +165,13 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       child: Row(
         children: [
           Container(
+            width: isTablet ? 102.w : 96.w,
+            height: isTablet ? 102.w : 96.w,
             padding: EdgeInsets.all(isTablet ? 14.w : 12.w),
-            decoration: BoxDecoration(
-              color: AppColors.primaryGold,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.psychology,
-              color: Colors.white,
-              size: isTablet ? 28.sp : 24.sp,
+            child: Lottie.asset(
+              'assets/animations/categories/heartbeat.json',
+              fit: BoxFit.contain,
+              repeat: true,
             ),
           ),
           SizedBox(width: 16.w),
@@ -169,7 +180,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Selected Conditions',
+                  'Selected Diseases',
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 14.sp : 13.sp,
                     fontWeight: FontWeight.w500,
@@ -178,7 +189,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '${widget.selectedDiseases.length} ${widget.selectedDiseases.length == 1 ? 'Condition' : 'Conditions'}',
+                  '${widget.selectedDiseases.length} ${widget.selectedDiseases.length == 1 ? 'Disease' : 'Diseases'}',
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 20.sp : 18.sp,
                     fontWeight: FontWeight.w700,
@@ -225,70 +236,86 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Disease name with number
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Number badge
-                  Container(
-                    width: isTablet ? 32.w : 28.w,
-                    height: isTablet ? 32.w : 28.w,
-                    decoration: BoxDecoration(
-                      color: Colors.black,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$number',
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 14.sp : 13.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+              IntrinsicHeight(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Number badge
+                    Padding(
+                      padding: EdgeInsets.only(top: 2.h),
+                      child: Container(
+                        width: (isTablet ? 26.w : 22.w).clamp(20.0, 28.0),
+                        height: (isTablet ? 26.w : 22.w).clamp(20.0, 28.0),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          shape: BoxShape.circle,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          '$number',
+                          style: GoogleFonts.inter(
+                            fontSize:
+                                (isTablet ? 11.sp : 10.sp).clamp(9.0, 12.0),
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          diseaseName,
-                          style: GoogleFonts.inter(
-                            fontSize: isTablet ? 18.sp : 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: disease.gender == 'male'
-                                ? Colors.blue.withOpacity(0.1)
-                                : Colors.pink.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6.r),
-                          ),
-                          child: Text(
-                            disease.gender == 'male' ? 'MALE' : 'FEMALE',
+                    SizedBox(width: 10.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Disease name
+                          Text(
+                            diseaseName,
                             style: GoogleFonts.inter(
-                              fontSize: isTablet ? 10.sp : 9.sp,
-                              fontWeight: FontWeight.w700,
-                              color: disease.gender == 'male'
-                                  ? Colors.blue[700]
-                                  : Colors.pink[700],
-                              letterSpacing: 0.5,
+                              fontSize:
+                                  (isTablet ? 13.sp : 12.sp).clamp(11.0, 14.0),
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                              height: 1.5,
+                            ),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 6.h),
+                          // Gender badge
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8.w,
+                                vertical: 3.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: disease.gender == 'male'
+                                    ? Colors.blue.withOpacity(0.1)
+                                    : Colors.pink.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(6.r),
+                              ),
+                              child: Text(
+                                disease.gender == 'male' ? 'MALE' : 'FEMALE',
+                                style: GoogleFonts.inter(
+                                  fontSize:
+                                      (isTablet ? 8.sp : 7.sp).clamp(6.0, 9.0),
+                                  fontWeight: FontWeight.w700,
+                                  color: disease.gender == 'male'
+                                      ? Colors.blue[700]
+                                      : Colors.pink[700],
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-
               if (cause != null) ...[
                 SizedBox(height: 16.h),
 
@@ -301,8 +328,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                 Text(
                   'Why is this caused?',
                   style: GoogleFonts.inter(
-                    fontSize: isTablet ? 14.sp : 13.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: (isTablet ? 15.sp : 14.sp).clamp(13.0, 16.0),
+                    fontWeight: FontWeight.w700,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -310,96 +337,153 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                 SizedBox(height: 8.h),
 
                 // Cause content
-                Text(
-                  cause.getLocalizedContent(currentLanguage),
-                  style: GoogleFonts.inter(
-                    fontSize: isTablet ? 14.sp : 13.sp,
-                    height: 1.5,
-                    color: AppColors.textPrimary,
-                  ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cause.getLocalizedContent(currentLanguage),
+                      style: GoogleFonts.inter(
+                        fontSize: (isTablet ? 13.sp : 12.sp).clamp(11.0, 14.0),
+                        fontWeight: FontWeight.w400,
+                        height: 1.5,
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: _isCauseExpanded(disease.id) ? null : 3,
+                      overflow: _isCauseExpanded(disease.id)
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
+                    ),
+
+                    // See more/less button
+                    if (cause.getLocalizedContent(currentLanguage).length >
+                        150) ...[
+                      SizedBox(height: 8.h),
+                      GestureDetector(
+                        onTap: () => _toggleCauseExpansion(disease.id),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              _isCauseExpanded(disease.id)
+                                  ? 'See less'
+                                  : 'See more',
+                              style: GoogleFonts.inter(
+                                fontSize: (isTablet ? 12.sp : 11.sp)
+                                    .clamp(10.0, 13.0),
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.darkBackground,
+                              ),
+                            ),
+                            SizedBox(width: 4.w),
+                            Icon(
+                              _isCauseExpanded(disease.id)
+                                  ? Icons.keyboard_arrow_up
+                                  : Icons.keyboard_arrow_down,
+                              size:
+                                  (isTablet ? 18.sp : 16.sp).clamp(14.0, 20.0),
+                              color: AppColors.darkBackground,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
 
                 SizedBox(height: 16.h),
 
                 // Recommended session
-                Container(
-                  padding: EdgeInsets.all(isTablet ? 14.w : 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.play_circle,
-                        color: AppColors.primaryGold,
-                        size: isTablet ? 24.sp : 22.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: FutureBuilder<String>(
-                          future: _getSessionTitle(
-                              cause.recommendedSessionId, currentLanguage),
-                          builder: (context, snapshot) {
-                            final sessionTitle = snapshot.data ??
-                                'Session №${cause.sessionNumber}';
-
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Recommended Session',
-                                  style: GoogleFonts.inter(
-                                    fontSize: isTablet ? 12.sp : 11.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                SizedBox(height: 2.h),
-                                Text(
-                                  sessionTitle,
-                                  style: GoogleFonts.inter(
-                                    fontSize: isTablet ? 15.sp : 14.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryGold,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () =>
-                            _navigateToSession(cause.recommendedSessionId),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isTablet ? 16.w : 14.w,
-                            vertical: isTablet ? 10.h : 8.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryGold,
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          child: Text(
-                            'Listen',
-                            style: GoogleFonts.inter(
-                              fontSize: isTablet ? 13.sp : 12.sp,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
+                GestureDetector(
+                  onTap: () => _navigateToSession(cause.recommendedSessionId),
+                  child: Container(
+                    padding: EdgeInsets.all(
+                        (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
+                    decoration: BoxDecoration(
+                      color: AppColors.textPrimary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return Row(
+                          children: [
+                            Icon(
+                              Icons.play_circle_filled,
+                              color: AppColors.textPrimary,
+                              size: isTablet ? 24.sp : 22.sp,
                             ),
-                          ),
-                        ),
-                      ),
-                    ],
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: FutureBuilder<String>(
+                                future: _getSessionTitle(
+                                    cause.recommendedSessionId,
+                                    currentLanguage),
+                                builder: (context, snapshot) {
+                                  final sessionTitle = snapshot.data ??
+                                      'Session №${cause.sessionNumber}';
+
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Recommended Session',
+                                        style: GoogleFonts.inter(
+                                          fontSize: (isTablet ? 11.sp : 10.sp)
+                                              .clamp(9.0, 12.0),
+                                          fontWeight: FontWeight.w500,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      SizedBox(height: 2.h),
+                                      Text(
+                                        sessionTitle,
+                                        style: GoogleFonts.inter(
+                                          fontSize: (isTablet ? 14.sp : 13.sp)
+                                              .clamp(12.0, 15.0),
+                                          fontWeight: FontWeight.w700,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal:
+                                    (isTablet ? 14.w : 12.w).clamp(10.0, 16.0),
+                                vertical:
+                                    (isTablet ? 9.h : 8.h).clamp(7.0, 11.0),
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.textPrimary,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Text(
+                                'Listen',
+                                style: GoogleFonts.inter(
+                                  fontSize: (isTablet ? 12.sp : 11.sp)
+                                      .clamp(10.0, 13.0),
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ] else ...[
                 SizedBox(height: 12.h),
                 Container(
-                  padding: EdgeInsets.all(isTablet ? 14.w : 12.w),
+                  padding: EdgeInsets.all(
+                      (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12.r),
@@ -409,14 +493,15 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                       Icon(
                         Icons.info_outline,
                         color: Colors.orange,
-                        size: isTablet ? 20.sp : 18.sp,
+                        size: (isTablet ? 20.sp : 18.sp).clamp(16.0, 22.0),
                       ),
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
-                          'No healing session available for this condition yet.',
+                          'No healing session available for this disease yet.',
                           style: GoogleFonts.inter(
-                            fontSize: isTablet ? 13.sp : 12.sp,
+                            fontSize:
+                                (isTablet ? 12.sp : 11.sp).clamp(10.0, 13.0),
                             color: Colors.orange[800],
                           ),
                         ),
@@ -432,10 +517,10 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
     );
   }
 
-  Widget _buildSeeMoreButton(bool isTablet) {
+  Widget _buildExpandToggleButton(bool isTablet) {
     return GestureDetector(
       onTap: () {
-        setState(() => _isExpanded = true);
+        setState(() => _isExpanded = !_isExpanded);
       },
       child: Container(
         padding: EdgeInsets.symmetric(
@@ -454,18 +539,18 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'See $_hiddenCount More',
+              _isExpanded ? 'See Less' : 'See $_hiddenCount More',
               style: GoogleFonts.inter(
-                fontSize: isTablet ? 15.sp : 14.sp,
+                fontSize: (isTablet ? 14.sp : 13.sp).clamp(12.0, 15.0),
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
             ),
             SizedBox(width: 8.w),
             Icon(
-              Icons.keyboard_arrow_down,
+              _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
               color: AppColors.textPrimary,
-              size: isTablet ? 22.sp : 20.sp,
+              size: (isTablet ? 20.sp : 18.sp).clamp(16.0, 22.0),
             ),
           ],
         ),
@@ -495,12 +580,12 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       // Build title with session number
       final sessionNumber = sessionData['sessionNumber'];
       if (sessionNumber != null && localizedContent.title.isNotEmpty) {
-        return '№$sessionNumber • ${localizedContent.title}';
+        return '$sessionNumber - ${localizedContent.title}';
       }
 
       return localizedContent.title.isNotEmpty
           ? localizedContent.title
-          : 'Session №$sessionNumber';
+          : 'Session $sessionNumber';
     } catch (e) {
       debugPrint('❌ Error getting session title: $e');
       return 'Session';
@@ -511,29 +596,6 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
     debugPrint('🎵 [QuizResults] Opening session: $sessionId');
 
     try {
-      // Show loading
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                ),
-                SizedBox(width: 16),
-                Text('Loading session...'),
-              ],
-            ),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-
       // Fetch session by ID
       final sessionDoc = await FirebaseFirestore.instance
           .collection('sessions')

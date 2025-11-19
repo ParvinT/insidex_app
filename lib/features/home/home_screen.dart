@@ -13,7 +13,7 @@ import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
 import '../../services/home_card_service.dart';
 import 'widgets/home_card_button.dart';
-import 'widgets/expandable_quiz_section.dart';
+import '../quiz/widgets/expandable_quiz_section.dart';
 import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
 import '../search/widgets/search_bar_widget.dart';
@@ -155,8 +155,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildScrollableContent() {
-    final isTablet = context.isTablet;
-
     if (_isLoadingCards) {
       return const Center(
         child: CircularProgressIndicator(
@@ -179,7 +177,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Responsive column count
     int crossAxisCount;
     if (screenWidth > 1200) {
       crossAxisCount = 4;
@@ -191,7 +188,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       crossAxisCount = 2;
     }
 
-    // Calculate card dimensions
     final horizontalPadding = 24.w;
     final totalPadding = horizontalPadding * 2;
     final totalGaps = 12.w * (crossAxisCount - 1);
@@ -200,36 +196,44 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final cardHeight = cardWidth * 1.0;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: 16.h,
+      padding: EdgeInsets.only(
+        left: horizontalPadding,
+        right: horizontalPadding,
+        top: 16.h,
+        bottom: 16.h,
       ),
       physics: const BouncingScrollPhysics(),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: 12.w,
-          mainAxisSpacing: 12.h,
-          childAspectRatio: cardWidth / cardHeight,
-        ),
-        itemCount: _homeCards.length,
-        itemBuilder: (context, index) {
-          final card = _homeCards[index];
-          final title = HomeCardService.getLocalizedTitleFromKey(
-            context,
-            card['cardType'],
-          );
+      child: Column(
+        children: [
+          const ExpandableQuizSection(),
+          SizedBox(height: 20.h),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 12.h,
+              childAspectRatio: cardWidth / cardHeight,
+            ),
+            itemCount: _homeCards.length,
+            itemBuilder: (context, index) {
+              final card = _homeCards[index];
+              final title = HomeCardService.getLocalizedTitleFromKey(
+                context,
+                card['cardType'],
+              );
 
-          return HomeCardButton(
-            imageUrl: card['randomImage'],
-            title: title,
-            icon: _getIconData(card['icon']),
-            onTap: () => _navigateToCard(card['navigateTo']),
-            height: cardHeight,
-          );
-        },
+              return HomeCardButton(
+                imageUrl: card['randomImage'],
+                title: title,
+                icon: _getIconData(card['icon']),
+                onTap: () => _navigateToCard(card['navigateTo']),
+                height: cardHeight,
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -317,27 +321,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 );
               },
             ),
-
-            SizedBox(height: 12.h),
-
-// Quiz section
-            const ExpandableQuizSection(),
-
-            SizedBox(height: 12.h),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Background
-  Widget _buildBackground() {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF9F9F9), Color(0xFFEFEFEF)],
         ),
       ),
     );
