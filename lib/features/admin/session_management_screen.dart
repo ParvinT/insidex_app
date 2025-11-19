@@ -82,10 +82,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
       try {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  SizedBox(
+                  const SizedBox(
                     width: 20,
                     height: 20,
                     child: CircularProgressIndicator(
@@ -93,11 +93,11 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   ),
-                  SizedBox(width: 16),
-                  Text('Deleting session and files...'),
+                  const SizedBox(width: 16),
+                  Text(AppLocalizations.of(context).deletingSessionAndFiles),
                 ],
               ),
-              duration: Duration(seconds: 30),
+              duration: const Duration(seconds: 30),
             ),
           );
         }
@@ -128,9 +128,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error deleting session: $e'),
+              content: Text(
+                  '${AppLocalizations.of(context).errorDeletingSession}: $e'),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -140,8 +141,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
   // 🆕 Helper: Get category name from ID
   String _getCategoryName(String? categoryId) {
+    final l10n = AppLocalizations.of(context);
+
     if (categoryId == null || _categories.isEmpty) {
-      return 'Uncategorized';
+      return l10n.uncategorized;
     }
 
     try {
@@ -149,7 +152,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
       return category.getName('en');
     } catch (e) {
       debugPrint('⚠️ Category not found: $categoryId');
-      return 'Uncategorized';
+      return l10n.uncategorized;
     }
   }
 

@@ -128,8 +128,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             ),
             onPressed: _toggleLanguageFilter,
             tooltip: _showOnlyUserLanguage
-                ? 'Showing only your language'
-                : 'Showing all languages',
+                ? AppLocalizations.of(context).showingOnlyYourLanguage
+                : AppLocalizations.of(context).showingAllLanguages,
           ),
           // Add button
           IconButton(
@@ -319,7 +319,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         SizedBox(width: 4.w),
                         Flexible(
                           child: Text(
-                            '${category.backgroundImages.length} images',
+                            '${category.backgroundImages.length} ${AppLocalizations.of(context).images}',
                             style: GoogleFonts.inter(
                               fontSize: isTablet ? 14.sp : 12.sp,
                               color: AppColors.textSecondary,
@@ -347,7 +347,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                       color: AppColors.primaryGold,
                       size: isTablet ? 24.sp : 22.sp,
                     ),
-                    tooltip: 'Manage Images',
+                    tooltip: AppLocalizations.of(context).manageImages,
                   ),
                   // Edit button
                   IconButton(

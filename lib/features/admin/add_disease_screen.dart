@@ -106,7 +106,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
 
       // Validate: at least English must be filled
       if (!translations.containsKey('en') || translations['en']!.isEmpty) {
-        throw Exception('English name is required');
+        throw Exception(AppLocalizations.of(context).englishNameRequired);
       }
 
       // Create disease model
@@ -145,7 +145,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
           );
           Navigator.pop(context, true);
         } else {
-          throw Exception('Failed to save disease');
+          throw Exception(AppLocalizations.of(context).failedToSaveDisease);
         }
       }
     } catch (e) {
@@ -280,8 +280,8 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
     return DropdownButtonFormField<String>(
       value: _selectedGender,
       decoration: InputDecoration(
-        labelText: 'Gender',
-        hintText: 'Select gender',
+        labelText: AppLocalizations.of(context).gender,
+        hintText: AppLocalizations.of(context).selectGender,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
@@ -289,11 +289,11 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
       items: [
         DropdownMenuItem(
           value: 'male',
-          child: Text('Male'),
+          child: Text(AppLocalizations.of(context).male),
         ),
         DropdownMenuItem(
           value: 'female',
-          child: Text('Female'),
+          child: Text(AppLocalizations.of(context).female),
         ),
       ],
       onChanged: (value) {
@@ -302,7 +302,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
         }
       },
       validator: (value) {
-        if (value == null) return 'Please select gender';
+        if (value == null) return AppLocalizations.of(context).pleaseSelectGender;
         return null;
       },
     );

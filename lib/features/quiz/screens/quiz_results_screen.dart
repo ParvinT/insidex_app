@@ -7,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
-import '../../../core/constants/app_icons.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/disease/disease_cause_service.dart';
@@ -106,7 +105,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Your Results',
+          AppLocalizations.of(context).yourResults,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
@@ -180,7 +179,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Selected Diseases',
+                  AppLocalizations.of(context).selectedDiseases,
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 14.sp : 13.sp,
                     fontWeight: FontWeight.w500,
@@ -189,7 +188,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  '${widget.selectedDiseases.length} ${widget.selectedDiseases.length == 1 ? 'Disease' : 'Diseases'}',
+                  '${widget.selectedDiseases.length} ${widget.selectedDiseases.length == 1 ? AppLocalizations.of(context).disease : AppLocalizations.of(context).diseases}',
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 20.sp : 18.sp,
                     fontWeight: FontWeight.w700,
@@ -246,7 +245,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                       child: Container(
                         width: (isTablet ? 26.w : 22.w).clamp(20.0, 28.0),
                         height: (isTablet ? 26.w : 22.w).clamp(20.0, 28.0),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
                         ),
@@ -297,7 +296,13 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                 borderRadius: BorderRadius.circular(6.r),
                               ),
                               child: Text(
-                                disease.gender == 'male' ? 'MALE' : 'FEMALE',
+                                disease.gender == 'male'
+                                    ? AppLocalizations.of(context)
+                                        .male
+                                        .toUpperCase()
+                                    : AppLocalizations.of(context)
+                                        .female
+                                        .toUpperCase(),
                                 style: GoogleFonts.inter(
                                   fontSize:
                                       (isTablet ? 8.sp : 7.sp).clamp(6.0, 9.0),
@@ -326,7 +331,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
                 // Why is this caused?
                 Text(
-                  'Why is this caused?',
+                  AppLocalizations.of(context).whyIsThisCaused,
                   style: GoogleFonts.inter(
                     fontSize: (isTablet ? 15.sp : 14.sp).clamp(13.0, 16.0),
                     fontWeight: FontWeight.w700,
@@ -365,8 +370,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                           children: [
                             Text(
                               _isCauseExpanded(disease.id)
-                                  ? 'See less'
-                                  : 'See more',
+                                  ? AppLocalizations.of(context).seeLess
+                                  : AppLocalizations.of(context).seeMore,
                               style: GoogleFonts.inter(
                                 fontSize: (isTablet ? 12.sp : 11.sp)
                                     .clamp(10.0, 13.0),
@@ -419,14 +424,15 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                     currentLanguage),
                                 builder: (context, snapshot) {
                                   final sessionTitle = snapshot.data ??
-                                      'Session №${cause.sessionNumber}';
+                                      '${AppLocalizations.of(context).session} №${cause.sessionNumber}';
 
                                   return Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        'Recommended Session',
+                                        AppLocalizations.of(context)
+                                            .recommendedSession,
                                         style: GoogleFonts.inter(
                                           fontSize: (isTablet ? 11.sp : 10.sp)
                                               .clamp(9.0, 12.0),
@@ -464,7 +470,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                 borderRadius: BorderRadius.circular(20.r),
                               ),
                               child: Text(
-                                'Listen',
+                                AppLocalizations.of(context).listen,
                                 style: GoogleFonts.inter(
                                   fontSize: (isTablet ? 12.sp : 11.sp)
                                       .clamp(10.0, 13.0),
@@ -498,7 +504,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
-                          'No healing session available for this disease yet.',
+                          AppLocalizations.of(context)
+                              .noHealingSessionAvailable,
                           style: GoogleFonts.inter(
                             fontSize:
                                 (isTablet ? 12.sp : 11.sp).clamp(10.0, 13.0),
@@ -539,7 +546,9 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _isExpanded ? 'See Less' : 'See $_hiddenCount More',
+              _isExpanded
+                  ? AppLocalizations.of(context).seeLess
+                  : AppLocalizations.of(context).seeXMore(_hiddenCount),
               style: GoogleFonts.inter(
                 fontSize: (isTablet ? 14.sp : 13.sp).clamp(12.0, 15.0),
                 fontWeight: FontWeight.w700,
@@ -566,7 +575,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           .doc(sessionId)
           .get();
 
-      if (!sessionDoc.exists) return 'Session';
+      if (!sessionDoc.exists) AppLocalizations.of(context).session;
 
       final sessionData = {
         'id': sessionId,
@@ -585,10 +594,10 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
       return localizedContent.title.isNotEmpty
           ? localizedContent.title
-          : 'Session $sessionNumber';
+          : '${AppLocalizations.of(context).session} $sessionNumber';
     } catch (e) {
       debugPrint('❌ Error getting session title: $e');
-      return 'Session';
+      return AppLocalizations.of(context).session;
     }
   }
 
@@ -644,9 +653,9 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not open session'),
+            content: Text(AppLocalizations.of(context).couldNotOpenSession),
             backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
+            duration: const Duration(seconds: 3),
           ),
         );
       }

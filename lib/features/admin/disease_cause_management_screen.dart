@@ -68,7 +68,8 @@ class _DiseaseCauseManagementScreenState
 
   Future<void> _deleteCause(DiseaseCauseModel cause) async {
     final disease = _diseasesById[cause.diseaseId];
-    final diseaseName = disease?.getLocalizedName('en') ?? 'Unknown';
+    final diseaseName =
+        disease?.getLocalizedName('en') ?? AppLocalizations.of(context).unknown;
 
     final confirm = await showDialog<bool>(
       context: context,
@@ -177,7 +178,8 @@ class _DiseaseCauseManagementScreenState
 
   Widget _buildCauseCard(DiseaseCauseModel cause) {
     final disease = _diseasesById[cause.diseaseId];
-    final diseaseName = disease?.getLocalizedName('en') ?? 'Unknown Disease';
+    final diseaseName = disease?.getLocalizedName('en') ??
+        AppLocalizations.of(context).unknownDisease;
 
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -203,7 +205,9 @@ class _DiseaseCauseManagementScreenState
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
-                    disease?.gender == 'male' ? 'MALE' : 'FEMALE',
+                    disease?.gender == 'male'
+                        ? AppLocalizations.of(context).male.toUpperCase()
+                        : AppLocalizations.of(context).female.toUpperCase(),
                     style: GoogleFonts.inter(
                       fontSize: 10.sp,
                       fontWeight: FontWeight.w700,

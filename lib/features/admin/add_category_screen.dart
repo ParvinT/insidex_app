@@ -191,7 +191,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Category Icon',
+                  AppLocalizations.of(context).categoryIcon,
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 16.sp : 14.sp,
                     fontWeight: FontWeight.w600,
@@ -200,7 +200,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Tap to choose an icon for this category',
+                  AppLocalizations.of(context).tapToChooseIcon,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,
@@ -439,7 +439,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
             // Title
             Text(
-              'Select Icon Animation',
+              AppLocalizations.of(context).selectIcon,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -616,7 +616,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text('${AppLocalizations.of(context).errorOccurred}: $e'),
           backgroundColor: Colors.red,
         ),
       );

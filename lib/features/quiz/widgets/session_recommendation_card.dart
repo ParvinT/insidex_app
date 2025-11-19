@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
+import '../../../l10n/app_localizations.dart'; 
 
 class SessionRecommendationCard extends StatelessWidget {
   final int? sessionNumber;
@@ -29,8 +30,10 @@ class SessionRecommendationCard extends StatelessWidget {
     final isDesktop = context.isDesktop;
 
     final double cardPadding = isDesktop ? 24.w : (isTablet ? 20.w : 18.w);
-    final double titleSize = isTablet ? 16.sp.clamp(15.0, 17.0) : 15.sp.clamp(14.0, 16.0);
-    final double sessionTitleSize = isTablet ? 18.sp.clamp(17.0, 19.0) : 17.sp.clamp(16.0, 18.0);
+    final double titleSize =
+        isTablet ? 16.sp.clamp(15.0, 17.0) : 15.sp.clamp(14.0, 16.0);
+    final double sessionTitleSize =
+        isTablet ? 18.sp.clamp(17.0, 19.0) : 17.sp.clamp(16.0, 18.0);
     final double buttonPadding = isTablet ? 16.h : 14.h;
     final double borderRadius = isTablet ? 18.r : 16.r;
 
@@ -65,7 +68,7 @@ class SessionRecommendationCard extends StatelessWidget {
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  'Recommended for you',
+                  AppLocalizations.of(context).recommendedForYou,
                   style: GoogleFonts.inter(
                     fontSize: titleSize,
                     fontWeight: FontWeight.w600,
@@ -94,7 +97,7 @@ class SessionRecommendationCard extends StatelessWidget {
                       ),
                       SizedBox(width: 4.w),
                       Text(
-                        'PREMIUM',
+                        AppLocalizations.of(context).premium.toUpperCase(),
                         style: GoogleFonts.inter(
                           fontSize: 10.sp.clamp(9.0, 11.0),
                           fontWeight: FontWeight.w700,
@@ -215,8 +218,8 @@ class SessionRecommendationCard extends StatelessWidget {
                   ],
                   Text(
                     isPremium && !userHasPremium
-                        ? 'Unlock & Listen'
-                        : 'Listen Now',
+                        ? AppLocalizations.of(context).unlockAndListen
+                        : AppLocalizations.of(context).listenNow,
                     style: GoogleFonts.inter(
                       fontSize: isTablet ? 16.sp : 15.sp,
                       fontWeight: FontWeight.w600,

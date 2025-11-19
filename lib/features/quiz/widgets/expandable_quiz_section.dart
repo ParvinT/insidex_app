@@ -1,4 +1,4 @@
-// lib/screens/home/widgets/expandable_quiz_section.dart
+// lib/features/quiz/widgets/expandable_quiz_section.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,6 +9,7 @@ import '../services/quiz_service.dart';
 import 'disease_card.dart';
 import '../screens/quiz_results_screen.dart';
 import '../../../models/disease_model.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ExpandableQuizSection extends StatefulWidget {
   const ExpandableQuizSection({super.key});
@@ -290,7 +291,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
           children: [
             Flexible(
               child: Text(
-                'Start My Emotional Test — Free',
+                AppLocalizations.of(context).startEmotionalTestFree,
                 style: GoogleFonts.inter(
                   fontSize: (isTablet ? 15.sp : 13.sp).clamp(11.0, 16.0),
                   fontWeight: FontWeight.w700,
@@ -350,7 +351,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                           height: 200.h,
                           child: Center(
                             child: Text(
-                              'No diseases available',
+                              AppLocalizations.of(context).noDiseasesAvailable,
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 color: AppColors.textSecondary,
@@ -369,7 +370,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                                   Expanded(
                                     child: _buildGenderButton(
                                       gender: 'male',
-                                      label: "Men's Test",
+                                      label:
+                                          AppLocalizations.of(context).mensTest,
                                       isTablet: isTablet,
                                     ),
                                   ),
@@ -377,7 +379,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                                   Expanded(
                                     child: _buildGenderButton(
                                       gender: 'female',
-                                      label: "Women's Test",
+                                      label: AppLocalizations.of(context)
+                                          .womensTest,
                                       isTablet: isTablet,
                                     ),
                                   ),
@@ -385,7 +388,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                                   Expanded(
                                     child: _buildGenderButton(
                                       gender: 'all',
-                                      label: "All",
+                                      label: AppLocalizations.of(context).all,
                                       isTablet: isTablet,
                                     ),
                                   ),
@@ -513,7 +516,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Selected',
+                            AppLocalizations.of(context).selected,
                             style: GoogleFonts.inter(
                               fontSize:
                                   isCompact ? 9.sp : (isTablet ? 12.sp : 10.sp),
@@ -585,7 +588,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                       children: [
                         Flexible(
                           child: Text(
-                            'Next',
+                            AppLocalizations.of(context).next,
                             style: GoogleFonts.inter(
                               fontSize: isCompact
                                   ? 11.sp

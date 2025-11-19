@@ -155,7 +155,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get removedFromPlaylist => 'Удалено из плейлиста';
 
   @override
-  String get untitledSession => 'Сессия без названия';
+  String get untitledSession => 'Сеанс без названия';
 
   @override
   String get general => 'Общее';
@@ -1465,7 +1465,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get editDiseaseCause => 'Редактировать причину болезни';
 
   @override
-  String get disease => 'Болезнь';
+  String get disease => 'Заболевание';
 
   @override
   String get selectADisease => 'Выберите болезнь';
@@ -1519,7 +1519,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get recommendsSession => 'Рекомендуется: Сессия';
 
   @override
-  String get recommendedSession => 'Рекомендуемая сессия';
+  String get recommendedSession => 'Рекомендуемый сеанс';
 
   @override
   String get selectASession => 'Выберите сессию';
@@ -1786,6 +1786,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noCategoriesYet => 'Категорий пока нет';
 
   @override
+  String get noCardsAvailable => 'Нет доступных карт';
+
+  @override
   String get addFirstCategory => 'Добавьте первую категорию выше';
 
   @override
@@ -1862,7 +1865,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noSessionsFound => 'Сессии не найдены';
 
   @override
-  String get uncategorized => 'Без категории';
+  String get uncategorized => 'अवर्गीकृत';
 
   @override
   String get adminSettings => 'Настройки администратора';
@@ -1978,4 +1981,130 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get describeWhatSessionDoes => 'Опишите, что делает эта сессия...';
+
+  @override
+  String get categoryIcon => 'Иконка категории';
+
+  @override
+  String get tapToChooseIcon =>
+      'Нажмите, чтобы выбрать иконку для этой категории';
+
+  @override
+  String get selectIcon => 'Выбрать иконку';
+
+  @override
+  String get failedToSaveDisease => 'Не удалось сохранить заболевание';
+
+  @override
+  String get selectGender => 'Выберите пол';
+
+  @override
+  String get pleaseSelectGender => 'Пожалуйста, выберите пол';
+
+  @override
+  String get originalCategoryDeleted =>
+      'Исходная категория была удалена. Пожалуйста, выберите новую категорию.';
+
+  @override
+  String get pleaseAddAtLeastOneImage =>
+      'Пожалуйста, добавьте хотя бы 1 изображение';
+
+  @override
+  String get categoryImagesInfo =>
+      'Добавьте 1-10 изображений. Каждый раз будет выбрано одно случайным образом.';
+
+  @override
+  String get showingOnlyYourLanguage => 'Показывается только ваш язык';
+
+  @override
+  String get showingAllLanguages => 'Показываются все языки';
+
+  @override
+  String get images => 'изображений';
+
+  @override
+  String get unknownDisease => 'Неизвестное заболевание';
+
+  @override
+  String get browseAllSubliminals => 'सभी उपलब्ध अवचेतन सत्रों को ब्राउज़ करें';
+
+  @override
+  String get yourPersonalizedCollection => 'आपका व्यक्तिगत अवचेतन संग्रह';
+
+  @override
+  String get deletingSessionAndFiles => 'सत्र और फ़ाइलें हटाई जा रही हैं...';
+
+  @override
+  String get errorDeletingSession => 'सत्र हटाते समय त्रुटि';
+
+  @override
+  String get recommendedForYou => 'Рекомендуется для вас';
+
+  @override
+  String get unlockAndListen => 'Разблокировать и слушать';
+
+  @override
+  String get listenNow => 'Слушать сейчас';
+
+  @override
+  String get startEmotionalTestFree =>
+      'Начать мой эмоциональный тест — Бесплатно';
+
+  @override
+  String get selected => 'Выбрано';
+
+  @override
+  String get next => 'Далее';
+
+  @override
+  String get noDiseasesAvailable => 'Доступных заболеваний нет';
+
+  @override
+  String get mensTest => 'Тест для мужчин';
+
+  @override
+  String get womensTest => 'Тест для женщин';
+
+  @override
+  String get yourResults => 'Ваши результаты';
+
+  @override
+  String get selectedDiseases => 'Выбранные заболевания';
+
+  @override
+  String get diseases => 'Заболеваний';
+
+  @override
+  String get whyIsThisCaused => 'Почему это происходит?';
+
+  @override
+  String get seeLess => 'Свернуть';
+
+  @override
+  String get seeMore => 'Показать больше';
+
+  @override
+  String get listen => 'Слушать';
+
+  @override
+  String get noHealingSessionAvailable =>
+      'Для этого заболевания пока нет лечебного сеанса.';
+
+  @override
+  String seeXMore(int count) {
+    return 'Показать ещё $count';
+  }
+
+  @override
+  String get session => 'Сеанс';
+
+  @override
+  String get couldNotOpenSession => 'Не удалось открыть сеанс';
+
+  @override
+  String get noHealingSessionYetWorkingOnIt =>
+      'Для этого состояния пока нет лечебного сеанса. Наша команда работает над этим!';
+
+  @override
+  String get loadingRecommendation => 'Загрузка рекомендации...';
 }

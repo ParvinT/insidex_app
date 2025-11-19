@@ -65,7 +65,7 @@ import 'app_localizations_tr.dart';
 /// property.
 abstract class AppLocalizations {
   AppLocalizations(String locale)
-      : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -88,18 +88,18 @@ abstract class AppLocalizations {
   /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
     Locale('hi'),
     Locale('ru'),
-    Locale('tr')
+    Locale('tr'),
   ];
 
   /// No description provided for @appName.
@@ -3480,6 +3480,12 @@ abstract class AppLocalizations {
   /// **'No categories yet'**
   String get noCategoriesYet;
 
+  /// No description provided for @noCardsAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No cards available'**
+  String get noCardsAvailable;
+
   /// No description provided for @addFirstCategory.
   ///
   /// In en, this message translates to:
@@ -3827,6 +3833,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Describe what this session does...'**
   String get describeWhatSessionDoes;
+
+  /// No description provided for @categoryIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Category Icon'**
+  String get categoryIcon;
+
+  /// No description provided for @tapToChooseIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to choose an icon for this category'**
+  String get tapToChooseIcon;
+
+  /// No description provided for @selectIcon.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Icon'**
+  String get selectIcon;
+
+  /// No description provided for @failedToSaveDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save disease'**
+  String get failedToSaveDisease;
+
+  /// No description provided for @selectGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Select gender'**
+  String get selectGender;
+
+  /// No description provided for @pleaseSelectGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select gender'**
+  String get pleaseSelectGender;
+
+  /// No description provided for @originalCategoryDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Original category was deleted. Please select a new category.'**
+  String get originalCategoryDeleted;
+
+  /// No description provided for @pleaseAddAtLeastOneImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please add at least 1 image'**
+  String get pleaseAddAtLeastOneImage;
+
+  /// No description provided for @categoryImagesInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Add 1-10 images. One will be randomly selected each time.'**
+  String get categoryImagesInfo;
+
+  /// No description provided for @showingOnlyYourLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing only your language'**
+  String get showingOnlyYourLanguage;
+
+  /// No description provided for @showingAllLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing all languages'**
+  String get showingAllLanguages;
+
+  /// No description provided for @images.
+  ///
+  /// In en, this message translates to:
+  /// **'images'**
+  String get images;
+
+  /// No description provided for @unknownDisease.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Disease'**
+  String get unknownDisease;
+
+  /// No description provided for @browseAllSubliminals.
+  ///
+  /// In en, this message translates to:
+  /// **'Browse all available subliminal sessions'**
+  String get browseAllSubliminals;
+
+  /// No description provided for @yourPersonalizedCollection.
+  ///
+  /// In en, this message translates to:
+  /// **'Your personalized subliminal collection'**
+  String get yourPersonalizedCollection;
+
+  /// No description provided for @deletingSessionAndFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting session and files...'**
+  String get deletingSessionAndFiles;
+
+  /// No description provided for @errorDeletingSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Error deleting session'**
+  String get errorDeletingSession;
+
+  /// No description provided for @recommendedForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommended for you'**
+  String get recommendedForYou;
+
+  /// No description provided for @unlockAndListen.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock & Listen'**
+  String get unlockAndListen;
+
+  /// No description provided for @listenNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen Now'**
+  String get listenNow;
+
+  /// No description provided for @startEmotionalTestFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Start My Emotional Test — Free'**
+  String get startEmotionalTestFree;
+
+  /// No description provided for @selected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get selected;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @noDiseasesAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No diseases available'**
+  String get noDiseasesAvailable;
+
+  /// No description provided for @mensTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Men\'s Test'**
+  String get mensTest;
+
+  /// No description provided for @womensTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Women\'s Test'**
+  String get womensTest;
+
+  /// No description provided for @yourResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Results'**
+  String get yourResults;
+
+  /// No description provided for @selectedDiseases.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Diseases'**
+  String get selectedDiseases;
+
+  /// No description provided for @diseases.
+  ///
+  /// In en, this message translates to:
+  /// **'Diseases'**
+  String get diseases;
+
+  /// No description provided for @whyIsThisCaused.
+  ///
+  /// In en, this message translates to:
+  /// **'Why is this caused?'**
+  String get whyIsThisCaused;
+
+  /// No description provided for @seeLess.
+  ///
+  /// In en, this message translates to:
+  /// **'See less'**
+  String get seeLess;
+
+  /// No description provided for @seeMore.
+  ///
+  /// In en, this message translates to:
+  /// **'See more'**
+  String get seeMore;
+
+  /// No description provided for @listen.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen'**
+  String get listen;
+
+  /// No description provided for @noHealingSessionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No healing session available for this disease yet.'**
+  String get noHealingSessionAvailable;
+
+  /// No description provided for @seeXMore.
+  ///
+  /// In en, this message translates to:
+  /// **'See {count} More'**
+  String seeXMore(int count);
+
+  /// No description provided for @session.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get session;
+
+  /// No description provided for @couldNotOpenSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open session'**
+  String get couldNotOpenSession;
+
+  /// No description provided for @noHealingSessionYetWorkingOnIt.
+  ///
+  /// In en, this message translates to:
+  /// **'No healing session available for this condition yet. Our team is working on it!'**
+  String get noHealingSessionYetWorkingOnIt;
+
+  /// No description provided for @loadingRecommendation.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading recommendation...'**
+  String get loadingRecommendation;
 }
 
 class _AppLocalizationsDelegate
@@ -3860,8 +4100,9 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   }
 
   throw FlutterError(
-      'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
-      'an issue with the localizations generation tool. Please file an issue '
-      'on GitHub with a reproducible sample app and the gen-l10n configuration '
-      'that was used.');
+    'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
+    'an issue with the localizations generation tool. Please file an issue '
+    'on GitHub with a reproducible sample app and the gen-l10n configuration '
+    'that was used.',
+  );
 }

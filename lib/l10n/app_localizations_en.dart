@@ -1773,6 +1773,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noCategoriesYet => 'No categories yet';
 
   @override
+  String get noCardsAvailable => 'No cards available';
+
+  @override
   String get addFirstCategory => 'Add your first category above';
 
   @override
@@ -1963,4 +1966,128 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get describeWhatSessionDoes => 'Describe what this session does...';
+
+  @override
+  String get categoryIcon => 'Category Icon';
+
+  @override
+  String get tapToChooseIcon => 'Tap to choose an icon for this category';
+
+  @override
+  String get selectIcon => 'Select Icon';
+
+  @override
+  String get failedToSaveDisease => 'Failed to save disease';
+
+  @override
+  String get selectGender => 'Select gender';
+
+  @override
+  String get pleaseSelectGender => 'Please select gender';
+
+  @override
+  String get originalCategoryDeleted =>
+      'Original category was deleted. Please select a new category.';
+
+  @override
+  String get pleaseAddAtLeastOneImage => 'Please add at least 1 image';
+
+  @override
+  String get categoryImagesInfo =>
+      'Add 1-10 images. One will be randomly selected each time.';
+
+  @override
+  String get showingOnlyYourLanguage => 'Showing only your language';
+
+  @override
+  String get showingAllLanguages => 'Showing all languages';
+
+  @override
+  String get images => 'images';
+
+  @override
+  String get unknownDisease => 'Unknown Disease';
+
+  @override
+  String get browseAllSubliminals => 'Browse all available subliminal sessions';
+
+  @override
+  String get yourPersonalizedCollection =>
+      'Your personalized subliminal collection';
+
+  @override
+  String get deletingSessionAndFiles => 'Deleting session and files...';
+
+  @override
+  String get errorDeletingSession => 'Error deleting session';
+
+  @override
+  String get recommendedForYou => 'Recommended for you';
+
+  @override
+  String get unlockAndListen => 'Unlock & Listen';
+
+  @override
+  String get listenNow => 'Listen Now';
+
+  @override
+  String get startEmotionalTestFree => 'Start My Emotional Test — Free';
+
+  @override
+  String get selected => 'Selected';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get noDiseasesAvailable => 'No diseases available';
+
+  @override
+  String get mensTest => 'Men\'s Test';
+
+  @override
+  String get womensTest => 'Women\'s Test';
+
+  @override
+  String get yourResults => 'Your Results';
+
+  @override
+  String get selectedDiseases => 'Selected Diseases';
+
+  @override
+  String get diseases => 'Diseases';
+
+  @override
+  String get whyIsThisCaused => 'Why is this caused?';
+
+  @override
+  String get seeLess => 'See less';
+
+  @override
+  String get seeMore => 'See more';
+
+  @override
+  String get listen => 'Listen';
+
+  @override
+  String get noHealingSessionAvailable =>
+      'No healing session available for this disease yet.';
+
+  @override
+  String seeXMore(int count) {
+    return 'See $count More';
+  }
+
+  @override
+  String get session => 'Session';
+
+  @override
+  String get couldNotOpenSession => 'Could not open session';
+
+  @override
+  String get noHealingSessionYetWorkingOnIt =>
+      'No healing session available for this condition yet. Our team is working on it!';
+
+  @override
+  String get loadingRecommendation => 'Loading recommendation...';
 }

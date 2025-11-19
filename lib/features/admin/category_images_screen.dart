@@ -162,8 +162,8 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
       // Validate: at least 1 image
       if (_images.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please add at least 1 image'),
+           SnackBar(
+            content: Text(AppLocalizations.of(context).pleaseAddAtLeastOneImage),
             backgroundColor: Colors.orange,
           ),
         );
@@ -253,7 +253,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
                       SizedBox(width: 12.w),
                       Expanded(
                         child: Text(
-                          'Add 1-10 images. One will be randomly selected each time.',
+                          AppLocalizations.of(context).categoryImagesInfo,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             color: AppColors.textPrimary,

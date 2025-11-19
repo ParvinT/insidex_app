@@ -704,7 +704,6 @@
   "addCategory": "Add Category",
   "errorLoadingCategories": "Error loading categories",
   "noCategoriesYet": "No categories yet",
-  "noCardsAvailable": "No cards available",
   "addFirstCategory": "Add your first category above",
   "pleaseEnterCategoryName": "Please enter a category name",
   "categoryAlreadyExists": "This category already exists",
@@ -766,59 +765,7 @@
   "enterSessionDescription": "Enter session description",
   "introductionTitle": "Introduction Title",
   "introductionContent": "Introduction Content",
-  "describeWhatSessionDoes": "Describe what this session does...",
-  "categoryIcon": "Category Icon",
-  "tapToChooseIcon": "Tap to choose an icon for this category",
-  "selectIcon": "Select Icon",
-  "failedToSaveDisease": "Failed to save disease",
-  "selectGender": "Select gender",
-  "pleaseSelectGender": "Please select gender",
-  "originalCategoryDeleted": "Original category was deleted. Please select a new category.",
-  "pleaseAddAtLeastOneImage": "Please add at least 1 image",
-  "categoryImagesInfo": "Add 1-10 images. One will be randomly selected each time.",
-   "showingOnlyYourLanguage": "Showing only your language",
-  "showingAllLanguages": "Showing all languages",
-  "images": "images",
-  "unknownDisease": "Unknown Disease",
-  "browseAllSubliminals": "Browse all available subliminal sessions",
-  "yourPersonalizedCollection": "Your personalized subliminal collection",
-  "deletingSessionAndFiles": "Deleting session and files...",
-  "errorDeletingSession": "Error deleting session",
-  "uncategorized": "Uncategorized",
-  "recommendedForYou": "Recommended for you",
-  "unlockAndListen": "Unlock & Listen",
-  "listenNow": "Listen Now",
-  "startEmotionalTestFree": "Start My Emotional Test — Free",
-  "selected": "Selected",
-  "next": "Next",
-  "noDiseasesAvailable": "No diseases available",
-  "mensTest": "Men's Test",
-  "womensTest": "Women's Test",
-  "yourResults": "Your Results",
-  "selectedDiseases": "Selected Diseases",
-  "disease": "Disease",
-  "diseases": "Diseases",
-  "whyIsThisCaused": "Why is this caused?",
-  "seeLess": "See less",
-  "seeMore": "See more",
-  "recommendedSession": "Recommended Session",
-  "listen": "Listen",
-  "noHealingSessionAvailable": "No healing session available for this disease yet.",
-  "seeXMore": "See {count} More",
-  "@seeXMore": {
-    "placeholders": {
-      "count": {
-        "type": "int"
-      }
-    }
-  },
-  "session": "Session",
-  "couldNotOpenSession": "Could not open session",
-  "untitledSession": "Untitled Session",
-  "noHealingSessionYetWorkingOnIt": "No healing session available for this condition yet. Our team is working on it!",
-  "loadingRecommendation": "Loading recommendation..."
-
-
+  "describeWhatSessionDoes": "Describe what this session does..."
 }
 
 

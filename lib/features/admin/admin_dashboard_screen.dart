@@ -93,7 +93,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(
+                '${AppLocalizations.of(context).errorOccurred}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -747,7 +748,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${e.toString()}'),
+          content: Text(
+              '${AppLocalizations.of(context).errorOccurred}: ${e.toString()}'),
           backgroundColor: Colors.red,
         ),
       );

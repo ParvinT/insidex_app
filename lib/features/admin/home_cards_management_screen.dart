@@ -23,33 +23,39 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Predefined cards with their properties
-  final List<Map<String, dynamic>> _predefinedCards = [
-    {
-      'id': 'all_subliminals',
-      'title': 'All Subliminals',
-      'icon': Icons.music_note,
-      'navigateTo': 'categories',
-      'description': 'Browse all available subliminal sessions',
-    },
-    {
-      'id': 'your_playlist',
-      'title': 'Your Playlist',
-      'icon': Icons.playlist_play,
-      'navigateTo': 'playlist',
-      'description': 'Your personalized subliminal collection',
-    },
-  ];
+  List<Map<String, dynamic>> _getPredefinedCards() {
+    final l10n = AppLocalizations.of(context);
+    return [
+      {
+        'id': 'all_subliminals',
+        'title': l10n.allSubliminals,
+        'icon': Icons.music_note,
+        'navigateTo': 'categories',
+        'description': l10n.browseAllSubliminals,
+      },
+      {
+        'id': 'your_playlist',
+        'title': l10n.yourPlaylist,
+        'icon': Icons.playlist_play,
+        'navigateTo': 'playlist',
+        'description': l10n.yourPersonalizedCollection,
+      },
+    ];
+  }
 
   @override
   void initState() {
     super.initState();
-    _initializeCards();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeCards();
+    });
   }
 
   /// Initialize cards in Firestore if they don't exist
   Future<void> _initializeCards() async {
     try {
-      for (final card in _predefinedCards) {
+      final cards = _getPredefinedCards();
+      for (final card in cards) {
         final doc =
             await _firestore.collection('home_cards').doc(card['id']).get();
 
@@ -70,6 +76,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final predefinedCards = _getPredefinedCards();
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       appBar: AppBar(
@@ -90,9 +97,9 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(20.w),
-        itemCount: _predefinedCards.length,
+        itemCount: predefinedCards.length,
         itemBuilder: (context, index) {
-          final cardInfo = _predefinedCards[index];
+          final cardInfo = predefinedCards[index];
           return _buildCardManager(cardInfo);
         },
       ),

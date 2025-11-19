@@ -155,11 +155,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                    '⚠️ Original category was deleted. Please select a new category.'),
+              SnackBar(
+                content:
+                    Text(AppLocalizations.of(context).originalCategoryDeleted),
                 backgroundColor: Colors.orange,
-                duration: Duration(seconds: 5),
+                duration: const Duration(seconds: 5),
               ),
             );
           }

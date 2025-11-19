@@ -15,6 +15,7 @@ import '../../../services/session_localization_service.dart';
 import '../widgets/disease_cause_card.dart';
 import '../widgets/session_recommendation_card.dart';
 import '../../player/audio_player_screen.dart';
+import '../../../l10n/app_localizations.dart';
 
 class DiseaseDetailScreen extends StatefulWidget {
   final DiseaseModel disease;
@@ -187,7 +188,8 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
 
   Widget _buildSessionRecommendation(String currentLanguage) {
     // Session title is already prepared in _sessionData['_localizedTitle']
-    final sessionTitle = _sessionData!['_localizedTitle'] ?? 'Untitled Session';
+    final sessionTitle = _sessionData!['_localizedTitle'] ??
+        AppLocalizations.of(context).untitledSession;
 
     return SessionRecommendationCard(
       sessionNumber: _cause?.sessionNumber,
@@ -217,7 +219,7 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              'No healing session available for this condition yet. Our team is working on it!',
+              AppLocalizations.of(context).noHealingSessionYetWorkingOnIt,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 14.sp : 13.sp,
                 color: AppColors.textSecondary,
@@ -241,7 +243,7 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Loading recommendation...',
+            AppLocalizations.of(context).loadingRecommendation,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,

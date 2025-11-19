@@ -189,16 +189,17 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
 
   Widget _buildGenderFilter() {
     final isTablet = context.isTablet;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       child: Row(
         children: [
-          _buildFilterChip('all', 'All', isTablet),
+          _buildFilterChip('all', l10n.all, isTablet),
           SizedBox(width: 10.w),
-          _buildFilterChip('male', 'Male', isTablet),
+          _buildFilterChip('male', l10n.male, isTablet),
           SizedBox(width: 10.w),
-          _buildFilterChip('female', 'Female', isTablet),
+          _buildFilterChip('female', l10n.female, isTablet),
         ],
       ),
     );
@@ -276,7 +277,9 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
-                      disease.gender == 'male' ? 'MALE' : 'FEMALE',
+                      disease.gender == 'male'
+                          ? AppLocalizations.of(context).male.toUpperCase()
+                          : AppLocalizations.of(context).female.toUpperCase(),
                       style: GoogleFonts.inter(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w700,

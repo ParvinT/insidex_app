@@ -166,7 +166,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_homeCards.isEmpty) {
       return Center(
         child: Text(
-          'No cards available',
+          AppLocalizations.of(context).noCardsAvailable,
           style: GoogleFonts.inter(
             fontSize: 16.sp,
             color: AppColors.textSecondary,
@@ -287,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 // Menu button
-                _buildHeaderButton('Menu', true),
+                _buildHeaderButton(AppLocalizations.of(context).menu, true),
               ],
             ),
 

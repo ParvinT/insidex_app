@@ -306,7 +306,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
 
                 // Brand name
                 Text(
-                  'INSIDEX',
+                  AppLocalizations.of(context).appName,
                   style: GoogleFonts.inter(
                     fontSize: (18.sp).clamp(14.0, 22.0),
                     fontWeight: FontWeight.w800,
