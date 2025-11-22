@@ -33,7 +33,7 @@ class InsidexApp extends StatelessWidget {
             child: Consumer2<ThemeProvider, LocaleProvider>(
               builder: (context, themeProvider, localeProvider, _) {
                 return MaterialApp(
-                  title: 'INSIDEX',
+                  title: 'InsideX',
                   debugShowCheckedModeBanner: false,
                   useInheritedMediaQuery: true,
                   locale: localeProvider.locale,
