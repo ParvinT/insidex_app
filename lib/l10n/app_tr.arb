@@ -759,6 +759,8 @@
   "couldNotOpenSession": "Seans açılamadı",
   "untitledSession": "İsimsiz Seans",
   "noHealingSessionYetWorkingOnIt": "Bu durum için henüz iyileştirme seansı mevcut değil. Ekibimiz üzerinde çalışıyor!",
-  "loadingRecommendation": "Öneri yükleniyor..."
+  "loadingRecommendation": "Öneri yükleniyor...",
+  "howItWorks": "Nasıl Çalışır"
+
   
 }

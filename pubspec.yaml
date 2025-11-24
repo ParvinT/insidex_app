@@ -85,6 +85,11 @@ flutter:
     - assets/legal/tr/
     - assets/legal/hi/
     - assets/animations/categories/
+    - assets/animations/ui/
+    - assets/content/en/
+    - assets/content/tr/
+    - assets/content/ru/
+    - assets/content/hi/
   #flutter_icons:
   #android: true
   #ios: true

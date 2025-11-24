@@ -2090,4 +2090,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadingRecommendation => 'Loading recommendation...';
+
+  @override
+  String get howItWorks => 'How It Works';
 }

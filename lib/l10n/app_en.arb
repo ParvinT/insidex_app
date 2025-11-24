@@ -816,7 +816,8 @@
   "couldNotOpenSession": "Could not open session",
   "untitledSession": "Untitled Session",
   "noHealingSessionYetWorkingOnIt": "No healing session available for this condition yet. Our team is working on it!",
-  "loadingRecommendation": "Loading recommendation..."
+  "loadingRecommendation": "Loading recommendation...",
+  "howItWorks": "How It Works"
 
 
 }

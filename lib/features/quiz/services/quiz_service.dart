@@ -182,7 +182,6 @@ class QuizService {
       final allDiseases = await getAllDiseases();
 
       final counts = <String, int>{
-        'all': allDiseases.length,
         'male': 0,
         'female': 0,
       };

@@ -4067,6 +4067,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Loading recommendation...'**
   String get loadingRecommendation;
+
+  /// No description provided for @howItWorks.
+  ///
+  /// In en, this message translates to:
+  /// **'How It Works'**
+  String get howItWorks;
 }
 
 class _AppLocalizationsDelegate

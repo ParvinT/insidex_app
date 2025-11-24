@@ -769,7 +769,7 @@
   "couldNotOpenSession": "Не удалось открыть сеанс",
   "untitledSession": "Сеанс без названия",
   "noHealingSessionYetWorkingOnIt": "Для этого состояния пока нет лечебного сеанса. Наша команда работает над этим!",
-  "loadingRecommendation": "Загрузка рекомендации..."
-
+  "loadingRecommendation": "Загрузка рекомендации...",
+  "howItWorks": "Как это работает"
   
 }

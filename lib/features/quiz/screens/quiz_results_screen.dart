@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
@@ -168,7 +169,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
             height: isTablet ? 102.w : 96.w,
             padding: EdgeInsets.all(isTablet ? 14.w : 12.w),
             child: Lottie.asset(
-              'assets/animations/categories/heartbeat.json',
+              AppIcons.getUiAnimationPath('heartbeat.json'),
               fit: BoxFit.contain,
               repeat: true,
             ),

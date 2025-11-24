@@ -3,10 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
+import '../../../core/constants/app_icons.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../services/quiz_service.dart';
 import 'disease_card.dart';
+import 'how_it_works_sheet.dart';
 import '../screens/quiz_results_screen.dart';
 import '../../../models/disease_model.dart';
 import '../../../l10n/app_localizations.dart';
@@ -26,7 +29,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
   bool _isQuizExpanded = false;
   bool _isLoadingDiseases = false;
   List<DiseaseModel> _diseases = [];
-  String _selectedGender = 'all';
+  String _selectedGender = 'male';
   Locale? _previousLocale;
 
   // Pagination state
@@ -181,6 +184,10 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
         ),
       ),
     );
+  }
+
+  void _showHowItWorks() {
+    HowItWorksSheet.show(context);
   }
 
   void _goToPage(int page) {
@@ -384,14 +391,6 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                                       isTablet: isTablet,
                                     ),
                                   ),
-                                  SizedBox(width: 12.w),
-                                  Expanded(
-                                    child: _buildGenderButton(
-                                      gender: 'all',
-                                      label: AppLocalizations.of(context).all,
-                                      isTablet: isTablet,
-                                    ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -543,6 +542,23 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                       ),
                     ),
                   ],
+                ),
+              ),
+
+              SizedBox(width: isCompact ? 6.w : 8.w),
+
+              GestureDetector(
+                onTap: _showHowItWorks,
+                child: Container(
+                  padding: EdgeInsets.all(
+                      isCompact ? 8.w : (isTablet ? 12.w : 10.w)),
+                  child: Lottie.asset(
+                    AppIcons.getUiAnimationPath('information.json'),
+                    width: isCompact ? 28.sp : (isTablet ? 36.sp : 32.sp),
+                    height: isCompact ? 28.sp : (isTablet ? 36.sp : 32.sp),
+                    fit: BoxFit.cover,
+                    repeat: true,
+                  ),
                 ),
               ),
 

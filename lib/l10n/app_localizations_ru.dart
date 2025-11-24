@@ -2107,4 +2107,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get loadingRecommendation => 'Загрузка рекомендации...';
+
+  @override
+  String get howItWorks => 'Как это работает';
 }
