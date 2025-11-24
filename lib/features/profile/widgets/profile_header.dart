@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
+import '../../../core/constants/app_icons.dart';
+import '../../../core/responsive/context_ext.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/user_provider.dart';
 import '../../../shared/widgets/custom_text_field.dart';
@@ -29,8 +32,8 @@ class ProfileHeader extends StatelessWidget {
         Stack(
           children: [
             Container(
-              width: 100.w,
-              height: 100.w,
+              width: context.isTablet ? 120.w : 100.w,
+              height: context.isTablet ? 120.w : 100.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.greyLight,
@@ -41,10 +44,14 @@ class ProfileHeader extends StatelessWidget {
                   width: 3,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  isEditing ? selectedAvatar : (userProvider.avatarEmoji ?? '👤'),
-                  style: TextStyle(fontSize: 40.sp),
+              child: Padding(
+                padding: EdgeInsets.all(context.isTablet ? 14.w : 12.w),
+                child: Lottie.asset(
+                  AppIcons.getAvatarPath(
+                    isEditing ? selectedAvatar : userProvider.avatarEmoji,
+                  ),
+                  fit: BoxFit.contain,
+                  repeat: true,
                 ),
               ),
             ),

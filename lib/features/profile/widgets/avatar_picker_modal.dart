@@ -1,46 +1,17 @@
+// lib/features/profile/widgets/avatar_picker_modal.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_icons.dart';
+import '../../../core/responsive/context_ext.dart';
+import '../../../l10n/app_localizations.dart';
 
 class AvatarPickerModal extends StatelessWidget {
   final String selectedAvatar;
   final Function(String) onAvatarSelected;
-
-  static final List<String> availableAvatars = [
-    '👤',
-    '😊',
-    '😎',
-    '🤓',
-    '🧑‍💻',
-    '👨‍🎨',
-    '👩‍🏫',
-    '🧑‍🚀',
-    '🦄',
-    '🐼',
-    '🦋',
-    '🐢',
-    '🦉',
-    '🐙',
-    '🦊',
-    '🐨',
-    '🌟',
-    '⭐',
-    '✨',
-    '💫',
-    '🔥',
-    '⚡',
-    '🌈',
-    '🌙',
-    '🎯',
-    '🎨',
-    '🎭',
-    '🎪',
-    '🎸',
-    '🎮',
-    '🧩',
-    '🎲'
-  ];
 
   const AvatarPickerModal({
     super.key,
@@ -50,78 +21,138 @@ class AvatarPickerModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Responsive values
+    final isTablet = context.isTablet;
+    final isDesktop = context.isDesktop;
+    final screenHeight = context.h;
+
+    // Adaptive sizing
+    final double modalHeight = isDesktop
+        ? screenHeight * 0.6
+        : (isTablet ? screenHeight * 0.55 : screenHeight * 0.5);
+
+    final double horizontalPadding =
+        isDesktop ? 32.w : (isTablet ? 24.w : 20.w);
+
+    final double borderRadius = isDesktop ? 28.r : (isTablet ? 24.r : 20.r);
+
+    final double titleSize =
+        isTablet ? 22.sp.clamp(20.0, 24.0) : 20.sp.clamp(18.0, 22.0);
+
+    final int crossAxisCount = isDesktop ? 4 : (isTablet ? 3 : 3);
+
+    final double avatarSize = isDesktop ? 80.w : (isTablet ? 75.w : 65.w);
+
+    final double gridSpacing = isTablet ? 20.w : 16.w;
+
     return Container(
-      height: 400.h,
+      height: modalHeight,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
+          topLeft: Radius.circular(borderRadius),
+          topRight: Radius.circular(borderRadius),
         ),
       ),
       child: Column(
         children: [
+          // Handle bar
           Container(
             margin: EdgeInsets.only(top: 12.h),
-            width: 40.w,
+            width: isTablet ? 50.w : 40.w,
             height: 4.h,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
+
+          // Title
           Padding(
-            padding: EdgeInsets.all(20.w),
+            padding: EdgeInsets.symmetric(
+              horizontal: horizontalPadding,
+              vertical: isTablet ? 20.h : 16.h,
+            ),
             child: Text(
-              'Choose Avatar',
+              AppLocalizations.of(context).chooseAvatar,
               style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
+                fontSize: titleSize,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
+
+          // Avatar Grid
           Expanded(
             child: GridView.builder(
-              padding: EdgeInsets.all(20.w),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 6,
-                crossAxisSpacing: 12.w,
-                mainAxisSpacing: 12.h,
+              padding: EdgeInsets.symmetric(
+                horizontal: horizontalPadding,
+                vertical: 8.h,
               ),
-              itemCount: availableAvatars.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: gridSpacing,
+                mainAxisSpacing: gridSpacing,
+                childAspectRatio: 1.0,
+              ),
+              itemCount: AppIcons.avatarIcons.length,
               itemBuilder: (context, index) {
-                final avatar = availableAvatars[index];
-                final isSelected = avatar == selectedAvatar;
+                final avatar = AppIcons.avatarIcons[index];
+                final isSelected = avatar['name'] == selectedAvatar;
 
                 return GestureDetector(
                   onTap: () {
-                    onAvatarSelected(avatar);
+                    onAvatarSelected(avatar['name']);
                     Navigator.pop(context);
                   },
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryGold.withOpacity(0.2)
+                          ? AppColors.primaryGold.withOpacity(0.15)
                           : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius:
+                          BorderRadius.circular(isTablet ? 18.r : 16.r),
                       border: Border.all(
                         color: isSelected
                             ? AppColors.primaryGold
                             : Colors.transparent,
-                        width: 2,
+                        width: 2.5,
                       ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primaryGold.withOpacity(0.3),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ]
+                          : null,
                     ),
-                    child: Center(
-                      child: Text(
-                        avatar,
-                        style: TextStyle(fontSize: 24.sp),
-                      ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Lottie Animation
+                        SizedBox(
+                          width: avatarSize,
+                          height: avatarSize,
+                          child: Lottie.asset(
+                            AppIcons.getAvatarAnimationPath(avatar['path']),
+                            fit: BoxFit.contain,
+                            repeat: true,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 );
               },
             ),
           ),
+
+          // Bottom safe area
+          SizedBox(height: context.bottomPad + 16.h),
         ],
       ),
     );

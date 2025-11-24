@@ -817,7 +817,8 @@
   "untitledSession": "Untitled Session",
   "noHealingSessionYetWorkingOnIt": "No healing session available for this condition yet. Our team is working on it!",
   "loadingRecommendation": "Loading recommendation...",
-  "howItWorks": "How It Works"
+  "howItWorks": "How It Works",
+  "chooseAvatar": "Choose Your Avatar"
 
 
 }

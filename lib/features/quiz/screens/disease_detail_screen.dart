@@ -232,24 +232,9 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
   }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset(
-            'assets/lottie/loading.json',
-            width: 120.w,
-            height: 120.w,
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            AppLocalizations.of(context).loadingRecommendation,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
+    return const Center(
+      child: CircularProgressIndicator(
+        color: AppColors.darkDivider,
       ),
     );
   }

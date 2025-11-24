@@ -2110,4 +2110,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get howItWorks => 'Как это работает';
+
+  @override
+  String get chooseAvatar => 'Выберите аватар';
 }

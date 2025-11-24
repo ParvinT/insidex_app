@@ -86,6 +86,7 @@ flutter:
     - assets/legal/hi/
     - assets/animations/categories/
     - assets/animations/ui/
+    - assets/animations/avatars/
     - assets/content/en/
     - assets/content/tr/
     - assets/content/ru/

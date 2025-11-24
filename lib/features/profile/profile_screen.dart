@@ -28,7 +28,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
-  String _selectedAvatar = '👤';
+  String _selectedAvatar = 'turtle';
   bool _isSaving = false;
 
   @override
@@ -42,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       final userProvider = context.read<UserProvider>();
       _nameController.text = userProvider.userName;
-      _selectedAvatar = userProvider.avatarEmoji ?? '👤';
+      _selectedAvatar = userProvider.avatarEmoji;
     }
   }
 
@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!_isEditing) {
         final userProvider = context.read<UserProvider>();
         _nameController.text = userProvider.userName;
-        _selectedAvatar = userProvider.avatarEmoji ?? '👤';
+        _selectedAvatar = userProvider.avatarEmoji;
       }
     });
   }

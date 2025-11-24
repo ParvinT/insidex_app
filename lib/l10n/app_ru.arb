@@ -770,6 +770,7 @@
   "untitledSession": "Сеанс без названия",
   "noHealingSessionYetWorkingOnIt": "Для этого состояния пока нет лечебного сеанса. Наша команда работает над этим!",
   "loadingRecommendation": "Загрузка рекомендации...",
-  "howItWorks": "Как это работает"
+  "howItWorks": "Как это работает",
+  "chooseAvatar": "Выберите аватар"
   
 }

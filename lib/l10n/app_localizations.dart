@@ -4073,6 +4073,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'How It Works'**
   String get howItWorks;
+
+  /// No description provided for @chooseAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Avatar'**
+  String get chooseAvatar;
 }
 
 class _AppLocalizationsDelegate

@@ -2093,4 +2093,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howItWorks => 'How It Works';
+
+  @override
+  String get chooseAvatar => 'Choose Your Avatar';
 }

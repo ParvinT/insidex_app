@@ -714,5 +714,6 @@
   "untitledSession": "शीर्षकहीन सत्र",
   "noHealingSessionYetWorkingOnIt": "इस स्थिति के लिए अभी तक कोई उपचार सत्र उपलब्ध नहीं है। हमारी टीम इस पर काम कर रही है!",
   "loadingRecommendation": "अनुशंसा लोड हो रही है...",
-  "howItWorks": "यह कैसे काम करता है"
+  "howItWorks": "यह कैसे काम करता है",
+  "chooseAvatar": "अपना अवतार चुनें"
 }

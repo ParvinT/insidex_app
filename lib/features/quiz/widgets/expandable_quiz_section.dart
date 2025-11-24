@@ -26,6 +26,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
   late PageController _pageController;
 
   // Quiz state
+  bool _isInfoPressed = false;
   bool _isQuizExpanded = false;
   bool _isLoadingDiseases = false;
   List<DiseaseModel> _diseases = [];
@@ -372,26 +373,30 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
                             // Gender filter buttons
                             Padding(
                               padding: EdgeInsets.only(bottom: 10.h),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildGenderButton(
-                                      gender: 'male',
-                                      label:
-                                          AppLocalizations.of(context).mensTest,
-                                      isTablet: isTablet,
+                              child: IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: _buildGenderButton(
+                                        gender: 'male',
+                                        label: AppLocalizations.of(context)
+                                            .mensTest,
+                                        isTablet: isTablet,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Expanded(
-                                    child: _buildGenderButton(
-                                      gender: 'female',
-                                      label: AppLocalizations.of(context)
-                                          .womensTest,
-                                      isTablet: isTablet,
+                                    SizedBox(width: 12.w),
+                                    Expanded(
+                                      child: _buildGenderButton(
+                                        gender: 'female',
+                                        label: AppLocalizations.of(context)
+                                            .womensTest,
+                                        isTablet: isTablet,
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
 
@@ -548,16 +553,26 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
               SizedBox(width: isCompact ? 6.w : 8.w),
 
               GestureDetector(
-                onTap: _showHowItWorks,
-                child: Container(
-                  padding: EdgeInsets.all(
-                      isCompact ? 8.w : (isTablet ? 12.w : 10.w)),
-                  child: Lottie.asset(
-                    AppIcons.getUiAnimationPath('information.json'),
-                    width: isCompact ? 28.sp : (isTablet ? 36.sp : 32.sp),
-                    height: isCompact ? 28.sp : (isTablet ? 36.sp : 32.sp),
-                    fit: BoxFit.cover,
-                    repeat: true,
+                onTapDown: (_) => setState(() => _isInfoPressed = true),
+                onTapUp: (_) {
+                  setState(() => _isInfoPressed = false);
+                  _showHowItWorks();
+                },
+                onTapCancel: () => setState(() => _isInfoPressed = false),
+                child: AnimatedScale(
+                  scale: _isInfoPressed ? 0.85 : 1.0,
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeInOut,
+                  child: Container(
+                    padding: EdgeInsets.all(
+                        isCompact ? 8.w : (isTablet ? 12.w : 10.w)),
+                    child: Lottie.asset(
+                      AppIcons.getUiAnimationPath('information.json'),
+                      width: isCompact ? 28.sp : (isTablet ? 36.sp : 32.sp),
+                      height: isCompact ? 28.sp : (isTablet ? 36.sp : 32.sp),
+                      fit: BoxFit.cover,
+                      repeat: true,
+                    ),
                   ),
                 ),
               ),
@@ -715,7 +730,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
     return GestureDetector(
       onTap: () => _onGenderChanged(gender),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(
           horizontal: isTablet ? 14.w : 12.w,
           vertical: isTablet ? 9.h : 8.h,
@@ -725,25 +740,27 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection> {
           borderRadius: BorderRadius.circular(100.r),
           border: Border.all(
             color: isSelected ? Colors.black : AppColors.greyBorder,
-            width: isSelected ? 2 : 1,
+            width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
                     blurRadius: 8,
-                    offset: Offset(0, 3),
+                    offset: const Offset(0, 3),
                   ),
                 ]
               : null,
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.inter(
-            fontSize: isTablet ? 14.sp : 13.sp,
-            fontWeight: FontWeight.w600,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+        child: Center(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 14.sp : 13.sp,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : AppColors.textPrimary,
+            ),
           ),
         ),
       ),

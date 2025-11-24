@@ -29,7 +29,7 @@ class UserProvider extends ChangeNotifier {
   String get userName => _userData?['name'] ?? 'User';
   String get userEmail => _userData?['email'] ?? '';
   String get userId => _firebaseUser?.uid ?? '';
-  String get avatarEmoji => _userData?['avatarEmoji'] ?? '👤';
+  String get avatarEmoji => _userData?['avatarEmoji'] ?? 'turtle';
 
   // Premium related getters
   bool get isPremium => _userData?['isPremium'] ?? false;
@@ -360,7 +360,7 @@ class UserProvider extends ChangeNotifier {
       'email': _firebaseUser!.email,
       'name': _firebaseUser!.displayName ?? 'User',
       'photoUrl': _firebaseUser!.photoURL,
-      'avatarEmoji': '👤',
+      'avatarEmoji': 'turtle',
       'isAdmin': false,
       'isPremium': false,
       'accountType': 'free',

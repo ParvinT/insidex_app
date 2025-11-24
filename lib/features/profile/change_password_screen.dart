@@ -199,15 +199,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     // Use context extensions
-    final isMobile = context.isMobile;
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
     final isCompact = context.isCompactH;
 
     // Calculate responsive sizes
-    final screenWidth = context.w;
-    final screenHeight = context.h;
-
     // Adaptive sizing
     final double horizontalPadding = isDesktop
         ? 40.w.clamp(40.0, 60.0)

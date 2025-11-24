@@ -1,6 +1,7 @@
 // lib/core/constants/app_icons.dart
 
 class AppIcons {
+  // =================== CATEGORY ANIMATIONS ===================
   static const String animationPath = 'assets/animations/categories/';
 
   static const List<Map<String, dynamic>> categoryIcons = [
@@ -30,7 +31,7 @@ class AppIcons {
     }
   }
 
-  // UI Animations Path
+  // =================== UI ANIMATIONS ===================
   static const String uiAnimationPath = 'assets/animations/ui/';
 
 // UI Icons
@@ -59,5 +60,60 @@ class AppIcons {
     } catch (e) {
       return null;
     }
+  }
+
+  // =================== AVATAR ANIMATIONS ===================
+
+  static const String avatarAnimationPath = 'assets/animations/avatars/';
+
+  static const List<Map<String, dynamic>> avatarIcons = [
+    {
+      'name': 'turtle',
+      'label': 'Zen Turtle',
+      'path': 'meditating_turtle.json',
+    },
+    {
+      'name': 'tiger',
+      'label': 'Calm Tiger',
+      'path': 'meditating_tiger.json',
+    },
+    {
+      'name': 'koala',
+      'label': 'Peaceful Koala',
+      'path': 'meditating_koala.json',
+    },
+    {
+      'name': 'brain',
+      'label': 'Mindful Brain',
+      'path': 'meditating_brain.json',
+    },
+    {
+      'name': 'sloth',
+      'label': 'Relaxed Sloth',
+      'path': 'sloth_meditate.json',
+    },
+  ];
+
+  /// Get full avatar animation path
+  static String getAvatarAnimationPath(String fileName) {
+    return '$avatarAnimationPath$fileName';
+  }
+
+  /// Get avatar icon data by name
+  static Map<String, dynamic>? getAvatarByName(String name) {
+    try {
+      return avatarIcons.firstWhere((icon) => icon['name'] == name);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  /// Get avatar path by name (shortcut)
+  static String getAvatarPath(String name) {
+    final avatar = getAvatarByName(name);
+    if (avatar != null) {
+      return getAvatarAnimationPath(avatar['path']);
+    }
+    return getAvatarAnimationPath('meditating_turtle.json');
   }
 }
