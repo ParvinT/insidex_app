@@ -37,10 +37,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  if (!kIsWeb) {
+  /*if (!kIsWeb) {
     BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
     await NotificationReliabilityService.initialize();
-  }
+  }*/
   // Notification Service
   try {
     await NotificationService().initialize();
