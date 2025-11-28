@@ -248,12 +248,42 @@ class DailyReminderService {
   }
 
   /// Test notification (for debugging)
+  /// Test notification (for debugging)
   Future<void> sendTestNotification() async {
-    await NotificationService().showNotification(
-      id: 9998,
-      title: 'Test Reminder 🔔',
-      body: 'This is how your daily reminder will look!',
-      channelId: NotificationConstants.dailyReminderChannelId,
-    );
+    debugPrint('🧪 ===== TEST NOTIFICATION START =====');
+
+    // 1. Permission check
+    final hasPermission = await NotificationService().hasPermission();
+    debugPrint('🔐 Has Permission: $hasPermission');
+
+    if (!hasPermission) {
+      debugPrint('❌ No permission! Requesting...');
+      final granted = await NotificationService().requestPermission();
+      debugPrint('📝 Permission request result: $granted');
+      if (!granted) {
+        debugPrint('❌ Permission denied, cannot show notification');
+        return;
+      }
+    }
+
+    // 2. Show notification
+    debugPrint('📤 Sending test notification...');
+    try {
+      await NotificationService().showNotification(
+        id: 9998,
+        title: 'Test Reminder 🔔',
+        body: 'This is how your daily reminder will look!',
+        channelId: NotificationConstants.dailyReminderChannelId,
+      );
+      debugPrint('✅ Test notification sent successfully!');
+    } catch (e) {
+      debugPrint('❌ Error sending notification: $e');
+    }
+
+    // 3. Check pending
+    final pending = await NotificationService().getPendingNotifications();
+    debugPrint('📋 Pending notifications: ${pending.length}');
+
+    debugPrint('🧪 ===== TEST NOTIFICATION END =====');
   }
 }

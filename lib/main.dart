@@ -1,5 +1,6 @@
 // lib/main.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -37,10 +38,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  /*if (!kIsWeb) {
+  if (!kIsWeb && Platform.isAndroid) {
     BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
     await NotificationReliabilityService.initialize();
-  }*/
+  }
   // Notification Service
   try {
     await NotificationService().initialize();

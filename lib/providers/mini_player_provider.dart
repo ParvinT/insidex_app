@@ -231,8 +231,7 @@ class MiniPlayerProvider extends ChangeNotifier {
     if (_currentSession!.containsKey('_localizedTitle')) {
       final localizedTitle = _currentSession!['_localizedTitle'];
       if (localizedTitle != null && localizedTitle.toString().isNotEmpty) {
-        return localizedTitle
-            .toString(); 
+        return localizedTitle.toString();
       }
     }
 

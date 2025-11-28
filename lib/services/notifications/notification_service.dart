@@ -226,19 +226,42 @@ class NotificationService {
 
   /// Check if notifications are permitted
   Future<bool> hasPermission() async {
-    if (Platform.isIOS) {
-      final status = await permission.Permission.notification.status;
-      return status.isGranted;
-    } else if (Platform.isAndroid) {
-      // For Android 13+ (API 33+)
-      if (await _isAndroid13OrHigher()) {
+    try {
+      if (Platform.isIOS) {
+        // iOS için flutter_local_notifications'ın native check'ini kullan
+        // Bu daha güvenilir çünkü direkt iOS API'sini kullanıyor
+        final IOSFlutterLocalNotificationsPlugin? iosPlugin =
+            _notifications.resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+
+        if (iosPlugin != null) {
+          final settings = await iosPlugin.checkPermissions();
+          // Alert permission varsa bildirim gösterebiliriz
+          final hasAlert = settings?.isAlertEnabled ?? false;
+          debugPrint('🍎 iOS Permission Check - Alert: $hasAlert');
+          return hasAlert;
+        }
+
+        // Fallback: permission_handler kullan
         final status = await permission.Permission.notification.status;
+        debugPrint('🍎 iOS Permission Status (fallback): $status');
         return status.isGranted;
+      } else if (Platform.isAndroid) {
+        // Android 13+ (API 33+)
+        if (await _isAndroid13OrHigher()) {
+          final status = await permission.Permission.notification.status;
+          return status.isGranted;
+        }
+        // Older Android - permissions granted at install
+        return true;
       }
-      // For older Android versions, permissions are granted at install
+      return false;
+    } catch (e) {
+      debugPrint('❌ Error checking permission: $e');
+      // Hata durumunda mevcut ayarları bozmamak için null dönebiliriz
+      // Ama bool dönmemiz gerekiyor, bu yüzden true dönüyoruz (güvenli taraf)
       return true;
     }
-    return false;
   }
 
   /// Request notification permission
@@ -270,17 +293,36 @@ class NotificationService {
 
   /// Check if system notifications are enabled
   Future<bool> areSystemNotificationsEnabled() async {
-    if (Platform.isIOS) {
-      final status = await permission.Permission.notification.status;
-      return !status.isPermanentlyDenied;
-    } else if (Platform.isAndroid) {
-      final androidPlugin =
-          _notifications.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-      final enabled = await androidPlugin?.areNotificationsEnabled() ?? false;
-      return enabled;
+    try {
+      if (Platform.isIOS) {
+        // iOS için aynı native check'i kullan
+        final IOSFlutterLocalNotificationsPlugin? iosPlugin =
+            _notifications.resolvePlatformSpecificImplementation<
+                IOSFlutterLocalNotificationsPlugin>();
+
+        if (iosPlugin != null) {
+          final settings = await iosPlugin.checkPermissions();
+          final isEnabled = settings?.isAlertEnabled ?? false;
+          debugPrint('🍎 iOS System Notifications Enabled: $isEnabled');
+          return isEnabled;
+        }
+
+        // Fallback
+        final status = await permission.Permission.notification.status;
+        // isPermanentlyDenied = kullanıcı "Don't Allow" dedi ve bir daha sorma
+        return !status.isPermanentlyDenied && !status.isDenied;
+      } else if (Platform.isAndroid) {
+        final androidPlugin =
+            _notifications.resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        final enabled = await androidPlugin?.areNotificationsEnabled() ?? false;
+        return enabled;
+      }
+      return false;
+    } catch (e) {
+      debugPrint('❌ Error checking system notifications: $e');
+      return true; // Hata durumunda true dön, settings'i bozma
     }
-    return false;
   }
 
   /// Open app notification settings
