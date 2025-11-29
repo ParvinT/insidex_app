@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AdminService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,14 +15,12 @@ class AdminService {
       if (user == null) return false;
 
       // Method 1: Firestore'dan kontrol
-      final adminDoc = await _firestore
-          .collection('admins')
-          .doc(user.uid)
-          .get();
-      
+      final adminDoc =
+          await _firestore.collection('admins').doc(user.uid).get();
+
       return adminDoc.exists;
     } catch (e) {
-      print('Error checking admin status: $e');
+      debugPrint('Error checking admin status: $e');
       return false;
     }
   }
@@ -52,7 +51,7 @@ class AdminService {
 
       return true;
     } catch (e) {
-      print('Error making user admin: $e');
+      debugPrint('Error making user admin: $e');
       return false;
     }
   }
@@ -71,7 +70,7 @@ class AdminService {
         return data;
       }).toList();
     } catch (e) {
-      print('Error getting admin list: $e');
+      debugPrint('Error getting admin list: $e');
       return [];
     }
   }
@@ -93,7 +92,7 @@ class AdminService {
 
       return true;
     } catch (e) {
-      print('Error removing admin access: $e');
+      debugPrint('Error removing admin access: $e');
       return false;
     }
   }

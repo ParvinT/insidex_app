@@ -248,7 +248,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           });
         }
       } catch (e) {
-        print('Error checking favorite status: $e');
+        debugPrint('Error checking favorite status: $e');
       }
     }
   }
@@ -272,7 +272,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           });
         }
       } catch (e) {
-        print('Error checking playlist status: $e');
+        debugPrint('Error checking playlist status: $e');
       }
     }
   }
@@ -288,9 +288,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
           'lastActiveAt': FieldValue.serverTimestamp(),
         });
-        print('Added to recent sessions: ${_session['id']}');
+        debugPrint('Added to recent sessions: ${_session['id']}');
       } catch (e) {
-        print('Error adding to recent sessions: $e');
+        debugPrint('Error adding to recent sessions: $e');
       }
     }
   }
@@ -382,9 +382,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               'recentSessionIds': FieldValue.arrayUnion([_session['id']]),
               'lastActiveAt': FieldValue.serverTimestamp(),
             });
-            print('Added to recent: ${_session['id']}');
+            debugPrint('Added to recent: ${_session['id']}');
           } catch (e) {
-            print('Error adding to recent: $e');
+            debugPrint('Error adding to recent: $e');
           }
         }
       }
@@ -475,7 +475,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   void dispose() {
     if (_isTracking) {
       ListeningTrackerService.endSession().then((_) {
-        print('Listening session ended and saved');
+        debugPrint('Listening session ended and saved');
       });
     }
 

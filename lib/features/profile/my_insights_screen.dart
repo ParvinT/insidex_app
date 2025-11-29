@@ -63,7 +63,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         });
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -1189,7 +1189,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
       return weeklyData;
     } catch (e) {
-      print('Error getting weekly activity: $e');
+      debugPrint('Error getting weekly activity: $e');
       return _getEmptyWeeklyData();
     }
   }
@@ -1459,7 +1459,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 Text(AppLocalizations.of(context).profileUpdatedSuccessfully)),
       );
     } catch (e) {
-      print('Error saving data: $e');
+      debugPrint('Error saving data: $e');
     }
   }
 }

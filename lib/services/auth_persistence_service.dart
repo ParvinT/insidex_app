@@ -1,6 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthPersistenceService {
   static const _secureStorage = FlutterSecureStorage();
@@ -27,9 +28,9 @@ class AuthPersistenceService {
         await _savePassword(user.email!, password);
       }
 
-      print('Auth session saved for: ${user.email}');
+      debugPrint('Auth session saved for: ${user.email}');
     } catch (e) {
-      print('Error saving auth session: $e');
+      debugPrint('Error saving auth session: $e');
     }
   }
 
@@ -48,13 +49,13 @@ class AuthPersistenceService {
       final maxAge = 24 * 60 * 60 * 1000; // 24 saat
 
       if (age > maxAge) {
-        print('Token expired (age: ${age ~/ 1000 / 60} minutes)');
+        debugPrint('Token expired (age: ${age ~/ 1000 / 60} minutes)');
         return false;
       }
 
       return true;
     } catch (e) {
-      print('Error checking session: $e');
+      debugPrint('Error checking session: $e');
       return false;
     }
   }
@@ -66,7 +67,7 @@ class AuthPersistenceService {
       final email = prefs.getString(_emailKey);
 
       if (email == null) {
-        print('No saved email found');
+        debugPrint('No saved email found');
         return null;
       }
 
@@ -74,11 +75,11 @@ class AuthPersistenceService {
       final password = await _getPassword(email);
 
       if (password == null) {
-        print('No saved password found');
+        debugPrint('No saved password found');
         return null;
       }
 
-      print('Attempting auto sign-in for: $email');
+      debugPrint('Attempting auto sign-in for: $email');
 
       final userCredential =
           await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -93,7 +94,7 @@ class AuthPersistenceService {
 
       return userCredential.user;
     } catch (e) {
-      print('Auto sign-in failed: $e');
+      debugPrint('Auto sign-in failed: $e');
       return null;
     }
   }
@@ -114,7 +115,7 @@ class AuthPersistenceService {
       await _secureStorage.delete(key: '${_securePasswordKey}_$email');
     }
 
-    print('Auth session cleared');
+    debugPrint('Auth session cleared');
   }
 
   // Basit şifreleme (production'da daha güçlü kullan)
@@ -145,10 +146,10 @@ class AuthPersistenceService {
       await prefs.setString(_tokenKey, token ?? '');
       await prefs.setInt(_timestampKey, DateTime.now().millisecondsSinceEpoch);
 
-      print('Token refreshed successfully');
+      debugPrint('Token refreshed successfully');
       return true;
     } catch (e) {
-      print('Token refresh failed: $e');
+      debugPrint('Token refresh failed: $e');
       return false;
     }
   }

@@ -77,6 +77,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     try {
       final user = _auth.currentUser;
       if (user == null) {
+        debugPrint('⚠️ [Playlist] User is NULL!');
         setState(() => _isLoading = false);
         return;
       }
@@ -101,11 +102,17 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         final recentIds = List<String>.from(
           userData['recentSessionIds'] ?? [],
         ).take(10).toList();
+        debugPrint('📋 [Playlist] Recent IDs from Firebase: $recentIds');
 
         // Fetch sessions for each list
-        _myPlaylistSessions = await _fetchSessions(playlistIds);
-        _favoriteSessions = await _fetchSessions(favoriteIds);
-        _recentSessions = await _fetchSessions(recentIds);
+        _myPlaylistSessions =
+            await _fetchSessions(playlistIds, fieldName: 'playlistSessionIds');
+        _favoriteSessions =
+            await _fetchSessions(favoriteIds, fieldName: 'favoriteSessionIds');
+        _recentSessions =
+            await _fetchSessions(recentIds, fieldName: 'recentSessionIds');
+        debugPrint(
+            '📋 [Playlist] Recent sessions loaded: ${_recentSessions.length}');
       }
     } catch (e) {
       debugPrint('Error loading playlists: $e');
@@ -136,9 +143,12 @@ class _PlaylistScreenState extends State<PlaylistScreen>
             .toList();
 
         // Session'ları yükle
-        final myPlaylist = await _fetchSessions(playlistIds);
-        final favorites = await _fetchSessions(favoriteIds);
-        final recent = await _fetchSessions(recentIds);
+        final myPlaylist =
+            await _fetchSessions(playlistIds, fieldName: 'playlistSessionIds');
+        final favorites =
+            await _fetchSessions(favoriteIds, fieldName: 'favoriteSessionIds');
+        final recent =
+            await _fetchSessions(recentIds, fieldName: 'recentSessionIds');
 
         // State'i güncelle
         if (mounted) {
@@ -153,11 +163,17 @@ class _PlaylistScreenState extends State<PlaylistScreen>
   }
 
   Future<List<Map<String, dynamic>>> _fetchSessions(
-    List<String> sessionIds,
-  ) async {
-    if (sessionIds.isEmpty) return [];
+    List<String> sessionIds, {
+    String? fieldName,
+  }) async {
+    debugPrint('🔍 [Playlist] Fetching sessions for IDs: $sessionIds');
+    if (sessionIds.isEmpty) {
+      debugPrint('⚠️ [Playlist] Session IDs is EMPTY!');
+      return [];
+    }
 
     final sessions = <Map<String, dynamic>>[];
+    final invalidIds = <String>[];
     for (String sessionId in sessionIds) {
       try {
         final sessionDoc =
@@ -167,12 +183,40 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           final data = sessionDoc.data()!;
           data['id'] = sessionDoc.id;
           sessions.add(data);
+          debugPrint('✅ [Playlist] Fetched session: ${sessionDoc.id}');
+        } else {
+          debugPrint('❌ [Playlist] Session NOT FOUND: $sessionId');
+          invalidIds.add(sessionId);
         }
       } catch (e) {
         debugPrint('Error fetching session $sessionId: $e');
       }
     }
-    return await SessionFilterService.filterFetchedSessions(sessions);
+
+    if (invalidIds.isNotEmpty && fieldName != null) {
+      _cleanupInvalidIds(invalidIds, fieldName);
+    }
+    debugPrint('📦 [Playlist] Total fetched: ${sessions.length}');
+    final filtered = await SessionFilterService.filterFetchedSessions(sessions);
+    debugPrint('🔻 [Playlist] After filter: ${filtered.length}'); // EKLE
+
+    return filtered;
+  }
+
+  Future<void> _cleanupInvalidIds(
+      List<String> invalidIds, String fieldName) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _firestore.collection('users').doc(user.uid).update({
+        fieldName: FieldValue.arrayRemove(invalidIds),
+      });
+      debugPrint(
+          '🧹 [Playlist] Cleaned up ${invalidIds.length} invalid IDs from $fieldName');
+    } catch (e) {
+      debugPrint('❌ [Playlist] Error cleaning up invalid IDs: $e');
+    }
   }
 
   Future<void> _addToPlaylist(String sessionId) async {

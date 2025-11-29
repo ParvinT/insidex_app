@@ -2,6 +2,7 @@
 
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:io';
 
 class AppCacheManager {
@@ -29,7 +30,7 @@ class AppCacheManager {
     try {
       await instance.downloadFile(imageUrl);
     } catch (e) {
-      print('❌ Error precaching image: $e');
+      debugPrint('❌ Error precaching image: $e');
     }
   }
 
@@ -40,7 +41,7 @@ class AppCacheManager {
         try {
           await instance.downloadFile(url);
         } catch (e) {
-          print('❌ Error precaching $url: $e');
+          debugPrint('❌ Error precaching $url: $e');
         }
       }
     }
@@ -50,9 +51,9 @@ class AppCacheManager {
   static Future<void> clearCache() async {
     try {
       await instance.emptyCache();
-      print('✅ Cache cleared successfully');
+      debugPrint('✅ Cache cleared successfully');
     } catch (e) {
-      print('❌ Error clearing cache: $e');
+      debugPrint('❌ Error clearing cache: $e');
     }
   }
 

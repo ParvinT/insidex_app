@@ -108,7 +108,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         });
       }
     } catch (e) {
-      print('Error loading analytics: $e');
+      debugPrint('Error loading analytics: $e');
       if (_mounted && mounted) {
         setState(() {
           _analyticsData = _getDefaultAnalytics();

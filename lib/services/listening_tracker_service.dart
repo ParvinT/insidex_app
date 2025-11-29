@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/notifications/streak_notification_service.dart';
+import 'package:flutter/foundation.dart';
 
 class ListeningTrackerService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -45,9 +46,9 @@ class ListeningTrackerService {
       });
 
       _currentDocId = docRef.id;
-      print('Started tracking session: $sessionTitle');
+      debugPrint('Started tracking session: $sessionTitle');
     } catch (e) {
-      print('Error starting session tracking: $e');
+      debugPrint('Error starting session tracking: $e');
     }
   }
 
@@ -86,11 +87,11 @@ class ListeningTrackerService {
           'status': 'paused',
         });
 
-        print(
+        debugPrint(
             'Session paused after $sessionMinutes minutes. Total: $totalDuration minutes');
       }
     } catch (e) {
-      print('Error pausing session: $e');
+      debugPrint('Error pausing session: $e');
     }
   }
 
@@ -115,10 +116,10 @@ class ListeningTrackerService {
           'status': 'playing',
         });
 
-        print('Session resumed');
+        debugPrint('Session resumed');
       }
     } catch (e) {
-      print('Error resuming session: $e');
+      debugPrint('Error resuming session: $e');
     }
   }
 
@@ -172,7 +173,7 @@ class ListeningTrackerService {
         // Update user stats
         await updateUserStats(finalDuration);
 
-        print('Session ended. Duration: $finalDuration minutes');
+        debugPrint('Session ended. Duration: $finalDuration minutes');
       }
 
       // Reset tracking variables
@@ -181,7 +182,7 @@ class ListeningTrackerService {
       _lastResumeTime = null;
       _currentDocId = null;
     } catch (e) {
-      print('Error ending session: $e');
+      debugPrint('Error ending session: $e');
     }
   }
 
@@ -215,7 +216,7 @@ class ListeningTrackerService {
         'lastListeningDate': DateTime.now().toIso8601String().split('T')[0],
       });
 
-      print('Updated user stats: +$minutesListened minutes');
+      debugPrint('Updated user stats: +$minutesListened minutes');
       final newStreak = await calculateStreak();
 
       // Streak değişti mi kontrol et
@@ -230,7 +231,7 @@ class ListeningTrackerService {
         );
       }
     } catch (e) {
-      print('Error updating user stats: $e');
+      debugPrint('Error updating user stats: $e');
     }
   }
 
@@ -257,7 +258,7 @@ class ListeningTrackerService {
         return data;
       }).toList();
     } catch (e) {
-      print('Error getting listening history: $e');
+      debugPrint('Error getting listening history: $e');
       return [];
     }
   }
@@ -320,7 +321,7 @@ class ListeningTrackerService {
 
       return streak;
     } catch (e) {
-      print('Error calculating streak: $e');
+      debugPrint('Error calculating streak: $e');
       return 0;
     }
   }
@@ -363,7 +364,7 @@ class ListeningTrackerService {
 
       return weeklyData;
     } catch (e) {
-      print('Error getting weekly stats: $e');
+      debugPrint('Error getting weekly stats: $e');
       return {};
     }
   }

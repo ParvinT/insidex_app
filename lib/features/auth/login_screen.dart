@@ -66,19 +66,19 @@ class _LoginScreenState extends State<LoginScreen> {
       final user = result['user'];
       if (user != null) {
         // ⭐ BURASI KRİTİK - Session'ı kaydet
-        print('SAVING AUTH SESSION for: ${user.email}');
+        debugPrint('SAVING AUTH SESSION for: ${user.email}');
         await AuthPersistenceService.saveAuthSession(user,
             password: password // ⭐ Password'ü geçiriyoruz
             );
 
         // Test için SharedPreferences'ı kontrol et
         final prefs = await SharedPreferences.getInstance();
-        print('After save - Email: ${prefs.getString('user_email')}');
-        print(
+        debugPrint('After save - Email: ${prefs.getString('user_email')}');
+        debugPrint(
             'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
-        print('💾 Saving active device session...');
+        debugPrint('💾 Saving active device session...');
         await DeviceSessionService().saveActiveDevice(user.uid);
-        print('✅ Active device saved, other devices will be logged out');
+        debugPrint('✅ Active device saved, other devices will be logged out');
 
         await context.read<UserProvider>().loadUserData(user.uid);
       }
@@ -91,8 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(errorMessage),
+          content: Text(errorMessage),
           backgroundColor: Colors.red,
         ),
       );
