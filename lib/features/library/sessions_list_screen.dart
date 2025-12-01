@@ -33,6 +33,241 @@ class SessionsListScreen extends StatefulWidget {
 }
 
 class _SessionsListScreenState extends State<SessionsListScreen> {
+  // All Sessions pagination
+  List<Map<String, dynamic>> _allSessions = [];
+  DocumentSnapshot? _lastAllDocument;
+  bool _hasMoreAllSessions = true;
+  bool _isLoadingAllSessions = false;
+  int _allSessionsRecursiveCount = 0;
+
+// Category Sessions pagination
+  List<Map<String, dynamic>> _categorySessions = [];
+  DocumentSnapshot? _lastCategoryDocument;
+  bool _hasMoreCategorySessions = true;
+  bool _isLoadingCategorySessions = false;
+  int _categorySessionsRecursiveCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isShowingAllSessions) {
+      _loadInitialAllSessions();
+    } else {
+      _loadInitialCategorySessions();
+    }
+  }
+
+  @override
+  void didUpdateWidget(SessionsListScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Reset pagination when widget updates (e.g. language change)
+    debugPrint('🔄 [SessionsListScreen] Widget updated, resetting pagination');
+
+    // Reset state
+    setState(() {
+      _allSessions = [];
+      _lastAllDocument = null;
+      _hasMoreAllSessions = true;
+
+      _categorySessions = [];
+      _lastCategoryDocument = null;
+      _hasMoreCategorySessions = true;
+    });
+
+    // Reload sessions based on current mode
+    if (widget.isShowingAllSessions) {
+      _loadInitialAllSessions();
+    } else {
+      _loadInitialCategorySessions();
+    }
+  }
+
+  // 🆕 ========== ALL SESSIONS PAGINATION ==========
+  Future<void> _loadInitialAllSessions() async {
+    setState(() {
+      _allSessions = [];
+      _lastAllDocument = null;
+      _hasMoreAllSessions = true;
+    });
+
+    await _loadMoreAllSessions();
+  }
+
+  Future<void> _loadMoreAllSessions() async {
+    if (_isLoadingAllSessions || !_hasMoreAllSessions) {
+      debugPrint('⏸️ [All Sessions Pagination] Already loading or no more');
+      return;
+    }
+
+    // 🆕 Prevent infinite loop
+    if (_allSessionsRecursiveCount > 10) {
+      debugPrint('⚠️ [All Sessions] Max recursive calls reached, stopping');
+      setState(() {
+        _hasMoreAllSessions = false;
+        _isLoadingAllSessions = false;
+      });
+      _allSessionsRecursiveCount = 0;
+      return;
+    }
+
+    setState(() => _isLoadingAllSessions = true);
+
+    try {
+      debugPrint('📥 [All Sessions Pagination] Loading sessions...');
+
+      Query query = FirebaseFirestore.instance
+          .collection('sessions')
+          .orderBy('createdAt', descending: true)
+          .limit(20);
+
+      if (_lastAllDocument != null) {
+        query = query.startAfter([_lastAllDocument!['createdAt']]);
+        debugPrint('📄 [All Sessions] Starting after: ${_lastAllDocument!.id}');
+      }
+
+      final snapshot = await query.get();
+      debugPrint('📦 [All Sessions] Fetched ${snapshot.docs.length} sessions');
+
+      if (snapshot.docs.isEmpty) {
+        setState(() {
+          _hasMoreAllSessions = false;
+          _isLoadingAllSessions = false;
+        });
+        _allSessionsRecursiveCount = 0; // 🆕 Reset
+        debugPrint('🏁 [All Sessions] No more sessions');
+        return;
+      }
+
+      // Apply language filter
+      final filtered = await SessionFilterService.filterSessionsByLanguage(
+        snapshot.docs,
+      );
+      debugPrint('🌍 [All Sessions] After filter: ${filtered.length}');
+
+      // 🆕 AUTO-RECURSIVE: If all filtered and more docs exist
+      if (filtered.isEmpty && snapshot.docs.length == 20) {
+        debugPrint(
+            '⚠️ [All Sessions] All filtered out, auto-loading more... (attempt ${_allSessionsRecursiveCount + 1}/10)');
+        _lastAllDocument = snapshot.docs.last;
+        _allSessionsRecursiveCount++; // 🆕 Increment
+        setState(() => _isLoadingAllSessions = false);
+        await _loadMoreAllSessions(); // 🆕 Recursive call
+        return;
+      }
+
+      // 🆕 Reset counter on success
+      _allSessionsRecursiveCount = 0;
+
+      setState(() {
+        _allSessions.addAll(filtered);
+        _lastAllDocument = snapshot.docs.last;
+        _hasMoreAllSessions = snapshot.docs.length == 20;
+        _isLoadingAllSessions = false;
+      });
+
+      debugPrint('✅ [All Sessions] Total: ${_allSessions.length}');
+    } catch (e) {
+      debugPrint('❌ [All Sessions] Error: $e');
+      _allSessionsRecursiveCount = 0; // 🆕 Reset on error
+      setState(() => _isLoadingAllSessions = false);
+    }
+  }
+
+// 🆕 ========== CATEGORY SESSIONS PAGINATION ==========
+  Future<void> _loadInitialCategorySessions() async {
+    setState(() {
+      _categorySessions = [];
+      _lastCategoryDocument = null;
+      _hasMoreCategorySessions = true;
+    });
+
+    await _loadMoreCategorySessions();
+  }
+
+  Future<void> _loadMoreCategorySessions() async {
+    if (_isLoadingCategorySessions || !_hasMoreCategorySessions) {
+      debugPrint('⏸️ [Category Pagination] Already loading or no more');
+      return;
+    }
+
+    // 🆕 Prevent infinite loop
+    if (_categorySessionsRecursiveCount > 10) {
+      debugPrint('⚠️ [Category] Max recursive calls reached, stopping');
+      setState(() {
+        _hasMoreCategorySessions = false;
+        _isLoadingCategorySessions = false;
+      });
+      _categorySessionsRecursiveCount = 0;
+      return;
+    }
+
+    setState(() => _isLoadingCategorySessions = true);
+
+    try {
+      debugPrint(
+          '📥 [Category Pagination] Loading sessions for ${widget.categoryId}...');
+
+      Query query = FirebaseFirestore.instance
+          .collection('sessions')
+          .where('categoryId', isEqualTo: widget.categoryId)
+          .orderBy('createdAt', descending: true)
+          .limit(20);
+
+      if (_lastCategoryDocument != null) {
+        query = query.startAfter([_lastCategoryDocument!['createdAt']]);
+        debugPrint(
+            '📄 [Category] Starting after: ${_lastCategoryDocument!.id}');
+      }
+
+      final snapshot = await query.get();
+      debugPrint('📦 [Category] Fetched ${snapshot.docs.length} sessions');
+
+      if (snapshot.docs.isEmpty) {
+        setState(() {
+          _hasMoreCategorySessions = false;
+          _isLoadingCategorySessions = false;
+        });
+        _categorySessionsRecursiveCount = 0; // 🆕 Reset
+        debugPrint('🏁 [Category] No more sessions');
+        return;
+      }
+
+      // Apply language filter
+      final filtered = await SessionFilterService.filterSessionsByLanguage(
+        snapshot.docs,
+      );
+      debugPrint('🌍 [Category] After filter: ${filtered.length}');
+
+      // 🆕 AUTO-RECURSIVE: If all filtered and more docs exist
+      if (filtered.isEmpty && snapshot.docs.length == 20) {
+        debugPrint(
+            '⚠️ [Category] All filtered out, auto-loading more... (attempt ${_categorySessionsRecursiveCount + 1}/10)');
+        _lastCategoryDocument = snapshot.docs.last;
+        _categorySessionsRecursiveCount++; // 🆕 Increment
+        setState(() => _isLoadingCategorySessions = false);
+        await _loadMoreCategorySessions(); // 🆕 Recursive call
+        return;
+      }
+
+      // 🆕 Reset counter on success
+      _categorySessionsRecursiveCount = 0;
+
+      setState(() {
+        _categorySessions.addAll(filtered);
+        _lastCategoryDocument = snapshot.docs.last;
+        _hasMoreCategorySessions = snapshot.docs.length == 20;
+        _isLoadingCategorySessions = false;
+      });
+
+      debugPrint('✅ [Category] Total: ${_categorySessions.length}');
+    } catch (e) {
+      debugPrint('❌ [Category] Error: $e');
+      _categorySessionsRecursiveCount = 0; // 🆕 Reset on error
+      setState(() => _isLoadingCategorySessions = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -68,7 +303,6 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           elevation: 0,
           leadingWidth: leadingWidth,
           titleSpacing: isTablet ? 4 : 0,
-
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
@@ -79,8 +313,6 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             onPressed: () => Navigator.pop(context),
           ),
-
-          
           title: LayoutBuilder(
             builder: (context, c) {
               return Row(
@@ -170,99 +402,182 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
             },
           ),
         ),
+        body: widget.isShowingAllSessions
+            ? _buildAllSessionsList()
+            : _buildCategorySessionsList(),
+      ),
+    );
+  }
 
-        // ⬇️ Aşağısı senin orijinal akışın
-        body: StreamBuilder<QuerySnapshot>(
-            stream: widget.isShowingAllSessions
-                ? FirebaseFirestore.instance
-                    .collection('sessions')
-                    .orderBy('createdAt', descending: true)
-                    .snapshots()
-                : FirebaseFirestore.instance
-                    .collection('sessions')
-                    .where('categoryId', isEqualTo: widget.categoryId)
-                    .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child:
-                      CircularProgressIndicator(color: AppColors.textPrimary),
-                );
-              }
+  // 🆕 ========== ALL SESSIONS LIST ==========
+  Widget _buildAllSessionsList() {
+    // Loading state (ilk yükleme)
+    if (_isLoadingAllSessions && _allSessions.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.textPrimary),
+      );
+    }
 
-              if (snapshot.hasError) {
-                return Center(
-                  child: Text(
-                    AppLocalizations.of(context).errorLoadingSessions,
-                    style: GoogleFonts.inter(
-                      fontSize: 16.sp,
-                      color: AppColors.textSecondary,
+    // Empty state
+    if (_allSessions.isEmpty && !_hasMoreAllSessions) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.music_off, size: 64.sp, color: AppColors.greyLight),
+            SizedBox(height: 16.h),
+            Text(
+              AppLocalizations.of(context).noSessionsAvailable,
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Sessions list with pagination
+    return ListView.builder(
+      padding: EdgeInsets.all(20.w),
+      itemCount: _allSessions.length + (_hasMoreAllSessions ? 1 : 0),
+      itemBuilder: (context, index) {
+        // See More button at the end
+        if (index == _allSessions.length) {
+          if (_isLoadingAllSessions) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.textPrimary),
+              ),
+            );
+          } else {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: _loadMoreAllSessions,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkBackgroundCard,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
-                );
-              }
+                  child: Text(
+                    AppLocalizations.of(context).seeMore,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+        }
 
-              final allDocs = snapshot.data?.docs ?? [];
+        // Session item
+        final session = _allSessions[index];
+        return _buildSessionCard(
+          sessionId: session['id'],
+          sessionData: session,
+        );
+      },
+    );
+  }
 
-              // ✅ LANGUAGE FILTER
-              return FutureBuilder<List<Map<String, dynamic>>>(
-                future: SessionFilterService.filterSessionsByLanguage(allDocs),
-                builder: (context, filteredSnapshot) {
-                  if (filteredSnapshot.connectionState ==
-                      ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.textPrimary),
-                    );
-                  }
+// 🆕 ========== CATEGORY SESSIONS LIST ==========
+  Widget _buildCategorySessionsList() {
+    // Loading state (ilk yükleme)
+    if (_isLoadingCategorySessions && _categorySessions.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(color: AppColors.textPrimary),
+      );
+    }
 
-                  final sessions = filteredSnapshot.data ?? [];
+    // Empty state
+    if (_categorySessions.isEmpty && !_hasMoreCategorySessions) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.music_off, size: 64.sp, color: AppColors.greyLight),
+            SizedBox(height: 16.h),
+            Text(
+              AppLocalizations.of(context).noSessionsAvailable,
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              AppLocalizations.of(context).checkBackLater,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
-                  if (sessions.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.music_off,
-                              size: 64.sp, color: AppColors.greyLight),
-                          SizedBox(height: 16.h),
-                          Text(
-                            AppLocalizations.of(context).noSessionsAvailable,
-                            style: GoogleFonts.inter(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            AppLocalizations.of(context).checkBackLater,
-                            style: GoogleFonts.inter(
-                                fontSize: 14.sp,
-                                color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
+    // Sessions list with pagination
+    return ListView.builder(
+      padding: EdgeInsets.all(20.w),
+      itemCount: _categorySessions.length + (_hasMoreCategorySessions ? 1 : 0),
+      itemBuilder: (context, index) {
+        // See More button at the end
+        if (index == _categorySessions.length) {
+          if (_isLoadingCategorySessions) {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.textPrimary),
+              ),
+            );
+          } else {
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: _loadMoreCategorySessions,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkBackgroundCard,
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).seeMore,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
+        }
 
-                  return ListView.builder(
-                    padding: EdgeInsets.all(20.w),
-                    itemCount: sessions.length,
-                    itemBuilder: (context, index) {
-                      final session = sessions[index];
-                      final sessionId = session['id'];
-
-                      return _buildSessionCard(
-                        sessionId: sessionId,
-                        sessionData: session,
-                      );
-                    },
-                  );
-                },
-              );
-            }),
-      ),
+        // Session item
+        final session = _categorySessions[index];
+        return _buildSessionCard(
+          sessionId: session['id'],
+          sessionData: session,
+        );
+      },
     );
   }
 

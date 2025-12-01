@@ -38,18 +38,45 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   List<CategoryModel> _categories = [];
   bool _isLoadingCategories = true;
 
+  // PAGINATION STATE
+  List<Map<String, dynamic>> _allSessions = [];
+  DocumentSnapshot? _lastDocument;
+  bool _hasMoreSessions = true;
+  bool _isLoadingSessions = false;
+  int _recursiveCallCount = 0;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _loadCategories();
     _prefetchImages();
+    _loadInitialSessions();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(CategoriesScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Reset pagination when widget updates (e.g. language change)
+    debugPrint('🔄 [CategoriesScreen] Widget updated, resetting pagination');
+
+    // Reset all sessions state
+    setState(() {
+      _allSessions = [];
+      _lastDocument = null;
+      _hasMoreSessions = true;
+    });
+
+    // Reload categories and sessions
+    _loadCategories();
+    _loadInitialSessions();
   }
 
   Future<void> _prefetchImages() async {
@@ -81,6 +108,96 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         _categories = [];
         _isLoadingCategories = false;
       });
+    }
+  }
+
+  Future<void> _loadInitialSessions() async {
+    setState(() {
+      _allSessions = [];
+      _lastDocument = null;
+      _hasMoreSessions = true;
+    });
+
+    await _loadMoreSessions();
+  }
+
+  Future<void> _loadMoreSessions() async {
+    if (_isLoadingSessions || !_hasMoreSessions) {
+      debugPrint('⏸️ [Pagination] Already loading or no more sessions');
+      return;
+    }
+
+    // 🆕 Prevent infinite loop
+    if (_recursiveCallCount > 10) {
+      debugPrint('⚠️ [Pagination] Max recursive calls reached, stopping');
+      setState(() {
+        _hasMoreSessions = false;
+        _isLoadingSessions = false;
+      });
+      _recursiveCallCount = 0;
+      return;
+    }
+
+    setState(() => _isLoadingSessions = true);
+
+    try {
+      debugPrint('📥 [Pagination] Loading sessions...');
+
+      Query query = _firestore
+          .collection('sessions')
+          .orderBy('createdAt', descending: true)
+          .limit(20);
+
+      if (_lastDocument != null) {
+        query = query.startAfter([_lastDocument!['createdAt']]);
+        debugPrint('📄 [Pagination] Starting after: ${_lastDocument!.id}');
+      }
+
+      final snapshot = await query.get();
+      debugPrint('📦 [Pagination] Fetched ${snapshot.docs.length} sessions');
+
+      if (snapshot.docs.isEmpty) {
+        setState(() {
+          _hasMoreSessions = false;
+          _isLoadingSessions = false;
+        });
+        _recursiveCallCount = 0; // 🆕 Reset
+        debugPrint('🏁 [Pagination] No more sessions');
+        return;
+      }
+
+      // Apply language filter
+      final filtered = await SessionFilterService.filterSessionsByLanguage(
+        snapshot.docs,
+      );
+      debugPrint('🌍 [Pagination] After language filter: ${filtered.length}');
+
+      // 🆕 AUTO-RECURSIVE: If all filtered and more docs exist
+      if (filtered.isEmpty && snapshot.docs.length == 20) {
+        debugPrint(
+            '⚠️ [Pagination] All filtered out, auto-loading more... (attempt ${_recursiveCallCount + 1}/10)');
+        _lastDocument = snapshot.docs.last;
+        _recursiveCallCount++; // 🆕 Increment
+        setState(() => _isLoadingSessions = false);
+        await _loadMoreSessions(); // 🆕 Recursive call
+        return;
+      }
+
+      // 🆕 Reset counter on success
+      _recursiveCallCount = 0;
+
+      setState(() {
+        _allSessions.addAll(filtered);
+        _lastDocument = snapshot.docs.last;
+        _hasMoreSessions = snapshot.docs.length == 20;
+        _isLoadingSessions = false;
+      });
+
+      debugPrint('✅ [Pagination] Total sessions now: ${_allSessions.length}');
+    } catch (e) {
+      debugPrint('❌ [Pagination] Error: $e');
+      _recursiveCallCount = 0; // 🆕 Reset on error
+      setState(() => _isLoadingSessions = false);
     }
   }
 
@@ -490,87 +607,94 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildAllSessionsTab() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('sessions')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.textPrimary,
-            ),
-          );
-        }
+    // Loading state (ilk yükleme)
+    if (_isLoadingSessions && _allSessions.isEmpty) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.textPrimary,
+        ),
+      );
+    }
 
-        if (snapshot.hasError) {
-          return Center(
-            child: Text(
-              AppLocalizations.of(context).errorLoadingSessions,
+    // Empty state
+    if (_allSessions.isEmpty && !_hasMoreSessions) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.library_music,
+              size: 64.sp,
+              color: AppColors.greyLight,
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              AppLocalizations.of(context).noSessionsAvailable,
               style: GoogleFonts.inter(
-                fontSize: 16.sp.clamp(14.0, 22.0),
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
                 color: AppColors.textSecondary,
               ),
             ),
-          );
+          ],
+        ),
+      );
+    }
+
+    // Sessions list with pagination
+    return ListView.builder(
+      padding: EdgeInsets.all(20.w),
+      itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
+      itemBuilder: (context, index) {
+        // See more button at the end
+        if (index == _allSessions.length) {
+          if (_isLoadingSessions) {
+            // Loading indicator
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            );
+          } else {
+            // See More button
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: Center(
+                child: ElevatedButton(
+                  onPressed: _loadMoreSessions,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.darkBackgroundCard,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 32.w,
+                      vertical: 12.h,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).seeMore,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
         }
 
-        final allDocs = snapshot.data?.docs ?? [];
-
-        // ✅ LANGUAGE FILTER
-        return FutureBuilder<List<Map<String, dynamic>>>(
-            future: SessionFilterService.filterSessionsByLanguage(allDocs),
-            builder: (context, filteredSnapshot) {
-              if (filteredSnapshot.connectionState == ConnectionState.waiting) {
-                return const Center(
-                  child: CircularProgressIndicator(
-                    color: AppColors.textPrimary,
-                  ),
-                );
-              }
-
-              final sessions = filteredSnapshot.data ?? [];
-
-              if (sessions.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.library_music,
-                        size: 64.sp,
-                        color: AppColors.greyLight,
-                      ),
-                      SizedBox(height: 16.h),
-                      Text(
-                        AppLocalizations.of(context).noSessionsAvailable,
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                padding: EdgeInsets.all(20.w),
-                itemCount: sessions.length,
-                itemBuilder: (context, index) {
-                  final session = sessions[index]; // Already filtered Map
-                  return _buildSessionItem(context, session);
-                },
-              );
-            });
+        // Session item
+        final session = _allSessions[index];
+        return _buildSessionItem(context, session);
       },
     );
   }
-
-// IMPORTANT: Only replace the _buildSessionItem method with this updated version
-// Add CachedNetworkImage import at the top of the file if not present
 
   Widget _buildSessionItem(BuildContext context, Map<String, dynamic> session) {
     // Add session ID if not present
