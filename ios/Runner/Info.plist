@@ -92,5 +92,8 @@
 	<!-- ✅ STATUS BAR STYLE -->
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>
+
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<true/>
 </dict>
 </plist>
