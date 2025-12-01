@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 import 'package:audio_session/audio_session.dart';
+import 'package:flutter/foundation.dart';
+
+import 'audio_cache_service.dart';
 
 /// Single-responsibility audio service.
 /// - Single AudioPlayer instance (prevents overlapping sounds)
@@ -54,8 +57,24 @@ class AudioPlayerService {
     for (int attempt = 0; attempt < 2; attempt++) {
       if (token != _loadToken) return lastResolvedDuration;
       try {
-        // setUrl resolves with the media duration (may be null for live/unknown)
-        lastResolvedDuration = await _player.setUrl(url);
+        // 🆕 CHECK CACHE FIRST (non-blocking)
+        final isCached = await AudioCacheService.isCached(url);
+
+        if (isCached) {
+          // ✅ CACHE'DEN ÇAL (ANINDA!)
+          debugPrint('✅ [AudioPlayer] Playing from cache');
+          final cachedFile = await AudioCacheService.getCachedAudio(url);
+          lastResolvedDuration = await _player.setFilePath(cachedFile.path);
+        } else {
+          // 🆕 HEMEN STREAM BAŞLAT (BEKLETME!)
+          debugPrint('⚡ [AudioPlayer] Streaming + caching in background');
+          lastResolvedDuration = await _player.setUrl(url);
+
+          // 🆕 ARKA PLANDA CACHE'E KAYDET (fire and forget)
+          AudioCacheService.precacheAudio(url).catchError((e) {
+            debugPrint('⚠️ Background cache failed: $e');
+          });
+        }
 
         if (token != _loadToken) return lastResolvedDuration;
         await _player.play();
