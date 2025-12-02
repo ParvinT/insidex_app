@@ -33,16 +33,62 @@ class DeviceSessionService {
       }
 
       try {
-        final isActive = await isCurrentDeviceActive(user.uid);
-
-        if (isActive) {
-          debugPrint('✅ Updating token for active device...');
-          await updateDeviceToken(user.uid, newToken);
-        } else {
-          debugPrint('⏭️ Not active device, skipping');
+        // ✅ Get current device token BEFORE transaction
+        final currentToken = await getCurrentDeviceToken();
+        if (currentToken == null) {
+          debugPrint('⚠️ Cannot get current token, skipping update');
+          return;
         }
+
+        debugPrint('🔐 Attempting atomic token update...');
+
+        // ✅ Use Firestore Transaction for atomic read+write
+        // This prevents race conditions when multiple devices are involved
+        await _firestore.runTransaction((transaction) async {
+          final userRef = _firestore.collection('users').doc(user.uid);
+          final snapshot = await transaction.get(userRef);
+
+          if (!snapshot.exists) {
+            debugPrint('❌ User document not found');
+            return;
+          }
+
+          final data = snapshot.data();
+          if (data == null) {
+            debugPrint('❌ User data is null');
+            return;
+          }
+
+          final activeDevice = data['activeDevice'] as Map<String, dynamic>?;
+
+          if (activeDevice == null) {
+            debugPrint('⚠️ No active device set, skipping token update');
+            return;
+          }
+
+          final activeToken = activeDevice['token'] as String?;
+
+          // ✅ CRITICAL CHECK: Only update if current token is still active
+          // This prevents Device B from being logged out if Device A's token refreshes
+          if (activeToken == currentToken) {
+            // Current device is still active, safe to update token
+            transaction.update(userRef, {
+              'activeDevice.token': newToken,
+              'activeDevice.tokenUpdatedAt': FieldValue.serverTimestamp(),
+            });
+            debugPrint(
+                '✅ Token updated atomically: ${newToken.substring(0, 20)}...');
+          } else {
+            // Current device is no longer active, skip update
+            debugPrint(
+                '⏭️ Device no longer active (current: ${currentToken.substring(0, 20)}, active: ${activeToken?.substring(0, 20)}), skipping update');
+          }
+        });
+
+        debugPrint('✅ Token refresh handled successfully');
       } catch (e) {
         debugPrint('❌ Error handling token refresh: $e');
+        // Don't rethrow - token refresh failures should not crash the app
       }
     });
   }
@@ -52,23 +98,50 @@ class DeviceSessionService {
   Future<void> saveActiveDevice(String userId) async {
     String? fcmToken;
     String? platform;
+
     try {
-      final hasPermission = await requestNotificationPermission();
-      if (!hasPermission) {
-        debugPrint(
-            '⚠️ Notification permission denied - device session may not work properly');
+      // Determine platform first
+      platform = Platform.isIOS ? 'ios' : 'android';
+
+      // ✅ iOS CRITICAL: Permission is REQUIRED for device session
+      if (Platform.isIOS) {
+        debugPrint('🍎 iOS detected - checking notification permission...');
+
+        final hasPermission = await requestNotificationPermission();
+
+        if (!hasPermission) {
+          debugPrint('❌ iOS notification permission DENIED');
+          debugPrint(
+              '⚠️ Device session system requires notification permission');
+          debugPrint(
+              '💡 User should enable notifications in Settings > Notifications');
+
+          // iOS'ta permission yoksa FCM token null olacak
+          // Sistem çalışmaz, devam etmeye gerek yok
+          throw Exception(
+              'iOS notification permission required for device session security');
+        }
+
+        debugPrint('✅ iOS notification permission granted');
       }
+
       // Get FCM token
       fcmToken = await _messaging.getToken();
 
       if (fcmToken == null) {
-        debugPrint('⚠️ FCM token is null, cannot save device');
-        return;
+        debugPrint('❌ FCM token is null - cannot save device session');
+
+        if (Platform.isIOS) {
+          debugPrint(
+              '💡 This usually happens when notification permission is denied on iOS');
+        }
+
+        throw Exception('FCM token unavailable');
       }
 
-      platform = Platform.isIOS ? 'ios' : 'android';
+      debugPrint('🔑 FCM Token obtained: ${fcmToken.substring(0, 20)}...');
 
-      // Update user's active device
+      // Update user's active device in Firestore
       await _firestore.collection('users').doc(userId).update({
         'activeDevice': {
           'token': fcmToken,
@@ -80,18 +153,18 @@ class DeviceSessionService {
 
       debugPrint(
           '✅ Active device saved: $platform - ${fcmToken.substring(0, 20)}...');
+      debugPrint('🔐 Multi-device logout system activated');
     } on FirebaseException catch (e) {
-      // Network hatalarını yakala
-      if (e.code == 'unavailable' || e.code == 'deadline-exceeded') {
-        debugPrint('⚠️ Network error, queueing offline update...');
-        if (fcmToken != null && platform != null) {
-          await _queueOfflineDeviceUpdate(userId, fcmToken, platform);
-        } else {
-          debugPrint('❌ Firebase error: ${e.code} - ${e.message}');
-        }
-      }
+      debugPrint('❌ Firebase error while saving device: ${e.code}');
+      debugPrint('   Message: ${e.message}');
+
+      // Re-throw to let caller handle
+      rethrow;
     } catch (e) {
-      debugPrint('❌ Unexpected error saving active device: $e');
+      debugPrint('❌ Error saving active device: $e');
+
+      // Re-throw to let caller handle
+      rethrow;
     }
   }
 
@@ -105,23 +178,68 @@ class DeviceSessionService {
     }
   }
 
-  /// Check if current device is the active device
+  /// Check if current device is the active device for the user
+  ///
+  /// Returns true if:
+  /// - Current device token matches active device token in Firestore
+  /// - No active device is set (legacy user - will auto-initialize)
+  ///
+  /// Returns false if:
+  /// - Current device token is null (permission denied or error)
+  /// - Another device is currently active
   Future<bool> isCurrentDeviceActive(String userId) async {
     try {
       final currentToken = await getCurrentDeviceToken();
-      if (currentToken == null) return false;
+      if (currentToken == null) {
+        debugPrint('⚠️ Current device token is null');
+        return false;
+      }
 
       final userDoc = await _firestore.collection('users').doc(userId).get();
       final data = userDoc.data();
 
-      if (data == null) return false;
+      if (data == null) {
+        debugPrint('⚠️ User data not found');
+        return false;
+      }
 
       final activeDevice = data['activeDevice'] as Map<String, dynamic>?;
-      if (activeDevice == null) return true; // No active device set yet
 
+      if (activeDevice == null) {
+        // ✅ BACKWARD COMPATIBILITY: Legacy user without activeDevice field
+        debugPrint(
+            '🔄 Legacy user detected - initializing activeDevice field...');
+
+        try {
+          // Auto-initialize activeDevice for legacy users
+          await saveActiveDevice(userId);
+          debugPrint('✅ activeDevice initialized for legacy user');
+
+          // After initialization, this device is the active one
+          return true;
+        } catch (e) {
+          debugPrint('❌ Failed to initialize activeDevice: $e');
+
+          // If initialization fails, still allow login (fallback)
+          // This prevents blocking legacy users if there's an error
+          debugPrint('⚠️ Falling back to permissive mode for legacy user');
+          return true;
+        }
+      }
+
+      // Normal flow: check if current token matches active token
       final activeToken = activeDevice['token'] as String?;
+      final isActive = currentToken == activeToken;
 
-      return currentToken == activeToken;
+      if (isActive) {
+        debugPrint('✅ Current device is active');
+      } else {
+        debugPrint('⚠️ Current device is NOT active');
+        debugPrint('   Current token: ${currentToken.substring(0, 20)}...');
+        debugPrint('   Active token: ${activeToken?.substring(0, 20)}...');
+      }
+
+      return isActive;
     } catch (e) {
       debugPrint('❌ Error checking device status: $e');
       return false;
@@ -180,6 +298,26 @@ class DeviceSessionService {
     }
   }
 
+  /// Update device token for active device
+  ///
+  /// ⚠️ DEPRECATED - DO NOT CALL DIRECTLY
+  ///
+  /// This method has a race condition issue and should not be used.
+  /// Token refresh is now handled automatically by initializeTokenRefreshListener()
+  /// using Firestore transactions for atomic updates.
+  ///
+  /// Race condition scenario:
+  /// 1. Device A: Token refresh starts
+  /// 2. Device B: Logs in (becomes active)
+  /// 3. Device A: Checks isActive (outdated cache returns true)
+  /// 4. Device A: Updates token (overwrites Device B!)
+  /// 5. Result: Device B gets logged out incorrectly
+  ///
+  /// This method is kept for backward compatibility only.
+  /// If you need to manually update token, use a transaction instead.
+  ///
+  /// @deprecated Use initializeTokenRefreshListener() with transaction
+
   Future<void> updateDeviceToken(String userId, String newToken) async {
     try {
       final isActive = await isCurrentDeviceActive(userId);
@@ -197,32 +335,6 @@ class DeviceSessionService {
       debugPrint('✅ Device token updated: ${newToken.substring(0, 20)}...');
     } catch (e) {
       debugPrint('❌ Error updating device token: $e');
-    }
-  }
-
-  /// Queue device update for offline scenario
-  Future<void> _queueOfflineDeviceUpdate(
-    String userId,
-    String token,
-    String platform,
-  ) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-
-      // Save pending update
-      await prefs.setString(
-        'pending_device_update',
-        jsonEncode({
-          'userId': userId,
-          'token': token,
-          'platform': platform,
-          'timestamp': DateTime.now().millisecondsSinceEpoch,
-        }),
-      );
-
-      debugPrint('📦 Device update queued for offline retry');
-    } catch (e) {
-      debugPrint('❌ Error queueing offline update: $e');
     }
   }
 

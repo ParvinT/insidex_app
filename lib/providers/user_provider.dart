@@ -97,8 +97,18 @@ class UserProvider extends ChangeNotifier {
 
     debugPrint('🔍 Starting device session monitoring for: $userId');
 
-    // 🔧 FIX: Biraz gecikme ekle ki context hazır olsun
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    // ✅ FIX: Use WidgetsBinding to safely wait for context
+    // This ensures the widget tree is fully built before starting listener
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Double-check user is still logged in
+      if (_firebaseUser == null || _firebaseUser!.uid != userId) {
+        debugPrint(
+            '⏭️ User logged out during initialization, skipping monitoring');
+        return;
+      }
+
+      debugPrint('🎯 Context ready, starting Firestore listener...');
+
       _deviceSessionSubscription = FirebaseFirestore.instance
           .collection('users')
           .doc(userId)

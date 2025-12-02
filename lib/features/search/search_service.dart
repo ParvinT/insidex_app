@@ -69,7 +69,12 @@ class SearchService {
   /// Searches ONLY in current app language content
   Future<List<Map<String, dynamic>>> _searchSessions(String query) async {
     try {
-      final snapshot = await _firestore.collection('sessions').get();
+      // 🆕 TEMPORARY PATCH: Limit to 50 sessions for cost control
+      // TODO: Migrate to Algolia when search volume > 3K/day (3-6 months)
+      final snapshot = await _firestore
+          .collection('sessions')
+          .limit(50) // Max 50 sessions to prevent excessive reads
+          .get();
 
       // ✅ LANGUAGE FILTER - Apply FIRST to get only sessions with current language
       final languageFilteredSessions =
