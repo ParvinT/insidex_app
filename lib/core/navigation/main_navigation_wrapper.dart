@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../shared/widgets/mini_player_widget.dart';
-import '../../services/audio_player_service.dart';
+import '../../services/audio/audio_player_service.dart';
 
 class MainNavigationWrapper extends StatefulWidget {
   final Widget child;

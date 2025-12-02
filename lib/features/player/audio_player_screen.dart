@@ -11,7 +11,7 @@ import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
 import 'widgets/player_album_art.dart';
 import '../../services/listening_tracker_service.dart';
-import '../../services/audio_player_service.dart';
+import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../services/language_helper_service.dart';
@@ -436,7 +436,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _audioUrl!,
         title:
             _session['title'] ?? AppLocalizations.of(context).subliminalSession,
-        artist: 'INSIDEX',
+        artist: 'InsideX',
+        artworkUrl: _backgroundImageUrl,
+        sessionId: _session['id'],
       );
 
       if (mounted && resolved != null) {

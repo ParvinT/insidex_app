@@ -9,7 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
 import '../../app.dart';
 import '../../providers/mini_player_provider.dart';
-import '../../services/audio_player_service.dart';
+import '../../services/audio/audio_player_service.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../features/player/audio_player_screen.dart';

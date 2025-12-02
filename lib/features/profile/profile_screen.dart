@@ -15,7 +15,7 @@ import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
-import '../../services/audio_player_service.dart';
+import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
 
 class ProfileScreen extends StatefulWidget {

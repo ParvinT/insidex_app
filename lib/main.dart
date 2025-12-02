@@ -12,7 +12,7 @@ import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/mini_player_provider.dart';
 import 'providers/locale_provider.dart';
-import 'services/audio_player_service.dart';
+import 'services/audio/audio_handler.dart';
 import 'app.dart';
 import 'providers/notification_provider.dart';
 import 'package:device_preview/device_preview.dart';
@@ -64,12 +64,11 @@ void main() async {
     debugPrint('FCM Token Refresh error: $e');
   }
 
-  // Audio Service'i başlat - Basit versiyon
   try {
-    await AudioPlayerService().initialize();
-    debugPrint('Audio Service initialized successfully');
+    await initAudioService();
+    debugPrint('✅ Audio Service initialized successfully');
   } catch (e) {
-    debugPrint('Audio Service initialization error: $e');
+    debugPrint('❌ Audio Service initialization error: $e');
   }
 
   SystemChrome.setSystemUIOverlayStyle(

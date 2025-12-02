@@ -9,7 +9,7 @@ import '../app.dart';
 import '../services/device_session_service.dart';
 import '../shared/widgets/device_logout_dialog.dart';
 import '../services/auth_persistence_service.dart';
-import '../services/audio_player_service.dart';
+import '../services/audio/audio_player_service.dart';
 import 'mini_player_provider.dart';
 
 class UserProvider extends ChangeNotifier {

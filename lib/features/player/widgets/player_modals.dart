@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../services/audio_player_service.dart';
+import '../../../services/audio/audio_player_service.dart';
 import '../../../l10n/app_localizations.dart';
 
 class PlayerModals {

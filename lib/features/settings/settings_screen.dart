@@ -11,7 +11,7 @@ import '../../core/routes/app_routes.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
 import '../../services/auth_persistence_service.dart';
-import '../../services/audio_player_service.dart';
+import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
 import 'widgets/language_selector.dart';
 import '../../l10n/app_localizations.dart';
