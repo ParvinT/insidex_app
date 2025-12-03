@@ -13,6 +13,7 @@ import 'providers/user_provider.dart';
 import 'providers/mini_player_provider.dart';
 import 'providers/locale_provider.dart';
 import 'services/audio/audio_handler.dart';
+import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
 import 'providers/notification_provider.dart';
 import 'package:device_preview/device_preview.dart';
@@ -65,6 +66,8 @@ void main() async {
   }
 
   try {
+    await AudioCacheService.initialize();
+    debugPrint('✅ Audio Cache initialized');
     await initAudioService();
     debugPrint('✅ Audio Service initialized successfully');
   } catch (e) {

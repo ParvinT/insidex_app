@@ -434,8 +434,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
       final resolved = await _audioService.playFromUrl(
         _audioUrl!,
-        title:
-            _session['title'] ?? AppLocalizations.of(context).subliminalSession,
+        title: _session['_displayTitle'] ??
+            _session['_localizedTitle'] ??
+            _session['title'] ??
+            AppLocalizations.of(context).subliminalSession,
         artist: 'InsideX',
         artworkUrl: _backgroundImageUrl,
         sessionId: _session['id'],

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -24,6 +25,7 @@ import 'audio_cache_service.dart';
 class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
   // =================== CORE PLAYER ===================
   final AudioPlayer _player = AudioPlayer();
+  final Completer<void> _initCompleter = Completer<void>();
 
   // Race guard for async loads (prevents overlapping plays)
   int _loadToken = 0;
@@ -38,6 +40,8 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   Future<void> _init() async {
+    // Setup audio session first
+    await _setupAudioSession();
     // Set default volume
     await _player.setVolume(0.7);
 
@@ -46,6 +50,7 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     _listenToPlaybackEvents();
     _listenToDuration();
     _listenToCurrentIndex();
+    _initCompleter.complete();
 
     debugPrint('🎵 [InsideXAudioHandler] Initialized');
   }
@@ -116,6 +121,51 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
       case ProcessingState.completed:
         return AudioProcessingState.completed;
     }
+  }
+
+  Future<void> _ensureInitialized() async {
+    if (!_initCompleter.isCompleted) {
+      await _initCompleter.future;
+    }
+  }
+
+  Future<void> _setupAudioSession() async {
+    final session = await AudioSession.instance;
+
+    await session.configure(const AudioSessionConfiguration.music());
+
+    await session.setActive(true);
+
+    // Handle interruptions (phone calls, other apps)
+    session.interruptionEventStream.listen((event) {
+      if (event.begin) {
+        switch (event.type) {
+          case AudioInterruptionType.duck:
+            _player.setVolume(0.3);
+            break;
+          case AudioInterruptionType.pause:
+          case AudioInterruptionType.unknown:
+            _player.pause();
+            break;
+        }
+      } else {
+        switch (event.type) {
+          case AudioInterruptionType.duck:
+            _player.setVolume(0.7);
+            break;
+          case AudioInterruptionType.pause:
+          case AudioInterruptionType.unknown:
+            break;
+        }
+      }
+    });
+
+    // Handle headphone disconnection
+    session.becomingNoisyEventStream.listen((_) {
+      _player.pause();
+    });
+
+    debugPrint('🎧 [InsideXAudioHandler] Audio session configured');
   }
 
   /// Listen to playback events for error handling
@@ -277,6 +327,7 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     String? sessionId,
     Duration? duration,
   }) async {
+    await _ensureInitialized();
     final int token = ++_loadToken;
 
     // Stop any current playback
@@ -295,10 +346,26 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
         final isCached = await AudioCacheService.isCached(url);
 
         if (isCached) {
-          // Play from cache (instant!)
-          debugPrint('✅ [InsideXAudioHandler] Playing from cache');
-          final cachedFile = await AudioCacheService.getCachedAudio(url);
-          resolvedDuration = await _player.setFilePath(cachedFile.path);
+          try {
+            debugPrint('✅ [InsideXAudioHandler] Playing from cache');
+            final cachedFile = await AudioCacheService.getCachedAudio(url);
+
+            // Use file URI for playback
+            final fileUri = Uri.file(cachedFile.path);
+            resolvedDuration = await _player.setUrl(fileUri.toString());
+
+            debugPrint('✅ [InsideXAudioHandler] Cache playback ready');
+          } catch (cacheError) {
+            // Cache failed, fallback to streaming
+            debugPrint(
+                '⚠️ [InsideXAudioHandler] Cache failed, streaming: $cacheError');
+            resolvedDuration = await _player.setUrl(url);
+
+            // Re-cache in background
+            AudioCacheService.precacheAudio(url).catchError((e) {
+              debugPrint('⚠️ Background re-cache failed: $e');
+            });
+          }
         } else {
           // Stream from URL and cache in background
           debugPrint(
