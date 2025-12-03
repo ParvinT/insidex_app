@@ -761,7 +761,25 @@
   "noHealingSessionYetWorkingOnIt": "Bu durum için henüz iyileştirme seansı mevcut değil. Ekibimiz üzerinde çalışıyor!",
   "loadingRecommendation": "Öneri yükleniyor...",
   "howItWorks": "Nasıl Çalışır",
-  "chooseAvatar": "Avatarını Seç"
+  "chooseAvatar": "Avatarını Seç",
+
+  "downloads": "İndirilenler",
+  "noDownloads": "İndirilen Yok",
+  "noDownloadsMessage": "İnternet olmadan dinlemek için oturumları indirin",
+  "removeDownload": "İndirmeyi Kaldır",
+  "removeDownloadMessage": "Bu, indirilen dosyayı cihazınızdan kaldıracak",
+  "remove": "Kaldır",
+  "storageUsed": "Kullanılan Depolama",
+  "sessions": "Oturum",
+  "totalSize": "Toplam Boyut",
+  "clearAllDownloads": "Tüm İndirilenleri Temizle",
+  "clearAllDownloadsMessage": "Bu, tüm indirilen oturumları cihazınızdan kaldıracak",
+  "clearAll": "Tümünü Temizle",
+  "downloading": "İndiriliyor...",
+  "downloadComplete": "İndirme Tamamlandı",
+  "downloadFailed": "İndirme Başarısız",
+  "offlineMode": "Çevrimdışı Mod",
+  "offlineModeMessage": "Yalnızca indirilen oturumlar kullanılabilir"
 
   
 }

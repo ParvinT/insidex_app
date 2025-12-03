@@ -346,6 +346,7 @@ class PlayerBottomActions extends StatelessWidget {
   final VoidCallback onFavorite;
   final VoidCallback onPlaylist;
   final VoidCallback onTimer;
+  final Widget? downloadButton;
 
   const PlayerBottomActions({
     super.key,
@@ -356,6 +357,7 @@ class PlayerBottomActions extends StatelessWidget {
     required this.onFavorite,
     required this.onPlaylist,
     required this.onTimer,
+    this.downloadButton,
   });
 
   @override
@@ -393,6 +395,7 @@ class PlayerBottomActions extends StatelessWidget {
             ),
             onPressed: onTimer,
           ),
+          if (downloadButton != null) downloadButton!,
         ],
       ),
     );

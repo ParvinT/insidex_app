@@ -818,7 +818,25 @@
   "noHealingSessionYetWorkingOnIt": "No healing session available for this condition yet. Our team is working on it!",
   "loadingRecommendation": "Loading recommendation...",
   "howItWorks": "How It Works",
-  "chooseAvatar": "Choose Your Avatar"
+  "chooseAvatar": "Choose Your Avatar",
+
+  "downloads": "Downloads",
+  "noDownloads": "No Downloads",
+  "noDownloadsMessage": "Download sessions to listen offline without internet",
+  "removeDownload": "Remove Download",
+  "removeDownloadMessage": "This will remove the downloaded file from your device",
+  "remove": "Remove",
+  "storageUsed": "Storage Used",
+  "sessions": "Sessions",
+  "totalSize": "Total Size",
+  "clearAllDownloads": "Clear All Downloads",
+  "clearAllDownloadsMessage": "This will remove all downloaded sessions from your device",
+  "clearAll": "Clear All",
+  "downloading": "Downloading...",
+  "downloadComplete": "Download Complete",
+  "downloadFailed": "Download Failed",
+  "offlineMode": "Offline Mode",
+  "offlineModeMessage": "Only downloaded sessions are available"
 
 
 }

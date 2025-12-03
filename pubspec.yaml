@@ -36,9 +36,15 @@ dependencies:
   flutter_markdown: ^0.6.23
   url_launcher: ^6.3.1
 
+  # Download
+  encrypt: ^5.0.3 
+  connectivity_plus: ^6.0.3 
+  sqflite: ^2.3.3 
+  path: ^1.9.0
+  http: ^1.2.0
+
   # Icons
   cupertino_icons: ^1.0.8
-  
 
   # Firebase - Compatible versions
   firebase_core: ^3.1.1

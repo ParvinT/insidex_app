@@ -771,6 +771,24 @@
   "noHealingSessionYetWorkingOnIt": "Для этого состояния пока нет лечебного сеанса. Наша команда работает над этим!",
   "loadingRecommendation": "Загрузка рекомендации...",
   "howItWorks": "Как это работает",
-  "chooseAvatar": "Выберите аватар"
+  "chooseAvatar": "Выберите аватар",
+
+  "downloads": "Загрузки",
+  "noDownloads": "Нет загрузок",
+  "noDownloadsMessage": "Скачайте сеансы для прослушивания без интернета",
+  "removeDownload": "Удалить загрузку",
+  "removeDownloadMessage": "Это удалит загруженный файл с вашего устройства",
+  "remove": "Удалить",
+  "storageUsed": "Использовано памяти",
+  "sessions": "Сеансы",
+  "totalSize": "Общий размер",
+  "clearAllDownloads": "Удалить все загрузки",
+  "clearAllDownloadsMessage": "Это удалит все загруженные сеансы с вашего устройства",
+  "clearAll": "Очистить всё",
+  "downloading": "Загрузка...",
+  "downloadComplete": "Загрузка завершена",
+  "downloadFailed": "Ошибка загрузки",
+  "offlineMode": "Офлайн режим",
+  "offlineModeMessage": "Доступны только загруженные сеансы"
   
 }

@@ -715,5 +715,23 @@
   "noHealingSessionYetWorkingOnIt": "इस स्थिति के लिए अभी तक कोई उपचार सत्र उपलब्ध नहीं है। हमारी टीम इस पर काम कर रही है!",
   "loadingRecommendation": "अनुशंसा लोड हो रही है...",
   "howItWorks": "यह कैसे काम करता है",
-  "chooseAvatar": "अपना अवतार चुनें"
+  "chooseAvatar": "अपना अवतार चुनें",
+
+  "downloads": "डाउनलोड",
+  "noDownloads": "कोई डाउनलोड नहीं",
+  "noDownloadsMessage": "इंटरनेट के बिना सुनने के लिए सत्र डाउनलोड करें",
+  "removeDownload": "डाउनलोड हटाएं",
+  "removeDownloadMessage": "यह आपके डिवाइस से डाउनलोड की गई फ़ाइल को हटा देगा",
+  "remove": "हटाएं",
+  "storageUsed": "उपयोग किया गया स्टोरेज",
+  "sessions": "सत्र",
+  "totalSize": "कुल आकार",
+  "clearAllDownloads": "सभी डाउनलोड साफ़ करें",
+  "clearAllDownloadsMessage": "यह आपके डिवाइस से सभी डाउनलोड किए गए सत्र हटा देगा",
+  "clearAll": "सब साफ़ करें",
+  "downloading": "डाउनलोड हो रहा है...",
+  "downloadComplete": "डाउनलोड पूर्ण",
+  "downloadFailed": "डाउनलोड विफल",
+  "offlineMode": "ऑफ़लाइन मोड",
+  "offlineModeMessage": "केवल डाउनलोड किए गए सत्र उपलब्ध हैं"
 }

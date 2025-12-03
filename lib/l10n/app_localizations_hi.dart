@@ -1170,7 +1170,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get recentSearches => 'हाल की खोजें';
 
   @override
-  String get clearAll => 'सभी साफ़ करें';
+  String get clearAll => 'सब साफ़ करें';
 
   @override
   String get clear => 'साफ़ करें';
@@ -2100,4 +2100,49 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get chooseAvatar => 'अपना अवतार चुनें';
+
+  @override
+  String get downloads => 'डाउनलोड';
+
+  @override
+  String get noDownloads => 'कोई डाउनलोड नहीं';
+
+  @override
+  String get noDownloadsMessage =>
+      'इंटरनेट के बिना सुनने के लिए सत्र डाउनलोड करें';
+
+  @override
+  String get removeDownload => 'डाउनलोड हटाएं';
+
+  @override
+  String get removeDownloadMessage =>
+      'यह आपके डिवाइस से डाउनलोड की गई फ़ाइल को हटा देगा';
+
+  @override
+  String get storageUsed => 'उपयोग किया गया स्टोरेज';
+
+  @override
+  String get totalSize => 'कुल आकार';
+
+  @override
+  String get clearAllDownloads => 'सभी डाउनलोड साफ़ करें';
+
+  @override
+  String get clearAllDownloadsMessage =>
+      'यह आपके डिवाइस से सभी डाउनलोड किए गए सत्र हटा देगा';
+
+  @override
+  String get downloading => 'डाउनलोड हो रहा है...';
+
+  @override
+  String get downloadComplete => 'डाउनलोड पूर्ण';
+
+  @override
+  String get downloadFailed => 'डाउनलोड विफल';
+
+  @override
+  String get offlineMode => 'ऑफ़लाइन मोड';
+
+  @override
+  String get offlineModeMessage => 'केवल डाउनलोड किए गए सत्र उपलब्ध हैं';
 }

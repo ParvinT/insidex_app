@@ -4079,6 +4079,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose Your Avatar'**
   String get chooseAvatar;
+
+  /// No description provided for @downloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloads'**
+  String get downloads;
+
+  /// No description provided for @noDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'No Downloads'**
+  String get noDownloads;
+
+  /// No description provided for @noDownloadsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Download sessions to listen offline without internet'**
+  String get noDownloadsMessage;
+
+  /// No description provided for @removeDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Download'**
+  String get removeDownload;
+
+  /// No description provided for @removeDownloadMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove the downloaded file from your device'**
+  String get removeDownloadMessage;
+
+  /// No description provided for @storageUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage Used'**
+  String get storageUsed;
+
+  /// No description provided for @totalSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Size'**
+  String get totalSize;
+
+  /// No description provided for @clearAllDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Downloads'**
+  String get clearAllDownloads;
+
+  /// No description provided for @clearAllDownloadsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This will remove all downloaded sessions from your device'**
+  String get clearAllDownloadsMessage;
+
+  /// No description provided for @downloading.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading...'**
+  String get downloading;
+
+  /// No description provided for @downloadComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Complete'**
+  String get downloadComplete;
+
+  /// No description provided for @downloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Failed'**
+  String get downloadFailed;
+
+  /// No description provided for @offlineMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Mode'**
+  String get offlineMode;
+
+  /// No description provided for @offlineModeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Only downloaded sessions are available'**
+  String get offlineModeMessage;
 }
 
 class _AppLocalizationsDelegate

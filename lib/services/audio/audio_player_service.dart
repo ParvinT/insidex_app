@@ -3,6 +3,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:flutter/foundation.dart';
 
 import 'audio_handler.dart';
+import '../download/download_service.dart';
+import '../language_helper_service.dart';
 
 /// Single-responsibility audio service.
 /// - Single AudioPlayer instance (prevents overlapping sounds)
@@ -57,6 +59,80 @@ class AudioPlayerService {
       artworkUrl: artworkUrl,
       sessionId: sessionId,
       duration: duration,
+    );
+  }
+
+  /// Play session with download priority
+  /// Priority: Downloaded → Cached → Stream
+  Future<Duration?> playSession({
+    required Map<String, dynamic> sessionData,
+    required String language,
+    String? artworkUrl,
+  }) async {
+    final sessionId = sessionData['id'] as String?;
+    if (sessionId == null) {
+      debugPrint('❌ [AudioPlayerService] Session ID is null');
+      return null;
+    }
+
+    final downloadService = DownloadService();
+
+    // Get session metadata
+    final title = sessionData['_displayTitle'] ??
+        sessionData['title'] ??
+        'INSIDEX Session';
+    final duration = LanguageHelperService.getDuration(
+      sessionData['subliminal']?['durations'],
+      language,
+    );
+
+    // 1️⃣ Check if downloaded (HIGHEST PRIORITY)
+    if (downloadService.isInitialized) {
+      final isDownloaded =
+          await downloadService.isDownloaded(sessionId, language);
+
+      if (isDownloaded) {
+        debugPrint('📥 [AudioPlayerService] Playing from download');
+
+        final decryptedPath = await downloadService.getDecryptedAudioPath(
+          sessionId,
+          language,
+        );
+
+        if (decryptedPath != null) {
+          // Play from decrypted file
+          return await audioHandler.playFromUrl(
+            url: 'file://$decryptedPath',
+            title: title,
+            artist: 'INSIDEX',
+            artworkUrl: artworkUrl,
+            sessionId: sessionId,
+            duration: duration > 0 ? Duration(seconds: duration) : null,
+          );
+        }
+      }
+    }
+
+    // 2️⃣ Get audio URL and use cache/stream flow
+    final audioUrl = LanguageHelperService.getAudioUrl(
+      sessionData['subliminal']?['audioUrls'],
+      language,
+    );
+
+    if (audioUrl.isEmpty) {
+      debugPrint('❌ [AudioPlayerService] Audio URL not found');
+      return null;
+    }
+
+    debugPrint('🎵 [AudioPlayerService] Playing from cache/stream');
+
+    return await playFromUrl(
+      audioUrl,
+      title: title,
+      artist: 'INSIDEX',
+      artworkUrl: artworkUrl,
+      sessionId: sessionId,
+      duration: duration > 0 ? Duration(seconds: duration) : null,
     );
   }
 

@@ -307,7 +307,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectCategoryExplore => 'Выберите категорию для просмотра сессий';
 
   @override
-  String get sessions => 'Сессии';
+  String get sessions => 'Сеансы';
 
   @override
   String get errorLoadingSessions => 'Ошибка загрузки сессий';
@@ -1178,7 +1178,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get recentSearches => 'Недавние поиски';
 
   @override
-  String get clearAll => 'Очистить все';
+  String get clearAll => 'Очистить всё';
 
   @override
   String get clear => 'Очистить';
@@ -2113,4 +2113,49 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get chooseAvatar => 'Выберите аватар';
+
+  @override
+  String get downloads => 'Загрузки';
+
+  @override
+  String get noDownloads => 'Нет загрузок';
+
+  @override
+  String get noDownloadsMessage =>
+      'Скачайте сеансы для прослушивания без интернета';
+
+  @override
+  String get removeDownload => 'Удалить загрузку';
+
+  @override
+  String get removeDownloadMessage =>
+      'Это удалит загруженный файл с вашего устройства';
+
+  @override
+  String get storageUsed => 'Использовано памяти';
+
+  @override
+  String get totalSize => 'Общий размер';
+
+  @override
+  String get clearAllDownloads => 'Удалить все загрузки';
+
+  @override
+  String get clearAllDownloadsMessage =>
+      'Это удалит все загруженные сеансы с вашего устройства';
+
+  @override
+  String get downloading => 'Загрузка...';
+
+  @override
+  String get downloadComplete => 'Загрузка завершена';
+
+  @override
+  String get downloadFailed => 'Ошибка загрузки';
+
+  @override
+  String get offlineMode => 'Офлайн режим';
+
+  @override
+  String get offlineModeMessage => 'Доступны только загруженные сеансы';
 }

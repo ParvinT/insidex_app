@@ -16,6 +16,8 @@ import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
+import '../../services/download/download_service.dart';
+import '../downloads/widgets/download_button.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -414,6 +416,63 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _playCurrentTrack() async {
+    if (_session['_isOffline'] == true) {
+      debugPrint('📥 [AudioPlayer] Playing from offline download');
+
+      final downloadService = DownloadService();
+      final language =
+          _session['_downloadedLanguage'] as String? ?? _currentLanguage;
+      final sessionId = _session['id'] as String?;
+
+      if (sessionId == null) {
+        debugPrint('❌ [AudioPlayer] Session ID is null for offline playback');
+        return;
+      }
+
+      final decryptedPath =
+          await downloadService.getDecryptedAudioPath(sessionId, language);
+
+      if (decryptedPath != null) {
+        try {
+          setState(() {
+            _currentPosition = Duration.zero;
+            _currentProgress = 0.0;
+          });
+
+          final resolved = await _audioService.playFromUrl(
+            'file://$decryptedPath',
+            title: _session['_displayTitle'] ??
+                _session['title'] ??
+                AppLocalizations.of(context).subliminalSession,
+            artist: 'InsideX',
+            artworkUrl: null, // Offline mode - no remote artwork
+            sessionId: sessionId,
+          );
+
+          if (mounted && resolved != null) {
+            setState(() => _totalDuration = resolved);
+          }
+
+          debugPrint('🎵 Playing offline: ${_session['title']}');
+          return; // ← ÖNEMLİ: Online flow'u atla
+        } catch (e) {
+          debugPrint('❌ [AudioPlayer] Offline playback error: $e');
+          // Fall through to show error
+        }
+      } else {
+        debugPrint('❌ [AudioPlayer] Could not decrypt offline file');
+      }
+
+      // Show error for offline playback failure
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context).audioFileNotFound),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     if (_audioUrl == null || _audioUrl!.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -581,6 +640,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                               onFavorite: _toggleFavorite,
                               onPlaylist: _togglePlaylist,
                               onTimer: _showSleepTimerModal,
+                              downloadButton: DownloadButton(
+                                session: _session,
+                                size: 24.sp,
+                                showBackground: false,
+                              ),
                             ),
                           ],
                         );

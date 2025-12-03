@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/responsive/responsive_scaffold.dart';
@@ -16,7 +18,9 @@ import 'widgets/home_card_button.dart';
 import '../quiz/widgets/expandable_quiz_section.dart';
 import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
+import '../../providers/download_provider.dart';
 import '../search/widgets/search_bar_widget.dart';
+import '../downloads/downloads_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -36,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _initializeDownloadProvider();
     _loadHomeCards();
     _startSmartPrefetch();
 
@@ -43,6 +48,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       NotificationService.checkAndShowPermissionDialog(context);
     });
+  }
+
+  void _initializeDownloadProvider() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<DownloadProvider>().initialize(user.uid);
+        debugPrint(
+            '✅ DownloadProvider initialized for user: ${user.uid.substring(0, 8)}...');
+      });
+    }
   }
 
   Future<void> _loadHomeCards() async {
@@ -286,8 +302,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     BlendMode.srcIn,
                   ),
                 ),
-                // Menu button
-                _buildHeaderButton(AppLocalizations.of(context).menu, true),
+
+                Row(
+                  children: [
+                    // Downloads button
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const DownloadsScreen()),
+                        );
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(isTablet ? 10.w : 8.w),
+                        decoration: BoxDecoration(
+                          color: AppColors.textPrimary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Icon(
+                          Icons.download_rounded,
+                          size: isTablet ? 24.sp : 22.sp,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    // Menu button
+                    _buildHeaderButton(AppLocalizations.of(context).menu, true),
+                  ],
+                ),
+                // ==================================
               ],
             ),
 

@@ -12,6 +12,7 @@ import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
 import 'providers/mini_player_provider.dart';
 import 'providers/locale_provider.dart';
+import 'providers/download_provider.dart';
 import 'services/audio/audio_handler.dart';
 import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
@@ -20,6 +21,7 @@ import 'package:device_preview/device_preview.dart';
 import 'services/notifications/notification_service.dart';
 import 'services/notifications/notification_reliability_service.dart';
 import 'services/device_session_service.dart';
+import 'services/download/connectivity_service.dart';
 import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
@@ -74,6 +76,13 @@ void main() async {
     debugPrint('❌ Audio Service initialization error: $e');
   }
 
+  try {
+    await ConnectivityService().initialize();
+    debugPrint('✅ Connectivity Service initialized');
+  } catch (e) {
+    debugPrint('Connectivity Service initialization error: $e');
+  }
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -96,6 +105,7 @@ void main() async {
       enabled: !kReleaseMode,
       builder: (context) => MultiProvider(
         providers: [
+          ChangeNotifierProvider(create: (_) => DownloadProvider()),
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
           ChangeNotifierProvider(
               create: (_) => UserProvider()..initAuthListener()),

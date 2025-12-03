@@ -2096,4 +2096,49 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chooseAvatar => 'Choose Your Avatar';
+
+  @override
+  String get downloads => 'Downloads';
+
+  @override
+  String get noDownloads => 'No Downloads';
+
+  @override
+  String get noDownloadsMessage =>
+      'Download sessions to listen offline without internet';
+
+  @override
+  String get removeDownload => 'Remove Download';
+
+  @override
+  String get removeDownloadMessage =>
+      'This will remove the downloaded file from your device';
+
+  @override
+  String get storageUsed => 'Storage Used';
+
+  @override
+  String get totalSize => 'Total Size';
+
+  @override
+  String get clearAllDownloads => 'Clear All Downloads';
+
+  @override
+  String get clearAllDownloadsMessage =>
+      'This will remove all downloaded sessions from your device';
+
+  @override
+  String get downloading => 'Downloading...';
+
+  @override
+  String get downloadComplete => 'Download Complete';
+
+  @override
+  String get downloadFailed => 'Download Failed';
+
+  @override
+  String get offlineMode => 'Offline Mode';
+
+  @override
+  String get offlineModeMessage => 'Only downloaded sessions are available';
 }
