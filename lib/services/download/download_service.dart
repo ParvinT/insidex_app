@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../models/downloaded_session.dart';
 import 'download_database.dart';
@@ -222,7 +221,6 @@ class DownloadService {
   Future<void> _executeDownload(DownloadQueueItem item) async {
     final sessionData = item.sessionData;
     final language = item.language;
-    final sessionId = item.sessionId;
     final key = item.key;
 
     debugPrint('📥 [DownloadService] Starting download: $key');
@@ -237,7 +235,7 @@ class DownloadService {
         language,
       );
 
-      if (audioUrl == null || audioUrl.isEmpty) {
+      if (audioUrl.isEmpty) {
         throw DownloadException('Audio URL not found for language: $language');
       }
 
@@ -253,6 +251,9 @@ class DownloadService {
         language,
       );
       final title = localizedContent.title;
+      final description = localizedContent.description;
+      final introTitle = localizedContent.introduction.title;
+      final introContent = localizedContent.introduction.content;
       final sessionNumber = sessionData['sessionNumber'] as int?;
       final displayTitle =
           sessionNumber != null ? '$sessionNumber • $title' : title;
@@ -299,6 +300,9 @@ class DownloadService {
         fileSizeBytes: fileSize,
         title: displayTitle,
         durationSeconds: duration,
+        description: description,
+        introTitle: introTitle,
+        introContent: introContent,
       );
 
       // 10. Save to database
@@ -450,6 +454,7 @@ class DownloadService {
   // =================== PLAYBACK ===================
 
   /// Get decrypted audio for playback (returns temp file path)
+  /// Uses cache to avoid re-decrypting and runs decryption in background isolate
   Future<String?> getDecryptedAudioPath(
       String sessionId, String language) async {
     try {
@@ -460,31 +465,63 @@ class DownloadService {
         return null;
       }
 
-      final encryptedFile = File(download.encryptedAudioPath);
+      final encryptedPath = download.encryptedAudioPath;
+
+      // 1️⃣ CHECK CACHE FIRST - Return immediately if already decrypted
+      final cachedPath =
+          await _encryption.getCachedDecryptedPath(encryptedPath);
+      if (cachedPath != null) {
+        debugPrint('⚡ [DownloadService] Using cached decrypted file');
+        // Update last played in background (fire and forget)
+        _database.updateLastPlayed(download.id).catchError((_) => false);
+        return cachedPath;
+      }
+
+      // 2️⃣ VERIFY ENCRYPTED FILE EXISTS
+      final encryptedFile = File(encryptedPath);
       if (!await encryptedFile.exists()) {
         debugPrint('❌ [DownloadService] Encrypted file not found');
         return null;
       }
 
-      // Create temp directory for decrypted files
+      // 3️⃣ PREPARE TEMP PATH
       final tempDir = await getTemporaryDirectory();
       final tempPath =
           path.join(tempDir.path, 'insidex_playback', '${download.id}.mp3');
 
-      // Ensure directory exists
       final tempFileDir = Directory(path.dirname(tempPath));
       if (!await tempFileDir.exists()) {
         await tempFileDir.create(recursive: true);
       }
 
-      // Decrypt to temp file
-      await _encryption.decryptFileToTemp(encryptedFile, tempPath);
+      // 4️⃣ CHECK IF TEMP FILE ALREADY EXISTS (from previous session)
+      final tempFile = File(tempPath);
+      if (await tempFile.exists() && await tempFile.length() > 0) {
+        debugPrint('⚡ [DownloadService] Temp file already exists');
+        _encryption.cacheDecryptedPath(encryptedPath, tempPath);
+        _database.updateLastPlayed(download.id).catchError((_) => false);
+        return tempPath;
+      }
 
-      // Update last played
-      await _database.updateLastPlayed(download.id);
+      // 5️⃣ DECRYPT IN BACKGROUND ISOLATE (NON-BLOCKING)
+      debugPrint('🔓 [DownloadService] Decrypting in background...');
 
-      debugPrint('▶️ [DownloadService] Decrypted for playback: $tempPath');
+      final encryptedBytes = await encryptedFile.readAsBytes();
 
+      // Run decryption in isolate - THIS IS THE KEY CHANGE
+      final decryptedBytes =
+          await _encryption.decryptBytesInBackground(encryptedBytes);
+
+      // Write to temp file
+      await tempFile.writeAsBytes(decryptedBytes, flush: true);
+
+      // 6️⃣ CACHE THE RESULT
+      _encryption.cacheDecryptedPath(encryptedPath, tempPath);
+
+      // Update last played in background
+      _database.updateLastPlayed(download.id).catchError((_) => false);
+
+      debugPrint('✅ [DownloadService] Decrypted for playback: $tempPath');
       return tempPath;
     } catch (e) {
       debugPrint('❌ [DownloadService] Decryption error: $e');

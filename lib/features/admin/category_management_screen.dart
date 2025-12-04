@@ -27,8 +27,6 @@ class CategoryManagementScreen extends StatefulWidget {
 
 class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   final CategoryService _categoryService = CategoryService();
-
-  List<CategoryModel> _allCategories = [];
   List<CategoryModel> _filteredCategories = [];
   bool _isLoading = true;
   bool _showOnlyUserLanguage = true; // Toggle filter
@@ -56,7 +54,6 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           return nameA.compareTo(nameB);
         });
         setState(() {
-          _allCategories = categories;
           _filteredCategories = filtered;
           _isLoading = false;
         });
@@ -67,7 +64,6 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           return nameA.compareTo(nameB);
         });
         setState(() {
-          _allCategories = categories;
           _filteredCategories = categories;
           _isLoading = false;
         });

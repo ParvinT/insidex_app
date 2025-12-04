@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:crypto/crypto.dart';
@@ -23,13 +22,14 @@ class DownloadEncryption {
   static const String _appSecret = 'InsideX_Secure_Audio_2024_v1';
 
   // Encryption settings
-  static const int _keyLength = 32; // 256 bits
+
   static const int _ivLength = 16; // 128 bits
 
   // Cached encrypter per user
   String? _currentUserId;
   encrypt.Encrypter? _encrypter;
   encrypt.Key? _key;
+  final Map<String, String> _decryptedFileCache = {};
 
   /// Initialize encryption for a specific user
   void initialize(String userId) {
@@ -63,6 +63,28 @@ class DownloadEncryption {
   encrypt.IV _generateIV() {
     return encrypt.IV.fromSecureRandom(_ivLength);
   }
+
+  /// Check if decrypted file already exists in cache
+  Future<String?> getCachedDecryptedPath(String encryptedPath) async {
+    final cachedPath = _decryptedFileCache[encryptedPath];
+    if (cachedPath != null) {
+      final file = File(cachedPath);
+      if (await file.exists() && await file.length() > 0) {
+        debugPrint('✅ [Encryption] Using cached decrypted file');
+        return cachedPath;
+      }
+      _decryptedFileCache.remove(encryptedPath);
+    }
+    return null;
+  }
+
+  /// Cache decrypted file path
+  void cacheDecryptedPath(String encryptedPath, String decryptedPath) {
+    _decryptedFileCache[encryptedPath] = decryptedPath;
+  }
+
+  /// Get key bytes for isolate
+  Uint8List? get keyBytes => _key?.bytes;
 
   /// Encrypt raw bytes (for audio files)
   /// Returns encrypted data with IV prepended
@@ -205,6 +227,19 @@ class DownloadEncryption {
     }
   }
 
+  /// Decrypt bytes in background isolate (NON-BLOCKING)
+  /// This prevents UI freezing for large files
+  Future<Uint8List> decryptBytesInBackground(Uint8List encryptedData) async {
+    if (_key == null) {
+      throw EncryptionException('Encryption not initialized');
+    }
+
+    return await compute(
+      _decryptInIsolate,
+      _DecryptParams(encryptedData, _key!.bytes),
+    );
+  }
+
   /// Validate if a file is properly encrypted (has valid IV prefix)
   Future<bool> isValidEncryptedFile(File file) async {
     try {
@@ -234,6 +269,7 @@ class DownloadEncryption {
     _currentUserId = null;
     _encrypter = null;
     _key = null;
+    _decryptedFileCache.clear();
     debugPrint('🔐 [Encryption] Cleared encryption state');
   }
 
@@ -265,4 +301,39 @@ extension SecureFileExtension on File {
 
   /// Get encrypted version path
   String get encryptedPath => '$path.enc';
+}
+
+// =================== ISOLATE HELPERS (Top-level functions) ===================
+
+/// Parameters for isolate decryption
+class _DecryptParams {
+  final Uint8List encryptedData;
+  final Uint8List keyBytes;
+
+  _DecryptParams(this.encryptedData, this.keyBytes);
+}
+
+/// Top-level function for isolate decryption
+Uint8List _decryptInIsolate(_DecryptParams params) {
+  const ivLength = 16;
+
+  // Extract IV
+  final iv = encrypt.IV(Uint8List.fromList(
+    params.encryptedData.sublist(0, ivLength),
+  ));
+
+  // Extract encrypted content
+  final encryptedContent = params.encryptedData.sublist(ivLength);
+
+  // Create encrypter with key
+  final key = encrypt.Key(params.keyBytes);
+  final encrypter = encrypt.Encrypter(
+    encrypt.AES(key, mode: encrypt.AESMode.cbc),
+  );
+
+  // Decrypt
+  final encrypted = encrypt.Encrypted(encryptedContent);
+  final decrypted = encrypter.decryptBytes(encrypted, iv: iv);
+
+  return Uint8List.fromList(decrypted);
 }

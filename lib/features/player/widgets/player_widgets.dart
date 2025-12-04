@@ -342,6 +342,8 @@ class PlayerBottomActions extends StatelessWidget {
   final bool isLooping;
   final bool isFavorite;
   final bool isInPlaylist;
+  final bool isOffline;
+  final bool isTimerActive;
   final VoidCallback onLoop;
   final VoidCallback onFavorite;
   final VoidCallback onPlaylist;
@@ -353,6 +355,8 @@ class PlayerBottomActions extends StatelessWidget {
     required this.isLooping,
     required this.isFavorite,
     required this.isInPlaylist,
+    this.isOffline = false,
+    this.isTimerActive = false,
     required this.onLoop,
     required this.onFavorite,
     required this.onPlaylist,
@@ -367,6 +371,7 @@ class PlayerBottomActions extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          // Loop - her zaman göster
           IconButton(
             icon: Icon(
               Icons.loop,
@@ -374,27 +379,37 @@ class PlayerBottomActions extends StatelessWidget {
             ),
             onPressed: onLoop,
           ),
+
+          // Playlist - offline'da gizle
+          if (!isOffline)
+            IconButton(
+              icon: Icon(
+                isInPlaylist ? Icons.playlist_add_check : Icons.playlist_add,
+                color: isInPlaylist ? Colors.black : const Color(0xFFBDBDBD),
+              ),
+              onPressed: onPlaylist,
+            ),
+
+          // Favorite - offline'da gizle
+          if (!isOffline)
+            IconButton(
+              icon: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.red : const Color(0xFFBDBDBD),
+              ),
+              onPressed: onFavorite,
+            ),
+
+          // Timer
           IconButton(
             icon: Icon(
-              isInPlaylist ? Icons.playlist_add_check : Icons.playlist_add,
-              color: isInPlaylist ? Colors.black : const Color(0xFFBDBDBD),
-            ),
-            onPressed: onPlaylist,
-          ),
-          IconButton(
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.red : const Color(0xFFBDBDBD),
-            ),
-            onPressed: onFavorite,
-          ),
-          IconButton(
-            icon: const Icon(
               Icons.access_time,
-              color: Color(0xFFBDBDBD),
+              color: isTimerActive ? Colors.black : const Color(0xFFBDBDBD),
             ),
             onPressed: onTimer,
           ),
+
+          // Download - offline'da zaten null geliyor
           if (downloadButton != null) downloadButton!,
         ],
       ),

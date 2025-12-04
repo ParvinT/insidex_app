@@ -4,18 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shimmer/shimmer.dart';
 import 'dart:io';
 
 import '../../core/constants/app_colors.dart';
-import '../../core/responsive/breakpoints.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../models/downloaded_session.dart';
 import '../../providers/download_provider.dart';
-import '../../providers/locale_provider.dart';
 import '../../l10n/app_localizations.dart';
-import '../../services/cache_manager_service.dart';
 import '../player/audio_player_screen.dart';
 
 /// Downloads Screen - Shows all downloaded sessions for offline playback
@@ -111,7 +106,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Widget _buildLoadingState() {
-    return Center(
+    return const Center(
       child: CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
       ),
@@ -458,7 +453,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -468,7 +463,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.remove,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
               ),

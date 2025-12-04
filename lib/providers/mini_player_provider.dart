@@ -242,9 +242,17 @@ class MiniPlayerProvider extends ChangeNotifier {
   /// Get session image URL safely
   String? _cachedImageUrl;
   String? _cachedImageSessionId;
+  bool get isOfflineSession => _currentSession?['_isOffline'] == true;
+
+  /// Get local image path for offline sessions
+  String? get localImagePath => _currentSession?['_localImagePath'] as String?;
 
   String? get sessionImageUrl {
     if (_currentSession == null) return null;
+
+    if (isOfflineSession) {
+      return null;
+    }
 
     final sessionId = _currentSession!['id'];
 

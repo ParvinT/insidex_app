@@ -15,7 +15,7 @@ class DownloadDatabase {
 
   static Database? _database;
   static const String _databaseName = 'insidex_downloads.db';
-  static const int _databaseVersion = 1;
+  static const int _databaseVersion = 2;
 
   // Table names
   static const String _tableDownloads = 'downloads';
@@ -68,6 +68,8 @@ class DownloadDatabase {
         category_name TEXT,
         session_number INTEGER,
         description TEXT,
+        intro_title TEXT,
+        intro_content TEXT,
         UNIQUE(session_id, language)
       )
     ''');
@@ -96,11 +98,15 @@ class DownloadDatabase {
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     debugPrint('⬆️ [DownloadDB] Upgrading from v$oldVersion to v$newVersion');
 
-    // Future migrations will be handled here
-    // Example:
-    // if (oldVersion < 2) {
-    //   await db.execute('ALTER TABLE downloads ADD COLUMN new_field TEXT');
-    // }
+    // Migration v1 -> v2: Add introduction fields
+    if (oldVersion < 2) {
+      debugPrint(
+          '📦 [DownloadDB] Adding intro_title and intro_content columns');
+      await db
+          .execute('ALTER TABLE $_tableDownloads ADD COLUMN intro_title TEXT');
+      await db.execute(
+          'ALTER TABLE $_tableDownloads ADD COLUMN intro_content TEXT');
+    }
   }
 
   // =================== CRUD OPERATIONS ===================

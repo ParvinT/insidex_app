@@ -49,14 +49,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   //Audio State
   String _currentLanguage = 'en';
-  String? _loadedLanguage;
   String? _audioUrl;
   String? _backgroundImageUrl;
-  double _currentProgress = 0.0;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool _hasAddedToRecent = false;
-  String? _currentTrackingSessionId;
 
   // Session
   late Map<String, dynamic> _session;
@@ -69,6 +66,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   int? _sleepTimerMinutes;
   StreamSubscription<int?>? _sleepTimerSub;
+  bool get _isOfflineSession => _session['_isOffline'] == true;
 
   @override
   void didChangeDependencies() {
@@ -86,12 +84,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _currentPosition = miniPlayer.position;
         _totalDuration = miniPlayer.duration;
         _isPlaying = miniPlayer.isPlaying;
-
-        if (_totalDuration.inMilliseconds > 0) {
-          _currentProgress =
-              (_currentPosition.inMilliseconds / _totalDuration.inMilliseconds)
-                  .clamp(0.0, 1.0);
-        }
 
         debugPrint(
             '✨ Pre-loaded state for same session: ${_currentPosition.inSeconds}s');
@@ -140,7 +132,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
       setState(() {
         _currentLanguage = language;
-        _loadedLanguage = language;
         _backgroundImageUrl = null; // Will use _localImagePath instead
 
         // Duration from offline data
@@ -161,7 +152,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     setState(() {
       _currentLanguage = language;
-      _loadedLanguage = language;
 
       // Get audio URL for current language
       _audioUrl = LanguageHelperService.getAudioUrl(
@@ -236,11 +226,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _currentPosition = miniPlayerPosition;
       _totalDuration = miniPlayerDuration;
       _isPlaying = wasPlaying;
-      if (_totalDuration.inMilliseconds > 0) {
-        _currentProgress =
-            (_currentPosition.inMilliseconds / _totalDuration.inMilliseconds)
-                .clamp(0.0, 1.0);
-      }
     });
 
     // ✅ Equalizer'ı sync et
@@ -252,6 +237,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _checkFavoriteStatus() async {
+    if (_isOfflineSession) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && _session['id'] != null) {
       try {
@@ -276,6 +262,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _checkPlaylistStatus() async {
+    if (_isOfflineSession) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && _session['id'] != null) {
       try {
@@ -300,6 +287,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _addToRecentSessions() async {
+    if (_isOfflineSession) {
+      debugPrint('📥 [AudioPlayer] Skipping recent - offline mode');
+      return;
+    }
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && _session['id'] != null) {
       try {
@@ -341,11 +332,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       context.read<MiniPlayerProvider>().updatePosition(pos);
       setState(() {
         _currentPosition = pos;
-        final totalMs = _totalDuration.inMilliseconds;
-        if (totalMs > 0) {
-          _currentProgress =
-              (_currentPosition.inMilliseconds / totalMs).clamp(0.0, 1.0);
-        }
       });
     });
 
@@ -369,7 +355,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     _sleepTimerSub = _audioService.sleepTimer.listen((m) {
       if (!mounted) return;
+      final hadTimer = _sleepTimerMinutes != null;
       setState(() => _sleepTimerMinutes = m);
+      if (m == null && hadTimer) {
+        setState(() => _isLooping = false);
+        debugPrint('🔁 [Timer] Timer ended - loop disabled');
+      }
       if (m == null && _isTracking) {
         ListeningTrackerService.endSession();
         _isTracking = false;
@@ -414,7 +405,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       // START TRACKING
       if (!_isTracking && _session['id'] != null) {
         _isTracking = true;
-        _currentTrackingSessionId = _session['id'];
 
         await ListeningTrackerService.startSession(
           sessionId: _session['id'],
@@ -456,7 +446,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         try {
           setState(() {
             _currentPosition = Duration.zero;
-            _currentProgress = 0.0;
           });
 
           final resolved = await _audioService.playFromUrl(
@@ -507,7 +496,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     try {
       setState(() {
         _currentPosition = Duration.zero;
-        _currentProgress = 0.0;
         // _totalDuration already set in _loadLanguageAndUrls
       });
 
@@ -657,15 +645,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                               isLooping: _isLooping,
                               isFavorite: _isFavorite,
                               isInPlaylist: _isInPlaylist,
+                              isOffline: _isOfflineSession,
+                              isTimerActive: _sleepTimerMinutes != null,
                               onLoop: _toggleLoop,
                               onFavorite: _toggleFavorite,
                               onPlaylist: _togglePlaylist,
                               onTimer: _showSleepTimerModal,
-                              downloadButton: DownloadButton(
-                                session: _session,
-                                size: 24.sp,
-                                showBackground: false,
-                              ),
+                              downloadButton: _isOfflineSession
+                                  ? null
+                                  : DownloadButton(
+                                      session: _session,
+                                      size: 24.sp,
+                                      showBackground: false,
+                                    ),
                             ),
                           ],
                         );
@@ -714,6 +706,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _togglePlaylist() async {
+    if (_isOfflineSession) return;
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && _session['id'] != null) {
       setState(() => _isInPlaylist = !_isInPlaylist);
@@ -759,6 +752,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _toggleFavorite() async {
+    if (_isOfflineSession) return;
+
     final user = FirebaseAuth.instance.currentUser;
     if (user != null && _session['id'] != null) {
       setState(() => _isFavorite = !_isFavorite);
@@ -810,7 +805,20 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _audioService,
       (minutes) {
         if (mounted) {
-          setState(() => _sleepTimerMinutes = minutes);
+          setState(() {
+            _sleepTimerMinutes = minutes;
+
+            if (minutes != null && _totalDuration.inSeconds > 0) {
+              final timerSeconds = minutes * 60;
+              final audioSeconds = _totalDuration.inSeconds;
+
+              if (timerSeconds > audioSeconds && !_isLooping) {
+                _isLooping = true;
+                debugPrint(
+                    '🔁 [Timer] Auto-loop enabled (timer: ${minutes}min > audio: ${audioSeconds ~/ 60}min)');
+              }
+            }
+          });
         }
       },
     );

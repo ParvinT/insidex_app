@@ -86,37 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final isTablet = context.isTablet;
-    final isDesktop = context.isDesktop;
-    final screenHeight = context.h;
-
-    // 🎯 IMPROVED: Dynamic header height based on device type and screen height
-    final double headerH;
-    if (isDesktop) {
-      headerH = 180.0;
-    } else if (isTablet) {
-      headerH = (screenHeight * 0.18).clamp(160.0, 200.0);
-    } else {
-      // Smart phone height calculation
-      if (screenHeight <= 667) {
-        headerH = 100.0; // iPhone SE, 8
-      } else if (screenHeight <= 736) {
-        headerH = 110.0; // iPhone 8 Plus
-      } else if (screenHeight <= 812) {
-        headerH = 120.0; // iPhone X, 11 Pro
-      } else if (screenHeight <= 896) {
-        headerH = 130.0; // iPhone 11, XR
-      } else {
-        headerH = 140.0; // iPhone 14 Pro Max+
-      }
-    }
-
     return PopScope(
       canPop: true,
       child: ResponsiveScaffold(

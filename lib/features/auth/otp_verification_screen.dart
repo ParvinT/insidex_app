@@ -24,9 +24,8 @@ class OTPVerificationScreen extends StatefulWidget {
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-
   final _codeCtrl = TextEditingController();
-  final _focusNode = FocusNode(); 
+  final _focusNode = FocusNode();
   bool _busy = false;
   bool _resending = false;
   Timer? _t;
@@ -149,8 +148,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       final birthDateString = prefs.getString('birthDate');
       final userAge = prefs.getInt('userAge');
 
-      if (user != null &&
-          (goals.isNotEmpty || gender != null || birthDateString != null)) {
+      if ((goals.isNotEmpty || gender != null || birthDateString != null)) {
         try {
           // Create a map with only non-null values
           final Map<String, dynamic> userData = {

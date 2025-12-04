@@ -721,7 +721,6 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     final completedSessions =
         (_userData['completedSessionIds'] as List?)?.length ?? 0;
     final currentStreak = _userData['currentStreak'] ?? 0;
-    final createdAt = _userData['createdAt'] as Timestamp?;
     final firstSessionDate = _userData['firstSessionDate'] as Timestamp?;
 
     final l10n = AppLocalizations.of(context);
@@ -1439,27 +1438,5 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         ],
       ),
     );
-  }
-
-  Future<void> _saveUserData() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text(AppLocalizations.of(context).profileUpdatedSuccessfully)),
-      );
-    } catch (e) {
-      debugPrint('Error saving data: $e');
-    }
   }
 }

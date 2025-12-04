@@ -1,5 +1,6 @@
 // lib/shared/widgets/mini_player_widget.dart
 
+import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -300,9 +301,10 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   /// Session image thumbnail
   Widget _buildSessionImage(MiniPlayerProvider miniPlayer) {
     final imageUrl = miniPlayer.sessionImageUrl;
+    final localImagePath = miniPlayer.localImagePath;
+    final isOffline = miniPlayer.isOfflineSession;
 
     return GestureDetector(
-      // ← EKLENDI
       onTap: () {
         debugPrint('🎯 [MiniPlayer] Image tapped - opening full player');
         _openFullPlayer(context);
@@ -316,31 +318,63 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.r),
-          child: imageUrl != null
-              ? CachedNetworkImage(
-                  imageUrl: imageUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: AppColors.greyLight,
-                    child: Icon(
-                      Icons.music_note,
-                      size: 24.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  errorWidget: (_, __, ___) => Icon(
-                    Icons.music_note,
-                    size: 24.sp,
-                    color: AppColors.textSecondary,
-                  ),
-                )
-              : Icon(
-                  Icons.music_note,
-                  size: 24.sp,
-                  color: AppColors.textSecondary,
-                ),
+          child: _buildImageContent(
+            imageUrl: imageUrl,
+            localImagePath: localImagePath,
+            isOffline: isOffline,
+          ),
         ),
       ),
+    );
+  }
+
+  /// Build image content based on online/offline mode
+  Widget _buildImageContent({
+    required String? imageUrl,
+    required String? localImagePath,
+    required bool isOffline,
+  }) {
+    // ✅ OFFLINE MODE - Use local file
+    if (isOffline && localImagePath != null && localImagePath.isNotEmpty) {
+      final file = File(localImagePath);
+      return FutureBuilder<bool>(
+        future: file.exists(),
+        builder: (context, snapshot) {
+          if (snapshot.data == true) {
+            return Image.file(
+              file,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => _buildPlaceholderIcon(),
+            );
+          }
+          return _buildPlaceholderIcon();
+        },
+      );
+    }
+
+    // ✅ ONLINE MODE - Use network image
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      return CachedNetworkImage(
+        imageUrl: imageUrl,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => Container(
+          color: AppColors.greyLight,
+          child: _buildPlaceholderIcon(),
+        ),
+        errorWidget: (_, __, ___) => _buildPlaceholderIcon(),
+      );
+    }
+
+    // Fallback
+    return _buildPlaceholderIcon();
+  }
+
+  /// Placeholder icon for missing images
+  Widget _buildPlaceholderIcon() {
+    return Icon(
+      Icons.music_note,
+      size: 24.sp,
+      color: AppColors.textSecondary,
     );
   }
 

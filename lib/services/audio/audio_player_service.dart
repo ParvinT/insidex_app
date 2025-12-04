@@ -49,6 +49,7 @@ class AudioPlayerService {
     String? title,
     String? artist,
     String? artworkUrl,
+    String? localArtworkPath,
     String? sessionId,
     Duration? duration,
   }) async {
@@ -57,6 +58,7 @@ class AudioPlayerService {
       title: title ?? 'INSIDEX Session',
       artist: artist ?? 'INSIDEX',
       artworkUrl: artworkUrl,
+      localArtworkPath: localArtworkPath,
       sessionId: sessionId,
       duration: duration,
     );
@@ -100,12 +102,16 @@ class AudioPlayerService {
         );
 
         if (decryptedPath != null) {
+          final download =
+              await downloadService.getDownload(sessionId, language);
+          final localImagePath = download?.imagePath;
           // Play from decrypted file
           return await audioHandler.playFromUrl(
             url: 'file://$decryptedPath',
             title: title,
             artist: 'INSIDEX',
-            artworkUrl: artworkUrl,
+            artworkUrl: null,
+            localArtworkPath: localImagePath,
             sessionId: sessionId,
             duration: duration > 0 ? Duration(seconds: duration) : null,
           );

@@ -324,6 +324,7 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     required String title,
     String artist = 'INSIDEX',
     String? artworkUrl,
+    String? localArtworkPath,
     String? sessionId,
     Duration? duration,
   }) async {
@@ -385,6 +386,7 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
           title: title,
           artist: artist,
           artworkUrl: artworkUrl,
+          localArtworkPath: localArtworkPath,
           sessionId: sessionId,
           duration: resolvedDuration ?? duration,
         );
@@ -427,18 +429,27 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     required String title,
     required String artist,
     String? artworkUrl,
+    String? localArtworkPath,
     String? sessionId,
     Duration? duration,
   }) {
+    // Determine artwork URI (local file takes priority)
+    Uri? artUri;
+    if (localArtworkPath != null && localArtworkPath.isNotEmpty) {
+      // ✅ OFFLINE - Use local file
+      artUri = Uri.file(localArtworkPath);
+      debugPrint(
+          '🖼️ [InsideXAudioHandler] Using local artwork: $localArtworkPath');
+    } else if (artworkUrl != null && artworkUrl.isNotEmpty) {
+      // ✅ ONLINE - Use network URL
+      artUri = Uri.parse(artworkUrl);
+    }
     final item = MediaItem(
       id: sessionId ?? DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
       artist: artist,
       duration: duration,
-      artUri: artworkUrl != null && artworkUrl.isNotEmpty
-          ? Uri.parse(artworkUrl)
-          : null,
-      // Additional metadata
+      artUri: artUri,
       extras: {
         'sessionId': sessionId,
       },
@@ -449,7 +460,7 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     debugPrint('📱 [InsideXAudioHandler] MediaItem updated:');
     debugPrint('   Title: $title');
     debugPrint('   Artist: $artist');
-    debugPrint('   Artwork: ${artworkUrl != null ? "✅" : "❌"}');
+    debugPrint('   Artwork: ${artUri != null ? "✅" : "❌"}');
     debugPrint('   Duration: ${duration?.inSeconds ?? "unknown"}s');
   }
 

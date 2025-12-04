@@ -22,6 +22,8 @@ class DownloadedSession {
   final String? categoryName;
   final int? sessionNumber;
   final String? description;
+  final String? introTitle;
+  final String? introContent;
 
   const DownloadedSession({
     required this.id,
@@ -41,6 +43,8 @@ class DownloadedSession {
     this.categoryName,
     this.sessionNumber,
     this.description,
+    this.introTitle,
+    this.introContent,
   });
 
   /// Create from SQLite row
@@ -65,6 +69,8 @@ class DownloadedSession {
       categoryName: map['category_name'] as String?,
       sessionNumber: map['session_number'] as int?,
       description: map['description'] as String?,
+      introTitle: map['intro_title'] as String?,
+      introContent: map['intro_content'] as String?,
     );
   }
 
@@ -88,6 +94,8 @@ class DownloadedSession {
       'category_name': categoryName,
       'session_number': sessionNumber,
       'description': description,
+      'intro_title': introTitle,
+      'intro_content': introContent,
     };
   }
 
@@ -100,6 +108,9 @@ class DownloadedSession {
     required int fileSizeBytes,
     required String title,
     required int durationSeconds,
+    String? description,
+    String? introTitle,
+    String? introContent,
   }) {
     final now = DateTime.now();
     final sessionId = sessionData['id'] as String;
@@ -121,7 +132,9 @@ class DownloadedSession {
       categoryId: sessionData['categoryId'] as String?,
       categoryName: sessionData['categoryName'] as String?,
       sessionNumber: sessionData['sessionNumber'] as int?,
-      description: sessionData['description'] as String?,
+      description: description,
+      introTitle: introTitle,
+      introContent: introContent,
     );
   }
 
@@ -144,6 +157,8 @@ class DownloadedSession {
     String? categoryName,
     int? sessionNumber,
     String? description,
+    String? introTitle,
+    String? introContent,
   }) {
     return DownloadedSession(
       id: id ?? this.id,
@@ -163,6 +178,8 @@ class DownloadedSession {
       categoryName: categoryName ?? this.categoryName,
       sessionNumber: sessionNumber ?? this.sessionNumber,
       description: description ?? this.description,
+      introTitle: introTitle ?? this.introTitle,
+      introContent: introContent ?? this.introContent,
     );
   }
 
@@ -203,6 +220,8 @@ class DownloadedSession {
       // Content
       'title': title,
       'description': description,
+      '_localizedIntroTitle': introTitle ?? 'Introduction',
+      '_localizedIntroContent': introContent ?? '',
 
       // Pre-formatted display titles (SKIP formatting in player)
       '_displayTitle': displayTitle,
