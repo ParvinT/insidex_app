@@ -282,6 +282,19 @@ class DownloadEncryption {
     if (_currentUserId!.length < 8) return '***';
     return '${_currentUserId!.substring(0, 8)}...';
   }
+
+  /// Encrypt bytes in background isolate (NON-BLOCKING)
+  /// This prevents UI freezing during download
+  Future<Uint8List> encryptBytesInBackground(Uint8List data) async {
+    if (_key == null) {
+      throw EncryptionException('Encryption not initialized');
+    }
+
+    return await compute(
+      _encryptInIsolate,
+      _EncryptParams(data, _key!.bytes),
+    );
+  }
 }
 
 /// Encryption exception
@@ -336,4 +349,36 @@ Uint8List _decryptInIsolate(_DecryptParams params) {
   final decrypted = encrypter.decryptBytes(encrypted, iv: iv);
 
   return Uint8List.fromList(decrypted);
+}
+
+/// Parameters for isolate encryption
+class _EncryptParams {
+  final Uint8List data;
+  final Uint8List keyBytes;
+
+  _EncryptParams(this.data, this.keyBytes);
+}
+
+/// Top-level function for isolate encryption
+Uint8List _encryptInIsolate(_EncryptParams params) {
+  const ivLength = 16;
+
+  // Generate random IV
+  final iv = encrypt.IV.fromSecureRandom(ivLength);
+
+  // Create encrypter with key
+  final key = encrypt.Key(params.keyBytes);
+  final encrypter = encrypt.Encrypter(
+    encrypt.AES(key, mode: encrypt.AESMode.cbc),
+  );
+
+  // Encrypt
+  final encrypted = encrypter.encryptBytes(params.data, iv: iv);
+
+  // Prepend IV to encrypted data
+  final result = Uint8List(ivLength + encrypted.bytes.length);
+  result.setRange(0, ivLength, iv.bytes);
+  result.setRange(ivLength, result.length, encrypted.bytes);
+
+  return result;
 }

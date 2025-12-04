@@ -1,5 +1,6 @@
 // lib/features/downloads/widgets/download_button.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import '../../../core/responsive/breakpoints.dart';
 import '../../../providers/download_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../../models/downloaded_session.dart'; 
+import '../../../models/downloaded_session.dart';
 
 /// Download button widget for session cards
 /// Shows different states: not downloaded, downloading, downloaded
@@ -40,6 +41,9 @@ class _DownloadButtonState extends State<DownloadButton>
   bool _isDownloaded = false;
   bool _isChecking = true;
 
+  // ✅ Track subscription to prevent memory leak
+  StreamSubscription? _progressSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -54,6 +58,7 @@ class _DownloadButtonState extends State<DownloadButton>
   @override
   void dispose() {
     _pulseController.dispose();
+    _progressSubscription?.cancel(); // ✅ Cancel subscription
     super.dispose();
   }
 
@@ -250,13 +255,15 @@ class _DownloadButtonState extends State<DownloadButton>
       DownloadProvider provider, String language) async {
     widget.onDownloadStarted?.call();
 
+    // ✅ Cancel previous subscription if exists
+    await _progressSubscription?.cancel();
+
     final success = await provider.downloadSession(
       sessionData: widget.session,
       language: language,
     );
 
     if (success && mounted) {
-      // Listen for completion
       _listenForCompletion(provider, language);
     }
   }
@@ -265,12 +272,22 @@ class _DownloadButtonState extends State<DownloadButton>
     final sessionId = widget.session['id'] as String;
     final key = '${sessionId}_$language';
 
-    // Create a listener for progress updates
-    provider.progressStream.listen((progress) {
-      if (progress.key == key && progress.status == DownloadStatus.completed) {
-        if (mounted) {
-          setState(() => _isDownloaded = true);
-          widget.onDownloadCompleted?.call();
+    // ✅ Store subscription for proper cleanup
+    _progressSubscription = provider.progressStream.listen((progress) {
+      if (progress.key == key) {
+        if (progress.status == DownloadStatus.completed) {
+          if (mounted) {
+            setState(() => _isDownloaded = true);
+            widget.onDownloadCompleted?.call();
+          }
+          // ✅ Cancel after completion
+          _progressSubscription?.cancel();
+        } else if (progress.status == DownloadStatus.failed) {
+          // ✅ Handle cancel/failure - reset UI
+          if (mounted) {
+            setState(() => _isDownloaded = false);
+          }
+          _progressSubscription?.cancel();
         }
       }
     });
@@ -281,7 +298,16 @@ class _DownloadButtonState extends State<DownloadButton>
     String sessionId,
     String language,
   ) async {
+    // ✅ Cancel subscription first
+    await _progressSubscription?.cancel();
+    _progressSubscription = null;
+
     await provider.cancelDownload(sessionId, language);
+
+    // ✅ Reset state immediately
+    if (mounted) {
+      setState(() => _isDownloaded = false);
+    }
   }
 
   Future<void> _showDeleteDialog(

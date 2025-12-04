@@ -308,7 +308,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Seansları keşfetmek için bir kategori seçin';
 
   @override
-  String get sessions => 'Oturum';
+  String get sessions => 'Seans';
 
   @override
   String get errorLoadingSessions => 'Seanslar yüklenirken hata oluştu';
@@ -2113,7 +2113,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get noDownloadsMessage =>
-      'İnternet olmadan dinlemek için oturumları indirin';
+      'İnternet olmadan dinlemek için seansları indirin';
 
   @override
   String get removeDownload => 'İndirmeyi Kaldır';
@@ -2133,7 +2133,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get clearAllDownloadsMessage =>
-      'Bu, tüm indirilen oturumları cihazınızdan kaldıracak';
+      'Bu, tüm indirilen seansları cihazınızdan kaldıracak';
 
   @override
   String get downloading => 'İndiriliyor...';
@@ -2148,6 +2148,5 @@ class AppLocalizationsTr extends AppLocalizations {
   String get offlineMode => 'Çevrimdışı Mod';
 
   @override
-  String get offlineModeMessage =>
-      'Yalnızca indirilen oturumlar kullanılabilir';
+  String get offlineModeMessage => 'Yalnızca indirilen seanslar kullanılabilir';
 }

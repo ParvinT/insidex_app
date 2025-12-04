@@ -333,6 +333,10 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
 
     // Stop any current playback
     await _player.stop();
+    await _player.seek(Duration.zero);
+
+    debugPrint(
+        '🔄 [InsideXAudioHandler] Stopped previous audio, loading new: $title');
 
     Duration? resolvedDuration;
 

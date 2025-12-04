@@ -68,6 +68,8 @@ class MiniPlayerProvider extends ChangeNotifier {
     _isExpanded = false;
     _position = Duration.zero;
     _currentTrack = 'subliminal';
+    _cachedImageUrl = null;
+    _cachedImageSessionId = null;
 
     debugPrint('[MiniPlayer] Session started: ${sessionData['title']}');
     notifyListeners();
@@ -76,6 +78,8 @@ class MiniPlayerProvider extends ChangeNotifier {
   /// Update current session data (e.g., when switching tracks)
   void updateSession(Map<String, dynamic> sessionData) {
     _currentSession = sessionData;
+    _cachedImageUrl = null;
+    _cachedImageSessionId = null;
     notifyListeners();
   }
 

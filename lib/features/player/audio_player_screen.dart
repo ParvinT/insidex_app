@@ -198,20 +198,25 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     final miniPlayer = _miniPlayerProvider;
 
     if (miniPlayer == null || !miniPlayer.hasActiveSession) {
-      await _initializeAudio(); // ← İLK KEZ BAŞLATIYORUZ
+      await _initializeAudio();
       return;
     }
 
     final isSameSession =
         miniPlayer.currentSession?['id'] == widget.sessionData?['id'];
 
-    if (!isSameSession) {
-      debugPrint('🆕 Different session, starting fresh');
-      await _initializeAudio(); // ← FARKLI SESSION, YENİ BAŞLAT
+    if (_isOfflineSession) {
+      debugPrint('📥 [AudioPlayer] Offline session - starting fresh');
+      await _initializeAudio();
       return;
     }
 
-    // ✅ AYNI SESSION - SADECE STATE'İ RESTORE ET, AUDIO'YU DOKUNMA!
+    if (!isSameSession) {
+      debugPrint('🆕 Different session, starting fresh');
+      await _initializeAudio();
+      return;
+    }
+
     final miniPlayerPosition = miniPlayer.position;
     final miniPlayerDuration = miniPlayer.duration;
     final miniPlayerTrack = miniPlayer.currentTrack;
@@ -228,7 +233,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _isPlaying = wasPlaying;
     });
 
-    // ✅ Equalizer'ı sync et
     if (wasPlaying) {
       _eqController.repeat();
     }
@@ -369,6 +373,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _initializeAudio() async {
+    await _audioService.stop();
     await _audioService.initialize();
     await _setupStreamListeners();
     await _playCurrentTrack();
@@ -443,10 +448,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           await downloadService.getDecryptedAudioPath(sessionId, language);
 
       if (decryptedPath != null) {
+        if (!mounted) return;
         try {
           setState(() {
             _currentPosition = Duration.zero;
           });
+
+          final localImagePath = _session['_localImagePath'] as String?;
 
           final resolved = await _audioService.playFromUrl(
             'file://$decryptedPath',
@@ -454,11 +462,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                 _session['title'] ??
                 AppLocalizations.of(context).subliminalSession,
             artist: 'InsideX',
-            artworkUrl: null, // Offline mode - no remote artwork
+            artworkUrl: null,
+            localArtworkPath: localImagePath,
             sessionId: sessionId,
           );
 
-          if (mounted && resolved != null) {
+          if (!mounted) return;
+
+          if (resolved != null) {
             setState(() => _totalDuration = resolved);
           }
 

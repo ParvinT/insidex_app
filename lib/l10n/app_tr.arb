@@ -765,21 +765,21 @@
 
   "downloads": "İndirilenler",
   "noDownloads": "İndirilen Yok",
-  "noDownloadsMessage": "İnternet olmadan dinlemek için oturumları indirin",
+  "noDownloadsMessage": "İnternet olmadan dinlemek için seansları indirin",
   "removeDownload": "İndirmeyi Kaldır",
   "removeDownloadMessage": "Bu, indirilen dosyayı cihazınızdan kaldıracak",
   "remove": "Kaldır",
   "storageUsed": "Kullanılan Depolama",
-  "sessions": "Oturum",
+  "sessions": "Seans",
   "totalSize": "Toplam Boyut",
   "clearAllDownloads": "Tüm İndirilenleri Temizle",
-  "clearAllDownloadsMessage": "Bu, tüm indirilen oturumları cihazınızdan kaldıracak",
+  "clearAllDownloadsMessage": "Bu, tüm indirilen seansları cihazınızdan kaldıracak",
   "clearAll": "Tümünü Temizle",
   "downloading": "İndiriliyor...",
   "downloadComplete": "İndirme Tamamlandı",
   "downloadFailed": "İndirme Başarısız",
   "offlineMode": "Çevrimdışı Mod",
-  "offlineModeMessage": "Yalnızca indirilen oturumlar kullanılabilir"
+  "offlineModeMessage": "Yalnızca indirilen seanslar kullanılabilir"
 
   
 }

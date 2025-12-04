@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import '../../models/downloaded_session.dart';
 import 'download_database.dart';
 import 'download_encryption.dart';
+import 'download_helpers.dart';
 import 'connectivity_service.dart';
 import '../language_helper_service.dart';
 import '../session_localization_service.dart';
@@ -55,6 +56,17 @@ class DownloadService {
   // Current user ID (for encryption)
   String? _currentUserId;
 
+  // Progress throttle
+  DateTime? _lastProgressEmit;
+  static const Duration _progressThrottleDuration = Duration(milliseconds: 100);
+
+  // Retry settings
+  static const int _maxRetries = 3;
+  static const Duration _retryDelay = Duration(seconds: 2);
+
+  // Cancel flags for active downloads
+  final Map<String, bool> _cancelFlags = {};
+
   /// Stream of download progress updates
   Stream<DownloadProgress> get progressStream => _progressController.stream;
 
@@ -94,6 +106,15 @@ class DownloadService {
 
       // Mark as initialized
       _isInitialized = true;
+
+      // Auto cleanup temp files and orphaned downloads (#7)
+      await DownloadHelpers.autoCleanup(
+        downloadDir: _downloadDir,
+        getValidKeys: () async {
+          final downloads = await getAllDownloads();
+          return downloads.map((d) => '${d.sessionId}_${d.language}').toList();
+        },
+      );
 
       // Notify listeners of current downloads
       await _notifyDownloadsChanged();
@@ -224,6 +245,7 @@ class DownloadService {
     final key = item.key;
 
     debugPrint('📥 [DownloadService] Starting download: $key');
+    _cancelFlags.remove(key);
 
     item.status = DownloadStatus.downloading;
     _emitProgress(key, 0, DownloadStatus.downloading);
@@ -237,6 +259,15 @@ class DownloadService {
 
       if (audioUrl.isEmpty) {
         throw DownloadException('Audio URL not found for language: $language');
+      }
+
+      final estimatedSize = await DownloadHelpers.getRemoteFileSize(audioUrl);
+      if (estimatedSize > 0) {
+        final hasSpace =
+            await DownloadHelpers.hasEnoughDiskSpace(estimatedSize);
+        if (!hasSpace) {
+          throw DownloadException('Not enough disk space');
+        }
       }
 
       // 2. Get image URL for language
@@ -285,7 +316,8 @@ class DownloadService {
 
       // 7. Download image
       _emitProgress(key, 0.85, DownloadStatus.downloading);
-      final imagePath = await _downloadImage(imageUrl, sessionDir.path, key);
+      final imagePath =
+          await DownloadHelpers.downloadImage(imageUrl, sessionDir.path);
 
       // 8. Get file size
       final audioFile = File(audioPath);
@@ -333,8 +365,52 @@ class DownloadService {
     }
   }
 
-  /// Download and encrypt audio file
+  /// Download and encrypt audio file with retry mechanism
   Future<String> _downloadAndEncryptAudio(
+    String url,
+    String destinationDir,
+    String key,
+    void Function(double progress) onProgress,
+  ) async {
+    int attempt = 0;
+
+    while (attempt < _maxRetries) {
+      attempt++;
+
+      // Don't retry if cancelled
+      if (_cancelFlags[key] == true) {
+        debugPrint('🛑 [DownloadService] Retry skipped - download cancelled');
+        throw DownloadException('Download cancelled by user');
+      }
+
+      try {
+        return await _downloadAndEncryptAudioAttempt(
+          url,
+          destinationDir,
+          key,
+          onProgress,
+        );
+      } catch (e) {
+        debugPrint(
+            '⚠️ [DownloadService] Attempt $attempt/$_maxRetries failed: $e');
+
+        if (attempt >= _maxRetries) {
+          debugPrint('❌ [DownloadService] All retry attempts exhausted');
+          rethrow;
+        }
+
+        // Exponential backoff: 2s, 4s, 8s...
+        final delay = _retryDelay * (1 << (attempt - 1));
+        debugPrint('🔄 [DownloadService] Retrying in ${delay.inSeconds}s...');
+        await Future.delayed(delay);
+      }
+    }
+
+    throw DownloadException('Download failed after $_maxRetries attempts');
+  }
+
+  /// Single download attempt
+  Future<String> _downloadAndEncryptAudioAttempt(
     String url,
     String destinationDir,
     String key,
@@ -345,7 +421,12 @@ class DownloadService {
     final client = http.Client();
     try {
       final request = http.Request('GET', Uri.parse(url));
-      final response = await client.send(request);
+      final response = await client.send(request).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw DownloadException('Connection timeout');
+        },
+      );
 
       if (response.statusCode != 200) {
         throw DownloadException('HTTP error: ${response.statusCode}');
@@ -356,19 +437,37 @@ class DownloadService {
       int received = 0;
 
       await for (final chunk in response.stream) {
+        // Check if download was cancelled
+        if (_cancelFlags[key] == true) {
+          client.close();
+          debugPrint('🛑 [DownloadService] HTTP stream cancelled: $key');
+          throw DownloadException('Download cancelled by user');
+        }
         bytes.addAll(chunk);
         received += chunk.length;
 
         if (contentLength > 0) {
-          onProgress(received / contentLength);
+          // Throttle progress updates (max every 100ms)
+          final now = DateTime.now();
+          if (_lastProgressEmit == null ||
+              now.difference(_lastProgressEmit!) >= _progressThrottleDuration) {
+            _lastProgressEmit = now;
+            onProgress(received / contentLength);
+          }
         }
+      }
+
+      // Always emit final progress
+      if (contentLength > 0) {
+        onProgress(1.0);
       }
 
       debugPrint('📥 [DownloadService] Downloaded ${bytes.length} bytes');
 
-      // Encrypt the audio
+      // Encrypt the audio in background isolate (NON-BLOCKING)
+      debugPrint('🔐 [DownloadService] Encrypting in background...');
       final encryptedBytes =
-          await _encryption.encryptBytes(Uint8List.fromList(bytes));
+          await _encryption.encryptBytesInBackground(Uint8List.fromList(bytes));
 
       // Save encrypted file
       final encryptedPath = path.join(destinationDir, 'audio.enc');
@@ -380,40 +479,6 @@ class DownloadService {
       return encryptedPath;
     } finally {
       client.close();
-    }
-  }
-
-  /// Download image file
-  Future<String> _downloadImage(
-    String? url,
-    String destinationDir,
-    String key,
-  ) async {
-    final imagePath = path.join(destinationDir, 'image.jpg');
-
-    if (url == null || url.isEmpty) {
-      debugPrint('ℹ️ [DownloadService] No image URL, skipping');
-      return '';
-    }
-
-    try {
-      debugPrint('📥 [DownloadService] Downloading image: $url');
-
-      final response = await http.get(Uri.parse(url));
-
-      if (response.statusCode == 200) {
-        final file = File(imagePath);
-        await file.writeAsBytes(response.bodyBytes, flush: true);
-        debugPrint('✅ [DownloadService] Image saved: $imagePath');
-        return imagePath;
-      } else {
-        debugPrint(
-            '⚠️ [DownloadService] Image download failed: ${response.statusCode}');
-        return '';
-      }
-    } catch (e) {
-      debugPrint('⚠️ [DownloadService] Image download error: $e');
-      return '';
     }
   }
 
@@ -531,18 +596,7 @@ class DownloadService {
 
   /// Clean up temp playback files
   Future<void> cleanupTempFiles() async {
-    try {
-      final tempDir = await getTemporaryDirectory();
-      final playbackDir =
-          Directory(path.join(tempDir.path, 'insidex_playback'));
-
-      if (await playbackDir.exists()) {
-        await playbackDir.delete(recursive: true);
-        debugPrint('🧹 [DownloadService] Cleaned up temp files');
-      }
-    } catch (e) {
-      debugPrint('⚠️ [DownloadService] Cleanup error: $e');
-    }
+    await DownloadHelpers.cleanupTempFiles();
   }
 
   // =================== DELETE OPERATIONS ===================
@@ -609,14 +663,39 @@ class DownloadService {
   Future<bool> cancelDownload(String sessionId, String language) async {
     final key = '${sessionId}_$language';
 
-    if (_queue.containsKey(key)) {
-      _queue.remove(key);
-      _emitProgress(key, 0, DownloadStatus.failed, error: 'Cancelled');
-      debugPrint('❌ [DownloadService] Download cancelled: $key');
-      return true;
+    _cancelFlags[key] = true;
+
+    // Check if in queue
+    if (!_queue.containsKey(key)) {
+      debugPrint('ℹ️ [DownloadService] Download not in queue: $key');
+      return false;
     }
 
-    return false;
+    debugPrint('🛑 [DownloadService] Cancelling download: $key');
+
+    // Remove from queue
+    _queue.remove(key);
+
+    // Clear active download if this is the one
+    if (_activeDownloadKey == key) {
+      _activeDownloadKey = null;
+    }
+
+    // Clean up partial files
+    try {
+      final sessionDir = Directory(path.join(_downloadDir!.path, key));
+      if (await sessionDir.exists()) {
+        await sessionDir.delete(recursive: true);
+        debugPrint('🧹 [DownloadService] Cleaned up partial files: $key');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [DownloadService] Cleanup error: $e');
+    }
+
+    // Emit cancelled status
+    _emitProgress(key, 0, DownloadStatus.failed, error: 'Cancelled');
+    debugPrint('✅ [DownloadService] Download cancelled: $key');
+    return true;
   }
 
   /// Get current queue
@@ -636,8 +715,6 @@ class DownloadService {
     final key = '${sessionId}_$language';
     return _queue.containsKey(key);
   }
-
-  // =================== HELPERS ===================
 
   /// Emit progress update
   void _emitProgress(
