@@ -2158,4 +2158,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get offlineModeMessage => 'Доступны только загруженные сеансы';
+
+  @override
+  String get offlineListening => 'Слушайте загруженные сеансы офлайн';
 }

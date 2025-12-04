@@ -789,6 +789,7 @@
   "downloadComplete": "Загрузка завершена",
   "downloadFailed": "Ошибка загрузки",
   "offlineMode": "Офлайн режим",
-  "offlineModeMessage": "Доступны только загруженные сеансы"
+  "offlineModeMessage": "Доступны только загруженные сеансы",
+  "offlineListening": "Слушайте загруженные сеансы офлайн"
   
 }

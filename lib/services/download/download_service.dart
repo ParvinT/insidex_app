@@ -295,6 +295,11 @@ class DownloadService {
         language,
       );
 
+      debugPrint(
+          '🕐 [DownloadService] Duration for $language: $duration seconds');
+      debugPrint(
+          '🕐 [DownloadService] Raw durations map: ${sessionData['subliminal']?['durations']}');
+
       // 5. Create session folder
       final sessionDir = Directory(path.join(_downloadDir!.path, key));
       if (!await sessionDir.exists()) {
@@ -303,7 +308,7 @@ class DownloadService {
 
       // 6. Download and encrypt audio
       _emitProgress(key, 0.1, DownloadStatus.downloading);
-      final audioPath = await _downloadAndEncryptAudio(
+      final audioResult = await _downloadAndEncryptAudio(
         audioUrl,
         sessionDir.path,
         key,
@@ -313,6 +318,13 @@ class DownloadService {
           _emitProgress(key, totalProgress, DownloadStatus.downloading);
         },
       );
+
+      final audioPath = audioResult.path;
+      final extractedDuration = audioResult.duration;
+
+      final finalDuration = duration > 0 ? duration : extractedDuration;
+      debugPrint(
+          '🕐 [DownloadService] Final duration: ${finalDuration}s (Firebase: $duration, Extracted: $extractedDuration)');
 
       // 7. Download image
       _emitProgress(key, 0.85, DownloadStatus.downloading);
@@ -331,7 +343,7 @@ class DownloadService {
         imagePath: imagePath,
         fileSizeBytes: fileSize,
         title: displayTitle,
-        durationSeconds: duration,
+        durationSeconds: finalDuration,
         description: description,
         introTitle: introTitle,
         introContent: introContent,
@@ -366,7 +378,7 @@ class DownloadService {
   }
 
   /// Download and encrypt audio file with retry mechanism
-  Future<String> _downloadAndEncryptAudio(
+  Future<({String path, int duration})> _downloadAndEncryptAudio(
     String url,
     String destinationDir,
     String key,
@@ -410,7 +422,7 @@ class DownloadService {
   }
 
   /// Single download attempt
-  Future<String> _downloadAndEncryptAudioAttempt(
+  Future<({String path, int duration})> _downloadAndEncryptAudioAttempt(
     String url,
     String destinationDir,
     String key,
@@ -464,6 +476,13 @@ class DownloadService {
 
       debugPrint('📥 [DownloadService] Downloaded ${bytes.length} bytes');
 
+      // Extract duration from downloaded bytes BEFORE encrypting
+      final extractedDuration = await DownloadHelpers.getAudioDurationFromBytes(
+        Uint8List.fromList(bytes),
+      );
+      debugPrint(
+          '🕐 [DownloadService] Extracted duration: ${extractedDuration}s');
+
       // Encrypt the audio in background isolate (NON-BLOCKING)
       debugPrint('🔐 [DownloadService] Encrypting in background...');
       final encryptedBytes =
@@ -476,7 +495,7 @@ class DownloadService {
 
       debugPrint('🔐 [DownloadService] Encrypted audio saved: $encryptedPath');
 
-      return encryptedPath;
+      return (path: encryptedPath, duration: extractedDuration);
     } finally {
       client.close();
     }

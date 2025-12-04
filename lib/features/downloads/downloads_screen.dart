@@ -194,7 +194,6 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     bool isTablet,
     bool isLast,
   ) {
-    final double cardHeight = isTablet ? 100.h : 90.h;
     final double imageSize = isTablet ? 80.w : 70.w;
     final double titleSize = isTablet ? 16.sp : 15.sp;
     final double subtitleSize = isTablet ? 13.sp : 12.sp;
@@ -208,7 +207,6 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           onTap: () => _playDownload(download),
           borderRadius: BorderRadius.circular(borderRadius),
           child: Container(
-            height: cardHeight,
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
               color: Colors.white,

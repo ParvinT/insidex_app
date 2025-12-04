@@ -20,7 +20,6 @@ import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
 import '../../providers/download_provider.dart';
 import '../search/widgets/search_bar_widget.dart';
-import '../downloads/downloads_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -273,36 +272,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                 ),
 
-                Row(
-                  children: [
-                    // Downloads button
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const DownloadsScreen()),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(isTablet ? 10.w : 8.w),
-                        decoration: BoxDecoration(
-                          color: AppColors.textPrimary.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Icon(
-                          Icons.download_rounded,
-                          size: isTablet ? 24.sp : 22.sp,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    // Menu button
-                    _buildHeaderButton(AppLocalizations.of(context).menu, true),
-                  ],
-                ),
-                // ==================================
+                // Menu button
+                _buildHeaderButton(AppLocalizations.of(context).menu, true),
               ],
             ),
 

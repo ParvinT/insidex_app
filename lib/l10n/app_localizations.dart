@@ -4163,6 +4163,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Only downloaded sessions are available'**
   String get offlineModeMessage;
+
+  /// No description provided for @offlineListening.
+  ///
+  /// In en, this message translates to:
+  /// **'Listen to downloaded sessions offline'**
+  String get offlineListening;
 }
 
 class _AppLocalizationsDelegate

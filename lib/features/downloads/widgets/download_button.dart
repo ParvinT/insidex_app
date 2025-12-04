@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import '../downloads_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/breakpoints.dart';
 import '../../../providers/download_provider.dart';
@@ -141,8 +142,10 @@ class _DownloadButtonState extends State<DownloadButton>
             buttonSize: buttonSize,
             iconSize: iconSize,
             isTablet: isTablet,
-            onDelete: () => _showDeleteDialog(
-                context, downloadProvider, sessionId, language),
+            onTap: widget.showBackground
+                ? () => _showDeleteDialog(
+                    context, downloadProvider, sessionId, language)
+                : () => _navigateToDownloads(context),
           );
         }
 
@@ -193,30 +196,35 @@ class _DownloadButtonState extends State<DownloadButton>
     required double progress,
     required VoidCallback onCancel,
   }) {
+    final double containerSize = widget.showBackground ? buttonSize : iconSize;
+    final double progressSize =
+        widget.showBackground ? buttonSize * 0.85 : iconSize;
+    final double stopIconSize =
+        widget.showBackground ? iconSize * 0.7 : iconSize * 0.55;
     return GestureDetector(
       onTap: onCancel,
       child: SizedBox(
-        width: buttonSize,
-        height: buttonSize,
+        width: containerSize,
+        height: containerSize,
         child: Stack(
           alignment: Alignment.center,
           children: [
             // Progress circle
             SizedBox(
-              width: buttonSize * 0.85,
-              height: buttonSize * 0.85,
+              width: progressSize,
+              height: progressSize,
               child: CircularProgressIndicator(
                 value: progress,
-                strokeWidth: 2.5,
+                strokeWidth: widget.showBackground ? 2.5 : 2.0,
                 backgroundColor: AppColors.greyLight,
                 valueColor:
-                    AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
+                    const AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
               ),
             ),
             // Stop icon
             Icon(
               Icons.stop_rounded,
-              size: iconSize * 0.7,
+              size: stopIconSize,
               color: AppColors.textPrimary,
             ),
           ],
@@ -229,10 +237,10 @@ class _DownloadButtonState extends State<DownloadButton>
     required double buttonSize,
     required double iconSize,
     required bool isTablet,
-    required VoidCallback onDelete,
+    required VoidCallback onTap,
   }) {
     return GestureDetector(
-      onTap: onDelete,
+      onTap: onTap,
       child: Container(
         width: buttonSize,
         height: buttonSize,
@@ -345,7 +353,7 @@ class _DownloadButtonState extends State<DownloadButton>
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -355,7 +363,7 @@ class _DownloadButtonState extends State<DownloadButton>
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.remove,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
               ),
@@ -372,6 +380,13 @@ class _DownloadButtonState extends State<DownloadButton>
         widget.onDeleted?.call();
       }
     }
+  }
+
+  void _navigateToDownloads(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const DownloadsScreen()),
+    );
   }
 }
 

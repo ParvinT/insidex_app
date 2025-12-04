@@ -733,5 +733,6 @@
   "downloadComplete": "डाउनलोड पूर्ण",
   "downloadFailed": "डाउनलोड विफल",
   "offlineMode": "ऑफ़लाइन मोड",
-  "offlineModeMessage": "केवल डाउनलोड किए गए सत्र उपलब्ध हैं"
+  "offlineModeMessage": "केवल डाउनलोड किए गए सत्र उपलब्ध हैं",
+  "offlineListening": "डाउनलोड किए गए सत्र ऑफ़लाइन सुनें"
 }

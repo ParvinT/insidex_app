@@ -2149,4 +2149,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get offlineModeMessage => 'Yalnızca indirilen seanslar kullanılabilir';
+
+  @override
+  String get offlineListening => 'İndirilen seansları çevrimdışı dinleyin';
 }

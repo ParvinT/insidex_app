@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:path/path.dart' as path;
 import 'package:http/http.dart' as http;
 
@@ -227,6 +228,40 @@ class DownloadHelpers {
       final hours = seconds ~/ 3600;
       final mins = (seconds % 3600) ~/ 60;
       return '${hours}h ${mins}m';
+    }
+  }
+  // =================== AUDIO DURATION ===================
+
+  /// Extract audio duration from bytes
+  /// Writes to temp file, reads duration with AudioPlayer, then deletes
+  static Future<int> getAudioDurationFromBytes(Uint8List bytes) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final tempPath = path.join(tempDir.path,
+          'insidex_duration_check_${DateTime.now().millisecondsSinceEpoch}.mp3');
+      final tempFile = File(tempPath);
+
+      // Write bytes to temp file
+      await tempFile.writeAsBytes(bytes, flush: true);
+
+      // Get duration using just_audio
+      final player = AudioPlayer();
+      try {
+        final duration = await player.setFilePath(tempPath);
+        final seconds = duration?.inSeconds ?? 0;
+
+        debugPrint('🕐 [DownloadHelpers] Extracted duration: ${seconds}s');
+        return seconds;
+      } finally {
+        await player.dispose();
+        // Clean up temp file
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [DownloadHelpers] Duration extraction error: $e');
+      return 0;
     }
   }
 }

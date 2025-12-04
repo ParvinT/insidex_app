@@ -2141,4 +2141,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineModeMessage => 'Only downloaded sessions are available';
+
+  @override
+  String get offlineListening => 'Listen to downloaded sessions offline';
 }

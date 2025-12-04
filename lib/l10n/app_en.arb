@@ -836,7 +836,8 @@
   "downloadComplete": "Download Complete",
   "downloadFailed": "Download Failed",
   "offlineMode": "Offline Mode",
-  "offlineModeMessage": "Only downloaded sessions are available"
+  "offlineModeMessage": "Only downloaded sessions are available",
+  "offlineListening": "Listen to downloaded sessions offline"
 
 
 }

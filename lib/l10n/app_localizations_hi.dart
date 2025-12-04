@@ -2145,4 +2145,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get offlineModeMessage => 'केवल डाउनलोड किए गए सत्र उपलब्ध हैं';
+
+  @override
+  String get offlineListening => 'डाउनलोड किए गए सत्र ऑफ़लाइन सुनें';
 }

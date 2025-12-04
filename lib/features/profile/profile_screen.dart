@@ -8,6 +8,7 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
+import '../downloads/downloads_screen.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_info_section.dart';
 import 'widgets/profile_action_button.dart';
@@ -291,6 +292,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Navigator.pushNamed(context, AppRoutes.myInsights),
                 ),
                 SizedBox(height: 20.h),
+                // Downloads button
+                ProfileActionButton(
+                  icon: Icons.download_rounded,
+                  title: AppLocalizations.of(context).downloads,
+                  subtitle: AppLocalizations.of(context).offlineListening,
+                  gradientColors: [
+                    const Color(0xFF6B8E9B).withOpacity(0.1),
+                    const Color(0xFF4A7C8C).withOpacity(0.1),
+                  ],
+                  borderColor: const Color(0xFF6B8E9B),
+                  iconBackgroundColor: const Color(0xFF6B8E9B),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DownloadsScreen()),
+                  ),
+                ),
+                /*
+                // Premium Waitlist - Disabled for now
+                SizedBox(height: 20.h),
                 ProfileActionButton(
                   icon: Icons.star_rounded,
                   title: AppLocalizations.of(context).premiumWaitlist,
@@ -305,6 +325,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () =>
                       Navigator.pushNamed(context, '/premium/waitlist'),
                 ),
+                */
                 SizedBox(height: 20.h),
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(
