@@ -299,6 +299,17 @@ class AudioCacheService {
   static Future<File> getCachedAudio(String url) async {
     await _ensureInitialized();
 
+    if (url.startsWith('file://')) {
+      final localPath = url.replaceFirst('file://', '');
+      debugPrint('🎵 [AudioCache] Using local file directly');
+      return File(localPath);
+    }
+
+    if (url.startsWith('/')) {
+      debugPrint('🎵 [AudioCache] Using local path directly');
+      return File(url);
+    }
+
     final shortUrl = url.length > 80 ? '${url.substring(0, 80)}...' : url;
     debugPrint('🎵 [AudioCache] Fetching: $shortUrl');
 
@@ -395,6 +406,10 @@ class AudioCacheService {
 
   /// Pre-cache audio in background
   static Future<void> precacheAudio(String url) async {
+    if (url.startsWith('file://') || url.startsWith('/')) {
+      debugPrint('📥 [AudioCache] Skipping local file (no cache needed)');
+      return;
+    }
     try {
       if (await isCached(url)) {
         final shortUrl = url.length > 50 ? '${url.substring(0, 50)}...' : url;

@@ -1,4 +1,5 @@
 // lib/features/player/widgets/player_album_art.dart
+import 'dart:io';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -10,12 +11,14 @@ import '../../../services/cache_manager_service.dart';
 /// Responsive design that adapts to screen size
 class PlayerAlbumArt extends StatefulWidget {
   final String? imageUrl;
+  final String? localImagePath;
   final AnimationController equalizerController;
   final bool isPlaying;
 
   const PlayerAlbumArt({
     super.key,
     required this.imageUrl,
+    this.localImagePath,
     required this.equalizerController,
     required this.isPlaying,
   });
@@ -112,6 +115,30 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
 
   /// Background image with cache
   Widget _buildBackgroundImage() {
+    if (widget.localImagePath != null && widget.localImagePath!.isNotEmpty) {
+      final file = File(widget.localImagePath!);
+      return Positioned.fill(
+        child: FutureBuilder<bool>(
+          future: file.exists(),
+          builder: (context, snapshot) {
+            if (snapshot.data == true) {
+              return Image.file(
+                file,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _buildPlaceholder(),
+              );
+            }
+            // Local file yoksa network'e fallback
+            return _buildNetworkImage();
+          },
+        ),
+      );
+    }
+
+    return _buildNetworkImage();
+  }
+
+  Widget _buildNetworkImage() {
     if (widget.imageUrl == null || widget.imageUrl!.isEmpty) {
       return _buildPlaceholder();
     }

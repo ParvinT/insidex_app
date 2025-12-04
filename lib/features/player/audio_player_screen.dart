@@ -131,6 +131,26 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _loadLanguageAndUrls() async {
+    // ✅ OFFLINE SESSION - Skip URL loading, use pre-set values
+    if (_session['_skipUrlLoading'] == true) {
+      debugPrint('📥 [AudioPlayer] Offline session - using cached data');
+
+      final language = _session['_downloadedLanguage'] as String? ??
+          await LanguageHelperService.getCurrentLanguage();
+
+      setState(() {
+        _currentLanguage = language;
+        _loadedLanguage = language;
+        _backgroundImageUrl = null; // Will use _localImagePath instead
+
+        // Duration from offline data
+        final offlineDuration = _session['_offlineDurationSeconds'] as int?;
+        if (offlineDuration != null && offlineDuration > 0) {
+          _totalDuration = Duration(seconds: offlineDuration);
+        }
+      });
+      return; // Skip online flow
+    }
     final language = await LanguageHelperService.getCurrentLanguage();
 
     // 🆕 Load localized content
@@ -601,6 +621,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                           children: [
                             PlayerAlbumArt(
                               imageUrl: _backgroundImageUrl,
+                              localImagePath: _session['_localImagePath'],
                               equalizerController: _eqController,
                               isPlaying: _isPlaying,
                             ),

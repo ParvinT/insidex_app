@@ -1,7 +1,5 @@
 // lib/models/downloaded_session.dart
 
-import 'dart:convert';
-
 /// Model for downloaded/offline sessions
 /// Stores all necessary data to play a session without internet
 class DownloadedSession {
@@ -188,10 +186,40 @@ class DownloadedSession {
 
   /// Get display title with session number
   String get displayTitle {
-    if (sessionNumber != null) {
+    if (sessionNumber != null && !title.startsWith('$sessionNumber •')) {
       return '$sessionNumber • $title';
     }
     return title;
+  }
+
+  Map<String, dynamic> toPlayerSessionData() {
+    return {
+      // Core identifiers
+      'id': sessionId,
+      'sessionNumber': sessionNumber,
+      'categoryId': categoryId,
+      'categoryName': categoryName,
+
+      // Content
+      'title': title,
+      'description': description,
+
+      // Pre-formatted display titles (SKIP formatting in player)
+      '_displayTitle': displayTitle,
+      '_localizedTitle': displayTitle,
+
+      // Offline playback flags
+      '_isOffline': true,
+      '_downloadedLanguage': language,
+      '_localImagePath': imagePath,
+
+      // Duration info
+      '_offlineDurationSeconds': durationSeconds,
+
+      // Skip flags - prevent double processing
+      '_skipTitleFormatting': true,
+      '_skipUrlLoading': true,
+    };
   }
 
   /// Check if download is complete
