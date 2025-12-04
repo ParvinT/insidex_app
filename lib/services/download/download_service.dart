@@ -128,6 +128,41 @@ class DownloadService {
     }
   }
 
+  /// Initialize for offline mode using cached user ID
+  /// Called when app starts offline but user has previously logged in
+  Future<void> initializeForOffline(String cachedUserId) async {
+    if (_isInitialized && _currentUserId == cachedUserId) {
+      debugPrint('📥 [DownloadService] Already initialized for offline');
+      return;
+    }
+
+    debugPrint('📥 [DownloadService] Initializing for OFFLINE mode...');
+
+    try {
+      // Store user ID
+      _currentUserId = cachedUserId;
+
+      // Initialize encryption with cached user ID
+      _encryption.initialize(cachedUserId);
+
+      // Setup download directory (no network needed)
+      await _setupDownloadDirectory();
+
+      // Mark as initialized
+      _isInitialized = true;
+
+      // Notify listeners of current downloads
+      await _notifyDownloadsChanged();
+
+      debugPrint('✅ [DownloadService] Offline initialization successful');
+      debugPrint('   User: ${cachedUserId.substring(0, 8)}...');
+      debugPrint('   Directory: ${_downloadDir?.path}');
+    } catch (e) {
+      debugPrint('❌ [DownloadService] Offline initialization error: $e');
+      rethrow;
+    }
+  }
+
   /// Setup download directory
   Future<void> _setupDownloadDirectory() async {
     final appDir = await getApplicationDocumentsDirectory();

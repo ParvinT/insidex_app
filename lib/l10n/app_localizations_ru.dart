@@ -2161,4 +2161,30 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get offlineListening => 'Слушайте загруженные сеансы офлайн';
+
+  @override
+  String get youAreOffline => 'Вы офлайн';
+
+  @override
+  String get offlineDescription =>
+      'Подключитесь к интернету для доступа ко всем функциям или слушайте загруженные сеансы.';
+
+  @override
+  String get goToDownloads => 'Перейти к загрузкам';
+
+  @override
+  String get tryAgain => 'Повторить';
+
+  @override
+  String get checking => 'Проверка...';
+
+  @override
+  String get stillOffline => 'Всё ещё офлайн. Проверьте подключение.';
+
+  @override
+  String get noInternet => 'Нет интернета';
+
+  @override
+  String get internetRequiredForFirstLogin =>
+      'Для первого входа требуется интернет. Подключитесь и попробуйте снова.';
 }

@@ -65,11 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['success']) {
       final user = result['user'];
       if (user != null) {
-        // ⭐ BURASI KRİTİK - Session'ı kaydet
         debugPrint('SAVING AUTH SESSION for: ${user.email}');
-        await AuthPersistenceService.saveAuthSession(user,
-            password: password // ⭐ Password'ü geçiriyoruz
-            );
+        await AuthPersistenceService.saveAuthSession(user, password: password);
 
         // Test için SharedPreferences'ı kontrol et
         final prefs = await SharedPreferences.getInstance();
@@ -81,6 +78,10 @@ class _LoginScreenState extends State<LoginScreen> {
         debugPrint('✅ Active device saved, other devices will be logged out');
 
         await context.read<UserProvider>().loadUserData(user.uid);
+        // Save has_logged_in flag for offline mode
+        await prefs.setBool('has_logged_in', true);
+        await prefs.setString('cached_user_id', user.uid);
+        debugPrint('✅ [Login] has_logged_in flag and user ID saved');
       }
 
       Navigator.pushReplacementNamed(context, AppRoutes.home);

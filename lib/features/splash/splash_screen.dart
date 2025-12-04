@@ -4,14 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:http/http.dart' as http;
 import 'dart:math' as math;
+import '../offline/offline_mode_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/image_prefetch_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -85,7 +89,38 @@ class _SplashScreenState extends State<SplashScreen>
       debugPrint('========== AUTH CHECK START ==========');
 
       try {
-        // Firebase user kontrolü
+        // 1️⃣ CHECK REAL INTERNET CONNECTIVITY (not just WiFi status)
+        final isOnline = await _checkRealConnectivity();
+        debugPrint('Connectivity: ${isOnline ? "ONLINE" : "OFFLINE"}');
+
+        // 2️⃣ CHECK IF USER HAS LOGGED IN BEFORE
+        final prefs = await SharedPreferences.getInstance();
+        final hasLoggedIn = prefs.getBool('has_logged_in') ?? false;
+        debugPrint('Has logged in before: $hasLoggedIn');
+
+        // 3️⃣ OFFLINE HANDLING
+        if (!isOnline) {
+          if (hasLoggedIn) {
+            // User has logged in before - show offline mode
+            debugPrint('OFFLINE + HAS_LOGGED_IN → Offline Mode Screen');
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const OfflineModeScreen()),
+              );
+            }
+            return;
+          } else {
+            // Never logged in - need internet
+            debugPrint('OFFLINE + NEVER_LOGGED_IN → Need internet');
+            if (mounted) {
+              _showInternetRequiredDialog();
+            }
+            return;
+          }
+        }
+
+        // 4️⃣ ONLINE - NORMAL AUTH FLOW (mevcut kod aynen devam)
         User? firebaseUser = FirebaseAuth.instance.currentUser;
         debugPrint('Firebase User: ${firebaseUser?.email ?? "NULL"}');
 
@@ -93,36 +128,32 @@ class _SplashScreenState extends State<SplashScreen>
         final hasSession = await AuthPersistenceService.hasValidSession();
         debugPrint('Has Valid Session: $hasSession');
 
-        // SharedPreferences'ı direkt kontrol et
-        final prefs = await SharedPreferences.getInstance();
         debugPrint('Saved Email: ${prefs.getString('user_email') ?? "NULL"}');
         debugPrint(
             'Saved Token: ${prefs.getString('fb_auth_token')?.substring(0, 20) ?? "NULL"}...');
         debugPrint('Token Timestamp: ${prefs.getInt('token_timestamp') ?? 0}');
 
-        if (hasSession) {
-          debugPrint('Valid session found, checking Firebase user...');
+        if (hasSession && firebaseUser != null) {
+          debugPrint('Valid session found with Firebase user');
 
-          if (firebaseUser != null) {
-            debugPrint('Firebase user exists, refreshing token...');
-
-            try {
-              await firebaseUser.reload();
-              debugPrint('Token refresh successful');
-
-              if (mounted) {
-                debugPrint('Navigating to HOME');
-                Navigator.pushReplacementNamed(context, AppRoutes.home);
-                return;
-              }
-            } catch (e) {
-              debugPrint('Token refresh failed: $e');
-            }
-          } else {
-            debugPrint('No Firebase user, trying auto login...');
+          // Try to refresh token, but continue even if it fails (offline mode)
+          try {
+            await firebaseUser.reload();
+            debugPrint('Token refresh successful');
+          } catch (e) {
+            debugPrint('Token refresh failed (offline?): $e');
+            // Continue anyway - user can use app in offline mode
           }
-        }
 
+          // Navigate to HOME regardless of token refresh result
+          if (mounted) {
+            debugPrint('Navigating to HOME');
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+            return;
+          }
+        } else if (hasSession && firebaseUser == null) {
+          debugPrint('Has session but no Firebase user, trying auto login...');
+        }
         // Auto login dene
         debugPrint('Attempting auto sign-in...');
         final user = await AuthPersistenceService.autoSignIn();
@@ -150,6 +181,83 @@ class _SplashScreenState extends State<SplashScreen>
 
       debugPrint('========== AUTH CHECK END ==========');
     });
+  }
+
+  /// Check real internet connectivity by making HTTP request
+  Future<bool> _checkRealConnectivity() async {
+    try {
+      // First check basic connectivity
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        debugPrint('📡 [Connectivity] No network interface');
+        return false;
+      }
+
+      // Then verify actual internet access with HTTP request
+      final response = await http
+          .get(
+            Uri.parse('https://clients3.google.com/generate_204'),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      debugPrint('📡 [Connectivity] HTTP check: ${response.statusCode}');
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      debugPrint('📡 [Connectivity] Real check failed: $e');
+      return false;
+    }
+  }
+
+  void _showInternetRequiredDialog() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.orange, size: 28.sp),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                l10n.noInternet,
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          l10n.internetRequiredForFirstLogin,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _checkAuthAndNavigate();
+            },
+            child: Text(
+              l10n.tryAgain,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

@@ -2148,4 +2148,30 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get offlineListening => 'डाउनलोड किए गए सत्र ऑफ़लाइन सुनें';
+
+  @override
+  String get youAreOffline => 'आप ऑफ़लाइन हैं';
+
+  @override
+  String get offlineDescription =>
+      'सभी सुविधाओं तक पहुंचने के लिए इंटरनेट से कनेक्ट करें, या अपने डाउनलोड किए गए सत्र सुनें।';
+
+  @override
+  String get goToDownloads => 'डाउनलोड पर जाएं';
+
+  @override
+  String get tryAgain => 'पुनः प्रयास करें';
+
+  @override
+  String get checking => 'जाँच हो रही है...';
+
+  @override
+  String get stillOffline => 'अभी भी ऑफ़लाइन। कृपया अपना कनेक्शन जांचें।';
+
+  @override
+  String get noInternet => 'इंटरनेट नहीं';
+
+  @override
+  String get internetRequiredForFirstLogin =>
+      'पहली बार लॉगिन के लिए इंटरनेट कनेक्शन आवश्यक है। कृपया कनेक्ट करें और पुनः प्रयास करें।';
 }

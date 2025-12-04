@@ -4169,6 +4169,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Listen to downloaded sessions offline'**
   String get offlineListening;
+
+  /// No description provided for @youAreOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re Offline'**
+  String get youAreOffline;
+
+  /// No description provided for @offlineDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to the internet to access all features, or listen to your downloaded sessions.'**
+  String get offlineDescription;
+
+  /// No description provided for @goToDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Downloads'**
+  String get goToDownloads;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @checking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking...'**
+  String get checking;
+
+  /// No description provided for @stillOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Still offline. Please check your connection.'**
+  String get stillOffline;
+
+  /// No description provided for @noInternet.
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet'**
+  String get noInternet;
+
+  /// No description provided for @internetRequiredForFirstLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Internet connection is required for first login. Please connect and try again.'**
+  String get internetRequiredForFirstLogin;
 }
 
 class _AppLocalizationsDelegate

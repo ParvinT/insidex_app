@@ -780,7 +780,15 @@
   "downloadFailed": "İndirme Başarısız",
   "offlineMode": "Çevrimdışı Mod",
   "offlineModeMessage": "Yalnızca indirilen seanslar kullanılabilir",
-  "offlineListening": "İndirilen seansları çevrimdışı dinleyin"
+  "offlineListening": "İndirilen seansları çevrimdışı dinleyin",
+  "youAreOffline": "Çevrimdışısınız",
+  "offlineDescription": "Tüm özelliklere erişmek için internete bağlanın veya indirilen seanslarınızı dinleyin.",
+  "goToDownloads": "İndirilenlere Git",
+  "tryAgain": "Tekrar Dene",
+  "checking": "Kontrol ediliyor...",
+  "stillOffline": "Hala çevrimdışı. Lütfen bağlantınızı kontrol edin.",
+  "noInternet": "İnternet Yok",
+  "internetRequiredForFirstLogin": "İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin."
 
   
 }

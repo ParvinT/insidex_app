@@ -101,6 +101,48 @@ class DownloadProvider extends ChangeNotifier {
     }
   }
 
+  /// Initialize for offline mode using cached user ID
+  Future<void> initializeForOffline(String cachedUserId) async {
+    if (_isInitialized) return;
+
+    debugPrint('📥 [DownloadProvider] Initializing for OFFLINE mode...');
+
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      // Initialize download service for offline
+      await _downloadService.initializeForOffline(cachedUserId);
+
+      // Subscribe to downloads stream
+      _downloadsSubscription = _downloadService.downloadsStream.listen(
+        _onDownloadsChanged,
+        onError: (e) =>
+            debugPrint('❌ [DownloadProvider] Downloads stream error: $e'),
+      );
+
+      // Set connectivity as offline
+      _connectivityStatus = ConnectivityStatus.offline;
+
+      // Load downloads from local database
+      await _loadDownloads();
+      await _loadStats();
+
+      _isInitialized = true;
+      _isLoading = false;
+      notifyListeners();
+
+      debugPrint(
+          '✅ [DownloadProvider] Offline init complete with ${_downloads.length} downloads');
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      debugPrint('❌ [DownloadProvider] Offline initialization error: $e');
+    }
+  }
+
   /// Handle downloads list changes
   void _onDownloadsChanged(List<DownloadedSession> downloads) {
     _downloads = downloads;

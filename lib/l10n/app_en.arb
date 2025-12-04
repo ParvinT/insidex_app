@@ -837,7 +837,15 @@
   "downloadFailed": "Download Failed",
   "offlineMode": "Offline Mode",
   "offlineModeMessage": "Only downloaded sessions are available",
-  "offlineListening": "Listen to downloaded sessions offline"
+  "offlineListening": "Listen to downloaded sessions offline",
+  "youAreOffline": "You're Offline",
+  "offlineDescription": "Connect to the internet to access all features, or listen to your downloaded sessions.",
+  "goToDownloads": "Go to Downloads",
+  "tryAgain": "Try Again",
+  "checking": "Checking...",
+  "stillOffline": "Still offline. Please check your connection.",
+  "noInternet": "No Internet",
+  "internetRequiredForFirstLogin": "Internet connection is required for first login. Please connect and try again."
 
 
 }

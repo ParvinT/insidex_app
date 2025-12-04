@@ -2152,4 +2152,31 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get offlineListening => 'İndirilen seansları çevrimdışı dinleyin';
+
+  @override
+  String get youAreOffline => 'Çevrimdışısınız';
+
+  @override
+  String get offlineDescription =>
+      'Tüm özelliklere erişmek için internete bağlanın veya indirilen seanslarınızı dinleyin.';
+
+  @override
+  String get goToDownloads => 'İndirilenlere Git';
+
+  @override
+  String get tryAgain => 'Tekrar Dene';
+
+  @override
+  String get checking => 'Kontrol ediliyor...';
+
+  @override
+  String get stillOffline =>
+      'Hala çevrimdışı. Lütfen bağlantınızı kontrol edin.';
+
+  @override
+  String get noInternet => 'İnternet Yok';
+
+  @override
+  String get internetRequiredForFirstLogin =>
+      'İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin.';
 }

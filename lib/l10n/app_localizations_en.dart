@@ -2144,4 +2144,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offlineListening => 'Listen to downloaded sessions offline';
+
+  @override
+  String get youAreOffline => 'You\'re Offline';
+
+  @override
+  String get offlineDescription =>
+      'Connect to the internet to access all features, or listen to your downloaded sessions.';
+
+  @override
+  String get goToDownloads => 'Go to Downloads';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get checking => 'Checking...';
+
+  @override
+  String get stillOffline => 'Still offline. Please check your connection.';
+
+  @override
+  String get noInternet => 'No Internet';
+
+  @override
+  String get internetRequiredForFirstLogin =>
+      'Internet connection is required for first login. Please connect and try again.';
 }
