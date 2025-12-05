@@ -2187,4 +2187,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get internetRequiredForFirstLogin =>
       'Для первого входа требуется интернет. Подключитесь и попробуйте снова.';
+
+  @override
+  String get preparing => 'Подготовка...';
 }

@@ -38,13 +38,15 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
 
       if (cachedUserId != null && cachedUserId.isNotEmpty) {
         debugPrint(
-            '📥 [OfflineMode] Found cached user ID, initializing provider...');
+          '📥 [OfflineMode] Found cached user ID, initializing provider...',
+        );
         if (mounted) {
-          await context
-              .read<DownloadProvider>()
-              .initializeForOffline(cachedUserId);
+          await context.read<DownloadProvider>().initializeForOffline(
+                cachedUserId,
+              );
           debugPrint(
-              '✅ [OfflineMode] Provider initialized for offline playback');
+            '✅ [OfflineMode] Provider initialized for offline playback',
+          );
         }
       } else {
         debugPrint('⚠️ [OfflineMode] No cached user ID found');
@@ -61,6 +63,21 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
     final isOnline = connectivityResult != ConnectivityResult.none;
 
     if (isOnline && mounted) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final cachedUserId = prefs.getString('cached_user_id');
+
+        if (cachedUserId != null && cachedUserId.isNotEmpty) {
+          debugPrint('🔄 [OfflineMode] Switching to online mode...');
+          await context.read<DownloadProvider>().reinitializeForOnline(
+                cachedUserId,
+              );
+          debugPrint('✅ [OfflineMode] Provider switched to online mode');
+        }
+      } catch (e) {
+        debugPrint('⚠️ [OfflineMode] Reinitialize error: $e');
+      }
+
       // Internet restored, restart app flow
       Navigator.pushReplacementNamed(context, AppRoutes.splash);
     } else if (mounted) {
@@ -134,7 +151,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
               // Go to Downloads button
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
+                height: 56.h.clamp(52.0, 64.0),
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.push(
@@ -148,7 +165,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                   label: Text(
                     l10n.goToDownloads,
                     style: GoogleFonts.inter(
-                      fontSize: 16.sp,
+                      fontSize: 16.sp.clamp(14.0, 18.0),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -168,7 +185,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
               // Retry button
               SizedBox(
                 width: double.infinity,
-                height: 56.h,
+                height: 56.h.clamp(52.0, 64.0),
                 child: OutlinedButton.icon(
                   onPressed: _isRetrying ? null : _retryConnection,
                   icon: _isRetrying
@@ -186,7 +203,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                   label: Text(
                     _isRetrying ? l10n.checking : l10n.tryAgain,
                     style: GoogleFonts.inter(
-                      fontSize: 16.sp,
+                      fontSize: 16.sp.clamp(14.0, 18.0),
                       fontWeight: FontWeight.w600,
                     ),
                   ),

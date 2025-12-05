@@ -4217,6 +4217,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Internet connection is required for first login. Please connect and try again.'**
   String get internetRequiredForFirstLogin;
+
+  /// No description provided for @preparing.
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing...'**
+  String get preparing;
 }
 
 class _AppLocalizationsDelegate

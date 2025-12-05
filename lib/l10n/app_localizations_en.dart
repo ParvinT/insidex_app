@@ -2170,4 +2170,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get internetRequiredForFirstLogin =>
       'Internet connection is required for first login. Please connect and try again.';
+
+  @override
+  String get preparing => 'Preparing...';
 }

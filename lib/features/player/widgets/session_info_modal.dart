@@ -28,13 +28,7 @@ class SessionInfoModal {
         ? localizedContent.title
         : (session['title'] ?? 'Untitled Session');
 
-    final sessionNumber = session['sessionNumber'];
-    if (sessionNumber != null) {
-      localizedSession['_displayTitle'] =
-          '$sessionNumber • $title'; // ← • kullan
-    } else {
-      localizedSession['_displayTitle'] = title;
-    }
+    localizedSession['_displayTitle'] = title;
     localizedSession['_displayDescription'] =
         localizedContent.description.isNotEmpty
             ? localizedContent.description

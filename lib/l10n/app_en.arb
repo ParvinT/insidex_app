@@ -845,7 +845,8 @@
   "checking": "Checking...",
   "stillOffline": "Still offline. Please check your connection.",
   "noInternet": "No Internet",
-  "internetRequiredForFirstLogin": "Internet connection is required for first login. Please connect and try again."
+  "internetRequiredForFirstLogin": "Internet connection is required for first login. Please connect and try again.",
+  "preparing": "Preparing..."
 
 
 }

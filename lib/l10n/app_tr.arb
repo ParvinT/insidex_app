@@ -788,7 +788,8 @@
   "checking": "Kontrol ediliyor...",
   "stillOffline": "Hala çevrimdışı. Lütfen bağlantınızı kontrol edin.",
   "noInternet": "İnternet Yok",
-  "internetRequiredForFirstLogin": "İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin."
+  "internetRequiredForFirstLogin": "İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin.",
+  "preparing": "Hazırlanıyor..."
 
   
 }

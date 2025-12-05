@@ -320,9 +320,7 @@ class DownloadService {
       final description = localizedContent.description;
       final introTitle = localizedContent.introduction.title;
       final introContent = localizedContent.introduction.content;
-      final sessionNumber = sessionData['sessionNumber'] as int?;
-      final displayTitle =
-          sessionNumber != null ? '$sessionNumber • $title' : title;
+      final displayTitle = title;
 
       // 4. Get duration
       final duration = LanguageHelperService.getDuration(

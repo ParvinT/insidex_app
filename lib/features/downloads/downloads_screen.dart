@@ -43,6 +43,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final currentLang = Localizations.localeOf(context).languageCode;
+    _preloader.setLanguage(currentLang);
+  }
+
+  @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
@@ -82,8 +90,10 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     final lastVisible = ((scrollOffset + viewportHeight) / itemHeight).ceil();
 
     // Add buffer for smoother experience
-    final startIndex =
-        (firstVisible - 1).clamp(0, _currentDownloads.length - 1);
+    final startIndex = (firstVisible - 1).clamp(
+      0,
+      _currentDownloads.length - 1,
+    );
     final endIndex = (lastVisible + 2).clamp(0, _currentDownloads.length);
 
     // Extract session IDs
@@ -102,8 +112,9 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     final isDesktop = context.isDesktop;
 
     // Responsive values
-    final double horizontalPadding =
-        isDesktop ? 32.w : (isTablet ? 24.w : 20.w);
+    final double horizontalPadding = isDesktop
+        ? 32.w
+        : (isTablet ? 24.w : 20.w);
     final double toolbarHeight = isDesktop ? 80.0 : (isTablet ? 70.0 : 60.0);
 
     return Scaffold(
@@ -326,9 +337,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                             ),
                             Text(
                               ' • ',
-                              style: TextStyle(
-                                color: AppColors.textLight,
-                              ),
+                              style: TextStyle(color: AppColors.textLight),
                             ),
                           ],
                           Text(
@@ -466,9 +475,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => AudioPlayerScreen(
-          sessionData: download.toPlayerSessionData(),
-        ),
+        builder: (_) =>
+            AudioPlayerScreen(sessionData: download.toPlayerSessionData()),
       ),
     );
   }
@@ -555,9 +563,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
       context: context,
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20.r),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) => Padding(
         padding: EdgeInsets.all(24.w),
@@ -611,10 +617,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => _confirmClearAll(context, provider),
-                icon: Icon(
-                  Icons.delete_sweep_rounded,
-                  color: Colors.red,
-                ),
+                icon: Icon(Icons.delete_sweep_rounded, color: Colors.red),
                 label: Text(
                   l10n.clearAllDownloads,
                   style: GoogleFonts.inter(
@@ -725,10 +728,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.clearAll,
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
             ),
           ),
         ],

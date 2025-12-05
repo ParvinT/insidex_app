@@ -48,7 +48,6 @@ class SessionCard extends StatelessWidget {
     debugPrint('🖼️ backgroundImages: ${session['backgroundImages']}');
     debugPrint('🖼️ OLD backgroundImage: ${session['backgroundImage']}');
     debugPrint('📝 title: ${session['title']}');
-    debugPrint('🏷️ category: ${session['category']}');
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -64,8 +63,6 @@ class SessionCard extends StatelessWidget {
     final double contentPadding = isTablet ? 18.w : 16.w;
     final double titleSize =
         isTablet ? 19.sp.clamp(17.0, 21.0) : 18.sp.clamp(16.0, 20.0);
-    final double categorySize =
-        isTablet ? 13.sp.clamp(12.0, 14.0) : 12.sp.clamp(11.0, 13.0);
     final double iconSize = isTablet ? 22.sp : 20.sp;
     final double playButtonSize = isTablet ? 60.w : 56.w;
     final double playIconSize = isTablet ? 34.sp : 32.sp;
@@ -101,11 +98,7 @@ class SessionCard extends StatelessWidget {
         ? localizedContent.title
         : AppLocalizations.of(context).untitledSession;
 
-    final sessionNumber = session['sessionNumber'];
-    final title =
-        sessionNumber != null ? '$sessionNumber • $baseTitle' : baseTitle;
-    final category =
-        session['category'] ?? AppLocalizations.of(context).general;
+    final title = baseTitle;
 
     return GestureDetector(
       onTap: onTap,
@@ -173,29 +166,6 @@ class SessionCard extends StatelessWidget {
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-
-                  SizedBox(width: isTablet ? 14.w : 12.w),
-
-                  // Category Badge
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isTablet ? 14.w : 12.w,
-                      vertical: isTablet ? 7.h : 6.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.textPrimary.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(isTablet ? 22.r : 20.r),
-                    ),
-                    child: Text(
-                      category,
-                      style: GoogleFonts.inter(
-                        fontSize: categorySize,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
                     ),
                   ),
 
@@ -327,7 +297,7 @@ class SessionCard extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 12,
                           spreadRadius: 1,
                           offset: const Offset(0, 4),
@@ -355,8 +325,10 @@ class SessionCard extends StatelessWidget {
     required double playButtonSize,
     required double playIconSize,
   }) {
-    final category = session['category']?.toString() ?? 'General';
-    final gradientColors = _getCategoryGradient(category);
+    final gradientColors = [
+      AppColors.textPrimary.withOpacity(0.7),
+      AppColors.textPrimary.withOpacity(0.5),
+    ];
 
     return ClipRRect(
       borderRadius: BorderRadius.only(
@@ -430,10 +402,10 @@ class SessionCard extends StatelessWidget {
   }
 
   Widget _buildErrorPlaceholder() {
-    // Session'ın category'sine göre renk ve emoji belirle
-    final category = session['category']?.toString() ?? 'General';
-    final gradientColors = _getCategoryGradient(category);
-
+    final gradientColors = [
+      AppColors.textPrimary.withOpacity(0.7),
+      AppColors.textPrimary.withOpacity(0.5),
+    ];
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -474,25 +446,5 @@ class SessionCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  List<Color> _getCategoryGradient(String category) {
-    switch (category.toLowerCase()) {
-      case 'sleep':
-        return [Color(0xFF6B5B95), Color(0xFF8B7BA8)];
-      case 'meditation':
-        return [Color(0xFF88B0D3), Color(0xFFA5C9E0)];
-      case 'focus':
-        return [Color(0xFFFFA500), Color(0xFFFFB733)];
-      case 'relaxation':
-        return [Color(0xFF5CDB95), Color(0xFF7EE8B0)];
-      case 'comfort':
-        return [Color(0xFFFF6B9D), Color(0xFFFF8BB5)];
-      default:
-        return [
-          AppColors.textPrimary.withOpacity(0.7),
-          AppColors.textPrimary.withOpacity(0.5)
-        ];
-    }
   }
 }

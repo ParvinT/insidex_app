@@ -92,7 +92,8 @@ class DownloadProvider extends ChangeNotifier {
       notifyListeners();
 
       debugPrint(
-          '✅ [DownloadProvider] Initialized with ${_downloads.length} downloads');
+        '✅ [DownloadProvider] Initialized with ${_downloads.length} downloads',
+      );
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
@@ -134,12 +135,77 @@ class DownloadProvider extends ChangeNotifier {
       notifyListeners();
 
       debugPrint(
-          '✅ [DownloadProvider] Offline init complete with ${_downloads.length} downloads');
+        '✅ [DownloadProvider] Offline init complete with ${_downloads.length} downloads',
+      );
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
       notifyListeners();
       debugPrint('❌ [DownloadProvider] Offline initialization error: $e');
+    }
+  }
+
+  /// Reinitialize for online mode after coming back from offline
+  /// Called when user was offline, then retry succeeds
+  Future<void> reinitializeForOnline(String userId) async {
+    debugPrint('🔄 [DownloadProvider] Reinitializing for ONLINE mode...');
+
+    try {
+      // Cancel existing subscriptions
+      await _downloadsSubscription?.cancel();
+      await _progressSubscription?.cancel();
+      await _connectivitySubscription?.cancel();
+
+      // Reset state
+      _isInitialized = false;
+      _isLoading = true;
+      _error = null;
+      _activeDownloads.clear();
+      notifyListeners();
+
+      // Reinitialize download service for online
+      await _downloadService.initialize(userId);
+
+      // Subscribe to downloads stream
+      _downloadsSubscription = _downloadService.downloadsStream.listen(
+        _onDownloadsChanged,
+        onError: (e) =>
+            debugPrint('❌ [DownloadProvider] Downloads stream error: $e'),
+      );
+
+      // Subscribe to progress stream (needed for downloads!)
+      _progressSubscription = _downloadService.progressStream.listen(
+        _onProgressChanged,
+        onError: (e) =>
+            debugPrint('❌ [DownloadProvider] Progress stream error: $e'),
+      );
+
+      // Subscribe to connectivity stream
+      _connectivitySubscription = _connectivityService.statusStream.listen(
+        _onConnectivityChanged,
+        onError: (e) =>
+            debugPrint('❌ [DownloadProvider] Connectivity stream error: $e'),
+      );
+
+      // Set connectivity as ONLINE
+      _connectivityStatus = ConnectivityStatus.online;
+
+      // Load downloads
+      await _loadDownloads();
+      await _loadStats();
+
+      _isInitialized = true;
+      _isLoading = false;
+      notifyListeners();
+
+      debugPrint(
+        '✅ [DownloadProvider] Reinitialize complete - NOW ONLINE with ${_downloads.length} downloads',
+      );
+    } catch (e) {
+      _error = e.toString();
+      _isLoading = false;
+      notifyListeners();
+      debugPrint('❌ [DownloadProvider] Reinitialize error: $e');
     }
   }
 
@@ -248,13 +314,16 @@ class DownloadProvider extends ChangeNotifier {
 
   /// Get download by session ID and language
   Future<DownloadedSession?> getDownload(
-      String sessionId, String language) async {
+    String sessionId,
+    String language,
+  ) async {
     return await _downloadService.getDownload(sessionId, language);
   }
 
   /// Get downloads for a specific language
   Future<List<DownloadedSession>> getDownloadsForLanguage(
-      String language) async {
+    String language,
+  ) async {
     return await _downloadService.getDownloadsForLanguage(language);
   }
 
@@ -295,7 +364,9 @@ class DownloadProvider extends ChangeNotifier {
 
   /// Get decrypted audio path for playback
   Future<String?> getDecryptedAudioPath(
-      String sessionId, String language) async {
+    String sessionId,
+    String language,
+  ) async {
     return await _downloadService.getDecryptedAudioPath(sessionId, language);
   }
 
@@ -331,10 +402,7 @@ class DownloadButtonState {
   final DownloadStateType type;
   final double progress;
 
-  const DownloadButtonState._({
-    required this.type,
-    this.progress = 0,
-  });
+  const DownloadButtonState._({required this.type, this.progress = 0});
 
   factory DownloadButtonState.notDownloaded() {
     return const DownloadButtonState._(type: DownloadStateType.notDownloaded);
@@ -357,8 +425,4 @@ class DownloadButtonState {
 }
 
 /// Download state type
-enum DownloadStateType {
-  notDownloaded,
-  downloading,
-  downloaded,
-}
+enum DownloadStateType { notDownloaded, downloading, downloaded }

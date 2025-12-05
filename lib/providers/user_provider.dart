@@ -10,6 +10,7 @@ import '../services/device_session_service.dart';
 import '../shared/widgets/device_logout_dialog.dart';
 import '../services/auth_persistence_service.dart';
 import '../services/audio/audio_player_service.dart';
+import '../services/download/decryption_preloader.dart';
 import 'mini_player_provider.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -192,6 +193,13 @@ class UserProvider extends ChangeNotifier {
       debugPrint('✅ [UserProvider] Audio stopped');
     } catch (e) {
       debugPrint('⚠️ [UserProvider] Audio stop error: $e');
+    }
+
+    try {
+      await DecryptionPreloader().clear();
+      debugPrint('✅ [UserProvider] Preloader cache cleared');
+    } catch (e) {
+      debugPrint('⚠️ [UserProvider] Preloader clear error: $e');
     }
 
     // Clear device session
@@ -412,7 +420,7 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      print('Error updating profile: $e');
+      debugPrint('Error updating profile: $e');
       return false;
     }
   }

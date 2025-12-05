@@ -116,9 +116,7 @@ class SessionLocalizationService {
         ? localizedContent.title
         : (sessionData['title'] ?? 'Untitled Session');
 
-    final sessionNumber = sessionData['sessionNumber'];
-    final displayTitle =
-        sessionNumber != null ? '№$sessionNumber • $baseTitle' : baseTitle;
+    final displayTitle = baseTitle;
 
     // Add localized fields to session data
     completeData['_displayTitle'] = displayTitle;

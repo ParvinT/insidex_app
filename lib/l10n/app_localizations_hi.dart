@@ -2174,4 +2174,7 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get internetRequiredForFirstLogin =>
       'पहली बार लॉगिन के लिए इंटरनेट कनेक्शन आवश्यक है। कृपया कनेक्ट करें और पुनः प्रयास करें।';
+
+  @override
+  String get preparing => 'तैयार हो रहा है...';
 }

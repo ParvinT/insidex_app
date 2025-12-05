@@ -587,15 +587,13 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       final localizedContent =
           SessionLocalizationService.getLocalizedContent(sessionData, locale);
 
-      // Build title with session number
-      final sessionNumber = sessionData['sessionNumber'];
-      if (sessionNumber != null && localizedContent.title.isNotEmpty) {
-        return '$sessionNumber - ${localizedContent.title}';
+      if (localizedContent.title.isNotEmpty) {
+        return localizedContent.title;
       }
 
       return localizedContent.title.isNotEmpty
           ? localizedContent.title
-          : '${AppLocalizations.of(context).session} $sessionNumber';
+          : AppLocalizations.of(context).session;
     } catch (e) {
       debugPrint('❌ Error getting session title: $e');
       return AppLocalizations.of(context).session;

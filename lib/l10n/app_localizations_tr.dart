@@ -2179,4 +2179,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get internetRequiredForFirstLogin =>
       'İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin.';
+
+  @override
+  String get preparing => 'Hazırlanıyor...';
 }

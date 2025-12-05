@@ -47,6 +47,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isInPlaylist = false;
   bool _isLooping = false;
   bool _isTracking = false;
+  bool _isDecrypting = false;
 
   //Audio State
   String _currentLanguage = 'en';
@@ -96,12 +97,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _isPlaying = miniPlayer.isPlaying;
 
         debugPrint(
-            '✨ Pre-loaded state for same session: ${_currentPosition.inSeconds}s');
+          '✨ Pre-loaded state for same session: ${_currentPosition.inSeconds}s',
+        );
       } else {
         debugPrint(
-            '🆕 New session or different type (online/offline mismatch)');
+          '🆕 New session or different type (online/offline mismatch)',
+        );
         debugPrint(
-            '   Current: $currentSessionId (offline: $currentIsOffline)');
+          '   Current: $currentSessionId (offline: $currentIsOffline)',
+        );
         debugPrint('   New: $newSessionId (offline: $newIsOffline)');
       }
     }
@@ -116,12 +120,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           'title': 'Session',
           'introduction': {
             'title': AppLocalizations.of(context).aboutThisSession,
-            'content': ''
+            'content': '',
           },
-          'subliminal': {
-            'audioUrls': {},
-            'durations': {},
-          },
+          'subliminal': {'audioUrls': {}, 'durations': {}},
           'backgroundImages': {},
         };
     _loadLanguageAndUrls();
@@ -189,18 +190,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         _totalDuration = Duration(seconds: duration);
       }
 
-      // 🆕 Store localized content in session
-      final sessionNumber = _session['sessionNumber'];
+      // Store localized content in session
       final title = localizedContent.title;
 
-      if (sessionNumber != null) {
-        _session['_localizedTitle'] =
-            '$sessionNumber • $title'; // ← Mini player için
-        _session['_displayTitle'] = '$sessionNumber • $title'; // ← Player için
-      } else {
-        _session['_localizedTitle'] = title;
-        _session['_displayTitle'] = title;
-      }
+      _session['_localizedTitle'] = title;
+      _session['_displayTitle'] = title;
       _session['_localizedDescription'] = localizedContent.description;
       _session['_localizedIntroTitle'] = localizedContent.introduction.title;
       _session['_localizedIntroContent'] =
@@ -465,8 +459,20 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       // 🆕 2. If not cached, fall back to normal decryption
       if (decryptedPath == null) {
         debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
-        decryptedPath =
-            await downloadService.getDecryptedAudioPath(sessionId, language);
+
+        // 🆕 Show loading
+        if (mounted) {
+          setState(() => _isDecrypting = true);
+        }
+
+        decryptedPath = await downloadService.getDecryptedAudioPath(
+          sessionId,
+          language,
+        );
+
+        if (mounted) {
+          setState(() => _isDecrypting = false);
+        }
       } else {
         debugPrint('⚡ [AudioPlayer] Cache hit - instant playback!');
       }
@@ -554,8 +560,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text('${AppLocalizations.of(context).failedToPlayAudio} ($e)'),
+          content: Text(
+            '${AppLocalizations.of(context).failedToPlayAudio} ($e)',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -610,13 +617,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         if (_miniPlayerProvider != null) {
           debugPrint(
-              '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}');
+            '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}',
+          );
           _session['_currentLanguage'] = _currentLanguage;
           _session['_backgroundImageUrl'] = _backgroundImageUrl;
           _miniPlayerProvider!.playSession(_session);
           _miniPlayerProvider!.show();
           debugPrint(
-              '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}');
+            '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}',
+          );
         } else {
           debugPrint('❌ Mini player provider is null');
         }
@@ -639,89 +648,122 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                         );
                       },
                     ),
-                    Expanded(child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final Widget _inner = Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            PlayerAlbumArt(
-                              imageUrl: _backgroundImageUrl,
-                              localImagePath: _session['_localImagePath'],
-                              equalizerController: _eqController,
-                              isPlaying: _isPlaying,
-                            ),
-                            SizedBox(height: 40.h),
-                            PlayerSessionInfo(
-                              title: _session['_displayTitle'] ??
-                                  _session['_localizedTitle'] ??
-                                  _session['title'] ??
-                                  AppLocalizations.of(context).untitledSession,
-                              subtitle: AppLocalizations.of(context)
-                                  .subliminalSession,
-                            ),
-                            SizedBox(height: 30.h),
-                            IntroductionButton(
-                              onTap: _showIntroductionModal,
-                            ),
-                            SizedBox(height: 30.h),
-                            PlayerProgressBar(
-                              position: _currentPosition,
-                              duration: _totalDuration,
-                              onSeek: (duration) =>
-                                  _audioService.seek(duration),
-                            ),
-                            SizedBox(height: 30.h),
-                            PlayerPlayControls(
-                              isPlaying: _isPlaying,
-                              onPlayPause: _togglePlayPause,
-                              onReplay10: _replay10,
-                              onForward10: _forward10,
-                            ),
-                            SizedBox(height: 25.h),
-                            PlayerBottomActions(
-                              isLooping: _isLooping,
-                              isFavorite: _isFavorite,
-                              isInPlaylist: _isInPlaylist,
-                              isOffline: _isOfflineSession,
-                              isTimerActive: _sleepTimerMinutes != null,
-                              onLoop: _toggleLoop,
-                              onFavorite: _toggleFavorite,
-                              onPlaylist: _togglePlaylist,
-                              onTimer: _showSleepTimerModal,
-                              downloadButton: _isOfflineSession
-                                  ? null
-                                  : DownloadButton(
-                                      session: _session,
-                                      size: 24.sp,
-                                      showBackground: false,
-                                    ),
-                            ),
-                          ],
-                        );
-                        final bool _isSmallPhone =
-                            constraints.maxWidth <= 400 ||
-                                constraints.maxHeight <= 700;
-                        return SingleChildScrollView(
-                          padding: EdgeInsets.only(
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final Widget _inner = Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              PlayerAlbumArt(
+                                imageUrl: _backgroundImageUrl,
+                                localImagePath: _session['_localImagePath'],
+                                equalizerController: _eqController,
+                                isPlaying: _isPlaying,
+                              ),
+                              SizedBox(height: 40.h),
+                              PlayerSessionInfo(
+                                title: _session['_displayTitle'] ??
+                                    _session['_localizedTitle'] ??
+                                    _session['title'] ??
+                                    AppLocalizations.of(
+                                      context,
+                                    ).untitledSession,
+                                subtitle: AppLocalizations.of(
+                                  context,
+                                ).subliminalSession,
+                              ),
+                              SizedBox(height: 30.h),
+                              IntroductionButton(onTap: _showIntroductionModal),
+                              SizedBox(height: 30.h),
+                              PlayerProgressBar(
+                                position: _currentPosition,
+                                duration: _totalDuration,
+                                onSeek: (duration) =>
+                                    _audioService.seek(duration),
+                              ),
+                              SizedBox(height: 30.h),
+                              PlayerPlayControls(
+                                isPlaying: _isPlaying,
+                                onPlayPause: _togglePlayPause,
+                                onReplay10: _replay10,
+                                onForward10: _forward10,
+                              ),
+                              SizedBox(height: 25.h),
+                              PlayerBottomActions(
+                                isLooping: _isLooping,
+                                isFavorite: _isFavorite,
+                                isInPlaylist: _isInPlaylist,
+                                isOffline: _isOfflineSession,
+                                isTimerActive: _sleepTimerMinutes != null,
+                                onLoop: _toggleLoop,
+                                onFavorite: _toggleFavorite,
+                                onPlaylist: _togglePlaylist,
+                                onTimer: _showSleepTimerModal,
+                                downloadButton: _isOfflineSession
+                                    ? null
+                                    : DownloadButton(
+                                        session: _session,
+                                        size: 24.sp,
+                                        showBackground: false,
+                                      ),
+                              ),
+                            ],
+                          );
+                          final bool _isSmallPhone =
+                              constraints.maxWidth <= 400 ||
+                                  constraints.maxHeight <= 700;
+                          return SingleChildScrollView(
+                            padding: EdgeInsets.only(
                               bottom:
-                                  MediaQuery.of(context).padding.bottom + 12),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                                minHeight: constraints.maxHeight),
-                            child: Align(
-                              alignment: _isSmallPhone
-                                  ? Alignment.topCenter
-                                  : Alignment.center,
-                              child: _inner,
+                                  MediaQuery.of(context).padding.bottom + 12,
                             ),
-                          ),
-                        );
-                      },
-                    )),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
+                              ),
+                              child: Align(
+                                alignment: _isSmallPhone
+                                    ? Alignment.topCenter
+                                    : Alignment.center,
+                                child: _inner,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
+            if (_isDecrypting)
+              Container(
+                color: Colors.black.withOpacity(0.7),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 48.w,
+                        height: 48.w,
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 3,
+                        ),
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        AppLocalizations.of(context).preparing,
+                        style: GoogleFonts.inter(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -733,9 +775,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(_isLooping
-            ? AppLocalizations.of(context).loopEnabled
-            : AppLocalizations.of(context).loopDisabled),
+        content: Text(
+          _isLooping
+              ? AppLocalizations.of(context).loopEnabled
+              : AppLocalizations.of(context).loopDisabled,
+        ),
         backgroundColor: Colors.black,
         duration: const Duration(seconds: 1),
       ),
@@ -836,29 +880,27 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _showSleepTimerModal() {
-    PlayerModals.showSleepTimer(
-      context,
-      _sleepTimerMinutes,
-      _audioService,
-      (minutes) {
-        if (mounted) {
-          setState(() {
-            _sleepTimerMinutes = minutes;
+    PlayerModals.showSleepTimer(context, _sleepTimerMinutes, _audioService, (
+      minutes,
+    ) {
+      if (mounted) {
+        setState(() {
+          _sleepTimerMinutes = minutes;
 
-            if (minutes != null && _totalDuration.inSeconds > 0) {
-              final timerSeconds = minutes * 60;
-              final audioSeconds = _totalDuration.inSeconds;
+          if (minutes != null && _totalDuration.inSeconds > 0) {
+            final timerSeconds = minutes * 60;
+            final audioSeconds = _totalDuration.inSeconds;
 
-              if (timerSeconds > audioSeconds && !_isLooping) {
-                _isLooping = true;
-                debugPrint(
-                    '🔁 [Timer] Auto-loop enabled (timer: ${minutes}min > audio: ${audioSeconds ~/ 60}min)');
-              }
+            if (timerSeconds > audioSeconds && !_isLooping) {
+              _isLooping = true;
+              debugPrint(
+                '🔁 [Timer] Auto-loop enabled (timer: ${minutes}min > audio: ${audioSeconds ~/ 60}min)',
+              );
             }
-          });
-        }
-      },
-    );
+          }
+        });
+      }
+    });
   }
 
   void _showIntroductionModal() {

@@ -201,11 +201,8 @@ class DownloadedSession {
     }
   }
 
-  /// Get display title with session number
+  /// Get display title
   String get displayTitle {
-    if (sessionNumber != null && !title.startsWith('$sessionNumber •')) {
-      return '$sessionNumber • $title';
-    }
     return title;
   }
 

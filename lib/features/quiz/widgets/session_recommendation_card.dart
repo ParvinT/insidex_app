@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/context_ext.dart';
-import '../../../l10n/app_localizations.dart'; 
+import '../../../l10n/app_localizations.dart';
 
 class SessionRecommendationCard extends StatelessWidget {
   final int? sessionNumber;
@@ -126,35 +126,6 @@ class SessionRecommendationCard extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // Session number
-                if (sessionNumber != null) ...[
-                  Container(
-                    width: isTablet ? 50.w : 46.w,
-                    height: isTablet ? 50.w : 46.w,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryGold,
-                          AppColors.primaryGold.withOpacity(0.8),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$sessionNumber',
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 16.sp : 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                ],
-
                 // Session title
                 Expanded(
                   child: Text(
