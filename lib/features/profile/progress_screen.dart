@@ -20,7 +20,6 @@ class ProgressScreen extends StatefulWidget {
 class _ProgressScreenState extends State<ProgressScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _selectedPeriod = 'Month';
 
   // Real data from Firebase
   Map<String, dynamic> _analyticsData = {};
@@ -505,7 +504,6 @@ class _ProgressScreenState extends State<ProgressScreen>
                                   AppLocalizations.of(context).week,
                                   AppLocalizations.of(context).day,
                                 ];
-                                setState(() => _selectedPeriod = periods[i]);
                               },
                             ),
                           ),
@@ -913,7 +911,7 @@ class _ProgressScreenState extends State<ProgressScreen>
           final double barH = maxBarH * t.clamp(0.0, 1.0);
 
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 2), // yatay aralık
+            padding: const EdgeInsets.symmetric(horizontal: 2), // yatay aralık
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

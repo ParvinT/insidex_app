@@ -354,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // Bottom nav content (only content; height/shape is in ResponsiveScaffold)
   Widget _buildBottomNavContent() {
-    int current = 0; // TODO: wire with state if needed
+    int current = 0;
 
     Widget item(IconData icon, String label, int idx, VoidCallback onTap) {
       final selected = current == idx;

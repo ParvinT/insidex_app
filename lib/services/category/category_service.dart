@@ -57,9 +57,7 @@ class CategoryService {
   Future<List<CategoryModel>> getCategoriesByLanguage([String? locale]) async {
     final categories = await getAllCategories();
 
-    if (locale == null) {
-      locale = await LanguageHelperService.getCurrentLanguage();
-    }
+    locale ??= await LanguageHelperService.getCurrentLanguage();
 
     final filtered = categories.where((cat) {
       return cat.hasLanguage(locale!);

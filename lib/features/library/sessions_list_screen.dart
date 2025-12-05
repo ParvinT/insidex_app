@@ -287,14 +287,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
     final double dividerH = (logoH * 0.9).clamp(18.0, 36.0);
 
     // Sadece bu ekranda font şişmesini yumuşat
-    final double _ts = mq.textScaleFactor.clamp(1.0, 1.2);
+    final double ts = mq.textScaler.scale(1.0).clamp(1.0, 1.2);
 
     final String rightTitleText = widget.isShowingAllSessions
         ? AppLocalizations.of(context).allSubliminals
         : widget.categoryTitle;
 
     return MediaQuery(
-      data: mq.copyWith(textScaleFactor: _ts),
+      data: mq.copyWith(textScaler: TextScaler.linear(ts)),
       child: Scaffold(
         backgroundColor: AppColors.backgroundWhite,
         appBar: AppBar(
@@ -326,7 +326,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                         width: logoW,
                         height: logoH,
                         fit: BoxFit.contain,
-                        colorFilter: ColorFilter.mode(
+                        colorFilter: const ColorFilter.mode(
                           AppColors.textPrimary,
                           BlendMode.srcIn,
                         ),

@@ -38,8 +38,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // Separate loading states for each button
   bool _isEmailLoading = false;
-  bool _isGoogleLoading = false;
-  bool _isAppleLoading = false;
+  final bool _isGoogleLoading = false;
+  final bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -95,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         SnackBar(
           content: Text(AppLocalizations.of(context).verificationCodeSent),
           backgroundColor: Colors.green,
-          duration: Duration(seconds: 3),
+          duration: const Duration(seconds: 3),
         ),
       );
 

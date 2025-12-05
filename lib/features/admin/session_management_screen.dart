@@ -118,7 +118,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
               content:
                   Text(AppLocalizations.of(context).sessionDeletedSuccessfully),
               backgroundColor: Colors.green,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -432,7 +432,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           value: 'delete',
                                           child: Text(
                                             AppLocalizations.of(context).delete,
-                                            style: TextStyle(color: Colors.red),
+                                            style: const TextStyle(color: Colors.red),
                                           ),
                                         ),
                                       ],

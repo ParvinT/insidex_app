@@ -234,8 +234,8 @@ class _EqualizerPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final barWidth = 4.0;
-    final spacing = 7.0;
+    const barWidth = 4.0;
+    const spacing = 7.0;
     final centerY = size.height / 2;
 
     final totalWidth =

@@ -44,7 +44,7 @@ class PlayerModals {
                           .currentMinutes(selected.toString())
                       : AppLocalizations.of(context).noTimerSet,
                   style:
-                      GoogleFonts.inter(fontSize: 13, color: Color(0xFF6E6E6E)),
+                      GoogleFonts.inter(fontSize: 13, color: const Color(0xFF6E6E6E)),
                 ),
                 const SizedBox(height: 16),
 

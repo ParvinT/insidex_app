@@ -17,10 +17,10 @@ class LegalDocumentScreen extends StatelessWidget {
   final String title;
 
   const LegalDocumentScreen({
-    Key? key,
+    super.key,
     required this.documentName,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,7 +61,7 @@ class LegalDocumentScreen extends StatelessWidget {
         builder: (context, snapshot) {
           // Loading
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(
                 color: AppColors.textPrimary,
               ),

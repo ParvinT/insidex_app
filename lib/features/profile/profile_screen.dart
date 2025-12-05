@@ -316,11 +316,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: AppLocalizations.of(context).premiumWaitlist,
                   subtitle: AppLocalizations.of(context).joinEarlyAccess,
                   gradientColors: [
-                    AppColors.textPrimary.withValues(alpha:0.15),
-                    AppColors.textPrimary.withValues(alpha:0.05),
+                    AppColors.primaryGold.withValues(alpha:0.15),
+                    AppColors.primaryGold.withValues(alpha:0.05),
                   ],
-                  borderColor: AppColors.textPrimary,
-                  iconBackgroundColor: AppColors.textPrimary,
+                  borderColor: AppColors.primaryGold,
+                  iconBackgroundColor: AppColors.primaryGold,
                   isGradientIcon: true,
                   onTap: () =>
                       Navigator.pushNamed(context, '/premium/waitlist'),

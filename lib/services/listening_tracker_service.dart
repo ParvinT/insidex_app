@@ -296,7 +296,7 @@ class ListeningTrackerService {
       final today = DateTime.now();
       final todayStr = today.toIso8601String().split('T')[0];
       final yesterdayStr =
-          today.subtract(Duration(days: 1)).toIso8601String().split('T')[0];
+          today.subtract(const Duration(days: 1)).toIso8601String().split('T')[0];
 
       // Check if user has listened today or yesterday
       bool hasRecentActivity =

@@ -495,8 +495,8 @@ class EqPainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..color = Colors.black87;
 
-    final barWidth = 8.0;
-    final spacing = 14.0;
+    const barWidth = 8.0;
+    const spacing = 14.0;
     final totalW = (bars.length * barWidth) + ((bars.length - 1) * spacing);
     var x = cx - totalW / 2;
 

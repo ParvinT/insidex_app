@@ -34,8 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Ayrı loading state'ler
   bool _isEmailLoading = false;
-  bool _isGoogleLoading = false;
-  bool _isAppleLoading = false;
+  final bool _isGoogleLoading = false;
+  final bool _isAppleLoading = false;
 
   @override
   void dispose() {

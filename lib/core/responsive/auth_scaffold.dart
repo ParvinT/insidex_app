@@ -103,7 +103,7 @@ class _AuthScaffoldState extends State<AuthScaffold> {
           : SafeArea(
               top: false,
               bottom: true,
-              minimum: EdgeInsets.only(bottom: kFooterExtra),
+              minimum: const EdgeInsets.only(bottom: kFooterExtra),
               child: MeasureSize(
                 onChange: (s) => setState(() => _measuredBottomH = s.height),
                 child: widget.bottomArea!,

@@ -223,7 +223,7 @@ class DailyReminderService {
     final dailyReminder = pendingNotifications.firstWhere(
       (notification) =>
           notification.id == NotificationConstants.dailyReminderId,
-      orElse: () => PendingNotificationRequest(
+      orElse: () => const PendingNotificationRequest(
         0,
         null,
         null,

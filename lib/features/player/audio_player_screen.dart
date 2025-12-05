@@ -652,7 +652,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final Widget _inner = Column(
+                          final Widget inner = Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               PlayerAlbumArt(
@@ -710,7 +710,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                               ),
                             ],
                           );
-                          final bool _isSmallPhone =
+                          final bool isSmallPhone =
                               constraints.maxWidth <= 400 ||
                                   constraints.maxHeight <= 700;
                           return SingleChildScrollView(
@@ -723,10 +723,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                                 minHeight: constraints.maxHeight,
                               ),
                               child: Align(
-                                alignment: _isSmallPhone
+                                alignment: isSmallPhone
                                     ? Alignment.topCenter
                                     : Alignment.center,
-                                child: _inner,
+                                child: inner,
                               ),
                             ),
                           );
@@ -918,7 +918,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         SnackBar(
           content: Text(AppLocalizations.of(context).noIntroductionAvailable),
           backgroundColor: Colors.orange,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;

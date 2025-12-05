@@ -46,7 +46,7 @@ class AuthPersistenceService {
       // Token yaşı kontrolü (24 saat)
       final timestamp = prefs.getInt(_timestampKey) ?? 0;
       final age = DateTime.now().millisecondsSinceEpoch - timestamp;
-      final maxAge = 24 * 60 * 60 * 1000; // 24 saat
+      const maxAge = 24 * 60 * 60 * 1000; // 24 saat
 
       if (age > maxAge) {
         debugPrint('Token expired (age: ${age ~/ 1000 / 60} minutes)');

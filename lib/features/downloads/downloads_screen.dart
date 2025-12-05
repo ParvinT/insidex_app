@@ -334,7 +334,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                                 color: AppColors.textSecondary,
                               ),
                             ),
-                            Text(
+                            const Text(
                               ' • ',
                               style: TextStyle(color: AppColors.textLight),
                             ),
@@ -616,7 +616,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: () => _confirmClearAll(context, provider),
-                icon: Icon(Icons.delete_sweep_rounded, color: Colors.red),
+                icon: const Icon(Icons.delete_sweep_rounded, color: Colors.red),
                 label: Text(
                   l10n.clearAllDownloads,
                   style: GoogleFonts.inter(
@@ -717,7 +717,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
@@ -727,7 +727,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.clearAll,
-              style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
             ),
           ),
         ],

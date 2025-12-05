@@ -16,10 +16,10 @@ class DeviceLogoutDialog extends StatefulWidget {
   final int countdownSeconds;
 
   const DeviceLogoutDialog({
-    Key? key,
+    super.key,
     required this.onLogout,
     this.countdownSeconds = 30,
-  }) : super(key: key);
+  });
 
   @override
   State<DeviceLogoutDialog> createState() => _DeviceLogoutDialogState();
@@ -77,9 +77,9 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
     final double countdownSize =
         isTablet ? 48.sp.clamp(42.0, 54.0) : 42.sp.clamp(36.0, 48.0);
 
-    return WillPopScope(
+    return PopScope(
       // Prevent back button
-      onWillPop: () async => false,
+      canPop: false,
       child: Material(
         color: Colors.black.withValues(alpha: 0.85),
         child: Center(

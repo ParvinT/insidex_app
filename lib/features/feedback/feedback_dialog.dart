@@ -166,7 +166,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: AppColors.textSecondary),
+                      icon: const Icon(Icons.close, color: AppColors.textSecondary),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                     ),

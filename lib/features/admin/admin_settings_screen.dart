@@ -202,7 +202,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 AppLocalizations.of(context).cancel,
-                style: TextStyle(color: AppColors.textSecondary),
+                style: const TextStyle(color: AppColors.textSecondary),
               ),
             ),
             ElevatedButton(
@@ -546,7 +546,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             child: Text(AppLocalizations.of(context).remove,
-                style: TextStyle(color: Colors.red)),
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

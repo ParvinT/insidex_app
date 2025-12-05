@@ -116,18 +116,18 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
-    final bool _isCompactH = mq.size.height <= 740;
+    final bool isCompactH = mq.size.height <= 740;
     return MediaQuery(
-        data: _isCompactH
+        data: isCompactH
             ? mq.copyWith(textScaler: const TextScaler.linear(1.0))
             : mq,
         child: Scaffold(
           body: Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF667eea),
-                  const Color(0xFF764ba2),
+                  Color(0xFF667eea),
+                  Color(0xFF764ba2),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -204,7 +204,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                     }),
                   ),
 
-                  SizedBox(height: _isCompactH ? 8.h : 20.h),
+                  SizedBox(height: isCompactH ? 8.h : 20.h),
 
                   // Waitlist Form - Expanded ile scroll edilebilir
                   Flexible(
@@ -228,7 +228,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                               Text(
                                 'Premium Coming Soon!',
                                 style: GoogleFonts.inter(
-                                  fontSize: _isCompactH ? 18.sp : 20.sp,
+                                  fontSize: isCompactH ? 18.sp : 20.sp,
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.textPrimary,
                                 ),
@@ -252,7 +252,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                                 keyboardType: TextInputType.emailAddress,
                                 decoration: InputDecoration(
                                   labelText: 'Email Address',
-                                  prefixIcon: Icon(Icons.email_outlined),
+                                  prefixIcon: const Icon(Icons.email_outlined),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12.r),
                                   ),
@@ -411,7 +411,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
     required String description,
   }) {
     final mq = MediaQuery.of(context);
-    final bool _isCompactH = mq.size.height <= 740;
+    final bool isCompactH = mq.size.height <= 740;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
@@ -434,7 +434,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
           Text(
             title,
             style: GoogleFonts.inter(
-              fontSize: _isCompactH ? 16.sp : 18.sp,
+              fontSize: isCompactH ? 16.sp : 18.sp,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -444,7 +444,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
           Text(
             description,
             style: GoogleFonts.inter(
-              fontSize: _isCompactH ? 13.sp : 14.sp,
+              fontSize: isCompactH ? 13.sp : 14.sp,
               color: Colors.white.withValues(alpha: 0.9),
               height: 1.4,
             ),

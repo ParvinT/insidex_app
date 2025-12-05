@@ -57,7 +57,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   @override
   void dispose() {
     // Dispose all controllers
-    _nameControllers.values.forEach((controller) => controller.dispose());
+    for (var controller in _nameControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 

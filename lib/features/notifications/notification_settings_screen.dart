@@ -181,7 +181,7 @@ class _NotificationSettingsScreenState
                                 SnackBar(
                                   content: Text(AppLocalizations.of(context)
                                       .testNotificationSent),
-                                  duration: Duration(seconds: 2),
+                                  duration: const Duration(seconds: 2),
                                 ),
                               );
                             }
@@ -420,7 +420,7 @@ class _NotificationSettingsScreenState
               ? CupertinoSwitch(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: AppColors.textPrimary,
+                  activeTrackColor: AppColors.textPrimary,
                 )
               : Switch(
                   value: value,
@@ -502,7 +502,7 @@ class _NotificationSettingsScreenState
                       onChanged: provider.allNotificationsEnabled
                           ? (value) => provider.toggleDailyReminder(value)
                           : null,
-                      activeColor: AppColors.textPrimary,
+                      activeTrackColor: AppColors.textPrimary,
                     )
                   : Switch(
                       value: enabled,

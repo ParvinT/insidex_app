@@ -169,7 +169,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 16.sp),
@@ -189,7 +189,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 14.sp),
@@ -209,7 +209,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 16.sp),
@@ -230,7 +230,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 14.sp),

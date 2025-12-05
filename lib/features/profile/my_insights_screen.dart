@@ -21,7 +21,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   Map<String, dynamic> _userData = {};
   bool _isLoading = true;
-  bool _isEditMode = false;
+  final bool _isEditMode = false;
 
   @override
   void initState() {
@@ -468,46 +468,42 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   ),
                 ),
                 SizedBox(height: 20.h),
-                ...goals
-                    .take(3)
-                    .map((goal) => Padding(
-                          padding: EdgeInsets.only(bottom: 16.h),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                ...goals.take(3).map((goal) => Padding(
+                      padding: EdgeInsets.only(bottom: 16.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _getLocalizedGoalName(goal),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${_getGoalProgress(goal)}%',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF7DB9B6),
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                _getLocalizedGoalName(goal),
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              SizedBox(height: 8.h),
-                              LinearProgressIndicator(
-                                value: _getGoalProgress(goal) / 100,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  _getGoalColor(goal),
+                              Text(
+                                '${_getGoalProgress(goal)}%',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF7DB9B6),
                                 ),
                               ),
                             ],
                           ),
-                        ))
-                    .toList(),
+                          SizedBox(height: 8.h),
+                          LinearProgressIndicator(
+                            value: _getGoalProgress(goal) / 100,
+                            backgroundColor: Colors.grey[200],
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _getGoalColor(goal),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
               ],
             ),
           ),
@@ -843,7 +839,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                       ],
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -1005,7 +1001,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   Widget _buildDayBar(String day, int minutes) {
-    final maxHeight = 80.0;
+    const maxHeight = 80.0;
     final height =
         minutes > 0 ? (minutes / 120 * maxHeight).clamp(10.0, maxHeight) : 10.0;
 
@@ -1329,9 +1325,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // Favorite Time - Real data from Firebase
   Future<String> _getFavoriteTimeAsync() async {
+    final l10n = AppLocalizations.of(context);
     try {
       final user = FirebaseAuth.instance.currentUser;
-      final l10n = AppLocalizations.of(context);
       if (user == null) return l10n.notSpecified;
 
       final history = await FirebaseFirestore.instance
@@ -1390,9 +1386,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           return l10n.evening;
       }
     } catch (e) {
-      final l10n = AppLocalizations.of(context);
       debugPrint('Error getting favorite time: $e');
-      return l10n.evening; // Fallback
+      return l10n.evening; 
     }
   }
 

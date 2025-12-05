@@ -245,7 +245,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).addedToPlaylist),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
@@ -273,7 +273,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).removedFromPlaylist),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (e) {
@@ -458,7 +458,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                     SvgPicture.asset(
                       'assets/images/logo.svg',
                       height: 16.h,
-                      colorFilter: ColorFilter.mode(
+                      colorFilter: const ColorFilter.mode(
                         AppColors.textSecondary,
                         BlendMode.srcIn,
                       ),
@@ -506,7 +506,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
 
   Widget _buildTabBar() {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
         border: Border(
           bottom: BorderSide(color: AppColors.greyBorder, width: 1),
@@ -675,7 +675,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     required String subtitle,
   }) {
     return SingleChildScrollView(
-      physics: AlwaysScrollableScrollPhysics(),
+      physics: const AlwaysScrollableScrollPhysics(),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           minHeight: MediaQuery.of(context).size.height - 300.h,
@@ -691,7 +691,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                 Container(
                   width: 100.w,
                   height: 100.w,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.greyLight,
                     shape: BoxShape.circle,
                   ),

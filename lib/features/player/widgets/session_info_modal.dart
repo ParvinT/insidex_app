@@ -93,10 +93,10 @@ class _SessionInfoContent extends StatelessWidget {
     final double modalH = (h * (isUltraWide ? 0.90 : 0.86)).clamp(360.0, 900.0);
 
     // Keep large accessibility text sane inside this modal only.
-    final double clampedTextScale = mq.textScaleFactor.clamp(1.0, 1.2);
+    final double clampedTextScale = mq.textScaler.scale(1.0).clamp(1.0, 1.2);
 
     return MediaQuery(
-      data: mq.copyWith(textScaleFactor: clampedTextScale),
+      data: mq.copyWith(textScaler: TextScaler.linear(clampedTextScale)),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -516,7 +516,7 @@ class _SessionInfoContent extends StatelessWidget {
                         margin: EdgeInsets.only(top: 6.h),
                         width: 4.w,
                         height: 4.w,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
                         ),
@@ -535,7 +535,7 @@ class _SessionInfoContent extends StatelessWidget {
                     ],
                   ),
                 ))
-            .toList(),
+            ,
         SizedBox(height: 24.h),
       ],
     );
@@ -618,7 +618,7 @@ class _SessionInfoContent extends StatelessWidget {
                           ],
                         ),
                       ))
-                  .toList(),
+                  ,
               if (affirmations.length > 5)
                 Padding(
                   padding: EdgeInsets.only(top: 8.h),

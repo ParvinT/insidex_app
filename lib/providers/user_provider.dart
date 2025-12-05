@@ -291,7 +291,7 @@ class UserProvider extends ChangeNotifier {
       debugPrint('🎯 User data loaded, starting monitoring...');
       _startDeviceSessionMonitoring(uid);
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -349,10 +349,10 @@ class UserProvider extends ChangeNotifier {
         _isAdmin = _userData!['isAdmin'] ?? false;
       }
 
-      print('Admin status for $uid: $_isAdmin');
+      debugPrint('Admin status for $uid: $_isAdmin');
       notifyListeners();
     } catch (e) {
-      print('Error checking admin status: $e');
+      debugPrint('Error checking admin status: $e');
       _isAdmin = false;
     }
   }
@@ -467,7 +467,7 @@ class UserProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error updating premium status: $e');
+      debugPrint('Error updating premium status: $e');
     }
   }
 
@@ -487,7 +487,7 @@ class UserProvider extends ChangeNotifier {
       _userData!['marketingConsent'] = consent;
       notifyListeners();
     } catch (e) {
-      print('Error updating marketing consent: $e');
+      debugPrint('Error updating marketing consent: $e');
     }
   }
 

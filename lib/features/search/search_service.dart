@@ -70,7 +70,6 @@ class SearchService {
   Future<List<Map<String, dynamic>>> _searchSessions(String query) async {
     try {
       // 🆕 TEMPORARY PATCH: Limit to 50 sessions for cost control
-      // TODO: Migrate to Algolia when search volume > 3K/day (3-6 months)
       final snapshot = await _firestore
           .collection('sessions')
           .limit(50) // Max 50 sessions to prevent excessive reads

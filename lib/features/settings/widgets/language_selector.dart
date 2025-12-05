@@ -33,7 +33,7 @@ class LanguageSelector extends StatelessWidget {
                 Container(
                   width: 40.w,
                   height: 40.w,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     color: AppColors.greyLight,
                     shape: BoxShape.circle,
                   ),
@@ -180,7 +180,7 @@ class LanguageSelector extends StatelessWidget {
                       ),
                     ),
 
-                    Divider(height: 1, color: AppColors.greyBorder),
+                    const Divider(height: 1, color: AppColors.greyBorder),
 
                     // Language Options
                     ...LocaleProvider.supportedLocales.map((locale) {
@@ -196,7 +196,7 @@ class LanguageSelector extends StatelessWidget {
                         localeProvider: localeProvider,
                         itemSize: itemSize,
                       );
-                    }).toList(),
+                    }),
 
                     SizedBox(height: 20.h),
                   ],

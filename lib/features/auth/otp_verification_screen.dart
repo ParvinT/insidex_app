@@ -36,7 +36,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     super.initState();
     _countdown(); // Start countdown on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         _focusNode.requestFocus();
       });
     });
@@ -207,7 +207,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         elevation: 0.5,
       ),
       body: SingleChildScrollView(
-        physics: ClampingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

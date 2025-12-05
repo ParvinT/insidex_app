@@ -219,10 +219,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     final double logoH = toolbarH * 0.70;
     final double dividerH = (logoH * 0.9).clamp(18.0, 36.0);
 
-    final double _ts = mq.textScaleFactor.clamp(1.0, 1.2);
+    final double ts = mq.textScaler.scale(1.0).clamp(1.0, 1.2);
 
     return MediaQuery(
-      data: mq.copyWith(textScaleFactor: _ts),
+      data: mq.copyWith(textScaler: TextScaler.linear(ts)),
       child: Scaffold(
         backgroundColor: AppColors.backgroundWhite,
         appBar: AppBar(
@@ -254,7 +254,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         width: logoW,
                         height: logoH,
                         fit: BoxFit.contain,
-                        colorFilter: ColorFilter.mode(
+                        colorFilter: const ColorFilter.mode(
                           AppColors.textPrimary,
                           BlendMode.srcIn,
                         ),

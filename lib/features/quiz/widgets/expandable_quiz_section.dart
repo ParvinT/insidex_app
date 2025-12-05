@@ -41,7 +41,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
   int _currentPage = 0;
   static const int _itemsPerPage = 10;
   // Selection state
-  Set<String> _selectedDiseaseIds = {};
+  final Set<String> _selectedDiseaseIds = {};
   static const int _maxSelection = 10;
 
   @override

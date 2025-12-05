@@ -24,7 +24,7 @@ class InsidexApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-        designSize: const Size(375, 812), // iPhone 11 Pro
+        designSize: const Size(375, 812),
         minTextAdapt: true,
         splitScreenMode: true,
         builder: (context, child) {
@@ -46,7 +46,7 @@ class InsidexApp extends StatelessWidget {
                   supportedLocales: LocaleProvider.supportedLocales,
                   theme: AppTheme.lightTheme,
                   darkTheme: AppTheme.darkTheme,
-                  themeMode: ThemeMode.light, // Geçici olarak light'a zorlanmış
+                  themeMode: ThemeMode.light,
                   navigatorKey: navigatorKey,
                   initialRoute: AppRoutes.splash,
                   routes: AppRoutes.routes,

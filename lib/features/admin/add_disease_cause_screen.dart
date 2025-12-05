@@ -168,7 +168,9 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
   @override
   void dispose() {
     _tabController.dispose();
-    _contentControllers.values.forEach((controller) => controller.dispose());
+    for (var controller in _contentControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -437,8 +439,9 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
         setState(() => _selectedDiseaseId = value);
       },
       validator: (value) {
-        if (value == null)
+        if (value == null) {
           return AppLocalizations.of(context).pleaseSelectDisease;
+        }
         return null;
       },
     );

@@ -692,10 +692,9 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '$successCount ${AppLocalizations.of(context).imagesUploaded}' +
-                    (failCount > 0
+                '$successCount ${AppLocalizations.of(context).imagesUploaded}${failCount > 0
                         ? ', $failCount ${AppLocalizations.of(context).failed}'
-                        : ''),
+                        : ''}',
               ),
               backgroundColor: successCount > 0 ? Colors.green : Colors.red,
             ),
