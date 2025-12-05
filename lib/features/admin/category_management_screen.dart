@@ -119,7 +119,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             icon: Icon(
               _showOnlyUserLanguage ? Icons.language : Icons.language_outlined,
               color: _showOnlyUserLanguage
-                  ? AppColors.primaryGold
+                  ? AppColors.textPrimary
                   : AppColors.textSecondary,
             ),
             onPressed: _toggleLanguageFilter,
@@ -129,14 +129,14 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           ),
           // Add button
           IconButton(
-            icon: const Icon(Icons.add_circle, color: AppColors.primaryGold),
+            icon: const Icon(Icons.add_circle, color: AppColors.textPrimary),
             onPressed: _navigateToAddCategory,
           ),
         ],
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGold),
+              child: CircularProgressIndicator(color: AppColors.textPrimary),
             )
           : _filteredCategories.isEmpty
               ? _buildEmptyState(isTablet, isDesktop)
@@ -176,7 +176,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             icon: const Icon(Icons.add),
             label: Text(AppLocalizations.of(context).addNewCategory),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryGold,
+              backgroundColor: AppColors.textPrimary,
               padding: EdgeInsets.symmetric(
                 horizontal: isTablet ? 32.w : 24.w,
                 vertical: isTablet ? 16.h : 14.h,
@@ -218,7 +218,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             border: Border.all(color: AppColors.greyBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.03),
+                color: Colors.black.withValues(alpha: 0.03),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -233,8 +233,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.primaryGold,
-                      AppColors.primaryGold.withOpacity(0.7),
+                      AppColors.textPrimary,
+                      AppColors.textPrimary.withValues(alpha: 0.7),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12.r),
@@ -287,7 +287,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         Icon(
                           Icons.play_circle_filled,
                           size: isTablet ? 18.sp : 16.sp,
-                          color: AppColors.primaryGold,
+                          color: AppColors.textPrimary,
                         ),
                         SizedBox(width: 4.w),
                         Flexible(
@@ -340,7 +340,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     onPressed: () => _manageImages(category),
                     icon: Icon(
                       Icons.photo_library,
-                      color: AppColors.primaryGold,
+                      color: AppColors.textPrimary,
                       size: isTablet ? 24.sp : 22.sp,
                     ),
                     tooltip: AppLocalizations.of(context).manageImages,
@@ -350,7 +350,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     onPressed: () => _navigateToEditCategory(category),
                     icon: Icon(
                       Icons.edit,
-                      color: AppColors.primaryGold,
+                      color: AppColors.textPrimary,
                       size: isTablet ? 24.sp : 22.sp,
                     ),
                     tooltip: AppLocalizations.of(context).editCategory,

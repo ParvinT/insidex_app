@@ -42,15 +42,15 @@ class SessionRecommendationCard extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.primaryGold.withOpacity(0.1),
-            AppColors.primaryGold.withOpacity(0.05),
+            AppColors.textPrimary.withValues(alpha: 0.1),
+            AppColors.textPrimary.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.textPrimary.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -62,7 +62,7 @@ class SessionRecommendationCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.recommend,
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
                 size: isTablet ? 24.sp : 22.sp,
               ),
               SizedBox(width: 8.w),
@@ -72,7 +72,7 @@ class SessionRecommendationCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: titleSize,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryGold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -84,7 +84,7 @@ class SessionRecommendationCard extends StatelessWidget {
                     vertical: 4.h,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGold,
+                    color: AppColors.textPrimary,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Row(
@@ -120,7 +120,7 @@ class SessionRecommendationCard extends StatelessWidget {
               color: Colors.white,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: AppColors.greyBorder.withOpacity(0.3),
+                color: AppColors.greyBorder.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -147,13 +147,13 @@ class SessionRecommendationCard extends StatelessWidget {
                   width: isTablet ? 44.w : 40.w,
                   height: isTablet ? 44.w : 40.w,
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
+                    color: AppColors.textPrimary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.play_arrow_rounded,
-                    color: AppColors.primaryGold,
+                    color: AppColors.textPrimary,
                     size: isTablet ? 28.sp : 26.sp,
                   ),
                 ),
@@ -169,7 +169,7 @@ class SessionRecommendationCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGold,
+                backgroundColor: AppColors.textPrimary,
                 padding: EdgeInsets.symmetric(vertical: buttonPadding),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),

@@ -162,8 +162,9 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
       // Validate: at least 1 image
       if (_images.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(
-            content: Text(AppLocalizations.of(context).pleaseAddAtLeastOneImage),
+          SnackBar(
+            content:
+                Text(AppLocalizations.of(context).pleaseAddAtLeastOneImage),
             backgroundColor: Colors.orange,
           ),
         );
@@ -242,12 +243,12 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(20.w),
-                  color: AppColors.primaryGold.withOpacity(0.1),
+                  color: AppColors.textPrimary.withValues(alpha: 0.1),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                         size: 20.sp,
                       ),
                       SizedBox(width: 12.w),
@@ -285,7 +286,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
           Icon(
             Icons.image_outlined,
             size: 80.sp,
-            color: AppColors.textSecondary.withOpacity(0.3),
+            color: AppColors.textSecondary.withValues(alpha: 0.3),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -351,7 +352,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -371,7 +372,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
@@ -395,7 +396,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -410,8 +411,8 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
               icon: const Icon(Icons.add_photo_alternate),
               label: Text(AppLocalizations.of(context).addImages),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primaryGold,
-                side: const BorderSide(color: AppColors.primaryGold, width: 2),
+                foregroundColor: AppColors.textPrimary,
+                side: const BorderSide(color: AppColors.textPrimary, width: 2),
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -429,7 +430,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
               icon: const Icon(Icons.save),
               label: Text(AppLocalizations.of(context).saveImages),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGold,
+                backgroundColor: AppColors.textPrimary,
                 foregroundColor: Colors.white,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(

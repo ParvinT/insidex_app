@@ -495,6 +495,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             artworkUrl: null,
             localArtworkPath: localImagePath,
             sessionId: sessionId,
+            duration: _totalDuration,
           );
 
           if (!mounted) return;
@@ -738,7 +739,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
             if (_isDecrypting)
               Container(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

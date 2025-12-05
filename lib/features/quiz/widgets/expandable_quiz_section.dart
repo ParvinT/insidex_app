@@ -311,7 +311,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           gradient: LinearGradient(
             colors: [
               Colors.black,
-              Colors.black.withOpacity(0.85),
+              Colors.black.withValues(alpha: 0.85),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -319,7 +319,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           borderRadius: BorderRadius.circular(isTablet ? 28.r : 24.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -376,12 +376,12 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                         borderRadius:
                             BorderRadius.circular(isTablet ? 20.r : 16.r),
                         border: Border.all(
-                          color: AppColors.greyBorder.withOpacity(0.3),
+                          color: AppColors.greyBorder.withValues(alpha: 0.3),
                           width: 1,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 10,
                             offset: const Offset(0, 3),
                           ),
@@ -392,7 +392,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                               height: 200.h,
                               child: const Center(
                                 child: CircularProgressIndicator(
-                                  color: AppColors.primaryGold,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             )
@@ -511,7 +511,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                 shape: BoxShape.circle,
                 color: _currentPage == index
                     ? Colors.black
-                    : AppColors.greyBorder.withOpacity(0.5),
+                    : AppColors.greyBorder.withValues(alpha: 0.5),
               ),
             ),
           );
@@ -532,7 +532,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
             vertical: isCompact ? 8.h : (isTablet ? 12.h : 10.h),
           ),
           decoration: BoxDecoration(
-            color: AppColors.greyLight.withOpacity(0.5),
+            color: AppColors.greyLight.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Row(
@@ -641,7 +641,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                           ? LinearGradient(
                               colors: [
                                 Colors.black,
-                                Colors.black.withOpacity(0.85)
+                                Colors.black.withValues(alpha: 0.85)
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -652,7 +652,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                       boxShadow: _canProceed
                           ? [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 3),
                               ),
@@ -791,7 +791,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),

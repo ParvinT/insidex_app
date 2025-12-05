@@ -21,22 +21,22 @@ class PremiumPromptWidget extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.primaryGold.withOpacity(0.1),
-              AppColors.primaryGold.withOpacity(0.05),
+              AppColors.textPrimary.withValues(alpha: 0.1),
+              AppColors.textPrimary.withValues(alpha: 0.05),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: AppColors.primaryGold.withOpacity(0.3),
+            color: AppColors.textPrimary.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
           children: [
             Icon(
               Icons.star,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
               size: 32.sp,
             ),
             SizedBox(width: 16.w),
@@ -64,7 +64,7 @@ class PremiumPromptWidget extends StatelessWidget {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
               size: 16.sp,
             ),
           ],

@@ -48,7 +48,7 @@ class QuizFilterChip extends StatelessWidget {
           border: Border.all(
             color: isSelected
                 ? Colors.black
-                : AppColors.greyBorder.withOpacity(0.5),
+                : AppColors.greyBorder.withValues(alpha: 0.5),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -75,7 +75,7 @@ class QuizFilterChip extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white.withOpacity(0.3)
+                      ? Colors.white.withValues(alpha: 0.3)
                       : AppColors.greyLight,
                   borderRadius: BorderRadius.circular(10.r),
                 ),

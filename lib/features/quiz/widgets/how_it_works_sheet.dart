@@ -24,7 +24,7 @@ class HowItWorksSheet extends StatefulWidget {
       isDismissible: true,
       enableDrag: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withOpacity(0.5),
+      barrierColor: Colors.black.withValues(alpha: 0.5),
       builder: (context) => const HowItWorksSheet(),
     );
   }
@@ -73,8 +73,10 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
     final screenHeight = context.h;
 
     // Responsive values
-    final double maxHeight = screenHeight * (isDesktop ? 0.7 : (isTablet ? 0.75 : 0.8));
-    final double horizontalPadding = isDesktop ? 32.w : (isTablet ? 24.w : 20.w);
+    final double maxHeight =
+        screenHeight * (isDesktop ? 0.7 : (isTablet ? 0.75 : 0.8));
+    final double horizontalPadding =
+        isDesktop ? 32.w : (isTablet ? 24.w : 20.w);
     final double verticalPadding = isDesktop ? 24.h : (isTablet ? 20.h : 16.h);
     final double borderRadius = isDesktop ? 28.r : (isTablet ? 24.r : 20.r);
     final double handleWidth = isTablet ? 50.w : 40.w;
@@ -92,7 +94,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -111,7 +113,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
           Divider(
             height: 1,
             thickness: 1,
-            color: AppColors.greyBorder.withOpacity(0.3),
+            color: AppColors.greyBorder.withValues(alpha: 0.3),
           ),
 
           // Content
@@ -136,7 +138,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.greyBorder.withOpacity(0.5),
+        color: AppColors.greyBorder.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(height / 2),
       ),
     );
@@ -158,7 +160,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
                 Icon(
                   Icons.help_outline_rounded,
                   size: isTablet ? 24.sp : 22.sp,
-                  color: AppColors.primaryGold,
+                  color: AppColors.textPrimary,
                 ),
                 SizedBox(width: 10.w),
                 Flexible(
@@ -183,7 +185,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColors.greyLight.withOpacity(0.5),
+                color: AppColors.greyLight.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -203,7 +205,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
       height: 200.h,
       child: const Center(
         child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
+          color: AppColors.textPrimary,
           strokeWidth: 2,
         ),
       ),

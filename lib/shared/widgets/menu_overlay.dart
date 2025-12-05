@@ -86,7 +86,7 @@ class _MenuOverlayState extends State<MenuOverlay>
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -107,7 +107,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(-5, 0),
                       ),
@@ -203,7 +203,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                                   height: 24.h,
                                   fit: BoxFit.contain,
                                   colorFilter: ColorFilter.mode(
-                                    AppColors.textPrimary.withOpacity(0.8),
+                                    AppColors.textPrimary
+                                        .withValues(alpha: 0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),

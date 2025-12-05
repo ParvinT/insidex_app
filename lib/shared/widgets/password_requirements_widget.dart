@@ -153,12 +153,12 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
   Widget _buildRequirement(String text, {required bool isMet}) {
     final bool showStatus = widget.password.isNotEmpty;
     final Color iconColor = showStatus
-        ? (isMet ? Colors.green : Colors.red.withOpacity(0.5))
-        : AppColors.textSecondary.withOpacity(0.3);
+        ? (isMet ? Colors.green : Colors.red.withValues(alpha: 0.5))
+        : AppColors.textSecondary.withValues(alpha: 0.3);
 
     final Color textColor = showStatus
         ? (isMet ? AppColors.textPrimary : AppColors.textSecondary)
-        : AppColors.textSecondary.withOpacity(0.6);
+        : AppColors.textSecondary.withValues(alpha: 0.6);
 
     // Responsive sizing
     final isTablet = context.isTablet;
@@ -234,7 +234,7 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
               borderRadius: BorderRadius.circular(10.r),
               child: LinearProgressIndicator(
                 value: _passwordStrength,
-                backgroundColor: AppColors.textSecondary.withOpacity(0.1),
+                backgroundColor: AppColors.textSecondary.withValues(alpha: 0.1),
                 valueColor: AlwaysStoppedAnimation(_passwordStrengthColor),
                 minHeight: 6.h,
               ),
@@ -246,10 +246,10 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
           Container(
             padding: EdgeInsets.all(12.w.clamp(12.0, 16.0)),
             decoration: BoxDecoration(
-              color: AppColors.textSecondary.withOpacity(0.03),
+              color: AppColors.textSecondary.withValues(alpha: 0.03),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: AppColors.textSecondary.withOpacity(0.1),
+                color: AppColors.textSecondary.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),

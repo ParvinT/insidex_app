@@ -280,9 +280,9 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
       decoration: BoxDecoration(
         color: _isAgeValid
             ? (_isAgeRecommended
-                ? Colors.green.withOpacity(0.1)
-                : Colors.orange.withOpacity(0.1))
-            : Colors.red.withOpacity(0.1),
+                ? Colors.green.withValues(alpha: 0.1)
+                : Colors.orange.withValues(alpha: 0.1))
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: _isAgeValid
@@ -326,7 +326,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
+          color: Colors.red.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8.r)),
       child: Row(
         children: [

@@ -169,7 +169,7 @@ class _DiseaseCauseManagementScreenState
                 ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToAddEdit(),
-        backgroundColor: AppColors.primaryGold,
+        backgroundColor: AppColors.textPrimary,
         icon: const Icon(Icons.add),
         label: Text(AppLocalizations.of(context).addDiseaseCause),
       ),
@@ -200,8 +200,8 @@ class _DiseaseCauseManagementScreenState
                       EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     color: disease?.gender == 'male'
-                        ? Colors.blue.withOpacity(0.1)
-                        : Colors.pink.withOpacity(0.1),
+                        ? Colors.blue.withValues(alpha: 0.1)
+                        : Colors.pink.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8.r),
                   ),
                   child: Text(
@@ -251,7 +251,7 @@ class _DiseaseCauseManagementScreenState
                   children: [
                     IconButton(
                       icon:
-                          const Icon(Icons.edit, color: AppColors.primaryGold),
+                          const Icon(Icons.edit, color: AppColors.textPrimary),
                       onPressed: () => _navigateToAddEdit(cause: cause),
                     ),
                     IconButton(

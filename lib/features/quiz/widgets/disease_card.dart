@@ -55,13 +55,13 @@ class DiseaseCard extends StatelessWidget {
               border: Border.all(
                 color: isSelected
                     ? Colors.black
-                    : AppColors.greyBorder.withOpacity(0.3),
+                    : AppColors.greyBorder.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
+                        color: Colors.black.withValues(alpha: 0.15),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),

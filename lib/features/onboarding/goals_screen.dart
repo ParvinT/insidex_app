@@ -291,8 +291,8 @@ class _GoalCard extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.textPrimary.withOpacity(0.18)
-                  : Colors.black.withOpacity(0.06),
+                  ? AppColors.textPrimary.withValues(alpha: 0.18)
+                  : Colors.black.withValues(alpha: 0.06),
               blurRadius: isSelected ? 14 : 10,
               offset: const Offset(0, 4),
             ),
@@ -310,8 +310,8 @@ class _GoalCard extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected
-                    ? Colors.white.withOpacity(0.2)
-                    : goal.color.withOpacity(0.1),
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : goal.color.withValues(alpha: 0.1),
               ),
               child: Icon(
                 goal.icon,

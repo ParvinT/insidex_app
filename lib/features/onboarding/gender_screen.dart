@@ -180,8 +180,8 @@ class _GenderScreenState extends State<GenderScreen> {
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.textPrimary.withOpacity(0.20)
-                  : Colors.black.withOpacity(0.05),
+                  ? AppColors.textPrimary.withValues(alpha: 0.20)
+                  : Colors.black.withValues(alpha: 0.05),
               blurRadius: isSelected ? 14 : 10,
               offset: const Offset(0, 4),
             ),

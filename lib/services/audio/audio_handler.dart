@@ -513,7 +513,7 @@ Future<void> initAudioService() async {
       androidNotificationChannelName: 'INSIDEX Audio',
       androidNotificationChannelDescription: 'Audio playback controls',
       androidNotificationIcon: 'drawable/ic_notification',
-      androidShowNotificationBadge: true,
+      androidShowNotificationBadge: false,
       androidNotificationOngoing: true,
       // Stop when swiped away (Android 13+)
       androidStopForegroundOnPause: true,

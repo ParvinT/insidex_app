@@ -173,7 +173,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle, color: AppColors.primaryGold),
+            icon: const Icon(Icons.add_circle, color: AppColors.textPrimary),
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -207,7 +207,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                         setState(() => _selectedCategoryId = null);
                       },
                       backgroundColor: AppColors.greyLight,
-                      selectedColor: AppColors.primaryGold,
+                      selectedColor: AppColors.textPrimary,
                       labelStyle: TextStyle(
                         color: _selectedCategoryId == null
                             ? Colors.white
@@ -232,7 +232,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       });
                     },
                     backgroundColor: AppColors.greyLight,
-                    selectedColor: AppColors.primaryGold,
+                    selectedColor: AppColors.textPrimary,
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : AppColors.textPrimary,
                     ),
@@ -358,13 +358,13 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           vertical: 6.h,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.primaryGold
-                                              .withOpacity(0.1),
+                                          color: AppColors.textPrimary
+                                              .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(8.r),
                                           border: Border.all(
-                                            color: AppColors.primaryGold
-                                                .withOpacity(0.3),
+                                            color: AppColors.textPrimary
+                                                .withValues(alpha: 0.3),
                                             width: 1,
                                           ),
                                         ),
@@ -373,7 +373,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           style: GoogleFonts.inter(
                                             fontSize: 16.sp,
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.primaryGold,
+                                            color: AppColors.textPrimary,
                                           ),
                                         ),
                                       )
@@ -382,7 +382,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                         padding: EdgeInsets.all(8.w),
                                         decoration: BoxDecoration(
                                           color: AppColors.textSecondary
-                                              .withOpacity(0.1),
+                                              .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(8.r),
                                         ),
@@ -534,10 +534,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: AppColors.primaryGold.withOpacity(0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6.r),
             border: Border.all(
-              color: AppColors.primaryGold.withOpacity(0.3),
+              color: AppColors.textPrimary.withValues(alpha: 0.3),
             ),
           ),
           child: Text(
@@ -545,7 +545,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
             style: GoogleFonts.inter(
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
             ),
           ),
         );

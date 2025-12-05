@@ -140,7 +140,7 @@ class LanguageSelector extends StatelessWidget {
                     BorderRadius.circular(24.r), // ← Tüm köşeler yuvarlak
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -221,7 +221,7 @@ class LanguageSelector extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primaryGold.withOpacity(0.1)
+              ? AppColors.textPrimary.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
@@ -251,7 +251,7 @@ class LanguageSelector extends StatelessWidget {
                   fontSize: itemSize,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: isSelected
-                      ? AppColors.primaryGold
+                      ? AppColors.textPrimary
                       : AppColors.textPrimary,
                 ),
               ),
@@ -261,7 +261,7 @@ class LanguageSelector extends StatelessWidget {
             if (isSelected)
               Icon(
                 Icons.check_circle,
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
                 size: 24.sp,
               ),
           ],

@@ -160,10 +160,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               width: isTablet ? 80.w : 70.w,
               height: isTablet ? 80.w : 70.w,
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                color: AppColors.textPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: AppColors.primaryGold,
+                  color: AppColors.textPrimary,
                   width: 2,
                 ),
               ),
@@ -256,7 +256,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
-              color: AppColors.primaryGold.withOpacity(0.1),
+              color: AppColors.textPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
@@ -264,7 +264,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 14.sp : 12.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
               ),
             ),
           ),
@@ -284,7 +284,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
                 borderSide: const BorderSide(
-                  color: AppColors.primaryGold,
+                  color: AppColors.textPrimary,
                   width: 2,
                 ),
               ),
@@ -325,14 +325,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       // Has content
       borderColor = Colors.green;
       backgroundColor =
-          isSelected ? AppColors.primaryGold : Colors.green.shade50;
+          isSelected ? AppColors.textPrimary : Colors.green.shade50;
       statusIcon = Icon(Icons.check_circle,
           size: 16.sp, color: isSelected ? Colors.white : Colors.green);
     } else {
       // Empty
       borderColor = Colors.grey.shade300;
       backgroundColor =
-          isSelected ? AppColors.primaryGold : Colors.grey.shade100;
+          isSelected ? AppColors.textPrimary : Colors.grey.shade100;
       statusIcon = Icon(Icons.circle_outlined,
           size: 16.sp, color: isSelected ? Colors.white : Colors.grey);
     }
@@ -374,7 +374,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveCategory,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGold,
+          backgroundColor: AppColors.textPrimary,
           padding: EdgeInsets.symmetric(
             vertical: isTablet ? 18.h : 16.h,
           ),
@@ -478,8 +478,9 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             gradient: isSelected
                                 ? LinearGradient(
                                     colors: [
-                                      AppColors.primaryGold,
-                                      AppColors.primaryGold.withOpacity(0.7),
+                                      AppColors.textPrimary,
+                                      AppColors.textPrimary
+                                          .withValues(alpha: 0.7),
                                     ],
                                   )
                                 : LinearGradient(
@@ -491,7 +492,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             borderRadius: BorderRadius.circular(16.r),
                             border: isSelected
                                 ? Border.all(
-                                    color: AppColors.primaryGold,
+                                    color: AppColors.textPrimary,
                                     width: 3,
                                   )
                                 : null,
@@ -513,7 +514,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             fontWeight:
                                 isSelected ? FontWeight.w600 : FontWeight.w400,
                             color: isSelected
-                                ? AppColors.primaryGold
+                                ? AppColors.textPrimary
                                 : AppColors.textSecondary,
                           ),
                           textAlign: TextAlign.center,

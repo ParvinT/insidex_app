@@ -227,9 +227,9 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
       color: Colors.white,
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.primaryGold,
+        labelColor: AppColors.textPrimary,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primaryGold,
+        indicatorColor: AppColors.textPrimary,
         tabs: AppLanguages.supportedLanguages.map((langCode) {
           return Tab(
             text: AppLanguages.getLabel(langCode),
@@ -302,7 +302,8 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
         }
       },
       validator: (value) {
-        if (value == null) return AppLocalizations.of(context).pleaseSelectGender;
+        if (value == null)
+          return AppLocalizations.of(context).pleaseSelectGender;
         return null;
       },
     );
@@ -315,7 +316,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveDisease,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGold,
+          backgroundColor: AppColors.textPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),

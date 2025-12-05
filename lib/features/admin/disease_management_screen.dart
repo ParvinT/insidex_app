@@ -180,7 +180,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToAddEdit(),
-        backgroundColor: AppColors.primaryGold,
+        backgroundColor: AppColors.textPrimary,
         icon: const Icon(Icons.add),
         label: Text(AppLocalizations.of(context).addDisease),
       ),
@@ -218,10 +218,10 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           vertical: isTablet ? 10.h : 8.h,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primaryGold : Colors.white,
+          color: isSelected ? AppColors.textPrimary : Colors.white,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: isSelected ? AppColors.primaryGold : AppColors.greyBorder,
+            color: isSelected ? AppColors.textPrimary : AppColors.greyBorder,
             width: 1.5,
           ),
         ),
@@ -272,8 +272,8 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: disease.gender == 'male'
-                          ? Colors.blue.withOpacity(0.1)
-                          : Colors.pink.withOpacity(0.1),
+                          ? Colors.blue.withValues(alpha: 0.1)
+                          : Colors.pink.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
@@ -311,7 +311,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
             Column(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.edit, color: AppColors.primaryGold),
+                  icon: const Icon(Icons.edit, color: AppColors.textPrimary),
                   onPressed: () => _navigateToAddEdit(disease: disease),
                 ),
                 IconButton(

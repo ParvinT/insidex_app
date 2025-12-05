@@ -110,7 +110,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                 width: 120.w,
                 height: 120.w,
                 decoration: BoxDecoration(
-                  color: AppColors.greyLight.withOpacity(0.3),
+                  color: AppColors.greyLight.withValues(alpha: 0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -210,7 +210,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.textPrimary,
                     side: BorderSide(
-                      color: AppColors.textPrimary.withOpacity(0.3),
+                      color: AppColors.textPrimary.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(

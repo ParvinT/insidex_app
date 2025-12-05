@@ -116,7 +116,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       ),
       body: _isLoading
           ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryGold))
+              child: CircularProgressIndicator(color: AppColors.textPrimary))
           : SingleChildScrollView(
               padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
               child: Column(
@@ -154,8 +154,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.textPrimary.withOpacity(0.1),
-            AppColors.textPrimary.withOpacity(0.05),
+            AppColors.textPrimary.withValues(alpha: 0.1),
+            AppColors.textPrimary.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -221,12 +221,12 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
-              color: AppColors.greyBorder.withOpacity(0.3),
+              color: AppColors.greyBorder.withValues(alpha: 0.3),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -292,8 +292,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                               ),
                               decoration: BoxDecoration(
                                 color: disease.gender == 'male'
-                                    ? Colors.blue.withOpacity(0.1)
-                                    : Colors.pink.withOpacity(0.1),
+                                    ? Colors.blue.withValues(alpha: 0.1)
+                                    : Colors.pink.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(6.r),
                               ),
                               child: Text(
@@ -326,7 +326,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                 SizedBox(height: 16.h),
 
                 // Divider
-                Divider(color: AppColors.greyBorder.withOpacity(0.3)),
+                Divider(color: AppColors.greyBorder.withValues(alpha: 0.3)),
 
                 SizedBox(height: 16.h),
 
@@ -405,7 +405,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                     padding: EdgeInsets.all(
                         (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
                     decoration: BoxDecoration(
-                      color: AppColors.textPrimary.withOpacity(0.1),
+                      color: AppColors.textPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: LayoutBuilder(
@@ -492,7 +492,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                   padding: EdgeInsets.all(
                       (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Row(
@@ -539,7 +539,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: AppColors.greyBorder.withOpacity(0.3),
+            color: AppColors.greyBorder.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

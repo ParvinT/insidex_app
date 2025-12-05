@@ -157,7 +157,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         borderRadius: BorderRadius.circular(30.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -171,13 +171,13 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           gradient: LinearGradient(
             colors: [
               const Color(0xFF7DB9B6),
-              const Color(0xFF7DB9B6).withOpacity(0.8),
+              const Color(0xFF7DB9B6).withValues(alpha: 0.8),
             ],
           ),
           borderRadius: BorderRadius.circular(25.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7DB9B6).withOpacity(0.3),
+              color: const Color(0xFF7DB9B6).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -225,7 +225,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -271,7 +271,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -343,13 +343,13 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF7DB9B6).withOpacity(0.1),
-                  const Color(0xFFE8C5A0).withOpacity(0.1),
+                  const Color(0xFF7DB9B6).withValues(alpha: 0.1),
+                  const Color(0xFFE8C5A0).withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
-                color: const Color(0xFF7DB9B6).withOpacity(0.2),
+                color: const Color(0xFF7DB9B6).withValues(alpha: 0.2),
               ),
             ),
             child: Column(
@@ -411,12 +411,12 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(25.r),
                           border: Border.all(
-                            color: goalColor.withOpacity(0.3),
+                            color: goalColor.withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: goalColor.withOpacity(0.1),
+                              color: goalColor.withValues(alpha: 0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -588,7 +588,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                     ),
                   ],
@@ -657,7 +657,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -904,7 +904,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -969,7 +969,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
           ),
         ],
@@ -1035,7 +1035,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 colors: minutes > 0
                     ? [
                         const Color(0xFF7DB9B6),
-                        const Color(0xFF7DB9B6).withOpacity(0.7),
+                        const Color(0xFF7DB9B6).withValues(alpha: 0.7),
                       ]
                     : [Colors.grey[300]!, Colors.grey[300]!],
               ),

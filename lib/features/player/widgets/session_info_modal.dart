@@ -110,7 +110,7 @@ class _SessionInfoContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(24.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -299,10 +299,10 @@ class _SessionInfoContent extends StatelessWidget {
             width: 48.w,
             height: 48.w,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),

@@ -112,7 +112,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Text(
               AppLocalizations.of(context).ok,
               style: GoogleFonts.inter(
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -137,12 +137,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               width: 60.w.clamp(60.0, 80.0),
               height: 60.w.clamp(60.0, 80.0),
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                color: AppColors.textPrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.check_circle,
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
                 size: 36.sp.clamp(36.0, 48.0),
               ),
             ),
@@ -178,7 +178,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 vertical: 10.h.clamp(10.0, 14.0),
               ),
               decoration: BoxDecoration(
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
                 borderRadius: BorderRadius.circular(25.r),
               ),
               child: Text(
@@ -266,7 +266,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -307,7 +307,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           borderRadius: BorderRadius.circular(16.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color: Colors.black.withValues(alpha: 0.06),
                               blurRadius: 15,
                               offset: const Offset(0, 4),
                             ),
@@ -326,8 +326,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    AppColors.primaryGold.withOpacity(0.1),
-                                    AppColors.primaryGold.withOpacity(0.05),
+                                    AppColors.textPrimary
+                                        .withValues(alpha: 0.1),
+                                    AppColors.textPrimary
+                                        .withValues(alpha: 0.05),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -336,7 +338,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               ),
                               child: Icon(
                                 Icons.lock_outline,
-                                color: AppColors.primaryGold,
+                                color: AppColors.textPrimary,
                                 size: isTablet
                                     ? 28.sp.clamp(24.0, 35.0)
                                     : 24.sp.clamp(22.0, 30.0),
@@ -380,7 +382,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           borderRadius: BorderRadius.circular(16.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color: Colors.black.withValues(alpha: 0.06),
                               blurRadius: 15,
                               offset: const Offset(0, 4),
                             ),

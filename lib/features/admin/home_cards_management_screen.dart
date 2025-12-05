@@ -131,13 +131,13 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
               color: enabled
-                  ? AppColors.primaryGold.withOpacity(0.3)
+                  ? AppColors.textPrimary.withValues(alpha: 0.3)
                   : AppColors.greyBorder,
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -152,12 +152,12 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                   Container(
                     padding: EdgeInsets.all(12.w),
                     decoration: BoxDecoration(
-                      color: AppColors.primaryGold.withOpacity(0.1),
+                      color: AppColors.textPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(
                       cardInfo['icon'],
-                      color: AppColors.primaryGold,
+                      color: AppColors.textPrimary,
                       size: 28.sp,
                     ),
                   ),
@@ -192,7 +192,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         value: enabled,
                         onChanged: (value) =>
                             _toggleCard(cardInfo['id'], value),
-                        activeColor: AppColors.primaryGold,
+                        activeColor: AppColors.textPrimary,
                       ),
                       Text(
                         enabled
@@ -210,7 +210,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
               ),
 
               SizedBox(height: 20.h),
-              Divider(color: AppColors.greyBorder.withOpacity(0.5)),
+              Divider(color: AppColors.greyBorder.withValues(alpha: 0.5)),
               SizedBox(height: 20.h),
 
               // Images Section
@@ -244,7 +244,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: Text(AppLocalizations.of(context).manage),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGold,
+                      backgroundColor: AppColors.textPrimary,
                       foregroundColor: Colors.white,
                       padding: EdgeInsets.symmetric(
                         horizontal: 16.w,
@@ -326,9 +326,9 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
       margin: EdgeInsets.only(bottom: 24.h),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.red.withOpacity(0.1),
+        color: Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: Colors.red.withOpacity(0.3)),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -456,7 +456,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
               icon: const Icon(Icons.save),
               label: Text(AppLocalizations.of(context).save),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.primaryGold,
+                foregroundColor: AppColors.textPrimary,
               ),
             ),
         ],
@@ -470,17 +470,17 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                   margin: EdgeInsets.all(20.w),
                   padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryGold.withOpacity(0.1),
+                    color: AppColors.textPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: AppColors.primaryGold.withOpacity(0.3),
+                      color: AppColors.textPrimary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: AppColors.primaryGold,
+                        color: AppColors.textPrimary,
                         size: 24.sp,
                       ),
                       SizedBox(width: 12.w),
@@ -524,7 +524,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                         AppLocalizations.of(context).addImages,
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGold,
+                        backgroundColor: AppColors.textPrimary,
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         shape: RoundedRectangleBorder(
@@ -569,7 +569,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           Icon(
             Icons.photo_library_outlined,
             size: 80.sp,
-            color: AppColors.textSecondary.withOpacity(0.5),
+            color: AppColors.textSecondary.withValues(alpha: 0.5),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -619,7 +619,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
@@ -639,7 +639,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
+              color: Colors.black.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(

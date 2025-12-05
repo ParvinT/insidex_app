@@ -59,7 +59,8 @@ class ProfileMenuSection extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(color: AppColors.greyBorder.withOpacity(0.3)),
+            bottom:
+                BorderSide(color: AppColors.greyBorder.withValues(alpha: 0.3)),
           ),
         ),
         child: Row(

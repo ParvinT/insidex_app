@@ -40,7 +40,7 @@ class SearchBarWidget extends StatelessWidget {
             (isTablet ? 14.r : 12.r).clamp(10.0, 16.0),
           ),
           border: Border.all(
-            color: AppColors.greyBorder.withOpacity(0.3),
+            color: AppColors.greyBorder.withValues(alpha: 0.3),
             width: 1,
           ),
         ),

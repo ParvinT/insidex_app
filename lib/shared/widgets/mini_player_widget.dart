@@ -25,7 +25,7 @@ class MiniPlayerWidget extends StatefulWidget {
 }
 
 class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final AudioPlayerService _audioService = AudioPlayerService();
   late AnimationController _slideController;
   late Animation<Offset> _slideAnimation;
@@ -42,6 +42,10 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   double _dragOffset = 0.0;
   bool _isDragging = false;
 
+  //  Smooth position animation
+  late AnimationController _positionController;
+  double _animatedOffset = 0.0;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +55,15 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+    _positionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _positionController.addListener(() {
+      setState(() {
+        _animatedOffset = _positionController.value;
+      });
+    });
 
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1), // Hidden below
@@ -117,6 +130,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     _positionSub?.cancel();
     _durationSub?.cancel();
     _playerStateSub?.cancel();
+    _positionController.dispose();
     _slideController.dispose();
     super.dispose();
   }
@@ -143,21 +157,27 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     final double height = isDesktop ? 80.h : (isTablet ? 72.h : 64.h);
     final double maxWidth = isDesktop ? 800.0 : double.infinity;
 
+    final screenHeight = MediaQuery.of(context).size.height;
+    final currentOffset =
+        _isDragging ? _dragOffset : _animatedOffset * screenHeight;
+
     return GestureDetector(
       onVerticalDragStart: (_) {
+        _positionController.stop();
         setState(() => _isDragging = true);
       },
       onVerticalDragUpdate: (details) {
         setState(() {
           _dragOffset += details.delta.dy;
-          _dragOffset = _dragOffset.clamp(-200.0, 200.0);
+          // 🆕 Full screen range - no clamp limit!
         });
       },
       onVerticalDragEnd: (details) {
-        _handleDragEnd(context, details);
+        _handleDragEnd(context, details, screenHeight);
       },
       child: Transform.translate(
-          offset: Offset(0, _dragOffset),
+          offset: Offset(0,
+              currentOffset.clamp(-screenHeight * 0.85, screenHeight * 0.85)),
           child: SlideTransition(
             position: _slideAnimation,
             child: Container(
@@ -197,7 +217,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.15),
+              color: Colors.black.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: Offset(0, miniPlayer.isAtTop ? 2 : -2)),
         ],
@@ -405,7 +425,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       child: Container(
         width: 32.w,
         height: 32.w,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.greyMedium,
           shape: BoxShape.circle,
         ),
@@ -425,7 +445,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       child: Container(
         width: 36.w,
         height: 36.w,
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: AppColors.textPrimary,
           shape: BoxShape.circle,
         ),
@@ -448,7 +468,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         child: Container(
           width: 32.w,
           height: 32.w,
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: AppColors.greyLight,
             shape: BoxShape.circle,
           ),
@@ -470,7 +490,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         width: 32.w,
         height: 32.w,
         decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
+          color: Colors.red.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -492,17 +512,17 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       child: SliderTheme(
         data: SliderThemeData(
           trackHeight: 2.5,
-          thumbShape: RoundSliderThumbShape(
+          thumbShape: const RoundSliderThumbShape(
             enabledThumbRadius: 6.0,
             elevation: 2,
           ),
-          overlayShape: RoundSliderOverlayShape(
+          overlayShape: const RoundSliderOverlayShape(
             overlayRadius: 12.0, // Touch area
           ),
           activeTrackColor: AppColors.textPrimary,
           inactiveTrackColor: AppColors.greyLight,
           thumbColor: AppColors.textPrimary,
-          overlayColor: AppColors.textPrimary.withOpacity(0.2),
+          overlayColor: AppColors.textPrimary.withValues(alpha: 0.2),
         ),
         child: Slider(
           value: progress,
@@ -537,8 +557,8 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   }
 
   void _closeMiniPlayer(MiniPlayerProvider miniPlayer) async {
-    // Pause audio first
-    await _audioService.pause();
+    // Stop audio and close notification
+    await _audioService.stop();
     // Hide and dismiss mini player
     miniPlayer.dismiss();
   }
@@ -609,45 +629,88 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     }
   }
 
-  void _handleDragEnd(BuildContext context, DragEndDetails details) {
-    const upThreshold = 150.0;
-    const downThreshold = 100.0;
+  void _handleDragEnd(
+      BuildContext context, DragEndDetails details, double screenHeight) {
     final provider = _miniPlayerProvider;
-
     if (provider == null) return;
 
     final velocity = details.primaryVelocity ?? 0.0;
-    final fastSwipeDown = velocity > 300;
-    final fastSwipeUp = velocity < -300;
+    final normalizedOffset = _dragOffset / screenHeight;
 
-    final bool draggedUp = _dragOffset < -upThreshold || fastSwipeUp;
-    final bool draggedDown = _dragOffset > downThreshold || fastSwipeDown;
+    // 🆕 Velocity-based decision (fast swipe = immediate action)
+    final fastSwipeDown = velocity > 800;
+    final fastSwipeUp = velocity < -800;
 
-    setState(() {
-      _isDragging = false;
-      _dragOffset = 0.0;
-    });
+    // 🆕 Position-based decision (drag threshold)
+    final bool shouldMoveUp = normalizedOffset < -0.15 || fastSwipeUp;
+    final bool shouldMoveDown = normalizedOffset > 0.15 || fastSwipeDown;
+    final bool shouldDismiss =
+        normalizedOffset > 0.35 || (fastSwipeDown && !provider.isAtTop);
 
-    if (draggedDown && !provider.isAtTop) {
-      setState(() {
-        _isDragging = true;
-        _dragOffset = 300.0;
+    setState(() => _isDragging = false);
+
+    // 🆕 Calculate target and animate smoothly
+    double targetOffset = 0.0;
+
+    if (shouldDismiss && !provider.isAtTop) {
+      // Dismiss with smooth animation
+      targetOffset = 1.0; // Slide down fully
+      _animateToPosition(targetOffset, onComplete: () async {
+        await _audioService.stop();
+        provider.dismiss();
+        setState(() {
+          _dragOffset = 0.0;
+          _animatedOffset = 0.0;
+        });
       });
-
-      Future.delayed(const Duration(milliseconds: 300), () async {
-        if (mounted) {
-          await _audioService.stop();
-          provider.dismiss();
-          setState(() {
-            _isDragging = false;
-            _dragOffset = 0.0;
-          });
-        }
-      });
-    } else if (draggedUp && !provider.isAtTop) {
+    } else if (shouldMoveUp && !provider.isAtTop) {
+      // Move to top
+      _animateToPosition(0.0, curve: Curves.easeOutBack);
       provider.setAtTop(true);
-    } else if (draggedDown && provider.isAtTop) {
+      setState(() => _dragOffset = 0.0);
+    } else if (shouldMoveDown && provider.isAtTop) {
+      // Move to bottom
+      _animateToPosition(0.0, curve: Curves.easeOutBack);
       provider.setAtTop(false);
-    } else {}
+      setState(() => _dragOffset = 0.0);
+    } else {
+      // 🆕 Spring back to original position
+      _animateToPosition(0.0, curve: Curves.elasticOut);
+      setState(() => _dragOffset = 0.0);
+    }
+  }
+
+  /// 🆕 Smooth animation helper with spring physics
+  void _animateToPosition(double target,
+      {Curve curve = Curves.easeOutCubic, VoidCallback? onComplete}) {
+    final startValue = _dragOffset / MediaQuery.of(context).size.height;
+
+    _positionController.reset();
+
+    final animation = Tween<double>(
+      begin: startValue,
+      end: target,
+    ).animate(CurvedAnimation(
+      parent: _positionController,
+      curve: curve,
+    ));
+
+    void listener() {
+      setState(() {
+        _animatedOffset = animation.value;
+      });
+    }
+
+    void statusListener(AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        animation.removeListener(listener);
+        _positionController.removeStatusListener(statusListener);
+        onComplete?.call();
+      }
+    }
+
+    animation.addListener(listener);
+    _positionController.addStatusListener(statusListener);
+    _positionController.forward();
   }
 }

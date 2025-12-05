@@ -238,7 +238,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp.clamp(14.0, 18.0),
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryGold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -263,8 +263,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: AppLocalizations.of(context).yourProgress,
                   subtitle: AppLocalizations.of(context).trackYourListening,
                   gradientColors: [
-                    const Color(0xFF7DB9B6).withOpacity(0.1),
-                    const Color(0xFFB8A6D9).withOpacity(0.1),
+                    const Color(0xFF7DB9B6).withValues(alpha: 0.1),
+                    const Color(0xFFB8A6D9).withValues(alpha: 0.1),
                   ],
                   borderColor: const Color(0xFF7DB9B6),
                   iconBackgroundColor: const Color(0xFF7DB9B6),
@@ -283,8 +283,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   subtitle:
                       AppLocalizations.of(context).viewPersonalizedWellness,
                   gradientColors: [
-                    const Color(0xFFE8C5A0).withOpacity(0.1),
-                    const Color(0xFF7DB9B6).withOpacity(0.1),
+                    const Color(0xFFE8C5A0).withValues(alpha: 0.1),
+                    const Color(0xFF7DB9B6).withValues(alpha: 0.1),
                   ],
                   borderColor: const Color(0xFFE8C5A0),
                   iconBackgroundColor: const Color(0xFFE8C5A0),
@@ -298,8 +298,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: AppLocalizations.of(context).downloads,
                   subtitle: AppLocalizations.of(context).offlineListening,
                   gradientColors: [
-                    const Color(0xFF6B8E9B).withOpacity(0.1),
-                    const Color(0xFF4A7C8C).withOpacity(0.1),
+                    const Color(0xFF6B8E9B).withValues(alpha: 0.1),
+                    const Color(0xFF4A7C8C).withValues(alpha: 0.1),
                   ],
                   borderColor: const Color(0xFF6B8E9B),
                   iconBackgroundColor: const Color(0xFF6B8E9B),
@@ -316,11 +316,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: AppLocalizations.of(context).premiumWaitlist,
                   subtitle: AppLocalizations.of(context).joinEarlyAccess,
                   gradientColors: [
-                    AppColors.primaryGold.withOpacity(0.15),
-                    AppColors.primaryGold.withOpacity(0.05),
+                    AppColors.textPrimary.withValues(alpha:0.15),
+                    AppColors.textPrimary.withValues(alpha:0.05),
                   ],
-                  borderColor: AppColors.primaryGold,
-                  iconBackgroundColor: AppColors.primaryGold,
+                  borderColor: AppColors.textPrimary,
+                  iconBackgroundColor: AppColors.textPrimary,
                   isGradientIcon: true,
                   onTap: () =>
                       Navigator.pushNamed(context, '/premium/waitlist'),
@@ -334,8 +334,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     subtitle:
                         AppLocalizations.of(context).manageUsersAndSessions,
                     gradientColors: [
-                      Colors.red.withOpacity(0.1),
-                      Colors.orange.withOpacity(0.1),
+                      Colors.red.withValues(alpha: 0.1),
+                      Colors.orange.withValues(alpha: 0.1),
                     ],
                     borderColor: Colors.red,
                     iconBackgroundColor: Colors.red,
@@ -352,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ElevatedButton(
                     onPressed: _handleSignOut,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.withOpacity(0.1),
+                      backgroundColor: Colors.red.withValues(alpha: 0.1),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),

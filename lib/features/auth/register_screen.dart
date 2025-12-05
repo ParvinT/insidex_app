@@ -297,7 +297,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (value) {
                           setState(() => _agreeToTerms = value ?? false);
                         },
-                        activeColor: AppColors.primaryGold,
+                        activeColor: AppColors.textPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.r),
                         ),
@@ -318,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               text: AppLocalizations.of(context)
                                   .termsAndConditions,
                               style: GoogleFonts.inter(
-                                color: AppColors.primaryGold,
+                                color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.underline,
                               ),
@@ -332,7 +332,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             TextSpan(
                               text: AppLocalizations.of(context).privacyPolicy,
                               style: GoogleFonts.inter(
-                                color: AppColors.primaryGold,
+                                color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.underline,
                               ),
@@ -383,8 +383,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading
-                              ? AppColors.primaryGold.withOpacity(0.5)
-                              : AppColors.primaryGold,
+                              ? AppColors.textPrimary.withValues(alpha: 0.5)
+                              : AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

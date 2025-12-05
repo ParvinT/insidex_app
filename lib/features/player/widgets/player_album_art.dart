@@ -62,7 +62,7 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 24,
             offset: const Offset(0, 8),
             spreadRadius: 2,
@@ -174,8 +174,8 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
             center: Alignment.center,
             radius: 0.8,
             colors: [
-              Colors.black.withOpacity(0.3), // Center lighter
-              Colors.black.withOpacity(0.6), // Edges darker
+              Colors.black.withValues(alpha: 0.3), // Center lighter
+              Colors.black.withValues(alpha: 0.6), // Edges darker
             ],
           ),
         ),
@@ -252,8 +252,8 @@ class _EqualizerPainter extends CustomPainter {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.white.withOpacity(0.6),
-            Colors.grey.shade400.withOpacity(0.4),
+            Colors.white.withValues(alpha: 0.6),
+            Colors.grey.shade400.withValues(alpha: 0.4),
           ],
         ).createShader(Rect.fromLTWH(startX, y1, barWidth, barHeight))
         ..style = PaintingStyle.fill;
@@ -296,7 +296,7 @@ class _EqualizerPainter extends CustomPainter {
 
       // 1. Outer glow (çok hafif)
       final glowPaint = Paint()
-        ..color = Colors.white.withOpacity(0.1)
+        ..color = Colors.white.withValues(alpha:0.1)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
 
       final glowRect = RRect.fromRectAndRadius(
@@ -307,7 +307,7 @@ class _EqualizerPainter extends CustomPainter {
 
       // 2. Main bar with frosted glass effect
       final glassPaint = Paint()
-        ..color = Colors.white.withOpacity(0.25)
+        ..color = Colors.white.withValues(alpha:0.25)
         ..style = PaintingStyle.fill;
 
       final rect = RRect.fromRectAndRadius(
@@ -322,8 +322,8 @@ class _EqualizerPainter extends CustomPainter {
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
-            Colors.white.withOpacity(0.4),
-            Colors.white.withOpacity(0.0),
+            Colors.white.withValues(alpha:0.4),
+            Colors.white.withValues(alpha:0.0),
           ],
         ).createShader(Rect.fromLTWH(startX, y1, barWidth * 0.5, barHeight))
         ..style = PaintingStyle.fill;

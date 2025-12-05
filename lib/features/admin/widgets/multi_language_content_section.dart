@@ -30,7 +30,8 @@ class MultiLanguageContentSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section title
-        _buildSectionTitle(context, AppLocalizations.of(context).contentMultiLanguage),
+        _buildSectionTitle(
+            context, AppLocalizations.of(context).contentMultiLanguage),
 
         SizedBox(height: 16.h),
 
@@ -88,19 +89,19 @@ class MultiLanguageContentSection extends StatelessWidget {
       // Full: content + audio
       borderColor = Colors.green;
       backgroundColor =
-          isSelected ? AppColors.primaryGold : Colors.green.shade50;
+          isSelected ? AppColors.textPrimary : Colors.green.shade50;
       statusIcon = Icon(Icons.check_circle, size: 16.sp, color: Colors.green);
     } else if (hasContent || hasAudio) {
       // Partial: only content OR only audio
       borderColor = Colors.orange;
       backgroundColor =
-          isSelected ? AppColors.primaryGold : Colors.orange.shade50;
+          isSelected ? AppColors.textPrimary : Colors.orange.shade50;
       statusIcon = Icon(Icons.warning, size: 16.sp, color: Colors.orange);
     } else {
       // Empty
       borderColor = Colors.grey.shade300;
       backgroundColor =
-          isSelected ? AppColors.primaryGold : Colors.grey.shade100;
+          isSelected ? AppColors.textPrimary : Colors.grey.shade100;
       statusIcon = Icon(Icons.circle_outlined, size: 16.sp, color: Colors.grey);
     }
 
@@ -142,15 +143,15 @@ class MultiLanguageContentSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
-            color: AppColors.primaryGold.withOpacity(0.1),
+            color: AppColors.textPrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6.r),
           ),
           child: Text(
-            '${AppLocalizations.of(context).editing}: ${AppLanguages.getFullLabel(lang)}', 
+            '${AppLocalizations.of(context).editing}: ${AppLanguages.getFullLabel(lang)}',
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
             ),
           ),
         ),
@@ -168,7 +169,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 16.sp),
@@ -188,7 +189,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 14.sp),
@@ -200,14 +201,15 @@ class MultiLanguageContentSection extends StatelessWidget {
         TextField(
           controller: controllers['introTitle']!,
           decoration: InputDecoration(
-            labelText: '${AppLocalizations.of(context).introductionTitle} ($lang)',
+            labelText:
+                '${AppLocalizations.of(context).introductionTitle} ($lang)',
             hintText: AppLocalizations.of(context).aboutThisSession,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 16.sp),
@@ -220,14 +222,15 @@ class MultiLanguageContentSection extends StatelessWidget {
           controller: controllers['introContent']!,
           maxLines: 5,
           decoration: InputDecoration(
-            labelText: '${AppLocalizations.of(context).introductionContent} ($lang)',
+            labelText:
+                '${AppLocalizations.of(context).introductionContent} ($lang)',
             hintText: AppLocalizations.of(context).describeWhatSessionDoes,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: AppColors.primaryGold, width: 2),
+              borderSide: BorderSide(color: AppColors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 14.sp),

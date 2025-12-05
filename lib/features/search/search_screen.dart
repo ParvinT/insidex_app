@@ -125,7 +125,7 @@ class _SearchScreenState extends State<SearchScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.searchHistoryCleared),
-            backgroundColor: AppColors.primaryGold,
+            backgroundColor: AppColors.textPrimary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -213,7 +213,7 @@ class _SearchScreenState extends State<SearchScreen>
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(isTablet ? 14.r : 12.r),
         border: Border.all(
-          color: AppColors.greyBorder.withOpacity(0.3),
+          color: AppColors.greyBorder.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -299,7 +299,7 @@ class _SearchScreenState extends State<SearchScreen>
         controller: _tabController,
         labelColor: AppColors.textPrimary,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primaryGold,
+        indicatorColor: AppColors.textPrimary,
         isScrollable: false,
         labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 12.w : 8.w),
         labelStyle: GoogleFonts.inter(
@@ -322,7 +322,7 @@ class _SearchScreenState extends State<SearchScreen>
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
-        color: AppColors.primaryGold,
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -469,7 +469,7 @@ class _SearchScreenState extends State<SearchScreen>
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 12,
               offset: Offset(0, 4),
             ),

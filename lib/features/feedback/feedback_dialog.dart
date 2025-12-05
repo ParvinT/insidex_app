@@ -233,7 +233,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                   index < _rating
                                       ? Icons.star
                                       : Icons.star_border,
-                                  color: AppColors.primaryGold,
+                                  color: AppColors.textPrimary,
                                   size: 36.sp,
                                 ),
                               );
@@ -271,7 +271,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
                               borderSide: const BorderSide(
-                                  color: AppColors.primaryGold, width: 2),
+                                  color: AppColors.textPrimary, width: 2),
                             ),
                           ),
                           validator: (value) {
@@ -314,7 +314,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
                               borderSide: const BorderSide(
-                                  color: AppColors.primaryGold, width: 2),
+                                  color: AppColors.textPrimary, width: 2),
                             ),
                           ),
                           validator: (value) {
@@ -356,7 +356,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
                               borderSide: const BorderSide(
-                                  color: AppColors.primaryGold, width: 2),
+                                  color: AppColors.textPrimary, width: 2),
                             ),
                           ),
                         ),

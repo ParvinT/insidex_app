@@ -618,14 +618,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                           AppLocalizations.of(context).sessionNumberHelper,
                       errorText: null,
                       prefixIcon:
-                          Icon(Icons.numbers, color: AppColors.primaryGold),
+                          Icon(Icons.numbers, color: AppColors.textPrimary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide:
-                            BorderSide(color: AppColors.primaryGold, width: 2),
+                            BorderSide(color: AppColors.textPrimary, width: 2),
                       ),
                     ),
                     style: GoogleFonts.inter(fontSize: 16.sp),
@@ -642,14 +642,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).category,
                       prefixIcon: const Icon(Icons.category,
-                          color: AppColors.primaryGold),
+                          color: AppColors.textPrimary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                         borderSide: const BorderSide(
-                          color: AppColors.primaryGold,
+                          color: AppColors.textPrimary,
                           width: 2,
                         ),
                       ),
@@ -765,7 +765,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _saveSession,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryGold,
+                        backgroundColor: AppColors.textPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
@@ -795,7 +795,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               color: Colors.black54,
               child: const Center(
                 child: CircularProgressIndicator(
-                  color: AppColors.primaryGold,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ),
@@ -820,10 +820,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       margin: EdgeInsets.only(bottom: 24.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.primaryGold.withOpacity(0.1),
+        color: AppColors.textPrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: AppColors.primaryGold.withOpacity(0.3),
+          color: AppColors.textPrimary.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -842,7 +842,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             value: _uploadProgress / 100,
             backgroundColor: Colors.grey.shade200,
             valueColor:
-                const AlwaysStoppedAnimation<Color>(AppColors.primaryGold),
+                const AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
           ),
           SizedBox(height: 8.h),
           Text(
@@ -883,7 +883,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Colors.black.withValues(alpha: 0.05),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           )
@@ -897,7 +897,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     fontSize: 14.sp,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isSelected
-                        ? AppColors.primaryGold
+                        ? AppColors.textPrimary
                         : AppColors.textSecondary,
                   ),
                 ),
@@ -967,7 +967,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: hasFile ? Colors.green : AppColors.primaryGold,
+                color: hasFile ? Colors.green : AppColors.textPrimary,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
@@ -1004,7 +1004,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             ),
             Icon(
               Icons.upload_file,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
               size: 24.sp,
             ),
           ],

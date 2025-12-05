@@ -237,7 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               height: 40.w,
               decoration: BoxDecoration(
                 color: isDestructive
-                    ? Colors.red.withOpacity(0.1)
+                    ? Colors.red.withValues(alpha: 0.1)
                     : AppColors.greyLight,
                 borderRadius: BorderRadius.circular(10.r),
               ),

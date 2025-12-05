@@ -32,12 +32,12 @@ class DiseaseCauseCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: AppColors.greyBorder.withOpacity(0.3),
+          color: AppColors.greyBorder.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),

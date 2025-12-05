@@ -34,13 +34,13 @@ class SocialLoginButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: isDisabled
               ? (isDark
-                  ? Colors.black.withOpacity(0.3)
-                  : Colors.white.withOpacity(0.5))
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.white.withValues(alpha: 0.5))
               : (isDark ? Colors.black : Colors.white),
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isDisabled
-                ? AppColors.greyBorder.withOpacity(0.3)
+                ? AppColors.greyBorder.withValues(alpha: 0.3)
                 : (isDark ? Colors.black : AppColors.greyBorder),
             width: 1.5,
           ),
@@ -67,8 +67,8 @@ class SocialLoginButton extends StatelessWidget {
                           : Icons.apple,
                       color: isDisabled
                           ? (isDark
-                              ? Colors.white.withOpacity(0.3)
-                              : AppColors.textPrimary.withOpacity(0.3))
+                              ? Colors.white.withValues(alpha: 0.3)
+                              : AppColors.textPrimary.withValues(alpha: 0.3))
                           : (isDark ? Colors.white : AppColors.textPrimary),
                       size: 24.sp,
                     ),
@@ -80,8 +80,8 @@ class SocialLoginButton extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                         color: isDisabled
                             ? (isDark
-                                ? Colors.white.withOpacity(0.3)
-                                : AppColors.textPrimary.withOpacity(0.3))
+                                ? Colors.white.withValues(alpha: 0.3)
+                                : AppColors.textPrimary.withValues(alpha: 0.3))
                             : (isDark ? Colors.white : AppColors.textPrimary),
                       ),
                     ),

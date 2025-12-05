@@ -231,7 +231,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 14.sp,
                         color: isAnyLoading
                             ? AppColors.textSecondary
-                            : AppColors.primaryGold,
+                            : AppColors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -276,8 +276,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading
-                              ? AppColors.primaryGold.withOpacity(0.5)
-                              : AppColors.primaryGold,
+                              ? AppColors.textPrimary.withValues(alpha: 0.5)
+                              : AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

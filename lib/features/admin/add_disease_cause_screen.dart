@@ -372,9 +372,9 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       color: Colors.white,
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.primaryGold,
+        labelColor: AppColors.textPrimary,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primaryGold,
+        indicatorColor: AppColors.textPrimary,
         tabs: AppLanguages.supportedLanguages.map((langCode) {
           return Tab(
             text: AppLanguages.getLabel(langCode),
@@ -406,8 +406,8 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                 decoration: BoxDecoration(
                   color: disease.gender == 'male'
-                      ? Colors.blue.withOpacity(0.2)
-                      : Colors.pink.withOpacity(0.2),
+                      ? Colors.blue.withValues(alpha: 0.2)
+                      : Colors.pink.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
@@ -453,7 +453,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
-        prefixIcon: const Icon(Icons.music_note, color: AppColors.primaryGold),
+        prefixIcon: const Icon(Icons.music_note, color: AppColors.textPrimary),
       ),
       isExpanded: true,
       items: _sessions.map((session) {
@@ -542,7 +542,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveDiseaseCause,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryGold,
+          backgroundColor: AppColors.textPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),

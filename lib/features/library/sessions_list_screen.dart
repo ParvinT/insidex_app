@@ -338,7 +338,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                   Container(
                     height: dividerH,
                     width: 1.5,
-                    color: AppColors.textPrimary.withOpacity(0.2),
+                    color: AppColors.textPrimary.withValues(alpha: 0.2),
                     margin: EdgeInsets.symmetric(horizontal: 8.w),
                   ),
 

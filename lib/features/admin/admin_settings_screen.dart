@@ -217,7 +217,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGold,
+                backgroundColor: AppColors.textPrimary,
               ),
               child: Text(sendTest
                   ? AppLocalizations.of(context).sendTest
@@ -243,7 +243,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       barrierDismissible: false,
       builder: (context) => const Center(
         child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
+          color: AppColors.textPrimary,
         ),
       ),
     );
@@ -318,15 +318,15 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    AppColors.primaryGold.withOpacity(0.1),
-                    AppColors.primaryGold.withOpacity(0.05),
+                    AppColors.textPrimary.withValues(alpha: 0.1),
+                    AppColors.textPrimary.withValues(alpha: 0.05),
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: AppColors.primaryGold.withOpacity(0.3),
+                  color: AppColors.textPrimary.withValues(alpha: 0.3),
                 ),
               ),
               child: Column(
@@ -366,7 +366,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                         onPressed:
                             _waitlistCount > 0 ? _showSendEmailDialog : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGold,
+                          backgroundColor: AppColors.textPrimary,
                           foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(
                             horizontal: 12.w,
@@ -436,7 +436,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                       ElevatedButton(
                         onPressed: _addNewAdmin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGold,
+                          backgroundColor: AppColors.textPrimary,
                           padding: EdgeInsets.symmetric(
                             horizontal: 16.w,
                             vertical: 12.h,
@@ -494,10 +494,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.primaryGold.withOpacity(0.1),
+            backgroundColor: AppColors.textPrimary.withValues(alpha: 0.1),
             child: const Icon(
               Icons.admin_panel_settings,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(width: 12.w),

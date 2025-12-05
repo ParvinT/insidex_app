@@ -39,7 +39,7 @@ class ProfileHeader extends StatelessWidget {
                 color: AppColors.greyLight,
                 border: Border.all(
                   color: userProvider.isPremium
-                      ? AppColors.primaryGold
+                      ? AppColors.textPrimary
                       : AppColors.greyBorder,
                   width: 3,
                 ),

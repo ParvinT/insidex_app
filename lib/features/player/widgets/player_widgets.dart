@@ -237,7 +237,7 @@ class PlayerProgressBar extends StatelessWidget {
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
               trackHeight: 3.h,
               overlayShape: RoundSliderOverlayShape(overlayRadius: 12.r),
-              overlayColor: Colors.black.withOpacity(0.1),
+              overlayColor: Colors.black.withValues(alpha: 0.1),
             ),
             child: Slider(
               value: value,
@@ -313,7 +313,7 @@ class PlayerPlayControls extends StatelessWidget {
               color: Colors.black,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.12),
+                  color: Colors.black.withValues(alpha: 0.12),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),

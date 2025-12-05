@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     if (_isLoadingCards) {
       return const Center(
         child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
+          color: AppColors.textPrimary,
         ),
       );
     }

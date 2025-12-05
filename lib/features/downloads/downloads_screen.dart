@@ -112,9 +112,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     final isDesktop = context.isDesktop;
 
     // Responsive values
-    final double horizontalPadding = isDesktop
-        ? 32.w
-        : (isTablet ? 24.w : 20.w);
+    final double horizontalPadding =
+        isDesktop ? 32.w : (isTablet ? 24.w : 20.w);
     final double toolbarHeight = isDesktop ? 80.0 : (isTablet ? 70.0 : 60.0);
 
     return Scaffold(
@@ -200,7 +199,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               width: isTablet ? 120.w : 100.w,
               height: isTablet ? 120.w : 100.w,
               decoration: BoxDecoration(
-                color: AppColors.greyLight.withOpacity(0.5),
+                color: AppColors.greyLight.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -293,7 +292,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               borderRadius: BorderRadius.circular(borderRadius),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -626,7 +625,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colors.red.withOpacity(0.5)),
+                  side: BorderSide(color: Colors.red.withValues(alpha: 0.5)),
                   padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
@@ -653,7 +652,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           width: isTablet ? 60.w : 50.w,
           height: isTablet ? 60.w : 50.w,
           decoration: BoxDecoration(
-            color: AppColors.textPrimary.withOpacity(0.08),
+            color: AppColors.textPrimary.withValues(alpha: 0.08),
             shape: BoxShape.circle,
           ),
           child: Icon(

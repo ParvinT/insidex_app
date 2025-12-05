@@ -110,20 +110,21 @@ class AvatarPickerModal extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.primaryGold.withOpacity(0.15)
+                          ? AppColors.textPrimary.withValues(alpha: 0.15)
                           : Colors.grey[100],
                       borderRadius:
                           BorderRadius.circular(isTablet ? 18.r : 16.r),
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.primaryGold
+                            ? AppColors.textPrimary
                             : Colors.transparent,
                         width: 2.5,
                       ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: AppColors.primaryGold.withOpacity(0.3),
+                                color: AppColors.textPrimary
+                                    .withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),

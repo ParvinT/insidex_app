@@ -40,7 +40,7 @@ class PrimaryButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12.r), // Reduced from 16.r
           ),
           elevation: 0,
-          padding: EdgeInsets.symmetric(vertical: 0), // Remove default padding
+          padding: EdgeInsets.symmetric(vertical: 0), 
         ),
         child: Center(
           // Explicit center

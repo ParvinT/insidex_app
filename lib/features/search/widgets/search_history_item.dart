@@ -35,7 +35,7 @@ class SearchHistoryItem extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(isTablet ? 12.r : 10.r),
           border: Border.all(
-            color: AppColors.greyBorder.withOpacity(0.5),
+            color: AppColors.greyBorder.withValues(alpha: 0.5),
             width: 1,
           ),
         ),

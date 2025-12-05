@@ -35,7 +35,7 @@ class _ProgressScreenState extends State<ProgressScreen>
     _loadAnalyticsData();
 
     // Auto refresh every 5 seconds
-    _refreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
         _loadAnalyticsData();
       }
@@ -470,7 +470,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                 borderRadius: BorderRadius.circular(20.r),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -656,7 +656,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -760,7 +760,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               Container(
                 height: 28.h,
                 decoration: BoxDecoration(
-                  color: colors[i].withOpacity(0.2),
+                  color: colors[i].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Stack(

@@ -117,7 +117,7 @@ class _DownloadButtonState extends State<DownloadButton>
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.textSecondary.withOpacity(0.5),
+                    AppColors.textSecondary.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -176,8 +176,8 @@ class _DownloadButtonState extends State<DownloadButton>
         decoration: widget.showBackground
             ? BoxDecoration(
                 color: isOffline
-                    ? AppColors.greyLight.withOpacity(0.5)
-                    : AppColors.textPrimary.withOpacity(0.08),
+                    ? AppColors.greyLight.withValues(alpha: 0.5)
+                    : AppColors.textPrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(buttonSize / 2),
               )
             : null,
@@ -246,7 +246,7 @@ class _DownloadButtonState extends State<DownloadButton>
         height: buttonSize,
         decoration: widget.showBackground
             ? BoxDecoration(
-                color: Colors.green.withOpacity(0.12),
+                color: Colors.green.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(buttonSize / 2),
               )
             : null,
@@ -408,7 +408,7 @@ class DownloadIndicator extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(2.w),
       decoration: BoxDecoration(
-        color: Colors.green.withOpacity(0.2),
+        color: Colors.green.withValues(alpha: 0.2),
         shape: BoxShape.circle,
       ),
       child: Icon(

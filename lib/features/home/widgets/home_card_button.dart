@@ -92,7 +92,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
             borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(_isPressed ? 0.1 : 0.15),
+                color: Colors.black.withValues(alpha: _isPressed ? 0.1 : 0.15),
                 blurRadius: _isPressed ? 15 : 20,
                 offset: Offset(0, _isPressed ? 8 : 10),
                 spreadRadius: _isPressed ? 0 : 2,
@@ -156,8 +156,8 @@ class _HomeCardButtonState extends State<HomeCardButton>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.black.withOpacity(0.2),
-            Colors.black.withOpacity(0.5),
+            Colors.black.withValues(alpha: 0.2),
+            Colors.black.withValues(alpha: 0.5),
           ],
           stops: const [0.0, 1.0],
         ),
@@ -182,12 +182,12 @@ class _HomeCardButtonState extends State<HomeCardButton>
                   (widget.height * 0.04).clamp(8.0, 12.0),
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(
                     10.r,
                   ),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.3),
                     width: 1,
                   ),
                 ),
@@ -213,7 +213,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
               height: 1.2,
               shadows: [
                 Shadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   blurRadius: 12,
                   offset: const Offset(0, 2),
                 ),
@@ -229,7 +229,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
   Widget _buildPressedOverlay() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Colors.white.withValues(alpha: 0.1),
       ),
     );
   }
@@ -252,8 +252,8 @@ class _HomeCardButtonState extends State<HomeCardButton>
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.primaryGoldLight.withOpacity(0.8),
-            AppColors.primaryGold.withOpacity(0.85),
+            AppColors.greyLight.withValues(alpha: 0.8),
+            AppColors.textPrimary.withValues(alpha: 0.85),
           ],
         ),
       ),
@@ -282,11 +282,11 @@ class _HomeCardButtonState extends State<HomeCardButton>
                       child: Container(
                         padding: EdgeInsets.all(20.w),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.15),
+                          color: Colors.white.withValues(alpha: 0.15),
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Colors.white.withValues(alpha: 0.3),
                               blurRadius: 20,
                               spreadRadius: 2,
                             ),
@@ -295,7 +295,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
                         child: Icon(
                           widget.icon ?? Icons.music_note_rounded,
                           size: (42.sp).clamp(32.0, 48.0),
-                          color: Colors.white.withOpacity(0.95),
+                          color: Colors.white.withValues(alpha: 0.95),
                         ),
                       ),
                     );
@@ -310,11 +310,11 @@ class _HomeCardButtonState extends State<HomeCardButton>
                   style: GoogleFonts.inter(
                     fontSize: (18.sp).clamp(14.0, 22.0),
                     fontWeight: FontWeight.w800,
-                    color: Colors.white.withOpacity(0.95),
+                    color: Colors.white.withValues(alpha: 0.95),
                     letterSpacing: 2,
                     shadows: [
                       Shadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -336,10 +336,10 @@ class _HomeCardButtonState extends State<HomeCardButton>
                   vertical: 6.h,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(20.r),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withValues(alpha: 0.25),
                     width: 1.5,
                   ),
                 ),
@@ -349,7 +349,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
                     Icon(
                       Icons.cloud_off_rounded,
                       size: 14.sp,
-                      color: Colors.white.withOpacity(0.95),
+                      color: Colors.white.withValues(alpha: 0.95),
                     ),
                     SizedBox(width: 6.w),
                     Text(
@@ -357,7 +357,7 @@ class _HomeCardButtonState extends State<HomeCardButton>
                       style: GoogleFonts.inter(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
-                        color: Colors.white.withOpacity(0.95),
+                        color: Colors.white.withValues(alpha: 0.95),
                       ),
                     ),
                   ],
@@ -374,7 +374,7 @@ class _DotPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white.withOpacity(0.08)
+      ..color = Colors.white.withValues(alpha: 0.08)
       ..style = PaintingStyle.fill;
 
     const spacing = 25.0;

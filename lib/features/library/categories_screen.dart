@@ -266,7 +266,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   Container(
                     height: dividerH,
                     width: 1.5,
-                    color: AppColors.textPrimary.withOpacity(0.2),
+                    color: AppColors.textPrimary.withValues(alpha: 0.2),
                     margin: EdgeInsets.symmetric(
                         horizontal: 8.w), // ← Biraz margin ekle
                   ),
@@ -438,14 +438,14 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    cardColor.withOpacity(0.8),
-                    cardColor.withOpacity(0.4),
+                    cardColor.withValues(alpha: 0.8),
+                    cardColor.withValues(alpha: 0.4),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20.r),
                 boxShadow: [
                   BoxShadow(
-                    color: cardColor.withOpacity(0.3),
+                    color: cardColor.withValues(alpha: 0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -466,14 +466,20 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           placeholder: (context, url) => Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [cardColor, cardColor.withOpacity(0.7)],
+                                colors: [
+                                  cardColor,
+                                  cardColor.withValues(alpha: 0.7)
+                                ],
                               ),
                             ),
                           ),
                           errorWidget: (context, url, error) => Container(
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
-                                colors: [cardColor, cardColor.withOpacity(0.7)],
+                                colors: [
+                                  cardColor,
+                                  cardColor.withValues(alpha: 0.7)
+                                ],
                               ),
                             ),
                           ),
@@ -489,8 +495,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           borderRadius: BorderRadius.circular(24.r),
                           gradient: LinearGradient(
                             colors: [
-                              Colors.black.withOpacity(0.4),
-                              Colors.black.withOpacity(0.6),
+                              Colors.black.withValues(alpha: 0.4),
+                              Colors.black.withValues(alpha: 0.6),
                             ],
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
@@ -549,7 +555,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                 children: [
                                   Icon(
                                     Icons.play_circle_filled,
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     size: 16.sp,
                                   ),
                                   SizedBox(width: 4.w),
@@ -557,7 +563,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                     '...  ${AppLocalizations.of(context).sessions}',
                                     style: GoogleFonts.inter(
                                       fontSize: 12.sp,
-                                      color: Colors.white.withOpacity(0.8),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.8),
                                     ),
                                   ),
                                 ],
@@ -579,7 +586,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                   children: [
                                     Icon(
                                       Icons.play_circle_filled,
-                                      color: Colors.white.withOpacity(0.8),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.8),
                                       size: 16.sp,
                                     ),
                                     SizedBox(width: 4.w),
@@ -587,7 +595,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                                       '$count  ${AppLocalizations.of(context).sessions}',
                                       style: GoogleFonts.inter(
                                         fontSize: 12.sp,
-                                        color: Colors.white.withOpacity(0.8),
+                                        color:
+                                            Colors.white.withValues(alpha: 0.8),
                                       ),
                                     ),
                                   ],

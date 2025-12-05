@@ -109,7 +109,7 @@ class SessionCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: isTablet ? 12 : 10,
               offset: Offset(0, isTablet ? 5 : 4),
             ),
@@ -138,7 +138,7 @@ class SessionCard extends StatelessWidget {
                       width: isTablet ? 36.w : 32.w,
                       height: isTablet ? 36.w : 32.w,
                       decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withOpacity(0.1),
+                        color: AppColors.textPrimary.withValues(alpha: 0.1),
                         borderRadius:
                             BorderRadius.circular(isTablet ? 9.r : 8.r),
                       ),
@@ -197,7 +197,7 @@ class SessionCard extends StatelessWidget {
                     SizedBox(width: isTablet ? 10.w : 8.w),
                     _buildActionButton(
                       icon: Icons.playlist_add,
-                      color: AppColors.primaryGold,
+                      color: AppColors.textPrimary,
                       onTap: onAddToPlaylist!,
                       iconSize: iconSize,
                       isTablet: isTablet,
@@ -274,7 +274,7 @@ class SessionCard extends StatelessWidget {
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      Colors.black.withOpacity(0.6),
+                      Colors.black.withValues(alpha: 0.6),
                     ],
                   ),
                 ),
@@ -288,12 +288,12 @@ class SessionCard extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(100),
-                  splashColor: Colors.white.withOpacity(0.3),
+                  splashColor: Colors.white.withValues(alpha: 0.3),
                   child: Container(
                     width: playButtonSize,
                     height: playButtonSize,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.95),
+                      color: Colors.white.withValues(alpha: 0.95),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -326,8 +326,8 @@ class SessionCard extends StatelessWidget {
     required double playIconSize,
   }) {
     final gradientColors = [
-      AppColors.textPrimary.withOpacity(0.7),
-      AppColors.textPrimary.withOpacity(0.5),
+      AppColors.textPrimary.withValues(alpha: 0.7),
+      AppColors.textPrimary.withValues(alpha: 0.5),
     ];
 
     return ClipRRect(
@@ -351,7 +351,7 @@ class SessionCard extends StatelessWidget {
               child: Icon(
                 Icons.music_note_rounded,
                 size: 80.sp,
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
               ),
             ),
             // Play button
@@ -361,16 +361,16 @@ class SessionCard extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(100),
-                  splashColor: Colors.white.withOpacity(0.3),
+                  splashColor: Colors.white.withValues(alpha: 0.3),
                   child: Container(
                     width: playButtonSize,
                     height: playButtonSize,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -403,8 +403,8 @@ class SessionCard extends StatelessWidget {
 
   Widget _buildErrorPlaceholder() {
     final gradientColors = [
-      AppColors.textPrimary.withOpacity(0.7),
-      AppColors.textPrimary.withOpacity(0.5),
+      AppColors.textPrimary.withValues(alpha: 0.7),
+      AppColors.textPrimary.withValues(alpha: 0.5),
     ];
     return Container(
       decoration: BoxDecoration(
@@ -418,7 +418,7 @@ class SessionCard extends StatelessWidget {
         child: Icon(
           Icons.music_note_rounded,
           size: 80.sp,
-          color: Colors.white.withOpacity(0.5),
+          color: Colors.white.withValues(alpha: 0.5),
         ),
       ),
     );
@@ -436,7 +436,7 @@ class SessionCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(isTablet ? 9.w : 8.w),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(isTablet ? 9.r : 8.r),
         ),
         child: Icon(

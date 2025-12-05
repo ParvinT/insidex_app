@@ -461,13 +461,13 @@ class NotificationService {
               width: 80.w,
               height: 80.w,
               decoration: BoxDecoration(
-                color: AppColors.primaryGold.withOpacity(0.1),
+                color: AppColors.textPrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.notifications_active_outlined,
                 size: 40.sp,
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
               ),
             ),
 
@@ -546,7 +546,7 @@ class NotificationService {
                             SnackBar(
                               content: Text(AppLocalizations.of(context)
                                   .notificationsEnabledSuccess),
-                              backgroundColor: AppColors.primaryGold,
+                              backgroundColor: AppColors.textPrimary,
                               duration: const Duration(seconds: 2),
                             ),
                           );
@@ -554,7 +554,7 @@ class NotificationService {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGold,
+                      backgroundColor: AppColors.textPrimary,
                       padding: EdgeInsets.symmetric(vertical: 12.h),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25.r),

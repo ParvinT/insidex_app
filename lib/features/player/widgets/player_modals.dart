@@ -167,7 +167,8 @@ class PlayerModals {
                           activeTrackColor: Colors.greenAccent,
                           inactiveTrackColor: Colors.grey[700],
                           thumbColor: Colors.greenAccent,
-                          overlayColor: Colors.greenAccent.withOpacity(0.2),
+                          overlayColor:
+                              Colors.greenAccent.withValues(alpha: 0.2),
                         ),
                         child: Slider(
                           value: tempVolume,
@@ -223,7 +224,7 @@ class PlayerModals {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: tempVolume == preset
-                            ? Colors.greenAccent.withOpacity(0.2)
+                            ? Colors.greenAccent.withValues(alpha: 0.2)
                             : Colors.grey[800],
                         padding: EdgeInsets.symmetric(
                             horizontal: 16.w, vertical: 8.h),

@@ -197,7 +197,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? Colors.white
-                              : Colors.white.withOpacity(0.3),
+                              : Colors.white.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4.r),
                         ),
                       );
@@ -421,7 +421,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
             width: math.min(60.w, 60.h),
             height: math.min(60.w, 60.h),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Icon(
@@ -445,7 +445,7 @@ class _PremiumWaitlistScreenState extends State<PremiumWaitlistScreen> {
             description,
             style: GoogleFonts.inter(
               fontSize: _isCompactH ? 13.sp : 14.sp,
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
               height: 1.4,
             ),
             textAlign: TextAlign.center,
