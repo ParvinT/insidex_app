@@ -17,6 +17,7 @@ import '../../providers/mini_player_provider.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
+import '../../services/download/decryption_preloader.dart';
 import '../downloads/widgets/download_button.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
@@ -76,9 +77,18 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       _miniPlayerProvider = context.read<MiniPlayerProvider>();
 
       // ✅ SMOOTH TRANSITION: Sadece AYNI session için state yükle
+      // ID + offline status BIRLIKTE kontrol edilmeli
       final miniPlayer = _miniPlayerProvider!;
+
+      final currentSessionId = miniPlayer.currentSession?['id'];
+      final newSessionId = widget.sessionData?['id'];
+      final currentIsOffline = miniPlayer.currentSession?['_isOffline'] == true;
+      final newIsOffline = widget.sessionData?['_isOffline'] == true;
+
+      // Aynı session = aynı ID + aynı offline status
       final isSameSession = miniPlayer.hasActiveSession &&
-          miniPlayer.currentSession?['id'] == widget.sessionData?['id'];
+          currentSessionId == newSessionId &&
+          currentIsOffline == newIsOffline;
 
       if (isSameSession && miniPlayer.position > Duration.zero) {
         _currentPosition = miniPlayer.position;
@@ -88,7 +98,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         debugPrint(
             '✨ Pre-loaded state for same session: ${_currentPosition.inSeconds}s');
       } else {
-        debugPrint('🆕 New session or no mini player state');
+        debugPrint(
+            '🆕 New session or different type (online/offline mismatch)');
+        debugPrint(
+            '   Current: $currentSessionId (offline: $currentIsOffline)');
+        debugPrint('   New: $newSessionId (offline: $newIsOffline)');
       }
     }
   }
@@ -444,8 +458,18 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         return;
       }
 
-      final decryptedPath =
-          await downloadService.getDecryptedAudioPath(sessionId, language);
+      // 🆕 1. Check preloader cache first (instant playback!)
+      final preloader = DecryptionPreloader();
+      String? decryptedPath = preloader.getCachedPath(sessionId);
+
+      // 🆕 2. If not cached, fall back to normal decryption
+      if (decryptedPath == null) {
+        debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
+        decryptedPath =
+            await downloadService.getDecryptedAudioPath(sessionId, language);
+      } else {
+        debugPrint('⚡ [AudioPlayer] Cache hit - instant playback!');
+      }
 
       if (decryptedPath != null) {
         if (!mounted) return;
@@ -587,6 +611,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         if (_miniPlayerProvider != null) {
           debugPrint(
               '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}');
+          _session['_currentLanguage'] = _currentLanguage;
+          _session['_backgroundImageUrl'] = _backgroundImageUrl;
           _miniPlayerProvider!.playSession(_session);
           _miniPlayerProvider!.show();
           debugPrint(

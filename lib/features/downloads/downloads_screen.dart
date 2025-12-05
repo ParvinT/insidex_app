@@ -12,6 +12,8 @@ import '../../models/downloaded_session.dart';
 import '../../providers/download_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../player/audio_player_screen.dart';
+import '../../services/download/decryption_preloader.dart';
+import '../../services/language_helper_service.dart';
 
 /// Downloads Screen - Shows all downloaded sessions for offline playback
 class DownloadsScreen extends StatefulWidget {
@@ -22,13 +24,75 @@ class DownloadsScreen extends StatefulWidget {
 }
 
 class _DownloadsScreenState extends State<DownloadsScreen> {
+  final DecryptionPreloader _preloader = DecryptionPreloader();
+  final ScrollController _scrollController = ScrollController();
+  List<DownloadedSession> _currentDownloads = [];
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     // Refresh downloads when screen opens
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Initialize preloader with current language
+      final language = await LanguageHelperService.getCurrentLanguage();
+      _preloader.initialize(language: language);
+
+      // Refresh downloads
       context.read<DownloadProvider>().refresh();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  /// Called when user scrolls - triggers pre-decryption for visible items
+  void _onScroll() {
+    _preloadVisibleSessions();
+  }
+
+  /// Preload visible sessions for instant playback
+  void _preloadVisibleSessions() {
+    if (_currentDownloads.isEmpty) return;
+
+    // Get visible item indices
+    final visibleIds = _getVisibleSessionIds();
+
+    if (visibleIds.isNotEmpty) {
+      _preloader.preloadVisibleSessions(visibleIds);
+    }
+  }
+
+  /// Calculate which session IDs are currently visible
+  List<String> _getVisibleSessionIds() {
+    if (!_scrollController.hasClients) return [];
+    if (_currentDownloads.isEmpty) return [];
+
+    // Approximate item height (adjust based on your card size)
+    const double itemHeight = 90.0;
+
+    final scrollOffset = _scrollController.offset;
+    final viewportHeight = _scrollController.position.viewportDimension;
+
+    // Calculate visible range
+    final firstVisible = (scrollOffset / itemHeight).floor();
+    final lastVisible = ((scrollOffset + viewportHeight) / itemHeight).ceil();
+
+    // Add buffer for smoother experience
+    final startIndex =
+        (firstVisible - 1).clamp(0, _currentDownloads.length - 1);
+    final endIndex = (lastVisible + 2).clamp(0, _currentDownloads.length);
+
+    // Extract session IDs
+    final visibleIds = <String>[];
+    for (int i = startIndex; i < endIndex; i++) {
+      visibleIds.add(_currentDownloads[i].sessionId);
+    }
+
+    return visibleIds;
   }
 
   @override
@@ -170,7 +234,12 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     double horizontalPadding,
     bool isTablet,
   ) {
+    _currentDownloads = downloads;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _preloadVisibleSessions();
+    });
     return ListView.builder(
+      controller: _scrollController,
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
         vertical: 16.h,
@@ -393,6 +462,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Future<void> _playDownload(DownloadedSession download) async {
+    _preloader.prioritize(download.sessionId);
     Navigator.push(
       context,
       MaterialPageRoute(

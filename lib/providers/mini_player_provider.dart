@@ -258,6 +258,11 @@ class MiniPlayerProvider extends ChangeNotifier {
       return null;
     }
 
+    final preComputedUrl = _currentSession!['_backgroundImageUrl'];
+    if (preComputedUrl != null && preComputedUrl.toString().isNotEmpty) {
+      return preComputedUrl.toString();
+    }
+
     final sessionId = _currentSession!['id'];
 
     // Return cached if same session
@@ -270,13 +275,19 @@ class MiniPlayerProvider extends ChangeNotifier {
     String? imageUrl;
 
     if (backgroundImages is Map) {
-      // Try to get from current language (sync - may not be accurate but fast)
-      // We'll use a default priority: en > tr > ru > hi
-      imageUrl = backgroundImages['en'] ??
-          backgroundImages['tr'] ??
-          backgroundImages['ru'] ??
-          backgroundImages['hi'] ??
-          backgroundImages.values.first;
+      final currentLanguage = _currentSession!['_currentLanguage'] as String?;
+
+      if (currentLanguage != null &&
+          backgroundImages[currentLanguage] != null) {
+        imageUrl = backgroundImages[currentLanguage];
+      } else {
+        // Fallback: default priority
+        imageUrl = backgroundImages['en'] ??
+            backgroundImages['tr'] ??
+            backgroundImages['ru'] ??
+            backgroundImages['hi'] ??
+            backgroundImages.values.first;
+      }
     } else {
       // Fallback to old structure
       imageUrl = _currentSession!['backgroundImage'];
