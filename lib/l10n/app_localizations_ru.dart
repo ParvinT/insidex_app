@@ -214,13 +214,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Просмотрите свой персонализированный профиль здоровья';
 
   @override
-  String get premiumWaitlist => 'Список ожидания Премиум';
-
-  @override
-  String get joinEarlyAccess =>
-      'Присоединяйтесь к раннему доступу к премиум-функциям';
-
-  @override
   String get adminDashboard => 'Панель администратора';
 
   @override
@@ -1673,12 +1666,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get errorSavingSession => 'Ошибка сохранения сессии';
 
   @override
-  String get premiumWaitlistCampaign => 'Кампания списка ожидания Premium';
-
-  @override
-  String get subscribersWithConsent => 'подписчиков с согласием на маркетинг';
-
-  @override
   String get send => 'Отправить';
 
   @override
@@ -1718,39 +1705,7 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get sendPremiumAnnouncement => 'Отправить объявление Premium';
-
-  @override
-  String sendToWaitlist(Object count) {
-    return 'Отправить $count подписчикам списка ожидания';
-  }
-
-  @override
-  String get emailSubject => 'Тема письма';
-
-  @override
-  String get emailTitle => 'Заголовок письма';
-
-  @override
   String get message => 'Сообщение';
-
-  @override
-  String get sendTestEmailFirst => 'Сначала отправить тестовое письмо';
-
-  @override
-  String get testEmail => 'Тестовый Email';
-
-  @override
-  String get sendTest => 'Отправить тест';
-
-  @override
-  String get sendToAll => 'Отправить всем';
-
-  @override
-  String get emailSentSuccessfully => 'Письмо успешно отправлено!';
-
-  @override
-  String get errorSendingEmail => 'Ошибка отправки письма';
 
   @override
   String get adminManagement => 'Управление администраторами';

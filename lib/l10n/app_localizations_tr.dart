@@ -215,12 +215,6 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kişiselleştirilmiş sağlıklı yaşam profilinizi görüntüleyin';
 
   @override
-  String get premiumWaitlist => 'Premium Bekleme Listesi';
-
-  @override
-  String get joinEarlyAccess => 'Premium özelliklere erken erişim için katılın';
-
-  @override
   String get adminDashboard => 'Yönetici Paneli';
 
   @override
@@ -1667,12 +1661,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errorSavingSession => 'Seans kaydedilirken hata';
 
   @override
-  String get premiumWaitlistCampaign => 'Premium Bekleme Listesi Kampanyası';
-
-  @override
-  String get subscribersWithConsent => 'pazarlama iznine sahip abone';
-
-  @override
   String get send => 'Gönder';
 
   @override
@@ -1712,39 +1700,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get sendPremiumAnnouncement => 'Premium Duyurusu Gönder';
-
-  @override
-  String sendToWaitlist(Object count) {
-    return '$count bekleme listesi abonelerine gönder';
-  }
-
-  @override
-  String get emailSubject => 'E-posta Konusu';
-
-  @override
-  String get emailTitle => 'E-posta Başlığı';
-
-  @override
   String get message => 'Mesaj';
-
-  @override
-  String get sendTestEmailFirst => 'Önce test e-postası gönder';
-
-  @override
-  String get testEmail => 'Test E-postası';
-
-  @override
-  String get sendTest => 'Test Gönder';
-
-  @override
-  String get sendToAll => 'Hepsine Gönder';
-
-  @override
-  String get emailSentSuccessfully => 'E-posta başarıyla gönderildi!';
-
-  @override
-  String get errorSendingEmail => 'E-posta gönderilirken hata';
 
   @override
   String get adminManagement => 'Yönetici Yönetimi';

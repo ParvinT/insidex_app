@@ -496,15 +496,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                 Tab(text: AppLocalizations.of(context).week),
                                 Tab(text: AppLocalizations.of(context).day),
                               ],
-                              onTap: (i) {
-                                final periods = [
-                                  AppLocalizations.of(context).analytics,
-                                  AppLocalizations.of(context).year,
-                                  AppLocalizations.of(context).month,
-                                  AppLocalizations.of(context).week,
-                                  AppLocalizations.of(context).day,
-                                ];
-                              },
+                              onTap: (i) {},
                             ),
                           ),
                           SizedBox(height: spacingUnit.h),

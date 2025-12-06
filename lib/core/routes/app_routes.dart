@@ -16,7 +16,6 @@ import '../../features/admin/user_management_screen.dart';
 import '../../features/admin/home_cards_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
 import '../../features/admin/add_category_screen.dart';
-import '../../features/premium/premium_waitlist_screen.dart';
 import '../../features/auth/forgot_password_screen.dart';
 import '../../features/profile/change_password_screen.dart';
 import '../../features/legal/legal_document_screen.dart';
@@ -54,7 +53,6 @@ class AppRoutes {
 
   static const String privacyPolicy = '/legal/privacy-policy';
   static const String termsOfService = '/legal/terms-of-service';
-  static const String premiumWaitlist = '/premium/waitlist';
   static const String about = '/legal/about';
   static const String disclaimer = '/legal/disclaimer';
 
@@ -103,8 +101,6 @@ class AppRoutes {
               title: AppLocalizations.of(context).aboutApp,
             ),
 
-        // premium
-        premiumWaitlist: (_) => const PremiumWaitlistScreen(),
 
         // routes with arguments
         player: (context) {

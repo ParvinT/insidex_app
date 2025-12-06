@@ -216,13 +216,6 @@ class AppLocalizationsHi extends AppLocalizations {
       'अपनी व्यक्तिगत स्वास्थ्य प्रोफ़ाइल देखें';
 
   @override
-  String get premiumWaitlist => 'प्रीमियम प्रतीक्षा सूची';
-
-  @override
-  String get joinEarlyAccess =>
-      'प्रीमियम सुविधाओं के लिए जल्दी पहुंच में शामिल हों';
-
-  @override
   String get adminDashboard => 'व्यवस्थापक डैशबोर्ड';
 
   @override
@@ -1663,12 +1656,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get errorSavingSession => 'सत्र सहेजते समय त्रुटि';
 
   @override
-  String get premiumWaitlistCampaign => 'प्रीमियम प्रतीक्षा सूची अभियान';
-
-  @override
-  String get subscribersWithConsent => 'मार्केटिंग सहमति वाले सब्सक्राइबर';
-
-  @override
   String get send => 'भेजें';
 
   @override
@@ -1708,39 +1695,7 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get sendPremiumAnnouncement => 'प्रीमियम घोषणा भेजें';
-
-  @override
-  String sendToWaitlist(Object count) {
-    return '$count प्रतीक्षा सूची सब्सक्राइबर्स को भेजें';
-  }
-
-  @override
-  String get emailSubject => 'ईमेल विषय';
-
-  @override
-  String get emailTitle => 'ईमेल शीर्षक';
-
-  @override
   String get message => 'संदेश';
-
-  @override
-  String get sendTestEmailFirst => 'पहले टेस्ट ईमेल भेजें';
-
-  @override
-  String get testEmail => 'टेस्ट ईमेल';
-
-  @override
-  String get sendTest => 'टेस्ट भेजें';
-
-  @override
-  String get sendToAll => 'सभी को भेजें';
-
-  @override
-  String get emailSentSuccessfully => 'ईमेल सफलतापूर्वक भेजा गया!';
-
-  @override
-  String get errorSendingEmail => 'ईमेल भेजने में त्रुटि';
 
   @override
   String get adminManagement => 'प्रशासक प्रबंधन';

@@ -83,8 +83,6 @@
   "trackYourListening": "Track your listening habits and improvements",
   "myInsights": "My Insights",
   "viewPersonalizedWellness": "View your personalized wellness profile",
-  "premiumWaitlist": "Premium Waitlist",
-  "joinEarlyAccess": "Join early access for premium features",
   "adminDashboard": "Admin Dashboard",
   "dashboardOverview": "Dashboard Overview",
   "welcomeToAdminDashboard": "Welcome to your admin dashboard",
@@ -647,8 +645,7 @@
   "createSession": "Create Session",
 
   
-  "premiumWaitlistCampaign": "Premium Waitlist Campaign",
-  "subscribersWithConsent": "subscribers with marketing consent",
+  
   "send": "Send",
   "addNewAdmin": "Add New Admin",
   "userEmail": "User Email",
@@ -663,17 +660,12 @@
   "adminAccessRemoved": "Admin access removed",
   "userNotFound": "User with email {email} not found",
   "adminAccessGranted": "Admin access granted to {email}",
-  "sendPremiumAnnouncement": "Send Premium Announcement",
-  "sendToWaitlist": "Send to {count} waitlist subscribers",
-  "emailSubject": "Email Subject",
-  "emailTitle": "Email Title",
+  
+  
+  
   "message": "Message",
-  "sendTestEmailFirst": "Send test email first",
-  "testEmail": "Test Email",
-  "sendTest": "Send Test",
-  "sendToAll": "Send to All",
-  "emailSentSuccessfully": "Email sent successfully!",
-  "errorSendingEmail": "Error sending email",
+  
+  
   "adminManagement": "Admin Management",
 
   "userNotFound": "User with email {email} not found",
@@ -688,12 +680,7 @@
       "email": {}
     }
   },
-  "sendToWaitlist": "Send to {count} waitlist subscribers",
-  "@sendToWaitlist": {
-    "placeholders": {
-      "count": {}
-    }
-  },
+  
   "categoryManagement": "Category Management",
   "addNewCategory": "Add New Category",
   "updateCategory": "Update Category",

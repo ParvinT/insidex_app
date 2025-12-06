@@ -13,7 +13,6 @@ class ListeningTrackerService {
   static DateTime? _sessionStartTime;
   static DateTime? _lastResumeTime;
   static String? _currentSessionId;
-  static String? _currentDocId; // Firestore document ID
 
   /// Start tracking a listening session
   static Future<void> startSession({
@@ -30,7 +29,7 @@ class ListeningTrackerService {
       _currentSessionId = sessionId;
 
       // Create a new listening session document
-      final docRef = await _firestore
+      await _firestore
           .collection('users')
           .doc(user.uid)
           .collection('listening_history')
@@ -45,7 +44,6 @@ class ListeningTrackerService {
         'accumulatedDuration': 0,
       });
 
-      _currentDocId = docRef.id;
       debugPrint('Started tracking session: $sessionTitle');
     } catch (e) {
       debugPrint('Error starting session tracking: $e');
@@ -180,7 +178,6 @@ class ListeningTrackerService {
       _sessionStartTime = null;
       _currentSessionId = null;
       _lastResumeTime = null;
-      _currentDocId = null;
     } catch (e) {
       debugPrint('Error ending session: $e');
     }
@@ -295,8 +292,10 @@ class ListeningTrackerService {
       int streak = 0;
       final today = DateTime.now();
       final todayStr = today.toIso8601String().split('T')[0];
-      final yesterdayStr =
-          today.subtract(const Duration(days: 1)).toIso8601String().split('T')[0];
+      final yesterdayStr = today
+          .subtract(const Duration(days: 1))
+          .toIso8601String()
+          .split('T')[0];
 
       // Check if user has listened today or yesterday
       bool hasRecentActivity =

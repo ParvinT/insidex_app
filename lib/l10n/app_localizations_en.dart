@@ -214,12 +214,6 @@ class AppLocalizationsEn extends AppLocalizations {
       'View your personalized wellness profile';
 
   @override
-  String get premiumWaitlist => 'Premium Waitlist';
-
-  @override
-  String get joinEarlyAccess => 'Join early access for premium features';
-
-  @override
   String get adminDashboard => 'Admin Dashboard';
 
   @override
@@ -1660,12 +1654,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errorSavingSession => 'Error saving session';
 
   @override
-  String get premiumWaitlistCampaign => 'Premium Waitlist Campaign';
-
-  @override
-  String get subscribersWithConsent => 'subscribers with marketing consent';
-
-  @override
   String get send => 'Send';
 
   @override
@@ -1705,39 +1693,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get sendPremiumAnnouncement => 'Send Premium Announcement';
-
-  @override
-  String sendToWaitlist(Object count) {
-    return 'Send to $count waitlist subscribers';
-  }
-
-  @override
-  String get emailSubject => 'Email Subject';
-
-  @override
-  String get emailTitle => 'Email Title';
-
-  @override
   String get message => 'Message';
-
-  @override
-  String get sendTestEmailFirst => 'Send test email first';
-
-  @override
-  String get testEmail => 'Test Email';
-
-  @override
-  String get sendTest => 'Send Test';
-
-  @override
-  String get sendToAll => 'Send to All';
-
-  @override
-  String get emailSentSuccessfully => 'Email sent successfully!';
-
-  @override
-  String get errorSendingEmail => 'Error sending email';
 
   @override
   String get adminManagement => 'Admin Management';

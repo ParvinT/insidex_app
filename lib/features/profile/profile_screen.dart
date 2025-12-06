@@ -30,7 +30,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
   String _selectedAvatar = 'turtle';
-  bool _isSaving = false;
 
   @override
   void initState() {
@@ -65,8 +64,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
-    setState(() => _isSaving = true);
-
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
@@ -88,7 +85,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() {
         _isEditing = false;
-        _isSaving = false;
       });
 
       if (mounted) {
@@ -100,7 +96,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
     } catch (e) {
-      setState(() => _isSaving = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -308,24 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     MaterialPageRoute(builder: (_) => const DownloadsScreen()),
                   ),
                 ),
-                /*
-                // Premium Waitlist - Disabled for now
-                SizedBox(height: 20.h),
-                ProfileActionButton(
-                  icon: Icons.star_rounded,
-                  title: AppLocalizations.of(context).premiumWaitlist,
-                  subtitle: AppLocalizations.of(context).joinEarlyAccess,
-                  gradientColors: [
-                    AppColors.primaryGold.withValues(alpha:0.15),
-                    AppColors.primaryGold.withValues(alpha:0.05),
-                  ],
-                  borderColor: AppColors.primaryGold,
-                  iconBackgroundColor: AppColors.primaryGold,
-                  isGradientIcon: true,
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/premium/waitlist'),
-                ),
-                */
+
                 SizedBox(height: 20.h),
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(

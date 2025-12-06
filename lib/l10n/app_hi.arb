@@ -67,8 +67,6 @@
   "trackYourListening": "अपनी सुनने की आदतों और सुधारों को ट्रैक करें",
   "myInsights": "मेरी अंतर्दृष्टि",
   "viewPersonalizedWellness": "अपनी व्यक्तिगत स्वास्थ्य प्रोफ़ाइल देखें",
-  "premiumWaitlist": "प्रीमियम प्रतीक्षा सूची",
-  "joinEarlyAccess": "प्रीमियम सुविधाओं के लिए जल्दी पहुंच में शामिल हों",
   "adminDashboard": "व्यवस्थापक डैशबोर्ड",
   "dashboardOverview": "डैशबोर्ड अवलोकन",
   "welcomeToAdminDashboard": "अपने व्यवस्थापक डैशबोर्ड में आपका स्वागत है",
@@ -511,8 +509,6 @@
   "savingSessionData": "सत्र डेटा सहेजा जा रहा है...",
   "sessionSavedSuccessfully": "सत्र सफलतापूर्वक सहेजा गया!",
   "errorSavingSession": "सत्र सहेजते समय त्रुटि",
-  "premiumWaitlistCampaign": "प्रीमियम प्रतीक्षा सूची अभियान",
-  "subscribersWithConsent": "मार्केटिंग सहमति वाले सब्सक्राइबर",
   "send": "भेजें",
   "addNewAdmin": "नया प्रशासक जोड़ें",
   "userEmail": "उपयोगकर्ता ईमेल",
@@ -524,17 +520,9 @@
   "remove": "हटाएं",
   "adminAccessRemoved": "प्रशासक एक्सेस हटाया गया",
   "adminAccessGranted": "{email} को प्रशासक एक्सेस दिया गया",
-  "sendPremiumAnnouncement": "प्रीमियम घोषणा भेजें",
-  "sendToWaitlist": "{count} प्रतीक्षा सूची सब्सक्राइबर्स को भेजें",
-  "emailSubject": "ईमेल विषय",
-  "emailTitle": "ईमेल शीर्षक",
+ 
+  
   "message": "संदेश",
-  "sendTestEmailFirst": "पहले टेस्ट ईमेल भेजें",
-  "testEmail": "टेस्ट ईमेल",
-  "sendTest": "टेस्ट भेजें",
-  "sendToAll": "सभी को भेजें",
-  "emailSentSuccessfully": "ईमेल सफलतापूर्वक भेजा गया!",
-  "errorSendingEmail": "ईमेल भेजने में त्रुटि",
   "adminManagement": "प्रशासक प्रबंधन",
   "categoryManagement": "श्रेणी प्रबंधन",
   "addNewCategory": "नई श्रेणी जोड़ें",
@@ -607,11 +595,6 @@
   "@adminAccessGranted": {
   "placeholders": {
     "email": {}
-    }
-  },
-  "@sendToWaitlist": {
-    "placeholders": {
-      "count": {}
     }
   },
   "@userNotFound": {

@@ -85,8 +85,6 @@
   "trackYourListening": "Отслеживайте свои привычки прослушивания и улучшения",
   "myInsights": "Мои данные",
   "viewPersonalizedWellness": "Просмотрите свой персонализированный профиль здоровья",
-  "premiumWaitlist": "Список ожидания Премиум",
-  "joinEarlyAccess": "Присоединяйтесь к раннему доступу к премиум-функциям",
   "adminDashboard": "Панель администратора",
   "dashboardOverview": "Обзор панели управления",
   "welcomeToAdminDashboard": "Добро пожаловать в панель администратора",
@@ -620,8 +618,7 @@
   "createSession": "Создать сессию",
 
   
-  "premiumWaitlistCampaign": "Кампания списка ожидания Premium",
-  "subscribersWithConsent": "подписчиков с согласием на маркетинг",
+  
   "send": "Отправить",
   "addNewAdmin": "Добавить администратора",
   "userEmail": "Email пользователя",
@@ -636,17 +633,8 @@
   "adminAccessRemoved": "Доступ администратора удален",
   "userNotFound": "Пользователь с email {email} не найден",
   "adminAccessGranted": "Доступ администратора предоставлен {email}",
-  "sendPremiumAnnouncement": "Отправить объявление Premium",
-  "sendToWaitlist": "Отправить {count} подписчикам списка ожидания",
-  "emailSubject": "Тема письма",
-  "emailTitle": "Заголовок письма",
+  
   "message": "Сообщение",
-  "sendTestEmailFirst": "Сначала отправить тестовое письмо",
-  "testEmail": "Тестовый Email",
-  "sendTest": "Отправить тест",
-  "sendToAll": "Отправить всем",
-  "emailSentSuccessfully": "Письмо успешно отправлено!",
-  "errorSendingEmail": "Ошибка отправки письма",
   "adminManagement": "Управление администраторами",
   "categoryManagement": "Управление категориями",
   "addNewCategory": "Добавить категорию",

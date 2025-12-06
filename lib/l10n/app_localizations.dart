@@ -504,18 +504,6 @@ abstract class AppLocalizations {
   /// **'View your personalized wellness profile'**
   String get viewPersonalizedWellness;
 
-  /// No description provided for @premiumWaitlist.
-  ///
-  /// In en, this message translates to:
-  /// **'Premium Waitlist'**
-  String get premiumWaitlist;
-
-  /// No description provided for @joinEarlyAccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Join early access for premium features'**
-  String get joinEarlyAccess;
-
   /// No description provided for @adminDashboard.
   ///
   /// In en, this message translates to:
@@ -3264,18 +3252,6 @@ abstract class AppLocalizations {
   /// **'Error saving session'**
   String get errorSavingSession;
 
-  /// No description provided for @premiumWaitlistCampaign.
-  ///
-  /// In en, this message translates to:
-  /// **'Premium Waitlist Campaign'**
-  String get premiumWaitlistCampaign;
-
-  /// No description provided for @subscribersWithConsent.
-  ///
-  /// In en, this message translates to:
-  /// **'subscribers with marketing consent'**
-  String get subscribersWithConsent;
-
   /// No description provided for @send.
   ///
   /// In en, this message translates to:
@@ -3348,71 +3324,11 @@ abstract class AppLocalizations {
   /// **'Admin access granted to {email}'**
   String adminAccessGranted(Object email);
 
-  /// No description provided for @sendPremiumAnnouncement.
-  ///
-  /// In en, this message translates to:
-  /// **'Send Premium Announcement'**
-  String get sendPremiumAnnouncement;
-
-  /// No description provided for @sendToWaitlist.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to {count} waitlist subscribers'**
-  String sendToWaitlist(Object count);
-
-  /// No description provided for @emailSubject.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Subject'**
-  String get emailSubject;
-
-  /// No description provided for @emailTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Email Title'**
-  String get emailTitle;
-
   /// No description provided for @message.
   ///
   /// In en, this message translates to:
   /// **'Message'**
   String get message;
-
-  /// No description provided for @sendTestEmailFirst.
-  ///
-  /// In en, this message translates to:
-  /// **'Send test email first'**
-  String get sendTestEmailFirst;
-
-  /// No description provided for @testEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Test Email'**
-  String get testEmail;
-
-  /// No description provided for @sendTest.
-  ///
-  /// In en, this message translates to:
-  /// **'Send Test'**
-  String get sendTest;
-
-  /// No description provided for @sendToAll.
-  ///
-  /// In en, this message translates to:
-  /// **'Send to All'**
-  String get sendToAll;
-
-  /// No description provided for @emailSentSuccessfully.
-  ///
-  /// In en, this message translates to:
-  /// **'Email sent successfully!'**
-  String get emailSentSuccessfully;
-
-  /// No description provided for @errorSendingEmail.
-  ///
-  /// In en, this message translates to:
-  /// **'Error sending email'**
-  String get errorSendingEmail;
 
   /// No description provided for @adminManagement.
   ///
