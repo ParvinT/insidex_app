@@ -388,6 +388,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _togglePlayPause() async {
+    final unknownSessionText = AppLocalizations.of(context).unknownSession;
     if (_isPlaying) {
       await _audioService.pause();
 
@@ -395,7 +396,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         await ListeningTrackerService.pauseSession();
       }
     } else {
-      // İLK PLAY'DE RECENT'E EKLE
       if (!_hasAddedToRecent && _session['id'] != null) {
         _hasAddedToRecent = true;
         final user = FirebaseAuth.instance.currentUser;
@@ -421,8 +421,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         await ListeningTrackerService.startSession(
           sessionId: _session['id'],
-          sessionTitle:
-              _session['title'] ?? AppLocalizations.of(context).unknownSession,
+          sessionTitle: _session['title'] ?? unknownSessionText,
           categoryId: _session['categoryId'],
         );
       } else if (_isTracking) {

@@ -148,6 +148,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
               padding: const EdgeInsetsDirectional.only(end: 16),
               child: TextButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
+
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setStringList(
                     'goals',
@@ -157,7 +159,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                       'gender', widget.selectedGender.toString());
                   await prefs.setBool('onboardingSkipped', true);
                   if (mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                    navigator.pushReplacementNamed(AppRoutes.welcome);
                   }
                 },
                 style: TextButton.styleFrom(

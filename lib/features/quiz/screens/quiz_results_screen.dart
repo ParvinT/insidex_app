@@ -570,13 +570,14 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
   /// Get localized session title for display
   Future<String> _getSessionTitle(String sessionId, String locale) async {
+    final sessionText = AppLocalizations.of(context).session;
     try {
       final sessionDoc = await FirebaseFirestore.instance
           .collection('sessions')
           .doc(sessionId)
           .get();
 
-      if (!sessionDoc.exists) AppLocalizations.of(context).session;
+      if (!sessionDoc.exists) sessionText;
 
       final sessionData = {
         'id': sessionId,
@@ -593,15 +594,17 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
       return localizedContent.title.isNotEmpty
           ? localizedContent.title
-          : AppLocalizations.of(context).session;
+          : sessionText;
     } catch (e) {
       debugPrint('❌ Error getting session title: $e');
-      return AppLocalizations.of(context).session;
+      return sessionText;
     }
   }
 
   Future<void> _navigateToSession(String sessionId) async {
     debugPrint('🎵 [QuizResults] Opening session: $sessionId');
+
+    final navigator = Navigator.of(context);
 
     try {
       // Fetch session by ID
@@ -639,9 +642,10 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       debugPrint(
           '✅ [QuizResults] Session loaded: ${completeSessionData['_displayTitle']}');
 
+      if (!mounted) return;
+
       // Navigate to audio player
-      await Navigator.push(
-        context,
+      await navigator.push(
         MaterialPageRoute(
           builder: (_) => AudioPlayerScreen(sessionData: completeSessionData),
         ),

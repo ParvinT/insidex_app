@@ -306,6 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _handleSignOut() async {
+    final miniPlayerProvider = context.read<MiniPlayerProvider>();
     // Show confirmation dialog
     final shouldSignOut = await showDialog<bool>(
       context: context,
@@ -367,7 +368,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
         debugPrint('🎵 [Settings] Dismissing mini player...');
         try {
-          final miniPlayerProvider = context.read<MiniPlayerProvider>();
           miniPlayerProvider.dismiss();
           debugPrint('✅ [Settings] Mini player dismissed');
         } catch (e) {

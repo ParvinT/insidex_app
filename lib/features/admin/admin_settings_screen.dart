@@ -46,6 +46,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         .limit(1)
         .get();
 
+    if (!mounted) return;
+
     if (users.docs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -61,6 +63,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       userId: userData.id,
       email: email,
     );
+
+    if (!mounted) return;
 
     if (success) {
       _emailController.clear();
@@ -257,8 +261,13 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       ),
     );
 
+    if (!mounted) return;
+
     if (confirm == true) {
       final success = await AdminService.removeAdminAccess(adminId);
+
+      if (!mounted) return;
+
       if (success) {
         _loadAdmins();
         ScaffoldMessenger.of(context).showSnackBar(

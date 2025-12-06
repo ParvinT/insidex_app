@@ -175,12 +175,16 @@ class _NotificationSettingsScreenState
                       Center(
                         child: TextButton.icon(
                           onPressed: () async {
+                            final messenger = ScaffoldMessenger.of(context);
+                            final message = AppLocalizations.of(context)
+                                .testNotificationSent;
+
                             await provider.sendTestNotification();
+
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(
-                                  content: Text(AppLocalizations.of(context)
-                                      .testNotificationSent),
+                                  content: Text(message),
                                   duration: const Duration(seconds: 2),
                                 ),
                               );
@@ -257,14 +261,20 @@ class _NotificationSettingsScreenState
           SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final pleaseEnableText =
+                  AppLocalizations.of(context).pleaseEnableNotifications;
+              final openSettingsText =
+                  AppLocalizations.of(context).openSettings;
+
               final granted = await provider.requestPermission();
+
               if (mounted && !granted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                messenger.showSnackBar(
                   SnackBar(
-                    content: Text(
-                        AppLocalizations.of(context).pleaseEnableNotifications),
+                    content: Text(pleaseEnableText),
                     action: SnackBarAction(
-                      label: AppLocalizations.of(context).openSettings,
+                      label: openSettingsText,
                       onPressed: () => provider.openSystemSettings(),
                     ),
                   ),

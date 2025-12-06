@@ -9,13 +9,15 @@ import '../../../services/language_helper_service.dart';
 
 class SessionInfoModal {
   static Future<void> show({
-    // 🆕 async yapıldı
     required BuildContext context,
     required Map<String, dynamic> session,
   }) async {
     // 🆕 async
     // 🆕 Prepare localized content BEFORE showing modal
     final language = await LanguageHelperService.getCurrentLanguage();
+
+    if (!context.mounted) return;
+
     final localizedContent = SessionLocalizationService.getLocalizedContent(
       session,
       language,
@@ -496,46 +498,43 @@ class _SessionInfoContent extends StatelessWidget {
           ),
         ),
         SizedBox(height: 12.h),
-        ...benefits
-            .map((benefit) => Container(
-                  margin: EdgeInsets.only(bottom: 8.h),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color: Colors.grey[200]!,
-                      width: 1,
+        ...benefits.map((benefit) => Container(
+              margin: EdgeInsets.only(bottom: 8.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(
+                  color: Colors.grey[200]!,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 6.h),
+                    width: 4.w,
+                    height: 4.w,
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 6.h),
-                        width: 4.w,
-                        height: 4.w,
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
-                          shape: BoxShape.circle,
-                        ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Text(
+                      benefit.toString(),
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: Colors.grey[800],
+                        height: 1.4,
                       ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: Text(
-                          benefit.toString(),
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            color: Colors.grey[800],
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ))
-            ,
+                ],
+              ),
+            )),
         SizedBox(height: 24.h),
       ],
     );
@@ -589,36 +588,33 @@ class _SessionInfoContent extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 12.h),
-              ...affirmations
-                  .take(5)
-                  .map((affirmation) => Padding(
-                        padding: EdgeInsets.only(bottom: 8.h),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '•',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: Text(
-                                affirmation.toString(),
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: Colors.grey[800],
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
-                          ],
+              ...affirmations.take(5).map((affirmation) => Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ))
-                  ,
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            affirmation.toString(),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: Colors.grey[800],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
               if (affirmations.length > 5)
                 Padding(
                   padding: EdgeInsets.only(top: 8.h),

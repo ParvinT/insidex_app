@@ -1286,7 +1286,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   int _getTotalWeeklyMinutes(Map<String, int> weeklyData) {
-    return weeklyData.values.fold(0, (sum, minutes) => sum + minutes);
+    return weeklyData.values.fold(0, (total, minutes) => total + minutes);
   }
 
   String _calculateAverageSession() {
@@ -1367,9 +1367,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
       String favoriteTime = 'Evening';
       int maxCount = 0;
 
-      timeSlots.forEach((time, count) {
-        if (count > maxCount) {
-          maxCount = count;
+      timeSlots.forEach((time, value) {
+        if (value > maxCount) {
+          maxCount = value;
           favoriteTime = time;
         }
       });
@@ -1387,7 +1387,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
       }
     } catch (e) {
       debugPrint('Error getting favorite time: $e');
-      return l10n.evening; 
+      return l10n.evening;
     }
   }
 

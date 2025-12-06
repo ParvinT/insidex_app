@@ -108,10 +108,12 @@ class _GoalsScreenState extends State<GoalsScreen>
               padding: const EdgeInsetsDirectional.only(end: 16),
               child: TextButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
+
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setBool('onboardingSkipped', true);
                   if (mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                    navigator.pushReplacementNamed(AppRoutes.welcome);
                   }
                 },
                 style: TextButton.styleFrom(

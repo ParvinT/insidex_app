@@ -88,7 +88,7 @@ class _ProgressScreenState extends State<ProgressScreen>
 
       // Calculate total weekly minutes
       final weeklyTotal =
-          weeklyStats.values.fold(0, (sum, minutes) => sum + minutes);
+          weeklyStats.values.fold<int>(0, (total, minutes) => total + minutes);
 
       if (_mounted && mounted) {
         setState(() {

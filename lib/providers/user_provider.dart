@@ -186,6 +186,19 @@ class UserProvider extends ChangeNotifier {
   Future<void> _performLogout({bool forcedByOtherDevice = false}) async {
     _isShowingLogoutDialog = false;
 
+    MiniPlayerProvider? miniPlayerProvider;
+    final navigatorState = InsidexApp.navigatorKey.currentState;
+    if (navigatorState != null) {
+      try {
+        miniPlayerProvider = Provider.of<MiniPlayerProvider>(
+          navigatorState.context,
+          listen: false,
+        );
+      } catch (e) {
+        debugPrint('⚠️ Could not get MiniPlayerProvider: $e');
+      }
+    }
+
     debugPrint('🎵 [UserProvider] Stopping audio before logout...');
     try {
       final audioService = AudioPlayerService();
@@ -214,8 +227,6 @@ class UserProvider extends ChangeNotifier {
     await signOut();
 
     // ✅ Navigate using GlobalKey
-    final navigatorState = InsidexApp.navigatorKey.currentState;
-
     if (navigatorState != null) {
       navigatorState.pushNamedAndRemoveUntil(
         '/auth/welcome',
@@ -223,12 +234,7 @@ class UserProvider extends ChangeNotifier {
       );
       Future.delayed(const Duration(milliseconds: 100), () {
         try {
-          final context = navigatorState.context;
-          final miniPlayerProvider = Provider.of<MiniPlayerProvider>(
-            context,
-            listen: false,
-          );
-          miniPlayerProvider.dismiss();
+          miniPlayerProvider?.dismiss();
           debugPrint('✅ [UserProvider] Mini player dismissed after logout');
         } catch (e) {
           debugPrint('⚠️ [UserProvider] Mini player dismiss error: $e');

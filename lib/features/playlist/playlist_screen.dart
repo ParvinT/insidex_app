@@ -223,6 +223,9 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     final user = _auth.currentUser;
     if (user == null) return;
 
+    final messenger = ScaffoldMessenger.of(context);
+    final addedText = AppLocalizations.of(context).addedToPlaylist;
+
     try {
       final session = _recentSessions.firstWhere(
         (s) => s['id'] == sessionId,
@@ -242,9 +245,9 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         'playlistSessionIds': FieldValue.arrayUnion([sessionId]),
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).addedToPlaylist),
+          content: Text(addedText),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -261,6 +264,9 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     final user = _auth.currentUser;
     if (user == null) return;
 
+    final messenger = ScaffoldMessenger.of(context);
+    final removedText = AppLocalizations.of(context).removedFromPlaylist;
+
     try {
       await _firestore.collection('users').doc(user.uid).update({
         'playlistSessionIds': FieldValue.arrayRemove([sessionId]),
@@ -270,9 +276,9 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         _myPlaylistSessions.removeWhere((s) => s['id'] == sessionId);
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).removedFromPlaylist),
+          content: Text(removedText),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -287,6 +293,10 @@ class _PlaylistScreenState extends State<PlaylistScreen>
   ) async {
     final user = _auth.currentUser;
     if (user == null) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    final removedText = AppLocalizations.of(context).removedFromFavorites;
+    final addedText = AppLocalizations.of(context).addedToFavorites;
 
     try {
       setState(() {
@@ -316,12 +326,10 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         });
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(
-            isCurrentlyFavorite
-                ? AppLocalizations.of(context).removedFromFavorites
-                : AppLocalizations.of(context).addedToFavorites,
+            isCurrentlyFavorite ? removedText : addedText,
           ),
           duration: const Duration(seconds: 2),
         ),

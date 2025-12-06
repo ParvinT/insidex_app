@@ -300,11 +300,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       icon: Icons.logout,
                       title: AppLocalizations.of(context).signOut,
                       onTap: () async {
-                        Navigator.pop(context);
+                        final navigator = Navigator.of(context);
+                        navigator.pop();
                         await _auth.signOut();
                         if (mounted) {
-                          Navigator.pushReplacementNamed(
-                              context, '/auth/login');
+                          navigator.pushReplacementNamed('/auth/login');
                         }
                       },
                       color: Colors.red,

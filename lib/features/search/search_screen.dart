@@ -443,12 +443,13 @@ class _SearchScreenState extends State<SearchScreen>
   Widget _buildCategoryCard(Map<String, dynamic> category, bool isTablet) {
     return GestureDetector(
       onTap: () async {
+        final navigator = Navigator.of(context);
         if (_searchController.text.trim().isNotEmpty) {
           await _historyService.saveSearchQuery(_searchController.text.trim());
           await _loadSearchHistory();
         }
-        Navigator.push(
-          context,
+        if (!mounted) return;
+        navigator.push(
           MaterialPageRoute(
             builder: (_) => SessionsListScreen(
               categoryTitle: category['name'],
@@ -553,15 +554,18 @@ class _SearchScreenState extends State<SearchScreen>
     return SessionCard(
       session: session,
       onTap: () async {
+        final navigator = Navigator.of(context);
+
         // Save search query to history
         if (_searchController.text.trim().isNotEmpty) {
           await _historyService.saveSearchQuery(_searchController.text.trim());
           await _loadSearchHistory();
         }
 
+        if (!mounted) return;
+
         // Navigate to audio player
-        Navigator.push(
-          context,
+        navigator.push(
           MaterialPageRoute(
             builder: (_) => AudioPlayerScreen(sessionData: session),
           ),

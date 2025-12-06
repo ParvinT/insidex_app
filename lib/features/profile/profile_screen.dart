@@ -64,6 +64,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveProfile() async {
+    final userProvider = context.read<UserProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final successText = AppLocalizations.of(context).profileUpdated;
+    final errorText = AppLocalizations.of(context).errorUpdatingProfile;
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
@@ -77,7 +81,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      final userProvider = context.read<UserProvider>();
       await userProvider.updateProfile(
         name: _nameController.text.trim(),
         avatarEmoji: _selectedAvatar,
@@ -88,18 +91,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).profileUpdated),
+            content: Text(successText),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).errorUpdatingProfile),
+            content: Text(errorText),
             backgroundColor: Colors.red,
           ),
         );
@@ -123,6 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleSignOut() async {
+    final miniPlayerProvider = context.read<MiniPlayerProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -165,7 +169,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       debugPrint('🎵 [Profile] Dismissing mini player...');
       try {
-        final miniPlayerProvider = context.read<MiniPlayerProvider>();
         miniPlayerProvider.dismiss();
         debugPrint('✅ [Profile] Mini player dismissed');
       } catch (e) {

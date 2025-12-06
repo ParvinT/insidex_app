@@ -411,13 +411,13 @@ class NotificationService {
   static Future<void> checkAndShowPermissionDialog(BuildContext context) async {
     try {
       // Check if already shown
+      final provider = context.read<NotificationProvider>();
       final prefs = await SharedPreferences.getInstance();
       final hasShown = prefs.getBool(_permissionShownKey) ?? false;
 
       if (hasShown) return;
 
       // Check if already has permission
-      final provider = context.read<NotificationProvider>();
       await provider.checkPermissions();
 
       if (provider.hasPermission) {

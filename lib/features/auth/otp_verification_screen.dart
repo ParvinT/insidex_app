@@ -77,6 +77,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     try {
       final result = await FirebaseService.resendOTP(widget.email);
 
+      if (!mounted) return;
+
       if (result['success']) {
         _toast('${AppLocalizations.of(context).newCodeSentTo} ${widget.email}');
         _countdown();
@@ -88,6 +90,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         _toast(errorMessage, bg: Colors.red);
       }
     } catch (e) {
+      if (!mounted) return;
       _toast('${AppLocalizations.of(context).failedToSendCode}. $e',
           bg: Colors.red);
     } finally {
@@ -103,12 +106,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     }
     setState(() => _busy = true);
 
+    final userProvider = context.read<UserProvider>();
+
     try {
       // Use Firebase service to verify OTP and create account
       final result = await FirebaseService.verifyOTPAndCreateAccount(
         email: widget.email,
         code: input,
       );
+
+      if (!mounted) return;
 
       if (!result['success']) {
         final errorMessage = FirebaseErrorHandler.getErrorMessage(
@@ -122,13 +129,13 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       // Success! Load user data
       final user = result['user'] as User;
-      if (mounted) {
-        await context.read<UserProvider>().loadUserData(user.uid);
-      }
+      await userProvider.loadUserData(user.uid);
 
       debugPrint('💾 Saving active device for new user...');
       await DeviceSessionService().saveActiveDevice(user.uid);
       debugPrint('✅ Active device saved for new user');
+
+      if (!mounted) return;
 
       _toast(AppLocalizations.of(context).accountCreatedSuccessfully);
 

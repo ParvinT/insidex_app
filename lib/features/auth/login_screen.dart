@@ -49,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isEmailLoading = true);
 
-    // ⭐ ÖNEMLİ: Password'ü sakla
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -65,6 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['success']) {
       final user = result['user'];
       if (user != null) {
+        final userProvider = context.read<UserProvider>();
         debugPrint('SAVING AUTH SESSION for: ${user.email}');
         await AuthPersistenceService.saveAuthSession(user, password: password);
 
@@ -77,12 +77,14 @@ class _LoginScreenState extends State<LoginScreen> {
         await DeviceSessionService().saveActiveDevice(user.uid);
         debugPrint('✅ Active device saved, other devices will be logged out');
 
-        await context.read<UserProvider>().loadUserData(user.uid);
+        await userProvider.loadUserData(user.uid);
         // Save has_logged_in flag for offline mode
         await prefs.setBool('has_logged_in', true);
         await prefs.setString('cached_user_id', user.uid);
         debugPrint('✅ [Login] has_logged_in flag and user ID saved');
       }
+
+      if (!mounted) return;
 
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {

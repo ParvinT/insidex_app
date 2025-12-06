@@ -317,7 +317,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           .where('sessionNumber', isEqualTo: sessionNumber)
           .get();
 
-      // Edit modunda kendi ID'sini skip et
+      if (!mounted) return;
+
+      
       if (existingSession.docs.isNotEmpty) {
         final existingId = existingSession.docs.first.id;
         if (widget.sessionToEdit == null ||
@@ -617,15 +619,15 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       helperText:
                           AppLocalizations.of(context).sessionNumberHelper,
                       errorText: null,
-                      prefixIcon:
-                          const Icon(Icons.numbers, color: AppColors.textPrimary),
+                      prefixIcon: const Icon(Icons.numbers,
+                          color: AppColors.textPrimary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide:
-                            const BorderSide(color: AppColors.textPrimary, width: 2),
+                        borderSide: const BorderSide(
+                            color: AppColors.textPrimary, width: 2),
                       ),
                     ),
                     style: GoogleFonts.inter(fontSize: 16.sp),

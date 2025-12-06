@@ -33,12 +33,16 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     _scrollController.addListener(_onScroll);
     // Refresh downloads when screen opens
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final downloadProvider = context.read<DownloadProvider>();
+
       // Initialize preloader with current language
       final language = await LanguageHelperService.getCurrentLanguage();
       _preloader.initialize(language: language);
 
+      if (!mounted) return;
+
       // Refresh downloads
-      context.read<DownloadProvider>().refresh();
+      downloadProvider.refresh();
     });
   }
 
@@ -727,7 +731,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, true),
             child: Text(
               l10n.clearAll,
-              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                  color: Colors.red, fontWeight: FontWeight.w600),
             ),
           ),
         ],

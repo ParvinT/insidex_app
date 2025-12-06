@@ -440,6 +440,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     final localizedName =
         await CategoryLocalizationService.getLocalizedNameAuto(category);
 
+    if (!mounted) return;
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -509,6 +511,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   /// Navigate to image management screen
   Future<void> _manageImages(CategoryModel category) async {
     final userLanguage = await LanguageHelperService.getCurrentLanguage();
+
+    if (!mounted) return;
 
     final result = await Navigator.push(
       context,

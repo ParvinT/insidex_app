@@ -59,32 +59,41 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
   Future<void> _retryConnection() async {
     setState(() => _isRetrying = true);
 
-    final connectivityResult = await Connectivity().checkConnectivity();
-    final isOnline = connectivityResult != ConnectivityResult.none;
+    final downloadProvider = context.read<DownloadProvider>();
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final stillOfflineText = AppLocalizations.of(context).stillOffline;
 
-    if (isOnline && mounted) {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    final isOnline = !connectivityResult.contains(ConnectivityResult.none);
+
+    if (!mounted) return;
+
+    if (isOnline) {
       try {
         final prefs = await SharedPreferences.getInstance();
         final cachedUserId = prefs.getString('cached_user_id');
 
         if (cachedUserId != null && cachedUserId.isNotEmpty) {
           debugPrint('🔄 [OfflineMode] Switching to online mode...');
-          await context.read<DownloadProvider>().reinitializeForOnline(
-                cachedUserId,
-              );
+          await downloadProvider.reinitializeForOnline(
+            cachedUserId,
+          );
           debugPrint('✅ [OfflineMode] Provider switched to online mode');
         }
       } catch (e) {
         debugPrint('⚠️ [OfflineMode] Reinitialize error: $e');
       }
 
+      if (!mounted) return;
+
       // Internet restored, restart app flow
-      Navigator.pushReplacementNamed(context, AppRoutes.splash);
-    } else if (mounted) {
+      navigator.pushReplacementNamed(AppRoutes.splash);
+    } else {
       setState(() => _isRetrying = false);
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).stillOffline),
+          content: Text(stillOfflineText),
           backgroundColor: Colors.orange,
         ),
       );

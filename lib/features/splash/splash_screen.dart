@@ -188,7 +188,7 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       // First check basic connectivity
       final connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
+      if (connectivityResult.contains(ConnectivityResult.none)) {
         debugPrint('📡 [Connectivity] No network interface');
         return false;
       }

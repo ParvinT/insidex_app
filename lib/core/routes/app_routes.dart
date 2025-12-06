@@ -101,7 +101,6 @@ class AppRoutes {
               title: AppLocalizations.of(context).aboutApp,
             ),
 
-
         // routes with arguments
         player: (context) {
           final args = ModalRoute.of(context)?.settings.arguments
@@ -115,11 +114,12 @@ class AppRoutes {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      // Kullanıcı giriş yapmamış, onboarding kontrolü yap
       final prefs = await SharedPreferences.getInstance();
       final goals = prefs.getStringList('goals');
       final gender = prefs.getString('gender');
       final birthDate = prefs.getString('birthDate');
+
+      if (!context.mounted) return;
 
       if (goals == null ||
           goals.isEmpty ||
@@ -127,14 +127,11 @@ class AppRoutes {
           gender.isEmpty ||
           birthDate == null ||
           birthDate.isEmpty) {
-        // Onboarding eksik, oraya yönlendir
         Navigator.pushNamed(context, goalsScreen);
       } else {
-        // Onboarding tam ama giriş yapmamış, login'e yönlendir
         Navigator.pushNamed(context, login);
       }
     } else {
-      // Kullanıcı giriş yapmış, profile'a git
       Navigator.pushNamed(context, profile);
     }
   }
