@@ -22,15 +22,14 @@ class ExpandableQuizSection extends StatefulWidget {
 }
 
 class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final QuizService _quizService = QuizService();
   late PageController _pageController;
 
   // Quiz state
   bool _isInfoPressed = false;
   late AnimationController _expandController;
-  late Animation<double> _fadeAnimation;
-  late Animation<Offset> _slideAnimation;
+  late AnimationController _staggerController;
   bool _isQuizExpanded = false;
   bool _isLoadingDiseases = false;
   List<DiseaseModel> _diseases = [];
@@ -78,27 +77,18 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _expandController,
-      curve: Curves.easeOut,
-    ));
-
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0.0, -0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _expandController,
-      curve: Curves.easeOutCubic,
-    ));
+    // Staggered animation controller for grid items
+    _staggerController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     _expandController.dispose();
+    _staggerController.dispose();
     super.dispose();
   }
 
@@ -123,7 +113,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
   // Toggle quiz expansion
   Future<void> _toggleQuiz() async {
     if (_isQuizExpanded) {
-      // Collapse with animation
+      // Collapse: first reverse stagger, then collapse container
+      await _staggerController.reverse();
       await _expandController.reverse();
       if (mounted) {
         setState(() {
@@ -131,6 +122,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
         });
       }
     } else {
+      _expandController.value = 0.0;
+
       // Expand
       setState(() {
         _isQuizExpanded = true;
@@ -138,8 +131,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
         _selectedDiseaseIds.clear();
       });
 
-      // Start animation
-      _expandController.forward();
+      // Start container animation
+      await _expandController.forward();
 
       // Load diseases if needed
       if (_diseases.isEmpty) {
@@ -155,7 +148,13 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
             _diseases = diseases;
             _isLoadingDiseases = false;
           });
+
+          // Start stagger animation after data loads
+          _staggerController.forward(from: 0.0);
         }
+      } else {
+        // Data already loaded, start stagger animation
+        _staggerController.forward(from: 0.0);
       }
     }
   }
@@ -327,7 +326,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: isTablet ? MainAxisSize.max : MainAxisSize.min,
           children: [
             Flexible(
               child: Text(
@@ -343,10 +342,15 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
               ),
             ),
             SizedBox(width: 8.w),
-            AnimatedRotation(
-              turns: _isQuizExpanded ? 0.5 : 0.0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
+            AnimatedBuilder(
+              animation: _expandController,
+              builder: (context, child) {
+                return Transform.rotate(
+                  angle: _expandController.value *
+                      3.14159, // 180 derece (π radian)
+                  child: child,
+                );
+              },
               child: Icon(
                 Icons.keyboard_arrow_down,
                 color: Colors.white,
@@ -360,115 +364,170 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
   }
 
   Widget _buildExpandableQuizGrid(bool isTablet) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
-      child: (_isQuizExpanded || _expandController.isAnimating)
-          ? FadeTransition(
-              opacity: _fadeAnimation,
-              child: SlideTransition(
-                  position: _slideAnimation,
-                  child: Container(
-                      margin: EdgeInsets.only(top: 12.h),
-                      padding: EdgeInsets.all(isTablet ? 18.w : 14.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius:
-                            BorderRadius.circular(isTablet ? 20.r : 16.r),
-                        border: Border.all(
-                          color: AppColors.greyBorder.withValues(alpha: 0.3),
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
-                            blurRadius: 10,
-                            offset: const Offset(0, 3),
+    return (_isQuizExpanded || _expandController.isAnimating)
+        ? AnimatedBuilder(
+            animation: _expandController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: 0.3 + (0.7 * _expandController.value), // 0.3'ten 1.0'a
+                alignment: Alignment.topRight, // Butonun altından başla
+                child: ClipRect(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: _expandController.value,
+                    child: child,
+                  ),
+                ),
+              );
+            },
+            child: Container(
+                margin: EdgeInsets.only(top: 12.h),
+                padding: EdgeInsets.all(isTablet ? 18.w : 14.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(isTablet ? 20.r : 16.r),
+                  border: Border.all(
+                    color: AppColors.greyBorder.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: _isLoadingDiseases
+                    ? SizedBox(
+                        height: 200.h,
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.textPrimary,
                           ),
-                        ],
-                      ),
-                      child: _isLoadingDiseases
-                          ? SizedBox(
-                              height: 200.h,
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.textPrimary,
+                        ),
+                      )
+                    : _diseases.isEmpty
+                        ? SizedBox(
+                            height: 200.h,
+                            child: Center(
+                              child: Text(
+                                AppLocalizations.of(context)
+                                    .noDiseasesAvailable,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                            )
-                          : _diseases.isEmpty
-                              ? SizedBox(
-                                  height: 200.h,
-                                  child: Center(
-                                    child: Text(
-                                      AppLocalizations.of(context)
-                                          .noDiseasesAvailable,
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
-                                        color: AppColors.textSecondary,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Gender filter buttons
-                                    Padding(
-                                      padding: EdgeInsets.only(bottom: 10.h),
-                                      child: IntrinsicHeight(
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          children: [
-                                            Expanded(
-                                              child: _buildGenderButton(
-                                                gender: 'male',
-                                                label:
-                                                    AppLocalizations.of(context)
-                                                        .mensTest,
-                                                isTablet: isTablet,
+                            ),
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Gender filter buttons with stagger animation
+                              AnimatedBuilder(
+                                animation: _staggerController,
+                                builder: (context, child) {
+                                  // First button appears at 0.0-0.3
+                                  final firstButtonAnim = Tween<double>(
+                                    begin: 0.0,
+                                    end: 1.0,
+                                  ).animate(CurvedAnimation(
+                                    parent: _staggerController,
+                                    curve: const Interval(0.0, 0.3,
+                                        curve: Curves.easeOut),
+                                  ));
+
+                                  // Second button appears at 0.1-0.4
+                                  final secondButtonAnim = Tween<double>(
+                                    begin: 0.0,
+                                    end: 1.0,
+                                  ).animate(CurvedAnimation(
+                                    parent: _staggerController,
+                                    curve: const Interval(0.1, 0.4,
+                                        curve: Curves.easeOut),
+                                  ));
+
+                                  return Padding(
+                                    padding: EdgeInsets.only(bottom: 10.h),
+                                    child: IntrinsicHeight(
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Expanded(
+                                            child: Transform.translate(
+                                              offset: Offset(
+                                                  -20 *
+                                                      (1 -
+                                                          firstButtonAnim
+                                                              .value),
+                                                  0),
+                                              child: Opacity(
+                                                opacity: firstButtonAnim.value
+                                                    .clamp(0.0, 1.0),
+                                                child: _buildGenderButton(
+                                                  gender: 'male',
+                                                  label: AppLocalizations.of(
+                                                          context)
+                                                      .mensTest,
+                                                  isTablet: isTablet,
+                                                ),
                                               ),
                                             ),
-                                            SizedBox(width: 12.w),
-                                            Expanded(
-                                              child: _buildGenderButton(
-                                                gender: 'female',
-                                                label:
-                                                    AppLocalizations.of(context)
-                                                        .womensTest,
-                                                isTablet: isTablet,
+                                          ),
+                                          SizedBox(width: 12.w),
+                                          Expanded(
+                                            child: Transform.translate(
+                                              offset: Offset(
+                                                  20 *
+                                                      (1 -
+                                                          secondButtonAnim
+                                                              .value),
+                                                  0),
+                                              child: Opacity(
+                                                opacity: secondButtonAnim.value
+                                                    .clamp(0.0, 1.0),
+                                                child: _buildGenderButton(
+                                                  gender: 'female',
+                                                  label: AppLocalizations.of(
+                                                          context)
+                                                      .womensTest,
+                                                  isTablet: isTablet,
+                                                ),
                                               ),
                                             ),
-                                          ],
-                                        ),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                  );
+                                },
+                              ),
 
-                                    // Horizontal PageView for disease grid
-                                    SizedBox(
-                                      height: _calculateGridHeight(isTablet),
-                                      child: PageView.builder(
-                                        controller: _pageController,
-                                        onPageChanged: (page) {
-                                          setState(() => _currentPage = page);
-                                        },
-                                        itemCount: _totalPages,
-                                        itemBuilder: (context, pageIndex) {
-                                          return _buildDiseaseGrid(
-                                              pageIndex, isTablet);
-                                        },
-                                      ),
-                                    ),
+                              // Horizontal PageView for disease grid
+                              SizedBox(
+                                height: _calculateGridHeight(isTablet),
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  onPageChanged: (page) {
+                                    setState(() => _currentPage = page);
+                                  },
+                                  itemCount: _totalPages,
+                                  itemBuilder: (context, pageIndex) {
+                                    return _buildDiseaseGrid(
+                                        pageIndex, isTablet);
+                                  },
+                                ),
+                              ),
 
-                                    _buildPaginationControls(isTablet),
-                                    SizedBox(height: 6.h),
+                              _buildPaginationControls(isTablet),
+                              SizedBox(height: 6.h),
 
-                                    _buildSelectionFooter(isTablet),
-                                  ],
-                                ))))
-          : const SizedBox.shrink(),
-    );
+                              _buildSelectionFooter(isTablet),
+                            ],
+                          )))
+        : const SizedBox.shrink();
   }
 
   Widget _buildPaginationControls(bool isTablet) {
@@ -753,11 +812,39 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
             final isSelected = _isDiseaseSelected(disease.id);
             final isDisabled = _isMaxSelected && !isSelected;
 
-            return DiseaseCard(
-              disease: disease,
-              isSelected: isSelected,
-              isDisabled: isDisabled,
-              onTap: () => _toggleDiseaseSelection(disease.id),
+            // Staggered animation for each card
+            final startInterval = (index * 0.1).clamp(0.0, 0.6);
+            final endInterval = (startInterval + 0.4).clamp(0.0, 1.0);
+
+            final itemAnimation = Tween<double>(
+              begin: 0.0,
+              end: 1.0,
+            ).animate(CurvedAnimation(
+              parent: _staggerController,
+              curve: Interval(
+                startInterval,
+                endInterval,
+                curve: Curves.easeOutBack,
+              ),
+            ));
+
+            return AnimatedBuilder(
+              animation: itemAnimation,
+              builder: (context, child) {
+                return Transform.scale(
+                  scale: 0.5 + (0.5 * itemAnimation.value),
+                  child: Opacity(
+                    opacity: itemAnimation.value.clamp(0.0, 1.0),
+                    child: child,
+                  ),
+                );
+              },
+              child: DiseaseCard(
+                disease: disease,
+                isSelected: isSelected,
+                isDisabled: isDisabled,
+                onTap: () => _toggleDiseaseSelection(disease.id),
+              ),
             );
           },
         );
