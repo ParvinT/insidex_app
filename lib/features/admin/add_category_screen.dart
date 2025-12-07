@@ -569,6 +569,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         id: widget.categoryToEdit?.id ?? '',
         iconName: _selectedIcon,
         names: names,
+        backgroundImages: widget.categoryToEdit?.backgroundImages ?? [],
         createdAt: widget.categoryToEdit?.createdAt,
         updatedAt: DateTime.now(),
         sessionCount: widget.categoryToEdit?.sessionCount ?? 0,
