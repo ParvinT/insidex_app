@@ -47,14 +47,13 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             itemCount: users.length,
             itemBuilder: (context, index) {
               final user = users[index].data() as Map<String, dynamic>;
-              final docId = users[index].id;
 
               return Card(
                 margin: EdgeInsets.only(bottom: 12.h),
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: user['isPremium'] == true
-                        ? AppColors.primaryGold
+                        ? AppColors.textPrimary
                         : AppColors.greyLight,
                     child: Text(
                       user['name']?.substring(0, 1).toUpperCase() ?? 'U',
@@ -86,14 +85,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryGold.withOpacity(0.1),
+                            color: AppColors.textPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: Text(
                             'PRO',
                             style: GoogleFonts.inter(
                               fontSize: 10.sp,
-                              color: AppColors.primaryGold,
+                              color: AppColors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

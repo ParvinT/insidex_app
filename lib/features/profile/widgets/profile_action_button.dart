@@ -39,7 +39,7 @@ class ProfileActionButton extends StatelessWidget {
           ),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: borderColor.withOpacity(0.3),
+            color: borderColor.withValues(alpha: 0.3),
             width: 1.5,
           ),
         ),
@@ -53,7 +53,7 @@ class ProfileActionButton extends StatelessWidget {
                     ? LinearGradient(
                         colors: [
                           iconBackgroundColor,
-                          iconBackgroundColor.withOpacity(0.8),
+                          iconBackgroundColor.withValues(alpha: 0.8),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,

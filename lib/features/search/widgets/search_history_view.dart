@@ -33,7 +33,7 @@ class SearchHistoryView extends StatelessWidget {
     if (isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
+          color: AppColors.textPrimary,
         ),
       );
     }

@@ -1,15 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:marquee/marquee.dart';
 
 import '../../../l10n/app_localizations.dart';
+import '../../../services/session_localization_service.dart';
+import '../../../services/language_helper_service.dart';
 
 class SessionInfoModal {
-  static void show({
+  static Future<void> show({
     required BuildContext context,
     required Map<String, dynamic> session,
-    required String currentTrack,
-  }) {
+  }) async {
+    // 🆕 async
+    // 🆕 Prepare localized content BEFORE showing modal
+    final language = await LanguageHelperService.getCurrentLanguage();
+
+    if (!context.mounted) return;
+
+    final localizedContent = SessionLocalizationService.getLocalizedContent(
+      session,
+      language,
+    );
+
+// Build title with session number
+    final localizedSession = Map<String, dynamic>.from(session);
+
+    final title = localizedContent.title.isNotEmpty
+        ? localizedContent.title
+        : (session['title'] ?? 'Untitled Session');
+
+    localizedSession['_displayTitle'] = title;
+    localizedSession['_displayDescription'] =
+        localizedContent.description.isNotEmpty
+            ? localizedContent.description
+            : (session['description'] ?? '');
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -30,8 +56,7 @@ class SessionInfoModal {
               ),
             ),
             child: _SessionInfoContent(
-              session: session,
-              currentTrack: currentTrack,
+              session: localizedSession, // 🆕 localized session
               animation: animation,
             ),
           ),
@@ -43,12 +68,10 @@ class SessionInfoModal {
 
 class _SessionInfoContent extends StatelessWidget {
   final Map<String, dynamic> session;
-  final String currentTrack;
   final Animation<double> animation;
 
   const _SessionInfoContent({
     required this.session,
-    required this.currentTrack,
     required this.animation,
   });
 
@@ -72,10 +95,10 @@ class _SessionInfoContent extends StatelessWidget {
     final double modalH = (h * (isUltraWide ? 0.90 : 0.86)).clamp(360.0, 900.0);
 
     // Keep large accessibility text sane inside this modal only.
-    final double clampedTextScale = mq.textScaleFactor.clamp(1.0, 1.2);
+    final double clampedTextScale = mq.textScaler.scale(1.0).clamp(1.0, 1.2);
 
     return MediaQuery(
-      data: mq.copyWith(textScaleFactor: clampedTextScale),
+      data: mq.copyWith(textScaler: TextScaler.linear(clampedTextScale)),
       child: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(
@@ -89,7 +112,7 @@ class _SessionInfoContent extends StatelessWidget {
               borderRadius: BorderRadius.circular(24.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: 0.08),
                   blurRadius: 20,
                   offset: const Offset(0, 10),
                 ),
@@ -109,7 +132,11 @@ class _SessionInfoContent extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         _buildSessionTitle(),
-                        if (session['description'] != null)
+                        if (session['_displayDescription'] != null &&
+                            session['_displayDescription']
+                                .toString()
+                                .trim()
+                                .isNotEmpty)
                           _buildDescription(context),
                         _buildNowPlayingCard(context),
                         if (session['howToListen'] != null ||
@@ -118,8 +145,7 @@ class _SessionInfoContent extends StatelessWidget {
                         if (session['benefits'] != null &&
                             (session['benefits'] as List).isNotEmpty)
                           _buildBenefits(),
-                        if (currentTrack == 'subliminal' &&
-                            session['affirmations'] != null)
+                        if (session['subliminal']?['affirmations'] != null)
                           _buildAffirmations(),
                         SizedBox(height: 8.h),
                       ],
@@ -191,20 +217,21 @@ class _SessionInfoContent extends StatelessWidget {
 
   Widget _buildSessionTitle() {
     // Title'ı temizle
-    String cleanTitle = (session['title'] ?? 'Untitled Session')
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-        .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-        .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-        .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-        .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
-        .trim();
+    String displayTitle =
+        (session['_displayTitle'] ?? session['title'] ?? 'Untitled Session')
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
+            .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
+            .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
+            .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
+            .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
+            .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
+            .trim();
 
     return Padding(
       padding: EdgeInsets.only(top: 20.h, bottom: 16.h),
       child: Text(
-        cleanTitle,
+        displayTitle,
         style: GoogleFonts.inter(
           fontSize: (24.sp).clamp(18.sp, 30.sp),
           fontWeight: FontWeight.w700,
@@ -217,10 +244,12 @@ class _SessionInfoContent extends StatelessWidget {
 
   Widget _buildDescription(BuildContext context) {
     // Description'ı temizle - HTML/Markdown tag'lerini kaldır
-    String cleanDescription = session['description'] ?? '';
+    String rawDescription = session['_displayDescription'] ??
+        (session['description'] ??
+            AppLocalizations.of(context).noDescriptionAvailable);
 
     // Basit HTML tag temizleme
-    cleanDescription = cleanDescription
+    String cleanDescription = rawDescription
         .replaceAll(RegExp(r'<[^>]*>'), '') // HTML tags
         .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1') // Bold markdown
         .replaceAll(RegExp(r'__([^_]*)__'), '\$1') // Bold markdown
@@ -259,34 +288,6 @@ class _SessionInfoContent extends StatelessWidget {
   }
 
   Widget _buildNowPlayingCard(BuildContext context) {
-    final trackData =
-        currentTrack == 'intro' ? session['intro'] : session['subliminal'];
-
-    // Track title ve description'ı temizle
-    String cleanTrackTitle = (trackData?['title'] ??
-            (currentTrack == 'intro' ? 'Introduction' : 'Subliminal'))
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-        .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-        .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-        .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-        .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
-        .trim();
-
-    String? cleanTrackDescription;
-    if (trackData?['description'] != null) {
-      cleanTrackDescription = trackData['description']
-          .replaceAll(RegExp(r'<[^>]*>'), '')
-          .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), '\$1')
-          .replaceAll(RegExp(r'__([^_]*)__'), '\$1')
-          .replaceAll(RegExp(r'\*([^\*]*)\*'), '\$1')
-          .replaceAll(RegExp(r'_([^_]*)_'), '\$1')
-          .replaceAll(RegExp(r'<u>([^<]*)</u>'), '\$1')
-          .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), '\$1')
-          .trim();
-    }
-
     return Container(
       margin: EdgeInsets.only(bottom: 24.h),
       padding: EdgeInsets.all(16.w),
@@ -300,10 +301,10 @@ class _SessionInfoContent extends StatelessWidget {
             width: 48.w,
             height: 48.w,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha: 0.1),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -318,6 +319,7 @@ class _SessionInfoContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // "NOW PLAYING" üst yazı
                 Text(
                   AppLocalizations.of(context).nowPlaying,
                   style: GoogleFonts.inter(
@@ -329,26 +331,8 @@ class _SessionInfoContent extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4.h),
-                Text(
-                  cleanTrackTitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-                if (cleanTrackDescription != null)
-                  Text(
-                    cleanTrackDescription,
-                    style: GoogleFonts.inter(
-                      fontSize: 12.sp,
-                      color: Colors.grey[500],
-                      decoration: TextDecoration.none,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+
+                _buildSessionTitleWithMarquee(context),
               ],
             ),
           ),
@@ -427,6 +411,77 @@ class _SessionInfoContent extends StatelessWidget {
     );
   }
 
+  Widget _buildSessionTitleWithMarquee(BuildContext context) {
+    String rawTitle =
+        session['_displayTitle'] ?? (session['title'] ?? 'Unknown Session');
+
+    String sessionTitle = rawTitle
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), r'$1')
+        .replaceAll(RegExp(r'__([^_]*)__'), r'$1')
+        .replaceAll(RegExp(r'\*([^\*]*)\*'), r'$1')
+        .replaceAll(RegExp(r'_([^_]*)_'), r'$1')
+        .replaceAll(RegExp(r'<u>([^<]*)</u>'), r'$1')
+        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), r'$1')
+        .trim();
+
+    // Text uzunluğunu hesapla (basit kontrol)
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: sessionTitle,
+        style: GoogleFonts.inter(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: double.infinity);
+
+    final textWidth = textPainter.size.width;
+    final availableWidth =
+        MediaQuery.of(context).size.width * 0.5; // Yaklaşık alan
+
+    // ✅ Eğer text uzunsa → Marquee
+    if (textWidth > availableWidth) {
+      return SizedBox(
+        height: 24.h,
+        child: Marquee(
+          text: sessionTitle,
+          style: GoogleFonts.inter(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+            decoration: TextDecoration.none,
+          ),
+          scrollAxis: Axis.horizontal,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          blankSpace: 40.0, // Boşluk
+          velocity: 30.0, // Hız (px/saniye)
+          pauseAfterRound: const Duration(seconds: 1), // Durakla
+          startPadding: 0.0,
+          accelerationDuration: const Duration(milliseconds: 500),
+          accelerationCurve: Curves.linear,
+          decelerationDuration: const Duration(milliseconds: 500),
+          decelerationCurve: Curves.linear,
+        ),
+      );
+    }
+
+    // ✅ Text kısa → Normal text
+    return Text(
+      sessionTitle,
+      style: GoogleFonts.inter(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: Colors.white,
+        decoration: TextDecoration.none,
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   Widget _buildBenefits() {
     final benefits = session['benefits'] as List;
 
@@ -443,46 +498,43 @@ class _SessionInfoContent extends StatelessWidget {
           ),
         ),
         SizedBox(height: 12.h),
-        ...benefits
-            .map((benefit) => Container(
-                  margin: EdgeInsets.only(bottom: 8.h),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(8.r),
-                    border: Border.all(
-                      color: Colors.grey[200]!,
-                      width: 1,
+        ...benefits.map((benefit) => Container(
+              margin: EdgeInsets.only(bottom: 8.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(
+                  color: Colors.grey[200]!,
+                  width: 1,
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 6.h),
+                    width: 4.w,
+                    height: 4.w,
+                    decoration: const BoxDecoration(
+                      color: Colors.black,
+                      shape: BoxShape.circle,
                     ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(top: 6.h),
-                        width: 4.w,
-                        height: 4.w,
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          shape: BoxShape.circle,
-                        ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: Text(
+                      benefit.toString(),
+                      style: GoogleFonts.inter(
+                        fontSize: 13.sp,
+                        color: Colors.grey[800],
+                        height: 1.4,
                       ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: Text(
-                          benefit.toString(),
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            color: Colors.grey[800],
-                            height: 1.4,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ))
-            .toList(),
+                ],
+              ),
+            )),
         SizedBox(height: 24.h),
       ],
     );
@@ -536,36 +588,33 @@ class _SessionInfoContent extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 12.h),
-              ...affirmations
-                  .take(5)
-                  .map((affirmation) => Padding(
-                        padding: EdgeInsets.only(bottom: 8.h),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '•',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Expanded(
-                              child: Text(
-                                affirmation.toString(),
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: Colors.grey[800],
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                            ),
-                          ],
+              ...affirmations.take(5).map((affirmation) => Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '•',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ))
-                  .toList(),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            affirmation.toString(),
+                            style: GoogleFonts.inter(
+                              fontSize: 12.sp,
+                              color: Colors.grey[800],
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
               if (affirmations.length > 5)
                 Padding(
                   padding: EdgeInsets.only(top: 8.h),

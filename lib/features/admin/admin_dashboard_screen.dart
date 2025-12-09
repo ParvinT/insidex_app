@@ -6,7 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../core/constants/app_colors.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'disease_management_screen.dart';
+import 'disease_cause_management_screen.dart';
+import '../../l10n/app_localizations.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -40,10 +42,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         debugPrint('ERROR: No authenticated user found!');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please login to access admin panel'),
+            SnackBar(
+              content:
+                  Text(AppLocalizations.of(context).pleaseLoginToAccessAdmin),
               backgroundColor: Colors.red,
-              duration: Duration(seconds: 3),
+              duration: const Duration(seconds: 3),
             ),
           );
           // Navigate to login screen
@@ -70,10 +73,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               'User ${_currentUser!.email} does not have admin privileges');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Admin access required'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).adminAccessRequired),
                 backgroundColor: Colors.orange,
-                duration: Duration(seconds: 3),
+                duration: const Duration(seconds: 3),
               ),
             );
             Navigator.pop(context);
@@ -89,7 +92,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text(
+                '${AppLocalizations.of(context).errorOccurred}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -149,7 +153,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -173,7 +177,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
             // Menu Title
             Text(
-              'Admin Menu',
+              AppLocalizations.of(context).adminMenu,
               style: GoogleFonts.inter(
                 fontSize: isSmallScreen ? 16.sp : 18.sp,
                 fontWeight: FontWeight.w700,
@@ -192,22 +196,62 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   children: [
                     _buildCompactMenuItem(
                       icon: Icons.dashboard,
-                      title: 'Dashboard',
+                      title: AppLocalizations.of(context).dashboard,
                       onTap: () => Navigator.pop(context),
                       isCompact: isSmallScreen,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.category,
-                      title: 'Categories',
+                      title: AppLocalizations.of(context).categories,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/categories');
                       },
                       isCompact: isSmallScreen,
                     ),
+
+                    _buildCompactMenuItem(
+                      icon: Icons.psychology,
+                      title: AppLocalizations.of(context).manageDiseases,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DiseaseManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.map,
+                      title: AppLocalizations.of(context).manageDiseaseCauses,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const DiseaseCauseManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+
+                    _buildCompactMenuItem(
+                      icon: Icons.home_outlined,
+                      title: AppLocalizations.of(context).homeCards,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(context, '/admin/home-cards');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
                     _buildCompactMenuItem(
                       icon: Icons.music_note,
-                      title: 'Sessions',
+                      title: AppLocalizations.of(context).sessions,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/sessions');
@@ -216,7 +260,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.add_circle,
-                      title: 'Add Session',
+                      title: AppLocalizations.of(context).addSession,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/add-session');
@@ -225,7 +269,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.people,
-                      title: 'Users',
+                      title: AppLocalizations.of(context).users,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/users');
@@ -234,7 +278,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.settings,
-                      title: 'Settings',
+                      title: AppLocalizations.of(context).settings,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/settings');
@@ -247,20 +291,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       padding: EdgeInsets.symmetric(
                           vertical: isSmallScreen ? 8.h : 12.h),
                       child: Divider(
-                        color: AppColors.greyBorder.withOpacity(0.5),
+                        color: AppColors.greyBorder.withValues(alpha: 0.5),
                       ),
                     ),
 
                     // Sign Out
                     _buildCompactMenuItem(
                       icon: Icons.logout,
-                      title: 'Sign Out',
+                      title: AppLocalizations.of(context).signOut,
                       onTap: () async {
-                        Navigator.pop(context);
+                        final navigator = Navigator.of(context);
+                        navigator.pop();
                         await _auth.signOut();
                         if (mounted) {
-                          Navigator.pushReplacementNamed(
-                              context, '/auth/login');
+                          navigator.pushReplacementNamed('/auth/login');
                         }
                       },
                       color: Colors.red,
@@ -273,7 +317,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         margin: EdgeInsets.only(top: 16.h, bottom: 8.h),
                         padding: EdgeInsets.all(12.w),
                         decoration: BoxDecoration(
-                          color: AppColors.greyLight.withOpacity(0.3),
+                          color: AppColors.greyLight.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Row(
@@ -325,12 +369,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         margin: EdgeInsets.symmetric(vertical: isCompact ? 2.h : 4.h),
         decoration: BoxDecoration(
           color: color != null
-              ? color.withOpacity(0.05)
+              ? color.withValues(alpha: 0.05)
               : AppColors.backgroundWhite,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: color?.withOpacity(0.2) ??
-                AppColors.greyBorder.withOpacity(0.3),
+            color: color?.withValues(alpha: 0.2) ??
+                AppColors.greyBorder.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -356,187 +400,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildDesktopSidebar() {
-    return Container(
-      width: 250.w,
-      decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
-        border: Border(
-          right: BorderSide(
-            color: AppColors.greyBorder.withOpacity(0.5),
-            width: 1,
-          ),
-        ),
-      ),
-      child: Column(
-        children: [
-          // Admin Header
-          Container(
-            padding: EdgeInsets.all(24.w),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.admin_panel_settings,
-                  color: AppColors.primaryGold,
-                  size: 48.sp,
-                ),
-                SizedBox(height: 12.h),
-                Text(
-                  'Admin Panel',
-                  style: GoogleFonts.inter(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                if (_currentUser != null)
-                  Column(
-                    children: [
-                      SizedBox(height: 8.h),
-                      Text(
-                        _currentUser!.email ?? '',
-                        style: GoogleFonts.inter(
-                          fontSize: 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-
-          Divider(color: AppColors.greyBorder.withOpacity(0.5)),
-
-          // Menu Items
-          Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: Column(
-                children: [
-                  _buildSidebarItem(
-                    icon: Icons.dashboard,
-                    title: 'Dashboard',
-                    isActive: true,
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.category,
-                    title: 'Categories',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/categories'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.music_note,
-                    title: 'Sessions',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/sessions'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.add_circle,
-                    title: 'Add Session',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/add-session'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.people,
-                    title: 'Users',
-                    onTap: () => Navigator.pushNamed(context, '/admin/users'),
-                  ),
-                  _buildSidebarItem(
-                    icon: Icons.settings,
-                    title: 'Settings',
-                    onTap: () =>
-                        Navigator.pushNamed(context, '/admin/settings'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom Actions
-          Container(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              children: [
-                Divider(color: AppColors.greyBorder.withOpacity(0.5)),
-                _buildSidebarItem(
-                  icon: Icons.logout,
-                  title: 'Sign Out',
-                  onTap: () async {
-                    await _auth.signOut();
-                    if (mounted) {
-                      Navigator.pushReplacementNamed(context, '/auth/login');
-                    }
-                  },
-                  isDestructive: true,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSidebarItem({
-    required IconData icon,
-    required String title,
-    VoidCallback? onTap,
-    bool isActive = false,
-    bool isDestructive = false,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.primaryGold.withOpacity(0.1)
-              : Colors.transparent,
-          border: isActive
-              ? const Border(
-                  left: BorderSide(
-                    color: AppColors.primaryGold,
-                    width: 3,
-                  ),
-                )
-              : null,
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isDestructive
-                  ? Colors.red
-                  : isActive
-                      ? AppColors.primaryGold
-                      : AppColors.textSecondary,
-              size: 20.sp,
-            ),
-            SizedBox(width: 12.w),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-                color: isDestructive
-                    ? Colors.red
-                    : isActive
-                        ? AppColors.primaryGold
-                        : AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildMainContent() {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
+          color: AppColors.textPrimary,
         ),
       );
     }
@@ -548,7 +416,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         children: [
           // Header
           Text(
-            'Dashboard Overview',
+            AppLocalizations.of(context).dashboardOverview,
             style: GoogleFonts.inter(
               fontSize: 24.sp,
               fontWeight: FontWeight.w700,
@@ -557,7 +425,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Welcome to your admin dashboard',
+            AppLocalizations.of(context).welcomeToAdminDashboard,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: AppColors.textSecondary,
@@ -591,25 +459,25 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           childAspectRatio: constraints.maxWidth > 600 ? 1.8 : 1.4,
           children: [
             _buildStatCard(
-              title: 'Total Users',
+              title: AppLocalizations.of(context).totalUsers,
               value: '${_statistics['totalUsers'] ?? 0}',
               icon: Icons.people,
               color: Colors.blue,
             ),
             _buildStatCard(
-              title: 'Premium Users',
+              title: AppLocalizations.of(context).premiumUsers,
               value: '${_statistics['premiumUsers'] ?? 0}',
               icon: Icons.star,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
             ),
             _buildStatCard(
-              title: 'Total Sessions',
+              title: AppLocalizations.of(context).totalSessions,
               value: '${_statistics['totalSessions'] ?? 0}',
               icon: Icons.music_note,
               color: Colors.green,
             ),
             _buildStatCard(
-              title: 'Categories',
+              title: AppLocalizations.of(context).totalCategories,
               value: '${_statistics['totalCategories'] ?? 0}',
               icon: Icons.category,
               color: Colors.purple,
@@ -618,272 +486,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         );
       },
     );
-  }
-
-  Widget _buildWaitlistSection() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('waitlist')
-          .where('marketingConsent', isEqualTo: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        final subscriberCount = snapshot.data?.size ?? 0;
-
-        return Container(
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.primaryGold.withOpacity(0.1),
-                AppColors.primaryGold.withOpacity(0.05),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(
-              color: AppColors.primaryGold.withOpacity(0.3),
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '📧 Premium Waitlist',
-                        style: GoogleFonts.inter(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        '$subscriberCount subscribers with marketing consent',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showSendEmailDialog(subscriberCount),
-                    icon: const Icon(Icons.send, size: 18),
-                    label: const Text('Send Email'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryGold,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Email gönderme dialog'u
-  void _showSendEmailDialog(int subscriberCount) {
-    final subjectController = TextEditingController(
-      text: '🎉 INSIDEX Premium is Now Available!',
-    );
-    final titleController = TextEditingController(
-      text: 'Premium Launch - Special Offer',
-    );
-    final messageController = TextEditingController(
-      text: 'We are excited to announce that INSIDEX Premium is finally here! '
-          'As an early supporter, you get exclusive access at 50% OFF for the first 3 months.',
-    );
-    final testEmailController = TextEditingController();
-    bool sendTest = false;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(
-            'Send Premium Announcement',
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Container(
-              width: 400.w,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Send to $subscriberCount waitlist subscribers',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // Subject
-                  TextField(
-                    controller: subjectController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Subject',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Title
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Title',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Message
-                  TextField(
-                    controller: messageController,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      labelText: 'Message',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Test option
-                  CheckboxListTile(
-                    value: sendTest,
-                    onChanged: (value) {
-                      setState(() => sendTest = value ?? false);
-                    },
-                    title: const Text('Send test email first'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-
-                  if (sendTest) ...[
-                    TextField(
-                      controller: testEmailController,
-                      decoration: InputDecoration(
-                        labelText: 'Test Email',
-                        hintText: 'your@email.com',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                await _sendWaitlistEmail(
-                  subject: subjectController.text,
-                  title: titleController.text,
-                  message: messageController.text,
-                  sendTest: sendTest,
-                  testEmail: sendTest ? testEmailController.text : null,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGold,
-              ),
-              child: Text(sendTest ? 'Send Test' : 'Send to All'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Email gönderme fonksiyonu
-  Future<void> _sendWaitlistEmail({
-    required String subject,
-    required String title,
-    required String message,
-    required bool sendTest,
-    String? testEmail,
-  }) async {
-    // Loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
-        ),
-      ),
-    );
-
-    try {
-      // Import ekleyin: import 'package:cloud_functions/cloud_functions.dart';
-      final functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('sendWaitlistAnnouncement');
-
-      final result = await callable.call({
-        'subject': subject,
-        'title': title,
-        'message': message,
-        'sendTest': sendTest,
-        'testEmail': testEmail,
-      });
-
-      // Hide loading
-      Navigator.pop(context);
-
-      // Show success
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result.data['message'] ?? 'Email sent successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      // Hide loading
-      Navigator.pop(context);
-
-      // Show error
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
   }
 
   Widget _buildStatCard({
@@ -898,12 +500,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         color: AppColors.backgroundWhite,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder.withOpacity(0.5),
+          color: AppColors.greyBorder.withValues(alpha: 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -919,7 +521,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
@@ -969,12 +571,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         color: AppColors.backgroundWhite,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder.withOpacity(0.5),
+          color: AppColors.greyBorder.withValues(alpha: 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -984,7 +586,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Recent Activity',
+            AppLocalizations.of(context).recentActivity,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -1006,7 +608,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     width: 8.w,
                     height: 8.w,
                     decoration: const BoxDecoration(
-                      color: AppColors.primaryGold,
+                      color: AppColors.textPrimary,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -1043,7 +645,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         color: AppColors.backgroundWhite,
         border: Border(
           bottom: BorderSide(
-            color: AppColors.greyBorder.withOpacity(0.5),
+            color: AppColors.greyBorder.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -1080,7 +682,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Admin Panel',
+                  AppLocalizations.of(context).adminPanel,
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
@@ -1088,7 +690,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 Text(
-                  'Manage your app',
+                  AppLocalizations.of(context).manageYourApp,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,
@@ -1109,7 +711,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 borderRadius: BorderRadius.circular(10.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -1129,9 +731,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isWideScreen = screenWidth > 768;
-
     return Scaffold(
       backgroundColor: AppColors.backgroundWhite,
       body: SafeArea(

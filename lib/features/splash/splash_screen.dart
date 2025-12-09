@@ -4,13 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:http/http.dart' as http;
 import 'dart:math' as math;
+import '../offline/offline_mode_screen.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_constants.dart';
-import 'package:google_fonts/google_fonts.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/auth_persistence_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/image_prefetch_service.dart';
+import '../../l10n/app_localizations.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,7 +37,8 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _initAnimations();
     _startAnimations();
-    _checkAuthAndNavigate(); // sadece yönlendirme mantığı güncellendi
+    _checkAuthAndNavigate();
+    ImagePrefetchService.prefetchPopularSessions(limit: 20);
   }
 
   void _initAnimations() {
@@ -80,75 +86,178 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(const Duration(seconds: 2), () async {
       if (!mounted) return;
 
-      print('========== AUTH CHECK START ==========');
+      debugPrint('========== AUTH CHECK START ==========');
 
       try {
-        // Firebase user kontrolü
-        User? firebaseUser = FirebaseAuth.instance.currentUser;
-        print('Firebase User: ${firebaseUser?.email ?? "NULL"}');
+        // 1️⃣ CHECK REAL INTERNET CONNECTIVITY (not just WiFi status)
+        final isOnline = await _checkRealConnectivity();
+        debugPrint('Connectivity: ${isOnline ? "ONLINE" : "OFFLINE"}');
 
-        // Saved session kontrolü
-        final hasSession = await AuthPersistenceService.hasValidSession();
-        print('Has Valid Session: $hasSession');
-
-        // SharedPreferences'ı direkt kontrol et
+        // 2️⃣ CHECK IF USER HAS LOGGED IN BEFORE
         final prefs = await SharedPreferences.getInstance();
-        print('Saved Email: ${prefs.getString('user_email') ?? "NULL"}');
-        print(
-            'Saved Token: ${prefs.getString('fb_auth_token')?.substring(0, 20) ?? "NULL"}...');
-        print('Token Timestamp: ${prefs.getInt('token_timestamp') ?? 0}');
+        final hasLoggedIn = prefs.getBool('has_logged_in') ?? false;
+        debugPrint('Has logged in before: $hasLoggedIn');
 
-        if (hasSession) {
-          print('Valid session found, checking Firebase user...');
-
-          if (firebaseUser != null) {
-            print('Firebase user exists, refreshing token...');
-
-            try {
-              await firebaseUser.reload();
-              final token = await firebaseUser.getIdToken();
-              print('Token refresh successful');
-
-              if (mounted) {
-                print('Navigating to HOME');
-                Navigator.pushReplacementNamed(context, AppRoutes.home);
-                return;
-              }
-            } catch (e) {
-              print('Token refresh failed: $e');
+        // 3️⃣ OFFLINE HANDLING
+        if (!isOnline) {
+          if (hasLoggedIn) {
+            // User has logged in before - show offline mode
+            debugPrint('OFFLINE + HAS_LOGGED_IN → Offline Mode Screen');
+            if (mounted) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const OfflineModeScreen()),
+              );
             }
+            return;
           } else {
-            print('No Firebase user, trying auto login...');
+            // Never logged in - need internet
+            debugPrint('OFFLINE + NEVER_LOGGED_IN → Need internet');
+            if (mounted) {
+              _showInternetRequiredDialog();
+            }
+            return;
           }
         }
 
+        // 4️⃣ ONLINE - NORMAL AUTH FLOW (mevcut kod aynen devam)
+        User? firebaseUser = FirebaseAuth.instance.currentUser;
+        debugPrint('Firebase User: ${firebaseUser?.email ?? "NULL"}');
+
+        // Saved session kontrolü
+        final hasSession = await AuthPersistenceService.hasValidSession();
+        debugPrint('Has Valid Session: $hasSession');
+
+        debugPrint('Saved Email: ${prefs.getString('user_email') ?? "NULL"}');
+        debugPrint(
+            'Saved Token: ${prefs.getString('fb_auth_token')?.substring(0, 20) ?? "NULL"}...');
+        debugPrint('Token Timestamp: ${prefs.getInt('token_timestamp') ?? 0}');
+
+        if (hasSession && firebaseUser != null) {
+          debugPrint('Valid session found with Firebase user');
+
+          // Try to refresh token, but continue even if it fails (offline mode)
+          try {
+            await firebaseUser.reload();
+            debugPrint('Token refresh successful');
+          } catch (e) {
+            debugPrint('Token refresh failed (offline?): $e');
+            // Continue anyway - user can use app in offline mode
+          }
+
+          // Navigate to HOME regardless of token refresh result
+          if (mounted) {
+            debugPrint('Navigating to HOME');
+            Navigator.pushReplacementNamed(context, AppRoutes.home);
+            return;
+          }
+        } else if (hasSession && firebaseUser == null) {
+          debugPrint('Has session but no Firebase user, trying auto login...');
+        }
         // Auto login dene
-        print('Attempting auto sign-in...');
+        debugPrint('Attempting auto sign-in...');
         final user = await AuthPersistenceService.autoSignIn();
 
         if (user != null) {
-          print('Auto login successful: ${user.email}');
+          debugPrint('Auto login successful: ${user.email}');
           if (mounted) {
-            print('Navigating to HOME after auto login');
+            debugPrint('Navigating to HOME after auto login');
             Navigator.pushReplacementNamed(context, AppRoutes.home);
           }
         } else {
-          print('Auto login failed, going to onboarding');
+          debugPrint('Auto login failed, going to onboarding');
           if (mounted) {
-            print('Navigating to GOALS SCREEN');
+            debugPrint('Navigating to GOALS SCREEN');
             Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
           }
         }
       } catch (e) {
-        print('ERROR in auth check: $e');
-        print(e.toString());
+        debugPrint('ERROR in auth check: $e');
+        debugPrint(e.toString());
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.goalsScreen);
         }
       }
 
-      print('========== AUTH CHECK END ==========');
+      debugPrint('========== AUTH CHECK END ==========');
     });
+  }
+
+  /// Check real internet connectivity by making HTTP request
+  Future<bool> _checkRealConnectivity() async {
+    try {
+      // First check basic connectivity
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult.contains(ConnectivityResult.none)) {
+        debugPrint('📡 [Connectivity] No network interface');
+        return false;
+      }
+
+      // Then verify actual internet access with HTTP request
+      final response = await http
+          .get(
+            Uri.parse('https://clients3.google.com/generate_204'),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      debugPrint('📡 [Connectivity] HTTP check: ${response.statusCode}');
+      return response.statusCode == 204 || response.statusCode == 200;
+    } catch (e) {
+      debugPrint('📡 [Connectivity] Real check failed: $e');
+      return false;
+    }
+  }
+
+  void _showInternetRequiredDialog() {
+    final l10n = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.orange, size: 28.sp),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Text(
+                l10n.noInternet,
+                style: GoogleFonts.inter(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          l10n.internetRequiredForFirstLogin,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: AppColors.textSecondary,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _checkAuthAndNavigate();
+            },
+            child: Text(
+              l10n.tryAgain,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

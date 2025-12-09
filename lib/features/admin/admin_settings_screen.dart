@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import '../../core/constants/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../services/admin_service.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
@@ -19,13 +19,11 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   final _emailController = TextEditingController();
   List<Map<String, dynamic>> _adminList = [];
   bool _isLoading = false;
-  int _waitlistCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadAdmins();
-    _loadWaitlistCount();
   }
 
   Future<void> _loadAdmins() async {
@@ -34,17 +32,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     setState(() {
       _adminList = admins;
       _isLoading = false;
-    });
-  }
-
-  Future<void> _loadWaitlistCount() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection('waitlist')
-        .where('marketingConsent', isEqualTo: true)
-        .get();
-
-    setState(() {
-      _waitlistCount = snapshot.size;
     });
   }
 
@@ -59,10 +46,12 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         .limit(1)
         .get();
 
+    if (!mounted) return;
+
     if (users.docs.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('User with email $email not found'),
+          content: Text(AppLocalizations.of(context).userNotFound(email)),
           backgroundColor: Colors.red,
         ),
       );
@@ -75,210 +64,15 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       email: email,
     );
 
+    if (!mounted) return;
+
     if (success) {
       _emailController.clear();
       _loadAdmins();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Admin access granted to $email'),
+          content: Text(AppLocalizations.of(context).adminAccessGranted(email)),
           backgroundColor: Colors.green,
-        ),
-      );
-    }
-  }
-
-  // Email sending dialog
-  void _showSendEmailDialog() {
-    final subjectController = TextEditingController(
-      text: '🎉 INSIDEX Premium is Now Available!',
-    );
-    final titleController = TextEditingController(
-      text: 'Premium Launch - Special Offer',
-    );
-    final messageController = TextEditingController(
-      text: 'We are excited to announce that INSIDEX Premium is finally here! '
-          'As an early supporter, you get exclusive access at 50% OFF for the first 3 months.',
-    );
-    final testEmailController = TextEditingController();
-    bool sendTest = false;
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Text(
-            'Send Premium Announcement',
-            style: GoogleFonts.inter(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: SingleChildScrollView(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.8,
-              constraints: BoxConstraints(maxWidth: 400.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Send to $_waitlistCount waitlist subscribers',
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  SizedBox(height: 20.h),
-
-                  // Subject field
-                  TextField(
-                    controller: subjectController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Subject',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Title field
-                  TextField(
-                    controller: titleController,
-                    decoration: InputDecoration(
-                      labelText: 'Email Title',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Message field
-                  TextField(
-                    controller: messageController,
-                    maxLines: 5,
-                    decoration: InputDecoration(
-                      labelText: 'Message',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-
-                  // Test email option
-                  CheckboxListTile(
-                    value: sendTest,
-                    onChanged: (value) {
-                      setState(() => sendTest = value ?? false);
-                    },
-                    title: const Text('Send test email first'),
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                  ),
-
-                  if (sendTest) ...[
-                    TextField(
-                      controller: testEmailController,
-                      decoration: InputDecoration(
-                        labelText: 'Test Email',
-                        hintText: 'your@email.com',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text(
-                'Cancel',
-                style: TextStyle(color: AppColors.textSecondary),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.pop(context);
-                await _sendWaitlistEmail(
-                  subject: subjectController.text,
-                  title: titleController.text,
-                  message: messageController.text,
-                  sendTest: sendTest,
-                  testEmail: sendTest ? testEmailController.text : null,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryGold,
-              ),
-              child: Text(sendTest ? 'Send Test' : 'Send to All'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Email sending function
-  Future<void> _sendWaitlistEmail({
-    required String subject,
-    required String title,
-    required String message,
-    required bool sendTest,
-    String? testEmail,
-  }) async {
-    // Loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.primaryGold,
-        ),
-      ),
-    );
-
-    try {
-      final functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('sendWaitlistAnnouncement');
-
-      final result = await callable.call({
-        'subject': subject,
-        'title': title,
-        'message': message,
-        'sendTest': sendTest,
-        'testEmail': testEmail,
-      });
-
-      // Hide loading
-      if (mounted) Navigator.pop(context);
-
-      // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result.data['message'] ?? 'Email sent successfully!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Reload count if sent to all
-      if (!sendTest) {
-        _loadWaitlistCount();
-      }
-    } catch (e) {
-      // Hide loading
-      if (mounted) Navigator.pop(context);
-
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to send email: ${e.toString()}'),
-          backgroundColor: Colors.red,
         ),
       );
     }
@@ -292,7 +86,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         backgroundColor: AppColors.backgroundWhite,
         elevation: 0,
         title: Text(
-          'Admin Management',
+          AppLocalizations.of(context).adminManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
@@ -305,84 +99,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Email Campaign Section - NEW!
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primaryGold.withOpacity(0.1),
-                    AppColors.primaryGold.withOpacity(0.05),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: AppColors.primaryGold.withOpacity(0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '📧 Premium Waitlist Campaign',
-                              style: GoogleFonts.inter(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              '$_waitlistCount subscribers with marketing consent',
-                              style: GoogleFonts.inter(
-                                fontSize: 11.sp,
-                                color: AppColors.textSecondary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      ElevatedButton(
-                        onPressed:
-                            _waitlistCount > 0 ? _showSendEmailDialog : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGold,
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 12.w,
-                            vertical: 8.h,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                        ),
-                        child: Text(
-                          'Send',
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
             SizedBox(height: 24.h),
 
             // Add New Admin Section - EXISTING CODE
@@ -397,7 +113,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Add New Admin',
+                    AppLocalizations.of(context).addNewAdmin,
                     style: GoogleFonts.inter(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -411,8 +127,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                         child: TextField(
                           controller: _emailController,
                           decoration: InputDecoration(
-                            labelText: 'User Email',
-                            hintText: 'Enter email',
+                            labelText: AppLocalizations.of(context).userEmail,
+                            hintText: AppLocalizations.of(context).enterEmail,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.r),
                             ),
@@ -429,7 +145,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                       ElevatedButton(
                         onPressed: _addNewAdmin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryGold,
+                          backgroundColor: AppColors.textPrimary,
                           padding: EdgeInsets.symmetric(
                             horizontal: 16.w,
                             vertical: 12.h,
@@ -439,7 +155,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           ),
                         ),
                         child: Text(
-                          'Add Admin',
+                          AppLocalizations.of(context).addAdmin,
                           style: GoogleFonts.inter(
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
@@ -456,7 +172,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
             // Admin List - EXISTING CODE
             Text(
-              'Current Admins',
+              AppLocalizations.of(context).currentAdmins,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
@@ -487,10 +203,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.primaryGold.withOpacity(0.1),
+            backgroundColor: AppColors.textPrimary.withValues(alpha: 0.1),
             child: const Icon(
               Icons.admin_panel_settings,
-              color: AppColors.primaryGold,
+              color: AppColors.textPrimary,
             ),
           ),
           SizedBox(width: 12.w),
@@ -499,7 +215,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  admin['email'] ?? 'Unknown',
+                  admin['email'] ?? AppLocalizations.of(context).unknown,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
@@ -507,7 +223,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   ),
                 ),
                 Text(
-                  'Role: ${admin['role'] ?? 'admin'}',
+                  '${AppLocalizations.of(context).role}: ${admin['role'] ?? 'admin'}',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     color: AppColors.textSecondary,
@@ -529,28 +245,34 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Admin Access'),
-        content: const Text('Are you sure you want to remove admin access?'),
+        title: Text(AppLocalizations.of(context).removeAdminAccess),
+        content: Text(AppLocalizations.of(context).removeAdminConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove', style: TextStyle(color: Colors.red)),
+            child: Text(AppLocalizations.of(context).remove,
+                style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
 
+    if (!mounted) return;
+
     if (confirm == true) {
       final success = await AdminService.removeAdminAccess(adminId);
+
+      if (!mounted) return;
+
       if (success) {
         _loadAdmins();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Admin access removed'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).adminAccessRemoved),
             backgroundColor: Colors.orange,
           ),
         );

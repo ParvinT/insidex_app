@@ -20,7 +20,6 @@ class ProgressScreen extends StatefulWidget {
 class _ProgressScreenState extends State<ProgressScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _selectedPeriod = 'Month';
 
   // Real data from Firebase
   Map<String, dynamic> _analyticsData = {};
@@ -35,7 +34,7 @@ class _ProgressScreenState extends State<ProgressScreen>
     _loadAnalyticsData();
 
     // Auto refresh every 5 seconds
-    _refreshTimer = Timer.periodic(Duration(seconds: 5), (timer) {
+    _refreshTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
       if (mounted) {
         _loadAnalyticsData();
       }
@@ -89,7 +88,7 @@ class _ProgressScreenState extends State<ProgressScreen>
 
       // Calculate total weekly minutes
       final weeklyTotal =
-          weeklyStats.values.fold(0, (sum, minutes) => sum + minutes);
+          weeklyStats.values.fold<int>(0, (total, minutes) => total + minutes);
 
       if (_mounted && mounted) {
         setState(() {
@@ -108,7 +107,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         });
       }
     } catch (e) {
-      print('Error loading analytics: $e');
+      debugPrint('Error loading analytics: $e');
       if (_mounted && mounted) {
         setState(() {
           _analyticsData = _getDefaultAnalytics();
@@ -470,7 +469,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                 borderRadius: BorderRadius.circular(20.r),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.2),
+                                    color: Colors.black.withValues(alpha: 0.2),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
@@ -497,16 +496,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                 Tab(text: AppLocalizations.of(context).week),
                                 Tab(text: AppLocalizations.of(context).day),
                               ],
-                              onTap: (i) {
-                                final periods = [
-                                  AppLocalizations.of(context).analytics,
-                                  AppLocalizations.of(context).year,
-                                  AppLocalizations.of(context).month,
-                                  AppLocalizations.of(context).week,
-                                  AppLocalizations.of(context).day,
-                                ];
-                                setState(() => _selectedPeriod = periods[i]);
-                              },
+                              onTap: (i) {},
                             ),
                           ),
                           SizedBox(height: spacingUnit.h),
@@ -656,7 +646,7 @@ class _ProgressScreenState extends State<ProgressScreen>
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -760,7 +750,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               Container(
                 height: 28.h,
                 decoration: BoxDecoration(
-                  color: colors[i].withOpacity(0.2),
+                  color: colors[i].withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(6.r),
                 ),
                 child: Stack(
@@ -913,7 +903,7 @@ class _ProgressScreenState extends State<ProgressScreen>
           final double barH = maxBarH * t.clamp(0.0, 1.0);
 
           return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 2), // yatay aralık
+            padding: const EdgeInsets.symmetric(horizontal: 2), // yatay aralık
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [

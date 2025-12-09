@@ -1,20 +1,27 @@
 // lib/main.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'firebase_options.dart';
 import 'providers/theme_provider.dart';
 import 'providers/user_provider.dart';
-import 'services/audio_player_service.dart';
+import 'providers/mini_player_provider.dart';
+import 'providers/locale_provider.dart';
+import 'providers/download_provider.dart';
+import 'services/audio/audio_handler.dart';
+import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
 import 'providers/notification_provider.dart';
+import 'package:device_preview/device_preview.dart';
 import 'services/notifications/notification_service.dart';
 import 'services/notifications/notification_reliability_service.dart';
 import 'services/device_session_service.dart';
-import 'providers/locale_provider.dart';
+import 'services/download/connectivity_service.dart';
 import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
@@ -34,32 +41,46 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
-  if (!kIsWeb) {
+  PlatformDispatcher.instance.onError = (error, stack) {
+    FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+    return true;
+  };
+
+  if (!kIsWeb && Platform.isAndroid) {
     BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
     await NotificationReliabilityService.initialize();
   }
   // Notification Service
   try {
     await NotificationService().initialize();
-    print('Notification Service initialized successfully');
+    debugPrint('Notification Service initialized successfully');
   } catch (e) {
-    print('Notification Service initialization error: $e');
+    debugPrint('Notification Service initialization error: $e');
   }
 
   try {
     DeviceSessionService().initializeTokenRefreshListener();
-    print('FCM Token Refresh Listener initialized');
+    debugPrint('FCM Token Refresh Listener initialized');
   } catch (e) {
-    print('FCM Token Refresh error: $e');
+    debugPrint('FCM Token Refresh error: $e');
   }
 
-  // Audio Service'i başlat - Basit versiyon
   try {
-    await AudioPlayerService().initialize();
-    print('Audio Service initialized successfully');
+    await AudioCacheService.initialize();
+    debugPrint('✅ Audio Cache initialized');
+    await initAudioService();
+    debugPrint('✅ Audio Service initialized successfully');
   } catch (e) {
-    print('Audio Service initialization error: $e');
+    debugPrint('❌ Audio Service initialization error: $e');
+  }
+
+  try {
+    await ConnectivityService().initialize();
+    debugPrint('✅ Connectivity Service initialized');
+  } catch (e) {
+    debugPrint('Connectivity Service initialization error: $e');
   }
 
   SystemChrome.setSystemUIOverlayStyle(
@@ -74,17 +95,26 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  debugPrint('🌍 Initializing LocaleProvider...');
+  final localeProvider = await LocaleProvider.initialize();
+  debugPrint(
+      '✅ LocaleProvider ready with locale: ${localeProvider.locale.languageCode}');
+
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(
-            create: (_) => UserProvider()..initAuthListener()),
-        ChangeNotifierProvider(
-            create: (_) => NotificationProvider()..initialize()),
-      ],
-      child: const InsidexApp(),
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => DownloadProvider()),
+          ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(
+              create: (_) => UserProvider()..initAuthListener()),
+          ChangeNotifierProvider(
+              create: (_) => NotificationProvider()..initialize()),
+          ChangeNotifierProvider(create: (_) => MiniPlayerProvider()),
+        ],
+        child: InsidexApp(localeProvider: localeProvider),
+      ),
     ),
   );
 }

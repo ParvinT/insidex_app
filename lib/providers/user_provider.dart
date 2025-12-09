@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
 import '../app.dart';
 import '../services/device_session_service.dart';
 import '../shared/widgets/device_logout_dialog.dart';
 import '../services/auth_persistence_service.dart';
+import '../services/audio/audio_player_service.dart';
+import '../services/download/decryption_preloader.dart';
+import 'mini_player_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   User? _firebaseUser;
@@ -26,7 +30,7 @@ class UserProvider extends ChangeNotifier {
   String get userName => _userData?['name'] ?? 'User';
   String get userEmail => _userData?['email'] ?? '';
   String get userId => _firebaseUser?.uid ?? '';
-  String get avatarEmoji => _userData?['avatarEmoji'] ?? '👤';
+  String get avatarEmoji => _userData?['avatarEmoji'] ?? 'turtle';
 
   // Premium related getters
   bool get isPremium => _userData?['isPremium'] ?? false;
@@ -182,6 +186,35 @@ class UserProvider extends ChangeNotifier {
   Future<void> _performLogout({bool forcedByOtherDevice = false}) async {
     _isShowingLogoutDialog = false;
 
+    MiniPlayerProvider? miniPlayerProvider;
+    final navigatorState = InsidexApp.navigatorKey.currentState;
+    if (navigatorState != null) {
+      try {
+        miniPlayerProvider = Provider.of<MiniPlayerProvider>(
+          navigatorState.context,
+          listen: false,
+        );
+      } catch (e) {
+        debugPrint('⚠️ Could not get MiniPlayerProvider: $e');
+      }
+    }
+
+    debugPrint('🎵 [UserProvider] Stopping audio before logout...');
+    try {
+      final audioService = AudioPlayerService();
+      await audioService.stop();
+      debugPrint('✅ [UserProvider] Audio stopped');
+    } catch (e) {
+      debugPrint('⚠️ [UserProvider] Audio stop error: $e');
+    }
+
+    try {
+      await DecryptionPreloader().clear();
+      debugPrint('✅ [UserProvider] Preloader cache cleared');
+    } catch (e) {
+      debugPrint('⚠️ [UserProvider] Preloader clear error: $e');
+    }
+
     // Clear device session
     if (_firebaseUser != null && !forcedByOtherDevice) {
       debugPrint('🧹 Clearing active device (user initiated logout)');
@@ -194,13 +227,19 @@ class UserProvider extends ChangeNotifier {
     await signOut();
 
     // ✅ Navigate using GlobalKey
-    final navigatorState = InsidexApp.navigatorKey.currentState;
-
     if (navigatorState != null) {
       navigatorState.pushNamedAndRemoveUntil(
         '/auth/welcome',
         (route) => false,
       );
+      Future.delayed(const Duration(milliseconds: 100), () {
+        try {
+          miniPlayerProvider?.dismiss();
+          debugPrint('✅ [UserProvider] Mini player dismissed after logout');
+        } catch (e) {
+          debugPrint('⚠️ [UserProvider] Mini player dismiss error: $e');
+        }
+      });
     } else {
       debugPrint('❌ Cannot navigate to login - Navigator state is null');
     }
@@ -258,7 +297,7 @@ class UserProvider extends ChangeNotifier {
       debugPrint('🎯 User data loaded, starting monitoring...');
       _startDeviceSessionMonitoring(uid);
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -316,10 +355,10 @@ class UserProvider extends ChangeNotifier {
         _isAdmin = _userData!['isAdmin'] ?? false;
       }
 
-      print('Admin status for $uid: $_isAdmin');
+      debugPrint('Admin status for $uid: $_isAdmin');
       notifyListeners();
     } catch (e) {
-      print('Error checking admin status: $e');
+      debugPrint('Error checking admin status: $e');
       _isAdmin = false;
     }
   }
@@ -335,7 +374,7 @@ class UserProvider extends ChangeNotifier {
       'email': _firebaseUser!.email,
       'name': _firebaseUser!.displayName ?? 'User',
       'photoUrl': _firebaseUser!.photoURL,
-      'avatarEmoji': '👤',
+      'avatarEmoji': 'turtle',
       'isAdmin': false,
       'isPremium': false,
       'accountType': 'free',
@@ -387,7 +426,7 @@ class UserProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      print('Error updating profile: $e');
+      debugPrint('Error updating profile: $e');
       return false;
     }
   }
@@ -434,7 +473,7 @@ class UserProvider extends ChangeNotifier {
 
       notifyListeners();
     } catch (e) {
-      print('Error updating premium status: $e');
+      debugPrint('Error updating premium status: $e');
     }
   }
 
@@ -454,7 +493,7 @@ class UserProvider extends ChangeNotifier {
       _userData!['marketingConsent'] = consent;
       notifyListeners();
     } catch (e) {
-      print('Error updating marketing consent: $e');
+      debugPrint('Error updating marketing consent: $e');
     }
   }
 

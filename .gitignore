@@ -57,5 +57,5 @@ functions/node_modules/
 .firebase/
 
 
-lib/l10n/app_localizations.dart
-lib/l10n/app_localizations_*.dart
+#lib/l10n/app_localizations.dart
+#lib/l10n/app_localizations_*.dart

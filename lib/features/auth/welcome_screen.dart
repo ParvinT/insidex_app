@@ -141,7 +141,7 @@ class WelcomeScreen extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.primaryGold,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ),
@@ -175,7 +175,7 @@ class _OutlinedBigButton extends StatelessWidget {
       color: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.black.withOpacity(0.15), width: 1),
+        side: BorderSide(color: Colors.black.withValues(alpha: 0.15), width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),

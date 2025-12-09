@@ -17,10 +17,10 @@ class LegalDocumentScreen extends StatelessWidget {
   final String title;
 
   const LegalDocumentScreen({
-    Key? key,
+    super.key,
     required this.documentName,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +61,9 @@ class LegalDocumentScreen extends StatelessWidget {
         builder: (context, snapshot) {
           // Loading
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(
-                color: AppColors.primaryGold,
+                color: AppColors.textPrimary,
               ),
             );
           }
@@ -181,13 +181,13 @@ class LegalDocumentScreen extends StatelessWidget {
       blockquote: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 15.sp),
         fontStyle: FontStyle.italic,
-        color: AppColors.textSecondary.withOpacity(0.8),
+        color: AppColors.textSecondary.withValues(alpha: 0.8),
       ),
       blockquoteDecoration: BoxDecoration(
-        color: AppColors.primaryGold.withOpacity(0.05),
+        color: AppColors.textPrimary.withValues(alpha: 0.05),
         border: Border(
           left: BorderSide(
-            color: AppColors.primaryGold,
+            color: AppColors.textPrimary,
             width: 4.w,
           ),
         ),
@@ -197,13 +197,13 @@ class LegalDocumentScreen extends StatelessWidget {
       // Code
       code: GoogleFonts.robotoMono(
         fontSize: isDesktop ? 14.sp : (isTablet ? 13.sp : 14.sp),
-        backgroundColor: AppColors.greyLight.withOpacity(0.3),
+        backgroundColor: AppColors.greyLight.withValues(alpha: 0.3),
       ),
 
       // Link
       a: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 15.sp),
-        color: AppColors.primaryGold,
+        color: AppColors.textPrimary,
         decoration: TextDecoration.underline,
       ),
 
@@ -221,7 +221,7 @@ class LegalDocumentScreen extends StatelessWidget {
       // Spacing
       blockSpacing: 16.h,
       listIndent: 24.w,
-      
+
       // Horizontal Rule
       horizontalRuleDecoration: BoxDecoration(
         border: Border(

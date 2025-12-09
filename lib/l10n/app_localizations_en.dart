@@ -214,13 +214,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'View your personalized wellness profile';
 
   @override
-  String get premiumWaitlist => 'Premium Waitlist';
-
-  @override
-  String get joinEarlyAccess => 'Join early access for premium features';
-
-  @override
   String get adminDashboard => 'Admin Dashboard';
+
+  @override
+  String get dashboardOverview => 'Dashboard Overview';
+
+  @override
+  String get welcomeToAdminDashboard => 'Welcome to your admin dashboard';
 
   @override
   String get manageUsersAndSessions =>
@@ -299,7 +299,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCategoryExplore => 'Select a category to explore sessions';
 
   @override
-  String get sessions => 'sessions';
+  String get sessions => 'Sessions';
 
   @override
   String get errorLoadingSessions => 'Error loading sessions';
@@ -476,7 +476,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourAge => 'Your Age';
 
   @override
-  String get active => 'active';
+  String get active => 'Active';
 
   @override
   String get goalsLabel => 'Goals';
@@ -592,7 +592,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseSelectBirthDate => 'Please select your birth date';
 
   @override
-  String get errorSavingData => 'Error saving data. Please try again.';
+  String get errorSavingData => 'Error saving data';
 
   @override
   String get yourInformationIsSecure =>
@@ -1058,6 +1058,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get intro => 'Intro';
 
   @override
+  String get introduction => 'Introduction';
+
+  @override
+  String get subliminalSession => 'Subliminal Session';
+
+  @override
+  String get noIntroductionAvailable => 'No introduction available';
+
+  @override
+  String get unknownSession => 'Unknown Session';
+
+  @override
+  String get audioFileNotFound => 'Audio file not found';
+
+  @override
+  String get failedToPlayAudio => 'Failed to play audio';
+
+  @override
   String get subliminal => 'Subliminal';
 
   @override
@@ -1268,7 +1286,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'The password is too weak. Please use at least 6 characters';
 
   @override
-  String get userNotFound => 'No account found with this email';
+  String userNotFound(Object email) {
+    return 'User with email $email not found';
+  }
 
   @override
   String get incorrectPassword => 'Incorrect password. Please try again';
@@ -1322,4 +1342,791 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get invalidVerificationCode =>
       'Invalid verification code. Please try again.';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get noImageAvailable => 'No image available';
+
+  @override
+  String get noDescriptionAvailable => 'No description available';
+
+  @override
+  String get adminPanel => 'Admin Panel';
+
+  @override
+  String get manageYourApp => 'Manage your app';
+
+  @override
+  String get dashboard => 'Dashboard';
+
+  @override
+  String get adminMenu => 'Admin Menu';
+
+  @override
+  String get users => 'Users';
+
+  @override
+  String get homeCards => 'Home Cards';
+
+  @override
+  String get addSession => 'Add Session';
+
+  @override
+  String get manageDiseases => 'Manage Diseases';
+
+  @override
+  String get addDisease => 'Add Disease';
+
+  @override
+  String get editDisease => 'Edit Disease';
+
+  @override
+  String get diseaseName => 'Disease Name';
+
+  @override
+  String get physical => 'Physical';
+
+  @override
+  String get mental => 'Mental';
+
+  @override
+  String get emotional => 'Emotional';
+
+  @override
+  String get all => 'All';
+
+  @override
+  String get displayOrder => 'Display Order';
+
+  @override
+  String get lowerNumbersFirst => 'Lower numbers appear first';
+
+  @override
+  String get orderRequired => 'Order is required';
+
+  @override
+  String get mustBeNumber => 'Must be a number';
+
+  @override
+  String get englishNameRequired => 'English name is required';
+
+  @override
+  String get diseaseCategory => 'Category';
+
+  @override
+  String get diseaseCreatedSuccessfully => 'Disease created successfully';
+
+  @override
+  String get diseaseUpdatedSuccessfully => 'Disease updated successfully';
+
+  @override
+  String get diseaseDeletedSuccessfully => 'Disease deleted successfully';
+
+  @override
+  String get deletingDiseaseKeepsCauses =>
+      'Note: Disease causes for this disease will NOT be deleted.';
+
+  @override
+  String get noDiseasesFound => 'No diseases found';
+
+  @override
+  String get tapToAddDisease => 'Tap the + button to add a disease';
+
+  @override
+  String get deleteDisease => 'Delete Disease';
+
+  @override
+  String get deleteDiseaseConfirm => 'Are you sure you want to delete';
+
+  @override
+  String get manageDiseaseCauses => 'Manage Disease Causes';
+
+  @override
+  String get addDiseaseCause => 'Add Disease Cause';
+
+  @override
+  String get editDiseaseCause => 'Edit Disease Cause';
+
+  @override
+  String get disease => 'Disease';
+
+  @override
+  String get selectADisease => 'Select a disease';
+
+  @override
+  String get pleaseSelectDisease => 'Please select a disease';
+
+  @override
+  String get diseaseCauseContent => 'Disease Cause Content';
+
+  @override
+  String get describeDiseaseHelp =>
+      'Describe the root cause of this disease and how the session helps...';
+
+  @override
+  String get diseaseCauseCreatedSuccessfully =>
+      'Disease cause created successfully';
+
+  @override
+  String get diseaseCauseUpdatedSuccessfully =>
+      'Disease cause updated successfully';
+
+  @override
+  String get diseaseCauseDeletedSuccessfully =>
+      'Disease cause deleted successfully';
+
+  @override
+  String get noDiseaseCausesFound => 'No disease causes found';
+
+  @override
+  String get tapToAddDiseaseCause => 'Tap the + button to add a disease cause';
+
+  @override
+  String get deleteDiseaseCause => 'Delete Disease Cause';
+
+  @override
+  String get deleteDiseaseCauseConfirm =>
+      'Are you sure you want to delete the disease cause for';
+
+  @override
+  String get forDisease => 'For:';
+
+  @override
+  String get updateDisease => 'Update Disease';
+
+  @override
+  String get updateDiseaseCause => 'Update Disease Cause';
+
+  @override
+  String get recommendsSession => 'Recommends: Session';
+
+  @override
+  String get recommendedSession => 'Recommended Session';
+
+  @override
+  String get selectASession => 'Select a session';
+
+  @override
+  String get pleaseSelectSession => 'Please select a session';
+
+  @override
+  String get englishContentRequired => 'English content is required';
+
+  @override
+  String get update => 'Update';
+
+  @override
+  String get create => 'Create';
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get pleaseSelectCategory => 'Please select a category';
+
+  @override
+  String get pleaseFillAllFields => 'Please fill all required fields';
+
+  @override
+  String get errorLoadingData => 'Error loading data';
+
+  @override
+  String get errorDeletingData => 'Error deleting data';
+
+  @override
+  String get updateSession => 'Update Session';
+
+  @override
+  String get createSession => 'Create Session';
+
+  @override
+  String get updateSymptom => 'Update Symptom';
+
+  @override
+  String get updateEmotionalMap => 'Update Emotional Map';
+
+  @override
+  String get pleaseLoginToAccessAdmin => 'Please login to access admin panel';
+
+  @override
+  String get adminAccessRequired => 'Admin access required';
+
+  @override
+  String get totalUsers => 'Total Users';
+
+  @override
+  String get premiumUsers => 'Premium Users';
+
+  @override
+  String get totalCategories => 'Total Categories';
+
+  @override
+  String get recentActivity => 'Recent Activity';
+
+  @override
+  String get newSessionAdded => 'New session added to Sleep category';
+
+  @override
+  String get hoursAgo => 'h ago';
+
+  @override
+  String get editSession => 'Edit Session';
+
+  @override
+  String get addNewSession => 'Add New Session';
+
+  @override
+  String get sessionNumber => 'Session Number';
+
+  @override
+  String get sessionNumberLabel => 'Session Number (№)';
+
+  @override
+  String get sessionNumberHint => 'e.g., 17';
+
+  @override
+  String get sessionNumberHelper => 'Unique number for this session';
+
+  @override
+  String get sessionNumberAlreadyExists => 'Session number already exists!';
+
+  @override
+  String get emoji => 'Emoji';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get audioFiles => 'Audio Files';
+
+  @override
+  String get subliminalAudio => 'Subliminal Audio';
+
+  @override
+  String get backgroundImages => 'Background Images';
+
+  @override
+  String get backgroundImage => 'Background Image';
+
+  @override
+  String get noAudioSelected => 'No audio selected';
+
+  @override
+  String get noImageSelected => 'No image selected';
+
+  @override
+  String get existing => 'Existing';
+
+  @override
+  String get audioFileTooLarge => 'Audio file too large! Max 500MB allowed';
+
+  @override
+  String get imageFileTooLarge => 'Image file too large! Max 10MB allowed';
+
+  @override
+  String get errorSelectingAudio => 'Error selecting audio';
+
+  @override
+  String get errorSelectingImage => 'Error selecting image';
+
+  @override
+  String get pleaseEnterTitleInOneLang =>
+      'Please enter a title in at least one language';
+
+  @override
+  String get startingUpload => 'Starting upload...';
+
+  @override
+  String get uploadingAudio => 'Uploading audio...';
+
+  @override
+  String get uploadingImage => 'Uploading image...';
+
+  @override
+  String get savingSessionData => 'Saving session data...';
+
+  @override
+  String get sessionSavedSuccessfully => 'Session saved successfully!';
+
+  @override
+  String get errorSavingSession => 'Error saving session';
+
+  @override
+  String get send => 'Send';
+
+  @override
+  String get addNewAdmin => 'Add New Admin';
+
+  @override
+  String get userEmail => 'User Email';
+
+  @override
+  String get enterEmail => 'Enter email';
+
+  @override
+  String get addAdmin => 'Add Admin';
+
+  @override
+  String get currentAdmins => 'Current Admins';
+
+  @override
+  String get unknown => 'Unknown';
+
+  @override
+  String get removeAdminAccess => 'Remove Admin Access';
+
+  @override
+  String get removeAdminConfirm =>
+      'Are you sure you want to remove admin access?';
+
+  @override
+  String get remove => 'Remove';
+
+  @override
+  String get adminAccessRemoved => 'Admin access removed';
+
+  @override
+  String adminAccessGranted(Object email) {
+    return 'Admin access granted to $email';
+  }
+
+  @override
+  String get message => 'Message';
+
+  @override
+  String get adminManagement => 'Admin Management';
+
+  @override
+  String get categoryManagement => 'Category Management';
+
+  @override
+  String get addNewCategory => 'Add New Category';
+
+  @override
+  String get updateCategory => 'Update Category';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Category updated successfully!';
+
+  @override
+  String get errorUpdatingCategory => 'Error updating category';
+
+  @override
+  String get categoryName => 'Category Name';
+
+  @override
+  String get categoryNameHint => 'Category name';
+
+  @override
+  String get addCategory => 'Add Category';
+
+  @override
+  String get errorLoadingCategories => 'Error loading categories';
+
+  @override
+  String get noCategoriesYet => 'No categories yet';
+
+  @override
+  String get noCardsAvailable => 'No cards available';
+
+  @override
+  String get addFirstCategory => 'Add your first category above';
+
+  @override
+  String get pleaseEnterCategoryName => 'Please enter a category name';
+
+  @override
+  String get categoryAlreadyExists => 'This category already exists';
+
+  @override
+  String get categoryAddedSuccessfully => 'Category added successfully!';
+
+  @override
+  String get errorAddingCategory => 'Error adding category';
+
+  @override
+  String get editCategory => 'Edit Category';
+
+  @override
+  String get selectEmoji => 'Select Emoji';
+
+  @override
+  String get deleteCategory => 'Delete Category';
+
+  @override
+  String deleteCategoryConfirm(Object title) {
+    return 'Are you sure you want to delete \"$title\"?\n\nNote: Sessions in this category will NOT be deleted.';
+  }
+
+  @override
+  String get thisCategoryLower => 'this category';
+
+  @override
+  String get categoryDeletedSuccessfully => 'Category deleted successfully';
+
+  @override
+  String get errorDeletingCategory => 'Error deleting category';
+
+  @override
+  String get justNow => 'Just now';
+
+  @override
+  String daysAgo(Object count) {
+    return '$count days ago';
+  }
+
+  @override
+  String hoursAgoFull(Object count) {
+    return '$count hours ago';
+  }
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count minutes ago';
+  }
+
+  @override
+  String get recently => 'Recently';
+
+  @override
+  String get sessionManagement => 'Session Management';
+
+  @override
+  String get deleteSession => 'Delete Session';
+
+  @override
+  String get deleteSessionConfirm =>
+      'Are you sure you want to delete this session?';
+
+  @override
+  String get sessionDeletedSuccessfully => 'Session deleted successfully';
+
+  @override
+  String get noSessionsFound => 'No sessions found';
+
+  @override
+  String get uncategorized => 'Uncategorized';
+
+  @override
+  String get adminSettings => 'Admin Settings';
+
+  @override
+  String get homeCardsManagement => 'Home Cards Management';
+
+  @override
+  String get inactive => 'Inactive';
+
+  @override
+  String imagesRandomRotation(Object count) {
+    return '$count images • Random rotation';
+  }
+
+  @override
+  String get manage => 'Manage';
+
+  @override
+  String manageImagesFor(Object title) {
+    return 'Manage Images for $title';
+  }
+
+  @override
+  String get addImages => 'Add Images';
+
+  @override
+  String get saveImages => 'Save Images';
+
+  @override
+  String get noImagesYet => 'No Images Yet';
+
+  @override
+  String get addImagesToGetStarted => 'Add images to get started';
+
+  @override
+  String imagesUploadedSuccessfully(Object success) {
+    return '$success images uploaded successfully';
+  }
+
+  @override
+  String imagesFailed(Object fail) {
+    return '$fail failed';
+  }
+
+  @override
+  String get errorUploadingImages => 'Error uploading images';
+
+  @override
+  String get imageRemoved => 'Image removed';
+
+  @override
+  String get pleaseAddAtLeast3Images => 'Please add at least 3 images';
+
+  @override
+  String get maximum10ImagesAllowed => 'Maximum 10 images allowed';
+
+  @override
+  String get imagesSavedSuccessfully => 'Images saved successfully';
+
+  @override
+  String get errorSavingImages => 'Error saving images';
+
+  @override
+  String get loadingText => 'Loading';
+
+  @override
+  String get errorLoadingCard => 'Error loading card';
+
+  @override
+  String get cardEnabled => 'Card enabled';
+
+  @override
+  String get cardDisabled => 'Card disabled';
+
+  @override
+  String get manageImages => 'Manage Images';
+
+  @override
+  String get randomBackgroundImages => 'Random Background Images';
+
+  @override
+  String get addImagesInfo =>
+      'Add 3-10 images. One will be randomly selected each time the home screen loads.';
+
+  @override
+  String get imagesUploaded => 'images uploaded successfully';
+
+  @override
+  String get failed => 'failed';
+
+  @override
+  String get contentMultiLanguage => '📝 Content (Multi-Language)';
+
+  @override
+  String get editing => 'Editing';
+
+  @override
+  String get enterSessionTitle => 'Enter session title';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get enterSessionDescription => 'Enter session description';
+
+  @override
+  String get introductionTitle => 'Introduction Title';
+
+  @override
+  String get introductionContent => 'Introduction Content';
+
+  @override
+  String get describeWhatSessionDoes => 'Describe what this session does...';
+
+  @override
+  String get categoryIcon => 'Category Icon';
+
+  @override
+  String get tapToChooseIcon => 'Tap to choose an icon for this category';
+
+  @override
+  String get selectIcon => 'Select Icon';
+
+  @override
+  String get failedToSaveDisease => 'Failed to save disease';
+
+  @override
+  String get selectGender => 'Select gender';
+
+  @override
+  String get pleaseSelectGender => 'Please select gender';
+
+  @override
+  String get originalCategoryDeleted =>
+      'Original category was deleted. Please select a new category.';
+
+  @override
+  String get pleaseAddAtLeastOneImage => 'Please add at least 1 image';
+
+  @override
+  String get categoryImagesInfo =>
+      'Add 1-10 images. One will be randomly selected each time.';
+
+  @override
+  String get showingOnlyYourLanguage => 'Showing only your language';
+
+  @override
+  String get showingAllLanguages => 'Showing all languages';
+
+  @override
+  String get images => 'images';
+
+  @override
+  String get unknownDisease => 'Unknown Disease';
+
+  @override
+  String get browseAllSubliminals => 'Browse all available subliminal sessions';
+
+  @override
+  String get yourPersonalizedCollection =>
+      'Your personalized subliminal collection';
+
+  @override
+  String get deletingSessionAndFiles => 'Deleting session and files...';
+
+  @override
+  String get errorDeletingSession => 'Error deleting session';
+
+  @override
+  String get recommendedForYou => 'Recommended for you';
+
+  @override
+  String get unlockAndListen => 'Unlock & Listen';
+
+  @override
+  String get listenNow => 'Listen Now';
+
+  @override
+  String get startEmotionalTestFree => 'Start My Emotional Test — Free';
+
+  @override
+  String get selected => 'Selected';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get noDiseasesAvailable => 'No diseases available';
+
+  @override
+  String get mensTest => 'Men\'s Test';
+
+  @override
+  String get womensTest => 'Women\'s Test';
+
+  @override
+  String get yourResults => 'Your Results';
+
+  @override
+  String get selectedDiseases => 'Selected Diseases';
+
+  @override
+  String get diseases => 'Diseases';
+
+  @override
+  String get whyIsThisCaused => 'Why is this caused?';
+
+  @override
+  String get seeLess => 'See less';
+
+  @override
+  String get seeMore => 'See more';
+
+  @override
+  String get listen => 'Listen';
+
+  @override
+  String get noHealingSessionAvailable =>
+      'No healing session available for this disease yet.';
+
+  @override
+  String seeXMore(int count) {
+    return 'See $count More';
+  }
+
+  @override
+  String get session => 'Session';
+
+  @override
+  String get couldNotOpenSession => 'Could not open session';
+
+  @override
+  String get noHealingSessionYetWorkingOnIt =>
+      'No healing session available for this condition yet. Our team is working on it!';
+
+  @override
+  String get loadingRecommendation => 'Loading recommendation...';
+
+  @override
+  String get howItWorks => 'How It Works';
+
+  @override
+  String get chooseAvatar => 'Choose Your Avatar';
+
+  @override
+  String get downloads => 'Downloads';
+
+  @override
+  String get noDownloads => 'No Downloads';
+
+  @override
+  String get noDownloadsMessage =>
+      'Download sessions to listen offline without internet';
+
+  @override
+  String get removeDownload => 'Remove Download';
+
+  @override
+  String get removeDownloadMessage =>
+      'This will remove the downloaded file from your device';
+
+  @override
+  String get storageUsed => 'Storage Used';
+
+  @override
+  String get totalSize => 'Total Size';
+
+  @override
+  String get clearAllDownloads => 'Clear All Downloads';
+
+  @override
+  String get clearAllDownloadsMessage =>
+      'This will remove all downloaded sessions from your device';
+
+  @override
+  String get downloading => 'Downloading...';
+
+  @override
+  String get downloadComplete => 'Download Complete';
+
+  @override
+  String get downloadFailed => 'Download Failed';
+
+  @override
+  String get offlineMode => 'Offline Mode';
+
+  @override
+  String get offlineModeMessage => 'Only downloaded sessions are available';
+
+  @override
+  String get offlineListening => 'Listen to downloaded sessions offline';
+
+  @override
+  String get youAreOffline => 'You\'re Offline';
+
+  @override
+  String get offlineDescription =>
+      'Connect to the internet to access all features, or listen to your downloaded sessions.';
+
+  @override
+  String get goToDownloads => 'Go to Downloads';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get checking => 'Checking...';
+
+  @override
+  String get stillOffline => 'Still offline. Please check your connection.';
+
+  @override
+  String get noInternet => 'No Internet';
+
+  @override
+  String get internetRequiredForFirstLogin =>
+      'Internet connection is required for first login. Please connect and try again.';
+
+  @override
+  String get preparing => 'Preparing...';
 }

@@ -13,8 +13,9 @@ import '../../features/admin/add_session_screen.dart';
 import '../../features/admin/category_management_screen.dart';
 import '../../features/admin/session_management_screen.dart';
 import '../../features/admin/user_management_screen.dart';
+import '../../features/admin/home_cards_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
-import '../../features/premium/premium_waitlist_screen.dart';
+import '../../features/admin/add_category_screen.dart';
 import '../../features/auth/forgot_password_screen.dart';
 import '../../features/profile/change_password_screen.dart';
 import '../../features/legal/legal_document_screen.dart';
@@ -47,10 +48,11 @@ class AppRoutes {
   static const String myInsights = '/profile/my-insights';
   static const String player = '/player';
   static const String adminDashboard = '/admin/dashboard';
+  static const String homeCardsManagement = '/admin/home-cards';
+  static const String addCategory = '/admin/add-category';
 
   static const String privacyPolicy = '/legal/privacy-policy';
   static const String termsOfService = '/legal/terms-of-service';
-  static const String premiumWaitlist = '/premium/waitlist';
   static const String about = '/legal/about';
   static const String disclaimer = '/legal/disclaimer';
 
@@ -73,9 +75,11 @@ class AppRoutes {
         profile: (_) => const ProfileScreen(),
         myInsights: (_) => const MyInsightsScreen(),
         adminDashboard: (_) => const AdminDashboardScreen(),
+        addCategory: (context) => const AddCategoryScreen(),
         '/admin/add-session': (_) => const AddSessionScreen(),
         '/admin/categories': (_) => const CategoryManagementScreen(),
         '/admin/sessions': (_) => const SessionManagementScreen(),
+        '/admin/home-cards': (_) => const HomeCardsManagementScreen(),
         '/admin/users': (_) => const UserManagementScreen(),
         '/admin/settings': (_) => const AdminSettingsScreen(),
 
@@ -97,9 +101,6 @@ class AppRoutes {
               title: AppLocalizations.of(context).aboutApp,
             ),
 
-        // premium
-        premiumWaitlist: (_) => const PremiumWaitlistScreen(),
-
         // routes with arguments
         player: (context) {
           final args = ModalRoute.of(context)?.settings.arguments
@@ -113,11 +114,12 @@ class AppRoutes {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      // Kullanıcı giriş yapmamış, onboarding kontrolü yap
       final prefs = await SharedPreferences.getInstance();
       final goals = prefs.getStringList('goals');
       final gender = prefs.getString('gender');
       final birthDate = prefs.getString('birthDate');
+
+      if (!context.mounted) return;
 
       if (goals == null ||
           goals.isEmpty ||
@@ -125,14 +127,11 @@ class AppRoutes {
           gender.isEmpty ||
           birthDate == null ||
           birthDate.isEmpty) {
-        // Onboarding eksik, oraya yönlendir
         Navigator.pushNamed(context, goalsScreen);
       } else {
-        // Onboarding tam ama giriş yapmamış, login'e yönlendir
         Navigator.pushNamed(context, login);
       }
     } else {
-      // Kullanıcı giriş yapmış, profile'a git
       Navigator.pushNamed(context, profile);
     }
   }

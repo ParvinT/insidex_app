@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/foundation.dart';
 
 class FirebaseService {
   FirebaseService._();
@@ -23,26 +24,26 @@ class FirebaseService {
     required String name,
   }) async {
     try {
-      print('=== Starting signUp process ===');
-      print('Email: $email');
-      print('Name: $name');
+      debugPrint('=== Starting signUp process ===');
+      debugPrint('Email: $email');
+      debugPrint('Name: $name');
 
-      print('Checking if email exists via Cloud Function...');
+      debugPrint('Checking if email exists via Cloud Function...');
       try {
         final callable =
             FirebaseFunctions.instance.httpsCallable('checkEmailExists');
         final result = await callable.call({'email': email});
 
         if (result.data['exists'] == true) {
-          print('Email already registered: ${result.data['location']}');
+          debugPrint('Email already registered: ${result.data['location']}');
           return {
             'success': false,
             'code': 'email-already-exists',
           };
         }
-        print('Email is available');
+        debugPrint('Email is available');
       } catch (e) {
-        print('Error checking email via Cloud Function: $e');
+        debugPrint('Error checking email via Cloud Function: $e');
         // Devam et, en kötü duplicate error alırız
       }
 
@@ -65,10 +66,10 @@ class FirebaseService {
       String genCode() =>
           List.generate(6, (_) => Random.secure().nextInt(10)).join();
       final code = genCode();
-      print('Generated OTP: $code');
+      debugPrint('Generated OTP: $code');
 
       // Store OTP and user data temporarily (NOT creating Firebase Auth account yet)
-      print('Attempting to write to otp_verifications collection...');
+      debugPrint('Attempting to write to otp_verifications collection...');
       await _firestore.collection('otp_verifications').doc(email).set({
         'email': email,
         'name': name,
@@ -81,10 +82,10 @@ class FirebaseService {
         'attempts': 0,
         'verified': false,
       });
-      print('Successfully wrote to otp_verifications');
+      debugPrint('Successfully wrote to otp_verifications');
 
       // Queue OTP email
-      print('Attempting to write to mail_queue collection...');
+      debugPrint('Attempting to write to mail_queue collection...');
       await _firestore.collection('mail_queue').add({
         'to': email,
         'type': 'otp',
@@ -94,7 +95,7 @@ class FirebaseService {
         'createdAt': FieldValue.serverTimestamp(),
         'status': 'pending',
       });
-      print('Successfully wrote to mail_queue');
+      debugPrint('Successfully wrote to mail_queue');
 
       return {
         'success': true,
@@ -103,16 +104,16 @@ class FirebaseService {
       };
     } on FirebaseAuthException catch (e) {
       // Firebase Auth errors shouldn't occur here since we're not creating account yet
-      print(
+      debugPrint(
         'Firebase Auth Error in signUp (unexpected): ${e.code} - ${e.message}',
       );
       return {'success': false, 'code': e.code};
     } on FirebaseException catch (e) {
-      print('Firebase Exception in signUp: ${e.code} - ${e.message}');
+      debugPrint('Firebase Exception in signUp: ${e.code} - ${e.message}');
       return {'success': false, 'code': e.code};
     } catch (e) {
-      print('Unexpected error during sign up: $e');
-      print('Error type: ${e.runtimeType}');
+      debugPrint('Unexpected error during sign up: $e');
+      debugPrint('Error type: ${e.runtimeType}');
       return {
         'success': false,
         'code': 'unknown',
@@ -238,7 +239,7 @@ class FirebaseService {
       // Handle specific Firebase Auth errors
       return {'success': false, 'code': e.code};
     } catch (e) {
-      print('Error verifying OTP: $e');
+      debugPrint('Error verifying OTP: $e');
       return {
         'success': false,
         'code': 'unknown',
@@ -275,7 +276,7 @@ class FirebaseService {
     } on FirebaseAuthException catch (e) {
       return {'success': false, 'code': e.code};
     } catch (e) {
-      print('Unexpected error during sign in: $e');
+      debugPrint('Unexpected error during sign in: $e');
       return {
         'success': false,
         'code': 'unknown',
@@ -299,7 +300,7 @@ class FirebaseService {
         'message': 'Password reset email sent successfully!',
       };
     } on FirebaseFunctionsException catch (e) {
-      print('Cloud Function Error: ${e.code} - ${e.message}');
+      debugPrint('Cloud Function Error: ${e.code} - ${e.message}');
 
       if (e.code == 'not-found') {
         return {
@@ -315,7 +316,7 @@ class FirebaseService {
         'code': e.code,
       };
     } catch (e) {
-      print('Unexpected error: $e');
+      debugPrint('Unexpected error: $e');
       return {
         'success': false,
         'code': 'unknown',
@@ -387,7 +388,7 @@ class FirebaseService {
         'code': e.code,
       };
     } catch (e) {
-      print('Unexpected error changing password: $e');
+      debugPrint('Unexpected error changing password: $e');
       return {
         'success': false,
         'code': 'unknown',
@@ -402,7 +403,7 @@ class FirebaseService {
     try {
       await _auth.signOut();
     } catch (e) {
-      print('Error signing out: $e');
+      debugPrint('Error signing out: $e');
     }
   }
 
@@ -455,7 +456,7 @@ class FirebaseService {
         'message': 'New verification code sent to your email.',
       };
     } catch (e) {
-      print('Error resending OTP: $e');
+      debugPrint('Error resending OTP: $e');
       return {
         'success': false,
         'code': 'failed-to-resend',

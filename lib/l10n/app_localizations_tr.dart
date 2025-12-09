@@ -215,13 +215,14 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kişiselleştirilmiş sağlıklı yaşam profilinizi görüntüleyin';
 
   @override
-  String get premiumWaitlist => 'Premium Bekleme Listesi';
-
-  @override
-  String get joinEarlyAccess => 'Premium özelliklere erken erişim için katılın';
-
-  @override
   String get adminDashboard => 'Yönetici Paneli';
+
+  @override
+  String get dashboardOverview => 'Kontrol Paneli Genel Bakış';
+
+  @override
+  String get welcomeToAdminDashboard =>
+      'Yönetici kontrol panelinize hoş geldiniz';
 
   @override
   String get manageUsersAndSessions =>
@@ -301,7 +302,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Seansları keşfetmek için bir kategori seçin';
 
   @override
-  String get sessions => 'seans';
+  String get sessions => 'Seans';
 
   @override
   String get errorLoadingSessions => 'Seanslar yüklenirken hata oluştu';
@@ -481,7 +482,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get yourAge => 'Yaşınız';
 
   @override
-  String get active => 'aktif';
+  String get active => 'Aktif';
 
   @override
   String get goalsLabel => 'Hedefler';
@@ -597,8 +598,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get pleaseSelectBirthDate => 'Lütfen doğum tarihinizi seçin';
 
   @override
-  String get errorSavingData =>
-      'Veri kaydedilirken hata oluştu. Lütfen tekrar deneyin.';
+  String get errorSavingData => 'Veri kaydedilirken hata';
 
   @override
   String get yourInformationIsSecure =>
@@ -1063,6 +1063,24 @@ class AppLocalizationsTr extends AppLocalizations {
   String get intro => 'Giriş';
 
   @override
+  String get introduction => 'Giriş';
+
+  @override
+  String get subliminalSession => 'Bilinçaltı Seans';
+
+  @override
+  String get noIntroductionAvailable => 'Giriş mevcut değil';
+
+  @override
+  String get unknownSession => 'Bilinmeyen Seans';
+
+  @override
+  String get audioFileNotFound => 'Ses dosyası bulunamadı';
+
+  @override
+  String get failedToPlayAudio => 'Ses çalınamadı';
+
+  @override
   String get subliminal => 'Bilinçaltı';
 
   @override
@@ -1273,7 +1291,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Şifre çok zayıf. Lütfen en az 6 karakter kullanın';
 
   @override
-  String get userNotFound => 'Bu e-posta ile kayıtlı hesap bulunamadı';
+  String userNotFound(Object email) {
+    return '$email e-postasına sahip kullanıcı bulunamadı';
+  }
 
   @override
   String get incorrectPassword => 'Yanlış şifre. Lütfen tekrar deneyin';
@@ -1328,4 +1348,794 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get invalidVerificationCode =>
       'Invalid verification code. Please try again.';
+
+  @override
+  String get offline => 'Çevrimdışı';
+
+  @override
+  String get noImageAvailable => 'Görsel mevcut değil';
+
+  @override
+  String get noDescriptionAvailable => 'Açıklama mevcut değil';
+
+  @override
+  String get adminPanel => 'Yönetici Paneli';
+
+  @override
+  String get manageYourApp => 'Uygulamanızı yönetin';
+
+  @override
+  String get dashboard => 'Kontrol Paneli';
+
+  @override
+  String get adminMenu => 'Yönetici Menüsü';
+
+  @override
+  String get users => 'Kullanıcılar';
+
+  @override
+  String get homeCards => 'Ana Sayfa Kartları';
+
+  @override
+  String get addSession => 'Seans Ekle';
+
+  @override
+  String get manageDiseases => 'Hastalıkları Yönet';
+
+  @override
+  String get addDisease => 'Hastalık Ekle';
+
+  @override
+  String get editDisease => 'Hastalığı Düzenle';
+
+  @override
+  String get diseaseName => 'Hastalık Adı';
+
+  @override
+  String get physical => 'Fiziksel';
+
+  @override
+  String get mental => 'Zihinsel';
+
+  @override
+  String get emotional => 'Duygusal';
+
+  @override
+  String get all => 'Tümü';
+
+  @override
+  String get displayOrder => 'Görüntüleme Sırası';
+
+  @override
+  String get lowerNumbersFirst => 'Küçük sayılar önce görünür';
+
+  @override
+  String get orderRequired => 'Sıra gereklidir';
+
+  @override
+  String get mustBeNumber => 'Sayı olmalıdır';
+
+  @override
+  String get englishNameRequired => 'İngilizce ad gereklidir';
+
+  @override
+  String get diseaseCategory => 'Kategori';
+
+  @override
+  String get diseaseCreatedSuccessfully => 'Hastalık başarıyla oluşturuldu';
+
+  @override
+  String get diseaseUpdatedSuccessfully => 'Hastalık başarıyla güncellendi';
+
+  @override
+  String get diseaseDeletedSuccessfully => 'Hastalık başarıyla silindi';
+
+  @override
+  String get deletingDiseaseKeepsCauses =>
+      'Not: Bu hastalığın nedenleri SİLİNMEYECEKTİR.';
+
+  @override
+  String get noDiseasesFound => 'Hastalık bulunamadı';
+
+  @override
+  String get tapToAddDisease => 'Hastalık eklemek için + butonuna dokunun';
+
+  @override
+  String get deleteDisease => 'Hastalığı Sil';
+
+  @override
+  String get deleteDiseaseConfirm => 'Silmek istediğinizden emin misiniz';
+
+  @override
+  String get manageDiseaseCauses => 'Hastalık Nedenlerini Yönet';
+
+  @override
+  String get addDiseaseCause => 'Hastalık Nedeni Ekle';
+
+  @override
+  String get editDiseaseCause => 'Hastalık Nedenini Düzenle';
+
+  @override
+  String get disease => 'Hastalık';
+
+  @override
+  String get selectADisease => 'Bir hastalık seçin';
+
+  @override
+  String get pleaseSelectDisease => 'Lütfen bir hastalık seçin';
+
+  @override
+  String get diseaseCauseContent => 'Hastalık Nedeni İçeriği';
+
+  @override
+  String get describeDiseaseHelp =>
+      'Bu hastalığın kök nedenini ve seansın nasıl yardımcı olduğunu açıklayın...';
+
+  @override
+  String get diseaseCauseCreatedSuccessfully =>
+      'Hastalık nedeni başarıyla oluşturuldu';
+
+  @override
+  String get diseaseCauseUpdatedSuccessfully =>
+      'Hastalık nedeni başarıyla güncellendi';
+
+  @override
+  String get diseaseCauseDeletedSuccessfully =>
+      'Hastalık nedeni başarıyla silindi';
+
+  @override
+  String get noDiseaseCausesFound => 'Hastalık nedeni bulunamadı';
+
+  @override
+  String get tapToAddDiseaseCause =>
+      'Hastalık nedeni eklemek için + butonuna dokunun';
+
+  @override
+  String get deleteDiseaseCause => 'Hastalık Nedenini Sil';
+
+  @override
+  String get deleteDiseaseCauseConfirm =>
+      'Hastalık nedenini silmek istediğinizden emin misiniz';
+
+  @override
+  String get forDisease => 'İçin:';
+
+  @override
+  String get updateDisease => 'Hastalığı Güncelle';
+
+  @override
+  String get updateDiseaseCause => 'Hastalık Nedenini Güncelle';
+
+  @override
+  String get recommendsSession => 'Önerilen Seans:';
+
+  @override
+  String get recommendedSession => 'Önerilen Seans';
+
+  @override
+  String get selectASession => 'Bir seans seçin';
+
+  @override
+  String get pleaseSelectSession => 'Lütfen bir seans seçin';
+
+  @override
+  String get englishContentRequired => 'İngilizce içerik gereklidir';
+
+  @override
+  String get update => 'Güncelle';
+
+  @override
+  String get create => 'Oluştur';
+
+  @override
+  String get delete => 'Sil';
+
+  @override
+  String get pleaseSelectCategory => 'Lütfen bir kategori seçin';
+
+  @override
+  String get pleaseFillAllFields => 'Lütfen tüm gerekli alanları doldurun';
+
+  @override
+  String get errorLoadingData => 'Veri yüklenirken hata';
+
+  @override
+  String get errorDeletingData => 'Veri silinirken hata';
+
+  @override
+  String get updateSession => 'Seansı Güncelle';
+
+  @override
+  String get createSession => 'Seans Oluştur';
+
+  @override
+  String get updateSymptom => 'Semptom Güncelle';
+
+  @override
+  String get updateEmotionalMap => 'Duygusal Haritayı Güncelle';
+
+  @override
+  String get pleaseLoginToAccessAdmin =>
+      'Yönetici paneline erişmek için lütfen giriş yapın';
+
+  @override
+  String get adminAccessRequired => 'Yönetici erişimi gerekli';
+
+  @override
+  String get totalUsers => 'Toplam Kullanıcı';
+
+  @override
+  String get premiumUsers => 'Premium Kullanıcı';
+
+  @override
+  String get totalCategories => 'Toplam Kategori';
+
+  @override
+  String get recentActivity => 'Son Aktiviteler';
+
+  @override
+  String get newSessionAdded => 'Uyku kategorisine yeni seans eklendi';
+
+  @override
+  String get hoursAgo => 's önce';
+
+  @override
+  String get editSession => 'Seans Düzenle';
+
+  @override
+  String get addNewSession => 'Yeni Seans Ekle';
+
+  @override
+  String get sessionNumber => 'Seans Numarası';
+
+  @override
+  String get sessionNumberLabel => 'Seans Numarası (№)';
+
+  @override
+  String get sessionNumberHint => 'örn., 17';
+
+  @override
+  String get sessionNumberHelper => 'Bu seans için benzersiz numara';
+
+  @override
+  String get sessionNumberAlreadyExists => 'Bu seans numarası zaten mevcut!';
+
+  @override
+  String get emoji => 'Emoji';
+
+  @override
+  String get category => 'Kategori';
+
+  @override
+  String get audioFiles => 'Ses Dosyaları';
+
+  @override
+  String get subliminalAudio => 'Bilinçaltı Sesi';
+
+  @override
+  String get backgroundImages => 'Arka Plan Görselleri';
+
+  @override
+  String get backgroundImage => 'Arka Plan Görseli';
+
+  @override
+  String get noAudioSelected => 'Ses seçilmedi';
+
+  @override
+  String get noImageSelected => 'Görsel seçilmedi';
+
+  @override
+  String get existing => 'Mevcut';
+
+  @override
+  String get audioFileTooLarge => 'Ses dosyası çok büyük! Maksimum 500MB';
+
+  @override
+  String get imageFileTooLarge => 'Görsel dosyası çok büyük! Maksimum 10MB';
+
+  @override
+  String get errorSelectingAudio => 'Ses seçilirken hata';
+
+  @override
+  String get errorSelectingImage => 'Görsel seçilirken hata';
+
+  @override
+  String get pleaseEnterTitleInOneLang => 'Lütfen en az bir dilde başlık girin';
+
+  @override
+  String get startingUpload => 'Yükleme başlıyor...';
+
+  @override
+  String get uploadingAudio => 'Ses yükleniyor...';
+
+  @override
+  String get uploadingImage => 'Görsel yükleniyor...';
+
+  @override
+  String get savingSessionData => 'Seans kaydediliyor...';
+
+  @override
+  String get sessionSavedSuccessfully => 'Seans başarıyla kaydedildi!';
+
+  @override
+  String get errorSavingSession => 'Seans kaydedilirken hata';
+
+  @override
+  String get send => 'Gönder';
+
+  @override
+  String get addNewAdmin => 'Yeni Yönetici Ekle';
+
+  @override
+  String get userEmail => 'Kullanıcı E-postası';
+
+  @override
+  String get enterEmail => 'E-posta girin';
+
+  @override
+  String get addAdmin => 'Yönetici Ekle';
+
+  @override
+  String get currentAdmins => 'Mevcut Yöneticiler';
+
+  @override
+  String get unknown => 'Bilinmiyor';
+
+  @override
+  String get removeAdminAccess => 'Yönetici Erişimini Kaldır';
+
+  @override
+  String get removeAdminConfirm =>
+      'Yönetici erişimini kaldırmak istediğinizden emin misiniz?';
+
+  @override
+  String get remove => 'Kaldır';
+
+  @override
+  String get adminAccessRemoved => 'Yönetici erişimi kaldırıldı';
+
+  @override
+  String adminAccessGranted(Object email) {
+    return '$email kullanıcısına yönetici erişimi verildi';
+  }
+
+  @override
+  String get message => 'Mesaj';
+
+  @override
+  String get adminManagement => 'Yönetici Yönetimi';
+
+  @override
+  String get categoryManagement => 'Kategori Yönetimi';
+
+  @override
+  String get addNewCategory => 'Yeni Kategori Ekle';
+
+  @override
+  String get updateCategory => 'Kategoriyi Güncelle';
+
+  @override
+  String get categoryUpdatedSuccessfully => 'Kategori başarıyla güncellendi!';
+
+  @override
+  String get errorUpdatingCategory => 'Kategori güncellenirken hata oluştu';
+
+  @override
+  String get categoryName => 'Kategori Adı';
+
+  @override
+  String get categoryNameHint => 'Kategori adı';
+
+  @override
+  String get addCategory => 'Kategori Ekle';
+
+  @override
+  String get errorLoadingCategories => 'Kategoriler yüklenirken hata';
+
+  @override
+  String get noCategoriesYet => 'Henüz kategori yok';
+
+  @override
+  String get noCardsAvailable => 'Kullanılabilir kart yok';
+
+  @override
+  String get addFirstCategory => 'İlk kategorinizi yukarıdan ekleyin';
+
+  @override
+  String get pleaseEnterCategoryName => 'Lütfen kategori adı girin';
+
+  @override
+  String get categoryAlreadyExists => 'Bu kategori zaten mevcut';
+
+  @override
+  String get categoryAddedSuccessfully => 'Kategori başarıyla eklendi!';
+
+  @override
+  String get errorAddingCategory => 'Kategori eklenirken hata';
+
+  @override
+  String get editCategory => 'Kategori Düzenle';
+
+  @override
+  String get selectEmoji => 'Emoji Seç';
+
+  @override
+  String get deleteCategory => 'Kategori Sil';
+
+  @override
+  String deleteCategoryConfirm(Object title) {
+    return '\"$title\" kategorisini silmek istediğinizden emin misiniz?\n\nNot: Bu kategorideki seanslar silinmeyecek.';
+  }
+
+  @override
+  String get thisCategoryLower => 'bu kategori';
+
+  @override
+  String get categoryDeletedSuccessfully => 'Kategori başarıyla silindi';
+
+  @override
+  String get errorDeletingCategory => 'Kategori silinirken hata';
+
+  @override
+  String get justNow => 'Az önce';
+
+  @override
+  String daysAgo(Object count) {
+    return '$count gün önce';
+  }
+
+  @override
+  String hoursAgoFull(Object count) {
+    return '$count saat önce';
+  }
+
+  @override
+  String minutesAgo(Object count) {
+    return '$count dakika önce';
+  }
+
+  @override
+  String get recently => 'Yakın zamanda';
+
+  @override
+  String get sessionManagement => 'Seans Yönetimi';
+
+  @override
+  String get deleteSession => 'Seans Sil';
+
+  @override
+  String get deleteSessionConfirm =>
+      'Bu seansı silmek istediğinizden emin misiniz?';
+
+  @override
+  String get sessionDeletedSuccessfully => 'Seans başarıyla silindi';
+
+  @override
+  String get noSessionsFound => 'Seans bulunamadı';
+
+  @override
+  String get uncategorized => 'Kategorisiz';
+
+  @override
+  String get adminSettings => 'Yönetici Ayarları';
+
+  @override
+  String get homeCardsManagement => 'Ana Sayfa Kartları Yönetimi';
+
+  @override
+  String get inactive => 'Pasif';
+
+  @override
+  String imagesRandomRotation(Object count) {
+    return '$count görsel • Rastgele rotasyon';
+  }
+
+  @override
+  String get manage => 'Yönet';
+
+  @override
+  String manageImagesFor(Object title) {
+    return '$title için Görselleri Yönet';
+  }
+
+  @override
+  String get addImages => 'Görsel Ekle';
+
+  @override
+  String get saveImages => 'Görselleri Kaydet';
+
+  @override
+  String get noImagesYet => 'Henüz Görsel Yok';
+
+  @override
+  String get addImagesToGetStarted => 'Başlamak için görsel ekleyin';
+
+  @override
+  String imagesUploadedSuccessfully(Object success) {
+    return '$success görsel başarıyla yüklendi';
+  }
+
+  @override
+  String imagesFailed(Object fail) {
+    return '$fail başarısız';
+  }
+
+  @override
+  String get errorUploadingImages => 'Görseller yüklenirken hata';
+
+  @override
+  String get imageRemoved => 'Görsel kaldırıldı';
+
+  @override
+  String get pleaseAddAtLeast3Images => 'Lütfen en az 3 görsel ekleyin';
+
+  @override
+  String get maximum10ImagesAllowed => 'Maksimum 10 görsel eklenebilir';
+
+  @override
+  String get imagesSavedSuccessfully => 'Görseller başarıyla kaydedildi';
+
+  @override
+  String get errorSavingImages => 'Görseller kaydedilirken hata';
+
+  @override
+  String get loadingText => 'Yükleniyor';
+
+  @override
+  String get errorLoadingCard => 'Kart yüklenirken hata';
+
+  @override
+  String get cardEnabled => 'Kart etkinleştirildi';
+
+  @override
+  String get cardDisabled => 'Kart devre dışı bırakıldı';
+
+  @override
+  String get manageImages => 'Görselleri Yönet';
+
+  @override
+  String get randomBackgroundImages => 'Rastgele Arka Plan Görselleri';
+
+  @override
+  String get addImagesInfo =>
+      '3-10 görsel ekleyin. Ana ekran her yüklendiğinde rastgele biri seçilecek.';
+
+  @override
+  String get imagesUploaded => 'görsel başarıyla yüklendi';
+
+  @override
+  String get failed => 'başarısız';
+
+  @override
+  String get contentMultiLanguage => '📝 İçerik (Çoklu Dil)';
+
+  @override
+  String get editing => 'Düzenleniyor';
+
+  @override
+  String get enterSessionTitle => 'Seans başlığını girin';
+
+  @override
+  String get description => 'Açıklama';
+
+  @override
+  String get enterSessionDescription => 'Seans açıklamasını girin';
+
+  @override
+  String get introductionTitle => 'Giriş Başlığı';
+
+  @override
+  String get introductionContent => 'Giriş İçeriği';
+
+  @override
+  String get describeWhatSessionDoes => 'Bu seansın ne yaptığını açıklayın...';
+
+  @override
+  String get categoryIcon => 'Kategori İkonu';
+
+  @override
+  String get tapToChooseIcon => 'Bu kategori için bir ikon seçmek için dokunun';
+
+  @override
+  String get selectIcon => 'İkon Seç';
+
+  @override
+  String get failedToSaveDisease => 'Hastalık kaydedilemedi';
+
+  @override
+  String get selectGender => 'Cinsiyet seçin';
+
+  @override
+  String get pleaseSelectGender => 'Lütfen cinsiyet seçin';
+
+  @override
+  String get originalCategoryDeleted =>
+      'Orijinal kategori silindi. Lütfen yeni bir kategori seçin.';
+
+  @override
+  String get pleaseAddAtLeastOneImage => 'Lütfen en az 1 görsel ekleyin';
+
+  @override
+  String get categoryImagesInfo =>
+      '1-10 arası görsel ekleyin. Her seferinde rastgele biri seçilecek.';
+
+  @override
+  String get showingOnlyYourLanguage => 'Sadece senin dilin gösteriliyor';
+
+  @override
+  String get showingAllLanguages => 'Tüm diller gösteriliyor';
+
+  @override
+  String get images => 'görsel';
+
+  @override
+  String get unknownDisease => 'Bilinmeyen Hastalık';
+
+  @override
+  String get browseAllSubliminals =>
+      'Tüm mevcut bilinçaltı seanslarına göz atın';
+
+  @override
+  String get yourPersonalizedCollection =>
+      'Kişiselleştirilmiş bilinçaltı koleksiyonun';
+
+  @override
+  String get deletingSessionAndFiles => 'Seans ve dosyalar siliniyor...';
+
+  @override
+  String get errorDeletingSession => 'Seans silinirken hata oluştu';
+
+  @override
+  String get recommendedForYou => 'Senin için önerilen';
+
+  @override
+  String get unlockAndListen => 'Kilidi Aç ve Dinle';
+
+  @override
+  String get listenNow => 'Şimdi Dinle';
+
+  @override
+  String get startEmotionalTestFree => 'Duygusal Testimi Başlat — Ücretsiz';
+
+  @override
+  String get selected => 'Seçili';
+
+  @override
+  String get next => 'İleri';
+
+  @override
+  String get noDiseasesAvailable => 'Mevcut hastalık yok';
+
+  @override
+  String get mensTest => 'Erkekler için Test';
+
+  @override
+  String get womensTest => 'Kadınlar için Test';
+
+  @override
+  String get yourResults => 'Sonuçların';
+
+  @override
+  String get selectedDiseases => 'Seçilen Hastalıklar';
+
+  @override
+  String get diseases => 'Hastalık';
+
+  @override
+  String get whyIsThisCaused => 'Bu neden oluşuyor?';
+
+  @override
+  String get seeLess => 'Daha az gör';
+
+  @override
+  String get seeMore => 'Daha fazla gör';
+
+  @override
+  String get listen => 'Dinle';
+
+  @override
+  String get noHealingSessionAvailable =>
+      'Bu hastalık için henüz iyileştirme seansı mevcut değil.';
+
+  @override
+  String seeXMore(int count) {
+    return '$count Tane Daha Gör';
+  }
+
+  @override
+  String get session => 'Seans';
+
+  @override
+  String get couldNotOpenSession => 'Seans açılamadı';
+
+  @override
+  String get noHealingSessionYetWorkingOnIt =>
+      'Bu durum için henüz iyileştirme seansı mevcut değil. Ekibimiz üzerinde çalışıyor!';
+
+  @override
+  String get loadingRecommendation => 'Öneri yükleniyor...';
+
+  @override
+  String get howItWorks => 'Nasıl Çalışır';
+
+  @override
+  String get chooseAvatar => 'Avatarını Seç';
+
+  @override
+  String get downloads => 'İndirilenler';
+
+  @override
+  String get noDownloads => 'İndirilen Yok';
+
+  @override
+  String get noDownloadsMessage =>
+      'İnternet olmadan dinlemek için seansları indirin';
+
+  @override
+  String get removeDownload => 'İndirmeyi Kaldır';
+
+  @override
+  String get removeDownloadMessage =>
+      'Bu, indirilen dosyayı cihazınızdan kaldıracak';
+
+  @override
+  String get storageUsed => 'Kullanılan Depolama';
+
+  @override
+  String get totalSize => 'Toplam Boyut';
+
+  @override
+  String get clearAllDownloads => 'Tüm İndirilenleri Temizle';
+
+  @override
+  String get clearAllDownloadsMessage =>
+      'Bu, tüm indirilen seansları cihazınızdan kaldıracak';
+
+  @override
+  String get downloading => 'İndiriliyor...';
+
+  @override
+  String get downloadComplete => 'İndirme Tamamlandı';
+
+  @override
+  String get downloadFailed => 'İndirme Başarısız';
+
+  @override
+  String get offlineMode => 'Çevrimdışı Mod';
+
+  @override
+  String get offlineModeMessage => 'Yalnızca indirilen seanslar kullanılabilir';
+
+  @override
+  String get offlineListening => 'İndirilen seansları çevrimdışı dinleyin';
+
+  @override
+  String get youAreOffline => 'Çevrimdışısınız';
+
+  @override
+  String get offlineDescription =>
+      'Tüm özelliklere erişmek için internete bağlanın veya indirilen seanslarınızı dinleyin.';
+
+  @override
+  String get goToDownloads => 'İndirilenlere Git';
+
+  @override
+  String get tryAgain => 'Tekrar Dene';
+
+  @override
+  String get checking => 'Kontrol ediliyor...';
+
+  @override
+  String get stillOffline =>
+      'Hala çevrimdışı. Lütfen bağlantınızı kontrol edin.';
+
+  @override
+  String get noInternet => 'İnternet Yok';
+
+  @override
+  String get internetRequiredForFirstLogin =>
+      'İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin.';
+
+  @override
+  String get preparing => 'Hazırlanıyor...';
 }

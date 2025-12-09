@@ -16,10 +16,10 @@ class DeviceLogoutDialog extends StatefulWidget {
   final int countdownSeconds;
 
   const DeviceLogoutDialog({
-    Key? key,
+    super.key,
     required this.onLogout,
     this.countdownSeconds = 30,
-  }) : super(key: key);
+  });
 
   @override
   State<DeviceLogoutDialog> createState() => _DeviceLogoutDialogState();
@@ -77,11 +77,11 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
     final double countdownSize =
         isTablet ? 48.sp.clamp(42.0, 54.0) : 42.sp.clamp(36.0, 48.0);
 
-    return WillPopScope(
+    return PopScope(
       // Prevent back button
-      onWillPop: () async => false,
+      canPop: false,
       child: Material(
-        color: Colors.black.withOpacity(0.85),
+        color: Colors.black.withValues(alpha: 0.85),
         child: Center(
           child: Container(
             width: maxContentWidth,
@@ -99,7 +99,7 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
                   width: iconSize,
                   height: iconSize,
                   decoration: BoxDecoration(
-                    color: Colors.orange.withOpacity(0.1),
+                    color: Colors.orange.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -141,10 +141,10 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
                 Container(
                   padding: EdgeInsets.all(isTablet ? 16.w : 14.w),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.05),
+                    color: Colors.red.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: Colors.red.withOpacity(0.2),
+                      color: Colors.red.withValues(alpha: 0.2),
                       width: 1,
                     ),
                   ),
@@ -185,7 +185,7 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
                       color: _getCountdownColor(),
                       width: 6,
                     ),
-                    color: _getCountdownColor().withOpacity(0.1),
+                    color: _getCountdownColor().withValues(alpha: 0.1),
                   ),
                   child: Center(
                     child: Text(
@@ -222,6 +222,6 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
   Color _getCountdownColor() {
     if (_remainingSeconds <= 10) return Colors.red;
     if (_remainingSeconds <= 20) return Colors.orange;
-    return AppColors.primaryGold;
+    return AppColors.textPrimary;
   }
 }

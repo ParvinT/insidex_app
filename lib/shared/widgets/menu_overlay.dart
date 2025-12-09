@@ -1,3 +1,5 @@
+// lib/shared/widgets/menu_overlay.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -57,10 +59,18 @@ class _MenuOverlayState extends State<MenuOverlay>
     super.dispose();
   }
 
-  void _closeMenu() {
-    _animationController.reverse().then((_) {
-      widget.onClose();
-    });
+  /// Close menu with animation and return Future
+  Future<void> _closeMenu() async {
+    await _animationController.reverse();
+    widget.onClose();
+  }
+
+  /// Close menu and then navigate
+  Future<void> _closeMenuAndNavigate(VoidCallback navigate) async {
+    await _closeMenu();
+    if (mounted) {
+      navigate();
+    }
   }
 
   @override
@@ -76,7 +86,7 @@ class _MenuOverlayState extends State<MenuOverlay>
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Container(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                 ),
               ),
             ),
@@ -97,7 +107,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color: Colors.black.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(-5, 0),
                       ),
@@ -147,19 +157,17 @@ class _MenuOverlayState extends State<MenuOverlay>
                               _buildMenuItem(
                                 icon: Icons.person_outline,
                                 title: AppLocalizations.of(context).profile,
-                                onTap: () {
-                                  _closeMenu();
+                                onTap: () => _closeMenuAndNavigate(() {
                                   AppRoutes.navigateToProfile(context);
-                                },
+                                }),
                               ),
                               _buildMenuItem(
                                 icon: Icons.settings_outlined,
                                 title: AppLocalizations.of(context).settings,
-                                onTap: () {
-                                  _closeMenu();
+                                onTap: () => _closeMenuAndNavigate(() {
                                   Navigator.pushNamed(
                                       context, AppRoutes.settings);
-                                },
+                                }),
                               ),
                             ],
                           ),
@@ -195,7 +203,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                                   height: 24.h,
                                   fit: BoxFit.contain,
                                   colorFilter: ColorFilter.mode(
-                                    AppColors.textPrimary.withOpacity(0.8),
+                                    AppColors.textPrimary
+                                        .withValues(alpha: 0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),

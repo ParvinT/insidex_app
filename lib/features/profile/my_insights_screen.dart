@@ -21,7 +21,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   Map<String, dynamic> _userData = {};
   bool _isLoading = true;
-  bool _isEditMode = false;
+  final bool _isEditMode = false;
 
   @override
   void initState() {
@@ -63,7 +63,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         });
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      debugPrint('Error loading user data: $e');
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -157,7 +157,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         borderRadius: BorderRadius.circular(30.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -171,13 +171,13 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           gradient: LinearGradient(
             colors: [
               const Color(0xFF7DB9B6),
-              const Color(0xFF7DB9B6).withOpacity(0.8),
+              const Color(0xFF7DB9B6).withValues(alpha: 0.8),
             ],
           ),
           borderRadius: BorderRadius.circular(25.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7DB9B6).withOpacity(0.3),
+              color: const Color(0xFF7DB9B6).withValues(alpha: 0.3),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -225,7 +225,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -271,7 +271,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -343,13 +343,13 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  const Color(0xFF7DB9B6).withOpacity(0.1),
-                  const Color(0xFFE8C5A0).withOpacity(0.1),
+                  const Color(0xFF7DB9B6).withValues(alpha: 0.1),
+                  const Color(0xFFE8C5A0).withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(16.r),
               border: Border.all(
-                color: const Color(0xFF7DB9B6).withOpacity(0.2),
+                color: const Color(0xFF7DB9B6).withValues(alpha: 0.2),
               ),
             ),
             child: Column(
@@ -411,12 +411,12 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(25.r),
                           border: Border.all(
-                            color: goalColor.withOpacity(0.3),
+                            color: goalColor.withValues(alpha: 0.3),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: goalColor.withOpacity(0.1),
+                              color: goalColor.withValues(alpha: 0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -468,46 +468,42 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   ),
                 ),
                 SizedBox(height: 20.h),
-                ...goals
-                    .take(3)
-                    .map((goal) => Padding(
-                          padding: EdgeInsets.only(bottom: 16.h),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                ...goals.take(3).map((goal) => Padding(
+                      padding: EdgeInsets.only(bottom: 16.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    _getLocalizedGoalName(goal),
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    '${_getGoalProgress(goal)}%',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF7DB9B6),
-                                    ),
-                                  ),
-                                ],
+                              Text(
+                                _getLocalizedGoalName(goal),
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              SizedBox(height: 8.h),
-                              LinearProgressIndicator(
-                                value: _getGoalProgress(goal) / 100,
-                                backgroundColor: Colors.grey[200],
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  _getGoalColor(goal),
+                              Text(
+                                '${_getGoalProgress(goal)}%',
+                                style: GoogleFonts.inter(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF7DB9B6),
                                 ),
                               ),
                             ],
                           ),
-                        ))
-                    .toList(),
+                          SizedBox(height: 8.h),
+                          LinearProgressIndicator(
+                            value: _getGoalProgress(goal) / 100,
+                            backgroundColor: Colors.grey[200],
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _getGoalColor(goal),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )),
               ],
             ),
           ),
@@ -588,7 +584,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                     ),
                   ],
@@ -657,7 +653,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -721,7 +717,6 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     final completedSessions =
         (_userData['completedSessionIds'] as List?)?.length ?? 0;
     final currentStreak = _userData['currentStreak'] ?? 0;
-    final createdAt = _userData['createdAt'] as Timestamp?;
     final firstSessionDate = _userData['firstSessionDate'] as Timestamp?;
 
     final l10n = AppLocalizations.of(context);
@@ -844,7 +839,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                       ],
                     ),
                   );
-                }).toList(),
+                }),
               ],
             ),
           ),
@@ -905,7 +900,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
-            color: color.withOpacity(0.1),
+            color: color.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -970,7 +965,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
           ),
         ],
@@ -1006,7 +1001,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   Widget _buildDayBar(String day, int minutes) {
-    final maxHeight = 80.0;
+    const maxHeight = 80.0;
     final height =
         minutes > 0 ? (minutes / 120 * maxHeight).clamp(10.0, maxHeight) : 10.0;
 
@@ -1036,7 +1031,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 colors: minutes > 0
                     ? [
                         const Color(0xFF7DB9B6),
-                        const Color(0xFF7DB9B6).withOpacity(0.7),
+                        const Color(0xFF7DB9B6).withValues(alpha: 0.7),
                       ]
                     : [Colors.grey[300]!, Colors.grey[300]!],
               ),
@@ -1189,7 +1184,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
       return weeklyData;
     } catch (e) {
-      print('Error getting weekly activity: $e');
+      debugPrint('Error getting weekly activity: $e');
       return _getEmptyWeeklyData();
     }
   }
@@ -1291,7 +1286,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   int _getTotalWeeklyMinutes(Map<String, int> weeklyData) {
-    return weeklyData.values.fold(0, (sum, minutes) => sum + minutes);
+    return weeklyData.values.fold(0, (total, minutes) => total + minutes);
   }
 
   String _calculateAverageSession() {
@@ -1330,9 +1325,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // Favorite Time - Real data from Firebase
   Future<String> _getFavoriteTimeAsync() async {
+    final l10n = AppLocalizations.of(context);
     try {
       final user = FirebaseAuth.instance.currentUser;
-      final l10n = AppLocalizations.of(context);
       if (user == null) return l10n.notSpecified;
 
       final history = await FirebaseFirestore.instance
@@ -1372,9 +1367,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
       String favoriteTime = 'Evening';
       int maxCount = 0;
 
-      timeSlots.forEach((time, count) {
-        if (count > maxCount) {
-          maxCount = count;
+      timeSlots.forEach((time, value) {
+        if (value > maxCount) {
+          maxCount = value;
           favoriteTime = time;
         }
       });
@@ -1391,9 +1386,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           return l10n.evening;
       }
     } catch (e) {
-      final l10n = AppLocalizations.of(context);
       debugPrint('Error getting favorite time: $e');
-      return l10n.evening; // Fallback
+      return l10n.evening;
     }
   }
 
@@ -1439,27 +1433,5 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         ],
       ),
     );
-  }
-
-  Future<void> _saveUserData() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content:
-                Text(AppLocalizations.of(context).profileUpdatedSuccessfully)),
-      );
-    } catch (e) {
-      print('Error saving data: $e');
-    }
   }
 }

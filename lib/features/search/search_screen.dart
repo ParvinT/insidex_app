@@ -3,12 +3,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import '../../core/constants/app_colors.dart';
-import '../../l10n/app_localizations.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/constants/app_icons.dart';
+import '../../l10n/app_localizations.dart';
 import 'search_service.dart';
-import '../library/category_sessions_screen.dart';
+import '../library/sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
+import '../../shared/widgets/session_card.dart';
 import 'search_history_service.dart';
 import 'widgets/search_history_view.dart';
 
@@ -122,7 +125,7 @@ class _SearchScreenState extends State<SearchScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.searchHistoryCleared),
-            backgroundColor: AppColors.primaryGold,
+            backgroundColor: AppColors.textPrimary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -210,7 +213,7 @@ class _SearchScreenState extends State<SearchScreen>
         color: AppColors.greyLight,
         borderRadius: BorderRadius.circular(isTablet ? 14.r : 12.r),
         border: Border.all(
-          color: AppColors.greyBorder.withOpacity(0.3),
+          color: AppColors.greyBorder.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -296,7 +299,7 @@ class _SearchScreenState extends State<SearchScreen>
         controller: _tabController,
         labelColor: AppColors.textPrimary,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.primaryGold,
+        indicatorColor: AppColors.textPrimary,
         isScrollable: false,
         labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 12.w : 8.w),
         labelStyle: GoogleFonts.inter(
@@ -319,7 +322,7 @@ class _SearchScreenState extends State<SearchScreen>
   Widget _buildLoadingState() {
     return const Center(
       child: CircularProgressIndicator(
-        color: AppColors.primaryGold,
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -438,20 +441,19 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildCategoryCard(Map<String, dynamic> category, bool isTablet) {
-    final color = Color(int.parse(category['color']));
-
     return GestureDetector(
       onTap: () async {
+        final navigator = Navigator.of(context);
         if (_searchController.text.trim().isNotEmpty) {
           await _historyService.saveSearchQuery(_searchController.text.trim());
           await _loadSearchHistory();
         }
-        Navigator.push(
-          context,
+        if (!mounted) return;
+        navigator.push(
           MaterialPageRoute(
-            builder: (_) => CategorySessionsScreen(
-              categoryTitle: category['title'],
-              categoryEmoji: category['emoji'],
+            builder: (_) => SessionsListScreen(
+              categoryTitle: category['name'],
+              categoryIconName: category['iconName'],
               categoryId: category['id'],
             ),
           ),
@@ -460,59 +462,74 @@ class _SearchScreenState extends State<SearchScreen>
       child: Container(
         padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [color, color.withOpacity(0.7)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
+          border: Border.all(
+            color: AppColors.greyBorder,
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Row(
           children: [
+            // Icon with colored background
             Container(
               width: isTablet ? 56.w : 48.w,
               height: isTablet ? 56.w : 48.w,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(isTablet ? 14.r : 12.r),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                category['emoji'],
-                style: TextStyle(fontSize: isTablet ? 32.sp : 28.sp),
+              padding: EdgeInsets.all(8.w),
+              child: Lottie.asset(
+                AppIcons.getAnimationPath(
+                  AppIcons.getIconByName(category['iconName'])?['path'] ??
+                      'meditation.json',
+                ),
+                fit: BoxFit.contain,
+                repeat: true,
               ),
             ),
+
             SizedBox(width: isTablet ? 18.w : 16.w),
+
+            // Text
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    category['title'],
+                    category['name'],
                     style: GoogleFonts.inter(
                       fontSize: isTablet ? 18.sp : 16.sp,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  if (category['description'].toString().isNotEmpty) ...[
+                  if ((category['description'] ?? '')
+                      .toString()
+                      .isNotEmpty) ...[
                     SizedBox(height: 4.h),
                     Text(
-                      category['description'],
+                      category['description'] ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 13.sp : 12.sp,
-                        color: Colors.white.withOpacity(0.8),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
                 ],
               ),
             ),
+
+            // Arrow
             Icon(
               Icons.arrow_forward_ios,
-              color: Colors.white,
+              color: AppColors.textSecondary,
               size: isTablet ? 20.sp : 18.sp,
             ),
           ],
@@ -533,97 +550,27 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildSessionCard(Map<String, dynamic> session, bool isTablet) {
-    // Get session data - use 'title' not 'name'
-    final sessionTitle = session['title']?.toString() ?? 'Untitled';
-    final sessionDescription = session['description']?.toString() ?? '';
-    final sessionDuration = session['duration'] ?? 0;
-
-    return GestureDetector(
+    // Yeni SessionCard widget'ını kullan
+    return SessionCard(
+      session: session,
       onTap: () async {
+        final navigator = Navigator.of(context);
+
+        // Save search query to history
         if (_searchController.text.trim().isNotEmpty) {
           await _historyService.saveSearchQuery(_searchController.text.trim());
           await _loadSearchHistory();
         }
-        Navigator.push(
-          context,
+
+        if (!mounted) return;
+
+        // Navigate to audio player
+        navigator.push(
           MaterialPageRoute(
             builder: (_) => AudioPlayerScreen(sessionData: session),
           ),
         );
       },
-      child: Container(
-        padding: EdgeInsets.all(isTablet ? 16.w : 14.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
-          border: Border.all(
-            color: AppColors.greyBorder,
-            width: 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            // Session Info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    sessionTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 16.sp : 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  if (sessionDescription.isNotEmpty) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      sessionDescription,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 13.sp : 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                  // Only show duration if > 0
-                  if (sessionDuration > 0) ...[
-                    SizedBox(height: 6.h),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.access_time,
-                          size: isTablet ? 14.sp : 12.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '$sessionDuration min',
-                          style: GoogleFonts.inter(
-                            fontSize: isTablet ? 12.sp : 11.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            // Play Icon
-            Icon(
-              Icons.play_circle_filled,
-              color: AppColors.textPrimary,
-              size: isTablet ? 36.sp : 32.sp,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

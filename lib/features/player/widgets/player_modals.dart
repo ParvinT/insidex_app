@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../services/audio_player_service.dart';
+import '../../../services/audio/audio_player_service.dart';
 import '../../../l10n/app_localizations.dart';
 
 class PlayerModals {
@@ -23,7 +23,7 @@ class PlayerModals {
       ),
       builder: (_) {
         int? selected = currentMinutes;
-        final options = <int>[10, 15, 20, 30, 45, 60, 90];
+        final options = <int>[5, 10, 15, 20, 30, 45];
 
         return StatefulBuilder(builder: (context, setState) {
           return Padding(
@@ -44,7 +44,7 @@ class PlayerModals {
                           .currentMinutes(selected.toString())
                       : AppLocalizations.of(context).noTimerSet,
                   style:
-                      GoogleFonts.inter(fontSize: 13, color: Color(0xFF6E6E6E)),
+                      GoogleFonts.inter(fontSize: 13, color: const Color(0xFF6E6E6E)),
                 ),
                 const SizedBox(height: 16),
 
@@ -167,7 +167,8 @@ class PlayerModals {
                           activeTrackColor: Colors.greenAccent,
                           inactiveTrackColor: Colors.grey[700],
                           thumbColor: Colors.greenAccent,
-                          overlayColor: Colors.greenAccent.withOpacity(0.2),
+                          overlayColor:
+                              Colors.greenAccent.withValues(alpha: 0.2),
                         ),
                         child: Slider(
                           value: tempVolume,
@@ -223,7 +224,7 @@ class PlayerModals {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: tempVolume == preset
-                            ? Colors.greenAccent.withOpacity(0.2)
+                            ? Colors.greenAccent.withValues(alpha: 0.2)
                             : Colors.grey[800],
                         padding: EdgeInsets.symmetric(
                             horizontal: 16.w, vertical: 8.h),

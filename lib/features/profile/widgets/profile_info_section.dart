@@ -31,7 +31,7 @@ class ProfileInfoSection extends StatelessWidget {
         border: Border.all(color: AppColors.greyBorder, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -93,11 +93,11 @@ class ProfileInfoSection extends StatelessWidget {
           decoration: isPremium || isAdmin
               ? BoxDecoration(
                   color: isAdmin
-                      ? Colors.red.withOpacity(0.1)
-                      : AppColors.primaryGold.withOpacity(0.1),
+                      ? Colors.red.withValues(alpha: 0.1)
+                      : AppColors.textPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(
-                    color: isAdmin ? Colors.red : AppColors.primaryGold,
+                    color: isAdmin ? Colors.red : AppColors.textPrimary,
                   ),
                 )
               : null,
@@ -110,7 +110,7 @@ class ProfileInfoSection extends StatelessWidget {
               color: isAdmin
                   ? Colors.red
                   : isPremium
-                      ? AppColors.primaryGold
+                      ? AppColors.textPrimary
                       : AppColors.textPrimary,
             ),
           ),

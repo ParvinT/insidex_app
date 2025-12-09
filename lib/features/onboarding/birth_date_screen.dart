@@ -148,6 +148,8 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
               padding: const EdgeInsetsDirectional.only(end: 16),
               child: TextButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
+
                   final prefs = await SharedPreferences.getInstance();
                   await prefs.setStringList(
                     'goals',
@@ -157,7 +159,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                       'gender', widget.selectedGender.toString());
                   await prefs.setBool('onboardingSkipped', true);
                   if (mounted) {
-                    Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+                    navigator.pushReplacementNamed(AppRoutes.welcome);
                   }
                 },
                 style: TextButton.styleFrom(
@@ -280,9 +282,9 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
       decoration: BoxDecoration(
         color: _isAgeValid
             ? (_isAgeRecommended
-                ? Colors.green.withOpacity(0.1)
-                : Colors.orange.withOpacity(0.1))
-            : Colors.red.withOpacity(0.1),
+                ? Colors.green.withValues(alpha: 0.1)
+                : Colors.orange.withValues(alpha: 0.1))
+            : Colors.red.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: _isAgeValid
@@ -326,7 +328,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-          color: Colors.red.withOpacity(0.1),
+          color: Colors.red.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8.r)),
       child: Row(
         children: [
@@ -447,15 +449,17 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final bool isWideOrShort = size.width >= 1024 || size.height <= 740;
-    final double buttonHeight = isWideOrShort ? 100.h : 56.h;
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 12.h),
+      color: Colors.transparent,
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        12.h,
+        20.w,
+        MediaQuery.of(context).padding.bottom + 12.h, // Safe area
+      ),
       child: SizedBox(
         width: double.infinity,
-        height: buttonHeight,
+        height: 48.h,
         child: ElevatedButton(
           onPressed: enabled && !loading ? onPressed : null,
           style: ElevatedButton.styleFrom(
@@ -464,16 +468,29 @@ class _BottomBar extends StatelessWidget {
             disabledBackgroundColor: AppColors.greyLight,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            padding: EdgeInsets.symmetric(horizontal: 16.w), // Padding ekledik
           ),
-          child: loading
+          child: loading // ← Loading durumunda spinner göster
               ? SizedBox(
-                  width: 24.w,
-                  height: 24.w,
+                  height: 20.h,
+                  width: 20.h,
                   child: const CircularProgressIndicator(
-                      color: Colors.white, strokeWidth: 2))
-              : Text(AppLocalizations.of(context).continueButton,
-                  style: GoogleFonts.inter(
-                      fontSize: 16.sp, fontWeight: FontWeight.w700)),
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    AppLocalizations.of(context).continueButton,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
         ),
       ),
     );

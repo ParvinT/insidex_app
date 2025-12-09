@@ -8,6 +8,7 @@ import '../../core/constants/app_colors.dart';
 import '../../providers/user_provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
+import '../downloads/downloads_screen.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/profile_info_section.dart';
 import 'widgets/profile_action_button.dart';
@@ -15,6 +16,8 @@ import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
+import '../../services/audio/audio_player_service.dart';
+import '../../providers/mini_player_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -26,8 +29,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
-  String _selectedAvatar = '👤';
-  bool _isSaving = false;
+  String _selectedAvatar = 'turtle';
 
   @override
   void initState() {
@@ -40,7 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } else {
       final userProvider = context.read<UserProvider>();
       _nameController.text = userProvider.userName;
-      _selectedAvatar = userProvider.avatarEmoji ?? '👤';
+      _selectedAvatar = userProvider.avatarEmoji;
     }
   }
 
@@ -56,14 +58,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (!_isEditing) {
         final userProvider = context.read<UserProvider>();
         _nameController.text = userProvider.userName;
-        _selectedAvatar = userProvider.avatarEmoji ?? '👤';
+        _selectedAvatar = userProvider.avatarEmoji;
       }
     });
   }
 
   Future<void> _saveProfile() async {
-    setState(() => _isSaving = true);
-
+    final userProvider = context.read<UserProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final successText = AppLocalizations.of(context).profileUpdated;
+    final errorText = AppLocalizations.of(context).errorUpdatingProfile;
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
@@ -77,7 +81,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      final userProvider = context.read<UserProvider>();
       await userProvider.updateProfile(
         name: _nameController.text.trim(),
         avatarEmoji: _selectedAvatar,
@@ -85,23 +88,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() {
         _isEditing = false;
-        _isSaving = false;
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).profileUpdated),
+            content: Text(successText),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
-      setState(() => _isSaving = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context).errorUpdatingProfile),
+            content: Text(errorText),
             backgroundColor: Colors.red,
           ),
         );
@@ -125,6 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleSignOut() async {
+    final miniPlayerProvider = context.read<MiniPlayerProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -156,6 +158,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldSignOut == true) {
+      debugPrint('🎵 [Profile] Stopping audio before logout...');
+      try {
+        final audioService = AudioPlayerService();
+        await audioService.stop();
+        debugPrint('✅ [Profile] Audio stopped');
+      } catch (e) {
+        debugPrint('⚠️ [Profile] Audio stop error: $e');
+      }
+
+      debugPrint('🎵 [Profile] Dismissing mini player...');
+      try {
+        miniPlayerProvider.dismiss();
+        debugPrint('✅ [Profile] Mini player dismissed');
+      } catch (e) {
+        debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
+      }
       await AuthPersistenceService.clearSession();
       await FirebaseAuth.instance.signOut();
       if (mounted) {
@@ -218,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp.clamp(14.0, 18.0),
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryGold,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ),
@@ -243,8 +261,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   title: AppLocalizations.of(context).yourProgress,
                   subtitle: AppLocalizations.of(context).trackYourListening,
                   gradientColors: [
-                    const Color(0xFF7DB9B6).withOpacity(0.1),
-                    const Color(0xFFB8A6D9).withOpacity(0.1),
+                    const Color(0xFF7DB9B6).withValues(alpha: 0.1),
+                    const Color(0xFFB8A6D9).withValues(alpha: 0.1),
                   ],
                   borderColor: const Color(0xFF7DB9B6),
                   iconBackgroundColor: const Color(0xFF7DB9B6),
@@ -263,8 +281,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   subtitle:
                       AppLocalizations.of(context).viewPersonalizedWellness,
                   gradientColors: [
-                    const Color(0xFFE8C5A0).withOpacity(0.1),
-                    const Color(0xFF7DB9B6).withOpacity(0.1),
+                    const Color(0xFFE8C5A0).withValues(alpha: 0.1),
+                    const Color(0xFF7DB9B6).withValues(alpha: 0.1),
                   ],
                   borderColor: const Color(0xFFE8C5A0),
                   iconBackgroundColor: const Color(0xFFE8C5A0),
@@ -272,20 +290,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       Navigator.pushNamed(context, AppRoutes.myInsights),
                 ),
                 SizedBox(height: 20.h),
+                // Downloads button
                 ProfileActionButton(
-                  icon: Icons.star_rounded,
-                  title: AppLocalizations.of(context).premiumWaitlist,
-                  subtitle: AppLocalizations.of(context).joinEarlyAccess,
+                  icon: Icons.download_rounded,
+                  title: AppLocalizations.of(context).downloads,
+                  subtitle: AppLocalizations.of(context).offlineListening,
                   gradientColors: [
-                    AppColors.primaryGold.withOpacity(0.15),
-                    AppColors.primaryGold.withOpacity(0.05),
+                    const Color(0xFF6B8E9B).withValues(alpha: 0.1),
+                    const Color(0xFF4A7C8C).withValues(alpha: 0.1),
                   ],
-                  borderColor: AppColors.primaryGold,
-                  iconBackgroundColor: AppColors.primaryGold,
-                  isGradientIcon: true,
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/premium/waitlist'),
+                  borderColor: const Color(0xFF6B8E9B),
+                  iconBackgroundColor: const Color(0xFF6B8E9B),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const DownloadsScreen()),
+                  ),
                 ),
+
                 SizedBox(height: 20.h),
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(
@@ -294,8 +315,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     subtitle:
                         AppLocalizations.of(context).manageUsersAndSessions,
                     gradientColors: [
-                      Colors.red.withOpacity(0.1),
-                      Colors.orange.withOpacity(0.1),
+                      Colors.red.withValues(alpha: 0.1),
+                      Colors.orange.withValues(alpha: 0.1),
                     ],
                     borderColor: Colors.red,
                     iconBackgroundColor: Colors.red,
@@ -312,7 +333,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: ElevatedButton(
                     onPressed: _handleSignOut,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red.withOpacity(0.1),
+                      backgroundColor: Colors.red.withValues(alpha: 0.1),
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),

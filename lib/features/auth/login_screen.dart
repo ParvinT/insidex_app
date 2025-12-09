@@ -34,8 +34,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   // Ayrı loading state'ler
   bool _isEmailLoading = false;
-  bool _isGoogleLoading = false;
-  bool _isAppleLoading = false;
+  final bool _isGoogleLoading = false;
+  final bool _isAppleLoading = false;
 
   @override
   void dispose() {
@@ -49,7 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     setState(() => _isEmailLoading = true);
 
-    // ⭐ ÖNEMLİ: Password'ü sakla
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
@@ -65,23 +64,27 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['success']) {
       final user = result['user'];
       if (user != null) {
-        // ⭐ BURASI KRİTİK - Session'ı kaydet
-        print('SAVING AUTH SESSION for: ${user.email}');
-        await AuthPersistenceService.saveAuthSession(user,
-            password: password // ⭐ Password'ü geçiriyoruz
-            );
+        final userProvider = context.read<UserProvider>();
+        debugPrint('SAVING AUTH SESSION for: ${user.email}');
+        await AuthPersistenceService.saveAuthSession(user, password: password);
 
         // Test için SharedPreferences'ı kontrol et
         final prefs = await SharedPreferences.getInstance();
-        print('After save - Email: ${prefs.getString('user_email')}');
-        print(
+        debugPrint('After save - Email: ${prefs.getString('user_email')}');
+        debugPrint(
             'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
-        print('💾 Saving active device session...');
+        debugPrint('💾 Saving active device session...');
         await DeviceSessionService().saveActiveDevice(user.uid);
-        print('✅ Active device saved, other devices will be logged out');
+        debugPrint('✅ Active device saved, other devices will be logged out');
 
-        await context.read<UserProvider>().loadUserData(user.uid);
+        await userProvider.loadUserData(user.uid);
+        // Save has_logged_in flag for offline mode
+        await prefs.setBool('has_logged_in', true);
+        await prefs.setString('cached_user_id', user.uid);
+        debugPrint('✅ [Login] has_logged_in flag and user ID saved');
       }
+
+      if (!mounted) return;
 
       Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
@@ -91,8 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content:
-              Text(errorMessage),
+          content: Text(errorMessage),
           backgroundColor: Colors.red,
         ),
       );
@@ -231,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 14.sp,
                         color: isAnyLoading
                             ? AppColors.textSecondary
-                            : AppColors.primaryGold,
+                            : AppColors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -276,8 +278,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading
-                              ? AppColors.primaryGold.withOpacity(0.5)
-                              : AppColors.primaryGold,
+                              ? AppColors.textPrimary.withValues(alpha: 0.5)
+                              : AppColors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

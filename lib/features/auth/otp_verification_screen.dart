@@ -1,7 +1,6 @@
 // lib/features/auth/otp_verification_screen.dart
 
 import 'dart:async';
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -25,11 +24,8 @@ class OTPVerificationScreen extends StatefulWidget {
 }
 
 class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
-
   final _codeCtrl = TextEditingController();
-  final _focusNode = FocusNode(); // ✅ EKLE
+  final _focusNode = FocusNode();
   bool _busy = false;
   bool _resending = false;
   Timer? _t;
@@ -40,7 +36,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     super.initState();
     _countdown(); // Start countdown on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(milliseconds: 300), () {
+      Future.delayed(const Duration(milliseconds: 300), () {
         _focusNode.requestFocus();
       });
     });
@@ -59,8 +55,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(m), backgroundColor: bg));
   }
-
-  String _gen() => List.generate(6, (_) => Random.secure().nextInt(10)).join();
 
   void _countdown([int s = 60]) {
     _t?.cancel();
@@ -83,6 +77,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     try {
       final result = await FirebaseService.resendOTP(widget.email);
 
+      if (!mounted) return;
+
       if (result['success']) {
         _toast('${AppLocalizations.of(context).newCodeSentTo} ${widget.email}');
         _countdown();
@@ -94,6 +90,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         _toast(errorMessage, bg: Colors.red);
       }
     } catch (e) {
+      if (!mounted) return;
       _toast('${AppLocalizations.of(context).failedToSendCode}. $e',
           bg: Colors.red);
     } finally {
@@ -109,12 +106,16 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     }
     setState(() => _busy = true);
 
+    final userProvider = context.read<UserProvider>();
+
     try {
       // Use Firebase service to verify OTP and create account
       final result = await FirebaseService.verifyOTPAndCreateAccount(
         email: widget.email,
         code: input,
       );
+
+      if (!mounted) return;
 
       if (!result['success']) {
         final errorMessage = FirebaseErrorHandler.getErrorMessage(
@@ -128,13 +129,13 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       // Success! Load user data
       final user = result['user'] as User;
-      if (mounted) {
-        await context.read<UserProvider>().loadUserData(user.uid);
-      }
+      await userProvider.loadUserData(user.uid);
 
       debugPrint('💾 Saving active device for new user...');
       await DeviceSessionService().saveActiveDevice(user.uid);
       debugPrint('✅ Active device saved for new user');
+
+      if (!mounted) return;
 
       _toast(AppLocalizations.of(context).accountCreatedSuccessfully);
 
@@ -154,8 +155,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       final birthDateString = prefs.getString('birthDate');
       final userAge = prefs.getInt('userAge');
 
-      if (user != null &&
-          (goals.isNotEmpty || gender != null || birthDateString != null)) {
+      if ((goals.isNotEmpty || gender != null || birthDateString != null)) {
         try {
           // Create a map with only non-null values
           final Map<String, dynamic> userData = {
@@ -214,7 +214,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         elevation: 0.5,
       ),
       body: SingleChildScrollView(
-        physics: ClampingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
