@@ -86,16 +86,16 @@ class UserProvider extends ChangeNotifier {
     // If session data provided, check if it's a demo
     if (sessionData != null) {
       final isDemo = sessionData['isDemo'] as bool? ?? false;
-      if (isDemo) return true;
+      if (isDemo) {
+        debugPrint('🎫 [canPlaySession] ✅ Demo session - allowed');
+        return true;
+      }
     }
 
     // User with subscription can play anything
-    if (canPlayAudio) return true;
-
-    // Free user without session data - use daily limit logic
-    final today = DateTime.now().toIso8601String().split('T')[0];
-    if (lastSessionDate != today) return true;
-    return dailySessionsPlayed < dailySessionLimit;
+    final canPlay = canPlayAudio;
+    debugPrint('🎫 [canPlaySession] canPlayAudio: $canPlay');
+    return canPlay;
   }
 
   // Check if premium is active

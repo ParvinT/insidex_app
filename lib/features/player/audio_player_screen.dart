@@ -15,12 +15,14 @@ import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../providers/user_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../features/subscription/paywall_screen.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../downloads/widgets/download_button.dart';
+import '../../shared/widgets/upgrade_prompt.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -136,19 +138,31 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   /// Check if user can access this session, then initialize
   Future<void> _checkAccessAndInitialize() async {
-    final userProvider = context.read<UserProvider>();
+    final subscriptionProvider = context.read<SubscriptionProvider>();
 
-    // Check if user can play this session
-    final canPlay = userProvider.canPlaySession(sessionData: _session);
+    // Check if session is demo
+    final isDemo = _session['isDemo'] as bool? ?? false;
+
+    // Can play if demo OR has active subscription
+    final canPlay = isDemo || subscriptionProvider.canPlayAudio;
+
+    debugPrint('🔍 [AccessCheck] isDemo: $isDemo');
+    debugPrint('🔍 [AccessCheck] tier: ${subscriptionProvider.tier}');
+    debugPrint('🔍 [AccessCheck] isActive: ${subscriptionProvider.isActive}');
+    debugPrint(
+        '🔍 [AccessCheck] canPlayAudio: ${subscriptionProvider.canPlayAudio}');
+    debugPrint('🔍 [AccessCheck] canPlay result: $canPlay');
 
     if (!canPlay) {
-      // Show paywall and go back if dismissed
-
-      final purchased = await showPaywall(
+      // Show upgrade prompt - returns true if purchased
+      final purchased = await showUpgradeBottomSheet(
         context,
         feature: 'play_session',
+        title: 'Premium Session',
+        subtitle: 'Subscribe to unlock all audio sessions and features',
       );
 
+      // If not purchased, go back
       if (purchased != true && mounted) {
         Navigator.of(context).pop();
         return;

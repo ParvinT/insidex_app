@@ -31,7 +31,8 @@ class UpgradePrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isTablet = width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
+    final isTablet =
+        width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
 
     return Container(
       margin: EdgeInsets.symmetric(
@@ -145,16 +146,17 @@ class UpgradePrompt extends StatelessWidget {
 }
 
 /// Shows upgrade prompt as a bottom sheet
-Future<void> showUpgradeBottomSheet(
+/// Returns true if user purchased, false/null otherwise
+Future<bool?> showUpgradeBottomSheet(
   BuildContext context, {
   required String feature,
   String? title,
   String? subtitle,
-}) {
-  return showModalBottomSheet(
+}) async {
+  final wantsToViewPlans = await showModalBottomSheet<bool>(
     context: context,
     backgroundColor: Colors.transparent,
-    builder: (context) => Container(
+    builder: (ctx) => Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -180,13 +182,13 @@ Future<void> showUpgradeBottomSheet(
               width: 70.w,
               height: 70.w,
               decoration: BoxDecoration(
-                color: AppColors.textPrimary.withValues(alpha: 0.1),
+                color: Colors.amber.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.lock_open,
+                Icons.workspace_premium,
                 size: 35.sp,
-                color: AppColors.textPrimary,
+                color: Colors.amber.shade700,
               ),
             ),
 
@@ -204,7 +206,7 @@ Future<void> showUpgradeBottomSheet(
             SizedBox(height: 8.h),
 
             Text(
-              subtitle ?? 'Upgrade to access this feature and more',
+              subtitle ?? 'Subscribe to access this feature and more',
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 color: AppColors.textSecondary,
@@ -219,7 +221,7 @@ Future<void> showUpgradeBottomSheet(
               children: [
                 Expanded(
                   child: OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => Navigator.pop(ctx, false),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 14.h),
                       side: BorderSide(color: AppColors.greyBorder),
@@ -240,10 +242,7 @@ Future<void> showUpgradeBottomSheet(
                 SizedBox(width: 12.w),
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      showPaywall(context, feature: feature);
-                    },
+                    onPressed: () => Navigator.pop(ctx, true),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.textPrimary,
                       padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -269,4 +268,11 @@ Future<void> showUpgradeBottomSheet(
       ),
     ),
   );
+
+  // If user wants to view plans, show paywall and return result
+  if (wantsToViewPlans == true && context.mounted) {
+    return showPaywall(context, feature: feature);
+  }
+
+  return false;
 }
