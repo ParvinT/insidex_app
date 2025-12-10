@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/user_provider.dart';
+import '../../../providers/subscription_provider.dart';
 import '../../../shared/widgets/custom_text_field.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -38,7 +40,7 @@ class ProfileHeader extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: AppColors.greyLight,
                 border: Border.all(
-                  color: userProvider.isPremium
+                  color: context.read<SubscriptionProvider>().isActive
                       ? AppColors.textPrimary
                       : AppColors.greyBorder,
                   width: 3,

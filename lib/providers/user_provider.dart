@@ -11,7 +11,6 @@ import '../shared/widgets/device_logout_dialog.dart';
 import '../services/auth_persistence_service.dart';
 import '../services/audio/audio_player_service.dart';
 import '../services/download/decryption_preloader.dart';
-import '../core/constants/subscription_constants.dart';
 import 'mini_player_provider.dart';
 import 'subscription_provider.dart';
 
@@ -34,83 +33,9 @@ class UserProvider extends ChangeNotifier {
   String get userId => _firebaseUser?.uid ?? '';
   String get avatarEmoji => _userData?['avatarEmoji'] ?? 'turtle';
 
-  // Premium related getters
-  bool get isPremium => _userData?['isPremium'] ?? false;
-  String get accountType => _userData?['accountType'] ?? 'free';
-
-  // ============================================================
-  // SUBSCRIPTION HELPERS (New subscription system)
-  // ============================================================
-
-  /// Get subscription tier from nested subscription object
-  SubscriptionTier get subscriptionTier {
-    final subscription = _userData?['subscription'] as Map<String, dynamic>?;
-    if (subscription == null) {
-      // Fallback to old isPremium field for backward compatibility
-      final oldIsPremium = _userData?['isPremium'] ?? false;
-      return oldIsPremium ? SubscriptionTier.standard : SubscriptionTier.free;
-    }
-    return SubscriptionTier.fromString(subscription['tier'] as String?);
-  }
-
-  /// Check if user can play audio (has active subscription)
-  bool get canPlayAudio => subscriptionTier.canPlayAudio || isPremium;
-
-  /// Check if user can download (standard tier only)
-  bool get canDownloadSessions => subscriptionTier.canDownload;
-
-  /// Check if user is in trial period
-  bool get isInTrial {
-    final subscription = _userData?['subscription'] as Map<String, dynamic>?;
-    return subscription?['status'] == 'trial';
-  }
-
-  DateTime? get premiumExpiryDate {
-    final expiry = _userData?['premiumExpiryDate'];
-    return expiry != null ? (expiry as Timestamp).toDate() : null;
-  }
-
-  // Session limits
-  int get dailySessionsPlayed => _userData?['dailySessionsPlayed'] ?? 0;
-  String? get lastSessionDate => _userData?['lastSessionDate'];
-  int get dailySessionLimit => canPlayAudio ? 999 : 3;
-
   // Marketing consent
   bool get marketingConsent => _userData?['marketingConsent'] ?? false;
   bool get privacyConsent => _userData?['privacyConsent'] ?? true;
-
-  /// Check if user can play a session
-  /// Demo sessions are always playable
-  /// Non-demo sessions require active subscription
-  bool canPlaySession({Map<String, dynamic>? sessionData}) {
-    // If session data provided, check if it's a demo
-    if (sessionData != null) {
-      final isDemo = sessionData['isDemo'] as bool? ?? false;
-      if (isDemo) {
-        debugPrint('🎫 [canPlaySession] ✅ Demo session - allowed');
-        return true;
-      }
-    }
-
-    // User with subscription can play anything
-    final canPlay = canPlayAudio;
-    debugPrint('🎫 [canPlaySession] canPlayAudio: $canPlay');
-    return canPlay;
-  }
-
-  // Check if premium is active
-  bool get isPremiumActive {
-    if (!isPremium) return false;
-    if (premiumExpiryDate == null) return true; // Lifetime premium
-    return premiumExpiryDate!.isAfter(DateTime.now());
-  }
-
-  // Days left in premium
-  int get premiumDaysLeft {
-    if (!isPremium || premiumExpiryDate == null) return 0;
-    final difference = premiumExpiryDate!.difference(DateTime.now()).inDays;
-    return difference > 0 ? difference : 0;
-  }
 
   // Auth state listener
   void initAuthListener() {
@@ -314,9 +239,6 @@ class UserProvider extends ChangeNotifier {
           // Local data'yı güncelle
           _userData!.addAll(updates);
         }
-
-        // Check if it's a new day and reset session counter
-        await _checkAndResetDailyLimit();
       } else {
         // Create user document if doesn't exist
         await createUserDocument();
@@ -351,43 +273,6 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
-  // Check and reset daily session limit
-  Future<void> _checkAndResetDailyLimit() async {
-    if (_firebaseUser == null || isPremium) return;
-
-    final today = DateTime.now().toIso8601String().split('T')[0];
-
-    if (lastSessionDate != today) {
-      // Reset daily counter
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_firebaseUser!.uid)
-          .update({'dailySessionsPlayed': 0, 'lastSessionDate': today});
-
-      _userData!['dailySessionsPlayed'] = 0;
-      _userData!['lastSessionDate'] = today;
-      notifyListeners();
-    }
-  }
-
-  // Increment session play count
-  Future<void> incrementSessionCount() async {
-    if (_firebaseUser == null || isPremium) return;
-
-    final newCount = dailySessionsPlayed + 1;
-
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(_firebaseUser!.uid)
-        .update({
-      'dailySessionsPlayed': newCount,
-      'lastActiveAt': FieldValue.serverTimestamp(),
-    });
-
-    _userData!['dailySessionsPlayed'] = newCount;
-    notifyListeners();
-  }
-
   // Check if user is admin
   Future<void> checkAdminStatus(String uid) async {
     try {
@@ -414,7 +299,7 @@ class UserProvider extends ChangeNotifier {
   Future<void> createUserDocument() async {
     if (_firebaseUser == null) return;
 
-    final today = DateTime.now().toIso8601String().split('T')[0];
+    
 
     final userData = {
       'uid': _firebaseUser!.uid,
@@ -423,8 +308,6 @@ class UserProvider extends ChangeNotifier {
       'photoUrl': _firebaseUser!.photoURL,
       'avatarEmoji': 'turtle',
       'isAdmin': false,
-      'isPremium': false,
-      'accountType': 'free',
       // New subscription system
       'subscription': {
         'tier': 'free',
@@ -436,8 +319,6 @@ class UserProvider extends ChangeNotifier {
       'favoriteSessionIds': [],
       'completedSessionIds': [],
       'totalListeningMinutes': 0,
-      'dailySessionsPlayed': 0,
-      'lastSessionDate': today,
       'marketingConsent': false,
       'privacyConsent': true,
       'consentDate': FieldValue.serverTimestamp(),
@@ -496,38 +377,6 @@ class UserProvider extends ChangeNotifier {
     _isAdmin = false;
     _stopDeviceSessionMonitoring();
     notifyListeners();
-  }
-
-  // Update premium status (for admin use)
-  Future<void> updatePremiumStatus({
-    required bool isPremium,
-    DateTime? expiryDate,
-  }) async {
-    if (_firebaseUser == null) return;
-
-    try {
-      final updates = {
-        'isPremium': isPremium,
-        'accountType': isPremium ? 'premium' : 'free',
-        'premiumExpiryDate':
-            expiryDate != null ? Timestamp.fromDate(expiryDate) : null,
-        'premiumUpdatedAt': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(_firebaseUser!.uid)
-          .update(updates);
-
-      _userData!['isPremium'] = isPremium;
-      _userData!['accountType'] = isPremium ? 'premium' : 'free';
-      _userData!['premiumExpiryDate'] =
-          expiryDate != null ? Timestamp.fromDate(expiryDate) : null;
-
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Error updating premium status: $e');
-    }
   }
 
   // Update marketing consent

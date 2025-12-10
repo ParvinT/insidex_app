@@ -10,8 +10,8 @@ import '../../core/constants/app_colors.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../models/subscription_package.dart';
 import '../../providers/subscription_provider.dart';
-import '../../l10n/app_localizations.dart';
 import 'widgets/package_card.dart';
+import 'widgets/success_dialog.dart';
 
 /// Paywall screen for displaying subscription options
 /// Shows available packages and handles purchase flow
@@ -365,19 +365,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
       if (success && mounted) {
         widget.onPurchaseSuccess?.call();
-        Navigator.of(context).pop(true);
 
-        // Show success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              package.hasTrial
-                  ? 'Your free trial has started!'
-                  : 'Subscription activated successfully!',
-            ),
-            backgroundColor: Colors.green,
-          ),
+        // Show success dialog first
+        await showPurchaseSuccessDialog(
+          context,
+          planName: package.tier.displayName,
+          isTrialStarted: package.hasTrial,
         );
+
+        // Then close paywall
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
       } else if (mounted && provider.error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

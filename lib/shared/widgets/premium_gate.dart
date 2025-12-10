@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../providers/user_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../features/subscription/paywall_screen.dart';
 
 /// Widget that gates content behind a subscription check
@@ -46,11 +46,11 @@ class PremiumGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, _) {
+    return Consumer<SubscriptionProvider>(
+      builder: (context, subscriptionProvider, _) {
         final hasAccess = requiresDownload
-            ? userProvider.canDownloadSessions
-            : userProvider.canPlayAudio;
+            ? subscriptionProvider.canDownload
+            : subscriptionProvider.canPlayAudio;
 
         if (hasAccess) {
           return child;

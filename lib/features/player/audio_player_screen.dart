@@ -14,9 +14,7 @@ import '../../services/listening_tracker_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
-import '../../providers/user_provider.dart';
 import '../../providers/subscription_provider.dart';
-import '../../features/subscription/paywall_screen.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
@@ -60,6 +58,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool _hasAddedToRecent = false;
+  bool _accessGranted = false;
 
   // Session
   late Map<String, dynamic> _session;
@@ -138,6 +137,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   /// Check if user can access this session, then initialize
   Future<void> _checkAccessAndInitialize() async {
+    // ✅ Load display info FIRST (title, image) - before access check
+    await _loadLanguageAndUrls();
+
+    if (!mounted) return;
+
     final subscriptionProvider = context.read<SubscriptionProvider>();
 
     // Check if session is demo
@@ -171,8 +175,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     if (!mounted) return;
 
-    // User has access - continue with initialization
-    _loadLanguageAndUrls();
+    // ✅ Access granted - mark it
+    _accessGranted = true;
+
+    // User has access - continue with audio initialization
     _setupStreamListeners();
     _addToRecentSessions();
     _checkFavoriteStatus();
@@ -660,7 +666,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           debugPrint('Session tracking ended on back press');
         }
 
-        if (_miniPlayerProvider != null) {
+        // ✅ Only show mini player if access was granted
+        if (_accessGranted && _miniPlayerProvider != null) {
           debugPrint(
             '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}',
           );
@@ -671,6 +678,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           debugPrint(
             '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}',
           );
+        } else if (!_accessGranted) {
+          debugPrint(
+              '🚫 [AudioPlayer] Access not granted - skipping mini player');
         } else {
           debugPrint('❌ Mini player provider is null');
         }

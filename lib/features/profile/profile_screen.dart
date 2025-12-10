@@ -329,12 +329,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           iconBackgroundColor: Colors.amber.shade700,
                           onTap: () => showPaywall(context),
                         ),
+                        SizedBox(height: 20.h),
                       ],
                     );
                   },
                 ),
-
-                if (!userProvider.canPlayAudio) SizedBox(height: 20.h),
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(
                     icon: Icons.admin_panel_settings,

@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../providers/user_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../core/constants/subscription_constants.dart';
 
 class ProfileInfoSection extends StatelessWidget {
   final UserProvider userProvider;
@@ -51,12 +54,17 @@ class ProfileInfoSection extends StatelessWidget {
           SizedBox(height: 16.h),
           _buildInfoRow(AppLocalizations.of(context).memberSince, memberSince),
           SizedBox(height: 12.h),
-          _buildInfoRow(
-            AppLocalizations.of(context).accountType,
-            userProvider.isPremium
-                ? AppLocalizations.of(context).premium
-                : AppLocalizations.of(context).free,
-            isPremium: userProvider.isPremium,
+          Consumer<SubscriptionProvider>(
+            builder: (context, subProvider, _) {
+              final tierName = _getTierDisplayName(context, subProvider);
+              final isSubscribed = subProvider.isActive;
+
+              return _buildInfoRow(
+                AppLocalizations.of(context).accountType,
+                tierName,
+                isPremium: isSubscribed,
+              );
+            },
           ),
           if (userProvider.isAdmin) ...[
             SizedBox(height: 12.h),
@@ -117,5 +125,21 @@ class ProfileInfoSection extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _getTierDisplayName(
+      BuildContext context, SubscriptionProvider provider) {
+    if (provider.isInTrial) {
+      return '${provider.tier.displayName} (Trial)';
+    }
+
+    switch (provider.tier) {
+      case SubscriptionTier.free:
+        return AppLocalizations.of(context).free;
+      case SubscriptionTier.lite:
+        return 'Lite';
+      case SubscriptionTier.standard:
+        return 'Standard';
+    }
   }
 }
