@@ -8,9 +8,11 @@ import '../downloads_screen.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/responsive/breakpoints.dart';
 import '../../../providers/download_provider.dart';
+import '../../../providers/user_provider.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/downloaded_session.dart';
+import '../../subscription/paywall_screen.dart';
 
 /// Download button widget for session cards
 /// Shows different states: not downloaded, downloading, downloaded
@@ -261,6 +263,20 @@ class _DownloadButtonState extends State<DownloadButton>
 
   Future<void> _startDownload(
       DownloadProvider provider, String language) async {
+    // ✅ Check if user can download (Standard tier only)
+    final userProvider = context.read<UserProvider>();
+
+    if (!userProvider.canDownloadSessions) {
+      // Show paywall with download feature message
+      final purchased = await showPaywall(
+        context,
+        feature: 'download',
+      );
+
+      // If not purchased, don't start download
+      if (purchased != true) return;
+    }
+
     widget.onDownloadStarted?.call();
 
     // ✅ Cancel previous subscription if exists

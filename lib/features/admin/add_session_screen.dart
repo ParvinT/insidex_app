@@ -53,6 +53,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   // Loading states
   bool _isLoading = false;
+  bool _isDemo = false;
   double _uploadProgress = 0.0;
   String _uploadStatus = '';
 
@@ -129,6 +130,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   void _loadExistingData() {
     final session = widget.sessionToEdit!;
+    _isDemo = session['isDemo'] ?? false;
 
     // Load session number
     if (session['sessionNumber'] != null) {
@@ -319,7 +321,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
       if (!mounted) return;
 
-      
       if (existingSession.docs.isNotEmpty) {
         final existingId = existingSession.docs.first.id;
         if (widget.sessionToEdit == null ||
@@ -510,6 +511,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           'durations': durations,
         },
 
+        'isDemo': _isDemo,
         'playCount': widget.sessionToEdit?['playCount'] ?? 0,
         'rating': widget.sessionToEdit?['rating'] ?? 0.0,
         'createdAt': widget.sessionToEdit != null
@@ -703,6 +705,67 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       }
                       return null;
                     },
+                  ),
+
+                  SizedBox(height: 32.h),
+
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color:
+                          _isDemo ? Colors.green.shade50 : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: _isDemo
+                            ? Colors.green.shade300
+                            : AppColors.greyBorder,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isDemo ? Icons.lock_open : Icons.lock,
+                          color:
+                              _isDemo ? Colors.green : AppColors.textSecondary,
+                          size: 24.sp,
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Demo Session',
+                                style: GoogleFonts.inter(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              SizedBox(height: 2.h),
+                              Text(
+                                _isDemo
+                                    ? 'Free users can play this session'
+                                    : 'Only premium users can play',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12.sp,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(
+                          value: _isDemo,
+                          onChanged: (value) {
+                            setState(() {
+                              _isDemo = value;
+                            });
+                          },
+                          activeColor: Colors.green,
+                        ),
+                      ],
+                    ),
                   ),
 
                   SizedBox(height: 32.h),

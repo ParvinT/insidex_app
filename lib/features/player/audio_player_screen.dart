@@ -14,6 +14,8 @@ import '../../services/listening_tracker_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/user_provider.dart';
+import '../../features/subscription/paywall_screen.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
@@ -125,16 +127,45 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           'subliminal': {'audioUrls': {}, 'durations': {}},
           'backgroundImages': {},
         };
+
+    // ✅ Premium/Demo check - must be done after frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAccessAndInitialize();
+    });
+  }
+
+  /// Check if user can access this session, then initialize
+  Future<void> _checkAccessAndInitialize() async {
+    final userProvider = context.read<UserProvider>();
+
+    // Check if user can play this session
+    final canPlay = userProvider.canPlaySession(sessionData: _session);
+
+    if (!canPlay) {
+      // Show paywall and go back if dismissed
+
+      final purchased = await showPaywall(
+        context,
+        feature: 'play_session',
+      );
+
+      if (purchased != true && mounted) {
+        Navigator.of(context).pop();
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
+    // User has access - continue with initialization
     _loadLanguageAndUrls();
     _setupStreamListeners();
     _addToRecentSessions();
     _checkFavoriteStatus();
     _checkPlaylistStatus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MiniPlayerProvider>().hide();
 
-      _restoreStateFromMiniPlayer();
-    });
+    context.read<MiniPlayerProvider>().hide();
+    _restoreStateFromMiniPlayer();
   }
 
   Future<void> _loadLanguageAndUrls() async {

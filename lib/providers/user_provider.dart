@@ -11,7 +11,9 @@ import '../shared/widgets/device_logout_dialog.dart';
 import '../services/auth_persistence_service.dart';
 import '../services/audio/audio_player_service.dart';
 import '../services/download/decryption_preloader.dart';
+import '../core/constants/subscription_constants.dart';
 import 'mini_player_provider.dart';
+import 'subscription_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   User? _firebaseUser;
@@ -35,6 +37,34 @@ class UserProvider extends ChangeNotifier {
   // Premium related getters
   bool get isPremium => _userData?['isPremium'] ?? false;
   String get accountType => _userData?['accountType'] ?? 'free';
+
+  // ============================================================
+  // SUBSCRIPTION HELPERS (New subscription system)
+  // ============================================================
+
+  /// Get subscription tier from nested subscription object
+  SubscriptionTier get subscriptionTier {
+    final subscription = _userData?['subscription'] as Map<String, dynamic>?;
+    if (subscription == null) {
+      // Fallback to old isPremium field for backward compatibility
+      final oldIsPremium = _userData?['isPremium'] ?? false;
+      return oldIsPremium ? SubscriptionTier.standard : SubscriptionTier.free;
+    }
+    return SubscriptionTier.fromString(subscription['tier'] as String?);
+  }
+
+  /// Check if user can play audio (has active subscription)
+  bool get canPlayAudio => subscriptionTier.canPlayAudio || isPremium;
+
+  /// Check if user can download (standard tier only)
+  bool get canDownloadSessions => subscriptionTier.canDownload;
+
+  /// Check if user is in trial period
+  bool get isInTrial {
+    final subscription = _userData?['subscription'] as Map<String, dynamic>?;
+    return subscription?['status'] == 'trial';
+  }
+
   DateTime? get premiumExpiryDate {
     final expiry = _userData?['premiumExpiryDate'];
     return expiry != null ? (expiry as Timestamp).toDate() : null;
@@ -43,24 +73,28 @@ class UserProvider extends ChangeNotifier {
   // Session limits
   int get dailySessionsPlayed => _userData?['dailySessionsPlayed'] ?? 0;
   String? get lastSessionDate => _userData?['lastSessionDate'];
-  int get dailySessionLimit => isPremium ? 999 : 3;
+  int get dailySessionLimit => canPlayAudio ? 999 : 3;
 
   // Marketing consent
   bool get marketingConsent => _userData?['marketingConsent'] ?? false;
   bool get privacyConsent => _userData?['privacyConsent'] ?? true;
 
-  // Check if user can play another session today
-  bool canPlaySession() {
-    if (isPremium) return true;
-
-    final today = DateTime.now().toIso8601String().split('T')[0];
-
-    // If it's a new day, reset the counter
-    if (lastSessionDate != today) {
-      return true;
+  /// Check if user can play a session
+  /// Demo sessions are always playable
+  /// Non-demo sessions require active subscription
+  bool canPlaySession({Map<String, dynamic>? sessionData}) {
+    // If session data provided, check if it's a demo
+    if (sessionData != null) {
+      final isDemo = sessionData['isDemo'] as bool? ?? false;
+      if (isDemo) return true;
     }
 
-    // Check if under the daily limit
+    // User with subscription can play anything
+    if (canPlayAudio) return true;
+
+    // Free user without session data - use daily limit logic
+    final today = DateTime.now().toIso8601String().split('T')[0];
+    if (lastSessionDate != today) return true;
     return dailySessionsPlayed < dailySessionLimit;
   }
 
@@ -297,6 +331,19 @@ class UserProvider extends ChangeNotifier {
       debugPrint('🎯 User data loaded, starting monitoring...');
       _startDeviceSessionMonitoring(uid);
     } catch (e) {
+      try {
+        final navContext = InsidexApp.navigatorKey.currentContext;
+        if (navContext != null) {
+          final subscriptionProvider = Provider.of<SubscriptionProvider>(
+            navContext,
+            listen: false,
+          );
+          await subscriptionProvider.initialize(uid);
+          debugPrint('✅ SubscriptionProvider initialized');
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not initialize SubscriptionProvider: $e');
+      }
       debugPrint('Error loading user data: $e');
     } finally {
       _isLoading = false;
@@ -378,6 +425,12 @@ class UserProvider extends ChangeNotifier {
       'isAdmin': false,
       'isPremium': false,
       'accountType': 'free',
+      // New subscription system
+      'subscription': {
+        'tier': 'free',
+        'status': 'none',
+        'trialUsed': false,
+      },
       'createdAt': FieldValue.serverTimestamp(),
       'lastActiveAt': FieldValue.serverTimestamp(),
       'favoriteSessionIds': [],

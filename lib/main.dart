@@ -13,6 +13,7 @@ import 'providers/user_provider.dart';
 import 'providers/mini_player_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/download_provider.dart';
+import 'providers/subscription_provider.dart';
 import 'services/audio/audio_handler.dart';
 import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
@@ -112,6 +113,7 @@ void main() async {
           ChangeNotifierProvider(
               create: (_) => NotificationProvider()..initialize()),
           ChangeNotifierProvider(create: (_) => MiniPlayerProvider()),
+          ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
         ],
         child: InsidexApp(localeProvider: localeProvider),
       ),

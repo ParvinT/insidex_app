@@ -18,6 +18,8 @@ import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/subscription_provider.dart';
+import '../subscription/paywall_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -308,6 +310,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 SizedBox(height: 20.h),
+                Consumer<SubscriptionProvider>(
+                  builder: (context, subProvider, _) {
+                    if (subProvider.isActive) {
+                      return const SizedBox.shrink();
+                    }
+                    return Column(
+                      children: [
+                        ProfileActionButton(
+                          icon: Icons.workspace_premium,
+                          title: 'Upgrade to Premium',
+                          subtitle: 'Unlock all sessions and features',
+                          gradientColors: [
+                            Colors.amber.withValues(alpha: 0.15),
+                            Colors.orange.withValues(alpha: 0.1),
+                          ],
+                          borderColor: Colors.amber,
+                          iconBackgroundColor: Colors.amber.shade700,
+                          onTap: () => showPaywall(context),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+
+                if (!userProvider.canPlayAudio) SizedBox(height: 20.h),
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(
                     icon: Icons.admin_panel_settings,
