@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/subscription_provider.dart';
+import '../../features/subscription/paywall_screen.dart';
+import 'upgrade_prompt.dart';
 
 class MenuOverlay extends StatefulWidget {
   final VoidCallback onClose;
@@ -150,10 +154,50 @@ class _MenuOverlayState extends State<MenuOverlay>
                         ),
 
                         // Menu Items
+                        // Menu Items
                         Expanded(
                           child: ListView(
                             padding: EdgeInsets.symmetric(vertical: 20.h),
                             children: [
+                              // Premium/Subscription item
+                              Consumer<SubscriptionProvider>(
+                                builder: (context, subProvider, _) {
+                                  if (subProvider.isActive) {
+                                    // Premium user - show subscription info
+                                    return _buildMenuItem(
+                                      icon: Icons.workspace_premium,
+                                      title: 'Your Subscription',
+                                      iconColor: Colors.amber.shade700,
+                                      onTap: () => _closeMenuAndNavigate(() {
+                                        showManageSubscriptionSheet(context);
+                                      }),
+                                    );
+                                  }
+                                  // Free user - show upgrade
+                                  return _buildMenuItem(
+                                    icon: Icons.workspace_premium,
+                                    title: 'Upgrade to Premium',
+                                    iconColor: Colors.amber.shade700,
+                                    onTap: () => _closeMenuAndNavigate(() {
+                                      showPaywall(context);
+                                    }),
+                                  );
+                                },
+                              ),
+
+                              // Divider
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 24.w,
+                                  vertical: 8.h,
+                                ),
+                                child: Divider(
+                                  color: AppColors.greyBorder
+                                      .withValues(alpha: 0.5),
+                                  height: 1,
+                                ),
+                              ),
+
                               _buildMenuItem(
                                 icon: Icons.person_outline,
                                 title: AppLocalizations.of(context).profile,
@@ -228,6 +272,7 @@ class _MenuOverlayState extends State<MenuOverlay>
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
     return InkWell(
       onTap: onTap,
@@ -237,7 +282,7 @@ class _MenuOverlayState extends State<MenuOverlay>
           children: [
             Icon(
               icon,
-              color: AppColors.textPrimary,
+              color: iconColor ?? AppColors.textPrimary,
               size: 24.sp,
             ),
             SizedBox(width: 16.w),
@@ -246,7 +291,7 @@ class _MenuOverlayState extends State<MenuOverlay>
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                color: iconColor ?? AppColors.textPrimary,
               ),
             ),
             const Spacer(),

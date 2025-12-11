@@ -3,10 +3,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../core/constants/subscription_constants.dart';
 import '../../features/subscription/paywall_screen.dart';
+import '../../providers/subscription_provider.dart';
 
 /// A prompt widget encouraging users to upgrade
 /// Can be used as inline banner or bottom sheet
@@ -224,7 +227,7 @@ Future<bool?> showUpgradeBottomSheet(
                     onPressed: () => Navigator.pop(ctx, false),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 14.h),
-                      side: BorderSide(color: AppColors.greyBorder),
+                      side: const BorderSide(color: AppColors.greyBorder),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -275,4 +278,263 @@ Future<bool?> showUpgradeBottomSheet(
   }
 
   return false;
+}
+
+/// Shows manage subscription bottom sheet for premium users
+Future<void> showManageSubscriptionSheet(BuildContext context) async {
+  final subscriptionProvider = context.read<SubscriptionProvider>();
+
+  await showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (ctx) => Container(
+      padding: EdgeInsets.all(24.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Handle
+            Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: AppColors.greyBorder,
+                borderRadius: BorderRadius.circular(2.r),
+              ),
+            ),
+            SizedBox(height: 20.h),
+
+            // Title
+            Text(
+              'Your Subscription',
+              style: GoogleFonts.inter(
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+
+            SizedBox(height: 24.h),
+
+            // Current plan card
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.amber.withValues(alpha: 0.15),
+                    Colors.orange.withValues(alpha: 0.1),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: Colors.amber.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 50.w,
+                        height: 50.w,
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade700,
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 28.sp,
+                        ),
+                      ),
+                      SizedBox(width: 16.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${subscriptionProvider.tier.displayName} Plan',
+                              style: GoogleFonts.inter(
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(height: 4.h),
+                            Text(
+                              _getStatusText(subscriptionProvider),
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Trial/Expiry info
+                  if (subscriptionProvider.isInTrial ||
+                      subscriptionProvider.daysRemaining > 0) ...[
+                    SizedBox(height: 16.h),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: subscriptionProvider.isInTrial
+                            ? Colors.blue.withValues(alpha: 0.1)
+                            : Colors.green.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            subscriptionProvider.isInTrial
+                                ? Icons.schedule
+                                : Icons.check_circle,
+                            size: 20.sp,
+                            color: subscriptionProvider.isInTrial
+                                ? Colors.blue.shade700
+                                : Colors.green.shade700,
+                          ),
+                          SizedBox(width: 10.w),
+                          Text(
+                            subscriptionProvider.isInTrial
+                                ? '${subscriptionProvider.trialDaysRemaining} days left in trial'
+                                : '${subscriptionProvider.daysRemaining} days until renewal',
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color: subscriptionProvider.isInTrial
+                                  ? Colors.blue.shade700
+                                  : Colors.green.shade700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+
+            SizedBox(height: 24.h),
+
+            // Actions
+            if (subscriptionProvider.tier != SubscriptionTier.standard) ...[
+              // Upgrade option
+              _buildManageActionTile(
+                icon: Icons.arrow_upward,
+                iconColor: Colors.green,
+                title: 'Upgrade Plan',
+                subtitle: 'Get more features with Standard',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  showPaywall(context);
+                },
+              ),
+              SizedBox(height: 12.h),
+            ],
+
+            // Cancel/Manage
+            _buildManageActionTile(
+              icon: Icons.settings,
+              iconColor: AppColors.textSecondary,
+              title: 'Manage in App Store',
+              subtitle: 'Change or cancel subscription',
+              onTap: () {
+                Navigator.pop(ctx);
+                // TODO: Open App Store/Play Store subscription management
+              },
+            ),
+
+            SizedBox(height: 20.h),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+String _getStatusText(SubscriptionProvider provider) {
+  if (provider.isInTrial) {
+    return 'Trial • ${provider.subscription.period?.displayName ?? 'Monthly'}';
+  }
+  return 'Active • ${provider.subscription.period?.displayName ?? 'Monthly'}';
+}
+
+Widget _buildManageActionTile({
+  required IconData icon,
+  required Color iconColor,
+  required String title,
+  required String subtitle,
+  required VoidCallback onTap,
+}) {
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12.r),
+    child: Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: AppColors.greyBorder.withValues(alpha: 0.5),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40.w,
+            height: 40.w,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 20.sp,
+            ),
+          ),
+          SizedBox(width: 14.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 13.sp,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.arrow_forward_ios,
+            size: 16.sp,
+            color: AppColors.textSecondary,
+          ),
+        ],
+      ),
+    ),
+  );
 }

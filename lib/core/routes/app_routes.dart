@@ -15,6 +15,7 @@ import '../../features/admin/session_management_screen.dart';
 import '../../features/admin/user_management_screen.dart';
 import '../../features/admin/home_cards_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
+import '../../features/admin/grant_subscription_screen.dart';
 import '../../features/admin/add_category_screen.dart';
 import '../../features/auth/forgot_password_screen.dart';
 import '../../features/profile/change_password_screen.dart';
@@ -82,6 +83,7 @@ class AppRoutes {
         '/admin/home-cards': (_) => const HomeCardsManagementScreen(),
         '/admin/users': (_) => const UserManagementScreen(),
         '/admin/settings': (_) => const AdminSettingsScreen(),
+        '/admin/grant-subscription': (_) => const GrantSubscriptionScreen(),
 
         // legal pages - Markdown-based
         privacyPolicy: (context) => LegalDocumentScreen(

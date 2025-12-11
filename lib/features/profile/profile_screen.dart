@@ -18,6 +18,7 @@ import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../shared/widgets/upgrade_prompt.dart';
 import '../../providers/subscription_provider.dart';
 import '../subscription/paywall_screen.dart';
 
@@ -125,6 +126,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
     );
+  }
+
+  String _getSubscriptionSubtitle(SubscriptionProvider provider) {
+    final tierName = provider.tier.displayName;
+
+    if (provider.isInTrial) {
+      final daysLeft = provider.trialDaysRemaining;
+      return '$tierName • Trial ($daysLeft days left)';
+    }
+
+    final daysLeft = provider.daysRemaining;
+    if (daysLeft > 0) {
+      return '$tierName • $daysLeft days remaining';
+    }
+
+    return '$tierName Plan';
   }
 
   Future<void> _handleSignOut() async {
@@ -312,9 +329,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 SizedBox(height: 20.h),
                 Consumer<SubscriptionProvider>(
                   builder: (context, subProvider, _) {
+                    // Premium user - show subscription info
                     if (subProvider.isActive) {
-                      return const SizedBox.shrink();
+                      return Column(
+                        children: [
+                          ProfileActionButton(
+                            icon: Icons.workspace_premium,
+                            title: 'Your Subscription',
+                            subtitle: _getSubscriptionSubtitle(subProvider),
+                            gradientColors: [
+                              Colors.amber.withValues(alpha: 0.15),
+                              Colors.orange.withValues(alpha: 0.1),
+                            ],
+                            borderColor: Colors.amber,
+                            iconBackgroundColor: Colors.amber.shade700,
+                            onTap: () => showManageSubscriptionSheet(context),
+                          ),
+                          SizedBox(height: 20.h),
+                        ],
+                      );
                     }
+
+                    // Free user - show upgrade button
                     return Column(
                       children: [
                         ProfileActionButton(

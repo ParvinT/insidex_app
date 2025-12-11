@@ -11,7 +11,7 @@ import '../core/constants/subscription_constants.dart';
 import '../services/subscription/subscription_service.dart';
 
 /// Provider for managing subscription state across the app
-/// 
+///
 /// Responsibilities:
 /// - Track current subscription status
 /// - Provide access control helpers
@@ -21,14 +21,14 @@ class SubscriptionProvider extends ChangeNotifier {
   // ============================================================
   // PRIVATE STATE
   // ============================================================
-  
+
   final SubscriptionService _subscriptionService = SubscriptionService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   SubscriptionModel _subscription = SubscriptionModel.free();
   List<SubscriptionPackage> _availablePackages = [];
-  
+
   bool _isLoading = false;
   bool _isInitialized = false;
   String? _error;
@@ -161,12 +161,13 @@ class SubscriptionProvider extends ChangeNotifier {
       if (doc.exists) {
         final data = doc.data();
         final subscriptionData = data?['subscription'] as Map<String, dynamic>?;
-        
+
         _subscription = SubscriptionModel.fromMap(subscriptionData);
         debugPrint('📦 [SubscriptionProvider] Loaded: $_subscription');
       } else {
         _subscription = SubscriptionModel.free();
-        debugPrint('📦 [SubscriptionProvider] No subscription data, using free');
+        debugPrint(
+            '📦 [SubscriptionProvider] No subscription data, using free');
       }
 
       notifyListeners();
@@ -180,7 +181,8 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> _loadPackages() async {
     try {
       _availablePackages = await _subscriptionService.getAvailablePackages();
-      debugPrint('📦 [SubscriptionProvider] Loaded ${_availablePackages.length} packages');
+      debugPrint(
+          '📦 [SubscriptionProvider] Loaded ${_availablePackages.length} packages');
     } catch (e) {
       debugPrint('❌ [SubscriptionProvider] Error loading packages: $e');
       // Fallback to default packages
@@ -200,13 +202,14 @@ class SubscriptionProvider extends ChangeNotifier {
       if (snapshot.exists) {
         final data = snapshot.data();
         final subscriptionData = data?['subscription'] as Map<String, dynamic>?;
-        
+
         final newSubscription = SubscriptionModel.fromMap(subscriptionData);
-        
+
         // Only notify if changed
         if (newSubscription != _subscription) {
           _subscription = newSubscription;
-          debugPrint('📦 [SubscriptionProvider] Subscription updated: $_subscription');
+          debugPrint(
+              '📦 [SubscriptionProvider] Subscription updated: $_subscription');
           notifyListeners();
         }
       }
@@ -323,7 +326,8 @@ class SubscriptionProvider extends ChangeNotifier {
     SubscriptionPeriod period = SubscriptionPeriod.monthly,
   }) async {
     try {
-      debugPrint('👑 [SubscriptionProvider] Granting $tier to $userId for $durationDays days');
+      debugPrint(
+          '👑 [SubscriptionProvider] Granting $tier to $userId for $durationDays days');
 
       final now = DateTime.now();
       final expiryDate = now.add(Duration(days: durationDays));
@@ -360,8 +364,17 @@ class SubscriptionProvider extends ChangeNotifier {
     try {
       debugPrint('🚫 [SubscriptionProvider] Revoking subscription for $userId');
 
+      // Keep trialUsed info, just reset to free
       await _firestore.collection('users').doc(userId).update({
-        'subscription': SubscriptionModel.free().toMap(),
+        'subscription.tier': 'free',
+        'subscription.status': 'none',
+        'subscription.period': FieldValue.delete(),
+        'subscription.startDate': FieldValue.delete(),
+        'subscription.expiryDate': FieldValue.delete(),
+        'subscription.trialEndDate': FieldValue.delete(),
+        'subscription.productId': FieldValue.delete(),
+        'subscription.autoRenew': false,
+        // trialUsed KORUNUYOR - silmiyoruz
       });
 
       // Reload if this is current user

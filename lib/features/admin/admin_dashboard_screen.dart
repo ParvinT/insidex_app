@@ -277,6 +277,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       isCompact: isSmallScreen,
                     ),
                     _buildCompactMenuItem(
+                      icon: Icons.card_giftcard,
+                      title: 'Grant Subscription',
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(
+                            context, '/admin/grant-subscription');
+                      },
+                      isCompact: isSmallScreen,
+                    ),
+                    _buildCompactMenuItem(
                       icon: Icons.settings,
                       title: AppLocalizations.of(context).settings,
                       onTap: () {

@@ -252,7 +252,8 @@ class UserProvider extends ChangeNotifier {
 
       debugPrint('🎯 User data loaded, starting monitoring...');
       _startDeviceSessionMonitoring(uid);
-    } catch (e) {
+
+      // Initialize SubscriptionProvider
       try {
         final navContext = InsidexApp.navigatorKey.currentContext;
         if (navContext != null) {
@@ -266,6 +267,7 @@ class UserProvider extends ChangeNotifier {
       } catch (e) {
         debugPrint('⚠️ Could not initialize SubscriptionProvider: $e');
       }
+    } catch (e) {
       debugPrint('Error loading user data: $e');
     } finally {
       _isLoading = false;
@@ -298,8 +300,6 @@ class UserProvider extends ChangeNotifier {
   // Create new user document
   Future<void> createUserDocument() async {
     if (_firebaseUser == null) return;
-
-    
 
     final userData = {
       'uid': _firebaseUser!.uid,
