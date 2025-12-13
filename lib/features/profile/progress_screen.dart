@@ -9,6 +9,7 @@ import 'dart:math' as math;
 import 'dart:async';
 import '../../services/listening_tracker_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -303,6 +304,7 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final screenSize = mq.size;
     final screenWidth = screenSize.width;
@@ -342,14 +344,14 @@ class _ProgressScreenState extends State<ProgressScreen>
             : 24;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.backgroundCard,
         elevation: 0,
         centerTitle: true,
         toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Padding(
@@ -360,7 +362,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               fontSize: (isTablet || isDesktop) ? 22 : 20,
               height: 1.15,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: colors.textPrimary,
             ),
           ),
         ),
@@ -390,7 +392,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                             AppLocalizations.of(context).trackYourListening,
                             style: GoogleFonts.inter(
                               fontSize: isCompactDevice ? 12.sp : 14.sp,
-                              color: Colors.grey[600],
+                              color: colors.textSecondary,
                             ),
                           ),
                           SizedBox(height: spacingUnit.h),
@@ -457,7 +459,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                           Container(
                             height: 40.h,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEEEEEE),
+                              color: colors.greyLight,
                               borderRadius: BorderRadius.circular(24.r),
                             ),
                             padding: EdgeInsets.all(3.w),
@@ -465,19 +467,20 @@ class _ProgressScreenState extends State<ProgressScreen>
                               controller: _tabController,
                               isScrollable: false, // Always fill width
                               indicator: BoxDecoration(
-                                color: Colors.black,
+                                color: colors.textPrimary,
                                 borderRadius: BorderRadius.circular(20.r),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
+                                    color: colors.textPrimary
+                                        .withValues(alpha: 0.2),
                                     blurRadius: 4,
                                     offset: const Offset(0, 2),
                                   ),
                                 ],
                               ),
                               indicatorSize: TabBarIndicatorSize.tab,
-                              labelColor: Colors.white,
-                              unselectedLabelColor: Colors.black87,
+                              labelColor: colors.textOnPrimary,
+                              unselectedLabelColor: colors.textPrimary,
                               labelStyle: GoogleFonts.inter(
                                 fontSize: isCompactDevice ? 10.sp : 11.sp,
                                 fontWeight: FontWeight.w600,
@@ -576,7 +579,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                             padding:
                                 EdgeInsets.all(isCompactDevice ? 12.w : 16.w),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: colors.backgroundCard,
                               borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Column(
@@ -593,6 +596,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                         fontSize:
                                             isCompactDevice ? 12.sp : 14.sp,
                                         fontWeight: FontWeight.w600,
+                                        color: colors.textPrimary,
                                       ),
                                     ),
                                     Text(
@@ -600,7 +604,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                                       style: GoogleFonts.inter(
                                         fontSize:
                                             isCompactDevice ? 10.sp : 12.sp,
-                                        color: Colors.grey[600],
+                                        color: colors.textSecondary,
                                       ),
                                     ),
                                   ],
@@ -636,17 +640,18 @@ class _ProgressScreenState extends State<ProgressScreen>
     required bool isCompact,
     required double padding,
   }) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.symmetric(
         vertical: isCompact ? 12.h : 16.h,
         horizontal: 4.w,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -666,7 +671,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   style: GoogleFonts.inter(
                     fontSize: isCompact ? 22.sp : 28.sp,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: colors.textPrimary,
                     height: 1,
                   ),
                 ),
@@ -675,7 +680,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                   unit,
                   style: GoogleFonts.inter(
                     fontSize: isCompact ? 8.sp : 10.sp,
-                    color: Colors.black54,
+                    color: colors.textSecondary,
                     height: 1,
                   ),
                 ),
@@ -688,7 +693,7 @@ class _ProgressScreenState extends State<ProgressScreen>
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: isCompact ? 9.sp : 11.sp,
-              color: Colors.grey[600],
+              color: colors.textSecondary,
               height: 1.2,
             ),
             maxLines: 2,
@@ -700,6 +705,7 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   List<Widget> _buildTopSessionBars() {
+    final appColors = context.colors;
     final topSessions =
         _analyticsData['topSessions'] as List<Map<String, dynamic>>? ?? [];
 
@@ -709,7 +715,7 @@ class _ProgressScreenState extends State<ProgressScreen>
           AppLocalizations.of(context).noSessionsYet,
           style: GoogleFonts.inter(
             fontSize: 12.sp,
-            color: Colors.grey[500],
+            color: appColors.textLight,
             fontStyle: FontStyle.italic,
           ),
         ),
@@ -742,7 +748,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                 title.length > 20 ? '${title.substring(0, 20)}...' : title,
                 style: GoogleFonts.inter(
                   fontSize: 10.sp,
-                  color: Colors.grey[700],
+                  color: appColors.textSecondary,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -772,7 +778,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                           '$minutes ${AppLocalizations.of(context).min}',
                           style: GoogleFonts.inter(
                             fontSize: 11.sp,
-                            color: Colors.white,
+                            color: appColors.background,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -792,6 +798,7 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   Widget _buildProgressBar(String label, double progress, Color color,
       {bool isCompact = false}) {
+    final colors = context.colors;
     return Row(
       children: [
         Icon(Icons.circle, size: isCompact ? 6.sp : 8.sp, color: color),
@@ -805,7 +812,7 @@ class _ProgressScreenState extends State<ProgressScreen>
             label,
             style: GoogleFonts.inter(
               fontSize: isCompact ? 10.sp : 12.sp,
-              color: Colors.black87,
+              color: colors.textPrimary,
             ),
           ),
         ),
@@ -816,7 +823,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               Container(
                 height: isCompact ? 4.h : 6.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: colors.greyMedium,
                   borderRadius: BorderRadius.circular(3.r),
                 ),
               ),
@@ -838,7 +845,7 @@ class _ProgressScreenState extends State<ProgressScreen>
           '${(progress * 100).toInt()}%',
           style: GoogleFonts.inter(
             fontSize: isCompact ? 9.sp : 11.sp,
-            color: Colors.grey[600],
+            color: colors.textSecondary,
           ),
         ),
       ],
@@ -846,6 +853,7 @@ class _ProgressScreenState extends State<ProgressScreen>
   }
 
   List<Widget> _buildWeeklyBars() {
+    final colors = context.colors;
     final weeklyData = _analyticsData['weeklyData'] as Map<String, int>? ?? {};
     final now = DateTime.now();
     final bars = <Widget>[];
@@ -873,7 +881,7 @@ class _ProgressScreenState extends State<ProgressScreen>
 
       Color barColor;
       if (displayMinutes == 0) {
-        barColor = Colors.grey[300]!;
+        barColor = colors.greyMedium;
       } else if (i == 0) {
         barColor = const Color(0xFFB8A6D9);
       } else {
@@ -927,7 +935,7 @@ class _ProgressScreenState extends State<ProgressScreen>
                       style: GoogleFonts.inter(
                         fontSize: fs,
                         height: 1.0,
-                        color: Colors.grey[600],
+                        color: context.colors.textSecondary,
                       ),
                     ),
                   ),
@@ -1043,7 +1051,7 @@ class _Donut extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 36,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: context.colors.textPrimary,
                         ),
                       ),
                       Text(
@@ -1051,7 +1059,7 @@ class _Donut extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: GoogleFonts.inter(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: context.colors.textSecondary,
                         ),
                       ),
                     ],
@@ -1080,7 +1088,7 @@ class _TopSessions extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: context.colors.textPrimary,
           ),
         ),
         SizedBox(height: 8.h),

@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../models/downloaded_session.dart';
 import '../../providers/download_provider.dart';
@@ -111,6 +111,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final l10n = AppLocalizations.of(context);
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
@@ -121,15 +122,15 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     final double toolbarHeight = isDesktop ? 80.0 : (isTablet ? 70.0 : 60.0);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         toolbarHeight: toolbarHeight,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
             size: isTablet ? 28.sp : 24.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -139,7 +140,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -152,7 +153,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               return IconButton(
                 icon: Icon(
                   Icons.storage_rounded,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                   size: isTablet ? 26.sp : 22.sp,
                 ),
                 onPressed: () => _showStorageInfo(context, provider),
@@ -184,14 +185,15 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
+        valueColor: AlwaysStoppedAnimation<Color>(context.colors.textPrimary),
       ),
     );
   }
 
   Widget _buildEmptyState(AppLocalizations l10n, bool isTablet) {
+    final colors = context.colors;
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32.w),
@@ -203,13 +205,13 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               width: isTablet ? 120.w : 100.w,
               height: isTablet ? 120.w : 100.w,
               decoration: BoxDecoration(
-                color: AppColors.greyLight.withValues(alpha: 0.5),
+                color: colors.greyLight.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.download_rounded,
                 size: isTablet ? 60.sp : 50.sp,
-                color: AppColors.textLight,
+                color: colors.textLight,
               ),
             ),
             SizedBox(height: 24.h),
@@ -220,7 +222,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 20.sp : 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -231,7 +233,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               l10n.noDownloadsMessage,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 15.sp : 14.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -277,6 +279,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     bool isTablet,
     bool isLast,
   ) {
+    final colors = context.colors;
     final double imageSize = isTablet ? 80.w : 70.w;
     final double titleSize = isTablet ? 16.sp : 15.sp;
     final double subtitleSize = isTablet ? 13.sp : 12.sp;
@@ -292,11 +295,11 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           child: Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(borderRadius),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
+                  color: colors.textPrimary.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -320,7 +323,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                         style: GoogleFonts.inter(
                           fontSize: titleSize,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -335,19 +338,19 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                               download.categoryName!,
                               style: GoogleFonts.inter(
                                 fontSize: subtitleSize,
-                                color: AppColors.textSecondary,
+                                color: colors.textSecondary,
                               ),
                             ),
-                            const Text(
+                            Text(
                               ' • ',
-                              style: TextStyle(color: AppColors.textLight),
+                              style: TextStyle(color: colors.textLight),
                             ),
                           ],
                           Text(
                             _getLanguageName(download.language),
                             style: GoogleFonts.inter(
                               fontSize: subtitleSize,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                           ),
                         ],
@@ -360,28 +363,28 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                           Icon(
                             Icons.access_time_rounded,
                             size: subtitleSize,
-                            color: AppColors.textLight,
+                            color: colors.textLight,
                           ),
                           SizedBox(width: 4.w),
                           Text(
                             download.formattedDuration,
                             style: GoogleFonts.inter(
                               fontSize: subtitleSize,
-                              color: AppColors.textLight,
+                              color: colors.textLight,
                             ),
                           ),
                           SizedBox(width: 12.w),
                           Icon(
                             Icons.storage_rounded,
                             size: subtitleSize,
-                            color: AppColors.textLight,
+                            color: colors.textLight,
                           ),
                           SizedBox(width: 4.w),
                           Text(
                             download.formattedFileSize,
                             style: GoogleFonts.inter(
                               fontSize: subtitleSize,
-                              color: AppColors.textLight,
+                              color: colors.textLight,
                             ),
                           ),
                         ],
@@ -395,7 +398,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                   onPressed: () => _showDeleteDialog(download, provider),
                   icon: Icon(
                     Icons.delete_outline_rounded,
-                    color: AppColors.textLight,
+                    color: colors.textLight,
                     size: isTablet ? 24.sp : 22.sp,
                   ),
                 ),
@@ -443,16 +446,17 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Widget _buildPlaceholder(double size, double borderRadius) {
+    final colors = context.colors;
     return Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: colors.greyLight,
         borderRadius: BorderRadius.circular(borderRadius - 4),
       ),
       child: Icon(
         Icons.music_note_rounded,
-        color: AppColors.textLight,
+        color: colors.textLight,
         size: size * 0.4,
       ),
     );
@@ -493,7 +497,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.colors.backgroundElevated,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
@@ -502,7 +506,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         content: Column(
@@ -514,7 +518,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               style: GoogleFonts.inter(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
             SizedBox(height: 8.h),
@@ -522,7 +526,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               l10n.removeDownloadMessage,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ],
@@ -532,8 +536,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: context.colors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -564,7 +568,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.colors.backgroundElevated,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
@@ -578,7 +582,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: AppColors.greyMedium,
+                color: context.colors.greyMedium,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -590,7 +594,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 20.sp : 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
             SizedBox(height: 24.h),
@@ -650,19 +654,20 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     required String label,
     required bool isTablet,
   }) {
+    final colors = context.colors;
     return Column(
       children: [
         Container(
           width: isTablet ? 60.w : 50.w,
           height: isTablet ? 60.w : 50.w,
           decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: 0.08),
+            color: colors.textPrimary.withValues(alpha: 0.08),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
             size: isTablet ? 28.sp : 24.sp,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         SizedBox(height: 12.h),
@@ -671,7 +676,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         SizedBox(height: 4.h),
@@ -679,7 +684,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           label,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 14.sp : 13.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
       ],
@@ -697,7 +702,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.colors.backgroundElevated,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
@@ -706,14 +711,14 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         content: Text(
           l10n.clearAllDownloadsMessage,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
         actions: [
@@ -721,8 +726,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: context.colors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),

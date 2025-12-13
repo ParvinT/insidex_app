@@ -2145,4 +2145,25 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get preparing => 'Подготовка...';
+
+  @override
+  String get appearance => 'Оформление';
+
+  @override
+  String get lightMode => 'Светлая';
+
+  @override
+  String get lightModeSubtitle => 'Классическая светлая тема';
+
+  @override
+  String get darkMode => 'Тёмная';
+
+  @override
+  String get darkModeSubtitle => 'Комфортно для глаз';
+
+  @override
+  String get systemDefault => 'Системная';
+
+  @override
+  String get systemDefaultSubtitle => 'Следовать настройкам устройства';
 }

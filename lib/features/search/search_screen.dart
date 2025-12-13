@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
@@ -103,7 +103,7 @@ class _SearchScreenState extends State<SearchScreen>
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: GoogleFonts.inter(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: context.colors.textSecondary),
             ),
           ),
           TextButton(
@@ -125,7 +125,7 @@ class _SearchScreenState extends State<SearchScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.searchHistoryCleared),
-            backgroundColor: AppColors.textPrimary,
+            backgroundColor: context.colors.textPrimary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -164,8 +164,9 @@ class _SearchScreenState extends State<SearchScreen>
     final isTablet = context.isTablet;
     final l10n = AppLocalizations.of(context);
 
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
           child: Column(
         children: [
@@ -186,7 +187,6 @@ class _SearchScreenState extends State<SearchScreen>
                 ? _buildLoadingState()
                 : _searchController.text.isEmpty
                     ? SearchHistoryView(
-                        // ⭐ BURAYI DEĞİŞTİR
                         searches: _recentSearches,
                         onSearchTap: _onHistoryItemTap,
                         onClearAll: _clearAllHistory,
@@ -201,6 +201,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildSearchTextField(bool isTablet, AppLocalizations l10n) {
+    final colors = context.colors;
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: isTablet ? 24.w : 20.w,
@@ -210,10 +211,10 @@ class _SearchScreenState extends State<SearchScreen>
         horizontal: isTablet ? 18.w : 16.w,
       ),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: colors.greyLight,
         borderRadius: BorderRadius.circular(isTablet ? 14.r : 12.r),
         border: Border.all(
-          color: AppColors.greyBorder.withValues(alpha: 0.3),
+          color: colors.border.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -221,7 +222,7 @@ class _SearchScreenState extends State<SearchScreen>
         children: [
           Icon(
             Icons.search,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
             size: isTablet ? 22.sp : 20.sp,
           ),
           SizedBox(width: isTablet ? 14.w : 12.w),
@@ -231,13 +232,13 @@ class _SearchScreenState extends State<SearchScreen>
               focusNode: _focusNode,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 16.sp : 15.sp,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
               decoration: InputDecoration(
                 hintText: l10n.searchSessions,
                 hintStyle: GoogleFonts.inter(
                   fontSize: isTablet ? 16.sp : 15.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
                 border: InputBorder.none,
               ),
@@ -250,7 +251,7 @@ class _SearchScreenState extends State<SearchScreen>
             IconButton(
               icon: Icon(
                 Icons.clear,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 size: isTablet ? 22.sp : 20.sp,
               ),
               onPressed: () {
@@ -262,7 +263,7 @@ class _SearchScreenState extends State<SearchScreen>
             IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 size: isTablet ? 22.sp : 20.sp,
               ),
               onPressed: () => Navigator.pop(context),
@@ -284,7 +285,7 @@ class _SearchScreenState extends State<SearchScreen>
           l10n.foundResults(_totalResults.toString()),
           style: GoogleFonts.inter(
             fontSize: isTablet ? 15.sp : 14.sp,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -293,13 +294,14 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildTabs(bool isTablet, AppLocalizations l10n) {
+    final colors = context.colors;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 20.w),
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.textPrimary,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.textPrimary,
+        labelColor: colors.textPrimary,
+        unselectedLabelColor: colors.textSecondary,
+        indicatorColor: colors.textPrimary,
         isScrollable: false,
         labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 12.w : 8.w),
         labelStyle: GoogleFonts.inter(
@@ -320,9 +322,9 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
     );
   }
@@ -343,6 +345,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildNoResults(bool isTablet, AppLocalizations l10n) {
+    final colors = context.colors;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -350,7 +353,7 @@ class _SearchScreenState extends State<SearchScreen>
           Icon(
             Icons.search_off,
             size: isTablet ? 80.sp : 64.sp,
-            color: AppColors.greyLight,
+            color: colors.greyMedium,
           ),
           SizedBox(height: isTablet ? 24.h : 16.h),
           Text(
@@ -358,7 +361,7 @@ class _SearchScreenState extends State<SearchScreen>
             style: GoogleFonts.inter(
               fontSize: isTablet ? 20.sp : 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: isTablet ? 10.h : 8.h),
@@ -366,7 +369,7 @@ class _SearchScreenState extends State<SearchScreen>
             l10n.tryDifferentKeywords,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 15.sp : 14.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -423,7 +426,7 @@ class _SearchScreenState extends State<SearchScreen>
       style: GoogleFonts.inter(
         fontSize: isTablet ? 18.sp : 16.sp,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
     );
   }
@@ -459,81 +462,86 @@ class _SearchScreenState extends State<SearchScreen>
           ),
         );
       },
-      child: Container(
-        padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
-          border: Border.all(
-            color: AppColors.greyBorder,
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Icon with colored background
-            Container(
-              width: isTablet ? 56.w : 48.w,
-              height: isTablet ? 56.w : 48.w,
-              padding: EdgeInsets.all(8.w),
-              child: Lottie.asset(
-                AppIcons.getAnimationPath(
-                  AppIcons.getIconByName(category['iconName'])?['path'] ??
-                      'meditation.json',
+      child: Builder(
+        builder: (context) {
+          final colors = context.colors;
+          return Container(
+            padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
+            decoration: BoxDecoration(
+              color: colors.backgroundCard,
+              borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
+              border: Border.all(
+                color: colors.border,
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.textPrimary.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                fit: BoxFit.contain,
-                repeat: true,
-              ),
+              ],
             ),
-
-            SizedBox(width: isTablet ? 18.w : 16.w),
-
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category['name'],
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 18.sp : 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+            child: Row(
+              children: [
+                // Icon with colored background
+                Container(
+                  width: isTablet ? 56.w : 48.w,
+                  height: isTablet ? 56.w : 48.w,
+                  padding: EdgeInsets.all(8.w),
+                  child: Lottie.asset(
+                    AppIcons.getAnimationPath(
+                      AppIcons.getIconByName(category['iconName'])?['path'] ??
+                          'meditation.json',
                     ),
+                    fit: BoxFit.contain,
+                    repeat: true,
                   ),
-                  if ((category['description'] ?? '')
-                      .toString()
-                      .isNotEmpty) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      category['description'] ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 13.sp : 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                ),
 
-            // Arrow
-            Icon(
-              Icons.arrow_forward_ios,
-              color: AppColors.textSecondary,
-              size: isTablet ? 20.sp : 18.sp,
+                SizedBox(width: isTablet ? 18.w : 16.w),
+
+                // Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category['name'],
+                        style: GoogleFonts.inter(
+                          fontSize: isTablet ? 18.sp : 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      if ((category['description'] ?? '')
+                          .toString()
+                          .isNotEmpty) ...[
+                        SizedBox(height: 4.h),
+                        Text(
+                          category['description'] ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 13.sp : 12.sp,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Arrow
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: colors.textSecondary,
+                  size: isTablet ? 20.sp : 18.sp,
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

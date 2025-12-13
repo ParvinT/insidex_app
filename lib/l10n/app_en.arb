@@ -833,7 +833,14 @@
   "stillOffline": "Still offline. Please check your connection.",
   "noInternet": "No Internet",
   "internetRequiredForFirstLogin": "Internet connection is required for first login. Please connect and try again.",
-  "preparing": "Preparing..."
+  "preparing": "Preparing...",
+  "appearance": "Appearance",
+  "lightMode": "Light",
+  "lightModeSubtitle": "Classic bright theme",
+  "darkMode": "Dark",
+  "darkModeSubtitle": "Easy on the eyes",
+  "systemDefault": "System",
+  "systemDefaultSubtitle": "Follow device settings"
 
 
 }

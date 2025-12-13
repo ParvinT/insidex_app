@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'context_ext.dart';
+import '../themes/app_theme_extension.dart';
 
 class FormScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
@@ -35,10 +36,10 @@ class FormScaffold extends StatelessWidget {
         child: child,
       );
     }
-
+    final colors = context.colors;
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: backgroundColor ?? const Color(0xFFF8F8F8),
+      backgroundColor: backgroundColor ?? colors.background,
       appBar: appBar,
       body: SafeArea(
           top: true, bottom: bottomNavigationBar == null, child: child),

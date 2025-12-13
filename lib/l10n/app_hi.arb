@@ -726,5 +726,12 @@
   "stillOffline": "अभी भी ऑफ़लाइन। कृपया अपना कनेक्शन जांचें।",
   "noInternet": "इंटरनेट नहीं",
   "internetRequiredForFirstLogin": "पहली बार लॉगिन के लिए इंटरनेट कनेक्शन आवश्यक है। कृपया कनेक्ट करें और पुनः प्रयास करें।",
-  "preparing": "तैयार हो रहा है..."
+  "preparing": "तैयार हो रहा है...",
+  "appearance": "दिखावट",
+  "lightMode": "लाइट",
+  "lightModeSubtitle": "क्लासिक ब्राइट थीम",
+  "darkMode": "डार्क",
+  "darkModeSubtitle": "आंखों के लिए आरामदायक",
+  "systemDefault": "सिस्टम",
+  "systemDefaultSubtitle": "डिवाइस सेटिंग्स का पालन करें"
 }

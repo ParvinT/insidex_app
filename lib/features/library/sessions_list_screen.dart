@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../shared/widgets/session_card.dart';
 import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
@@ -270,6 +270,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -296,17 +297,17 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
     return MediaQuery(
       data: mq.copyWith(textScaler: TextScaler.linear(ts)),
       child: Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         appBar: AppBar(
           toolbarHeight: toolbarH,
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           leadingWidth: leadingWidth,
           titleSpacing: isTablet ? 4 : 0,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: (24.sp).clamp(20.0, 28.0),
             ),
             padding: EdgeInsets.only(left: leadingPad),
@@ -326,8 +327,8 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                         width: logoW,
                         height: logoH,
                         fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.textPrimary,
+                        colorFilter: ColorFilter.mode(
+                          colors.textPrimary,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -338,11 +339,10 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                   Container(
                     height: dividerH,
                     width: 1.5,
-                    color: AppColors.textPrimary.withValues(alpha: 0.2),
+                    color: colors.textPrimary.withValues(alpha: 0.2),
                     margin: EdgeInsets.symmetric(horizontal: 8.w),
                   ),
 
-                  // SAĞ: Başlık varyantı
                   Expanded(
                     child: Center(
                       child: widget.isShowingAllSessions
@@ -354,7 +354,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: (15.sp).clamp(14.0, 20.0),
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                               ),
                             )
                           : Row(
@@ -389,7 +389,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                                     style: GoogleFonts.inter(
                                       fontSize: (18.sp).clamp(16.0, 22.0),
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
+                                      color: colors.textPrimary,
                                     ),
                                   ),
                                 ),
@@ -411,10 +411,11 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
 
   // 🆕 ========== ALL SESSIONS LIST ==========
   Widget _buildAllSessionsList() {
+    final colors = context.colors;
     // Loading state (ilk yükleme)
     if (_isLoadingAllSessions && _allSessions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.textPrimary),
+      return Center(
+        child: CircularProgressIndicator(color: colors.textPrimary),
       );
     }
 
@@ -424,14 +425,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.music_off, size: 64.sp, color: AppColors.greyLight),
+            Icon(Icons.music_off, size: 64.sp, color: colors.greyLight),
             SizedBox(height: 16.h),
             Text(
               AppLocalizations.of(context).noSessionsAvailable,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -449,8 +450,8 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           if (_isLoadingAllSessions) {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.textPrimary),
+              child: Center(
+                child: CircularProgressIndicator(color: colors.textPrimary),
               ),
             );
           } else {
@@ -460,7 +461,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                 child: ElevatedButton(
                   onPressed: _loadMoreAllSessions,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackgroundCard,
+                    backgroundColor: colors.textPrimary,
                     padding:
                         EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
@@ -472,7 +473,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),
@@ -493,10 +494,11 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
 
 // 🆕 ========== CATEGORY SESSIONS LIST ==========
   Widget _buildCategorySessionsList() {
-    // Loading state (ilk yükleme)
+    final colors = context.colors;
+    // Loading state
     if (_isLoadingCategorySessions && _categorySessions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.textPrimary),
+      return Center(
+        child: CircularProgressIndicator(color: colors.textPrimary),
       );
     }
 
@@ -506,14 +508,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.music_off, size: 64.sp, color: AppColors.greyLight),
+            Icon(Icons.music_off, size: 64.sp, color: colors.greyLight),
             SizedBox(height: 16.h),
             Text(
               AppLocalizations.of(context).noSessionsAvailable,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             SizedBox(height: 8.h),
@@ -521,7 +523,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
               AppLocalizations.of(context).checkBackLater,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -539,8 +541,8 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           if (_isLoadingCategorySessions) {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.textPrimary),
+              child: Center(
+                child: CircularProgressIndicator(color: colors.textPrimary),
               ),
             );
           } else {
@@ -550,7 +552,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                 child: ElevatedButton(
                   onPressed: _loadMoreCategorySessions,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackgroundCard,
+                    backgroundColor: colors.textPrimary,
                     padding:
                         EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
@@ -562,7 +564,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),

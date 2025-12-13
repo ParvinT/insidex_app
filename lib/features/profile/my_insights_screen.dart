@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class MyInsightsScreen extends StatefulWidget {
   const MyInsightsScreen({super.key});
@@ -72,14 +73,15 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.backgroundCard,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -87,23 +89,9 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.black,
+            color: colors.textPrimary,
           ),
         ),
-        /*actions: [
-          IconButton(
-            icon: Icon(
-              _isEditMode ? Icons.check : Icons.edit_outlined,
-              color: Colors.black,
-            ),
-            onPressed: () {
-              setState(() => _isEditMode = !_isEditMode);
-              if (!_isEditMode) {
-                _saveUserData();
-              }
-            },
-          ),
-        ],*/
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -111,7 +99,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               children: [
                 // Fixed top section
                 Container(
-                  color: const Color(0xFFF5F5F5),
+                  color: colors.background,
                   padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -120,7 +108,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                         AppLocalizations.of(context).yourPersonalizedProfile,
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: Colors.grey[600],
+                          color: colors.textSecondary,
                         ),
                       ),
                       SizedBox(height: 20.h),
@@ -150,14 +138,15 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // Improved Tab Bar
   Widget _buildImprovedTabBar() {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(30.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -185,8 +174,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
         ),
         indicatorSize: TabBarIndicatorSize.tab,
         dividerColor: Colors.transparent,
-        labelColor: Colors.white,
-        unselectedLabelColor: Colors.grey[600],
+        labelColor: colors.textOnPrimary,
+        unselectedLabelColor: colors.textSecondary,
         labelStyle: GoogleFonts.inter(
           fontSize: 12.sp,
           fontWeight: FontWeight.w600,
@@ -214,6 +203,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // OVERVIEW TAB
   Widget _buildOverviewTab() {
+    final colors = context.colors;
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -221,11 +211,11 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: colors.textPrimary.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -238,6 +228,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -246,13 +237,13 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   label: AppLocalizations.of(context).gender,
                   value: _getLocalizedGender(_userData['gender'] ?? ''),
                 ),
-                Divider(height: 24.h, color: Colors.grey[200]),
+                Divider(height: 24.h, color: colors.border),
                 _buildInfoRow(
                   icon: Icons.cake_outlined,
                   label: AppLocalizations.of(context).birthDate,
                   value: _formatBirthDate(),
                 ),
-                Divider(height: 24.h, color: Colors.grey[200]),
+                Divider(height: 24.h, color: colors.border),
                 _buildInfoRow(
                   icon: Icons.email_outlined,
                   label: AppLocalizations.of(context).email,
@@ -267,11 +258,11 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: colors.textPrimary.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -284,6 +275,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -332,6 +324,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // GOALS TAB
   Widget _buildGoalsTab() {
+    final colors = context.colors;
     final goals = (_userData['goals'] as List?) ?? [];
 
     return SingleChildScrollView(
@@ -363,6 +356,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                       style: GoogleFonts.inter(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
                       ),
                     ),
                     if (_isEditMode)
@@ -381,14 +375,14 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                         Icon(
                           Icons.flag_outlined,
                           size: 48.sp,
-                          color: Colors.grey[400],
+                          color: colors.greyMedium,
                         ),
                         SizedBox(height: 12.h),
                         Text(
                           AppLocalizations.of(context).noGoalsYet,
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
-                            color: Colors.grey[600],
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -408,7 +402,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                           vertical: 12.h,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: colors.backgroundCard,
                           borderRadius: BorderRadius.circular(25.r),
                           border: Border.all(
                             color: goalColor.withValues(alpha: 0.3),
@@ -436,7 +430,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.black87,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ],
@@ -454,7 +448,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Column(
@@ -465,6 +459,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 20.h),
@@ -481,6 +476,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                                 style: GoogleFonts.inter(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w500,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               Text(
@@ -496,7 +492,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                           SizedBox(height: 8.h),
                           LinearProgressIndicator(
                             value: _getGoalProgress(goal) / 100,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: colors.greyLight,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               _getGoalColor(goal),
                             ),
@@ -514,6 +510,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // STATS TAB
   Widget _buildStatsTab() {
+    final colors = context.colors;
     return SingleChildScrollView(
       padding: EdgeInsets.all(20.w),
       child: Column(
@@ -566,7 +563,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   height: 200.h,
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.backgroundCard,
                     borderRadius: BorderRadius.circular(16.r),
                   ),
                   child: const Center(
@@ -580,11 +577,11 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               return Container(
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: colors.backgroundCard,
                   borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
+                      color: colors.textPrimary.withValues(alpha: 0.05),
                       blurRadius: 10,
                     ),
                   ],
@@ -600,13 +597,14 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
+                            color: colors.textPrimary,
                           ),
                         ),
                         Text(
                           '${_getTotalWeeklyMinutes(weeklyData)} ${AppLocalizations.of(context).minTotal}',
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: Colors.grey[600],
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -649,11 +647,11 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(16.r),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: colors.textPrimary.withValues(alpha: 0.05),
                   blurRadius: 10,
                 ),
               ],
@@ -666,6 +664,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 16.h),
@@ -714,6 +713,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
 
   // JOURNEY TAB
   Widget _buildJourneyTab() {
+    final colors = context.colors;
     final completedSessions =
         (_userData['completedSessionIds'] as List?)?.length ?? 0;
     final currentStreak = _userData['currentStreak'] ?? 0;
@@ -761,7 +761,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Column(
@@ -772,6 +772,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 8.h),
@@ -779,7 +780,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                   AppLocalizations.of(context).trackMilestones,
                   style: GoogleFonts.inter(
                     fontSize: 13.sp,
-                    color: Colors.grey[600],
+                    color: colors.textSecondary,
                   ),
                 ),
                 SizedBox(height: 24.h),
@@ -795,12 +796,12 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                           decoration: BoxDecoration(
                             color: isCompleted
                                 ? const Color(0xFF7DB9B6)
-                                : Colors.grey[300],
+                                : colors.greyMedium,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             isCompleted ? Icons.check : Icons.lock_outline,
-                            color: Colors.white,
+                            color: colors.backgroundCard,
                             size: 20.sp,
                           ),
                         ),
@@ -815,8 +816,8 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
                                   color: isCompleted
-                                      ? Colors.black
-                                      : Colors.grey[500],
+                                      ? colors.textPrimary
+                                      : colors.textLight,
                                 ),
                               ),
                               SizedBox(height: 4.h),
@@ -824,7 +825,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                                 milestone['date'] as String,
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
-                                  color: Colors.grey[600],
+                                  color: colors.textSecondary,
                                 ),
                               ),
                             ],
@@ -893,10 +894,11 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     required String label,
     required Color color,
   }) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -917,7 +919,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 style: GoogleFonts.inter(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: colors.textPrimary,
                 ),
               ),
               Container(
@@ -943,7 +945,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             label,
             style: GoogleFonts.inter(
               fontSize: 11.sp,
-              color: Colors.grey[600],
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -958,14 +960,15 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     required String value,
     required Color color,
   }) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
           ),
         ],
@@ -982,6 +985,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
+                color: colors.textPrimary,
               ),
             ),
           ),
@@ -991,7 +995,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
               label,
               style: GoogleFonts.inter(
                 fontSize: 10.sp,
-                color: Colors.grey[600],
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -1001,6 +1005,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   Widget _buildDayBar(String day, int minutes) {
+    final colors = context.colors;
     const maxHeight = 80.0;
     final height =
         minutes > 0 ? (minutes / 120 * maxHeight).clamp(10.0, maxHeight) : 10.0;
@@ -1033,7 +1038,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                         const Color(0xFF7DB9B6),
                         const Color(0xFF7DB9B6).withValues(alpha: 0.7),
                       ]
-                    : [Colors.grey[300]!, Colors.grey[300]!],
+                    : [colors.greyMedium, colors.greyMedium],
               ),
               borderRadius: BorderRadius.circular(4.r),
             ),
@@ -1043,7 +1048,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             day,
             style: GoogleFonts.inter(
               fontSize: 11.sp,
-              color: Colors.grey[600],
+              color: colors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -1057,6 +1062,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     required String value,
     required IconData icon,
   }) {
+    final colors = context.colors;
     return Row(
       children: [
         Icon(
@@ -1070,7 +1076,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
             label,
             style: GoogleFonts.inter(
               fontSize: 13.sp,
-              color: Colors.grey[600],
+              color: colors.textSecondary,
             ),
           ),
         ),
@@ -1079,7 +1085,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           style: GoogleFonts.inter(
             fontSize: 13.sp,
             fontWeight: FontWeight.w600,
-            color: Colors.black87,
+            color: colors.textPrimary,
           ),
         ),
       ],
@@ -1091,9 +1097,10 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
     required String label,
     required String value,
   }) {
+    final colors = context.colors;
     return Row(
       children: [
-        Icon(icon, size: 20.sp, color: Colors.grey[600]),
+        Icon(icon, size: 20.sp, color: colors.textSecondary),
         SizedBox(width: 12.w),
         Expanded(
           child: Column(
@@ -1103,7 +1110,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 label,
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
-                  color: Colors.grey[600],
+                  color: colors.textSecondary,
                 ),
               ),
               Text(
@@ -1111,6 +1118,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w500,
+                  color: colors.textPrimary,
                 ),
               ),
             ],
@@ -1121,6 +1129,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
   }
 
   Widget _buildInsightRow(String label, String value) {
+    final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -1128,7 +1137,7 @@ class _MyInsightsScreenState extends State<MyInsightsScreen>
           label,
           style: GoogleFonts.inter(
             fontSize: 13.sp,
-            color: Colors.grey[600],
+            color: colors.textSecondary,
           ),
         ),
         Text(

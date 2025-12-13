@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
@@ -94,15 +94,16 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isTablet = context.isTablet;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -110,13 +111,12 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.textPrimary))
+          ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
           : SingleChildScrollView(
               padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
               child: Column(
@@ -149,13 +149,14 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
   }
 
   Widget _buildHeader(bool isTablet) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.textPrimary.withValues(alpha: 0.1),
-            AppColors.textPrimary.withValues(alpha: 0.05),
+            colors.textPrimary.withValues(alpha: 0.1),
+            colors.textPrimary.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -184,7 +185,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 14.sp : 13.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -193,7 +194,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 20.sp : 18.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ],
@@ -206,6 +207,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
   Widget _buildDiseaseResultCard(
       DiseaseModel disease, int number, bool isTablet) {
+    final colors = context.colors;
     final cause = _causes[disease.id];
 
     return FutureBuilder<String>(
@@ -218,15 +220,15 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           margin: EdgeInsets.only(bottom: 16.h),
           padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.backgroundCard,
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
-              color: AppColors.greyBorder.withValues(alpha: 0.3),
+              color: colors.border.withValues(alpha: 0.3),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: colors.textPrimary.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -246,8 +248,8 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                       child: Container(
                         width: (isTablet ? 26.w : 22.w).clamp(20.0, 28.0),
                         height: (isTablet ? 26.w : 22.w).clamp(20.0, 28.0),
-                        decoration: const BoxDecoration(
-                          color: Colors.black,
+                        decoration: BoxDecoration(
+                          color: colors.textPrimary,
                           shape: BoxShape.circle,
                         ),
                         alignment: Alignment.center,
@@ -257,7 +259,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                             fontSize:
                                 (isTablet ? 11.sp : 10.sp).clamp(9.0, 12.0),
                             fontWeight: FontWeight.w700,
-                            color: Colors.white,
+                            color: colors.textOnPrimary,
                           ),
                         ),
                       ),
@@ -275,7 +277,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                               fontSize:
                                   (isTablet ? 13.sp : 12.sp).clamp(11.0, 14.0),
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                               height: 1.5,
                             ),
                             maxLines: 3,
@@ -326,7 +328,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                 SizedBox(height: 16.h),
 
                 // Divider
-                Divider(color: AppColors.greyBorder.withValues(alpha: 0.3)),
+                Divider(color: colors.border.withValues(alpha: 0.3)),
 
                 SizedBox(height: 16.h),
 
@@ -336,7 +338,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: (isTablet ? 15.sp : 14.sp).clamp(13.0, 16.0),
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
 
@@ -352,7 +354,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                         fontSize: (isTablet ? 13.sp : 12.sp).clamp(11.0, 14.0),
                         fontWeight: FontWeight.w400,
                         height: 1.5,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                       maxLines: _isCauseExpanded(disease.id) ? null : 3,
                       overflow: _isCauseExpanded(disease.id)
@@ -377,7 +379,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                 fontSize: (isTablet ? 12.sp : 11.sp)
                                     .clamp(10.0, 13.0),
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.darkBackground,
+                                color: colors.textPrimary,
                               ),
                             ),
                             SizedBox(width: 4.w),
@@ -387,7 +389,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                   : Icons.keyboard_arrow_down,
                               size:
                                   (isTablet ? 18.sp : 16.sp).clamp(14.0, 20.0),
-                              color: AppColors.darkBackground,
+                              color: colors.textPrimary,
                             ),
                           ],
                         ),
@@ -405,7 +407,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                     padding: EdgeInsets.all(
                         (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
                     decoration: BoxDecoration(
-                      color: AppColors.textPrimary.withValues(alpha: 0.1),
+                      color: colors.textPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: LayoutBuilder(
@@ -414,7 +416,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                           children: [
                             Icon(
                               Icons.play_circle_filled,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                               size: isTablet ? 24.sp : 22.sp,
                             ),
                             SizedBox(width: 12.w),
@@ -438,7 +440,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                           fontSize: (isTablet ? 11.sp : 10.sp)
                                               .clamp(9.0, 12.0),
                                           fontWeight: FontWeight.w500,
-                                          color: AppColors.textSecondary,
+                                          color: colors.textSecondary,
                                         ),
                                       ),
                                       SizedBox(height: 2.h),
@@ -448,7 +450,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                           fontSize: (isTablet ? 14.sp : 13.sp)
                                               .clamp(12.0, 15.0),
                                           fontWeight: FontWeight.w700,
-                                          color: AppColors.textPrimary,
+                                          color: colors.textPrimary,
                                         ),
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -467,7 +469,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                     (isTablet ? 9.h : 8.h).clamp(7.0, 11.0),
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                                 borderRadius: BorderRadius.circular(20.r),
                               ),
                               child: Text(
@@ -476,7 +478,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                                   fontSize: (isTablet ? 12.sp : 11.sp)
                                       .clamp(10.0, 13.0),
                                   fontWeight: FontWeight.w700,
-                                  color: Colors.white,
+                                  color: colors.textOnPrimary,
                                 ),
                               ),
                             ),
@@ -526,6 +528,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
   }
 
   Widget _buildExpandToggleButton(bool isTablet) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: () {
         setState(() => _isExpanded = !_isExpanded);
@@ -536,10 +539,10 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
           vertical: isTablet ? 14.h : 12.h,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.backgroundCard,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: AppColors.greyBorder.withValues(alpha: 0.3),
+            color: colors.border.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -553,13 +556,13 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
               style: GoogleFonts.inter(
                 fontSize: (isTablet ? 14.sp : 13.sp).clamp(12.0, 15.0),
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             SizedBox(width: 8.w),
             Icon(
               _isExpanded ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: (isTablet ? 20.sp : 18.sp).clamp(16.0, 22.0),
             ),
           ],

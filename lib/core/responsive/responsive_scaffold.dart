@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'context_ext.dart';
+import '../themes/app_theme_extension.dart';
 
 class ResponsiveScaffold extends StatelessWidget {
   final PreferredSizeWidget? appBar;
@@ -17,8 +18,9 @@ class ResponsiveScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: bg,
+      backgroundColor: bg == const Color(0xFFF8F8F8) ? colors.background : bg,
       appBar: appBar,
       body: SafeArea(
         top: true,
@@ -42,12 +44,12 @@ class ResponsiveScaffold extends StatelessWidget {
                     padding: EdgeInsets.only(bottom: bottomInset),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: colors.backgroundElevated,
                         borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(20)),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: .08),
+                            color: colors.textPrimary.withValues(alpha: .08),
                             blurRadius: 10,
                             offset: const Offset(0, -2),
                           ),

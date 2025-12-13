@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/analytics_service.dart';
@@ -43,6 +43,7 @@ class _GenderScreenState extends State<GenderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final size = mq.size;
 
@@ -55,19 +56,19 @@ class _GenderScreenState extends State<GenderScreen> {
     return MediaQuery(
       data: isCompactHeight ? clamped : mq,
       child: AuthScaffold(
-        bodyIsScrollable: true, // whole page scrolls
-        backgroundColor: AppColors.backgroundWhite,
+        bodyIsScrollable: true,
+        backgroundColor: colors.background,
         bottomAreaVisualHeight: bottomVisual,
         bottomArea: _BottomBar(
           enabled: _selectedGender != null,
           onPressed: _onContinue,
         ),
         appBar: AppBar(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           toolbarHeight: 64,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back, color: colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -96,7 +97,7 @@ class _GenderScreenState extends State<GenderScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ),
@@ -120,7 +121,7 @@ class _GenderScreenState extends State<GenderScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 28.sp,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 8.h),
@@ -129,7 +130,7 @@ class _GenderScreenState extends State<GenderScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w400,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                       SizedBox(height: 24.h),
@@ -138,7 +139,7 @@ class _GenderScreenState extends State<GenderScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 16.h),
@@ -167,6 +168,7 @@ class _GenderScreenState extends State<GenderScreen> {
   }
 
   Widget _genderOption(Gender gender, String label) {
+    final colors = context.colors;
     final isSelected = _selectedGender == gender;
     return GestureDetector(
       onTap: () => setState(() => _selectedGender = gender),
@@ -174,16 +176,16 @@ class _GenderScreenState extends State<GenderScreen> {
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : Colors.white,
+          color: isSelected ? colors.textPrimary : colors.backgroundCard,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-              color: isSelected ? AppColors.textPrimary : AppColors.greyBorder,
+              color: isSelected ? colors.textPrimary : colors.border,
               width: 1.5),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.textPrimary.withValues(alpha: 0.20)
-                  : Colors.black.withValues(alpha: 0.05),
+                  ? colors.textPrimary.withValues(alpha: 0.20)
+                  : colors.textPrimary.withValues(alpha: 0.05),
               blurRadius: isSelected ? 14 : 10,
               offset: const Offset(0, 4),
             ),
@@ -197,7 +199,7 @@ class _GenderScreenState extends State<GenderScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                    color: isSelected ? Colors.white : AppColors.greyBorder,
+                    color: isSelected ? colors.textOnPrimary : colors.border,
                     width: 2),
               ),
               child: isSelected
@@ -205,8 +207,9 @@ class _GenderScreenState extends State<GenderScreen> {
                       child: Container(
                           width: 12.w,
                           height: 12.w,
-                          decoration: const BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.white)),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: colors.textOnPrimary)),
                     )
                   : null,
             ),
@@ -216,7 +219,7 @@ class _GenderScreenState extends State<GenderScreen> {
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? colors.textOnPrimary : colors.textPrimary,
               ),
             ),
           ],
@@ -226,13 +229,14 @@ class _GenderScreenState extends State<GenderScreen> {
   }
 
   Widget _buildProgressIndicator() {
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Container(
               height: 4.h,
               decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                   borderRadius: BorderRadius.circular(2.r))),
         ),
         SizedBox(width: 8.w),
@@ -240,7 +244,7 @@ class _GenderScreenState extends State<GenderScreen> {
           child: Container(
               height: 4.h,
               decoration: BoxDecoration(
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                   borderRadius: BorderRadius.circular(2.r))),
         ),
         SizedBox(width: 8.w),
@@ -248,7 +252,7 @@ class _GenderScreenState extends State<GenderScreen> {
           child: Container(
               height: 4.h,
               decoration: BoxDecoration(
-                  color: AppColors.greyLight,
+                  color: colors.greyLight,
                   borderRadius: BorderRadius.circular(2.r))),
         ),
       ],
@@ -263,13 +267,14 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       color: Colors.transparent,
       padding: EdgeInsets.fromLTRB(
         20.w,
         12.h,
         20.w,
-        MediaQuery.of(context).padding.bottom + 12.h, // Safe area
+        MediaQuery.of(context).padding.bottom + 12.h,
       ),
       child: SizedBox(
         width: double.infinity,
@@ -277,9 +282,9 @@ class _BottomBar extends StatelessWidget {
         child: ElevatedButton(
           onPressed: enabled ? onPressed : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.textPrimary,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.greyLight,
+            backgroundColor: colors.textPrimary,
+            foregroundColor: colors.textOnPrimary,
+            disabledBackgroundColor: colors.greyLight,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
             elevation: 0,

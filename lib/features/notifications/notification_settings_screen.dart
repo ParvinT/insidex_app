@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../providers/notification_provider.dart';
 import '../../l10n/app_localizations.dart';
@@ -33,6 +33,7 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // Responsive values
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
@@ -54,16 +55,16 @@ class _NotificationSettingsScreenState
         isTablet ? 16.sp.clamp(15.0, 17.0) : 14.sp.clamp(13.0, 15.0);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         centerTitle: true,
         toolbarHeight: isTablet ? 64 : 56,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
             size: 24.sp.clamp(22.0, 26.0),
           ),
           onPressed: () => Navigator.pop(context),
@@ -73,16 +74,16 @@ class _NotificationSettingsScreenState
           style: GoogleFonts.inter(
             fontSize: titleSize,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
       body: Consumer<NotificationProvider>(
         builder: (context, provider, child) {
           if (provider.isLoading) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             );
           }
@@ -193,13 +194,13 @@ class _NotificationSettingsScreenState
                           icon: Icon(
                             Icons.bug_report_outlined,
                             size: 18.sp,
-                            color: AppColors.textLight,
+                            color: colors.textLight,
                           ),
                           label: Text(
                             AppLocalizations.of(context).sendTestNotification,
                             style: GoogleFonts.inter(
                               fontSize: bodyTextSize,
-                              color: AppColors.textLight,
+                              color: colors.textLight,
                             ),
                           ),
                         ),
@@ -222,13 +223,14 @@ class _NotificationSettingsScreenState
     NotificationProvider provider,
     double textSize,
   ) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.greyLight.withValues(alpha: 0.5),
+        color: colors.greyLight.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: AppColors.greyBorder,
+          color: colors.border,
           width: 1,
         ),
       ),
@@ -237,7 +239,7 @@ class _NotificationSettingsScreenState
           Icon(
             Icons.notifications_off_outlined,
             size: 32.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
           SizedBox(height: 12.h),
           Text(
@@ -245,7 +247,7 @@ class _NotificationSettingsScreenState
             style: GoogleFonts.inter(
               fontSize: textSize + 2,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -254,7 +256,7 @@ class _NotificationSettingsScreenState
             textAlign: TextAlign.center,
             style: GoogleFonts.inter(
               fontSize: textSize,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               height: 1.4,
             ),
           ),
@@ -282,7 +284,7 @@ class _NotificationSettingsScreenState
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
+              backgroundColor: colors.textPrimary,
               padding: EdgeInsets.symmetric(
                 horizontal: 24.w,
                 vertical: 12.h,
@@ -296,7 +298,7 @@ class _NotificationSettingsScreenState
               style: GoogleFonts.inter(
                 fontSize: textSize,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: colors.textOnPrimary,
               ),
             ),
           ),
@@ -333,7 +335,7 @@ class _NotificationSettingsScreenState
               NotificationConstants.notificationsDisabledInSystem,
               style: GoogleFonts.inter(
                 fontSize: textSize,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
           ),
@@ -343,7 +345,7 @@ class _NotificationSettingsScreenState
               AppLocalizations.of(context).settings,
               style: GoogleFonts.inter(
                 fontSize: textSize,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -359,7 +361,7 @@ class _NotificationSettingsScreenState
       style: GoogleFonts.inter(
         fontSize: fontSize,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
     );
   }
@@ -374,14 +376,15 @@ class _NotificationSettingsScreenState
     required double bodyTextSize,
     required double sectionTitleSize,
   }) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -392,12 +395,12 @@ class _NotificationSettingsScreenState
           Container(
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: AppColors.greyLight.withValues(alpha: 0.5),
+              color: colors.greyLight.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Icon(
               icon,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: 24.sp,
             ),
           ),
@@ -411,7 +414,7 @@ class _NotificationSettingsScreenState
                   style: GoogleFonts.inter(
                     fontSize: sectionTitleSize,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -419,7 +422,7 @@ class _NotificationSettingsScreenState
                   subtitle,
                   style: GoogleFonts.inter(
                     fontSize: bodyTextSize,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -430,12 +433,12 @@ class _NotificationSettingsScreenState
               ? CupertinoSwitch(
                   value: value,
                   onChanged: onChanged,
-                  activeTrackColor: AppColors.textPrimary,
+                  activeTrackColor: colors.textPrimary,
                 )
               : Switch(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: AppColors.textPrimary,
+                  activeColor: colors.textPrimary,
                 ),
         ],
       ),
@@ -449,17 +452,18 @@ class _NotificationSettingsScreenState
     required double sectionTitleSize,
     required bool isTablet,
   }) {
+    final colors = context.colors;
     final reminder = provider.dailyReminder;
     final enabled = reminder.enabled && provider.allNotificationsEnabled;
 
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -473,12 +477,12 @@ class _NotificationSettingsScreenState
               Container(
                 padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: AppColors.greyLight.withValues(alpha: 0.5),
+                  color: colors.greyLight.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
                   Icons.alarm,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                   size: 24.sp,
                 ),
               ),
@@ -492,7 +496,7 @@ class _NotificationSettingsScreenState
                       style: GoogleFonts.inter(
                         fontSize: sectionTitleSize,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -500,7 +504,7 @@ class _NotificationSettingsScreenState
                       AppLocalizations.of(context).getRemindedDaily,
                       style: GoogleFonts.inter(
                         fontSize: bodyTextSize,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -512,14 +516,14 @@ class _NotificationSettingsScreenState
                       onChanged: provider.allNotificationsEnabled
                           ? (value) => provider.toggleDailyReminder(value)
                           : null,
-                      activeTrackColor: AppColors.textPrimary,
+                      activeTrackColor: colors.textPrimary,
                     )
                   : Switch(
                       value: enabled,
                       onChanged: provider.allNotificationsEnabled
                           ? (value) => provider.toggleDailyReminder(value)
                           : null,
-                      activeColor: AppColors.textPrimary,
+                      activeColor: colors.textPrimary,
                     ),
             ],
           ),
@@ -527,7 +531,7 @@ class _NotificationSettingsScreenState
           // Time Selector (shown when enabled)
           if (enabled) ...[
             SizedBox(height: 16.h),
-            const Divider(color: AppColors.greyBorder),
+            Divider(color: colors.border),
             SizedBox(height: 16.h),
             InkWell(
               onTap: () => _showTimePicker(context, provider),
@@ -538,7 +542,7 @@ class _NotificationSettingsScreenState
                   vertical: 12.h,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.greyLight.withValues(alpha: 0.3),
+                  color: colors.greyLight.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Row(
@@ -548,7 +552,7 @@ class _NotificationSettingsScreenState
                       AppLocalizations.of(context).reminderTime,
                       style: GoogleFonts.inter(
                         fontSize: bodyTextSize,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     Row(
@@ -558,14 +562,14 @@ class _NotificationSettingsScreenState
                           style: GoogleFonts.inter(
                             fontSize: sectionTitleSize,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                         ),
                         SizedBox(width: 8.w),
                         Icon(
                           Icons.access_time,
                           size: 18.sp,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ],
                     ),
@@ -602,9 +606,9 @@ class _NotificationSettingsScreenState
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
-              colorScheme: const ColorScheme.light(
-                primary: AppColors.textPrimary,
-                onSurface: AppColors.textPrimary,
+              colorScheme: ColorScheme.light(
+                primary: context.colors.textPrimary,
+                onSurface: context.colors.textPrimary,
               ),
             ),
             child: child!,
@@ -623,12 +627,13 @@ class _NotificationSettingsScreenState
     NotificationProvider provider,
     TimeOfDay currentTime,
   ) {
+    final colors = context.colors;
     TimeOfDay selectedTime = currentTime;
 
     return Container(
       height: 320.h,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundElevated,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20.r),
           topRight: Radius.circular(20.r),
@@ -648,7 +653,7 @@ class _NotificationSettingsScreenState
                     AppLocalizations.of(context).cancel,
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ),
@@ -657,7 +662,7 @@ class _NotificationSettingsScreenState
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 TextButton(
@@ -670,7 +675,7 @@ class _NotificationSettingsScreenState
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),

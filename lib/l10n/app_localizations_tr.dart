@@ -2138,4 +2138,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get preparing => 'Hazırlanıyor...';
+
+  @override
+  String get appearance => 'Görünüm';
+
+  @override
+  String get lightMode => 'Açık';
+
+  @override
+  String get lightModeSubtitle => 'Klasik aydınlık tema';
+
+  @override
+  String get darkMode => 'Koyu';
+
+  @override
+  String get darkModeSubtitle => 'Gözleri yormaz';
+
+  @override
+  String get systemDefault => 'Sistem';
+
+  @override
+  String get systemDefaultSubtitle => 'Cihaz ayarlarını takip et';
 }

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../providers/user_provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
@@ -162,7 +162,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               AppLocalizations.of(context).cancel,
-              style: GoogleFonts.inter(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: context.colors.textSecondary),
             ),
           ),
           TextButton(
@@ -207,6 +207,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final screenSize = mq.size;
     final screenWidth = screenSize.width;
@@ -218,23 +219,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: colors.background,
+        body:
+            Center(child: CircularProgressIndicator(color: colors.textPrimary)),
       );
     }
 
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           appBar: AppBar(
-            backgroundColor: AppColors.backgroundWhite,
+            backgroundColor: colors.background,
             elevation: 0,
             centerTitle: true,
             toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              icon: Icon(Icons.arrow_back, color: colors.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -242,7 +244,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: GoogleFonts.inter(
                 fontSize: 20.sp.clamp(20.0, 22.0),
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             actions: [
@@ -255,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp.clamp(14.0, 18.0),
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),

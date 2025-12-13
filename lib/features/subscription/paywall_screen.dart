@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../models/subscription_package.dart';
 import '../../providers/subscription_provider.dart';
@@ -73,8 +73,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final maxContentWidth =
         isDesktop ? 600.0 : (isTablet ? 500.0 : double.infinity);
 
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Consumer<SubscriptionProvider>(
           builder: (context, subscriptionProvider, _) {
@@ -155,6 +156,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildAppBar(BuildContext context, bool isTablet) {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 16.w,
@@ -167,7 +169,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             onPressed: () => Navigator.of(context).pop(),
             icon: Icon(
               Icons.close,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: isTablet ? 28.sp : 24.sp,
             ),
           ),
@@ -179,8 +181,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
             'assets/images/logo.svg',
             width: isTablet ? 100.w : 80.w,
             height: isTablet ? 33.h : 27.h,
-            colorFilter: const ColorFilter.mode(
-              AppColors.textPrimary,
+            colorFilter: ColorFilter.mode(
+              colors.textPrimary,
               BlendMode.srcIn,
             ),
           ),
@@ -195,6 +197,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
   }
 
   Widget _buildHeader(BuildContext context, bool isTablet) {
+    final colors = context.colors;
     return Column(
       children: [
         // Premium icon
@@ -206,8 +209,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                AppColors.textPrimary.withValues(alpha: 0.1),
-                AppColors.textPrimary.withValues(alpha: 0.05),
+                colors.textPrimary.withValues(alpha: 0.1),
+                colors.textPrimary.withValues(alpha: 0.05),
               ],
             ),
             shape: BoxShape.circle,
@@ -215,7 +218,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           child: Icon(
             Icons.workspace_premium,
             size: isTablet ? 40.sp : 35.sp,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
 
@@ -227,7 +230,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 26.sp : 22.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -239,7 +242,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
           'Choose the plan that works best for you',
           style: GoogleFonts.inter(
             fontSize: isTablet ? 16.sp : 14.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
           textAlign: TextAlign.center,
         ),
@@ -255,7 +258,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         'Restore purchases',
         style: GoogleFonts.inter(
           fontSize: 14.sp,
-          color: AppColors.textSecondary,
+          color: context.colors.textSecondary,
           decoration: TextDecoration.underline,
         ),
       ),
@@ -270,7 +273,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         'You can manage and cancel your subscription in your App Store or Google Play account settings.',
         style: GoogleFonts.inter(
           fontSize: isTablet ? 12.sp : 11.sp,
-          color: AppColors.textSecondary.withValues(alpha: 0.7),
+          color: context.colors.textSecondary.withValues(alpha: 0.7),
           height: 1.5,
         ),
         textAlign: TextAlign.center,
@@ -294,14 +297,15 @@ class _PaywallScreenState extends State<PaywallScreen> {
     final buttonText = selectedPackage.hasTrial
         ? 'Start ${selectedPackage.trialDays}-Day Free Trial'
         : 'Subscribe Now';
+    final colors = context.colors;
 
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundElevated,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -4),
           ),
@@ -315,10 +319,10 @@ class _PaywallScreenState extends State<PaywallScreen> {
           child: ElevatedButton(
             onPressed: _isProcessing ? null : () => _handlePurchase(provider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
-              foregroundColor: Colors.white,
+              backgroundColor: colors.textPrimary,
+              foregroundColor: colors.textOnPrimary,
               disabledBackgroundColor:
-                  AppColors.textPrimary.withValues(alpha: 0.5),
+                  colors.textPrimary.withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
               ),
@@ -328,8 +332,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                 ? SizedBox(
                     width: 24.w,
                     height: 24.w,
-                    child: const CircularProgressIndicator(
-                      color: Colors.white,
+                    child: CircularProgressIndicator(
+                      color: colors.textOnPrimary,
                       strokeWidth: 2,
                     ),
                   )

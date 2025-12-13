@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/subscription_provider.dart';
@@ -79,6 +79,7 @@ class _MenuOverlayState extends State<MenuOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -104,14 +105,14 @@ class _MenuOverlayState extends State<MenuOverlay>
                   width: 280.w,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.backgroundElevated,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(30.r),
                       bottomLeft: Radius.circular(30.r),
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: colors.textPrimary.withValues(alpha: 0.1),
                         blurRadius: 20,
                         offset: const Offset(-5, 0),
                       ),
@@ -132,14 +133,14 @@ class _MenuOverlayState extends State<MenuOverlay>
                                 style: GoogleFonts.inter(
                                   fontSize: 24.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               IconButton(
                                 onPressed: _closeMenu,
                                 icon: Icon(
                                   Icons.close,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                   size: 24.sp,
                                 ),
                               ),
@@ -147,8 +148,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                           ),
                         ),
 
-                        const Divider(
-                          color: AppColors.greyBorder,
+                        Divider(
+                          color: colors.border,
                           thickness: 1,
                           height: 1,
                         ),
@@ -192,8 +193,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                                   vertical: 8.h,
                                 ),
                                 child: Divider(
-                                  color: AppColors.greyBorder
-                                      .withValues(alpha: 0.5),
+                                  color: colors.border.withValues(alpha: 0.5),
                                   height: 1,
                                 ),
                               ),
@@ -218,8 +218,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                         ),
 
                         // Bottom section
-                        const Divider(
-                          color: AppColors.greyBorder,
+                        Divider(
+                          color: colors.border,
                           thickness: 1,
                           height: 1,
                         ),
@@ -234,7 +234,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w400,
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                               ),
                               SizedBox(height: 8.h),
@@ -247,8 +247,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                                   height: 24.h,
                                   fit: BoxFit.contain,
                                   colorFilter: ColorFilter.mode(
-                                    AppColors.textPrimary
-                                        .withValues(alpha: 0.8),
+                                    colors.textPrimary.withValues(alpha: 0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),
@@ -274,6 +273,7 @@ class _MenuOverlayState extends State<MenuOverlay>
     required VoidCallback onTap,
     Color? iconColor,
   }) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -282,7 +282,7 @@ class _MenuOverlayState extends State<MenuOverlay>
           children: [
             Icon(
               icon,
-              color: iconColor ?? AppColors.textPrimary,
+              color: iconColor ?? colors.textPrimary,
               size: 24.sp,
             ),
             SizedBox(width: 16.w),
@@ -291,13 +291,13 @@ class _MenuOverlayState extends State<MenuOverlay>
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
-                color: iconColor ?? AppColors.textPrimary,
+                color: iconColor ?? colors.textPrimary,
               ),
             ),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               size: 20.sp,
             ),
           ],

@@ -7,7 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/analytics_service.dart';
@@ -115,6 +115,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final size = mq.size;
 
@@ -128,7 +129,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
       data: isCompactHeight ? clamped : mq,
       child: AuthScaffold(
         bodyIsScrollable: true,
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         bottomAreaVisualHeight: bottomVisual,
         bottomArea: _BottomBar(
           enabled: _selectedDate != null && _isAgeValid && !_isLoading,
@@ -136,11 +137,11 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
           onPressed: _saveAndContinue,
         ),
         appBar: AppBar(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           toolbarHeight: 64,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            icon: Icon(Icons.arrow_back, color: colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           actions: [
@@ -171,7 +172,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ),
@@ -195,7 +196,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                         style: GoogleFonts.inter(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary),
+                            color: colors.textPrimary),
                       ),
                       SizedBox(height: 8.h),
                       Text(
@@ -203,7 +204,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                         style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary),
+                            color: colors.textSecondary),
                       ),
                       SizedBox(height: 24.h),
                       Text(
@@ -211,7 +212,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                         style: GoogleFonts.inter(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary),
+                            color: colors.textPrimary),
                       ),
                       SizedBox(height: 16.h),
                       _dateInput(),
@@ -236,20 +237,21 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
   }
 
   Widget _dateInput() {
+    final colors = context.colors;
     return GestureDetector(
       onTap: _showDatePicker,
       child: Container(
         width: double.infinity,
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.backgroundCard,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: _errorMessage != null
                 ? Colors.red
                 : _selectedDate != null
-                    ? AppColors.textPrimary
-                    : AppColors.greyBorder,
+                    ? colors.textPrimary
+                    : colors.border,
             width: 1.5,
           ),
         ),
@@ -264,12 +266,12 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
                 color: _selectedDate != null
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
+                    ? colors.textPrimary
+                    : colors.textSecondary,
               ),
             ),
             Icon(Icons.calendar_today_outlined,
-                color: AppColors.textSecondary, size: 20.sp),
+                color: colors.textSecondary, size: 20.sp),
           ],
         ),
       ),
@@ -344,20 +346,20 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
   }
 
   Widget _privacyInfo() {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-          color: AppColors.greyLight,
-          borderRadius: BorderRadius.circular(12.r)),
+          color: colors.greyLight, borderRadius: BorderRadius.circular(12.r)),
       child: Row(
         children: [
-          Icon(Icons.lock_outline, color: AppColors.textSecondary, size: 16.sp),
+          Icon(Icons.lock_outline, color: colors.textSecondary, size: 16.sp),
           SizedBox(width: 8.w),
           Expanded(
             child: Text(
               AppLocalizations.of(context).yourInformationIsSecure,
               style: GoogleFonts.inter(
-                  fontSize: 11.sp, color: AppColors.textSecondary),
+                  fontSize: 11.sp, color: colors.textSecondary),
             ),
           ),
         ],
@@ -366,6 +368,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
   }
 
   Widget _buildProgressIndicator() {
+    final colors = context.colors;
     return Row(
       children: List.generate(
         3,
@@ -374,7 +377,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
             height: 4.h,
             margin: EdgeInsets.only(right: index < 2 ? 8.w : 0),
             decoration: BoxDecoration(
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -384,9 +387,10 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
   }
 
   void _showDatePicker() {
+    final colors = context.colors;
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: colors.backgroundElevated,
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r))),
       builder: (_) => SizedBox(
@@ -402,13 +406,13 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                     onPressed: () => Navigator.pop(context),
                     child: Text(AppLocalizations.of(context).cancel,
                         style: GoogleFonts.inter(
-                            color: AppColors.textSecondary, fontSize: 16.sp)),
+                            color: colors.textSecondary, fontSize: 16.sp)),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(AppLocalizations.of(context).done,
                         style: GoogleFonts.inter(
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w700)),
                   ),
@@ -449,13 +453,14 @@ class _BottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       color: Colors.transparent,
       padding: EdgeInsets.fromLTRB(
         20.w,
         12.h,
         20.w,
-        MediaQuery.of(context).padding.bottom + 12.h, // Safe area
+        MediaQuery.of(context).padding.bottom + 12.h,
       ),
       child: SizedBox(
         width: double.infinity,
@@ -463,22 +468,23 @@ class _BottomBar extends StatelessWidget {
         child: ElevatedButton(
           onPressed: enabled && !loading ? onPressed : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.textPrimary,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.greyLight,
+            backgroundColor: colors.textPrimary,
+            foregroundColor: colors.textOnPrimary,
+            disabledBackgroundColor: colors.greyLight,
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r)),
             elevation: 0,
             shadowColor: Colors.transparent,
-            padding: EdgeInsets.symmetric(horizontal: 16.w), // Padding ekledik
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
-          child: loading // ← Loading durumunda spinner göster
+          child: loading
               ? SizedBox(
                   height: 20.h,
                   width: 20.h,
-                  child: const CircularProgressIndicator(
+                  child: CircularProgressIndicator(
                     strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    valueColor:
+                        AlwaysStoppedAnimation<Color>(colors.textOnPrimary),
                   ),
                 )
               : FittedBox(

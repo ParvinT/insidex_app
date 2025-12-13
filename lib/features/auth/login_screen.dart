@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
 import '../../core/utils/firebase_error_handler.dart';
@@ -106,12 +106,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildDivider() {
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Container(
             height: 1,
-            color: AppColors.greyBorder,
+            color: colors.border,
           ),
         ),
         Padding(
@@ -121,14 +122,14 @@ class _LoginScreenState extends State<LoginScreen> {
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ),
         Expanded(
           child: Container(
             height: 1,
-            color: AppColors.greyBorder,
+            color: colors.border,
           ),
         ),
       ],
@@ -137,17 +138,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Herhangi biri loading durumundaysa diğer butonları disable et
+    final colors = context.colors;
     final isAnyLoading = _isEmailLoading || _isGoogleLoading || _isAppleLoading;
     final l10n = AppLocalizations.of(context);
 
     return AuthScaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -167,7 +168,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
 
@@ -178,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   l10n.signInToContinue,
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
 
@@ -209,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       _isPasswordVisible
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                     onPressed: isAnyLoading
                         ? null
@@ -232,8 +233,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         color: isAnyLoading
-                            ? AppColors.textSecondary
-                            : AppColors.textPrimary,
+                            ? colors.textSecondary
+                            : colors.textPrimary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -264,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       l10n.dontHaveAccount,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                     GestureDetector(
@@ -278,8 +279,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading
-                              ? AppColors.textPrimary.withValues(alpha: 0.5)
-                              : AppColors.textPrimary,
+                              ? colors.textPrimary.withValues(alpha: 0.5)
+                              : colors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

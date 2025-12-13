@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/utils/firebase_error_handler.dart';
 import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
@@ -202,15 +203,15 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final label =
-        GoogleFonts.inter(fontSize: 14, color: const Color(0xFF6E6E6E));
+    final colors = context.colors;
+    final label = GoogleFonts.inter(fontSize: 14, color: colors.textSecondary);
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: Colors.white,
+      backgroundColor: colors.background,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context).verifyEmail),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: colors.background,
+        foregroundColor: colors.textPrimary,
         elevation: 0.5,
       ),
       body: SingleChildScrollView(
@@ -223,11 +224,15 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             const SizedBox(height: 4),
             Text(widget.email,
                 style: GoogleFonts.inter(
-                    fontSize: 16, fontWeight: FontWeight.w700)),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textPrimary)),
             const SizedBox(height: 16),
             Text(AppLocalizations.of(context).enterSixDigitPassword,
                 style: GoogleFonts.inter(
-                    fontSize: 14, fontWeight: FontWeight.w600)),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: colors.textPrimary)),
             const SizedBox(height: 8),
             TextField(
               controller: _codeCtrl,
@@ -241,6 +246,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 4,
+                color: colors.textPrimary,
               ),
               decoration: const InputDecoration(
                 counterText: '',
@@ -255,8 +261,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
               child: ElevatedButton(
                 onPressed: _busy ? null : _verify,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
+                  backgroundColor: colors.textPrimary,
+                  foregroundColor: colors.textOnPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: _busy

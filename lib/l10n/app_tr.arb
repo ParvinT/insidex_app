@@ -776,7 +776,14 @@
   "stillOffline": "Hala çevrimdışı. Lütfen bağlantınızı kontrol edin.",
   "noInternet": "İnternet Yok",
   "internetRequiredForFirstLogin": "İlk giriş için internet bağlantısı gerekli. Lütfen bağlanın ve tekrar deneyin.",
-  "preparing": "Hazırlanıyor..."
+  "preparing": "Hazırlanıyor...",
+  "appearance": "Görünüm",
+  "lightMode": "Açık",
+  "lightModeSubtitle": "Klasik aydınlık tema",
+  "darkMode": "Koyu",
+  "darkModeSubtitle": "Gözleri yormaz",
+  "systemDefault": "Sistem",
+  "systemDefaultSubtitle": "Cihaz ayarlarını takip et"
 
   
 }

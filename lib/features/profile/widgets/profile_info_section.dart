@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../providers/user_provider.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../providers/subscription_provider.dart';
@@ -19,6 +19,7 @@ class ProfileInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final userData = userProvider.userData ?? {};
     final createdAt = userData['createdAt']?.toDate() ?? DateTime.now();
     final locale = Localizations.localeOf(context).languageCode;
@@ -29,12 +30,12 @@ class ProfileInfoSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder, width: 1.5),
+        border: Border.all(color: colors.border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -48,11 +49,12 @@ class ProfileInfoSection extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 16.h),
-          _buildInfoRow(AppLocalizations.of(context).memberSince, memberSince),
+          _buildInfoRow(
+              context, AppLocalizations.of(context).memberSince, memberSince),
           SizedBox(height: 12.h),
           Consumer<SubscriptionProvider>(
             builder: (context, subProvider, _) {
@@ -60,6 +62,7 @@ class ProfileInfoSection extends StatelessWidget {
               final isSubscribed = subProvider.isActive;
 
               return _buildInfoRow(
+                context,
                 AppLocalizations.of(context).accountType,
                 tierName,
                 isPremium: isSubscribed,
@@ -68,7 +71,7 @@ class ProfileInfoSection extends StatelessWidget {
           ),
           if (userProvider.isAdmin) ...[
             SizedBox(height: 12.h),
-            _buildInfoRow(AppLocalizations.of(context).role,
+            _buildInfoRow(context, AppLocalizations.of(context).role,
                 AppLocalizations.of(context).administrator,
                 isAdmin: true),
           ],
@@ -82,8 +85,9 @@ class ProfileInfoSection extends StatelessWidget {
     return text[0].toUpperCase() + text.substring(1);
   }
 
-  Widget _buildInfoRow(String label, String value,
+  Widget _buildInfoRow(BuildContext context, String label, String value,
       {bool isPremium = false, bool isAdmin = false}) {
+    final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -91,7 +95,7 @@ class ProfileInfoSection extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
         Container(
@@ -102,10 +106,10 @@ class ProfileInfoSection extends StatelessWidget {
               ? BoxDecoration(
                   color: isAdmin
                       ? Colors.red.withValues(alpha: 0.1)
-                      : AppColors.textPrimary.withValues(alpha: 0.1),
+                      : colors.textPrimary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(
-                    color: isAdmin ? Colors.red : AppColors.textPrimary,
+                    color: isAdmin ? Colors.red : colors.textPrimary,
                   ),
                 )
               : null,
@@ -115,11 +119,7 @@ class ProfileInfoSection extends StatelessWidget {
               fontSize: 14.sp,
               fontWeight:
                   isPremium || isAdmin ? FontWeight.w600 : FontWeight.w500,
-              color: isAdmin
-                  ? Colors.red
-                  : isPremium
-                      ? AppColors.textPrimary
-                      : AppColors.textPrimary,
+              color: isAdmin ? Colors.red : colors.textPrimary,
             ),
           ),
         ),

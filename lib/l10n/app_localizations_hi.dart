@@ -2132,4 +2132,25 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get preparing => 'तैयार हो रहा है...';
+
+  @override
+  String get appearance => 'दिखावट';
+
+  @override
+  String get lightMode => 'लाइट';
+
+  @override
+  String get lightModeSubtitle => 'क्लासिक ब्राइट थीम';
+
+  @override
+  String get darkMode => 'डार्क';
+
+  @override
+  String get darkModeSubtitle => 'आंखों के लिए आरामदायक';
+
+  @override
+  String get systemDefault => 'सिस्टम';
+
+  @override
+  String get systemDefaultSubtitle => 'डिवाइस सेटिंग्स का पालन करें';
 }

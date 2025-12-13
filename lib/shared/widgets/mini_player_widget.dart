@@ -11,8 +11,8 @@ import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
 import '../../app.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../services/audio/audio_player_service.dart';
-import '../../core/constants/app_colors.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../features/player/audio_player_screen.dart';
 
 /// Mini Player Widget - Spotify/YouTube style
@@ -196,6 +196,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     double baseHeight,
     bool isTablet,
   ) {
+    final colors = context.colors;
     // Calculate height based on expand state
     final double collapsedHeight = baseHeight + 20.h;
     final double expandedHeight = baseHeight + 48.h + 20.h;
@@ -213,11 +214,11 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         bottom: miniPlayer.isAtTop ? 0 : 8.h,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundElevated,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
+              color: colors.textPrimary.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: Offset(0, miniPlayer.isAtTop ? 2 : -2)),
         ],
@@ -320,6 +321,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
   /// Session image thumbnail
   Widget _buildSessionImage(MiniPlayerProvider miniPlayer) {
+    final colors = context.colors;
     final imageUrl = miniPlayer.sessionImageUrl;
     final localImagePath = miniPlayer.localImagePath;
     final isOffline = miniPlayer.isOfflineSession;
@@ -334,7 +336,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         height: 48.w,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
-          color: AppColors.greyLight,
+          color: colors.greyLight,
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8.r),
@@ -354,6 +356,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     required String? localImagePath,
     required bool isOffline,
   }) {
+    final colors = context.colors;
     // ✅ OFFLINE MODE - Use local file
     if (isOffline && localImagePath != null && localImagePath.isNotEmpty) {
       final file = File(localImagePath);
@@ -378,7 +381,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         imageUrl: imageUrl,
         fit: BoxFit.cover,
         placeholder: (_, __) => Container(
-          color: AppColors.greyLight,
+          color: colors.greyLight,
           child: _buildPlaceholderIcon(),
         ),
         errorWidget: (_, __, ___) => _buildPlaceholderIcon(),
@@ -391,10 +394,11 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
   /// Placeholder icon for missing images
   Widget _buildPlaceholderIcon() {
+    final colors = context.colors;
     return Icon(
       Icons.music_note,
       size: 24.sp,
-      color: AppColors.textSecondary,
+      color: colors.textSecondary,
     );
   }
 
@@ -409,7 +413,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       style: GoogleFonts.inter(
         fontSize: 14.sp,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
         decoration: TextDecoration.none, // Remove any underline
       ),
     );
@@ -425,14 +429,14 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       child: Container(
         width: 32.w,
         height: 32.w,
-        decoration: const BoxDecoration(
-          color: AppColors.greyMedium,
+        decoration: BoxDecoration(
+          color: context.colors.greyMedium,
           shape: BoxShape.circle,
         ),
         child: Icon(
           icon,
           size: 18.sp,
-          color: AppColors.textPrimary,
+          color: context.colors.textPrimary,
         ),
       ),
     );
@@ -445,13 +449,13 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       child: Container(
         width: 36.w,
         height: 36.w,
-        decoration: const BoxDecoration(
-          color: AppColors.textPrimary,
+        decoration: BoxDecoration(
+          color: context.colors.textPrimary,
           shape: BoxShape.circle,
         ),
         child: Icon(
           miniPlayer.isPlaying ? Icons.pause : Icons.play_arrow,
-          color: Colors.white,
+          color: context.colors.textOnPrimary,
           size: 20.sp,
         ),
       ),
@@ -468,14 +472,14 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         child: Container(
           width: 32.w,
           height: 32.w,
-          decoration: const BoxDecoration(
-            color: AppColors.greyLight,
+          decoration: BoxDecoration(
+            color: context.colors.greyLight,
             shape: BoxShape.circle,
           ),
           child: Icon(
             Icons.keyboard_arrow_up,
             size: 18.sp,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
       ),
@@ -519,10 +523,10 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
           overlayShape: const RoundSliderOverlayShape(
             overlayRadius: 12.0, // Touch area
           ),
-          activeTrackColor: AppColors.textPrimary,
-          inactiveTrackColor: AppColors.greyLight,
-          thumbColor: AppColors.textPrimary,
-          overlayColor: AppColors.textPrimary.withValues(alpha: 0.2),
+          activeTrackColor: context.colors.textPrimary,
+          inactiveTrackColor: context.colors.greyLight,
+          thumbColor: context.colors.textPrimary,
+          overlayColor: context.colors.textPrimary.withValues(alpha: 0.2),
         ),
         child: Slider(
           value: progress,

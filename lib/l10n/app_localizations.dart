@@ -4139,6 +4139,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preparing...'**
   String get preparing;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @lightMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightMode;
+
+  /// No description provided for @lightModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic bright theme'**
+  String get lightModeSubtitle;
+
+  /// No description provided for @darkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkMode;
+
+  /// No description provided for @darkModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy on the eyes'**
+  String get darkModeSubtitle;
+
+  /// No description provided for @systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemDefault;
+
+  /// No description provided for @systemDefaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow device settings'**
+  String get systemDefaultSubtitle;
 }
 
 class _AppLocalizationsDelegate

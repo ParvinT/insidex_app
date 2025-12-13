@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 
 /// Success dialog shown after successful purchase
 class SuccessDialog extends StatefulWidget {
@@ -85,160 +85,162 @@ class _SuccessDialogState extends State<SuccessDialog>
         child: Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
-          child: Container(
-            padding: EdgeInsets.all(24.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 15),
+          child: Builder(builder: (context) {
+            final colors = context.colors;
+            return Container(
+                padding: EdgeInsets.all(24.w),
+                decoration: BoxDecoration(
+                  color: colors.backgroundElevated,
+                  borderRadius: BorderRadius.circular(24.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: colors.textPrimary.withValues(alpha: 0.15),
+                      blurRadius: 30,
+                      offset: const Offset(0, 15),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Animated success icon
-                _buildSuccessIcon(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Animated success icon
+                    _buildSuccessIcon(),
 
-                SizedBox(height: 20.h),
+                    SizedBox(height: 20.h),
 
-                // Title
-                Text(
-                  widget.title,
-                  style: GoogleFonts.inter(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: 12.h),
-
-                // Plan badge (if provided)
-                if (widget.planName != null) ...[
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.amber.shade400,
-                          Colors.orange.shade400,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20.r),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.workspace_premium,
-                          size: 18.sp,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          widget.planName!,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                ],
-
-                // Subtitle
-                Text(
-                  widget.subtitle,
-                  style: GoogleFonts.inter(
-                    fontSize: 15.sp,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                // Trial info
-                if (widget.isTrialStarted) ...[
-                  SizedBox(height: 16.h),
-                  Container(
-                    padding: EdgeInsets.all(12.w),
-                    decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: Colors.green.withValues(alpha: 0.3),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          size: 18.sp,
-                          color: Colors.green.shade700,
-                        ),
-                        SizedBox(width: 8.w),
-                        Text(
-                          '7-day free trial started',
-                          style: GoogleFonts.inter(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.green.shade700,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-
-                SizedBox(height: 24.h),
-
-                // Features unlocked
-                _buildFeaturesList(),
-
-                SizedBox(height: 24.h),
-
-                // Continue button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52.h,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      widget.onDismiss?.call();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.textPrimary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Start Exploring',
+                    // Title
+                    Text(
+                      widget.title,
                       style: GoogleFonts.inter(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 24.sp,
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(height: 12.h),
+
+                    // Plan badge (if provided)
+                    if (widget.planName != null) ...[
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 16.w,
+                          vertical: 8.h,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.amber.shade400,
+                              Colors.orange.shade400,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.workspace_premium,
+                              size: 18.sp,
+                              color: Colors.white,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              widget.planName!,
+                              style: GoogleFonts.inter(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.h),
+                    ],
+
+                    // Subtitle
+                    Text(
+                      widget.subtitle,
+                      style: GoogleFonts.inter(
+                        fontSize: 15.sp,
+                        color: colors.textSecondary,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    // Trial info
+                    if (widget.isTrialStarted) ...[
+                      SizedBox(height: 16.h),
+                      Container(
+                        padding: EdgeInsets.all(12.w),
+                        decoration: BoxDecoration(
+                          color: Colors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: Colors.green.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.schedule,
+                              size: 18.sp,
+                              color: Colors.green.shade700,
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              '7-day free trial started',
+                              style: GoogleFonts.inter(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.green.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    SizedBox(height: 24.h),
+
+                    // Features unlocked
+                    _buildFeaturesList(),
+
+                    SizedBox(height: 24.h),
+
+                    // Continue button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52.h,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          widget.onDismiss?.call();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.textPrimary,
+                          foregroundColor: colors.textOnPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14.r),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          'Start Exploring',
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+                  ],
+                ));
+          }),
         ),
       ),
     );
@@ -328,7 +330,7 @@ class _SuccessDialogState extends State<SuccessDialog>
                 feature,
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
             ],

@@ -6,10 +6,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:provider/provider.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
+import '../../core/responsive/breakpoints.dart';
 import '../../services/cache_manager_service.dart';
 import '../../l10n/app_localizations.dart';
-import '../../core/responsive/breakpoints.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../providers/locale_provider.dart';
@@ -48,6 +48,7 @@ class SessionCard extends StatelessWidget {
     debugPrint('🖼️ backgroundImages: ${session['backgroundImages']}');
     debugPrint('🖼️ OLD backgroundImage: ${session['backgroundImage']}');
     debugPrint('📝 title: ${session['title']}');
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -105,11 +106,11 @@ class SessionCard extends StatelessWidget {
       child: Container(
         margin: EdgeInsets.only(bottom: cardMargin),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.backgroundCard,
           borderRadius: BorderRadius.circular(borderRadius),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.08),
+              color: colors.textPrimary.withValues(alpha: 0.08),
               blurRadius: isTablet ? 12 : 10,
               offset: Offset(0, isTablet ? 5 : 4),
             ),
@@ -120,6 +121,7 @@ class SessionCard extends StatelessWidget {
           children: [
             // IMAGE SECTION WITH CACHE
             _buildImageSection(
+              context,
               imageUrl: imageUrl,
               imageHeight: imageHeight,
               borderRadius: borderRadius,
@@ -138,7 +140,7 @@ class SessionCard extends StatelessWidget {
                       width: isTablet ? 36.w : 32.w,
                       height: isTablet ? 36.w : 32.w,
                       decoration: BoxDecoration(
-                        color: AppColors.textPrimary.withValues(alpha: 0.1),
+                        color: colors.textPrimary.withValues(alpha: 0.1),
                         borderRadius:
                             BorderRadius.circular(isTablet ? 9.r : 8.r),
                       ),
@@ -148,7 +150,7 @@ class SessionCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: isTablet ? 15.sp : 14.sp,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
@@ -162,7 +164,7 @@ class SessionCard extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: titleSize,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -174,8 +176,7 @@ class SessionCard extends StatelessWidget {
                     SizedBox(width: isTablet ? 10.w : 8.w),
                     _buildActionButton(
                       icon: isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color:
-                          isFavorite ? Colors.redAccent : AppColors.textPrimary,
+                      color: isFavorite ? Colors.redAccent : colors.textPrimary,
                       onTap: onToggleFavorite!,
                       iconSize: iconSize,
                       isTablet: isTablet,
@@ -197,7 +198,7 @@ class SessionCard extends StatelessWidget {
                     SizedBox(width: isTablet ? 10.w : 8.w),
                     _buildActionButton(
                       icon: Icons.playlist_add,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                       onTap: onAddToPlaylist!,
                       iconSize: iconSize,
                       isTablet: isTablet,
@@ -212,7 +213,8 @@ class SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection({
+  Widget _buildImageSection(
+    BuildContext context, {
     required String imageUrl,
     required double imageHeight,
     required double borderRadius,
@@ -221,6 +223,7 @@ class SessionCard extends StatelessWidget {
   }) {
     if (imageUrl.isEmpty) {
       return _buildImageWithGradient(
+        context,
         imageHeight: imageHeight,
         borderRadius: borderRadius,
         playButtonSize: playButtonSize,
@@ -247,11 +250,11 @@ class SessionCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 placeholder: (context, url) {
                   debugPrint('⏳ Loading: $url');
-                  return _buildShimmerPlaceholder();
+                  return _buildShimmerPlaceholder(context);
                 },
                 errorWidget: (context, url, error) {
                   debugPrint('❌ ERROR loading image: $error');
-                  return _buildErrorPlaceholder();
+                  return _buildErrorPlaceholder(context);
                 },
                 fadeInDuration: const Duration(milliseconds: 300),
                 fadeOutDuration: const Duration(milliseconds: 200),
@@ -307,7 +310,7 @@ class SessionCard extends StatelessWidget {
                     child: Icon(
                       Icons.play_arrow_rounded,
                       size: playIconSize,
-                      color: AppColors.textPrimary,
+                      color: context.colors.textPrimary,
                     ),
                   ),
                 ),
@@ -319,15 +322,17 @@ class SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageWithGradient({
+  Widget _buildImageWithGradient(
+    BuildContext context, {
     required double imageHeight,
     required double borderRadius,
     required double playButtonSize,
     required double playIconSize,
   }) {
+    final colors = context.colors;
     final gradientColors = [
-      AppColors.textPrimary.withValues(alpha: 0.7),
-      AppColors.textPrimary.withValues(alpha: 0.5),
+      colors.textPrimary.withValues(alpha: 0.7),
+      colors.textPrimary.withValues(alpha: 0.5),
     ];
 
     return ClipRRect(
@@ -379,7 +384,7 @@ class SessionCard extends StatelessWidget {
                     child: Icon(
                       Icons.play_arrow,
                       size: playIconSize,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                 ),
@@ -391,20 +396,22 @@ class SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmerPlaceholder() {
+  Widget _buildShimmerPlaceholder(BuildContext context) {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: colors.greyMedium,
+      highlightColor: colors.greyLight,
       child: Container(
-        color: Colors.white,
+        color: colors.backgroundPure,
       ),
     );
   }
 
-  Widget _buildErrorPlaceholder() {
+  Widget _buildErrorPlaceholder(BuildContext context) {
+    final colors = context.colors;
     final gradientColors = [
-      AppColors.textPrimary.withValues(alpha: 0.7),
-      AppColors.textPrimary.withValues(alpha: 0.5),
+      colors.textPrimary.withValues(alpha: 0.7),
+      colors.textPrimary.withValues(alpha: 0.5),
     ];
     return Container(
       decoration: BoxDecoration(

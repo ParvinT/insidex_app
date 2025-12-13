@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../core/responsive/context_ext.dart';
 
@@ -13,6 +13,7 @@ class LanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, _) {
         return InkWell(
@@ -20,10 +21,10 @@ class LanguageSelector extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: AppColors.greyBorder,
+                color: colors.border,
                 width: 1,
               ),
             ),
@@ -33,8 +34,8 @@ class LanguageSelector extends StatelessWidget {
                 Container(
                   width: 40.w,
                   height: 40.w,
-                  decoration: const BoxDecoration(
-                    color: AppColors.greyLight,
+                  decoration: BoxDecoration(
+                    color: colors.greyLight,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -58,7 +59,7 @@ class LanguageSelector extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -68,7 +69,7 @@ class LanguageSelector extends StatelessWidget {
                         ),
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -79,7 +80,7 @@ class LanguageSelector extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 16.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ],
             ),
@@ -132,15 +133,14 @@ class LanguageSelector extends StatelessWidget {
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: 400.w,
-                maxHeight: 500.h, // ← Max yükseklik ekle (overflow önlenir)
+                maxHeight: 500.h,
               ),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                    BorderRadius.circular(24.r), // ← Tüm köşeler yuvarlak
+                color: context.colors.backgroundElevated,
+                borderRadius: BorderRadius.circular(24.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: context.colors.textPrimary.withValues(alpha: 0.1),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -162,7 +162,7 @@ class LanguageSelector extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: titleSize,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: context.colors.textPrimary,
                               ),
                             ),
                           ),
@@ -170,7 +170,7 @@ class LanguageSelector extends StatelessWidget {
                             onPressed: () => Navigator.pop(context),
                             icon: Icon(
                               Icons.close,
-                              color: AppColors.textSecondary,
+                              color: context.colors.textSecondary,
                               size: 24.sp,
                             ),
                             padding: EdgeInsets.zero,
@@ -180,7 +180,7 @@ class LanguageSelector extends StatelessWidget {
                       ),
                     ),
 
-                    const Divider(height: 1, color: AppColors.greyBorder),
+                    Divider(height: 1, color: context.colors.border),
 
                     // Language Options
                     ...LocaleProvider.supportedLocales.map((locale) {
@@ -215,13 +215,14 @@ class LanguageSelector extends StatelessWidget {
     required LocaleProvider localeProvider,
     required double itemSize,
   }) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.textPrimary.withValues(alpha: 0.1)
+              ? colors.textPrimary.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
@@ -231,7 +232,7 @@ class LanguageSelector extends StatelessWidget {
               width: 36.w,
               height: 36.w,
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: colors.greyLight,
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -250,9 +251,7 @@ class LanguageSelector extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: itemSize,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected
-                      ? AppColors.textPrimary
-                      : AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -261,7 +260,7 @@ class LanguageSelector extends StatelessWidget {
             if (isSelected)
               Icon(
                 Icons.check_circle,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 size: 24.sp,
               ),
           ],

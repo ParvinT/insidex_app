@@ -10,7 +10,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:http/http.dart' as http;
 import 'dart:math' as math;
 import '../offline/offline_mode_screen.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/auth_persistence_service.dart';
@@ -213,8 +213,8 @@ class _SplashScreenState extends State<SplashScreen>
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: dialogContext.colors.backgroundElevated,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
@@ -237,7 +237,7 @@ class _SplashScreenState extends State<SplashScreen>
           l10n.internetRequiredForFirstLogin,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: dialogContext.colors.textSecondary,
           ),
         ),
         actions: [
@@ -251,7 +251,7 @@ class _SplashScreenState extends State<SplashScreen>
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: dialogContext.colors.textPrimary,
               ),
             ),
           ),
@@ -269,8 +269,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite, // White background
+      backgroundColor: colors.background,
       body: Center(
         child: AnimatedBuilder(
           animation: Listenable.merge([_rotationController, _fadeController]),
@@ -291,8 +292,8 @@ class _SplashScreenState extends State<SplashScreen>
                       width: 220.w,
                       height: 65.h,
                       fit: BoxFit.contain,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.textPrimary,
+                      colorFilter: ColorFilter.mode(
+                        colors.textPrimary,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -309,7 +310,7 @@ class _SplashScreenState extends State<SplashScreen>
                     style: GoogleFonts.inter(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w300,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                       letterSpacing: 1.8,
                     ),
                   ),

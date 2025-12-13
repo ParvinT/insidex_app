@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:marquee/marquee.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../services/analytics_service.dart';
@@ -79,6 +79,7 @@ class _GoalsScreenState extends State<GoalsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final size = mq.size;
     final bool isCompactHeight = size.height <= 740;
@@ -89,7 +90,7 @@ class _GoalsScreenState extends State<GoalsScreen>
       data: isCompactHeight ? clamped : mq,
       child: AuthScaffold(
         bodyIsScrollable: true,
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         bottomAreaVisualHeight: 0.0,
         bottomArea: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
@@ -99,7 +100,7 @@ class _GoalsScreenState extends State<GoalsScreen>
           ),
         ),
         appBar: AppBar(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           toolbarHeight: 64,
           automaticallyImplyLeading: false,
@@ -125,7 +126,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ),
@@ -151,7 +152,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                           style: GoogleFonts.inter(
                             fontSize: 28.sp,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                         ),
                         SizedBox(height: 8.h),
@@ -160,7 +161,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                         SizedBox(height: 24.h),
@@ -169,7 +170,7 @@ class _GoalsScreenState extends State<GoalsScreen>
                           style: GoogleFonts.inter(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                         ),
                         SizedBox(height: 16.h),
@@ -183,10 +184,9 @@ class _GoalsScreenState extends State<GoalsScreen>
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent:
-                          isNarrowWidth ? 180 : 220, // ← Daha kompakt
-                      crossAxisSpacing: 12.w, // ← Az spacing
-                      mainAxisSpacing: 12.h, // ← Az spacing
+                      maxCrossAxisExtent: isNarrowWidth ? 180 : 220,
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12.h,
                       childAspectRatio: 0.95,
                     ),
                     delegate: SliverChildBuilderDelegate(
@@ -221,13 +221,14 @@ class _GoalsScreenState extends State<GoalsScreen>
   }
 
   Widget _buildProgressIndicator() {
+    final colors = context.colors;
     return Row(
       children: [
         Expanded(
           child: Container(
             height: 4.h,
             decoration: BoxDecoration(
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -237,7 +238,7 @@ class _GoalsScreenState extends State<GoalsScreen>
           child: Container(
             height: 4.h,
             decoration: BoxDecoration(
-              color: AppColors.greyLight,
+              color: colors.greyLight,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -247,7 +248,7 @@ class _GoalsScreenState extends State<GoalsScreen>
           child: Container(
             height: 4.h,
             decoration: BoxDecoration(
-              color: AppColors.greyLight,
+              color: colors.greyLight,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -284,17 +285,20 @@ class _GoalCard extends StatelessWidget {
         duration: const Duration(milliseconds: 160),
         curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : Colors.white,
+          color: isSelected
+              ? context.colors.textPrimary
+              : context.colors.backgroundCard,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.greyBorder,
+            color:
+                isSelected ? context.colors.textPrimary : context.colors.border,
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
               color: isSelected
-                  ? AppColors.textPrimary.withValues(alpha: 0.18)
-                  : Colors.black.withValues(alpha: 0.06),
+                  ? context.colors.textPrimary.withValues(alpha: 0.18)
+                  : context.colors.textPrimary.withValues(alpha: 0.06),
               blurRadius: isSelected ? 14 : 10,
               offset: const Offset(0, 4),
             ),
@@ -305,20 +309,19 @@ class _GoalCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Icon bubble - SABİT BOYUT
             Container(
               width: iconSize,
               height: iconSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: isSelected
-                    ? Colors.white.withValues(alpha: 0.2)
+                    ? context.colors.textOnPrimary.withValues(alpha: 0.2)
                     : goal.color.withValues(alpha: 0.1),
               ),
               child: Icon(
                 goal.icon,
                 size: iconInnerSize,
-                color: isSelected ? Colors.white : goal.color,
+                color: isSelected ? context.colors.textOnPrimary : goal.color,
               ),
             ),
 
@@ -332,7 +335,9 @@ class _GoalCard extends StatelessWidget {
                   fontSize: textSize,
                   fontWeight: FontWeight.w600,
                   height: 1.3,
-                  color: isSelected ? Colors.white : AppColors.textPrimary,
+                  color: isSelected
+                      ? context.colors.textOnPrimary
+                      : context.colors.textPrimary,
                 ),
               ),
             ),
@@ -345,7 +350,6 @@ class _GoalCard extends StatelessWidget {
   Widget _buildScrollingGoalText(String text, TextStyle style) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Text genişliğini hesapla
         final textPainter = TextPainter(
           text: TextSpan(text: text, style: style),
           maxLines: 1,
@@ -354,7 +358,6 @@ class _GoalCard extends StatelessWidget {
 
         final availableWidth = constraints.maxWidth;
 
-        // Text sığıyorsa normal Text
         if (textPainter.width <= availableWidth) {
           return Text(
             text,
@@ -364,7 +367,6 @@ class _GoalCard extends StatelessWidget {
           );
         }
 
-        // Sığmıyorsa Marquee
         return SizedBox(
           height: style.fontSize! * 1.4,
           child: Marquee(
@@ -393,32 +395,32 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({required this.enabled, required this.onPressed});
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Container(
       color: Colors.transparent,
       padding: EdgeInsets.fromLTRB(
         20.w,
         12.h,
         20.w,
-        MediaQuery.of(context).padding.bottom + 12.h, // Safe area
+        MediaQuery.of(context).padding.bottom + 12.h,
       ),
       child: SizedBox(
         width: double.infinity,
-        height: 48.h, // 52'den 48'e düşürdük
+        height: 48.h,
         child: ElevatedButton(
           onPressed: enabled ? onPressed : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.textPrimary,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: AppColors.greyLight,
+            backgroundColor: colors.textPrimary,
+            foregroundColor: colors.textOnPrimary,
+            disabledBackgroundColor: colors.greyLight,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.r), // 16'dan 12'ye
+              borderRadius: BorderRadius.circular(12.r),
             ),
             elevation: 0,
             shadowColor: Colors.transparent,
-            padding: EdgeInsets.symmetric(horizontal: 16.w), // Padding ekledik
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
           child: FittedBox(
-            // Yazı sığmazsa küçültsün
             fit: BoxFit.scaleDown,
             child: Text(
               AppLocalizations.of(context).continueButton,

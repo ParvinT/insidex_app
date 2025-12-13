@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
 import '../../core/utils/firebase_error_handler.dart';
@@ -125,17 +125,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // Check if any loading is active
     final bool isAnyLoading =
         _isEmailLoading || _isGoogleLoading || _isAppleLoading;
 
     return AuthScaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -155,8 +156,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'assets/images/logo.svg',
                     width: 120.w,
                     height: 40.h,
-                    colorFilter: const ColorFilter.mode(
-                      AppColors.textPrimary,
+                    colorFilter: ColorFilter.mode(
+                      colors.textPrimary,
                       BlendMode.srcIn,
                     ),
                   ),
@@ -170,7 +171,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 28.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
 
@@ -181,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   AppLocalizations.of(context).startYourHealingJourney,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
 
@@ -196,7 +197,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       FormValidators.validateName(value, context),
                   suffixIcon: Icon(
                     Icons.person_outline,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                     size: 20.sp,
                   ),
                 ),
@@ -213,7 +214,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       FormValidators.validateEmail(value, context),
                   suffixIcon: Icon(
                     Icons.email_outlined,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                     size: 20.sp,
                   ),
                 ),
@@ -238,7 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _isPasswordVisible
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                       size: 20.sp,
                     ),
                     onPressed: () {
@@ -274,7 +275,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _isConfirmPasswordVisible
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                       size: 20.sp,
                     ),
                     onPressed: () {
@@ -297,7 +298,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onChanged: (value) {
                           setState(() => _agreeToTerms = value ?? false);
                         },
-                        activeColor: AppColors.textPrimary,
+                        activeColor: colors.textPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(4.r),
                         ),
@@ -309,7 +310,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         text: TextSpan(
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                           children: [
                             TextSpan(
@@ -318,7 +319,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               text: AppLocalizations.of(context)
                                   .termsAndConditions,
                               style: GoogleFonts.inter(
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.underline,
                               ),
@@ -332,7 +333,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             TextSpan(
                               text: AppLocalizations.of(context).privacyPolicy,
                               style: GoogleFonts.inter(
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                                 fontWeight: FontWeight.w500,
                                 decoration: TextDecoration.underline,
                               ),
@@ -368,7 +369,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       AppLocalizations.of(context).alreadyHaveAccount,
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                     GestureDetector(
@@ -383,8 +384,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           color: isAnyLoading
-                              ? AppColors.textPrimary.withValues(alpha: 0.5)
-                              : AppColors.textPrimary,
+                              ? colors.textPrimary.withValues(alpha: 0.5)
+                              : colors.textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../services/quiz_service.dart';
 import 'disease_card.dart';
@@ -380,158 +380,169 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                 ),
               );
             },
-            child: Container(
-                margin: EdgeInsets.only(top: 12.h),
-                padding: EdgeInsets.all(isTablet ? 18.w : 14.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(isTablet ? 20.r : 16.r),
-                  border: Border.all(
-                    color: AppColors.greyBorder.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: _isLoadingDiseases
-                    ? SizedBox(
-                        height: 200.h,
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            color: AppColors.textPrimary,
-                          ),
+            child: Builder(
+              builder: (context) {
+                final colors = context.colors;
+                return Container(
+                    margin: EdgeInsets.only(top: 12.h),
+                    padding: EdgeInsets.all(isTablet ? 18.w : 14.w),
+                    decoration: BoxDecoration(
+                      color: colors.backgroundCard,
+                      borderRadius:
+                          BorderRadius.circular(isTablet ? 20.r : 16.r),
+                      border: Border.all(
+                        color: colors.border.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: colors.textPrimary.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 3),
                         ),
-                      )
-                    : _diseases.isEmpty
+                      ],
+                    ),
+                    child: _isLoadingDiseases
                         ? SizedBox(
                             height: 200.h,
                             child: Center(
-                              child: Text(
-                                AppLocalizations.of(context)
-                                    .noDiseasesAvailable,
-                                style: GoogleFonts.inter(
-                                  fontSize: 14.sp,
-                                  color: AppColors.textSecondary,
-                                ),
+                              child: CircularProgressIndicator(
+                                color: colors.textPrimary,
                               ),
                             ),
                           )
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Gender filter buttons with stagger animation
-                              AnimatedBuilder(
-                                animation: _staggerController,
-                                builder: (context, child) {
-                                  // First button appears at 0.0-0.3
-                                  final firstButtonAnim = Tween<double>(
-                                    begin: 0.0,
-                                    end: 1.0,
-                                  ).animate(CurvedAnimation(
-                                    parent: _staggerController,
-                                    curve: const Interval(0.0, 0.3,
-                                        curve: Curves.easeOut),
-                                  ));
-
-                                  // Second button appears at 0.1-0.4
-                                  final secondButtonAnim = Tween<double>(
-                                    begin: 0.0,
-                                    end: 1.0,
-                                  ).animate(CurvedAnimation(
-                                    parent: _staggerController,
-                                    curve: const Interval(0.1, 0.4,
-                                        curve: Curves.easeOut),
-                                  ));
-
-                                  return Padding(
-                                    padding: EdgeInsets.only(bottom: 10.h),
-                                    child: IntrinsicHeight(
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        children: [
-                                          Expanded(
-                                            child: Transform.translate(
-                                              offset: Offset(
-                                                  -20 *
-                                                      (1 -
-                                                          firstButtonAnim
-                                                              .value),
-                                                  0),
-                                              child: Opacity(
-                                                opacity: firstButtonAnim.value
-                                                    .clamp(0.0, 1.0),
-                                                child: _buildGenderButton(
-                                                  gender: 'male',
-                                                  label: AppLocalizations.of(
-                                                          context)
-                                                      .mensTest,
-                                                  isTablet: isTablet,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(width: 12.w),
-                                          Expanded(
-                                            child: Transform.translate(
-                                              offset: Offset(
-                                                  20 *
-                                                      (1 -
-                                                          secondButtonAnim
-                                                              .value),
-                                                  0),
-                                              child: Opacity(
-                                                opacity: secondButtonAnim.value
-                                                    .clamp(0.0, 1.0),
-                                                child: _buildGenderButton(
-                                                  gender: 'female',
-                                                  label: AppLocalizations.of(
-                                                          context)
-                                                      .womensTest,
-                                                  isTablet: isTablet,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                        : _diseases.isEmpty
+                            ? SizedBox(
+                                height: 200.h,
+                                child: Center(
+                                  child: Text(
+                                    AppLocalizations.of(context)
+                                        .noDiseasesAvailable,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: colors.textSecondary,
                                     ),
-                                  );
-                                },
-                              ),
-
-                              // Horizontal PageView for disease grid
-                              SizedBox(
-                                height: _calculateGridHeight(isTablet),
-                                child: PageView.builder(
-                                  controller: _pageController,
-                                  onPageChanged: (page) {
-                                    setState(() => _currentPage = page);
-                                  },
-                                  itemCount: _totalPages,
-                                  itemBuilder: (context, pageIndex) {
-                                    return _buildDiseaseGrid(
-                                        pageIndex, isTablet);
-                                  },
+                                  ),
                                 ),
-                              ),
+                              )
+                            : Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Gender filter buttons with stagger animation
+                                  AnimatedBuilder(
+                                    animation: _staggerController,
+                                    builder: (context, child) {
+                                      // First button appears at 0.0-0.3
+                                      final firstButtonAnim = Tween<double>(
+                                        begin: 0.0,
+                                        end: 1.0,
+                                      ).animate(CurvedAnimation(
+                                        parent: _staggerController,
+                                        curve: const Interval(0.0, 0.3,
+                                            curve: Curves.easeOut),
+                                      ));
 
-                              _buildPaginationControls(isTablet),
-                              SizedBox(height: 6.h),
+                                      // Second button appears at 0.1-0.4
+                                      final secondButtonAnim = Tween<double>(
+                                        begin: 0.0,
+                                        end: 1.0,
+                                      ).animate(CurvedAnimation(
+                                        parent: _staggerController,
+                                        curve: const Interval(0.1, 0.4,
+                                            curve: Curves.easeOut),
+                                      ));
 
-                              _buildSelectionFooter(isTablet),
-                            ],
-                          )))
+                                      return Padding(
+                                        padding: EdgeInsets.only(bottom: 10.h),
+                                        child: IntrinsicHeight(
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              Expanded(
+                                                child: Transform.translate(
+                                                  offset: Offset(
+                                                      -20 *
+                                                          (1 -
+                                                              firstButtonAnim
+                                                                  .value),
+                                                      0),
+                                                  child: Opacity(
+                                                    opacity: firstButtonAnim
+                                                        .value
+                                                        .clamp(0.0, 1.0),
+                                                    child: _buildGenderButton(
+                                                      gender: 'male',
+                                                      label:
+                                                          AppLocalizations.of(
+                                                                  context)
+                                                              .mensTest,
+                                                      isTablet: isTablet,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: 12.w),
+                                              Expanded(
+                                                child: Transform.translate(
+                                                  offset: Offset(
+                                                      20 *
+                                                          (1 -
+                                                              secondButtonAnim
+                                                                  .value),
+                                                      0),
+                                                  child: Opacity(
+                                                    opacity: secondButtonAnim
+                                                        .value
+                                                        .clamp(0.0, 1.0),
+                                                    child: _buildGenderButton(
+                                                      gender: 'female',
+                                                      label:
+                                                          AppLocalizations.of(
+                                                                  context)
+                                                              .womensTest,
+                                                      isTablet: isTablet,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+
+                                  // Horizontal PageView for disease grid
+                                  SizedBox(
+                                    height: _calculateGridHeight(isTablet),
+                                    child: PageView.builder(
+                                      controller: _pageController,
+                                      onPageChanged: (page) {
+                                        setState(() => _currentPage = page);
+                                      },
+                                      itemCount: _totalPages,
+                                      itemBuilder: (context, pageIndex) {
+                                        return _buildDiseaseGrid(
+                                            pageIndex, isTablet);
+                                      },
+                                    ),
+                                  ),
+
+                                  _buildPaginationControls(isTablet),
+                                  SizedBox(height: 6.h),
+
+                                  _buildSelectionFooter(isTablet),
+                                ],
+                              ));
+              },
+            ))
         : const SizedBox.shrink();
   }
 
   Widget _buildPaginationControls(bool isTablet) {
     if (_totalPages <= 1) return const SizedBox.shrink();
+    final colors = context.colors;
 
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -550,7 +561,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                       '...',
                       style: GoogleFonts.inter(
                         fontSize: 12.sp,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   );
@@ -569,8 +580,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _currentPage == index
-                    ? Colors.black
-                    : AppColors.greyBorder.withValues(alpha: 0.5),
+                    ? colors.textPrimary
+                    : colors.border.withValues(alpha: 0.5),
               ),
             ),
           );
@@ -584,6 +595,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
       builder: (context, constraints) {
         final availableWidth = constraints.maxWidth;
         final isCompact = availableWidth < 340;
+        final colors = context.colors;
 
         return Container(
           padding: EdgeInsets.symmetric(
@@ -591,7 +603,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
             vertical: isCompact ? 8.h : (isTablet ? 12.h : 10.h),
           ),
           decoration: BoxDecoration(
-            color: AppColors.greyLight.withValues(alpha: 0.5),
+            color: colors.greyLight.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Row(
@@ -608,14 +620,14 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                           isCompact ? 5.w : (isTablet ? 8.w : 6.w)),
                       decoration: BoxDecoration(
                         color: _selectionCount > 0
-                            ? Colors.black
-                            : Colors.grey[300],
+                            ? colors.textPrimary
+                            : colors.greyMedium,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.check,
                         size: isCompact ? 12.sp : (isTablet ? 16.sp : 14.sp),
-                        color: Colors.white,
+                        color: colors.textOnPrimary,
                       ),
                     ),
                     SizedBox(width: isCompact ? 6.w : 10.w),
@@ -630,7 +642,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                               fontSize:
                                   isCompact ? 9.sp : (isTablet ? 12.sp : 10.sp),
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -644,8 +656,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                                   : (isTablet ? 16.sp : 14.sp),
                               fontWeight: FontWeight.w700,
                               color: _selectionCount > 0
-                                  ? AppColors.textPrimary
-                                  : AppColors.textSecondary,
+                                  ? colors.textPrimary
+                                  : colors.textSecondary,
                             ),
                           ),
                         ],
@@ -699,19 +711,19 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                       gradient: _canProceed
                           ? LinearGradient(
                               colors: [
-                                Colors.black,
-                                Colors.black.withValues(alpha: 0.85)
+                                colors.textPrimary,
+                                colors.textPrimary.withValues(alpha: 0.85)
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                             )
                           : null,
-                      color: _canProceed ? null : Colors.grey[300],
+                      color: _canProceed ? null : colors.greyMedium,
                       borderRadius: BorderRadius.circular(24.r),
                       boxShadow: _canProceed
                           ? [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.3),
+                                color: colors.textPrimary.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 3),
                               ),
@@ -731,7 +743,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                                   : (isTablet ? 14.sp : 12.sp),
                               fontWeight: FontWeight.w700,
                               color:
-                                  _canProceed ? Colors.white : Colors.grey[500],
+                                  _canProceed ? colors.textOnPrimary : colors.textLight,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.clip,
@@ -741,7 +753,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                         Icon(
                           Icons.arrow_forward,
                           size: isCompact ? 12.sp : (isTablet ? 16.sp : 14.sp),
-                          color: _canProceed ? Colors.white : Colors.grey[500],
+                          color: _canProceed ? colors.textOnPrimary : colors.textLight,
                         ),
                       ],
                     ),
@@ -858,6 +870,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
     required String label,
     required bool isTablet,
   }) {
+    final colors = context.colors;
     final isSelected = _selectedGender == gender;
 
     return GestureDetector(
@@ -869,16 +882,16 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           vertical: isTablet ? 9.h : 8.h,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.white,
+          color: isSelected ? colors.textPrimary : colors.backgroundCard,
           borderRadius: BorderRadius.circular(100.r),
           border: Border.all(
-            color: isSelected ? Colors.black : AppColors.greyBorder,
+            color: isSelected ? colors.textPrimary : colors.border,
             width: 1.5,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
+                    color: colors.textPrimary.withValues(alpha: 0.15),
                     blurRadius: 8,
                     offset: const Offset(0, 3),
                   ),
@@ -892,7 +905,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : AppColors.textPrimary,
+              color: isSelected ? colors.textOnPrimary : colors.textPrimary,
             ),
           ),
         ),

@@ -10,7 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 import '../../providers/locale_provider.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../player/audio_player_screen.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/session_card.dart';
@@ -381,8 +381,9 @@ class _PlaylistScreenState extends State<PlaylistScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [
@@ -415,13 +416,14 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     return AnimatedBuilder(
       animation: _tabController,
       builder: (context, child) {
+        final colors = context.colors;
         return Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.backgroundCard,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
+                color: colors.textPrimary.withValues(alpha: 0.03),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -436,12 +438,12 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                   width: 40.w,
                   height: 40.w,
                   decoration: BoxDecoration(
-                    color: AppColors.greyLight,
+                    color: colors.greyLight,
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Icon(
                     Icons.arrow_back,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                     size: 20.sp,
                   ),
                 ),
@@ -459,15 +461,15 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                       style: GoogleFonts.inter(
                         fontSize: 24.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 4.h),
                     SvgPicture.asset(
                       'assets/images/logo.svg',
                       height: 16.h,
-                      colorFilter: const ColorFilter.mode(
-                        AppColors.textSecondary,
+                      colorFilter: ColorFilter.mode(
+                        colors.textSecondary,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -487,8 +489,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                         EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     decoration: BoxDecoration(
                       color: _isReorderMode
-                          ? AppColors.textPrimary
-                          : AppColors.greyLight,
+                          ? colors.textPrimary
+                          : colors.greyLight,
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -499,8 +501,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: _isReorderMode
-                            ? Colors.white
-                            : AppColors.textPrimary,
+                            ? colors.textOnPrimary
+                            : colors.textPrimary,
                       ),
                     ),
                   ),
@@ -513,11 +515,12 @@ class _PlaylistScreenState extends State<PlaylistScreen>
   }
 
   Widget _buildTabBar() {
+    final colors = context.colors;
     return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colors.backgroundCard,
         border: Border(
-          bottom: BorderSide(color: AppColors.greyBorder, width: 1),
+          bottom: BorderSide(color: colors.border, width: 1),
         ),
       ),
       child: TabBar(
@@ -527,8 +530,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
             _isReorderMode = false;
           });
         },
-        labelColor: AppColors.textPrimary,
-        unselectedLabelColor: AppColors.textSecondary,
+        labelColor: colors.textPrimary,
+        unselectedLabelColor: colors.textSecondary,
         labelStyle: GoogleFonts.inter(
           fontSize: 13.sp,
           fontWeight: FontWeight.w600,
@@ -537,7 +540,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           fontSize: 13.sp,
           fontWeight: FontWeight.w500,
         ),
-        indicatorColor: AppColors.textPrimary,
+        indicatorColor: colors.textPrimary,
         indicatorWeight: 3,
         tabs: [
           Tab(
@@ -567,8 +570,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
   }
 
   Widget _buildLoadingState() {
-    return const Center(
-      child: CircularProgressIndicator(color: AppColors.textPrimary),
+    return Center(
+      child: CircularProgressIndicator(color: context.colors.textPrimary),
     );
   }
 
@@ -682,6 +685,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     required String title,
     required String subtitle,
   }) {
+    final colors = context.colors;
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       child: ConstrainedBox(
@@ -699,12 +703,11 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                 Container(
                   width: 100.w,
                   height: 100.w,
-                  decoration: const BoxDecoration(
-                    color: AppColors.greyLight,
+                  decoration: BoxDecoration(
+                    color: colors.greyLight,
                     shape: BoxShape.circle,
                   ),
-                  child:
-                      Icon(icon, size: 50.sp, color: AppColors.textSecondary),
+                  child: Icon(icon, size: 50.sp, color: colors.textSecondary),
                 ),
                 SizedBox(height: 24.h),
                 Text(
@@ -713,7 +716,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                   style: GoogleFonts.inter(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 8.h),
@@ -722,7 +725,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                   textAlign: TextAlign.center,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                     height: 1.5,
                   ),
                 ),

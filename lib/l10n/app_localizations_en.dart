@@ -2129,4 +2129,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preparing => 'Preparing...';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get lightMode => 'Light';
+
+  @override
+  String get lightModeSubtitle => 'Classic bright theme';
+
+  @override
+  String get darkMode => 'Dark';
+
+  @override
+  String get darkModeSubtitle => 'Easy on the eyes';
+
+  @override
+  String get systemDefault => 'System';
+
+  @override
+  String get systemDefaultSubtitle => 'Follow device settings';
 }

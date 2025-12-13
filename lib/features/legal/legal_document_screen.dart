@@ -9,7 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../services/legal_document_service.dart';
 import '../../providers/locale_provider.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 
 class LegalDocumentScreen extends StatelessWidget {
@@ -24,6 +24,7 @@ class LegalDocumentScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final locale = Provider.of<LocaleProvider>(context).locale;
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
@@ -35,13 +36,13 @@ class LegalDocumentScreen extends StatelessWidget {
         isDesktop ? 40.w : (isTablet ? 30.w : 20.w);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -49,7 +50,7 @@ class LegalDocumentScreen extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: 20.sp.clamp(20.0, 22.0),
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -61,9 +62,9 @@ class LegalDocumentScreen extends StatelessWidget {
         builder: (context, snapshot) {
           // Loading
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
+            return Center(
               child: CircularProgressIndicator(
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             );
           }
@@ -87,7 +88,7 @@ class LegalDocumentScreen extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 8.h),
@@ -95,7 +96,7 @@ class LegalDocumentScreen extends StatelessWidget {
                       'Please try again later',
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -140,6 +141,7 @@ class LegalDocumentScreen extends StatelessWidget {
 
   /// Markdown stil ayarları
   MarkdownStyleSheet _buildMarkdownStyleSheet(BuildContext context) {
+    final colors = context.colors;
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
 
@@ -148,19 +150,19 @@ class LegalDocumentScreen extends StatelessWidget {
       h1: GoogleFonts.inter(
         fontSize: isDesktop ? 28.sp : (isTablet ? 26.sp : 24.sp),
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
         height: 1.3,
       ),
       h2: GoogleFonts.inter(
         fontSize: isDesktop ? 22.sp : (isTablet ? 20.sp : 20.sp),
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
         height: 1.3,
       ),
       h3: GoogleFonts.inter(
         fontSize: isDesktop ? 18.sp : (isTablet ? 17.sp : 18.sp),
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
         height: 1.3,
       ),
 
@@ -168,26 +170,26 @@ class LegalDocumentScreen extends StatelessWidget {
       p: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 15.sp),
         height: 1.6,
-        color: AppColors.textSecondary,
+        color: colors.textSecondary,
       ),
 
       // Liste
       listBullet: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 15.sp),
-        color: AppColors.textSecondary,
+        color: colors.textSecondary,
       ),
 
       // Blockquote
       blockquote: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 15.sp),
         fontStyle: FontStyle.italic,
-        color: AppColors.textSecondary.withValues(alpha: 0.8),
+        color: colors.textSecondary.withValues(alpha: 0.8),
       ),
       blockquoteDecoration: BoxDecoration(
-        color: AppColors.textPrimary.withValues(alpha: 0.05),
+        color: colors.textPrimary.withValues(alpha: 0.05),  
         border: Border(
           left: BorderSide(
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
             width: 4.w,
           ),
         ),
@@ -197,20 +199,20 @@ class LegalDocumentScreen extends StatelessWidget {
       // Code
       code: GoogleFonts.robotoMono(
         fontSize: isDesktop ? 14.sp : (isTablet ? 13.sp : 14.sp),
-        backgroundColor: AppColors.greyLight.withValues(alpha: 0.3),
+        backgroundColor: colors.greyLight.withValues(alpha: 0.3),
       ),
 
       // Link
       a: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 15.sp),
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
         decoration: TextDecoration.underline,
       ),
 
       // Strong (Bold)
       strong: GoogleFonts.inter(
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
       ),
 
       // Em (Italic)
@@ -226,7 +228,7 @@ class LegalDocumentScreen extends StatelessWidget {
       horizontalRuleDecoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: AppColors.greyBorder,
+            color: colors.border,
             width: 1.h,
           ),
         ),

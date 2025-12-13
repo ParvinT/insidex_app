@@ -5,7 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../providers/user_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import '../../../shared/widgets/custom_text_field.dart';
@@ -29,6 +29,7 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       children: [
         Stack(
@@ -38,11 +39,11 @@ class ProfileHeader extends StatelessWidget {
               height: context.isTablet ? 120.w : 100.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.greyLight,
+                color: colors.greyLight,
                 border: Border.all(
                   color: context.read<SubscriptionProvider>().isActive
-                      ? AppColors.textPrimary
-                      : AppColors.greyBorder,
+                      ? colors.textPrimary
+                      : colors.border,
                   width: 3,
                 ),
               ),
@@ -67,14 +68,14 @@ class ProfileHeader extends StatelessWidget {
                     width: 32.w,
                     height: 32.w,
                     decoration: BoxDecoration(
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                      border: Border.all(color: colors.textOnPrimary, width: 2),
                     ),
                     child: Icon(
                       Icons.edit,
                       size: 16.sp,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),
@@ -97,7 +98,7 @@ class ProfileHeader extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
         SizedBox(height: 4.h),
@@ -105,7 +106,7 @@ class ProfileHeader extends StatelessWidget {
           userProvider.userEmail,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
       ],

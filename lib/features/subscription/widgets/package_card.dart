@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/subscription_constants.dart';
 import '../../../core/responsive/breakpoints.dart';
 import '../../../models/subscription_package.dart';
@@ -26,8 +26,9 @@ class PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final isTablet = width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
-
+    final isTablet =
+        width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
+    final colors = context.colors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -35,16 +36,18 @@ class PackageCard extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary.withValues(alpha: 0.05) : Colors.white,
+          color: isSelected
+              ? colors.textPrimary.withValues(alpha: 0.05)
+              : colors.backgroundCard,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.greyBorder,
+            color: isSelected ? colors.textPrimary : colors.border,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppColors.textPrimary.withValues(alpha: 0.1),
+                    color: colors.textPrimary.withValues(alpha: 0.1),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
@@ -108,7 +111,7 @@ class PackageCard extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: isTablet ? 18.sp : 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.colors.textPrimary,
                 ),
               ),
               if (package.period == SubscriptionPeriod.yearly)
@@ -116,7 +119,7 @@ class PackageCard extends StatelessWidget {
                   package.monthlyEquivalentDisplay ?? '',
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 13.sp : 12.sp,
-                    color: AppColors.textSecondary,
+                    color: context.colors.textSecondary,
                   ),
                 ),
             ],
@@ -134,24 +137,29 @@ class PackageCard extends StatelessWidget {
       children: [
         // Popular badge
         if (package.isHighlighted)
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 10.w,
-              vertical: 4.h,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.textPrimary,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Text(
-              'POPULAR',
-              style: GoogleFonts.inter(
-                fontSize: isTablet ? 11.sp : 10.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                letterSpacing: 0.5,
-              ),
-            ),
+          Builder(
+            builder: (context) {
+              final colors = context.colors;
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: colors.textPrimary,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  'POPULAR',
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 11.sp : 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: colors.textOnPrimary,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              );
+            },
           ),
 
         // Savings badge
@@ -183,6 +191,7 @@ class PackageCard extends StatelessWidget {
   }
 
   Widget _buildPrice(BuildContext context, bool isTablet) {
+    final colors = context.colors;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
@@ -192,7 +201,7 @@ class PackageCard extends StatelessWidget {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 32.sp : 28.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         SizedBox(width: 4.w),
@@ -200,7 +209,7 @@ class PackageCard extends StatelessWidget {
           package.periodSuffix,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 15.sp : 14.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
       ],
@@ -208,6 +217,7 @@ class PackageCard extends StatelessWidget {
   }
 
   Widget _buildFeatures(BuildContext context, bool isTablet) {
+    final colors = context.colors;
     return Column(
       children: package.features.map((feature) {
         return Padding(
@@ -216,7 +226,9 @@ class PackageCard extends StatelessWidget {
             children: [
               Icon(
                 feature.isIncluded ? Icons.check_circle : Icons.cancel,
-                color: feature.isIncluded ? Colors.green : AppColors.textSecondary.withValues(alpha: 0.5),
+                color: feature.isIncluded
+                    ? Colors.green
+                    : colors.textSecondary.withValues(alpha: 0.5),
                 size: isTablet ? 20.sp : 18.sp,
               ),
               SizedBox(width: 8.w),
@@ -225,10 +237,11 @@ class PackageCard extends StatelessWidget {
                   feature.title,
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 14.sp : 13.sp,
-                    color: feature.isIncluded 
-                        ? AppColors.textPrimary 
-                        : AppColors.textSecondary.withValues(alpha: 0.7),
-                    decoration: feature.isIncluded ? null : TextDecoration.lineThrough,
+                    color: feature.isIncluded
+                        ? colors.textPrimary
+                        : colors.textSecondary.withValues(alpha: 0.7),
+                    decoration:
+                        feature.isIncluded ? null : TextDecoration.lineThrough,
                   ),
                 ),
               ),

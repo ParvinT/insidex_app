@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -151,14 +151,15 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
   }
 
   Widget _buildRequirement(String text, {required bool isMet}) {
+    final colors = context.colors;
     final bool showStatus = widget.password.isNotEmpty;
     final Color iconColor = showStatus
         ? (isMet ? Colors.green : Colors.red.withValues(alpha: 0.5))
-        : AppColors.textSecondary.withValues(alpha: 0.3);
+        : colors.textSecondary.withValues(alpha: 0.3);
 
     final Color textColor = showStatus
-        ? (isMet ? AppColors.textPrimary : AppColors.textSecondary)
-        : AppColors.textSecondary.withValues(alpha: 0.6);
+        ? (isMet ? colors.textPrimary : colors.textSecondary)
+        : colors.textSecondary.withValues(alpha: 0.6);
 
     // Responsive sizing
     final isTablet = context.isTablet;
@@ -194,6 +195,7 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final isTablet = context.isTablet;
 
     return SizeTransition(
@@ -214,7 +216,7 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
                         ? 12.sp.clamp(11.0, 13.0)
                         : 11.sp.clamp(10.0, 12.0),
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
                 Text(
@@ -234,7 +236,7 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
               borderRadius: BorderRadius.circular(10.r),
               child: LinearProgressIndicator(
                 value: _passwordStrength,
-                backgroundColor: AppColors.textSecondary.withValues(alpha: 0.1),
+                backgroundColor: colors.textSecondary.withValues(alpha: 0.1),
                 valueColor: AlwaysStoppedAnimation(_passwordStrengthColor),
                 minHeight: 6.h,
               ),
@@ -246,10 +248,10 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
           Container(
             padding: EdgeInsets.all(12.w.clamp(12.0, 16.0)),
             decoration: BoxDecoration(
-              color: AppColors.textSecondary.withValues(alpha: 0.03),
+              color: colors.textSecondary.withValues(alpha: 0.03),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: AppColors.textSecondary.withValues(alpha: 0.1),
+                color: colors.textSecondary.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -260,7 +262,7 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
                   children: [
                     Icon(
                       Icons.info_outline,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                       size: isTablet ? 14.0 : 12.0,
                     ),
                     SizedBox(width: 6.w),
@@ -271,7 +273,7 @@ class _PasswordRequirementsWidgetState extends State<PasswordRequirementsWidget>
                             ? 12.sp.clamp(11.0, 13.0)
                             : 11.sp.clamp(10.0, 12.0),
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ],

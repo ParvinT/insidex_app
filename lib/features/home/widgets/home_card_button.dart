@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../services/cache_manager_service.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -92,7 +92,8 @@ class _HomeCardButtonState extends State<HomeCardButton>
             borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: _isPressed ? 0.1 : 0.15),
+                color: context.colors.textPrimary
+                    .withValues(alpha: _isPressed ? 0.1 : 0.15),
                 blurRadius: _isPressed ? 15 : 20,
                 offset: Offset(0, _isPressed ? 8 : 10),
                 spreadRadius: _isPressed ? 0 : 2,
@@ -236,24 +237,26 @@ class _HomeCardButtonState extends State<HomeCardButton>
 
   /// Shimmer placeholder while loading
   Widget _buildShimmerPlaceholder() {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: colors.greyMedium,
+      highlightColor: colors.greyLight,
       child: Container(
-        color: Colors.white,
+        color: colors.backgroundPure,
       ),
     );
   }
 
   Widget _buildBrandPlaceholder({required bool showOfflineBadge}) {
+    final colors = context.colors;
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.greyLight.withValues(alpha: 0.8),
-            AppColors.textPrimary.withValues(alpha: 0.85),
+            colors.greyLight.withValues(alpha: 0.8),
+            colors.textPrimary.withValues(alpha: 0.85),
           ],
         ),
       ),

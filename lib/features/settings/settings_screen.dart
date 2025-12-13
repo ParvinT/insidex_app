@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
@@ -14,6 +14,7 @@ import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
 import 'widgets/language_selector.dart';
+import 'widgets/theme_selector.dart';
 import '../../l10n/app_localizations.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final screenSize = mq.size;
     final screenWidth = screenSize.width;
@@ -37,15 +39,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
         screenWidth >= 1024 && screenHeight <= 800; // Nest Hub (Max)
     final bool isDesktop = screenWidth >= 1024 && !isShortWide;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
             size: 24.sp.clamp(24.0, 26.0),
           ),
           onPressed: () => Navigator.pop(context),
@@ -55,7 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: GoogleFonts.inter(
             fontSize: 24.sp.clamp(24.0, 28.0),
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -108,6 +110,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ]),
 
                 SizedBox(height: 32.h),
+
+                _buildSectionHeader(AppLocalizations.of(context).appearance),
+                SizedBox(height: 12.h),
+                const ThemeSelector(),
 
                 _buildSectionHeader(AppLocalizations.of(context).language),
                 SizedBox(height: 12.h),
@@ -171,13 +177,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ]),
 
+                SizedBox(height: 24.h),
+
                 // Version info
                 Center(
                   child: Text(
                     '${AppLocalizations.of(context).version} 1.0.0',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      color: AppColors.textLight,
+                      color: colors.textLight,
                     ),
                   ),
                 ),
@@ -197,18 +205,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       style: GoogleFonts.inter(
         fontSize: 18.sp,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
     );
   }
 
   Widget _buildSettingsCard(List<Widget> children) {
+    final colors = context.colors;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder,
+          color: colors.border,
           width: 1,
         ),
       ),
@@ -225,6 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     bool isDestructive = false,
     required VoidCallback onTap,
   }) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16.r),
@@ -238,13 +248,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
               decoration: BoxDecoration(
                 color: isDestructive
                     ? Colors.red.withValues(alpha: 0.1)
-                    : AppColors.greyLight,
+                    : colors.greyLight,
                 borderRadius: BorderRadius.circular(10.r),
               ),
               child: Icon(
                 icon,
-                color: isDestructive ? Colors.red : AppColors.textPrimary,
-                size: 20.sp,
+                color: isDestructive ? Colors.red : colors.textPrimary,
               ),
             ),
             SizedBox(width: 16.w),
@@ -257,7 +266,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
-                      color: isDestructive ? Colors.red : AppColors.textPrimary,
+                      color: isDestructive ? Colors.red : colors.textPrimary,
                     ),
                   ),
                   if (subtitle != null) ...[
@@ -267,7 +276,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -276,7 +285,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: AppColors.textLight,
+              color: colors.textLight,
               size: 16.sp,
             ),
           ],
@@ -288,10 +297,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildDivider() {
     return Padding(
       padding: EdgeInsets.only(left: 76.w),
-      child: const Divider(
+      child: Divider(
         height: 1,
         thickness: 1,
-        color: AppColors.greyBorder,
+        color: context.colors.border,
       ),
     );
   }
@@ -319,14 +328,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         content: Text(
           AppLocalizations.of(context).signOutConfirmMessage,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
         actions: [
@@ -336,7 +345,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               AppLocalizations.of(context).cancel,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),

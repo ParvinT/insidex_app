@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 
 class ProfileActionButton extends StatelessWidget {
   final IconData icon;
@@ -27,6 +27,7 @@ class ProfileActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -64,7 +65,7 @@ class ProfileActionButton extends StatelessWidget {
               ),
               child: Icon(
                 icon,
-                color: Colors.white,
+                color: colors.backgroundCard,
                 size: 24.sp,
               ),
             ),
@@ -78,7 +79,7 @@ class ProfileActionButton extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -86,7 +87,7 @@ class ProfileActionButton extends StatelessWidget {
                     subtitle,
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -94,7 +95,7 @@ class ProfileActionButton extends StatelessWidget {
             ),
             Icon(
               Icons.arrow_forward_ios,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               size: 16.sp,
             ),
           ],

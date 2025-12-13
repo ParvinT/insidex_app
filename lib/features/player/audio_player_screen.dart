@@ -21,6 +21,7 @@ import '../../services/download/download_service.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../downloads/widgets/download_button.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -654,6 +655,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
@@ -686,11 +688,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         body: Stack(
           children: [
             Container(
-              color: Colors.white,
+              color: colors.background,
               child: SafeArea(
                 child: Column(
                   children: [
@@ -793,7 +795,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             ),
             if (_isDecrypting)
               Container(
-                color: Colors.black.withValues(alpha: 0.7),
+                color: colors.textPrimary.withValues(alpha: 0.85),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -801,8 +803,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                       SizedBox(
                         width: 48.w,
                         height: 48.w,
-                        child: const CircularProgressIndicator(
-                          color: Colors.white,
+                        child: CircularProgressIndicator(
+                          color: colors.textOnPrimary,
                           strokeWidth: 3,
                         ),
                       ),
@@ -812,7 +814,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: colors.textOnPrimary,
                         ),
                       ),
                     ],
@@ -985,7 +987,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.backgroundElevated,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
         child: Column(
@@ -996,7 +998,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: context.colors.greyMedium,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -1012,19 +1014,20 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                       style: GoogleFonts.inter(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black87,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon:
+                        Icon(Icons.close, color: context.colors.textSecondary),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
             ),
 
-            Divider(height: 1, color: Colors.grey[300]),
+            Divider(height: 1, color: context.colors.border),
 
             // Content
             Expanded(
@@ -1035,7 +1038,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     height: 1.6,
-                    color: Colors.black87,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),

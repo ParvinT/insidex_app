@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
@@ -122,14 +122,14 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
       builder: (context, snapshot) {
         final currentLanguage = snapshot.data ?? 'en';
         final diseaseName = widget.disease.getLocalizedName(currentLanguage);
-
+        final colors = context.colors;
         return Scaffold(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           appBar: AppBar(
-            backgroundColor: AppColors.backgroundWhite,
+            backgroundColor: colors.background,
             elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              icon: Icon(Icons.arrow_back, color: colors.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
           ),
@@ -149,7 +149,7 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
                           style: GoogleFonts.inter(
                             fontSize: titleSize,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                           textAlign: TextAlign.center,
                         ),
@@ -221,7 +221,7 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
               AppLocalizations.of(context).noHealingSessionYetWorkingOnIt,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 14.sp : 13.sp,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
             ),
           ),
@@ -231,9 +231,9 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
-        color: AppColors.darkDivider,
+        color: context.colors.textPrimary,
       ),
     );
   }

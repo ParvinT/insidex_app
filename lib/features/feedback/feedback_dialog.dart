@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 
 class FeedbackDialog extends StatefulWidget {
@@ -127,6 +127,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final l10n = AppLocalizations.of(context);
     final Map<String, String> typeLabels = {
       'suggestion': l10n.suggestion,
@@ -136,7 +137,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
       'other': l10n.other,
     };
     return Dialog(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.backgroundElevated,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20.r),
       ),
@@ -162,11 +163,11 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                       style: GoogleFonts.inter(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: AppColors.textSecondary),
+                      icon: Icon(Icons.close, color: colors.textSecondary),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
                     ),
@@ -184,7 +185,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         // Type Selector
                         Container(
                           decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.greyBorder),
+                            border: Border.all(color: colors.border),
                             borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: DropdownButtonFormField<String>(
@@ -197,7 +198,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             ),
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                             items: typeLabels.entries.map((entry) {
                               return DropdownMenuItem(
@@ -219,7 +220,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             style: GoogleFonts.inter(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                           ),
                           SizedBox(height: 8.h),
@@ -233,7 +234,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                                   index < _rating
                                       ? Icons.star
                                       : Icons.star_border,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                   size: 36.sp,
                                 ),
                               );
@@ -246,32 +247,31 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         // Title Field
                         TextFormField(
                           controller: _titleController,
-                          style: GoogleFonts.inter(fontSize: 14.sp),
+                          style: GoogleFonts.inter(
+                              fontSize: 14.sp, color: colors.textPrimary),
                           decoration: InputDecoration(
                             labelText: l10n.title,
                             hintText: l10n.briefSummary,
                             labelStyle: GoogleFonts.inter(
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                               fontSize: 14.sp,
                             ),
                             hintStyle: GoogleFonts.inter(
-                              color: AppColors.textLight,
+                              color: colors.textLight,
                               fontSize: 14.sp,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide:
-                                  const BorderSide(color: AppColors.greyBorder),
+                              borderSide: BorderSide(color: colors.border),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide:
-                                  const BorderSide(color: AppColors.greyBorder),
+                              borderSide: BorderSide(color: colors.border),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide: const BorderSide(
-                                  color: AppColors.textPrimary, width: 2),
+                              borderSide: BorderSide(
+                                  color: colors.textPrimary, width: 2),
                             ),
                           ),
                           validator: (value) {
@@ -288,33 +288,32 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         TextFormField(
                           controller: _messageController,
                           maxLines: 4,
-                          style: GoogleFonts.inter(fontSize: 14.sp),
+                          style: GoogleFonts.inter(
+                              fontSize: 14.sp, color: colors.textPrimary),
                           decoration: InputDecoration(
                             labelText: l10n.details,
                             hintText: l10n.tellUsMore,
                             alignLabelWithHint: true,
                             labelStyle: GoogleFonts.inter(
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                               fontSize: 14.sp,
                             ),
                             hintStyle: GoogleFonts.inter(
-                              color: AppColors.textLight,
+                              color: colors.textLight,
                               fontSize: 14.sp,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide:
-                                  const BorderSide(color: AppColors.greyBorder),
+                              borderSide: BorderSide(color: colors.border),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide:
-                                  const BorderSide(color: AppColors.greyBorder),
+                              borderSide: BorderSide(color: colors.border),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide: const BorderSide(
-                                  color: AppColors.textPrimary, width: 2),
+                              borderSide: BorderSide(
+                                  color: colors.textPrimary, width: 2),
                             ),
                           ),
                           validator: (value) {
@@ -331,32 +330,31 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         TextFormField(
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
-                          style: GoogleFonts.inter(fontSize: 14.sp),
+                          style: GoogleFonts.inter(
+                              fontSize: 14.sp, color: colors.textPrimary),
                           decoration: InputDecoration(
                             labelText: l10n.emailOptional,
                             hintText: l10n.forFollowUp,
                             labelStyle: GoogleFonts.inter(
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                               fontSize: 14.sp,
                             ),
                             hintStyle: GoogleFonts.inter(
-                              color: AppColors.textLight,
+                              color: colors.textLight,
                               fontSize: 14.sp,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide:
-                                  const BorderSide(color: AppColors.greyBorder),
+                              borderSide: BorderSide(color: colors.border),
                             ),
                             enabledBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide:
-                                  const BorderSide(color: AppColors.greyBorder),
+                              borderSide: BorderSide(color: colors.border),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12.r),
-                              borderSide: const BorderSide(
-                                  color: AppColors.textPrimary, width: 2),
+                              borderSide: BorderSide(
+                                  color: colors.textPrimary, width: 2),
                             ),
                           ),
                         ),
@@ -374,7 +372,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                   child: ElevatedButton(
                     onPressed: _isSubmitting ? null : _submitFeedback,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.textPrimary,
+                      backgroundColor: colors.textPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -384,8 +382,8 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                         ? SizedBox(
                             width: 20.w,
                             height: 20.w,
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
+                            child: CircularProgressIndicator(
+                              color: colors.textOnPrimary,
                               strokeWidth: 2,
                             ),
                           )
@@ -394,7 +392,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             style: GoogleFonts.inter(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: colors.textOnPrimary,
                             ),
                           ),
                   ),

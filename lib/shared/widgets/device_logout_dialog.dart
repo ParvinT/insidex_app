@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -78,150 +78,152 @@ class _DeviceLogoutDialogState extends State<DeviceLogoutDialog> {
         isTablet ? 48.sp.clamp(42.0, 54.0) : 42.sp.clamp(36.0, 48.0);
 
     return PopScope(
-      // Prevent back button
-      canPop: false,
-      child: Material(
-        color: Colors.black.withValues(alpha: 0.85),
-        child: Center(
-          child: Container(
-            width: maxContentWidth,
-            margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
-            padding: EdgeInsets.all(isTablet ? 32.w : 24.w),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24.r),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Warning Icon
-                Container(
-                  width: iconSize,
-                  height: iconSize,
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.warning_rounded,
-                    color: Colors.orange,
-                    size: iconSize * 0.6,
-                  ),
+        // Prevent back button
+        canPop: false,
+        child: Material(
+          color: context.colors.textPrimary.withValues(alpha: 0.85),
+          child: Center(
+            child: Builder(builder: (context) {
+              final colors = context.colors;
+              return Container(
+                width: maxContentWidth,
+                margin: EdgeInsets.symmetric(horizontal: horizontalPadding),
+                padding: EdgeInsets.all(isTablet ? 32.w : 24.w),
+                decoration: BoxDecoration(
+                  color: colors.backgroundElevated,
+                  borderRadius: BorderRadius.circular(24.r),
                 ),
-
-                SizedBox(height: isTablet ? 24.h : 20.h),
-
-                // Title
-                Text(
-                  AppLocalizations.of(context).accountOpenedOnAnotherDevice,
-                  style: GoogleFonts.inter(
-                    fontSize: titleSize,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: isTablet ? 16.h : 12.h),
-
-                // Message
-                Text(
-                  AppLocalizations.of(context).accountOpenedMessage,
-                  style: GoogleFonts.inter(
-                    fontSize: bodySize,
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: isTablet ? 24.h : 20.h),
-
-                // ⭐ SECURITY WARNING BOX
-                Container(
-                  padding: EdgeInsets.all(isTablet ? 16.w : 14.w),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: Colors.red.withValues(alpha: 0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.shield_outlined,
-                        color: Colors.red,
-                        size: isTablet ? 22.sp : 20.sp,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Warning Icon
+                    Container(
+                      width: iconSize,
+                      height: iconSize,
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
                       ),
-                      SizedBox(width: 12.w),
-                      Expanded(
+                      child: Icon(
+                        Icons.warning_rounded,
+                        color: Colors.orange,
+                        size: iconSize * 0.6,
+                      ),
+                    ),
+
+                    SizedBox(height: isTablet ? 24.h : 20.h),
+
+                    // Title
+                    Text(
+                      AppLocalizations.of(context).accountOpenedOnAnotherDevice,
+                      style: GoogleFonts.inter(
+                        fontSize: titleSize,
+                        fontWeight: FontWeight.w700,
+                        color: colors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(height: isTablet ? 16.h : 12.h),
+
+                    // Message
+                    Text(
+                      AppLocalizations.of(context).accountOpenedMessage,
+                      style: GoogleFonts.inter(
+                        fontSize: bodySize,
+                        color: colors.textSecondary,
+                        height: 1.5,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(height: isTablet ? 24.h : 20.h),
+
+                    // ⭐ SECURITY WARNING BOX
+                    Container(
+                      padding: EdgeInsets.all(isTablet ? 16.w : 14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: Colors.red.withValues(alpha: 0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.shield_outlined,
+                            color: Colors.red,
+                            size: isTablet ? 22.sp : 20.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Text(
+                              AppLocalizations.of(context)
+                                  .securityWarningUnauthorized,
+                              style: GoogleFonts.inter(
+                                fontSize: warningSize,
+                                color: Colors.red.shade700,
+                                height: 1.4,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: isTablet ? 28.h : 24.h),
+
+                    // Countdown
+                    Container(
+                      width: isTablet ? 120.w : 100.w,
+                      height: isTablet ? 120.w : 100.w,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: _getCountdownColor(),
+                          width: 6,
+                        ),
+                        color: _getCountdownColor().withValues(alpha: 0.1),
+                      ),
+                      child: Center(
                         child: Text(
-                          AppLocalizations.of(context)
-                              .securityWarningUnauthorized,
+                          '$_remainingSeconds',
                           style: GoogleFonts.inter(
-                            fontSize: warningSize,
-                            color: Colors.red.shade700,
-                            height: 1.4,
-                            fontWeight: FontWeight.w500,
+                            fontSize: countdownSize,
+                            fontWeight: FontWeight.w700,
+                            color: _getCountdownColor(),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: isTablet ? 28.h : 24.h),
-
-                // Countdown
-                Container(
-                  width: isTablet ? 120.w : 100.w,
-                  height: isTablet ? 120.w : 100.w,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _getCountdownColor(),
-                      width: 6,
                     ),
-                    color: _getCountdownColor().withValues(alpha: 0.1),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '$_remainingSeconds',
+
+                    SizedBox(height: isTablet ? 16.h : 12.h),
+
+                    // Seconds text
+                    Text(
+                      _remainingSeconds == 1
+                          ? AppLocalizations.of(context).second
+                          : AppLocalizations.of(context).seconds,
                       style: GoogleFonts.inter(
-                        fontSize: countdownSize,
-                        fontWeight: FontWeight.w700,
-                        color: _getCountdownColor(),
+                        fontSize: bodySize * 0.9,
+                        color: colors.textSecondary,
                       ),
                     ),
-                  ),
+                  ],
                 ),
-
-                SizedBox(height: isTablet ? 16.h : 12.h),
-
-                // Seconds text
-                Text(
-                  _remainingSeconds == 1
-                      ? AppLocalizations.of(context).second
-                      : AppLocalizations.of(context).seconds,
-                  style: GoogleFonts.inter(
-                    fontSize: bodySize * 0.9,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ),
+              );
+            }),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   Color _getCountdownColor() {
     if (_remainingSeconds <= 10) return Colors.red;
     if (_remainingSeconds <= 20) return Colors.orange;
-    return AppColors.textPrimary;
+    return context.colors.textPrimary;
   }
 }

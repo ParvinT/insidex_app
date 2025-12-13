@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import 'sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
@@ -203,6 +203,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -224,17 +225,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     return MediaQuery(
       data: mq.copyWith(textScaler: TextScaler.linear(ts)),
       child: Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         appBar: AppBar(
           toolbarHeight: toolbarH,
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           leadingWidth: leadingWidth,
           titleSpacing: isTablet ? 8 : 4,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: (24.sp).clamp(20.0, 28.0),
             ),
             padding: EdgeInsets.only(left: leadingPad),
@@ -254,8 +255,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         width: logoW,
                         height: logoH,
                         fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.textPrimary,
+                        colorFilter: ColorFilter.mode(
+                          colors.textPrimary,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -266,7 +267,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   Container(
                     height: dividerH,
                     width: 1.5,
-                    color: AppColors.textPrimary.withValues(alpha: 0.2),
+                    color: colors.textPrimary.withValues(alpha: 0.2),
                     margin: EdgeInsets.symmetric(
                         horizontal: 8.w), // ← Biraz margin ekle
                   ),
@@ -281,7 +282,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         style: GoogleFonts.inter(
                           fontSize: (15.sp).clamp(14.0, 20.0),
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
@@ -299,10 +300,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             indicatorPadding:
                 EdgeInsets.symmetric(horizontal: isTablet ? 10 : 6),
             controller: _tabController,
-            indicatorColor: AppColors.textPrimary,
+            indicatorColor: colors.textPrimary,
             indicatorWeight: 3,
-            labelColor: AppColors.textPrimary,
-            unselectedLabelColor: AppColors.textSecondary,
+            labelColor: colors.textPrimary,
+            unselectedLabelColor: colors.textSecondary,
             labelStyle: GoogleFonts.inter(
               fontSize: (14.sp).clamp(12.0, 18.0),
               fontWeight: FontWeight.w600,
@@ -329,10 +330,11 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildCategoriesTab() {
+    final colors = context.colors;
     if (_isLoadingCategories) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: colors.textPrimary,
         ),
       );
     }
@@ -344,14 +346,14 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             Icon(
               Icons.category_outlined,
               size: 64.sp,
-              color: AppColors.greyMedium,
+              color: colors.greyMedium,
             ),
             SizedBox(height: 16.h),
             Text(
               AppLocalizations.of(context).noCategoriesYet,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -373,7 +375,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 style: GoogleFonts.inter(
                   fontSize: 24.sp.clamp(22.0, 34.0),
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -382,7 +384,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -411,8 +413,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildCategoryCard(CategoryModel category) {
+    final colors = context.colors;
     // Parse color
-    Color cardColor = AppColors.textPrimary;
+    Color cardColor = colors.textPrimary;
 
     return FutureBuilder<String>(
         future: CategoryLocalizationService.getLocalizedNameAuto(category),
@@ -616,11 +619,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildAllSessionsTab() {
-    // Loading state (ilk yükleme)
+    final colors = context.colors;
+    // Loading state
     if (_isLoadingSessions && _allSessions.isEmpty) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: colors.textPrimary,
         ),
       );
     }
@@ -634,7 +638,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             Icon(
               Icons.library_music,
               size: 64.sp,
-              color: AppColors.greyLight,
+              color: colors.greyLight,
             ),
             SizedBox(height: 16.h),
             Text(
@@ -642,7 +646,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -661,9 +665,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             // Loading indicator
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             );
@@ -675,7 +679,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 child: ElevatedButton(
                   onPressed: _loadMoreSessions,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackgroundCard,
+                    backgroundColor: colors.textPrimary,
                     padding: EdgeInsets.symmetric(
                       horizontal: 32.w,
                       vertical: 12.h,

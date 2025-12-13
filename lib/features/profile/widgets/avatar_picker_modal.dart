@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../l10n/app_localizations.dart';
@@ -21,6 +21,7 @@ class AvatarPickerModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // Responsive values
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
@@ -48,7 +49,7 @@ class AvatarPickerModal extends StatelessWidget {
     return Container(
       height: modalHeight,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundElevated,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(borderRadius),
           topRight: Radius.circular(borderRadius),
@@ -62,7 +63,7 @@ class AvatarPickerModal extends StatelessWidget {
             width: isTablet ? 50.w : 40.w,
             height: 4.h,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: colors.greyMedium,
               borderRadius: BorderRadius.circular(2.r),
             ),
           ),
@@ -78,7 +79,7 @@ class AvatarPickerModal extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: titleSize,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
           ),
@@ -110,21 +111,21 @@ class AvatarPickerModal extends StatelessWidget {
                     duration: const Duration(milliseconds: 200),
                     decoration: BoxDecoration(
                       color: isSelected
-                          ? AppColors.textPrimary.withValues(alpha: 0.15)
-                          : Colors.grey[100],
+                          ? colors.textPrimary.withValues(alpha: 0.15)
+                          : colors.greyLight,
                       borderRadius:
                           BorderRadius.circular(isTablet ? 18.r : 16.r),
                       border: Border.all(
                         color: isSelected
-                            ? AppColors.textPrimary
+                            ? colors.textPrimary
                             : Colors.transparent,
                         width: 2.5,
                       ),
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
-                                color: AppColors.textPrimary
-                                    .withValues(alpha: 0.3),
+                                color:
+                                    colors.textPrimary.withValues(alpha: 0.3),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
