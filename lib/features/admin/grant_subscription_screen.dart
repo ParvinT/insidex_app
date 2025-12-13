@@ -60,7 +60,6 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     try {
       QuerySnapshot? result;
 
-      
       // Check if query looks like an email
       if (query.contains('@')) {
         // Search by email - try multiple variations
@@ -78,7 +77,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
               .limit(1)
               .get();
 
-          if (result!.docs.isNotEmpty) break;
+          if (result.docs.isNotEmpty) break;
         }
       } else {
         // Search by UID - direct document access
@@ -727,47 +726,57 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           SizedBox(height: 20.h),
 
           // Plan options grid
-          GridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            mainAxisSpacing: 12.h,
-            crossAxisSpacing: 12.w,
-            childAspectRatio: isTablet ? 2.2 : 1.8,
-            children: [
-              _buildPlanOption(
-                tier: SubscriptionTier.lite,
-                days: 30,
-                label: 'Lite',
-                subtitle: '30 days',
-                color: Colors.blue,
-                isTablet: isTablet,
-              ),
-              _buildPlanOption(
-                tier: SubscriptionTier.standard,
-                days: 30,
-                label: 'Standard',
-                subtitle: '30 days',
-                color: Colors.amber,
-                isTablet: isTablet,
-              ),
-              _buildPlanOption(
-                tier: SubscriptionTier.lite,
-                days: 365,
-                label: 'Lite',
-                subtitle: '1 year',
-                color: Colors.blue,
-                isTablet: isTablet,
-              ),
-              _buildPlanOption(
-                tier: SubscriptionTier.standard,
-                days: 365,
-                label: 'Standard',
-                subtitle: '1 year',
-                color: Colors.amber,
-                isTablet: isTablet,
-              ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth;
+              final crossAxisSpacing = 12.w;
+              final itemWidth = (availableWidth - crossAxisSpacing) / 2;
+              final itemHeight = isTablet ? 90.h : 80.h;
+              final childAspectRatio = itemWidth / itemHeight;
+
+              return GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                mainAxisSpacing: 12.h,
+                crossAxisSpacing: crossAxisSpacing,
+                childAspectRatio: childAspectRatio,
+                children: [
+                  _buildPlanOption(
+                    tier: SubscriptionTier.lite,
+                    days: 30,
+                    label: 'Lite',
+                    subtitle: '30 days',
+                    color: Colors.blue,
+                    isTablet: isTablet,
+                  ),
+                  _buildPlanOption(
+                    tier: SubscriptionTier.standard,
+                    days: 30,
+                    label: 'Standard',
+                    subtitle: '30 days',
+                    color: Colors.amber,
+                    isTablet: isTablet,
+                  ),
+                  _buildPlanOption(
+                    tier: SubscriptionTier.lite,
+                    days: 365,
+                    label: 'Lite',
+                    subtitle: '1 year',
+                    color: Colors.blue,
+                    isTablet: isTablet,
+                  ),
+                  _buildPlanOption(
+                    tier: SubscriptionTier.standard,
+                    days: 365,
+                    label: 'Standard',
+                    subtitle: '1 year',
+                    color: Colors.amber,
+                    isTablet: isTablet,
+                  ),
+                ],
+              );
+            },
           ),
 
           SizedBox(height: 20.h),
@@ -815,7 +824,10 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       onTap: _isGranting ? null : () => _grantSubscription(tier, days),
       borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: EdgeInsets.all(isTablet ? 16.w : 12.w),
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 12.w : 8.w,
+          vertical: isTablet ? 8.h : 6.h,
+        ),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(12.r),
@@ -823,29 +835,35 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
         ),
         child: _isGranting
             ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            : Row(
                 children: [
                   Icon(
                     Icons.workspace_premium,
                     color: color,
-                    size: isTablet ? 28.sp : 24.sp,
+                    size: isTablet ? 24.sp : 20.sp,
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    label,
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 15.sp : 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    subtitle,
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 13.sp : 12.sp,
-                      color: AppColors.textSecondary,
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          label,
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 14.sp : 13.sp,
+                            fontWeight: FontWeight.w700,
+                            color: color,
+                          ),
+                        ),
+                        Text(
+                          subtitle,
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 12.sp : 11.sp,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
