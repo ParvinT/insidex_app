@@ -95,13 +95,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             // Background + Main Content
             Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [colors.background, colors.backgroundCard],
-                ),
-              ),
+              color: colors.background,
               child: Column(
                 children: [
                   // Header (Logo + Search + Quiz)
@@ -325,7 +319,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           vertical: (8.h).clamp(6.0, 10.0),
         ),
         decoration: BoxDecoration(
-          color: isFilled ? context.colors.textPrimary : Colors.transparent,
+          color: isFilled
+              ? (context.isDarkMode
+                  ? context.colors.textPrimary.withValues(alpha: 0.85)
+                  : context.colors.textPrimary)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20.r),
           border: isFilled
               ? null

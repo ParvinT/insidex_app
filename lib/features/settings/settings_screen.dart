@@ -114,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 _buildSectionHeader(AppLocalizations.of(context).appearance),
                 SizedBox(height: 12.h),
                 const ThemeSelector(),
-
+                SizedBox(height: 32.h),
                 _buildSectionHeader(AppLocalizations.of(context).language),
                 SizedBox(height: 12.h),
                 const LanguageSelector(),

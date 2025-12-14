@@ -450,7 +450,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
         width: 36.w,
         height: 36.w,
         decoration: BoxDecoration(
-          color: context.colors.textPrimary,
+          color: context.isDarkMode
+              ? context.colors.textSecondary
+              : context.colors.textPrimary,
           shape: BoxShape.circle,
         ),
         child: Icon(

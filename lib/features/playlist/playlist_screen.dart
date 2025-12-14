@@ -489,8 +489,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                         EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
                     decoration: BoxDecoration(
                       color: _isReorderMode
-                          ? colors.textPrimary
-                          : colors.greyLight,
+                          ? colors.textSecondary
+                          : colors.textSecondary,
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -502,7 +502,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                         fontWeight: FontWeight.w600,
                         color: _isReorderMode
                             ? colors.textOnPrimary
-                            : colors.textPrimary,
+                            : colors.textOnPrimary,
                       ),
                     ),
                   ),

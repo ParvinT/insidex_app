@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/subscription_constants.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../models/subscription_model.dart';
@@ -239,6 +239,8 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     final width = MediaQuery.of(context).size.width;
     final isTablet =
         width >= Breakpoints.tabletMin && width < Breakpoints.desktopMin;
@@ -249,12 +251,12 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
         isDesktop ? 700.0 : (isTablet ? 600.0 : double.infinity);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -262,7 +264,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         centerTitle: true,
@@ -279,7 +281,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Search Section
-                _buildSearchSection(isTablet),
+                _buildSearchSection(isTablet, colors),
 
                 SizedBox(height: 24.h),
 
@@ -288,16 +290,16 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
 
                 // User Info Card
                 if (_foundUser != null) ...[
-                  _buildUserInfoCard(isTablet),
+                  _buildUserInfoCard(isTablet, colors),
                   SizedBox(height: 24.h),
-                  _buildSubscriptionOptions(isTablet),
+                  _buildSubscriptionOptions(isTablet, colors),
                 ],
 
                 // Empty State
                 if (_foundUser == null &&
                     _errorMessage == null &&
                     !_isSearching)
-                  _buildEmptyState(isTablet),
+                  _buildEmptyState(isTablet, colors),
               ],
             ),
           ),
@@ -306,16 +308,16 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildSearchSection(bool isTablet) {
+  Widget _buildSearchSection(bool isTablet, AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -329,7 +331,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 18.sp : 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -337,7 +339,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             'Enter user email address or UID',
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 16.h),
@@ -350,15 +352,15 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                     hintText: 'email@example.com or user-uid',
                     hintStyle: GoogleFonts.inter(
                       fontSize: isTablet ? 15.sp : 14.sp,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                     prefixIcon: Icon(
                       Icons.search,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                       size: isTablet ? 24.sp : 22.sp,
                     ),
                     filled: true,
-                    fillColor: AppColors.greyLight,
+                    fillColor: colors.greyLight,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.r),
                       borderSide: BorderSide.none,
@@ -370,7 +372,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                   ),
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 15.sp : 14.sp,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                   onSubmitted: (_) => _searchUser(),
                 ),
@@ -381,8 +383,8 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                 child: ElevatedButton(
                   onPressed: _isSearching ? null : _searchUser,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colors.textPrimary,
+                    foregroundColor: colors.textOnPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
                     ),
@@ -394,8 +396,8 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                       ? SizedBox(
                           width: 20.w,
                           height: 20.w,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
+                          child: CircularProgressIndicator(
+                            color: colors.textOnPrimary,
                             strokeWidth: 2,
                           ),
                         )
@@ -442,19 +444,19 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildUserInfoCard(bool isTablet) {
+  Widget _buildUserInfoCard(bool isTablet, AppThemeExtension colors) {
     final subscription = _foundUser!['subscription'] as Map<String, dynamic>?;
     final subModel = SubscriptionModel.fromMap(subscription);
 
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -472,7 +474,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                 decoration: BoxDecoration(
                   color: subModel.isActive
                       ? Colors.amber.withValues(alpha: 0.15)
-                      : AppColors.greyLight,
+                      : colors.greyLight,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -486,7 +488,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                       fontWeight: FontWeight.w700,
                       color: subModel.isActive
                           ? Colors.amber.shade700
-                          : AppColors.textSecondary,
+                          : colors.textSecondary,
                     ),
                   ),
                 ),
@@ -501,7 +503,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 18.sp : 16.sp,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                     SizedBox(height: 4.h),
@@ -509,7 +511,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                       _foundUser!['email'] ?? '',
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 14.sp : 13.sp,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ],
@@ -547,10 +549,11 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             _foundUserId ?? '',
             isTablet,
             showCopy: true,
+            colors: colors,
           ),
 
           SizedBox(height: 12.h),
-          Divider(color: AppColors.greyBorder.withValues(alpha: 0.5)),
+          Divider(color: colors.border.withValues(alpha: 0.5)),
           SizedBox(height: 12.h),
 
           // Subscription Info
@@ -559,7 +562,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 16.sp : 14.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 12.h),
@@ -568,6 +571,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             'Tier',
             subModel.tier.displayName,
             isTablet,
+            colors: colors,
             valueColor: subModel.isActive ? Colors.amber.shade700 : null,
           ),
           SizedBox(height: 8.h),
@@ -575,13 +579,15 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             'Status',
             subModel.status.value.toUpperCase(),
             isTablet,
-            valueColor: _getStatusColor(subModel.status),
+            colors: colors,
+            valueColor: _getStatusColor(subModel.status, colors),
           ),
           SizedBox(height: 8.h),
           _buildSubscriptionInfoRow(
             'Source',
             subModel.source.value,
             isTablet,
+            colors: colors,
           ),
           if (subModel.expiryDate != null) ...[
             SizedBox(height: 8.h),
@@ -589,6 +595,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
               'Expires',
               _formatDate(subModel.expiryDate!),
               isTablet,
+              colors: colors,
               valueColor: subModel.isExpired ? Colors.red : Colors.green,
             ),
           ],
@@ -598,6 +605,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
               'Trial Ends',
               _formatDate(subModel.trialEndDate!),
               isTablet,
+              colors: colors,
               valueColor: Colors.blue,
             ),
           ],
@@ -607,7 +615,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
   }
 
   Widget _buildInfoRow(String label, String value, bool isTablet,
-      {bool showCopy = false}) {
+      {required AppThemeExtension colors, bool showCopy = false}) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -617,7 +625,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             label,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ),
@@ -627,7 +635,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -647,7 +655,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             icon: Icon(
               Icons.copy,
               size: isTablet ? 20.sp : 18.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
             constraints: const BoxConstraints(),
             padding: EdgeInsets.all(4.w),
@@ -657,7 +665,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
   }
 
   Widget _buildSubscriptionInfoRow(String label, String value, bool isTablet,
-      {Color? valueColor}) {
+      {required AppThemeExtension colors, Color? valueColor}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -665,7 +673,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           label,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 14.sp : 13.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
         Container(
@@ -681,7 +689,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
               fontWeight: FontWeight.w600,
-              color: valueColor ?? AppColors.textPrimary,
+              color: valueColor ?? colors.textPrimary,
             ),
           ),
         ),
@@ -689,16 +697,16 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildSubscriptionOptions(bool isTablet) {
+  Widget _buildSubscriptionOptions(bool isTablet, AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -712,7 +720,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 18.sp : 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -720,7 +728,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             'Select a plan to grant to this user',
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 20.h),
@@ -749,6 +757,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                     subtitle: '30 days',
                     color: Colors.blue,
                     isTablet: isTablet,
+                    colors: colors,
                   ),
                   _buildPlanOption(
                     tier: SubscriptionTier.standard,
@@ -757,6 +766,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                     subtitle: '30 days',
                     color: Colors.amber,
                     isTablet: isTablet,
+                    colors: colors,
                   ),
                   _buildPlanOption(
                     tier: SubscriptionTier.lite,
@@ -765,6 +775,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                     subtitle: '1 year',
                     color: Colors.blue,
                     isTablet: isTablet,
+                    colors: colors,
                   ),
                   _buildPlanOption(
                     tier: SubscriptionTier.standard,
@@ -773,6 +784,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                     subtitle: '1 year',
                     color: Colors.amber,
                     isTablet: isTablet,
+                    colors: colors,
                   ),
                 ],
               );
@@ -780,7 +792,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           ),
 
           SizedBox(height: 20.h),
-          Divider(color: AppColors.greyBorder.withValues(alpha: 0.5)),
+          Divider(color: colors.border.withValues(alpha: 0.5)),
           SizedBox(height: 16.h),
 
           // Revoke button
@@ -819,6 +831,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     required String subtitle,
     required Color color,
     required bool isTablet,
+    required AppThemeExtension colors,
   }) {
     return InkWell(
       onTap: _isGranting ? null : () => _grantSubscription(tier, days),
@@ -860,7 +873,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                           subtitle,
                           style: GoogleFonts.inter(
                             fontSize: isTablet ? 12.sp : 11.sp,
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -872,7 +885,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildEmptyState(bool isTablet) {
+  Widget _buildEmptyState(bool isTablet, AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 40.w : 32.w),
       child: Column(
@@ -880,7 +893,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           Icon(
             Icons.person_search,
             size: isTablet ? 80.sp : 64.sp,
-            color: AppColors.greyBorder,
+            color: colors.border,
           ),
           SizedBox(height: 16.h),
           Text(
@@ -888,7 +901,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 18.sp : 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -896,7 +909,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             'Enter an email address or UID to find a user\nand manage their subscription',
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -905,7 +918,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Color _getStatusColor(SubscriptionStatus status) {
+  Color _getStatusColor(SubscriptionStatus status, AppThemeExtension colors) {
     switch (status) {
       case SubscriptionStatus.active:
         return Colors.green;
@@ -918,7 +931,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       case SubscriptionStatus.gracePeriod:
         return Colors.amber;
       case SubscriptionStatus.none:
-        return AppColors.textSecondary;
+        return colors.textSecondary;
     }
   }
 

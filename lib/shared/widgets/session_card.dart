@@ -291,16 +291,17 @@ class SessionCard extends StatelessWidget {
                 child: InkWell(
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(100),
-                  splashColor: Colors.white.withValues(alpha: 0.3),
+                  splashColor: context.colors.background.withValues(alpha: 0.3),
                   child: Container(
                     width: playButtonSize,
                     height: playButtonSize,
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.95),
+                      color: context.colors.background.withValues(alpha: 0.95),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
+                          color:
+                              context.colors.textPrimary.withValues(alpha: 0.3),
                           blurRadius: 12,
                           spreadRadius: 1,
                           offset: const Offset(0, 4),

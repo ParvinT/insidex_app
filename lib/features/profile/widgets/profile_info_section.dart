@@ -98,29 +98,12 @@ class ProfileInfoSection extends StatelessWidget {
             color: colors.textSecondary,
           ),
         ),
-        Container(
-          padding: isPremium || isAdmin
-              ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h)
-              : null,
-          decoration: isPremium || isAdmin
-              ? BoxDecoration(
-                  color: isAdmin
-                      ? Colors.red.withValues(alpha: 0.1)
-                      : colors.textPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: isAdmin ? Colors.red : colors.textPrimary,
-                  ),
-                )
-              : null,
-          child: Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight:
-                  isPremium || isAdmin ? FontWeight.w600 : FontWeight.w500,
-              color: isAdmin ? Colors.red : colors.textPrimary,
-            ),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: isAdmin ? Colors.red : colors.textPrimary,
           ),
         ),
       ],

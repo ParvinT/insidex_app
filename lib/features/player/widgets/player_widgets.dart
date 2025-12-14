@@ -310,7 +310,11 @@ class PlayerPlayControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         IconButton(
-          icon: Icon(Icons.replay_10, color: colors.textPrimary),
+          icon: Icon(
+            Icons.replay_10,
+            color:
+                context.isDarkMode ? colors.textSecondary : colors.textPrimary,
+          ),
           iconSize: 32.sp,
           onPressed: onReplay10,
         ),
@@ -322,10 +326,15 @@ class PlayerPlayControls extends StatelessWidget {
             height: 70.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: colors.textPrimary,
+              color: context.isDarkMode
+                  ? colors.textSecondary
+                  : colors.textPrimary,
               boxShadow: [
                 BoxShadow(
-                  color: colors.textPrimary.withValues(alpha: 0.12),
+                  color: (context.isDarkMode
+                          ? colors.textSecondary
+                          : colors.textPrimary)
+                      .withValues(alpha: 0.12),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -340,7 +349,11 @@ class PlayerPlayControls extends StatelessWidget {
         ),
         SizedBox(width: 20.w),
         IconButton(
-          icon: Icon(Icons.forward_10, color: colors.textPrimary),
+          icon: Icon(
+            Icons.forward_10,
+            color:
+                context.isDarkMode ? colors.textSecondary : colors.textPrimary,
+          ),
           iconSize: 32.sp,
           onPressed: onForward10,
         ),

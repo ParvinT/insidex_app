@@ -241,6 +241,9 @@ class _SearchScreenState extends State<SearchScreen>
                   color: colors.textSecondary,
                 ),
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) {
                 _performSearch(value);

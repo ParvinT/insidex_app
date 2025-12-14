@@ -837,7 +837,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ? AppLocalizations.of(context).loopEnabled
               : AppLocalizations.of(context).loopDisabled,
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: context.colors.textSecondary,
         duration: const Duration(seconds: 1),
       ),
     );
@@ -862,7 +862,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).addedToPlaylist),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.green.shade700,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -878,7 +878,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).removedFromPlaylist),
-              backgroundColor: Colors.orange,
+              backgroundColor: Colors.orange.shade700,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -909,7 +909,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).addedToFavorites),
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.red.shade700,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -925,7 +925,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).removedFromFavorites),
-              backgroundColor: Colors.grey,
+              backgroundColor: context.colors.textSecondary,
               duration: const Duration(seconds: 1),
             ),
           );

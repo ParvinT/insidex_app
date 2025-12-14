@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/responsive/context_ext.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../models/disease_model.dart';
 import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -133,13 +133,14 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -147,32 +148,32 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, color: AppColors.textPrimary),
+            icon: Icon(Icons.refresh, color: colors.textPrimary),
             onPressed: _loadDiseases,
           ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
           : Column(
               children: [
-                _buildGenderFilter(),
+                _buildGenderFilter(colors),
 
                 // Disease List
                 Expanded(
                   child: _filteredDiseases.isEmpty
-                      ? _buildEmptyState()
+                      ? _buildEmptyState(colors)
                       : ListView.builder(
                           padding: EdgeInsets.all(20.w),
                           itemCount: _filteredDiseases.length,
                           itemBuilder: (context, index) {
                             final disease = _filteredDiseases[index];
-                            return _buildDiseaseCard(disease);
+                            return _buildDiseaseCard(disease, colors);
                           },
                         ),
                 ),
@@ -180,14 +181,15 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToAddEdit(),
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: colors.textPrimary,
+        foregroundColor: colors.textOnPrimary,
         icon: const Icon(Icons.add),
         label: Text(AppLocalizations.of(context).addDisease),
       ),
     );
   }
 
-  Widget _buildGenderFilter() {
+  Widget _buildGenderFilter(AppThemeExtension colors) {
     final isTablet = context.isTablet;
     final l10n = AppLocalizations.of(context);
 
@@ -195,17 +197,18 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       child: Row(
         children: [
-          _buildFilterChip('all', l10n.all, isTablet),
+          _buildFilterChip('all', l10n.all, isTablet, colors),
           SizedBox(width: 10.w),
-          _buildFilterChip('male', l10n.male, isTablet),
+          _buildFilterChip('male', l10n.male, isTablet, colors),
           SizedBox(width: 10.w),
-          _buildFilterChip('female', l10n.female, isTablet),
+          _buildFilterChip('female', l10n.female, isTablet, colors),
         ],
       ),
     );
   }
 
-  Widget _buildFilterChip(String value, String label, bool isTablet) {
+  Widget _buildFilterChip(
+      String value, String label, bool isTablet, AppThemeExtension colors) {
     final isSelected = _selectedGender == value;
 
     return GestureDetector(
@@ -218,10 +221,10 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           vertical: isTablet ? 10.h : 8.h,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.textPrimary : Colors.white,
+          color: isSelected ? colors.textPrimary : colors.backgroundPure,
           borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
-            color: isSelected ? AppColors.textPrimary : AppColors.greyBorder,
+            color: isSelected ? colors.textPrimary : colors.border,
             width: 1.5,
           ),
         ),
@@ -230,17 +233,18 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 14.sp : 13.sp,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-            color: isSelected ? Colors.white : AppColors.textPrimary,
+            color: isSelected ? colors.textOnPrimary : colors.textPrimary,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDiseaseCard(DiseaseModel disease) {
+  Widget _buildDiseaseCard(DiseaseModel disease, AppThemeExtension colors) {
     return Card(
       margin: EdgeInsets.only(bottom: 16.h),
       elevation: 2,
+      color: colors.backgroundPure,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.r),
       ),
@@ -259,7 +263,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -298,7 +302,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
                     'TR: ${disease.getLocalizedName('tr')}',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -311,7 +315,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
             Column(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.edit, color: AppColors.textPrimary),
+                  icon: Icon(Icons.edit, color: colors.textPrimary),
                   onPressed: () => _navigateToAddEdit(disease: disease),
                 ),
                 IconButton(
@@ -326,7 +330,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppThemeExtension colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -334,7 +338,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           Icon(
             Icons.psychology_outlined,
             size: 80.sp,
-            color: Colors.grey[300],
+            color: colors.greyMedium,
           ),
           SizedBox(height: 16.h),
           Text(
@@ -342,7 +346,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -350,7 +354,7 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
             AppLocalizations.of(context).tapToAddDisease,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -16,17 +16,18 @@ class UserManagementScreen extends StatefulWidget {
 class _UserManagementScreenState extends State<UserManagementScreen> {
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         title: Text(
           'User Management',
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -37,7 +38,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+                child: CircularProgressIndicator(color: colors.textPrimary));
           }
 
           final users = snapshot.data!.docs;
@@ -53,14 +55,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 child: ListTile(
                   leading: CircleAvatar(
                     backgroundColor: user['isPremium'] == true
-                        ? AppColors.textPrimary
-                        : AppColors.greyLight,
+                        ? colors.textPrimary
+                        : colors.greyLight,
                     child: Text(
                       user['name']?.substring(0, 1).toUpperCase() ?? 'U',
                       style: TextStyle(
                         color: user['isPremium'] == true
-                            ? Colors.white
-                            : AppColors.textPrimary,
+                            ? colors.textOnPrimary
+                            : colors.textPrimary,
                       ),
                     ),
                   ),
@@ -85,14 +87,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                             vertical: 4.h,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.textPrimary.withValues(alpha: 0.1),
+                            color: colors.textPrimary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: Text(
                             'PRO',
                             style: GoogleFonts.inter(
                               fontSize: 10.sp,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                               fontWeight: FontWeight.w600,
                             ),
                           ),

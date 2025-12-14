@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/admin_service.dart';
 
@@ -80,17 +80,18 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         title: Text(
           AppLocalizations.of(context).adminManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -105,9 +106,9 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.backgroundPure,
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColors.greyBorder),
+                border: Border.all(color: colors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +118,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 16.h),
@@ -145,7 +146,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                       ElevatedButton(
                         onPressed: _addNewAdmin,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.textPrimary,
+                          backgroundColor: colors.textPrimary,
+                          foregroundColor: colors.textOnPrimary,
                           padding: EdgeInsets.symmetric(
                             horizontal: 16.w,
                             vertical: 12.h,
@@ -176,37 +178,40 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             SizedBox(height: 12.h),
 
             if (_isLoading)
-              const Center(child: CircularProgressIndicator())
+              Center(
+                  child: CircularProgressIndicator(color: colors.textPrimary))
             else
-              ...(_adminList.map((admin) => _buildAdminCard(admin)).toList()),
+              ...(_adminList
+                  .map((admin) => _buildAdminCard(admin, colors))
+                  .toList()),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildAdminCard(Map<String, dynamic> admin) {
+  Widget _buildAdminCard(Map<String, dynamic> admin, AppThemeExtension colors) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
           CircleAvatar(
-            backgroundColor: AppColors.textPrimary.withValues(alpha: 0.1),
-            child: const Icon(
+            backgroundColor: colors.textPrimary.withValues(alpha: 0.1),
+            child: Icon(
               Icons.admin_panel_settings,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(width: 12.w),
@@ -219,14 +224,14 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 Text(
                   '${AppLocalizations.of(context).role}: ${admin['role'] ?? 'admin'}',
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],

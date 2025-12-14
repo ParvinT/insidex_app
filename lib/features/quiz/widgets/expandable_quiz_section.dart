@@ -307,22 +307,10 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           vertical: isTablet ? 16.h : 12.h,
         ),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.black,
-              Colors.black.withValues(alpha: 0.85),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: context.isDarkMode
+              ? context.colors.textPrimary.withValues(alpha: 0.85)
+              : context.colors.textPrimary,
           borderRadius: BorderRadius.circular(isTablet ? 28.r : 24.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.2),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -334,7 +322,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                 style: GoogleFonts.inter(
                   fontSize: (isTablet ? 15.sp : 13.sp).clamp(11.0, 16.0),
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: context.colors.textOnPrimary,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -353,7 +341,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
               },
               child: Icon(
                 Icons.keyboard_arrow_down,
-                color: Colors.white,
+                color: context.colors.textOnPrimary,
                 size: (isTablet ? 22.sp : 20.sp).clamp(18.0, 24.0),
               ),
             ),
@@ -708,27 +696,12 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                       vertical: isCompact ? 8.h : (isTablet ? 12.h : 10.h),
                     ),
                     decoration: BoxDecoration(
-                      gradient: _canProceed
-                          ? LinearGradient(
-                              colors: [
-                                colors.textPrimary,
-                                colors.textPrimary.withValues(alpha: 0.85)
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            )
-                          : null,
-                      color: _canProceed ? null : colors.greyMedium,
+                      color: _canProceed
+                          ? (context.isDarkMode
+                              ? colors.textPrimary.withValues(alpha: 0.85)
+                              : colors.textPrimary)
+                          : colors.greyMedium,
                       borderRadius: BorderRadius.circular(24.r),
-                      boxShadow: _canProceed
-                          ? [
-                              BoxShadow(
-                                color: colors.textPrimary.withValues(alpha: 0.3),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ]
-                          : null,
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -742,8 +715,9 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                                   ? 11.sp
                                   : (isTablet ? 14.sp : 12.sp),
                               fontWeight: FontWeight.w700,
-                              color:
-                                  _canProceed ? colors.textOnPrimary : colors.textLight,
+                              color: _canProceed
+                                  ? colors.textOnPrimary
+                                  : colors.textLight,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.clip,
@@ -753,7 +727,9 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                         Icon(
                           Icons.arrow_forward,
                           size: isCompact ? 12.sp : (isTablet ? 16.sp : 14.sp),
-                          color: _canProceed ? colors.textOnPrimary : colors.textLight,
+                          color: _canProceed
+                              ? colors.textOnPrimary
+                              : colors.textLight,
                         ),
                       ],
                     ),
@@ -882,21 +858,20 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           vertical: isTablet ? 9.h : 8.h,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? colors.textPrimary : colors.backgroundCard,
+          color: isSelected
+              ? (context.isDarkMode
+                  ? colors.textPrimary.withValues(alpha: 0.85)
+                  : colors.textPrimary)
+              : colors.backgroundCard,
           borderRadius: BorderRadius.circular(100.r),
           border: Border.all(
-            color: isSelected ? colors.textPrimary : colors.border,
+            color: isSelected
+                ? (context.isDarkMode
+                    ? colors.textPrimary.withValues(alpha: 0.85)
+                    : colors.textPrimary)
+                : colors.border,
             width: 1.5,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: colors.textPrimary.withValues(alpha: 0.15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
         ),
         child: Center(
           child: Text(

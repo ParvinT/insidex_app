@@ -434,11 +434,15 @@ class _NotificationSettingsScreenState
                   value: value,
                   onChanged: onChanged,
                   activeTrackColor: colors.textPrimary,
+                  inactiveTrackColor: colors.greyMedium,
                 )
               : Switch(
                   value: value,
                   onChanged: onChanged,
                   activeColor: colors.textPrimary,
+                  activeTrackColor: colors.textPrimary.withValues(alpha: 0.5),
+                  inactiveThumbColor: colors.textSecondary,
+                  inactiveTrackColor: colors.greyMedium,
                 ),
         ],
       ),
@@ -517,6 +521,7 @@ class _NotificationSettingsScreenState
                           ? (value) => provider.toggleDailyReminder(value)
                           : null,
                       activeTrackColor: colors.textPrimary,
+                      inactiveTrackColor: colors.greyMedium,
                     )
                   : Switch(
                       value: enabled,
@@ -524,6 +529,10 @@ class _NotificationSettingsScreenState
                           ? (value) => provider.toggleDailyReminder(value)
                           : null,
                       activeColor: colors.textPrimary,
+                      activeTrackColor:
+                          colors.textPrimary.withValues(alpha: 0.5),
+                      inactiveThumbColor: colors.textSecondary,
+                      inactiveTrackColor: colors.greyMedium,
                     ),
             ],
           ),
@@ -604,11 +613,35 @@ class _NotificationSettingsScreenState
         context: context,
         initialTime: currentTime,
         builder: (context, child) {
+          final isDark = context.isDarkMode;
           return Theme(
             data: Theme.of(context).copyWith(
-              colorScheme: ColorScheme.light(
-                primary: context.colors.textPrimary,
-                onSurface: context.colors.textPrimary,
+              colorScheme: isDark
+                  ? ColorScheme.dark(
+                      primary: context.colors.textPrimary,
+                      onPrimary: context.colors.textOnPrimary,
+                      surface: context.colors.backgroundElevated,
+                      onSurface: context.colors.textPrimary,
+                    )
+                  : ColorScheme.light(
+                      primary: context.colors.textPrimary,
+                      onPrimary: context.colors.textOnPrimary,
+                      surface: context.colors.backgroundElevated,
+                      onSurface: context.colors.textPrimary,
+                    ),
+              timePickerTheme: TimePickerThemeData(
+                backgroundColor: context.colors.backgroundElevated,
+                hourMinuteColor: context.colors.greyLight,
+                hourMinuteTextColor: context.colors.textPrimary,
+                dialBackgroundColor: context.colors.greyLight,
+                dialHandColor: context.colors.textSecondary,
+                dialTextColor: context.colors.textPrimary,
+                entryModeIconColor: context.colors.textSecondary,
+                dayPeriodTextColor: context.colors.textPrimary,
+                helpTextStyle: GoogleFonts.inter(
+                  color: context.colors.textPrimary,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             child: child!,
@@ -684,19 +717,32 @@ class _NotificationSettingsScreenState
           ),
           const Divider(),
           // Time Picker
+          // Time Picker
           Expanded(
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.time,
-              initialDateTime: DateTime(
-                2024,
-                1,
-                1,
-                currentTime.hour,
-                currentTime.minute,
+            child: CupertinoTheme(
+              data: CupertinoThemeData(
+                brightness:
+                    context.isDarkMode ? Brightness.dark : Brightness.light,
+                textTheme: CupertinoTextThemeData(
+                  dateTimePickerTextStyle: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 20.sp,
+                  ),
+                ),
               ),
-              onDateTimeChanged: (DateTime newDateTime) {
-                selectedTime = TimeOfDay.fromDateTime(newDateTime);
-              },
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: DateTime(
+                  2024,
+                  1,
+                  1,
+                  currentTime.hour,
+                  currentTime.minute,
+                ),
+                onDateTimeChanged: (DateTime newDateTime) {
+                  selectedTime = TimeOfDay.fromDateTime(newDateTime);
+                },
+              ),
             ),
           ),
         ],

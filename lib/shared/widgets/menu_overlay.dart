@@ -110,13 +110,6 @@ class _MenuOverlayState extends State<MenuOverlay>
                       topLeft: Radius.circular(30.r),
                       bottomLeft: Radius.circular(30.r),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: colors.textPrimary.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        offset: const Offset(-5, 0),
-                      ),
-                    ],
                   ),
                   child: SafeArea(
                     child: Column(

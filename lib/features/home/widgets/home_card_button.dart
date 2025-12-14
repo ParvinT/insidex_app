@@ -90,15 +90,6 @@ class _HomeCardButtonState extends State<HomeCardButton>
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30.r),
-            boxShadow: [
-              BoxShadow(
-                color: context.colors.textPrimary
-                    .withValues(alpha: _isPressed ? 0.1 : 0.15),
-                blurRadius: _isPressed ? 15 : 20,
-                offset: Offset(0, _isPressed ? 8 : 10),
-                spreadRadius: _isPressed ? 0 : 2,
-              ),
-            ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(30.r),

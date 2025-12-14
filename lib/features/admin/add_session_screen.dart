@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -572,13 +572,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: Icon(Icons.close, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -588,7 +589,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           style: GoogleFonts.inter(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -602,11 +603,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Loading indicator
-                  if (_isLoading) _buildUploadProgress(),
+                  if (_isLoading) _buildUploadProgress(colors),
 
                   // Session Number
                   _buildSectionTitle(
-                      AppLocalizations.of(context).sessionNumber),
+                      AppLocalizations.of(context).sessionNumber, colors),
                   SizedBox(height: 12.h),
                   TextField(
                     controller: _sessionNumberController,
@@ -621,15 +622,15 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       helperText:
                           AppLocalizations.of(context).sessionNumberHelper,
                       errorText: null,
-                      prefixIcon: const Icon(Icons.numbers,
-                          color: AppColors.textPrimary),
+                      prefixIcon:
+                          Icon(Icons.numbers, color: colors.textPrimary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide: const BorderSide(
-                            color: AppColors.textPrimary, width: 2),
+                        borderSide:
+                            BorderSide(color: colors.textPrimary, width: 2),
                       ),
                     ),
                     style: GoogleFonts.inter(fontSize: 16.sp),
@@ -638,22 +639,23 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   SizedBox(height: 24.h),
 
                   // Category Dropdown
-                  _buildSectionTitle(AppLocalizations.of(context).category),
+                  _buildSectionTitle(
+                      AppLocalizations.of(context).category, colors),
                   SizedBox(height: 12.h),
                   DropdownButtonFormField<String>(
                     value: _selectedCategoryId,
                     isExpanded: true,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).category,
-                      prefixIcon: const Icon(Icons.category,
-                          color: AppColors.textPrimary),
+                      prefixIcon:
+                          Icon(Icons.category, color: colors.textPrimary),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12.r),
-                        borderSide: const BorderSide(
-                          color: AppColors.textPrimary,
+                        borderSide: BorderSide(
+                          color: colors.textPrimary,
                           width: 2,
                         ),
                       ),
@@ -712,21 +714,17 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   Container(
                     padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color:
-                          _isDemo ? Colors.green.shade50 : Colors.grey.shade50,
+                      color: _isDemo ? Colors.green.shade50 : colors.greyLight,
                       borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
-                        color: _isDemo
-                            ? Colors.green.shade300
-                            : AppColors.greyBorder,
+                        color: _isDemo ? Colors.green.shade300 : colors.border,
                       ),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           _isDemo ? Icons.lock_open : Icons.lock,
-                          color:
-                              _isDemo ? Colors.green : AppColors.textSecondary,
+                          color: _isDemo ? Colors.green : colors.textSecondary,
                           size: 24.sp,
                         ),
                         SizedBox(width: 12.w),
@@ -739,7 +737,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                                 style: GoogleFonts.inter(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               SizedBox(height: 2.h),
@@ -749,7 +747,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                                     : 'Only premium users can play',
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                               ),
                             ],
@@ -785,9 +783,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
                   // Audio Upload Section
                   _buildSectionTitle(
-                      '🎵 ${AppLocalizations.of(context).audioFiles}'),
+                      '🎵 ${AppLocalizations.of(context).audioFiles}', colors),
                   SizedBox(height: 12.h),
-                  _buildLanguageTabs(),
+                  _buildLanguageTabs(colors),
                   SizedBox(height: 16.h),
                   _buildFileUploadCard(
                     title:
@@ -799,6 +797,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     onTap: () =>
                         _pickSubliminalAudioForLanguage(_selectedLanguage),
                     hasFile: _subliminalAudios[_selectedLanguage] != null,
+                    colors: colors,
                     languageCode: _selectedLanguage,
                   ),
 
@@ -806,7 +805,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
 
                   // Image Upload Section
                   _buildSectionTitle(
-                      '🖼️ ${AppLocalizations.of(context).backgroundImages}'),
+                      '🖼️ ${AppLocalizations.of(context).backgroundImages}',
+                      colors),
                   SizedBox(height: 12.h),
                   _buildFileUploadCard(
                     title:
@@ -818,6 +818,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     onTap: () =>
                         _pickBackgroundImageForLanguage(_selectedLanguage),
                     hasFile: _backgroundImages[_selectedLanguage] != null,
+                    colors: colors,
                     languageCode: _selectedLanguage,
                   ),
 
@@ -830,7 +831,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _saveSession,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
+                        backgroundColor: colors.textPrimary,
+                        foregroundColor: colors.textOnPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
@@ -842,7 +844,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: Colors.white,
+                          color: colors.textOnPrimary,
                         ),
                       ),
                     ),
@@ -858,9 +860,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           if (_isLoading)
             Container(
               color: Colors.black54,
-              child: const Center(
+              child: Center(
                 child: CircularProgressIndicator(
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -869,26 +871,26 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(String title, AppThemeExtension colors) {
     return Text(
       title,
       style: GoogleFonts.inter(
         fontSize: 16.sp,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
       ),
     );
   }
 
-  Widget _buildUploadProgress() {
+  Widget _buildUploadProgress(AppThemeExtension colors) {
     return Container(
       margin: EdgeInsets.only(bottom: 24.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.textPrimary.withValues(alpha: 0.1),
+        color: colors.textPrimary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
-          color: AppColors.textPrimary.withValues(alpha: 0.3),
+          color: colors.textPrimary.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -899,22 +901,21 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 12.h),
           LinearProgressIndicator(
             value: _uploadProgress / 100,
-            backgroundColor: Colors.grey.shade200,
-            valueColor:
-                const AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
+            backgroundColor: colors.greyMedium,
+            valueColor: AlwaysStoppedAnimation<Color>(colors.textPrimary),
           ),
           SizedBox(height: 8.h),
           Text(
             '${_uploadProgress.toStringAsFixed(1)}%',
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -922,11 +923,11 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     );
   }
 
-  Widget _buildLanguageTabs() {
+  Widget _buildLanguageTabs(AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(4.w),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: colors.greyLight,
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
@@ -943,12 +944,13 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               child: Container(
                 padding: EdgeInsets.symmetric(vertical: 12.h),
                 decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : Colors.transparent,
+                  color:
+                      isSelected ? colors.backgroundPure : Colors.transparent,
                   borderRadius: BorderRadius.circular(8.r),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.05),
+                            color: colors.textPrimary.withValues(alpha: 0.05),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           )
@@ -961,9 +963,8 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
+                    color:
+                        isSelected ? colors.textPrimary : colors.textSecondary,
                   ),
                 ),
               ),
@@ -980,6 +981,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     required IconData icon,
     required VoidCallback onTap,
     required bool hasFile,
+    required AppThemeExtension colors,
     String? languageCode,
   }) {
     String displaySubtitle = subtitle;
@@ -1020,10 +1022,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         decoration: BoxDecoration(
           color: (hasFile || hasExistingFile)
               ? Colors.green.shade50
-              : Colors.grey.shade50,
+              : colors.greyLight,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: hasFile ? Colors.green : Colors.grey.shade300,
+            color: hasFile ? Colors.green : colors.border,
             width: 2,
           ),
         ),
@@ -1032,12 +1034,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: hasFile ? Colors.green : AppColors.textPrimary,
+                color: hasFile ? Colors.green : colors.textPrimary,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 hasFile ? Icons.check : icon,
-                color: Colors.white,
+                color: colors.textOnPrimary,
                 size: 24.sp,
               ),
             ),
@@ -1051,7 +1053,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -1059,7 +1061,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                     displaySubtitle,
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -1069,7 +1071,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             ),
             Icon(
               Icons.upload_file,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: 24.sp,
             ),
           ],

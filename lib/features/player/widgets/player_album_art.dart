@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../services/cache_manager_service.dart';
+import '../../../core/themes/app_theme_extension.dart';
 
 /// YouTube Music style album art with integrated equalizer
 /// Responsive design that adapts to screen size
@@ -156,11 +157,12 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
 
   /// Placeholder for loading/error states
   Widget _buildPlaceholder() {
+    final colors = context.colors;
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!,
-      highlightColor: Colors.grey[100]!,
+      baseColor: colors.greyMedium,
+      highlightColor: colors.greyLight,
       child: Container(
-        color: Colors.white,
+        color: colors.backgroundPure,
       ),
     );
   }

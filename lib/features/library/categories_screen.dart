@@ -446,13 +446,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   ],
                 ),
                 borderRadius: BorderRadius.circular(20.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: cardColor.withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
               ),
               child: Stack(
                 children: [

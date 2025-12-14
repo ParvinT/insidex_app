@@ -49,24 +49,19 @@ class DiseaseCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? colors.textPrimary
+                  ? (context.isDarkMode
+                      ? colors.textPrimary.withValues(alpha: 0.85)
+                      : colors.textPrimary)
                   : (isDisabled ? colors.greyLight : colors.backgroundCard),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                 color: isSelected
-                    ? colors.textPrimary
+                    ? (context.isDarkMode
+                        ? colors.textPrimary.withValues(alpha: 0.85)
+                        : colors.textPrimary)
                     : colors.border.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: colors.textPrimary.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {

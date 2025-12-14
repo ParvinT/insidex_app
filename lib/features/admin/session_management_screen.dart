@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -158,22 +158,23 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         title: Text(
           AppLocalizations.of(context).sessionManagement,
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_circle, color: AppColors.textPrimary),
+            icon: Icon(Icons.add_circle, color: colors.textPrimary),
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -206,12 +207,12 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       onSelected: (selected) {
                         setState(() => _selectedCategoryId = null);
                       },
-                      backgroundColor: AppColors.greyLight,
-                      selectedColor: AppColors.textPrimary,
+                      backgroundColor: colors.greyLight,
+                      selectedColor: colors.textPrimary,
                       labelStyle: TextStyle(
                         color: _selectedCategoryId == null
-                            ? Colors.white
-                            : AppColors.textPrimary,
+                            ? colors.textOnPrimary
+                            : colors.textPrimary,
                       ),
                     ),
                   );
@@ -231,10 +232,12 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                         _selectedCategoryId = isSelected ? null : category.id;
                       });
                     },
-                    backgroundColor: AppColors.greyLight,
-                    selectedColor: AppColors.textPrimary,
+                    backgroundColor: colors.greyLight,
+                    selectedColor: colors.textPrimary,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : AppColors.textPrimary,
+                      color: isSelected
+                          ? colors.textOnPrimary
+                          : colors.textPrimary,
                     ),
                   ),
                 );
@@ -253,10 +256,12 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                   : FirebaseFirestore.instance
                       .collection('sessions')
                       .where('categoryId', isEqualTo: _selectedCategoryId)
-                      .snapshots(), // ✅ orderBy removed to avoid index requirement
+                      .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child:
+                          CircularProgressIndicator(color: colors.textPrimary));
                 }
 
                 if (snapshot.hasError) {
@@ -281,7 +286,9 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                 }
 
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return Center(
+                      child:
+                          CircularProgressIndicator(color: colors.textPrimary));
                 }
 
                 var sessions = snapshot.data!.docs;
@@ -311,14 +318,14 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                         Icon(
                           Icons.library_music,
                           size: 64.sp,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                         SizedBox(height: 16.h),
                         Text(
                           AppLocalizations.of(context).noSessionsFound,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -343,6 +350,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
                         return Card(
                           margin: EdgeInsets.only(bottom: 16.h),
+                          color: colors.backgroundPure,
                           child: Padding(
                             padding: EdgeInsets.all(16.w),
                             child: Column(
@@ -358,12 +366,12 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           vertical: 6.h,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: AppColors.textPrimary
+                                          color: colors.textPrimary
                                               .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(8.r),
                                           border: Border.all(
-                                            color: AppColors.textPrimary
+                                            color: colors.textPrimary
                                                 .withValues(alpha: 0.3),
                                             width: 1,
                                           ),
@@ -373,7 +381,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           style: GoogleFonts.inter(
                                             fontSize: 16.sp,
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.textPrimary,
+                                            color: colors.textPrimary,
                                           ),
                                         ),
                                       )
@@ -381,7 +389,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                       Container(
                                         padding: EdgeInsets.all(8.w),
                                         decoration: BoxDecoration(
-                                          color: AppColors.textSecondary
+                                          color: colors.textSecondary
                                               .withValues(alpha: 0.1),
                                           borderRadius:
                                               BorderRadius.circular(8.r),
@@ -389,7 +397,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                         child: Icon(
                                           Icons.music_note,
                                           size: 24.sp,
-                                          color: AppColors.textSecondary,
+                                          color: colors.textSecondary,
                                         ),
                                       ),
                                     SizedBox(width: 12.w),
@@ -404,7 +412,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                             style: GoogleFonts.inter(
                                               fontSize: 16.sp,
                                               fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimary,
+                                              color: colors.textPrimary,
                                             ),
                                           ),
                                           SizedBox(height: 4.h),
@@ -414,7 +422,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                                 session['categoryId']),
                                             style: GoogleFonts.inter(
                                               fontSize: 12.sp,
-                                              color: AppColors.textSecondary,
+                                              color: colors.textSecondary,
                                             ),
                                           ),
                                         ],
@@ -432,7 +440,8 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                           value: 'delete',
                                           child: Text(
                                             AppLocalizations.of(context).delete,
-                                            style: const TextStyle(color: Colors.red),
+                                            style: const TextStyle(
+                                                color: Colors.red),
                                           ),
                                         ),
                                       ],
@@ -469,7 +478,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                       descSnapshot.data ?? '',
                                       style: GoogleFonts.inter(
                                         fontSize: 14.sp,
-                                        color: AppColors.textSecondary,
+                                        color: colors.textSecondary,
                                       ),
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
@@ -478,7 +487,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                 ),
                                 SizedBox(height: 12.h),
                                 // Language badges
-                                _buildLanguageBadges(session),
+                                _buildLanguageBadges(session, colors),
                               ],
                             ),
                           ),
@@ -519,7 +528,8 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
   }
 
   // Build language availability badges
-  Widget _buildLanguageBadges(Map<String, dynamic> session) {
+  Widget _buildLanguageBadges(
+      Map<String, dynamic> session, AppThemeExtension colors) {
     final availableLanguages =
         SessionLocalizationService.getAvailableLanguages(session);
 
@@ -534,10 +544,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
           decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: 0.1),
+            color: colors.textPrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6.r),
             border: Border.all(
-              color: AppColors.textPrimary.withValues(alpha: 0.3),
+              color: colors.textPrimary.withValues(alpha: 0.3),
             ),
           ),
           child: Text(
@@ -545,7 +555,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
             style: GoogleFonts.inter(
               fontSize: 10.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
         );
