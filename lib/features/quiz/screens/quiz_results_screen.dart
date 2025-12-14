@@ -153,15 +153,12 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
     return Container(
       padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            colors.textPrimary.withValues(alpha: 0.1),
-            colors.textPrimary.withValues(alpha: 0.05),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: colors.backgroundElevated,
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: colors.border.withValues(alpha: 0.3),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
