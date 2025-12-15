@@ -1,4 +1,4 @@
-# 🧘 INSIDEX
+#  INSIDEX
 
 **Sound Healing & Subliminal Wellness App**
 
@@ -6,16 +6,16 @@ INSIDEX is a mental wellness platform that uses subliminal audio therapy to help
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🎵 **200+ Subliminal Audio Sessions** - Sleep, relaxation, focus, meditation, and more
-- 📊 **Progress Tracking** - Monitor your wellness journey with detailed analytics
-- 🎯 **Custom Frequency Combinations** - Tailored audio therapy for your needs
-- 🌍 **Multi-language Support** 
+-  **200+ Subliminal Audio Sessions** - Sleep, relaxation, focus, meditation, and more
+-  **Progress Tracking** - Monitor your wellness journey with detailed analytics
+-  **Custom Frequency Combinations** - Tailored audio therapy for your needs
+-  **Multi-language Support** 
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 - **Framework:** Flutter 3.0+
 - **Backend:** Firebase (Auth, Firestore, Storage, Functions)
@@ -25,7 +25,7 @@ INSIDEX is a mental wellness platform that uses subliminal audio therapy to help
 
 ---
 
-## 📱 Platforms
+##  Platforms
 
 - ✅ iOS
 - ✅ Android
@@ -33,7 +33,7 @@ INSIDEX is a mental wellness platform that uses subliminal audio therapy to help
 - ✅ macOS
 
 ---
-## 📜 License
+##  License
 
 **Copyright © 2025 ALZHAMI LTD. All Rights Reserved.**
 
@@ -43,7 +43,7 @@ See [LICENSE](./LICENSE) for full terms and conditions.
 
 ---
 
-## 🏢 About
+## About
 
 **Developer:** [Parvin](https://github.com/ParvinT)  
 **Company:** ALZHAMI LTD, United Kingdom  
@@ -52,7 +52,7 @@ See [LICENSE](./LICENSE) for full terms and conditions.
 
 ---
 
-## ⚠️ Disclaimer
+##  Disclaimer
 
 This repository is publicly visible for portfolio and demonstration purposes only. 
 All code is proprietary and confidential. No usage rights are granted without 
