@@ -9,7 +9,7 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'Ses İyileştirme ve Bilinçaltı';
@@ -58,7 +58,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sendFeedback => 'Geri Bildirim Gönder';
 
   @override
-  String get sendFeedbackSubtitle => 'INSIDEX\'i geliştirmemize yardımcı olun';
+  String get sendFeedbackSubtitle => 'InsideX\'i geliştirmemize yardımcı olun';
 
   @override
   String get reportBug => 'Hata Bildir';
@@ -208,7 +208,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Dinleme alışkanlıklarınızı ve gelişimlerinizi takip edin';
 
   @override
-  String get myInsights => 'İçgörülerim';
+  String get myInsights => 'İstatistiklerim';
 
   @override
   String get viewPersonalizedWellness =>
@@ -998,7 +998,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'INSIDEX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın';
+      'InsideX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın';
 
   @override
   String get notificationStreak3Title => '🎉 Tebrikler!';
@@ -1039,7 +1039,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'Yarım yüzyıl! Gerçek bir INSIDEX ustasısın!';
+      'Yarım yüzyıl! Gerçek bir InsideX ustasısın!';
 
   @override
   String get notificationStreak100Title => '👑 100 Günlük Şampiyon!';
@@ -2159,4 +2159,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get systemDefaultSubtitle => 'Cihaz ayarlarını takip et';
+
+  @override
+  String get minutesThisWeek => 'dakika bu hafta';
+
+  @override
+  String get minutesThisMonth => 'dakika bu ay';
+
+  @override
+  String get minutesThisYear => 'dakika bu yıl';
+
+  @override
+  String get minutesAllTime => 'dakika toplam';
 }

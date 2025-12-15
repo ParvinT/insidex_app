@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../../core/themes/app_theme_extension.dart';
 import '../../services/progress_analytics_service.dart';
+export '../../services/progress_analytics_service.dart' show ProgressPeriod;
 
 // Stat Card Widget
 class ProgressStatCard extends StatelessWidget {
@@ -148,18 +149,22 @@ class ProgressDonut extends StatelessWidget {
   final double donutSize;
   final double stroke;
   final Map<String, dynamic> analytics;
+  final ProgressPeriod period;
 
   const ProgressDonut({
     super.key,
     required this.donutSize,
     required this.stroke,
     required this.analytics,
+    required this.period,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final today = (analytics['todayMinutes'] ?? 0) as num;
+    final periodMinutes =
+        (analytics['periodMinutes'] ?? analytics['todayMinutes'] ?? 0) as num;
+    final periodGoal = (analytics['periodGoal'] ?? 30) as num;
     final double inner = donutSize - 2 * stroke - 16.0;
 
     // Progress color based on theme
@@ -176,7 +181,7 @@ class ProgressDonut extends StatelessWidget {
           CustomPaint(
             size: Size(donutSize, donutSize),
             painter: CircularProgressPainter(
-              progress: (today / 30.0).clamp(0.0, 1.0),
+              progress: (periodMinutes / periodGoal).clamp(0.0, 1.0),
               backgroundColor: bgColor,
               progressColor: progressColor,
               strokeWidth: stroke,
@@ -192,7 +197,7 @@ class ProgressDonut extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    '$today',
+                    '$periodMinutes',
                     style: GoogleFonts.inter(
                       fontSize: 32.sp,
                       fontWeight: FontWeight.bold,
@@ -205,7 +210,7 @@ class ProgressDonut extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    AppLocalizations.of(context).minutesToday,
+                    _getPeriodLabel(context),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
@@ -220,6 +225,22 @@ class ProgressDonut extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getPeriodLabel(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    switch (period) {
+      case ProgressPeriod.day:
+        return l10n.minutesToday;
+      case ProgressPeriod.week:
+        return l10n.minutesThisWeek;
+      case ProgressPeriod.month:
+        return l10n.minutesThisMonth;
+      case ProgressPeriod.year:
+        return l10n.minutesThisYear;
+      case ProgressPeriod.analytics:
+        return l10n.minutesAllTime;
+    }
   }
 }
 

@@ -22,14 +22,21 @@ class _ProgressScreenState extends State<ProgressScreen>
 
   // Real data from Firebase
   Map<String, dynamic> _analyticsData = {};
+  Map<String, dynamic>? _cachedBaseData;
   bool _isLoading = true;
   Timer? _refreshTimer;
+
+  // Current selected period
+  ProgressPeriod _selectedPeriod = ProgressPeriod.analytics;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this, initialIndex: 2);
+    _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
     _loadAnalyticsData();
+
+    // Listen to tab changes
+    _tabController.addListener(_onTabChanged);
 
     // Auto refresh every 30 seconds
     _refreshTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
@@ -42,17 +49,70 @@ class _ProgressScreenState extends State<ProgressScreen>
   @override
   void dispose() {
     _refreshTimer?.cancel();
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadAnalyticsData() async {
-    final data = await ProgressAnalyticsService.loadAnalyticsData();
+  Future<void> _loadAnalyticsData({bool forceRefresh = false}) async {
+    // If we have cached data and not forcing refresh, use local calculation
+    if (_cachedBaseData != null && !forceRefresh) {
+      final recalculated = ProgressAnalyticsService.recalculateForPeriod(
+        _cachedBaseData!,
+        _selectedPeriod,
+      );
+      if (mounted) {
+        setState(() {
+          _analyticsData = recalculated;
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
+    // First load or forced refresh - fetch from Firebase
+    final data = await ProgressAnalyticsService.loadAnalyticsData(
+      period: _selectedPeriod,
+    );
     if (mounted) {
       setState(() {
+        _cachedBaseData = data; // Cache the base data
         _analyticsData = data;
         _isLoading = false;
       });
+    }
+  }
+
+  void _onTabChanged() {
+    if (!_tabController.indexIsChanging) return;
+
+    final newPeriod = _indexToPeriod(_tabController.index);
+    if (newPeriod != _selectedPeriod) {
+      setState(() {
+        _selectedPeriod = newPeriod;
+        // Don't set loading if we have cached data - instant switch!
+        if (_cachedBaseData == null) {
+          _isLoading = true;
+        }
+      });
+      _loadAnalyticsData(); // Will use cache if available
+    }
+  }
+
+  ProgressPeriod _indexToPeriod(int index) {
+    switch (index) {
+      case 0:
+        return ProgressPeriod.analytics;
+      case 1:
+        return ProgressPeriod.year;
+      case 2:
+        return ProgressPeriod.month;
+      case 3:
+        return ProgressPeriod.week;
+      case 4:
+        return ProgressPeriod.day;
+      default:
+        return ProgressPeriod.month;
     }
   }
 
@@ -125,7 +185,7 @@ class _ProgressScreenState extends State<ProgressScreen>
             ? mq.copyWith(textScaler: const TextScaler.linear(1.0))
             : mq,
         child: RefreshIndicator(
-          onRefresh: () async => _loadAnalyticsData(),
+          onRefresh: () async => _loadAnalyticsData(forceRefresh: true),
           child: _isLoading
               ? Center(
                   child: CircularProgressIndicator(color: colors.textPrimary))
@@ -301,6 +361,7 @@ class _ProgressScreenState extends State<ProgressScreen>
               donutSize: donutSize,
               stroke: isCompact ? 15 : 20,
               analytics: _analyticsData,
+              period: _selectedPeriod,
             ),
           ),
           SizedBox(height: 16.h),
@@ -316,6 +377,7 @@ class _ProgressScreenState extends State<ProgressScreen>
           donutSize: donutSize,
           stroke: 20,
           analytics: _analyticsData,
+          period: _selectedPeriod,
         ),
         SizedBox(width: 20.w),
         Expanded(child: ProgressTopSessions(topSessions: topSessions)),
@@ -327,36 +389,49 @@ class _ProgressScreenState extends State<ProgressScreen>
     final monthlyProgress =
         _analyticsData['monthlyProgress'] as Map<String, double>? ?? {};
 
-    return Column(
-      children: [
-        ProgressBar(
-          label: AppLocalizations.of(context).day,
-          progress: monthlyProgress['Day'] ?? 0.0,
-          color: const Color(0xFFE8C5A0),
-          isCompact: isCompact,
-        ),
-        SizedBox(height: 12.h),
-        ProgressBar(
-          label: AppLocalizations.of(context).week,
-          progress: monthlyProgress['Week'] ?? 0.0,
-          color: const Color(0xFF7DB9B6),
-          isCompact: isCompact,
-        ),
-        SizedBox(height: 12.h),
-        ProgressBar(
-          label: AppLocalizations.of(context).month,
-          progress: monthlyProgress['Month'] ?? 0.0,
-          color: const Color(0xFF7DB9B6),
-          isCompact: isCompact,
-        ),
-        SizedBox(height: 12.h),
-        ProgressBar(
-          label: AppLocalizations.of(context).year,
-          progress: monthlyProgress['Year'] ?? 0.0,
-          color: const Color(0xFF9B8B7E),
-          isCompact: isCompact,
-        ),
-      ],
-    );
+    final showAll = _selectedPeriod == ProgressPeriod.analytics;
+
+    final bars = <Widget>[];
+
+    if (showAll || _selectedPeriod == ProgressPeriod.day) {
+      bars.add(ProgressBar(
+        label: AppLocalizations.of(context).day,
+        progress: monthlyProgress['Day'] ?? 0.0,
+        color: const Color(0xFFE8C5A0),
+        isCompact: isCompact,
+      ));
+    }
+
+    if (showAll || _selectedPeriod == ProgressPeriod.week) {
+      if (bars.isNotEmpty) bars.add(SizedBox(height: 12.h));
+      bars.add(ProgressBar(
+        label: AppLocalizations.of(context).week,
+        progress: monthlyProgress['Week'] ?? 0.0,
+        color: const Color(0xFF7DB9B6),
+        isCompact: isCompact,
+      ));
+    }
+
+    if (showAll || _selectedPeriod == ProgressPeriod.month) {
+      if (bars.isNotEmpty) bars.add(SizedBox(height: 12.h));
+      bars.add(ProgressBar(
+        label: AppLocalizations.of(context).month,
+        progress: monthlyProgress['Month'] ?? 0.0,
+        color: const Color(0xFF7DB9B6),
+        isCompact: isCompact,
+      ));
+    }
+
+    if (showAll || _selectedPeriod == ProgressPeriod.year) {
+      if (bars.isNotEmpty) bars.add(SizedBox(height: 12.h));
+      bars.add(ProgressBar(
+        label: AppLocalizations.of(context).year,
+        progress: monthlyProgress['Year'] ?? 0.0,
+        color: const Color(0xFF9B8B7E),
+        isCompact: isCompact,
+      ));
+    }
+
+    return Column(children: bars);
   }
 }

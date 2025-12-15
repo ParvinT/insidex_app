@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'Sound Healing & Subliminal';
@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendFeedback => 'Send Feedback';
 
   @override
-  String get sendFeedbackSubtitle => 'Help us improve INSIDEX';
+  String get sendFeedbackSubtitle => 'Help us improve InsideX';
 
   @override
   String get reportBug => 'Report a Bug';
@@ -993,7 +993,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'Take a moment to relax and heal with INSIDEX';
+      'Take a moment to relax and heal with InsideX';
 
   @override
   String get notificationStreak3Title => '🎉 Congratulations!';
@@ -1034,7 +1034,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'Half a century! You\'re a true INSIDEX master!';
+      'Half a century! You\'re a true InsideX master!';
 
   @override
   String get notificationStreak100Title => '👑 100 Day Champion!';
@@ -2150,4 +2150,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get systemDefaultSubtitle => 'Follow device settings';
+
+  @override
+  String get minutesThisWeek => 'minutes this week';
+
+  @override
+  String get minutesThisMonth => 'minutes this month';
+
+  @override
+  String get minutesThisYear => 'minutes this year';
+
+  @override
+  String get minutesAllTime => 'minutes all time';
 }

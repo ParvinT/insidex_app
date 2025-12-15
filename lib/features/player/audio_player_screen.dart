@@ -424,10 +424,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       if (m == null && hadTimer) {
         setState(() => _isLooping = false);
         debugPrint('🔁 [Timer] Timer ended - loop disabled');
-      }
-      if (m == null && _isTracking) {
-        ListeningTrackerService.endSession();
-        _isTracking = false;
+
+        if (_isTracking) {
+          ListeningTrackerService.endSession();
+          _isTracking = false;
+        }
       }
     });
   }

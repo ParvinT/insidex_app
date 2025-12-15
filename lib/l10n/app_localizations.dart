@@ -105,7 +105,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'INSIDEX'**
+  /// **'InsideX'**
   String get appName;
 
   /// No description provided for @appTagline.
@@ -201,7 +201,7 @@ abstract class AppLocalizations {
   /// No description provided for @sendFeedbackSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Help us improve INSIDEX'**
+  /// **'Help us improve InsideX'**
   String get sendFeedbackSubtitle;
 
   /// No description provided for @reportBug.
@@ -2025,7 +2025,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationDailyReminderMessage.
   ///
   /// In en, this message translates to:
-  /// **'Take a moment to relax and heal with INSIDEX'**
+  /// **'Take a moment to relax and heal with InsideX'**
   String get notificationDailyReminderMessage;
 
   /// No description provided for @notificationStreak3Title.
@@ -2097,7 +2097,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationStreak50Message.
   ///
   /// In en, this message translates to:
-  /// **'Half a century! You\'re a true INSIDEX master!'**
+  /// **'Half a century! You\'re a true InsideX master!'**
   String get notificationStreak50Message;
 
   /// No description provided for @notificationStreak100Title.
@@ -4181,6 +4181,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Follow device settings'**
   String get systemDefaultSubtitle;
+
+  /// No description provided for @minutesThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes this week'**
+  String get minutesThisWeek;
+
+  /// No description provided for @minutesThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes this month'**
+  String get minutesThisMonth;
+
+  /// No description provided for @minutesThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes this year'**
+  String get minutesThisYear;
+
+  /// No description provided for @minutesAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes all time'**
+  String get minutesAllTime;
 }
 
 class _AppLocalizationsDelegate

@@ -138,13 +138,6 @@ class LanguageSelector extends StatelessWidget {
               decoration: BoxDecoration(
                 color: context.colors.backgroundElevated,
                 borderRadius: BorderRadius.circular(24.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: context.colors.textPrimary.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
               ),
               child: SingleChildScrollView(
                 child: Column(

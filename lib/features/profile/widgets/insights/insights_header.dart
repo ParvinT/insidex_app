@@ -152,63 +152,40 @@ class InsightsTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return Container(
-      padding: EdgeInsets.all(4.w),
+      height: 40.h,
       decoration: BoxDecoration(
-        color: colors.backgroundCard,
-        borderRadius: BorderRadius.circular(30.r),
-        boxShadow: [
-          BoxShadow(
-            color: colors.textPrimary.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        color: colors.greyLight,
+        borderRadius: BorderRadius.circular(24.r),
       ),
+      padding: EdgeInsets.all(3.w),
       child: TabBar(
         controller: tabController,
-        tabAlignment: TabAlignment.start,
-        isScrollable: true,
+        isScrollable: false,
+        dividerColor: Colors.transparent,
         indicator: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              const Color(0xFF7DB9B6),
-              const Color(0xFF7DB9B6).withValues(alpha: 0.8),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(25.r),
+          color: colors.textPrimary,
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF7DB9B6).withValues(alpha: 0.3),
-              blurRadius: 8,
+              color: colors.textPrimary.withValues(alpha: 0.2),
+              blurRadius: 4,
               offset: const Offset(0, 2),
             ),
           ],
         ),
         indicatorSize: TabBarIndicatorSize.tab,
-        dividerColor: Colors.transparent,
         labelColor: colors.textOnPrimary,
-        unselectedLabelColor: colors.textSecondary,
+        unselectedLabelColor: colors.textPrimary,
         labelStyle: GoogleFonts.inter(
-          fontSize: 12.sp,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
         ),
         unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: 12.sp,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w500,
         ),
-        labelPadding: EdgeInsets.symmetric(horizontal: 12.w),
-        tabs: tabs
-            .map((tab) => Tab(
-                  height: 36.h,
-                  child: Center(
-                    child: Text(
-                      tab,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ))
-            .toList(),
+        labelPadding: EdgeInsets.zero,
+        tabs: tabs.map((tab) => Tab(text: tab)).toList(),
       ),
     );
   }

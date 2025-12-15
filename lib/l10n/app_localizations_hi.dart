@@ -9,7 +9,7 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'ध्वनि उपचार और अवचेतन';
@@ -58,7 +58,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get sendFeedbackSubtitle =>
-      'INSIDEX को बेहतर बनाने में हमारी मदद करें';
+      'InsideX को बेहतर बनाने में हमारी मदद करें';
 
   @override
   String get reportBug => 'बग की रिपोर्ट करें';
@@ -209,7 +209,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'अपनी सुनने की आदतों और सुधारों को ट्रैक करें';
 
   @override
-  String get myInsights => 'मेरी अंतर्दृष्टि';
+  String get myInsights => 'मेरे आँकड़े';
 
   @override
   String get viewPersonalizedWellness =>
@@ -260,7 +260,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get topSessions => 'शीर्ष सत्र';
 
   @override
-  String get minutesToday => 'आज मिनट';
+  String get minutesToday => 'मिनट आज';
 
   @override
   String get total => 'कुल';
@@ -991,7 +991,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'INSIDEX के साथ आराम करने और ठीक होने के लिए एक पल लें';
+      'InsideX के साथ आराम करने और ठीक होने के लिए एक पल लें';
 
   @override
   String get notificationStreak3Title => '🎉 बधाई हो!';
@@ -1031,7 +1031,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'आधी शताब्दी! आप एक सच्चे INSIDEX मास्टर हैं!';
+      'आधी शताब्दी! आप एक सच्चे InsideX मास्टर हैं!';
 
   @override
   String get notificationStreak100Title => '👑 100 दिन के चैंपियन!';
@@ -2153,4 +2153,16 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get systemDefaultSubtitle => 'डिवाइस सेटिंग्स का पालन करें';
+
+  @override
+  String get minutesThisWeek => 'मिनट इस सप्ताह';
+
+  @override
+  String get minutesThisMonth => 'मिनट इस महीने';
+
+  @override
+  String get minutesThisYear => 'मिनट इस साल';
+
+  @override
+  String get minutesAllTime => 'मिनट कुल';
 }

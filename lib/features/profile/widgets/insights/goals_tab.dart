@@ -26,16 +26,8 @@ class GoalsTab extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  const Color(0xFF7DB9B6).withValues(alpha: 0.1),
-                  const Color(0xFFE8C5A0).withValues(alpha: 0.1),
-                ],
-              ),
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(
-                color: const Color(0xFF7DB9B6).withValues(alpha: 0.2),
-              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

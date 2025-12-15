@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   
-  "appName": "INSIDEX",
+  "appName": "InsideX",
   "appTagline": "Sound Healing & Subliminal",
   
   "settings": "Settings",
@@ -21,7 +21,7 @@
   
   "supportAndFeedback": "Support & Feedback",
   "sendFeedback": "Send Feedback",
-  "sendFeedbackSubtitle": "Help us improve INSIDEX",
+  "sendFeedbackSubtitle": "Help us improve InsideX",
   "reportBug": "Report a Bug",
   "reportBugSubtitle": "Something not working?",
   
@@ -380,7 +380,7 @@
   "notificationsEnabledSuccess": "Notifications enabled! 🔔",
 
   "notificationDailyReminderTitle": "Time for Your Daily Session 🎧",
-  "notificationDailyReminderMessage": "Take a moment to relax and heal with INSIDEX",
+  "notificationDailyReminderMessage": "Take a moment to relax and heal with InsideX",
 
   "notificationStreak3Title": "🎉 Congratulations!",
   "notificationStreak3Message": "🔥 3 day streak! Great start!",
@@ -398,7 +398,7 @@
   "notificationStreak30Message": "One full month! Incredible dedication!",
 
   "notificationStreak50Title": "💎 50 Day Diamond Streak!",
-  "notificationStreak50Message": "Half a century! You're a true INSIDEX master!",
+  "notificationStreak50Message": "Half a century! You're a true InsideX master!",
 
   "notificationStreak100Title": "👑 100 Day Champion!",
   "notificationStreak100Message": "One hundred days! You're absolutely legendary! 🎊",
@@ -840,7 +840,12 @@
   "darkMode": "Dark",
   "darkModeSubtitle": "Easy on the eyes",
   "systemDefault": "System",
-  "systemDefaultSubtitle": "Follow device settings"
+  "systemDefaultSubtitle": "Follow device settings",
+  "minutesToday": "minutes today",
+  "minutesThisWeek": "minutes this week",
+  "minutesThisMonth": "minutes this month",
+  "minutesThisYear": "minutes this year",
+  "minutesAllTime": "minutes all time"
 
 
 }

@@ -14,10 +14,7 @@ class InsightsService {
       final user = _auth.currentUser;
       if (user == null) return null;
 
-      final userDoc = await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
 
       if (userDoc.exists) {
         return userDoc.data();
@@ -35,18 +32,46 @@ class InsightsService {
       final user = _auth.currentUser;
       if (user == null) return _getEmptyWeeklyData();
 
-      final now = DateTime.now();
-      final weekStart = now.subtract(Duration(days: now.weekday - 1));
+      final weekAgo = DateTime.now().subtract(const Duration(days: 7));
 
       final history = await _firestore
           .collection('users')
           .doc(user.uid)
           .collection('listening_history')
-          .where('timestamp', isGreaterThan: Timestamp.fromDate(weekStart))
+          .where('timestamp', isGreaterThan: Timestamp.fromDate(weekAgo))
           .get();
 
       if (history.docs.isEmpty) {
         return _getEmptyWeeklyData();
+      }
+
+      Map<String, Map<String, dynamic>> sessionBestRecord = {};
+
+      for (var doc in history.docs) {
+        final data = doc.data();
+        final sessionId = data['sessionId'] as String?;
+        final timestamp = (data['timestamp'] as Timestamp?)?.toDate();
+        if (sessionId == null || timestamp == null) continue;
+
+        final status = data['status'] as String?;
+
+        int duration = 0;
+        if (status == 'completed') {
+          duration = data['duration'] as int? ?? 0;
+        } else if (status == 'playing' || status == 'paused') {
+          duration = data['accumulatedDuration'] as int? ?? 0;
+        }
+
+        final dayName = _getDayNameFromWeekday(timestamp.weekday);
+        final key = '${sessionId}_${timestamp.day}_${timestamp.month}';
+
+        if (!sessionBestRecord.containsKey(key) ||
+            duration > (sessionBestRecord[key]!['duration'] as int)) {
+          sessionBestRecord[key] = {
+            'duration': duration,
+            'dayName': dayName,
+          };
+        }
       }
 
       Map<String, int> weeklyData = {
@@ -59,13 +84,10 @@ class InsightsService {
         'Sun': 0
       };
 
-      for (var doc in history.docs) {
-        final data = doc.data();
-        final timestamp = (data['timestamp'] as Timestamp).toDate();
-        final duration = data['duration'] ?? 0;
-
-        final dayName = _getDayNameFromWeekday(timestamp.weekday);
-        weeklyData[dayName] = (weeklyData[dayName] ?? 0) + duration as int;
+      for (var record in sessionBestRecord.values) {
+        final dayName = record['dayName'] as String;
+        final duration = record['duration'] as int;
+        weeklyData[dayName] = (weeklyData[dayName] ?? 0) + duration;
       }
 
       return weeklyData;
@@ -85,13 +107,19 @@ class InsightsService {
           .collection('users')
           .doc(user.uid)
           .collection('listening_history')
-          .orderBy('duration', descending: true)
-          .limit(1)
+          .where('status', isEqualTo: 'completed')
           .get();
 
       if (history.docs.isEmpty) return '0 min';
 
-      final longestDuration = history.docs.first.data()['duration'] ?? 0;
+      int longestDuration = 0;
+      for (var doc in history.docs) {
+        final duration = doc.data()['duration'] as int? ?? 0;
+        if (duration > longestDuration) {
+          longestDuration = duration;
+        }
+      }
+
       return '$longestDuration min';
     } catch (e) {
       debugPrint('Error getting longest session: $e');
@@ -109,6 +137,7 @@ class InsightsService {
           .collection('users')
           .doc(user.uid)
           .collection('listening_history')
+          .where('status', isEqualTo: 'completed')
           .get();
 
       if (history.docs.isEmpty) return 'Evening';
