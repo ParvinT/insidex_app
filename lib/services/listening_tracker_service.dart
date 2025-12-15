@@ -28,6 +28,15 @@ class ListeningTrackerService {
       _lastResumeTime = _sessionStartTime;
       _currentSessionId = sessionId;
 
+      // Check if this is user's first session ever
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists && userDoc.data()?['firstSessionDate'] == null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'firstSessionDate': FieldValue.serverTimestamp(),
+        });
+        debugPrint('✅ First session date recorded for user');
+      }
+
       // Create a new listening session document
       await _firestore
           .collection('users')

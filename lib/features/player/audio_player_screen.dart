@@ -473,7 +473,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         await ListeningTrackerService.startSession(
           sessionId: _session['id'],
-          sessionTitle: _session['title'] ?? unknownSessionText,
+          sessionTitle: _session['_displayTitle'] ??
+              _session['_localizedTitle'] ??
+              _session['title'] ??
+              unknownSessionText,
           categoryId: _session['categoryId'],
         );
       } else if (_isTracking) {
@@ -490,6 +493,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _playCurrentTrack() async {
+    final l10n = AppLocalizations.of(context);
+    final unknownSessionText = l10n.unknownSession;
+    final subliminalSessionText = l10n.subliminalSession;
+    final audioNotFoundText = l10n.audioFileNotFound;
     if (_session['_isOffline'] == true) {
       debugPrint('📥 [AudioPlayer] Playing from offline download');
 
@@ -503,15 +510,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         return;
       }
 
-      // 🆕 1. Check preloader cache first (instant playback!)
       final preloader = DecryptionPreloader();
       String? decryptedPath = preloader.getCachedPath(sessionId);
 
-      // 🆕 2. If not cached, fall back to normal decryption
       if (decryptedPath == null) {
         debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
 
-        // 🆕 Show loading
         if (mounted) {
           setState(() => _isDecrypting = true);
         }
@@ -535,13 +539,26 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             _currentPosition = Duration.zero;
           });
 
+          // ✅ Start tracking BEFORE audio loads
+          if (!_isTracking && _session['id'] != null) {
+            _isTracking = true;
+            await ListeningTrackerService.startSession(
+              sessionId: _session['id'],
+              sessionTitle: _session['_displayTitle'] ??
+                  _session['_localizedTitle'] ??
+                  _session['title'] ??
+                  unknownSessionText,
+              categoryId: _session['categoryId'],
+            );
+          }
+
           final localImagePath = _session['_localImagePath'] as String?;
 
           final resolved = await _audioService.playFromUrl(
             'file://$decryptedPath',
             title: _session['_displayTitle'] ??
                 _session['title'] ??
-                AppLocalizations.of(context).subliminalSession,
+                subliminalSessionText,
             artist: 'InsideX',
             artworkUrl: null,
             localArtworkPath: localImagePath,
@@ -555,26 +572,27 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             setState(() => _totalDuration = resolved);
           }
 
-          debugPrint('🎵 Playing offline: ${_session['title']}');
-          return; // ← ÖNEMLİ: Online flow'u atla
+          debugPrint(
+              '🎵 Playing offline: ${_session['_displayTitle'] ?? _session['title']}');
+
+          return;
         } catch (e) {
           debugPrint('❌ [AudioPlayer] Offline playback error: $e');
-          // Fall through to show error
         }
       } else {
         debugPrint('❌ [AudioPlayer] Could not decrypt offline file');
       }
 
-      // Show error for offline playback failure
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context).audioFileNotFound),
+          content: Text(audioNotFoundText),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
+
     if (_audioUrl == null || _audioUrl!.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -589,15 +607,27 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     try {
       setState(() {
         _currentPosition = Duration.zero;
-        // _totalDuration already set in _loadLanguageAndUrls
       });
+
+      // ✅ Start tracking BEFORE audio loads
+      if (!_isTracking && _session['id'] != null) {
+        _isTracking = true;
+        await ListeningTrackerService.startSession(
+          sessionId: _session['id'],
+          sessionTitle: _session['_displayTitle'] ??
+              _session['_localizedTitle'] ??
+              _session['title'] ??
+              AppLocalizations.of(context).unknownSession,
+          categoryId: _session['categoryId'],
+        );
+      }
 
       final resolved = await _audioService.playFromUrl(
         _audioUrl!,
         title: _session['_displayTitle'] ??
             _session['_localizedTitle'] ??
             _session['title'] ??
-            AppLocalizations.of(context).subliminalSession,
+            subliminalSessionText,
         artist: 'InsideX',
         artworkUrl: _backgroundImageUrl,
         sessionId: _session['id'],
@@ -607,7 +637,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         setState(() => _totalDuration = resolved);
       }
 
-      debugPrint('🎵 Playing: ${_session['title']}');
+      debugPrint(
+          '🎵 Playing: ${_session['_displayTitle'] ?? _session['title']}');
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
