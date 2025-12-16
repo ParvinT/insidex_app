@@ -1967,17 +1967,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unknownDisease => 'अज्ञात बीमारी';
 
   @override
-  String get browseAllSubliminals => 'Browse all available subliminal sessions';
+  String get browseAllSubliminals => 'सभी उपलब्ध सबलिमिनल सत्र ब्राउज़ करें';
 
   @override
-  String get yourPersonalizedCollection =>
-      'Your personalized subliminal collection';
+  String get yourPersonalizedCollection => 'आपका व्यक्तिगत सबलिमिनल संग्रह';
 
   @override
-  String get deletingSessionAndFiles => 'Deleting session and files...';
+  String get deletingSessionAndFiles => 'सत्र और फ़ाइलें हटाई जा रही हैं...';
 
   @override
-  String get errorDeletingSession => 'Error deleting session';
+  String get errorDeletingSession => 'सत्र हटाने में त्रुटि';
 
   @override
   String get recommendedForYou => 'आपके लिए अनुशंसित';

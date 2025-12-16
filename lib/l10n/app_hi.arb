@@ -738,5 +738,9 @@
   "minutesThisWeek": "मिनट इस सप्ताह",
   "minutesThisMonth": "मिनट इस महीने",
   "minutesThisYear": "मिनट इस साल",
-  "minutesAllTime": "मिनट कुल"
+  "minutesAllTime": "मिनट कुल",
+  "browseAllSubliminals": "सभी उपलब्ध सबलिमिनल सत्र ब्राउज़ करें",
+  "yourPersonalizedCollection": "आपका व्यक्तिगत सबलिमिनल संग्रह",
+  "deletingSessionAndFiles": "सत्र और फ़ाइलें हटाई जा रही हैं...",
+  "errorDeletingSession": "सत्र हटाने में त्रुटि"
 }

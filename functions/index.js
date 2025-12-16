@@ -4,6 +4,14 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 
+// Import email templates
+const { 
+  getOtpTemplate, 
+  getWelcomeTemplate, 
+  getPasswordResetTemplate,
+  normalizeLanguage 
+} = require("./templates");
+
 // Initialize Firebase Admin
 admin.initializeApp();
 
@@ -60,30 +68,29 @@ exports.sendEmailFromQueue = functions.firestore
           to: mailData.to,
         };
 
-        // Check email type
+        // Get language (default to 'en')
+        const lang = normalizeLanguage(mailData.lang);
+        console.log(`Processing ${mailData.type} email in language: ${lang}`);
+
         if (mailData.type === "otp") {
-        // OTP Email
-          mailOptions.subject = mailData.subject || "Your INSIDEX Verification Code";
-          mailOptions.html = mailData.html;
-
+          // OTP Email
+          const template = getOtpTemplate(lang);
+          const userName = mailData.userName || 'User';
+          const code = mailData.code || '';
           
-          console.log(`Sending OTP email to ${mailData.to}`);
+          mailOptions.subject = template.subject;
+          mailOptions.html = template.html(userName, code);
+          
+          console.log(`Sending OTP email to ${mailData.to} (${lang})`);
         } else if (mailData.type === "welcome") {
-
-          console.log('Welcome email data:', mailData); // Debug log
-          console.log('Template data:', mailData.template?.data);
-        // Welcome Email
-          mailOptions.subject = "Welcome to INSIDEX! 🎉";
-           if (mailData.html) {
-    mailOptions.html = mailData.html;  // firebase_service.dart'tan gelen HTML
-  } else if (mailData.template?.data) {
-    mailOptions.html = getWelcomeEmailHTML(mailData.template.data);
-  } else {
-    // Fallback
-    mailOptions.html = getWelcomeEmailHTML({ userName: 'User' });
-  }
-
-          console.log(`Sending welcome email to ${mailData.to}`);
+          // Welcome Email
+          const template = getWelcomeTemplate(lang);
+          const userName = mailData.userName || mailData.template?.data?.userName || 'User';
+          
+          mailOptions.subject = template.subject;
+          mailOptions.html = template.html(userName);
+          
+          console.log(`Sending welcome email to ${mailData.to} (${lang})`);
         }
         
           
@@ -218,82 +225,7 @@ exports.rateLimitOTP = functions.firestore
       }
     });
 
-// Helper function for welcome email HTML
-function getWelcomeEmailHTML(data) {
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            margin: 0;
-            padding: 0;
-            background: #f5f5f5;
-        }
-        .container { 
-            max-width: 600px;
-            margin: 20px auto;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-        .content {
-            padding: 40px 30px;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #888;
-            font-size: 14px;
-            background: #f8f9fa;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1 style="margin: 0;">Welcome to INSIDEX!</h1>
-            <p style="margin: 10px 0 0 0;">Your Journey to Inner Peace Begins Here</p>
-        </div>
-        
-        <div class="content">
-            <h2>Hello ${data.userName}! 👋</h2>
-            
-            <p>Thank you for joining INSIDEX. Your account has been successfully created!</p>
-            
-            <p>Best regards,<br>
-            <strong>The INSIDEX Team</strong></p>
-        </div>
-        
-        <div class="footer">
-            <p>© 2025 INSIDEX. All rights reserved.</p>
-        </div>
-    </div>
-</body>
-</html>
-  `;
-}
+
 
 
 // Send email helper function
@@ -343,7 +275,7 @@ exports.onFeedbackCreated = functions.firestore
 
 // Custom Password Reset with Link
 exports.customPasswordReset = functions.https.onCall(async (data, context) => {
-  const { email } = data;
+  const { email, lang: requestLang } = data;
   
   if (!email || !isValidEmail(email)) {
     throw new functions.https.HttpsError('invalid-argument', 'Valid email required');
@@ -368,64 +300,18 @@ exports.customPasswordReset = functions.https.onCall(async (data, context) => {
     
     const userName = userDoc.exists ? userDoc.data().name : 'User';
     
-    // 4. Email HTML'i oluştur
-    const emailHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f5f5f5; }
-        .container { max-width: 600px; margin: 20px auto; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; text-align: center; border-radius: 10px 10px 0 0; }
-        .header h1 { color: white; margin: 0; font-size: 32px; }
-        .content { padding: 40px; }
-        .reset-button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white !important; padding: 15px 40px; text-decoration: none; border-radius: 50px; display: inline-block; font-weight: 600; margin: 20px 0; }
-        .warning-box { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .link-box { background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; word-break: break-all; font-size: 12px; color: #666; }
-        .footer { background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 10px 10px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>INSIDEX</h1>
-            <p style="color: white; margin: 10px 0 0 0;">Password Reset Request</p>
-        </div>
-        <div class="content">
-            <h2>Hi ${userName}! 👋</h2>
-            <p>You requested to reset your password. Click the button below to create a new password:</p>
-            
-            <div style="text-align: center;">
-                <a href="${resetLink}" class="reset-button">Reset My Password</a>
-            </div>
-            
-            <div class="warning-box">
-                <strong>⚠️ Security Notice:</strong>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>This link expires in 1 hour</li>
-                    <li>Never share this link with anyone</li>
-                    <li>If you didn't request this, ignore this email</li>
-                </ul>
-            </div>
-            
-            <p style="color: #666; font-size: 14px;">Or copy this link:</p>
-            <div class="link-box">${resetLink}</div>
-        </div>
-        <div class="footer">
-            <p>© 2025 INSIDEX. All rights reserved.</p>
-            <p>You received this because a password reset was requested for your account.</p>
-        </div>
-    </div>
-</body>
-</html>
-    `;
+    // 4. Get user's preferred language or use request language
+    const userLang = userDoc.exists ? userDoc.data().preferredLanguage : null;
+    const lang = normalizeLanguage(userLang || requestLang);
     
-    // 5. Email'i gönder
+    // 5. Get email template
+    const template = getPasswordResetTemplate(lang);
+    
     const mailOptions = {
       from: process.env.ZOHO_FROM,
       to: email,
-      subject: '🔐 Reset Your INSIDEX Password',
-      html: emailHtml
+      subject: template.subject,
+      html: template.html(userName, resetLink)
     };
     
     try {

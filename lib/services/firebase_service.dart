@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 
+import 'language_helper_service.dart';
+
 class FirebaseService {
   FirebaseService._();
 
@@ -89,9 +91,9 @@ class FirebaseService {
       await _firestore.collection('mail_queue').add({
         'to': email,
         'type': 'otp',
-        'subject': 'Your INSIDEX Verification Code',
-        'text': 'Your verification code: $code',
-        'html': _getOTPEmailHTML(name, code),
+        'userName': name,
+        'code': code,
+        'lang': await LanguageHelperService.getCurrentLanguage(),
         'createdAt': FieldValue.serverTimestamp(),
         'status': 'pending',
       });
@@ -197,6 +199,8 @@ class FirebaseService {
       await user.updateDisplayName(name);
 
       // Create user profile in Firestore
+      final currentLang = await LanguageHelperService.getCurrentLanguage();
+
       await _firestore.collection('users').doc(user.uid).set({
         'uid': user.uid,
         'email': email,
@@ -210,10 +214,11 @@ class FirebaseService {
         'emailVerified': true,
         'emailVerifiedAt': FieldValue.serverTimestamp(),
         'profileCompleted': false,
-        'avatarEmoji': '👤',
+        'avatarEmoji': 'turtle',
         'onboardingCompleted': false,
         'playlistSessionIds': [],
         'recentSessionIds': [],
+        'preferredLanguage': currentLang,
       });
 
       // Delete OTP document (cleanup)
@@ -223,8 +228,8 @@ class FirebaseService {
       await _firestore.collection('mail_queue').add({
         'to': email,
         'type': 'welcome',
-        'subject': 'Welcome to INSIDEX!',
-        'html': _getWelcomeEmailHTML(name),
+        'userName': name,
+        'lang': currentLang,
         'userId': user.uid,
         'createdAt': FieldValue.serverTimestamp(),
         'status': 'pending',
@@ -293,7 +298,8 @@ class FirebaseService {
       final callable =
           FirebaseFunctions.instance.httpsCallable('customPasswordReset');
 
-      await callable.call({'email': email});
+      final lang = await LanguageHelperService.getCurrentLanguage();
+      await callable.call({'email': email, 'lang': lang});
 
       return {
         'success': true,
@@ -444,9 +450,9 @@ class FirebaseService {
       await _firestore.collection('mail_queue').add({
         'to': email,
         'type': 'otp',
-        'subject': 'Your INSIDEX Verification Code',
-        'text': 'Your new verification code: $newCode',
-        'html': _getOTPEmailHTML(data['name'] ?? 'User', newCode),
+        'userName': data['name'] ?? 'User',
+        'code': newCode,
+        'lang': await LanguageHelperService.getCurrentLanguage(),
         'createdAt': FieldValue.serverTimestamp(),
         'status': 'pending',
       });
@@ -462,148 +468,5 @@ class FirebaseService {
         'code': 'failed-to-resend',
       };
     }
-  }
-
-  // =========================
-  // Helper: OTP Email HTML Template
-  // =========================
-  static String _getOTPEmailHTML(String userName, String otpCode) {
-    return '''
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            background: #000;
-            padding: 30px;
-            text-align: center;
-            color: white;
-        }
-        .content {
-            padding: 30px;
-        }
-        .otp-box {
-            background: #f9f9f9;
-            border: 2px solid #000;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-        }
-        .otp-code {
-            font-size: 32px;
-            font-weight: bold;
-            letter-spacing: 5px;
-            color: #000;
-        }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>INSIDEX</h1>
-        </div>
-        <div class="content">
-            <p>Hello $userName,</p>
-            <p>Your verification code is:</p>
-            <div class="otp-box">
-                <div class="otp-code">$otpCode</div>
-            </div>
-            <p>This code expires in 10 minutes.</p>
-            <p>If you didn't request this code, please ignore this email.</p>
-        </div>
-        <div class="footer">
-            © 2025 INSIDEX. All rights reserved.
-        </div>
-    </div>
-</body>
-</html>
-    ''';
-  }
-
-  // =========================
-  // Helper: Welcome Email HTML Template
-  // =========================
-  static String _getWelcomeEmailHTML(String userName) {
-    return '''
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .header {
-            background: #000;
-            padding: 30px;
-            text-align: center;
-            color: white;
-        }
-        .content {
-            padding: 30px;
-        }
-        .footer {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-            font-size: 12px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Welcome to INSIDEX!</h1>
-        </div>
-        <div class="content">
-            <p>Hello $userName,</p>
-            <p>Thank you for joining INSIDEX. Your account has been successfully created and verified.</p>
-            <p>You can now enjoy all the features of our app.</p>
-            <p>Best regards,<br>The INSIDEX Team</p>
-        </div>
-        <div class="footer">
-            © 2025 INSIDEX. All rights reserved.
-        </div>
-    </div>
-</body>
-</html>
-    ''';
   }
 }

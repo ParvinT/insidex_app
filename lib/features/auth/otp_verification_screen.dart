@@ -138,7 +138,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       if (!mounted) return;
 
-      _toast(AppLocalizations.of(context).accountCreatedSuccessfully);
+      _toast(AppLocalizations.of(context).accountCreatedSuccessfully,
+          bg: Colors.green);
 
       try {
         final prefs = await SharedPreferences.getInstance();
