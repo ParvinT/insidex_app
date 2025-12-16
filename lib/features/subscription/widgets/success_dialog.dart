@@ -302,7 +302,7 @@ class _SuccessDialogState extends State<SuccessDialog>
   Widget _buildFeaturesList() {
     final features = [
       'All audio sessions',
-      'Personalized recommendations',
+      'Background playback',
       'Offline downloads',
     ];
 

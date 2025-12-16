@@ -171,19 +171,17 @@ class SubscriptionPackage {
       ));
     }
 
+    // Background playback & lock screen controls
+    result.add(PackageFeature(
+      title: 'Background playback',
+      isIncluded: tier.canUseBackgroundPlayback,
+    ));
+
     // Offline download
     result.add(PackageFeature(
       title: 'Offline download',
       isIncluded: tier.canDownload,
     ));
-
-    // Personalized recommendations (always included for paid)
-    if (tier != SubscriptionTier.free) {
-      result.add(const PackageFeature(
-        title: 'Personalized recommendations',
-        isIncluded: true,
-      ));
-    }
 
     return result;
   }

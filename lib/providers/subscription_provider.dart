@@ -34,6 +34,17 @@ class SubscriptionProvider extends ChangeNotifier {
   String? _error;
 
   StreamSubscription<DocumentSnapshot>? _subscriptionListener;
+  StreamSubscription<User?>? _authSubscription;
+  String? _currentUserId;
+  Completer<void>? _initCompleter;
+
+  // ============================================================
+  // CONSTRUCTOR
+  // ============================================================
+
+  SubscriptionProvider() {
+    _initAuthListener();
+  }
 
   // ============================================================
   // GETTERS
@@ -79,6 +90,9 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Whether user can download for offline
   bool get canDownload => _subscription.canDownload;
 
+  /// Whether user can use background playback & lock screen controls
+  bool get canUseBackgroundPlayback => _subscription.canUseBackgroundPlayback;
+
   /// Days remaining in subscription
   int get daysRemaining => _subscription.daysRemaining;
 
@@ -101,11 +115,26 @@ class SubscriptionProvider extends ChangeNotifier {
   // INITIALIZATION
   // ============================================================
 
+  /// Wait until subscription data is loaded
+  /// Use this before checking subscription status
+  Future<void> waitForInitialization() async {
+    if (_isInitialized) return;
+
+    _initCompleter ??= Completer<void>();
+    return _initCompleter!.future;
+  }
+
   /// Initialize provider for a user
   /// Call this after user login
   Future<void> initialize(String userId) async {
-    if (_isInitialized) return;
+    if (_isInitialized && _currentUserId == userId) return;
 
+    // Different user - reset first
+    if (_currentUserId != null && _currentUserId != userId) {
+      await reset();
+    }
+
+    _currentUserId = userId;
     _setLoading(true);
     _error = null;
 
@@ -125,6 +154,10 @@ class SubscriptionProvider extends ChangeNotifier {
       _startSubscriptionListener(userId);
 
       _isInitialized = true;
+
+      if (_initCompleter != null && !_initCompleter!.isCompleted) {
+        _initCompleter!.complete();
+      }
       debugPrint('✅ [SubscriptionProvider] Initialized successfully');
     } catch (e) {
       _error = e.toString();
@@ -132,6 +165,19 @@ class SubscriptionProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  /// Listen to auth state changes and auto-initialize/reset
+  void _initAuthListener() {
+    _authSubscription = _auth.authStateChanges().listen((user) {
+      if (user != null) {
+        debugPrint('🔐 [SubscriptionProvider] User logged in: ${user.uid}');
+        initialize(user.uid);
+      } else {
+        debugPrint('🔐 [SubscriptionProvider] User logged out');
+        reset();
+      }
+    });
   }
 
   /// Reset provider state (call on logout)
@@ -144,6 +190,8 @@ class SubscriptionProvider extends ChangeNotifier {
     _subscription = SubscriptionModel.free();
     _availablePackages = [];
     _isInitialized = false;
+    _currentUserId = null;
+    _initCompleter = null;
     _error = null;
 
     notifyListeners();
@@ -409,6 +457,7 @@ class SubscriptionProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _authSubscription?.cancel();
     _subscriptionListener?.cancel();
     super.dispose();
   }

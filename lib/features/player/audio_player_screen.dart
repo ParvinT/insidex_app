@@ -19,6 +19,7 @@ import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/download/decryption_preloader.dart';
+import '../../services/audio/audio_handler.dart';
 import '../downloads/widgets/download_button.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
 import '../../core/themes/app_theme_extension.dart';
@@ -32,7 +33,7 @@ class AudioPlayerScreen extends StatefulWidget {
 }
 
 class _AudioPlayerScreenState extends State<AudioPlayerScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   // Equalizer animation (replaces old rotating note)
   late final AnimationController _eqController = AnimationController(
     vsync: this,
@@ -118,6 +119,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     _session = widget.sessionData ??
         {
@@ -144,6 +146,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     if (!mounted) return;
 
     final subscriptionProvider = context.read<SubscriptionProvider>();
+
+    await subscriptionProvider.waitForInitialization();
+
+    if (!mounted) return;
 
     // Check if session is demo
     final isDemo = _session['isDemo'] as bool? ?? false;
@@ -176,8 +182,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     if (!mounted) return;
 
-    // ✅ Access granted - mark it
     _accessGranted = true;
+
+    final canUseBackground = subscriptionProvider.canUseBackgroundPlayback;
+    audioHandler.setShowMediaNotification(canUseBackground);
+    debugPrint(
+        '🎧 [AudioPlayer] Background playback: ${canUseBackground ? "ENABLED" : "DISABLED"}');
 
     // User has access - continue with audio initialization
     _setupStreamListeners();
@@ -668,8 +678,32 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
+  // =================== LIFECYCLE OBSERVER ===================
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Only handle for free users (non-background playback)
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    if (subscriptionProvider.canUseBackgroundPlayback) {
+      return; // Premium users - do nothing, let audio continue
+    }
+
+    // Free user - pause when app goes to background
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isPlaying) {
+        debugPrint(
+            '⏸️ [AudioPlayer] Free user - pausing audio (app backgrounded)');
+        _audioService.pause();
+      }
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (_isTracking) {
       ListeningTrackerService.endSession().then((_) {
         debugPrint('Listening session ended and saved');

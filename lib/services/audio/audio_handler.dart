@@ -27,6 +27,9 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
   final AudioPlayer _player = AudioPlayer();
   final Completer<void> _initCompleter = Completer<void>();
 
+  // Premium mode flag - controls notification visibility
+  bool _showMediaNotification = true;
+
   // Race guard for async loads (prevents overlapping plays)
   int _loadToken = 0;
 
@@ -37,6 +40,20 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
 
   InsideXAudioHandler() {
     _init();
+  }
+
+  /// Set whether to show media notification (lock screen / notification bar)
+  /// Free users should not see media notification
+  void setShowMediaNotification(bool show) {
+    _showMediaNotification = show;
+    debugPrint(
+        '🔔 [InsideXAudioHandler] Media notification: ${show ? "ON" : "OFF"}');
+
+    // If turning off and currently playing, clear the notification
+    if (!show) {
+      mediaItem.add(null);
+      playbackState.add(PlaybackState());
+    }
   }
 
   Future<void> _init() async {
@@ -103,7 +120,9 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
         );
       },
     ).listen((state) {
-      playbackState.add(state);
+      if (_showMediaNotification) {
+        playbackState.add(state);
+      }
     });
   }
 
@@ -437,6 +456,12 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     String? sessionId,
     Duration? duration,
   }) {
+    if (!_showMediaNotification) {
+      debugPrint(
+          '🔕 [InsideXAudioHandler] Skipping media notification (free user)');
+      mediaItem.add(null);
+      return;
+    }
     // Determine artwork URI (local file takes priority)
     Uri? artUri;
     if (localArtworkPath != null && localArtworkPath.isNotEmpty) {

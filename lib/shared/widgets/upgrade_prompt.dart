@@ -251,6 +251,7 @@ Future<bool?> showUpgradeBottomSheet(
                         onPressed: () => Navigator.pop(ctx, true),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.textPrimary,
+                          foregroundColor: colors.textOnPrimary,
                           padding: EdgeInsets.symmetric(vertical: 14.h),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
@@ -262,7 +263,7 @@ Future<bool?> showUpgradeBottomSheet(
                           style: GoogleFonts.inter(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                            color: colors.textOnPrimary,
                           ),
                         ),
                       ),
@@ -355,7 +356,7 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                             ),
                             child: Icon(
                               Icons.workspace_premium,
-                              color: Colors.white,
+                              color: colors.textOnPrimary,
                               size: 28.sp,
                             ),
                           ),

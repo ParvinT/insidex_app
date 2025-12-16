@@ -5,7 +5,7 @@ import '../core/constants/subscription_constants.dart';
 
 /// User's subscription data model
 /// Represents the current subscription state of a user
-/// 
+///
 /// Stored in Firestore: users/{uid}/subscription (as nested object)
 class SubscriptionModel {
   /// Current subscription tier
@@ -75,7 +75,7 @@ class SubscriptionModel {
 
     return SubscriptionModel(
       tier: SubscriptionTier.fromString(map['tier'] as String?),
-      period: map['period'] != null 
+      period: map['period'] != null
           ? SubscriptionPeriod.fromString(map['period'] as String?)
           : null,
       status: SubscriptionStatus.fromString(map['status'] as String?),
@@ -100,11 +100,13 @@ class SubscriptionModel {
       'source': source.value,
       'startDate': startDate != null ? Timestamp.fromDate(startDate!) : null,
       'expiryDate': expiryDate != null ? Timestamp.fromDate(expiryDate!) : null,
-      'trialEndDate': trialEndDate != null ? Timestamp.fromDate(trialEndDate!) : null,
+      'trialEndDate':
+          trialEndDate != null ? Timestamp.fromDate(trialEndDate!) : null,
       'trialUsed': trialUsed,
       'autoRenew': autoRenew,
       'originalTransactionId': originalTransactionId,
-      'lastVerifiedAt': lastVerifiedAt != null ? Timestamp.fromDate(lastVerifiedAt!) : null,
+      'lastVerifiedAt':
+          lastVerifiedAt != null ? Timestamp.fromDate(lastVerifiedAt!) : null,
       'productId': productId,
     };
   }
@@ -160,6 +162,10 @@ class SubscriptionModel {
   /// Check if user can download
   bool get canDownload => isActive && tier.canDownload;
 
+  /// Check if user can use background playback & lock screen controls
+  bool get canUseBackgroundPlayback =>
+      isActive && tier.canUseBackgroundPlayback;
+
   // ============================================================
   // COPY WITH
   // ============================================================
@@ -188,7 +194,8 @@ class SubscriptionModel {
       trialEndDate: trialEndDate ?? this.trialEndDate,
       trialUsed: trialUsed ?? this.trialUsed,
       autoRenew: autoRenew ?? this.autoRenew,
-      originalTransactionId: originalTransactionId ?? this.originalTransactionId,
+      originalTransactionId:
+          originalTransactionId ?? this.originalTransactionId,
       lastVerifiedAt: lastVerifiedAt ?? this.lastVerifiedAt,
       productId: productId ?? this.productId,
     );

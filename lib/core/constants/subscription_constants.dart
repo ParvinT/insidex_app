@@ -126,6 +126,9 @@ enum SubscriptionTier {
   /// Check if user can download for offline
   bool get canDownload => this == standard;
 
+  /// Check if user can use background playback & lock screen controls
+  bool get canUseBackgroundPlayback => this != free;
+
   /// Check if tier has trial option
   bool get hasTrialOption => this != free;
 
