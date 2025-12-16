@@ -159,6 +159,9 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
                   await prefs.setString(
                       'gender', widget.selectedGender.toString());
                   await prefs.setBool('onboardingSkipped', true);
+
+                  await prefs.remove('birthDate');
+                  await prefs.remove('userAge');
                   if (mounted) {
                     navigator.pushReplacementNamed(AppRoutes.welcome);
                   }

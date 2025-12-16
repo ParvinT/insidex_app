@@ -4205,6 +4205,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'minutes all time'**
   String get minutesAllTime;
+
+  /// No description provided for @tooManyResetRequestsHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please try again in an hour.'**
+  String get tooManyResetRequestsHourly;
+
+  /// No description provided for @tooManyResetRequestsDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily limit reached. Please try again tomorrow.'**
+  String get tooManyResetRequestsDaily;
 }
 
 class _AppLocalizationsDelegate

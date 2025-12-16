@@ -799,6 +799,8 @@
   "minutesThisWeek": "минут за неделю",
   "minutesThisMonth": "минут за месяц",
   "minutesThisYear": "минут за год",
-  "minutesAllTime": "минут всего"
+  "minutesAllTime": "минут всего",
+  "tooManyResetRequestsHourly": "Слишком много запросов. Попробуйте через час.",
+  "tooManyResetRequestsDaily": "Достигнут дневной лимит. Попробуйте завтра."
   
 }

@@ -845,7 +845,9 @@
   "minutesThisWeek": "minutes this week",
   "minutesThisMonth": "minutes this month",
   "minutesThisYear": "minutes this year",
-  "minutesAllTime": "minutes all time"
+  "minutesAllTime": "minutes all time",
+  "tooManyResetRequestsHourly": "Too many requests. Please try again in an hour.",
+  "tooManyResetRequestsDaily": "Daily limit reached. Please try again tomorrow."
 
 
 }

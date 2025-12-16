@@ -2171,4 +2171,12 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get minutesAllTime => 'dakika toplam';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'Çok fazla istek. Lütfen bir saat sonra tekrar deneyin.';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'Günlük limit aşıldı. Lütfen yarın tekrar deneyin.';
 }

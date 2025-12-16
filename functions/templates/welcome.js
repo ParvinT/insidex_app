@@ -187,7 +187,7 @@ const welcomeTemplates = {
   },
 
   hi: {
-    subject: 'INSIDEX में आपका स्वागत है',
+    subject: 'InsideX में आपका स्वागत है',
     html: (userName) => `
 <!DOCTYPE html>
 <html>

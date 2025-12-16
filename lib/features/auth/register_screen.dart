@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/utils/form_validators.dart';
@@ -41,6 +44,94 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final bool _isGoogleLoading = false;
   final bool _isAppleLoading = false;
 
+  // Birth date fields
+  bool _showBirthDatePicker = true;
+  DateTime? _selectedBirthDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkExistingBirthDate();
+  }
+
+  Future<void> _checkExistingBirthDate() async {
+    final prefs = await SharedPreferences.getInstance();
+    final birthDateString = prefs.getString('birthDate');
+
+    if (mounted) {
+      setState(() {
+        if (birthDateString != null) {
+          _selectedBirthDate = DateTime.parse(birthDateString);
+          _showBirthDatePicker = false;
+        } else {
+          _showBirthDatePicker = true;
+        }
+      });
+    }
+  }
+
+  int? get _userAge {
+    if (_selectedBirthDate == null) return null;
+    final now = DateTime.now();
+    int age = now.year - _selectedBirthDate!.year;
+    final hadBirthday = (now.month > _selectedBirthDate!.month) ||
+        (now.month == _selectedBirthDate!.month &&
+            now.day >= _selectedBirthDate!.day);
+    if (!hadBirthday) age -= 1;
+    return age;
+  }
+
+  bool get _isAgeValid => (_userAge ?? 0) >= 18;
+
+  String _formatDate(DateTime date) {
+    return DateFormat('dd MMM yyyy').format(date);
+  }
+
+  void _showDatePicker() {
+    final colors = context.colors;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: colors.background,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SizedBox(
+        height: 300,
+        child: Column(
+          children: [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(AppLocalizations.of(context).cancel),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(AppLocalizations.of(context).done),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: _selectedBirthDate ?? DateTime(2000, 1, 1),
+                maximumDate: DateTime.now(),
+                minimumDate: DateTime(1920),
+                onDateTimeChanged: (date) {
+                  setState(() => _selectedBirthDate = date);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -74,6 +165,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       );
       return;
+    }
+
+    // Check birth date if shown
+    if (_showBirthDatePicker) {
+      if (_selectedBirthDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).pleaseSelectBirthDate),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+      if (!_isAgeValid) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).youMustBeAtLeast18),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Save to SharedPreferences for later use
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('birthDate', _selectedBirthDate!.toIso8601String());
+      await prefs.setInt('userAge', _userAge!);
     }
 
     setState(() => _isEmailLoading = true);
@@ -284,6 +402,104 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     },
                   ),
                 ),
+
+                SizedBox(height: 20.h),
+
+                // Birth Date Picker (conditional)
+                if (_showBirthDatePicker) ...[
+                  SizedBox(height: 16.h),
+
+                  Text(
+                    AppLocalizations.of(context).dateOfBirth,
+                    style: GoogleFonts.inter(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+
+                  GestureDetector(
+                    onTap: isAnyLoading ? null : _showDatePicker,
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 14.h),
+                      decoration: BoxDecoration(
+                        color: colors.backgroundCard,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: _selectedBirthDate != null
+                              ? (_isAgeValid ? colors.textPrimary : Colors.red)
+                              : colors.border,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _selectedBirthDate != null
+                                ? _formatDate(_selectedBirthDate!)
+                                : AppLocalizations.of(context)
+                                    .selectYourBirthDate,
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w500,
+                              color: _selectedBirthDate != null
+                                  ? colors.textPrimary
+                                  : colors.textSecondary,
+                            ),
+                          ),
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            color: colors.textSecondary,
+                            size: 20.sp,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // Age validation feedback
+                  if (_selectedBirthDate != null) ...[
+                    SizedBox(height: 8.h),
+                    Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: _isAgeValid
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(
+                          color: _isAgeValid ? Colors.green : Colors.red,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isAgeValid ? Icons.check_circle : Icons.error,
+                            color: _isAgeValid ? Colors.green : Colors.red,
+                            size: 18.sp,
+                          ),
+                          SizedBox(width: 8.w),
+                          Text(
+                            _isAgeValid
+                                ? '${AppLocalizations.of(context).age}: $_userAge ${AppLocalizations.of(context).yearsOld}'
+                                : AppLocalizations.of(context)
+                                    .youMustBeAtLeast18,
+                            style: GoogleFonts.inter(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: _isAgeValid ? Colors.green : Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
 
                 SizedBox(height: 20.h),
 

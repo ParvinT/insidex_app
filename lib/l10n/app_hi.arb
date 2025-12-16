@@ -742,5 +742,7 @@
   "browseAllSubliminals": "सभी उपलब्ध सबलिमिनल सत्र ब्राउज़ करें",
   "yourPersonalizedCollection": "आपका व्यक्तिगत सबलिमिनल संग्रह",
   "deletingSessionAndFiles": "सत्र और फ़ाइलें हटाई जा रही हैं...",
-  "errorDeletingSession": "सत्र हटाने में त्रुटि"
+  "errorDeletingSession": "सत्र हटाने में त्रुटि",
+  "tooManyResetRequestsHourly": "बहुत सारे अनुरोध। कृपया एक घंटे बाद पुनः प्रयास करें।",
+  "tooManyResetRequestsDaily": "दैनिक सीमा समाप्त। कृपया कल पुनः प्रयास करें।"
 }

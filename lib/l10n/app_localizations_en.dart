@@ -2162,4 +2162,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get minutesAllTime => 'minutes all time';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'Too many requests. Please try again in an hour.';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'Daily limit reached. Please try again tomorrow.';
 }

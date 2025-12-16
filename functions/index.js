@@ -282,27 +282,89 @@ exports.customPasswordReset = functions.https.onCall(async (data, context) => {
   }
   
   try {
+    // ========== RATE LIMITING ==========
+    const now = admin.firestore.Timestamp.now();
+    const oneHourAgo = admin.firestore.Timestamp.fromDate(
+      new Date(now.toMillis() - 60 * 60 * 1000)
+    );
+    const oneDayAgo = admin.firestore.Timestamp.fromDate(
+      new Date(now.toMillis() - 24 * 60 * 60 * 1000)
+    );
+    
+    // Check hourly limit (max 3 per hour)
+    const hourlyResets = await admin.firestore()
+      .collection('password_reset_logs')
+      .where('email', '==', email)
+      .where('requestedAt', '>', oneHourAgo)
+      .get();
+    
+    if (hourlyResets.size >= 3) {
+      console.log(`Hourly rate limit exceeded for ${email}: ${hourlyResets.size} requests`);
+      
+      await admin.firestore().collection('security_logs').add({
+        type: 'password_reset_rate_limit',
+        email: email,
+        reason: 'hourly_limit_exceeded',
+        attempts: hourlyResets.size,
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
+      });
+      
+      throw new functions.https.HttpsError(
+        'resource-exhausted', 
+        'hourly-limit-exceeded'
+      );
+    }
+    
+    // Check daily limit (max 5 per day)
+    const dailyResets = await admin.firestore()
+      .collection('password_reset_logs')
+      .where('email', '==', email)
+      .where('requestedAt', '>', oneDayAgo)
+      .get();
+    
+    if (dailyResets.size >= 5) {
+      console.log(`Daily rate limit exceeded for ${email}: ${dailyResets.size} requests`);
+      
+      await admin.firestore().collection('security_logs').add({
+        type: 'password_reset_rate_limit',
+        email: email,
+        reason: 'daily_limit_exceeded',
+        attempts: dailyResets.size,
+        timestamp: admin.firestore.FieldValue.serverTimestamp()
+      });
+      
+      throw new functions.https.HttpsError(
+        'resource-exhausted', 
+        'daily-limit-exceeded'
+      );
+    }
+    // ========== END RATE LIMITING ==========
+    
     // 1. Kullanıcı var mı kontrol et
     console.log('Checking user existence...');
     const userRecord = await admin.auth().getUserByEmail(email);
     console.log('User found:', userRecord.uid);
     
-    // 2. Reset linki oluştur (Firebase Admin SDK)
-    console.log('Generating reset link...');
-    const resetLink = await admin.auth().generatePasswordResetLink(email);
-    console.log('Reset link generated');
-    
-    // 3. Kullanıcı adını al
+    // 2. Kullanıcı adını ve dilini al
     const userDoc = await admin.firestore()
       .collection('users')
       .doc(userRecord.uid)
       .get();
     
     const userName = userDoc.exists ? userDoc.data().name : 'User';
-    
-    // 4. Get user's preferred language or use request language
     const userLang = userDoc.exists ? userDoc.data().preferredLanguage : null;
     const lang = normalizeLanguage(userLang || requestLang);
+    
+    // 3. Reset linki oluştur
+    console.log('Generating reset link...');
+    const firebaseResetLink = await admin.auth().generatePasswordResetLink(email);
+    console.log('Firebase reset link generated');
+    
+    // 4. oobCode'u çıkar ve kendi URL'imize ekle
+    const url = new URL(firebaseResetLink);
+    const oobCode = url.searchParams.get('oobCode');
+    const resetLink = `https://insidex-app-3fe91.web.app/reset-password?oobCode=${oobCode}&lang=${lang}`;
+    console.log('Custom reset link created');
     
     // 5. Get email template
     const template = getPasswordResetTemplate(lang);
@@ -315,12 +377,12 @@ exports.customPasswordReset = functions.https.onCall(async (data, context) => {
     };
     
     try {
-  const info = await transporter.sendMail(mailOptions);
-  console.log('Password reset email sent:', info.messageId);
-} catch (mailError) {
-  console.error('Failed to send email:', mailError);
-  throw new functions.https.HttpsError('internal', 'Failed to send email: ' + mailError.message);
-}
+      const info = await transporter.sendMail(mailOptions);
+      console.log('Password reset email sent:', info.messageId);
+    } catch (mailError) {
+      console.error('Failed to send email:', mailError);
+      throw new functions.https.HttpsError('internal', 'Failed to send email: ' + mailError.message);
+    }
     
     // 6. Log tut
     await admin.firestore().collection('password_reset_logs').add({
@@ -330,6 +392,8 @@ exports.customPasswordReset = functions.https.onCall(async (data, context) => {
       status: 'sent'
     });
     
+    console.log(`Password reset sent for ${email} - hourly: ${hourlyResets.size + 1}/3, daily: ${dailyResets.size + 1}/5`);
+    
     return { success: true, message: 'Password reset email sent!' };
     
   } catch (error) {
@@ -337,6 +401,11 @@ exports.customPasswordReset = functions.https.onCall(async (data, context) => {
     
     if (error.code === 'auth/user-not-found') {
       throw new functions.https.HttpsError('not-found', 'No account found with this email');
+    }
+    
+    // Re-throw rate limit errors
+    if (error.code === 'resource-exhausted') {
+      throw error;
     }
     
     throw new functions.https.HttpsError('internal', 'Failed to send reset email');

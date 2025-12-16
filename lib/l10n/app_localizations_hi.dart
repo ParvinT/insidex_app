@@ -2164,4 +2164,12 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get minutesAllTime => 'मिनट कुल';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'बहुत सारे अनुरोध। कृपया एक घंटे बाद पुनः प्रयास करें।';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'दैनिक सीमा समाप्त। कृपया कल पुनः प्रयास करें।';
 }

@@ -115,6 +115,12 @@ class FirebaseErrorHandler {
       case 'invalid-verification-code':
         return l10n.invalidVerificationCode;
 
+      case 'resource-exhausted':
+      case 'hourly-limit-exceeded':
+        return l10n.tooManyResetRequestsHourly;
+      case 'daily-limit-exceeded':
+        return l10n.tooManyResetRequestsDaily;
+
       // Default
       case 'unknown':
       default:

@@ -788,7 +788,9 @@
   "minutesThisWeek": "dakika bu hafta",
   "minutesThisMonth": "dakika bu ay",
   "minutesThisYear": "dakika bu yıl",
-  "minutesAllTime": "dakika toplam"
+  "minutesAllTime": "dakika toplam",
+  "tooManyResetRequestsHourly": "Çok fazla istek. Lütfen bir saat sonra tekrar deneyin.",
+  "tooManyResetRequestsDaily": "Günlük limit aşıldı. Lütfen yarın tekrar deneyin."
 
   
 }

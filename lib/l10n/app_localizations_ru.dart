@@ -2178,4 +2178,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get minutesAllTime => 'минут всего';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'Слишком много запросов. Попробуйте через час.';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'Достигнут дневной лимит. Попробуйте завтра.';
 }

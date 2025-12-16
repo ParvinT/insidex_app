@@ -56,6 +56,9 @@ functions/.env
 functions/node_modules/
 .firebase/
 
+# Firebase Hosting (contains API keys)
+hosting/public/
+
 
 #lib/l10n/app_localizations.dart
 #lib/l10n/app_localizations_*.dart
