@@ -9,7 +9,7 @@ Kayıtlı Ofis: 85 Great Portland Street, London, İngiltere W1W 7LT
 
 ---
 
-ALZHAMI LTD ("biz", "bizim" veya "bize") gizliliğinize saygı duyar ve kişisel verilerinizi korumayı taahhüt eder. Bu Gizlilik Politikası, INSIDEX mobil uygulamamızı ve ilgili hizmetlerimizi kullandığınızda bilgilerinizi nasıl topladığımızı, kullandığımızı, ifşa ettiğimizi ve koruduğumuzu açıklar.
+ALZHAMI LTD ("biz", "bizim" veya "bize") gizliliğinize saygı duyar ve kişisel verilerinizi korumayı taahhüt eder. Bu Gizlilik Politikası, InsideX mobil uygulamamızı ve ilgili hizmetlerimizi kullandığınızda bilgilerinizi nasıl topladığımızı, kullandığımızı, ifşa ettiğimizi ve koruduğumuzu açıklar.
 
 ## 1. Topladığımız Bilgiler
 

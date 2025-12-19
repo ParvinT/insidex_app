@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/constants/app_info.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/subscription_provider.dart';
 import '../../features/subscription/paywall_screen.dart';
@@ -223,7 +224,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                             children: [
                               // Version info
                               Text(
-                                '${AppLocalizations.of(context).version} 1.0.0',
+                                '${AppLocalizations.of(context).version} ${AppInfo.version}',
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w400,

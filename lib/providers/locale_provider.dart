@@ -111,18 +111,18 @@ class LocaleProvider extends ChangeNotifier {
     }
   }
 
-  String getLanguageFlag(String languageCode) {
+  String getCountryCode(String languageCode) {
     switch (languageCode) {
       case 'en':
-        return '🇬🇧';
+        return 'GB';
       case 'ru':
-        return '🇷🇺';
+        return 'RU';
       case 'tr':
-        return '🇹🇷';
+        return 'TR';
       case 'hi':
-        return '🇮🇳';
+        return 'IN';
       default:
-        return '🌍';
+        return 'GB';
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:country_flags/country_flags.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../core/responsive/context_ext.dart';
@@ -31,20 +32,13 @@ class LanguageSelector extends StatelessWidget {
             child: Row(
               children: [
                 // Icon
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: BoxDecoration(
-                    color: colors.greyLight,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      localeProvider.getLanguageFlag(
-                        localeProvider.locale.languageCode,
-                      ),
-                      style: TextStyle(fontSize: 20.sp),
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: CountryFlag.fromCountryCode(
+                    localeProvider
+                        .getCountryCode(localeProvider.locale.languageCode),
+                    height: 20,
+                    width: 28,
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -221,18 +215,12 @@ class LanguageSelector extends StatelessWidget {
         child: Row(
           children: [
             // Flag emoji
-            Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: BoxDecoration(
-                color: colors.greyLight,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  localeProvider.getLanguageFlag(locale.languageCode),
-                  style: TextStyle(fontSize: 18.sp),
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: CountryFlag.fromCountryCode(
+                localeProvider.getCountryCode(locale.languageCode),
+                height: 18,
+                width: 26,
               ),
             ),
             SizedBox(width: 12.w),

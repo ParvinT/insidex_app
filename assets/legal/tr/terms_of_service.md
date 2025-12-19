@@ -11,7 +11,7 @@ Kayıtlı Ofis: 85 Great Portland Street, London, İngiltere W1W 7LT
 > ⚠️ **Tıbbi Feragatname Uyarısı:**  
 > Uygulama bir tıbbi cihaz değildir veya profesyonel tıbbi tavsiyenin yerini tutmaz.
 
-Bu Koşullar, ALZHAMI LTD tarafından sağlanan INSIDEX mobil uygulamasını ve hizmetlerini kullanımınızı düzenler. Hizmetlerimizi kullanarak bu Koşulları kabul etmiş olursunuz.
+Bu Koşullar, ALZHAMI LTD tarafından sağlanan InsideX mobil uygulamasını ve hizmetlerini kullanımınızı düzenler. Hizmetlerimizi kullanarak bu Koşulları kabul etmiş olursunuz.
 
 ## 1. Uygunluk ve Hesap
 
@@ -60,7 +60,7 @@ Mülkiyeti sizde kalır ancak içeriğinizi işlememiz için bize dünya çapın
 
 Tüm içerik (ses programları, yapay zeka algoritmaları, tasarımlar) bize veya lisans verenlere aittir ve yasalarla korunmaktadır.
 
-"INSIDEX" ve ilgili logolar ticari markalarımızdır. İzinsiz kopyalayamaz, dağıtamaz veya türev çalışmalar oluşturamazsınız.
+"InsideX" ve ilgili logolar ticari markalarımızdır. İzinsiz kopyalayamaz, dağıtamaz veya türev çalışmalar oluşturamazsınız.
 
 ## 5. Abonelikler ve Ödemeler
 
@@ -155,4 +155,4 @@ ABD ambargosu altındaki bir ülkede olmadığınızı veya kısıtlı listelerd
 ---
 
 > **Anlaşma Bildirimi:**  
-> INSIDEX'i kullanarak, bu Kullanım Koşullarını okuduğunuzu, anladığınızı ve bunlara bağlı kalmayı kabul ettiğinizi onaylarsınız.
+> InsideX'i kullanarak, bu Kullanım Koşullarını okuduğunuzu, anladığınızı ve bunlara bağlı kalmayı kabul ettiğinizi onaylarsınız.

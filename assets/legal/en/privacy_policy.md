@@ -9,7 +9,7 @@ Registered Office: 85 Great Portland Street, London, England W1W 7LT
 
 ---
 
-ALZHAMI LTD ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our INSIDEX mobile application and related services.
+ALZHAMI LTD ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our InsideX mobile application and related services.
 
 ## 1. Information We Collect
 

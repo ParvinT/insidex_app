@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/constants/app_info.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
 import '../../services/auth_persistence_service.dart';
@@ -182,7 +183,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 // Version info
                 Center(
                   child: Text(
-                    '${AppLocalizations.of(context).version} 1.0.0',
+                    '${AppLocalizations.of(context).version} ${AppInfo.version}',
                     style: GoogleFonts.inter(
                       fontSize: 12.sp,
                       color: colors.textLight,

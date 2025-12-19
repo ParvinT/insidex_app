@@ -17,6 +17,7 @@ import 'providers/subscription_provider.dart';
 import 'services/audio/audio_handler.dart';
 import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
+import 'core/constants/app_info.dart';
 import 'providers/notification_provider.dart';
 import 'package:device_preview/device_preview.dart';
 import 'services/notifications/notification_service.dart';
@@ -37,6 +38,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppInfo.initialize();
 
   // Firebase'i başlat
   await Firebase.initializeApp(

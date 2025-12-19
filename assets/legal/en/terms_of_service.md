@@ -11,7 +11,7 @@ Registered Office: 85 Great Portland Street, London, England W1W 7LT
 > ⚠️ **Medical Disclaimer Warning:**  
 > The App is not a medical device or substitute for professional medical advice.
 
-These Terms govern your use of the INSIDEX mobile application and services provided by ALZHAMI LTD. By using our Services, you agree to these Terms.
+These Terms govern your use of the InsideX mobile application and services provided by ALZHAMI LTD. By using our Services, you agree to these Terms.
 
 ## 1. Eligibility and Account
 
@@ -56,7 +56,7 @@ You retain ownership but grant us a worldwide, royalty-free license to process y
 
 All content (audio programs, AI algorithms, designs) is owned by us or licensors and protected by law.
 
-"INSIDEX" and related logos are our trademarks. You may not copy, distribute, or create derivative works without permission.
+"InsideX" and related logos are our trademarks. You may not copy, distribute, or create derivative works without permission.
 
 ## 5. Subscriptions and Payments
 
@@ -144,4 +144,4 @@ Company Number: 16545604
 ---
 
 > **Agreement Notice:**  
-> By using INSIDEX, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+> By using InsideX, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.

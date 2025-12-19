@@ -21,10 +21,10 @@ class AppLanguages {
 
   /// Language information (name + flag)
   static const Map<String, Map<String, String>> languageInfo = {
-    'en': {'name': 'English', 'flag': '🇬🇧'},
-    'tr': {'name': 'Türkçe', 'flag': '🇹🇷'},
-    'ru': {'name': 'Русский', 'flag': '🇷🇺'},
-    'hi': {'name': 'हिन्दी', 'flag': '🇮🇳'},
+    'en': {'name': 'English', 'flag': '🇬🇧', 'countryCode': 'GB'},
+    'tr': {'name': 'Türkçe', 'flag': '🇹🇷', 'countryCode': 'TR'},
+    'ru': {'name': 'Русский', 'flag': '🇷🇺', 'countryCode': 'RU'},
+    'hi': {'name': 'हिन्दी', 'flag': '🇮🇳', 'countryCode': 'IN'},
   };
 
   /// Default fallback language
@@ -42,6 +42,12 @@ class AppLanguages {
   /// Example: 'en' → '🇬🇧'
   static String getFlag(String code) {
     return languageInfo[code]?['flag'] ?? '🌐';
+  }
+
+  /// Get country code for flag widget
+  /// Example: 'en' → 'GB'
+  static String getCountryCode(String code) {
+    return languageInfo[code]?['countryCode'] ?? 'GB';
   }
 
   /// Get language label (flag + code)
