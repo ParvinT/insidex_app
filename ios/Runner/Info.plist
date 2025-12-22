@@ -95,5 +95,13 @@
 
 	<key>FirebaseCrashlyticsCollectionEnabled</key>
 	<true/>
+
+	<!-- ✅ LOCAL NETWORK -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>This app uses local network to provide audio playback controls.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_insidex._tcp</string>
+	</array>
 </dict>
 </plist>
