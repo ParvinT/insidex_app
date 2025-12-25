@@ -287,6 +287,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sun => 'Sun';
 
   @override
+  String get allCategories => 'All Categories';
+
+  @override
   String get categories => 'Categories';
 
   @override
@@ -2170,4 +2173,39 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get tooManyResetRequestsDaily =>
       'Daily limit reached. Please try again tomorrow.';
+
+  @override
+  String get quizCategories => 'Quiz Categories';
+
+  @override
+  String get icon => 'Icon';
+
+  @override
+  String get both => 'Both';
+
+  @override
+  String get names => 'Names';
+
+  @override
+  String get selectCategoryOptional => 'Select Category (Optional)';
+
+  @override
+  String get noCategory => 'No Category';
+
+  @override
+  String get addYourFirstQuizCategory => 'Add your first quiz category';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return 'Are you sure you want to delete \"$categoryName\"?\n\nNote: Diseases in this category will not be deleted, but their category reference will be removed.';
+  }
+
+  @override
+  String get failedToSaveCategory => 'Failed to save category';
+
+  @override
+  String get failedToDeleteCategory => 'Failed to delete category';
+
+  @override
+  String get grantSubscription => 'Grant Subscription';
 }

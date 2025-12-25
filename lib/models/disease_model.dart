@@ -3,14 +3,16 @@
 class DiseaseModel {
   final String id;
   final String gender;
-  final Map<String, String> translations; // Multi-language names
+  final Map<String, String> translations;
   final DateTime? createdAt;
+  final String? categoryId;
 
   DiseaseModel({
     required this.id,
     required this.gender,
     required this.translations,
     this.createdAt,
+    this.categoryId,
   });
 
   /// Create from Firestore document
@@ -20,6 +22,7 @@ class DiseaseModel {
       gender: map['gender'] ?? 'male',
       translations: Map<String, String>.from(map['translations'] ?? {}),
       createdAt: map['createdAt']?.toDate(),
+      categoryId: map['categoryId'],
     );
   }
 
@@ -29,6 +32,7 @@ class DiseaseModel {
       'gender': gender,
       'translations': translations,
       'createdAt': createdAt,
+      'categoryId': categoryId,
     };
   }
 
@@ -43,12 +47,14 @@ class DiseaseModel {
     String? gender,
     Map<String, String>? translations,
     DateTime? createdAt,
+    String? categoryId,
   }) {
     return DiseaseModel(
       id: id ?? this.id,
       gender: gender ?? this.gender,
       translations: translations ?? this.translations,
       createdAt: createdAt ?? this.createdAt,
+      categoryId: categoryId ?? this.categoryId,
     );
   }
 }

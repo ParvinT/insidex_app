@@ -12,6 +12,7 @@ import 'disease_card.dart';
 import 'how_it_works_sheet.dart';
 import '../screens/quiz_results_screen.dart';
 import '../../../models/disease_model.dart';
+import '../../../models/quiz_category_model.dart';
 import '../../../l10n/app_localizations.dart';
 
 class ExpandableQuizSection extends StatefulWidget {
@@ -34,6 +35,9 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
   bool _isLoadingDiseases = false;
   List<DiseaseModel> _diseases = [];
   String _selectedGender = 'male';
+  String? _selectedCategoryId;
+  List<QuizCategoryModel> _categories = [];
+  bool _isLoadingCategories = false;
   Locale? _previousLocale;
 
   // Pagination state
@@ -59,6 +63,8 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           _isQuizExpanded = false;
           _diseases.clear();
           _selectedDiseaseIds.clear();
+          _selectedCategoryId = null;
+          _categories.clear();
           _currentPage = 0;
         });
       });
@@ -129,33 +135,17 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
         _isQuizExpanded = true;
         _currentPage = 0;
         _selectedDiseaseIds.clear();
+        _selectedCategoryId = null;
       });
 
       // Start container animation
       await _expandController.forward();
 
-      // Load diseases if needed
-      if (_diseases.isEmpty) {
-        setState(() => _isLoadingDiseases = true);
+      // Load categories first
+      await _loadCategories();
 
-        final diseases = await _quizService.getDiseasesByGender(
-          _selectedGender,
-          forceRefresh: true,
-        );
-
-        if (mounted) {
-          setState(() {
-            _diseases = diseases;
-            _isLoadingDiseases = false;
-          });
-
-          // Start stagger animation after data loads
-          _staggerController.forward(from: 0.0);
-        }
-      } else {
-        // Data already loaded, start stagger animation
-        _staggerController.forward(from: 0.0);
-      }
+      // Load diseases
+      await _loadDiseases();
     }
   }
 
@@ -164,27 +154,88 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
 
     setState(() {
       _selectedGender = gender;
-      _isLoadingDiseases = true;
+      _selectedCategoryId = null; // Reset category when gender changes
+      _currentPage = 0;
+      _selectedDiseaseIds.clear();
+      _categories.clear(); // Clear categories to reload for new gender
+    });
+
+    // Reload categories for new gender
+    await _loadCategories();
+    await _loadDiseases();
+  }
+
+  /// Load categories from service
+  Future<void> _loadCategories() async {
+    setState(() => _isLoadingCategories = true);
+
+    try {
+      final currentLang = Localizations.localeOf(context).languageCode;
+      final categories = await _quizService.getCategoriesByGender(
+        _selectedGender,
+        currentLang,
+        forceRefresh: true,
+      );
+
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _isLoadingCategories = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading categories: $e');
+      if (mounted) {
+        setState(() => _isLoadingCategories = false);
+      }
+    }
+  }
+
+  /// Load diseases based on selected gender and category
+  Future<void> _loadDiseases() async {
+    setState(() => _isLoadingDiseases = true);
+
+    try {
+      final diseases = await _quizService.getDiseasesByCategoryAndGender(
+        _selectedCategoryId,
+        _selectedGender,
+        forceRefresh: true,
+      );
+
+      if (mounted) {
+        setState(() {
+          _diseases = diseases;
+          _isLoadingDiseases = false;
+          _currentPage = 0;
+        });
+
+        // Reset page controller
+        if (_pageController.hasClients) {
+          _pageController.jumpToPage(0);
+        }
+
+        // Start stagger animation
+        _staggerController.forward(from: 0.0);
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading diseases: $e');
+      if (mounted) {
+        setState(() => _isLoadingDiseases = false);
+      }
+    }
+  }
+
+  /// Handle category selection
+  Future<void> _onCategoryChanged(String? categoryId) async {
+    if (_selectedCategoryId == categoryId) return;
+
+    setState(() {
+      _selectedCategoryId = categoryId;
       _currentPage = 0;
       _selectedDiseaseIds.clear();
     });
 
-    final diseases = await _quizService.getDiseasesByGender(
-      gender,
-      forceRefresh: true,
-    );
-
-    if (mounted) {
-      setState(() {
-        _diseases = diseases;
-        _isLoadingDiseases = false;
-      });
-
-      // Reset page controller
-      if (_pageController.hasClients) {
-        _pageController.jumpToPage(0);
-      }
-    }
+    await _loadDiseases();
   }
 
   void _toggleDiseaseSelection(String diseaseId) {
@@ -390,7 +441,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                         ),
                       ],
                     ),
-                    child: _isLoadingDiseases
+                    child: (_isLoadingDiseases || _isLoadingCategories)
                         ? SizedBox(
                             height: 200.h,
                             child: Center(
@@ -500,6 +551,10 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
                                       );
                                     },
                                   ),
+                                  // Category selector
+                                  SizedBox(height: 12.h),
+                                  _buildCategorySelector(isTablet),
+                                  SizedBox(height: 8.h),
 
                                   // Horizontal PageView for disease grid
                                   SizedBox(
@@ -886,5 +941,146 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
         ),
       ),
     );
+  }
+
+  /// Build category selector chips
+  Widget _buildCategorySelector(bool isTablet) {
+    final colors = context.colors;
+    final currentLang = Localizations.localeOf(context).languageCode;
+
+    if (_isLoadingCategories) {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 8.h),
+        child: SizedBox(
+          height: 36.h,
+          child: Center(
+            child: SizedBox(
+              width: 20.w,
+              height: 20.w,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: colors.textPrimary,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: isTablet ? 42.h : 36.h,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: 4.w),
+        itemCount: _categories.length + 1, // +1 for "All" option
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            // "All Categories" chip
+            return _buildCategoryChip(
+              id: null,
+              name: AppLocalizations.of(context).allCategories,
+              iconName: 'category',
+              isSelected: _selectedCategoryId == null,
+              isTablet: isTablet,
+            );
+          }
+
+          final category = _categories[index - 1];
+          return _buildCategoryChip(
+            id: category.id,
+            name: category.getName(currentLang),
+            iconName: category.iconName,
+            isSelected: _selectedCategoryId == category.id,
+            isTablet: isTablet,
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCategoryChip({
+    required String? id,
+    required String name,
+    required String iconName,
+    required bool isSelected,
+    required bool isTablet,
+  }) {
+    final colors = context.colors;
+
+    return GestureDetector(
+      onTap: () => _onCategoryChanged(id),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        margin: EdgeInsets.only(right: 8.w),
+        padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 14.w : 12.w,
+          vertical: isTablet ? 8.h : 6.h,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.textPrimary : colors.backgroundElevated,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected
+                ? colors.textPrimary
+                : colors.border.withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _getCategoryIcon(iconName),
+              size: isTablet ? 16.sp : 14.sp,
+              color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+            ),
+            SizedBox(width: 6.w),
+            Text(
+              name,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 13.sp : 12.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? colors.textOnPrimary : colors.textPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getCategoryIcon(String iconName) {
+    const iconMap = {
+      'face': Icons.face,
+      'person': Icons.person,
+      'no_drinks': Icons.no_drinks,
+      'child_care': Icons.child_care,
+      'psychology': Icons.psychology,
+      'psychology_alt': Icons.psychology_alt,
+      'restaurant': Icons.restaurant,
+      'favorite': Icons.favorite,
+      'accessibility_new': Icons.accessibility_new,
+      'air': Icons.air,
+      'visibility': Icons.visibility,
+      'mood': Icons.mood,
+      'water_drop': Icons.water_drop,
+      'medical_services': Icons.medical_services,
+      'health_and_safety': Icons.health_and_safety,
+      'fitness_center': Icons.fitness_center,
+      'category': Icons.category,
+      'healing': Icons.healing,
+      'local_hospital': Icons.local_hospital,
+      'monitor_heart': Icons.monitor_heart,
+      'medication': Icons.medication,
+      'vaccines': Icons.vaccines,
+      'bloodtype': Icons.bloodtype,
+      'sick': Icons.sick,
+      'elderly': Icons.elderly,
+      'pregnant_woman': Icons.pregnant_woman,
+      'male': Icons.male,
+      'female': Icons.female,
+    };
+
+    return iconMap[iconName] ?? Icons.category;
   }
 }

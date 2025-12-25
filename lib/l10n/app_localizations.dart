@@ -648,6 +648,12 @@ abstract class AppLocalizations {
   /// **'Sun'**
   String get sun;
 
+  /// No description provided for @allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get allCategories;
+
   /// No description provided for @categories.
   ///
   /// In en, this message translates to:
@@ -4217,6 +4223,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily limit reached. Please try again tomorrow.'**
   String get tooManyResetRequestsDaily;
+
+  /// No description provided for @quizCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Categories'**
+  String get quizCategories;
+
+  /// No description provided for @icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get icon;
+
+  /// No description provided for @both.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get both;
+
+  /// No description provided for @names.
+  ///
+  /// In en, this message translates to:
+  /// **'Names'**
+  String get names;
+
+  /// No description provided for @selectCategoryOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category (Optional)'**
+  String get selectCategoryOptional;
+
+  /// No description provided for @noCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No Category'**
+  String get noCategory;
+
+  /// No description provided for @addYourFirstQuizCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first quiz category'**
+  String get addYourFirstQuizCategory;
+
+  /// No description provided for @deleteCategoryWithDiseaseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{categoryName}\"?\n\nNote: Diseases in this category will not be deleted, but their category reference will be removed.'**
+  String deleteCategoryWithDiseaseNote(String categoryName);
+
+  /// No description provided for @failedToSaveCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save category'**
+  String get failedToSaveCategory;
+
+  /// No description provided for @failedToDeleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete category'**
+  String get failedToDeleteCategory;
+
+  /// No description provided for @grantSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Subscription'**
+  String get grantSubscription;
 }
 
 class _AppLocalizationsDelegate

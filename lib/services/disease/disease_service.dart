@@ -79,6 +79,42 @@ class DiseaseService {
     }
   }
 
+  /// Get diseases by category and gender
+  Future<List<DiseaseModel>> getDiseasesByCategoryAndGender(
+    String? categoryId,
+    String gender,
+  ) async {
+    try {
+      final allDiseases = await getAllDiseases();
+
+      return allDiseases.where((disease) {
+        // Filter by gender
+        if (disease.gender != gender) return false;
+
+        // Filter by category (if specified)
+        if (categoryId != null && disease.categoryId != categoryId)
+          return false;
+
+        return true;
+      }).toList();
+    } catch (e) {
+      debugPrint(
+          '❌ [DiseaseService] Error filtering by category and gender: $e');
+      return [];
+    }
+  }
+
+  /// Get diseases by category
+  Future<List<DiseaseModel>> getDiseasesByCategory(String categoryId) async {
+    try {
+      final allDiseases = await getAllDiseases();
+      return allDiseases.where((d) => d.categoryId == categoryId).toList();
+    } catch (e) {
+      debugPrint('❌ [DiseaseService] Error filtering by category: $e');
+      return [];
+    }
+  }
+
   /// Search diseases by name (localized)
   Future<List<DiseaseModel>> searchDiseases(
     String query,

@@ -290,6 +290,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get sun => 'रवि';
 
   @override
+  String get allCategories => 'सभी श्रेणियां';
+
+  @override
   String get categories => 'श्रेणियाँ';
 
   @override
@@ -2172,4 +2175,39 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get tooManyResetRequestsDaily =>
       'दैनिक सीमा समाप्त। कृपया कल पुनः प्रयास करें।';
+
+  @override
+  String get quizCategories => 'प्रश्नोत्तरी श्रेणियाँ';
+
+  @override
+  String get icon => 'आइकन';
+
+  @override
+  String get both => 'दोनों';
+
+  @override
+  String get names => 'नाम';
+
+  @override
+  String get selectCategoryOptional => 'श्रेणी चुनें (वैकल्पिक)';
+
+  @override
+  String get noCategory => 'कोई श्रेणी नहीं';
+
+  @override
+  String get addYourFirstQuizCategory => 'अपनी पहली प्रश्नोत्तरी श्रेणी जोड़ें';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return 'क्या आप वाकई \"$categoryName\" को हटाना चाहते हैं?\n\nनोट: इस श्रेणी में बीमारियाँ हटाई नहीं जाएंगी, लेकिन उनका श्रेणी संदर्भ हटा दिया जाएगा।';
+  }
+
+  @override
+  String get failedToSaveCategory => 'श्रेणी सहेजने में विफल';
+
+  @override
+  String get failedToDeleteCategory => 'श्रेणी हटाने में विफल';
+
+  @override
+  String get grantSubscription => 'सदस्यता प्रदान करें';
 }

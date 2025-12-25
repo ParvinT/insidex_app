@@ -119,6 +119,7 @@
   "sat": "Сб",
   "sun": "Вс",
 
+  "allCategories": "Все категории",
   "categories": "Категории",
   "allSessions": "Все сессии",
   "chooseCategory": "Выберите категорию",
@@ -801,6 +802,24 @@
   "minutesThisYear": "минут за год",
   "minutesAllTime": "минут всего",
   "tooManyResetRequestsHourly": "Слишком много запросов. Попробуйте через час.",
-  "tooManyResetRequestsDaily": "Достигнут дневной лимит. Попробуйте завтра."
+  "tooManyResetRequestsDaily": "Достигнут дневной лимит. Попробуйте завтра.",
+  "quizCategories": "Категории теста",
+  "icon": "Иконка",
+  "both": "Оба",
+  "names": "Названия",
+  "selectCategoryOptional": "Выберите категорию (необязательно)",
+  "noCategory": "Без категории",
+  "addYourFirstQuizCategory": "Добавьте свою первую категорию теста",
+  "deleteCategoryWithDiseaseNote": "Вы уверены, что хотите удалить \"{categoryName}\"?\n\nПримечание: Заболевания в этой категории не будут удалены, но их ссылка на категорию будет удалена.",
+  "@deleteCategoryWithDiseaseNote": {
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "Не удалось сохранить категорию",
+  "failedToDeleteCategory": "Не удалось удалить категорию",
+  "grantSubscription": "Предоставить подписку"
   
 }

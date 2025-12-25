@@ -115,6 +115,7 @@
   "sat": "Sat",
   "sun": "Sun",
 
+  "allCategories": "All Categories",
   "categories": "Categories",
   "allSessions": "All Sessions",
   "chooseCategory": "Choose a Category",
@@ -847,7 +848,25 @@
   "minutesThisYear": "minutes this year",
   "minutesAllTime": "minutes all time",
   "tooManyResetRequestsHourly": "Too many requests. Please try again in an hour.",
-  "tooManyResetRequestsDaily": "Daily limit reached. Please try again tomorrow."
+  "tooManyResetRequestsDaily": "Daily limit reached. Please try again tomorrow.",
+  "quizCategories": "Quiz Categories",
+  "icon": "Icon",
+  "both": "Both",
+  "names": "Names",
+  "selectCategoryOptional": "Select Category (Optional)",
+  "noCategory": "No Category",
+  "addYourFirstQuizCategory": "Add your first quiz category",
+  "deleteCategoryWithDiseaseNote": "Are you sure you want to delete \"{categoryName}\"?\n\nNote: Diseases in this category will not be deleted, but their category reference will be removed.",
+  "@deleteCategoryWithDiseaseNote": {
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "Failed to save category",
+  "failedToDeleteCategory": "Failed to delete category",
+  "grantSubscription": "Grant Subscription"
 
 
 }

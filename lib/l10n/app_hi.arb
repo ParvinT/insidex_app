@@ -91,6 +91,7 @@
   "fri": "शुक्र",
   "sat": "शनि",
   "sun": "रवि",
+  "allCategories": "सभी श्रेणियां",
   "categories": "श्रेणियाँ",
   "allSessions": "सभी सत्र",
   "chooseCategory": "एक श्रेणी चुनें",
@@ -744,5 +745,23 @@
   "deletingSessionAndFiles": "सत्र और फ़ाइलें हटाई जा रही हैं...",
   "errorDeletingSession": "सत्र हटाने में त्रुटि",
   "tooManyResetRequestsHourly": "बहुत सारे अनुरोध। कृपया एक घंटे बाद पुनः प्रयास करें।",
-  "tooManyResetRequestsDaily": "दैनिक सीमा समाप्त। कृपया कल पुनः प्रयास करें।"
+  "tooManyResetRequestsDaily": "दैनिक सीमा समाप्त। कृपया कल पुनः प्रयास करें।",
+  "quizCategories": "प्रश्नोत्तरी श्रेणियाँ",
+  "icon": "आइकन",
+  "both": "दोनों",
+  "names": "नाम",
+  "selectCategoryOptional": "श्रेणी चुनें (वैकल्पिक)",
+  "noCategory": "कोई श्रेणी नहीं",
+  "addYourFirstQuizCategory": "अपनी पहली प्रश्नोत्तरी श्रेणी जोड़ें",
+  "deleteCategoryWithDiseaseNote": "क्या आप वाकई \"{categoryName}\" को हटाना चाहते हैं?\n\nनोट: इस श्रेणी में बीमारियाँ हटाई नहीं जाएंगी, लेकिन उनका श्रेणी संदर्भ हटा दिया जाएगा।",
+  "@deleteCategoryWithDiseaseNote": {
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "श्रेणी सहेजने में विफल",
+  "failedToDeleteCategory": "श्रेणी हटाने में विफल",
+  "grantSubscription": "सदस्यता प्रदान करें"
 }

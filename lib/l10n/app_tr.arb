@@ -113,6 +113,7 @@
   "sat": "Cmt",
   "sun": "Paz",
 
+  "allCategories": "Tüm Kategoriler",
   "categories": "Kategoriler",
   "allSessions": "Tüm Seanslar",
   "chooseCategory": "Bir Kategori Seçin",
@@ -790,7 +791,25 @@
   "minutesThisYear": "dakika bu yıl",
   "minutesAllTime": "dakika toplam",
   "tooManyResetRequestsHourly": "Çok fazla istek. Lütfen bir saat sonra tekrar deneyin.",
-  "tooManyResetRequestsDaily": "Günlük limit aşıldı. Lütfen yarın tekrar deneyin."
+  "tooManyResetRequestsDaily": "Günlük limit aşıldı. Lütfen yarın tekrar deneyin.",
+  "quizCategories": "Test Kategorileri",
+  "icon": "İkon",
+  "both": "Her İkisi",
+  "names": "İsimler",
+  "selectCategoryOptional": "Kategori Seçin (Opsiyonel)",
+  "noCategory": "Kategori Yok",
+  "addYourFirstQuizCategory": "İlk test kategorinizi ekleyin",
+  "deleteCategoryWithDiseaseNote": "\"{categoryName}\" kategorisini silmek istediğinizden emin misiniz?\n\nNot: Bu kategorideki hastalıklar silinmeyecek, ancak kategori referansları kaldırılacaktır.",
+  "@deleteCategoryWithDiseaseNote": {
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "Kategori kaydedilemedi",
+  "failedToDeleteCategory": "Kategori silinemedi",
+  "grantSubscription": "Abonelik Ver"
 
   
 }

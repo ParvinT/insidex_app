@@ -289,6 +289,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sun => 'Paz';
 
   @override
+  String get allCategories => 'Tüm Kategoriler';
+
+  @override
   String get categories => 'Kategoriler';
 
   @override
@@ -2179,4 +2182,39 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get tooManyResetRequestsDaily =>
       'Günlük limit aşıldı. Lütfen yarın tekrar deneyin.';
+
+  @override
+  String get quizCategories => 'Test Kategorileri';
+
+  @override
+  String get icon => 'İkon';
+
+  @override
+  String get both => 'Her İkisi';
+
+  @override
+  String get names => 'İsimler';
+
+  @override
+  String get selectCategoryOptional => 'Kategori Seçin (Opsiyonel)';
+
+  @override
+  String get noCategory => 'Kategori Yok';
+
+  @override
+  String get addYourFirstQuizCategory => 'İlk test kategorinizi ekleyin';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return '\"$categoryName\" kategorisini silmek istediğinizden emin misiniz?\n\nNot: Bu kategorideki hastalıklar silinmeyecek, ancak kategori referansları kaldırılacaktır.';
+  }
+
+  @override
+  String get failedToSaveCategory => 'Kategori kaydedilemedi';
+
+  @override
+  String get failedToDeleteCategory => 'Kategori silinemedi';
+
+  @override
+  String get grantSubscription => 'Abonelik Ver';
 }

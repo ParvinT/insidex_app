@@ -2,9 +2,11 @@
 
 import 'package:flutter/foundation.dart';
 import '../../../models/disease_model.dart';
+import '../../../models/quiz_category_model.dart';
 import '../../../services/disease/disease_service.dart';
 import '../../../services/disease/disease_cause_service.dart';
 import '../../../services/language_helper_service.dart';
+import 'quiz_category_service.dart';
 
 /// Quiz Service - Facade pattern for disease quiz functionality
 /// Wraps DiseaseService and DiseaseCauseService for cleaner API
@@ -15,6 +17,7 @@ class QuizService {
 
   final DiseaseService _diseaseService = DiseaseService();
   final DiseaseCauseService _causeService = DiseaseCauseService();
+  final QuizCategoryService _categoryService = QuizCategoryService();
 
   // =================== PUBLIC API ===================
 
@@ -73,6 +76,79 @@ class QuizService {
     } catch (e) {
       debugPrint('❌ [QuizService] Error loading diseases by gender: $e');
       return [];
+    }
+  }
+
+  // =================== CATEGORY METHODS ===================
+
+  /// Get all quiz categories
+  Future<List<QuizCategoryModel>> getCategoriesByGender(
+    String gender,
+    String locale, {
+    bool forceRefresh = false,
+  }) async {
+    try {
+      final categories = await _categoryService.getCategoriesByGender(
+        gender,
+        locale,
+        forceRefresh: forceRefresh,
+      );
+
+      debugPrint(
+          '✅ [QuizService] Loaded ${categories.length} categories for gender: $gender');
+      return categories;
+    } catch (e) {
+      debugPrint('❌ [QuizService] Error loading categories: $e');
+      return [];
+    }
+  }
+
+  /// Get diseases by category and gender, sorted alphabetically
+  Future<List<DiseaseModel>> getDiseasesByCategoryAndGender(
+    String? categoryId,
+    String gender, {
+    bool forceRefresh = false,
+  }) async {
+    try {
+      final allDiseases = await _diseaseService.getAllDiseases(
+        forceRefresh: forceRefresh,
+      );
+
+      // Filter by gender and category
+      final diseases = allDiseases.where((d) {
+        // Filter by gender
+        if (d.gender != gender) return false;
+
+        // Filter by category (null means "all categories")
+        if (categoryId != null && d.categoryId != categoryId) return false;
+
+        return true;
+      }).toList();
+
+      // Sort alphabetically by current language
+      final currentLanguage = await LanguageHelperService.getCurrentLanguage();
+      diseases.sort((a, b) {
+        final nameA = a.getLocalizedName(currentLanguage).toLowerCase();
+        final nameB = b.getLocalizedName(currentLanguage).toLowerCase();
+        return nameA.compareTo(nameB);
+      });
+
+      debugPrint(
+          '✅ [QuizService] Loaded ${diseases.length} diseases for category: ${categoryId ?? "all"}, gender: $gender');
+      return diseases;
+    } catch (e) {
+      debugPrint('❌ [QuizService] Error loading diseases by category: $e');
+      return [];
+    }
+  }
+
+  /// Get disease counts per category for a gender
+  Future<Map<String, int>> getCategoryDiseaseCounts(String gender) async {
+    try {
+      return await _categoryService.getCategoryDiseaseCounts(gender);
+    } catch (e) {
+      debugPrint('❌ [QuizService] Error getting category counts: $e');
+      return {};
     }
   }
 
@@ -202,6 +278,7 @@ class QuizService {
   void clearCache() {
     _diseaseService.clearCache();
     _causeService.clearCache();
+    _categoryService.clearCache();
     debugPrint('🗑️ [QuizService] Cache cleared');
   }
 }

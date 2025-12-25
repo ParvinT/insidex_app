@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'disease_management_screen.dart';
 import 'disease_cause_management_screen.dart';
+import 'quiz_category_management_screen.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -214,6 +215,23 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
 
                     _buildCompactMenuItem(
+                      icon: Icons.category_outlined,
+                      title: AppLocalizations.of(context).quizCategories,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const QuizCategoryManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+
+                    _buildCompactMenuItem(
                       icon: Icons.psychology,
                       title: AppLocalizations.of(context).manageDiseases,
                       onTap: () {
@@ -287,7 +305,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.card_giftcard,
-                      title: 'Grant Subscription',
+                      title: AppLocalizations.of(context).grantSubscription,
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(

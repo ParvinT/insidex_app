@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../models/disease_model.dart';
+import '../../models/quiz_category_model.dart';
+import '../../features/quiz/services/quiz_category_service.dart';
 import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -25,6 +27,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
     with SingleTickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final DiseaseService _diseaseService = DiseaseService();
+  final QuizCategoryService _categoryService = QuizCategoryService();
 
   late TabController _tabController;
 
@@ -34,7 +37,9 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
   // Other fields
 
   String _selectedGender = 'male';
-
+  String? _selectedCategoryId;
+  List<QuizCategoryModel> _categories = [];
+  bool _isLoadingCategories = true;
   bool _isLoading = false;
 
   @override
@@ -52,9 +57,27 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
       _nameControllers[langCode] = TextEditingController();
     }
 
+    _loadCategories();
+
     // Load existing data if editing
     if (widget.diseaseToEdit != null) {
       _loadExistingData();
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final categories = await _categoryService.getAllCategories();
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _isLoadingCategories = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingCategories = false);
+      }
     }
   }
 
@@ -69,8 +92,8 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
     });
 
     // Load other fields
-
     _selectedGender = disease.gender;
+    _selectedCategoryId = disease.categoryId;
 
     setState(() {});
   }
@@ -117,6 +140,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
         gender: _selectedGender,
         translations: translations,
         createdAt: widget.diseaseToEdit?.createdAt ?? DateTime.now(),
+        categoryId: _selectedCategoryId,
       );
 
       // Save to Firestore
@@ -213,6 +237,16 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
 
                     SizedBox(height: 32.h),
 
+                    Text(
+                      AppLocalizations.of(context).category,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                    _buildCategoryDropdown(colors),
+
                     // Save Button
                     _buildSaveButton(colors),
                   ],
@@ -230,7 +264,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
       color: colors.backgroundPure,
       child: TabBar(
         controller: _tabController,
-         labelColor: colors.textPrimary,
+        labelColor: colors.textPrimary,
         unselectedLabelColor: colors.textSecondary,
         indicatorColor: colors.textPrimary,
         tabs: AppLanguages.supportedLanguages.map((langCode) {
@@ -337,6 +371,76 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
                   fontWeight: FontWeight.w600,
                 ),
               ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryDropdown(AppThemeExtension colors) {
+    if (_isLoadingCategories) {
+      return Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundElevated,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: colors.border.withValues(alpha: 0.3)),
+        ),
+        child: Center(
+          child: SizedBox(
+            width: 20.w,
+            height: 20.w,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colors.textPrimary,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: colors.backgroundElevated,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: colors.border.withValues(alpha: 0.3)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String?>(
+          value: _selectedCategoryId,
+          hint: Text(
+            AppLocalizations.of(context).selectCategoryOptional,
+            style: GoogleFonts.inter(color: colors.textSecondary),
+          ),
+          isExpanded: true,
+          dropdownColor: colors.backgroundElevated,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            color: colors.textPrimary,
+          ),
+          items: [
+            // None option
+            DropdownMenuItem<String?>(
+              value: null,
+              child: Text(
+                AppLocalizations.of(context).noCategory,
+                style: GoogleFonts.inter(color: colors.textSecondary),
+              ),
+            ),
+            // Category options
+            ..._categories.map((category) {
+              return DropdownMenuItem<String?>(
+                value: category.id,
+                child: Text(
+                  category.getName('en'),
+                  style: GoogleFonts.inter(color: colors.textPrimary),
+                ),
+              );
+            }),
+          ],
+          onChanged: (value) {
+            setState(() => _selectedCategoryId = value);
+          },
+        ),
       ),
     );
   }

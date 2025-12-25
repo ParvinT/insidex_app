@@ -288,6 +288,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sun => 'Вс';
 
   @override
+  String get allCategories => 'Все категории';
+
+  @override
   String get categories => 'Категории';
 
   @override
@@ -2186,4 +2189,39 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get tooManyResetRequestsDaily =>
       'Достигнут дневной лимит. Попробуйте завтра.';
+
+  @override
+  String get quizCategories => 'Категории теста';
+
+  @override
+  String get icon => 'Иконка';
+
+  @override
+  String get both => 'Оба';
+
+  @override
+  String get names => 'Названия';
+
+  @override
+  String get selectCategoryOptional => 'Выберите категорию (необязательно)';
+
+  @override
+  String get noCategory => 'Без категории';
+
+  @override
+  String get addYourFirstQuizCategory => 'Добавьте свою первую категорию теста';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return 'Вы уверены, что хотите удалить \"$categoryName\"?\n\nПримечание: Заболевания в этой категории не будут удалены, но их ссылка на категорию будет удалена.';
+  }
+
+  @override
+  String get failedToSaveCategory => 'Не удалось сохранить категорию';
+
+  @override
+  String get failedToDeleteCategory => 'Не удалось удалить категорию';
+
+  @override
+  String get grantSubscription => 'Предоставить подписку';
 }
