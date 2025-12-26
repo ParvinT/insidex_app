@@ -2217,4 +2217,22 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get grantSubscription => 'Abonelik Ver';
+
+  @override
+  String get quizTab => 'Test';
+
+  @override
+  String get quizCategoriesSection => 'Test Kategorileri';
+
+  @override
+  String get diseasesSection => 'Hastalıklar';
+
+  @override
+  String get sessionAvailable => 'Seans';
+
+  @override
+  String get comingSoon => 'Yakında';
+
+  @override
+  String get searchQuizHint => 'Hastalık, kategori ara...';
 }

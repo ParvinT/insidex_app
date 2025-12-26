@@ -763,5 +763,12 @@
   },
   "failedToSaveCategory": "श्रेणी सहेजने में विफल",
   "failedToDeleteCategory": "श्रेणी हटाने में विफल",
-  "grantSubscription": "सदस्यता प्रदान करें"
+  "grantSubscription": "सदस्यता प्रदान करें",
+  "quizTab": "परीक्षण",
+  "quizCategoriesSection": "परीक्षण श्रेणियाँ",
+  "diseasesSection": "बीमारियाँ",
+  "uncategorized": "श्रेणीबद्ध नहीं",
+  "sessionAvailable": "सत्र",
+  "comingSoon": "जल्द आ रहा है",
+  "searchQuizHint": "बीमारियाँ, श्रेणियाँ खोजें..."
 }

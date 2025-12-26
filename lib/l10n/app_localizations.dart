@@ -4289,6 +4289,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Grant Subscription'**
   String get grantSubscription;
+
+  /// No description provided for @quizTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get quizTab;
+
+  /// No description provided for @quizCategoriesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Categories'**
+  String get quizCategoriesSection;
+
+  /// No description provided for @diseasesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Diseases'**
+  String get diseasesSection;
+
+  /// No description provided for @sessionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get sessionAvailable;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming'**
+  String get comingSoon;
+
+  /// No description provided for @searchQuizHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search diseases, categories...'**
+  String get searchQuizHint;
 }
 
 class _AppLocalizationsDelegate

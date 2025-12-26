@@ -809,7 +809,14 @@
   },
   "failedToSaveCategory": "Kategori kaydedilemedi",
   "failedToDeleteCategory": "Kategori silinemedi",
-  "grantSubscription": "Abonelik Ver"
+  "grantSubscription": "Abonelik Ver",
+  "quizTab": "Test",
+  "quizCategoriesSection": "Test Kategorileri",
+  "diseasesSection": "Hastalıklar",
+  "uncategorized": "Kategorisiz",
+  "sessionAvailable": "Seans",
+  "comingSoon": "Yakında",
+  "searchQuizHint": "Hastalık, kategori ara..."
 
   
 }

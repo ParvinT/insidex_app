@@ -247,6 +247,8 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
                     ),
                     _buildCategoryDropdown(colors),
 
+                    SizedBox(height: 32.h),
+
                     // Save Button
                     _buildSaveButton(colors),
                   ],
@@ -350,7 +352,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
   Widget _buildSaveButton(AppThemeExtension colors) {
     return SizedBox(
       width: double.infinity,
-      height: 50.h,
+      height: 60.h,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveDisease,
         style: ElevatedButton.styleFrom(
@@ -367,9 +369,11 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
                     ? AppLocalizations.of(context).updateDisease
                     : AppLocalizations.of(context).addDisease,
                 style: GoogleFonts.inter(
-                  fontSize: 16.sp,
+                  fontSize: 16.sp.clamp(12.0, 18.0),
                   fontWeight: FontWeight.w600,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
       ),
     );

@@ -866,7 +866,14 @@
   },
   "failedToSaveCategory": "Failed to save category",
   "failedToDeleteCategory": "Failed to delete category",
-  "grantSubscription": "Grant Subscription"
+  "grantSubscription": "Grant Subscription",
+  "quizTab": "Quiz",
+  "quizCategoriesSection": "Quiz Categories",
+  "diseasesSection": "Diseases",
+  "uncategorized": "Uncategorized",
+  "sessionAvailable": "Session",
+  "comingSoon": "Coming",
+  "searchQuizHint": "Search diseases, categories..."
 
 
 }

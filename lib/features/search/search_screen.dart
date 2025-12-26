@@ -8,12 +8,16 @@ import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
-import 'search_service.dart';
 import '../library/sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
-import '../../shared/widgets/session_card.dart';
+import '../../shared/widgets/session_card.dart'; // EKLE:
+import '../quiz/screens/quiz_results_screen.dart';
+import 'search_service.dart';
 import 'search_history_service.dart';
 import 'widgets/search_history_view.dart';
+import 'quiz_search_service.dart';
+import 'widgets/quiz_category_search_card.dart';
+import 'widgets/disease_search_card.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -26,6 +30,7 @@ class _SearchScreenState extends State<SearchScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final SearchService _searchService = SearchService();
+  final QuizSearchService _quizSearchService = QuizSearchService();
   final FocusNode _focusNode = FocusNode();
   final SearchHistoryService _historyService = SearchHistoryService();
   late TabController _tabController;
@@ -38,11 +43,15 @@ class _SearchScreenState extends State<SearchScreen>
     'categories': <Map<String, dynamic>>[],
     'sessions': <Map<String, dynamic>>[],
   };
+  Map<String, dynamic> _quizSearchResults = {
+    'quizCategories': <QuizCategorySearchResult>[],
+    'diseases': <DiseaseSearchResult>[],
+  };
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _loadSearchHistory();
 
     // Auto-focus when opened
@@ -140,6 +149,10 @@ class _SearchScreenState extends State<SearchScreen>
           'categories': <Map<String, dynamic>>[],
           'sessions': <Map<String, dynamic>>[],
         };
+        _quizSearchResults = {
+          'quizCategories': <QuizCategorySearchResult>[],
+          'diseases': <DiseaseSearchResult>[],
+        };
         _isSearching = false;
       });
       return;
@@ -147,17 +160,30 @@ class _SearchScreenState extends State<SearchScreen>
 
     setState(() => _isSearching = true);
 
-    final results = await _searchService.search(query);
+    // Search in parallel
+    final results = await Future.wait([
+      _searchService.search(query),
+      _quizSearchService.searchAll(query),
+    ]);
 
     setState(() {
-      _searchResults = results;
+      _searchResults = results[0];
+      _quizSearchResults = results[1];
       _isSearching = false;
     });
   }
 
-  int get _totalResults => _searchService.getTotalResultCount(_searchResults);
+  int get _totalResults =>
+      _searchService.getTotalResultCount(_searchResults) +
+      _quizSearchService.getTotalQuizResultCount(_quizSearchResults);
   int get _categoryCount => (_searchResults['categories'] as List).length;
   int get _sessionCount => (_searchResults['sessions'] as List).length;
+  int get _quizCategoryCount => // 🆕
+      (_quizSearchResults['quizCategories'] as List<QuizCategorySearchResult>)
+          .length;
+  int get _diseaseCount => // 🆕
+      (_quizSearchResults['diseases'] as List<DiseaseSearchResult>).length;
+  int get _quizTotalCount => _quizCategoryCount + _diseaseCount;
 
   @override
   Widget build(BuildContext context) {
@@ -298,29 +324,29 @@ class _SearchScreenState extends State<SearchScreen>
 
   Widget _buildTabs(bool isTablet, AppLocalizations l10n) {
     final colors = context.colors;
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 20.w),
-      child: TabBar(
-        controller: _tabController,
-        labelColor: colors.textPrimary,
-        unselectedLabelColor: colors.textSecondary,
-        indicatorColor: colors.textPrimary,
-        isScrollable: false,
-        labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 12.w : 8.w),
-        labelStyle: GoogleFonts.inter(
-          fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: [
-          Tab(text: '${l10n.allResults} ($_totalResults)'),
-          Tab(text: '${l10n.searchCategories} ($_categoryCount)'),
-          Tab(text: '${l10n.searchSessionsTab} ($_sessionCount)'),
-        ],
+    return TabBar(
+      controller: _tabController,
+      labelColor: colors.textPrimary,
+      unselectedLabelColor: colors.textSecondary,
+      indicatorColor: colors.textPrimary,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 20.w),
+      labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 16.w : 12.w),
+      labelStyle: GoogleFonts.inter(
+        fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
+        fontWeight: FontWeight.w600,
       ),
+      unselectedLabelStyle: GoogleFonts.inter(
+        fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
+        fontWeight: FontWeight.w500,
+      ),
+      tabs: [
+        Tab(text: '${l10n.allResults} ($_totalResults)'),
+        Tab(text: '${l10n.searchCategories} ($_categoryCount)'),
+        Tab(text: '${l10n.searchSessionsTab} ($_sessionCount)'),
+        Tab(text: '${l10n.quizTab} ($_quizTotalCount)'),
+      ],
     );
   }
 
@@ -343,6 +369,7 @@ class _SearchScreenState extends State<SearchScreen>
         _buildAllResults(isTablet),
         _buildCategoriesTab(isTablet),
         _buildSessionsTab(isTablet),
+        _buildQuizTab(isTablet),
       ],
     );
   }
@@ -396,6 +423,24 @@ class _SearchScreenState extends State<SearchScreen>
               isTablet, AppLocalizations.of(context).searchSessionsTab),
           SizedBox(height: isTablet ? 14.h : 12.h),
           ..._buildSessionItems(isTablet),
+          SizedBox(height: isTablet ? 28.h : 24.h),
+        ],
+
+// 🆕 Quiz Categories
+        if (_quizCategoryCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).quizCategoriesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildQuizCategoryItems(isTablet),
+          SizedBox(height: isTablet ? 28.h : 24.h),
+        ],
+
+// 🆕 Diseases
+        if (_diseaseCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).diseasesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildDiseaseItems(isTablet),
         ],
       ],
     );
@@ -583,5 +628,116 @@ class _SearchScreenState extends State<SearchScreen>
         );
       },
     );
+  }
+
+  // 🆕 Quiz Tab
+  Widget _buildQuizTab(bool isTablet) {
+    if (_quizTotalCount == 0) {
+      return _buildNoResults(isTablet, AppLocalizations.of(context));
+    }
+
+    return ListView(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      children: [
+        // Quiz Categories
+        if (_quizCategoryCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).quizCategoriesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildQuizCategoryItems(isTablet),
+          SizedBox(height: isTablet ? 28.h : 24.h),
+        ],
+
+        // Diseases
+        if (_diseaseCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).diseasesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildDiseaseItems(isTablet),
+        ],
+      ],
+    );
+  }
+
+// 🆕 Quiz Category Items
+  List<Widget> _buildQuizCategoryItems(bool isTablet) {
+    final quizCategories =
+        _quizSearchResults['quizCategories'] as List<QuizCategorySearchResult>;
+    final currentLang = Localizations.localeOf(context).languageCode;
+
+    return quizCategories.map((result) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: isTablet ? 14.h : 12.h),
+        child: QuizCategorySearchCard(
+          result: result,
+          locale: currentLang,
+          onTap: () async {
+            await _saveSearchAndNavigate();
+            if (!mounted) return;
+
+            // Show info and navigate to home
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '${result.category.getName(currentLang)} - ${result.totalCount} ${AppLocalizations.of(context).diseases}',
+                ),
+                backgroundColor: context.colors.textPrimary,
+                behavior: SnackBarBehavior.floating,
+                action: SnackBarAction(
+                  label: AppLocalizations.of(context)
+                      .startEmotionalTestFree
+                      .split('—')
+                      .first
+                      .trim(),
+                  textColor: context.colors.textOnPrimary,
+                  onPressed: () {
+                    Navigator.popUntil(context, (route) => route.isFirst);
+                  },
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }).toList();
+  }
+
+// 🆕 Disease Items
+  List<Widget> _buildDiseaseItems(bool isTablet) {
+    final diseases =
+        _quizSearchResults['diseases'] as List<DiseaseSearchResult>;
+    final currentLang = Localizations.localeOf(context).languageCode;
+
+    return diseases.map((result) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: isTablet ? 14.h : 12.h),
+        child: DiseaseSearchCard(
+          result: result,
+          locale: currentLang,
+          onTap: () async {
+            await _saveSearchAndNavigate();
+            if (!mounted) return;
+
+            // Navigate to QuizResultsScreen with this disease
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => QuizResultsScreen(
+                  selectedDiseases: [result.disease],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }).toList();
+  }
+
+// 🆕 Helper: Save search and navigate
+  Future<void> _saveSearchAndNavigate() async {
+    if (_searchController.text.trim().isNotEmpty) {
+      await _historyService.saveSearchQuery(_searchController.text.trim());
+      await _loadSearchHistory();
+    }
   }
 }

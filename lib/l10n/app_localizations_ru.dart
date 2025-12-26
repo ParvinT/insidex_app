@@ -1823,7 +1823,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noSessionsFound => 'Сессии не найдены';
 
   @override
-  String get uncategorized => 'अवर्गीकृत';
+  String get uncategorized => 'Без категории';
 
   @override
   String get adminSettings => 'Настройки администратора';
@@ -2224,4 +2224,22 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get grantSubscription => 'Предоставить подписку';
+
+  @override
+  String get quizTab => 'Тест';
+
+  @override
+  String get quizCategoriesSection => 'Категории теста';
+
+  @override
+  String get diseasesSection => 'Заболевания';
+
+  @override
+  String get sessionAvailable => 'Сеанс';
+
+  @override
+  String get comingSoon => 'Скоро';
+
+  @override
+  String get searchQuizHint => 'Поиск болезней, категорий...';
 }

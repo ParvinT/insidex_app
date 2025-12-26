@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'dart:math' as math;
 import '../offline/offline_mode_screen.dart';
@@ -185,6 +186,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   /// Check real internet connectivity by making HTTP request
   Future<bool> _checkRealConnectivity() async {
+    if (kIsWeb) {
+      debugPrint('📡 [Connectivity] Web platform - skipping check');
+      return true;
+    }
     try {
       // First check basic connectivity
       final connectivityResult = await Connectivity().checkConnectivity();

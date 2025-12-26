@@ -1811,7 +1811,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noSessionsFound => 'कोई सत्र नहीं मिला';
 
   @override
-  String get uncategorized => 'बिना श्रेणी';
+  String get uncategorized => 'श्रेणीबद्ध नहीं';
 
   @override
   String get adminSettings => 'प्रशासक सेटिंग्स';
@@ -2210,4 +2210,22 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get grantSubscription => 'सदस्यता प्रदान करें';
+
+  @override
+  String get quizTab => 'परीक्षण';
+
+  @override
+  String get quizCategoriesSection => 'परीक्षण श्रेणियाँ';
+
+  @override
+  String get diseasesSection => 'बीमारियाँ';
+
+  @override
+  String get sessionAvailable => 'सत्र';
+
+  @override
+  String get comingSoon => 'जल्द आ रहा है';
+
+  @override
+  String get searchQuizHint => 'बीमारियाँ, श्रेणियाँ खोजें...';
 }

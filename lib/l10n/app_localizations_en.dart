@@ -2208,4 +2208,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get grantSubscription => 'Grant Subscription';
+
+  @override
+  String get quizTab => 'Quiz';
+
+  @override
+  String get quizCategoriesSection => 'Quiz Categories';
+
+  @override
+  String get diseasesSection => 'Diseases';
+
+  @override
+  String get sessionAvailable => 'Session';
+
+  @override
+  String get comingSoon => 'Coming';
+
+  @override
+  String get searchQuizHint => 'Search diseases, categories...';
 }
