@@ -3918,6 +3918,12 @@ abstract class AppLocalizations {
   /// **'Your Results'**
   String get yourResults;
 
+  /// No description provided for @viewResults.
+  ///
+  /// In en, this message translates to:
+  /// **'View Results'**
+  String get viewResults;
+
   /// No description provided for @selectedDiseases.
   ///
   /// In en, this message translates to:

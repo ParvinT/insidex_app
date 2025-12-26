@@ -2011,6 +2011,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get yourResults => 'Your Results';
 
   @override
+  String get viewResults => 'View Results';
+
+  @override
   String get selectedDiseases => 'Selected Diseases';
 
   @override

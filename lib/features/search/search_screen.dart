@@ -18,6 +18,7 @@ import 'widgets/search_history_view.dart';
 import 'quiz_search_service.dart';
 import 'widgets/quiz_category_search_card.dart';
 import 'widgets/disease_search_card.dart';
+import 'widgets/quiz_category_diseases_sheet.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -377,32 +378,35 @@ class _SearchScreenState extends State<SearchScreen>
   Widget _buildNoResults(bool isTablet, AppLocalizations l10n) {
     final colors = context.colors;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: isTablet ? 80.sp : 64.sp,
-            color: colors.greyMedium,
-          ),
-          SizedBox(height: isTablet ? 24.h : 16.h),
-          Text(
-            l10n.noResultsFound,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 20.sp : 18.sp,
-              fontWeight: FontWeight.w600,
-              color: colors.textSecondary,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: isTablet ? 80.sp : 64.sp,
+              color: colors.greyMedium,
             ),
-          ),
-          SizedBox(height: isTablet ? 10.h : 8.h),
-          Text(
-            l10n.tryDifferentKeywords,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 15.sp : 14.sp,
-              color: colors.textSecondary,
+            SizedBox(height: isTablet ? 24.h : 16.h),
+            Text(
+              l10n.noResultsFound,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 20.sp : 18.sp,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: isTablet ? 10.h : 8.h),
+            Text(
+              l10n.tryDifferentKeywords,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 15.sp : 14.sp,
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -675,26 +679,11 @@ class _SearchScreenState extends State<SearchScreen>
             await _saveSearchAndNavigate();
             if (!mounted) return;
 
-            // Show info and navigate to home
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  '${result.category.getName(currentLang)} - ${result.totalCount} ${AppLocalizations.of(context).diseases}',
-                ),
-                backgroundColor: context.colors.textPrimary,
-                behavior: SnackBarBehavior.floating,
-                action: SnackBarAction(
-                  label: AppLocalizations.of(context)
-                      .startEmotionalTestFree
-                      .split('—')
-                      .first
-                      .trim(),
-                  textColor: context.colors.textOnPrimary,
-                  onPressed: () {
-                    Navigator.popUntil(context, (route) => route.isFirst);
-                  },
-                ),
-              ),
+            // Show bottom sheet with diseases
+            QuizCategoryDiseasesSheet.show(
+              context,
+              category: result.category,
+              locale: currentLang,
             );
           },
         ),

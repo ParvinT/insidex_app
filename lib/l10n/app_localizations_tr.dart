@@ -2019,6 +2019,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get yourResults => 'Sonuçların';
 
   @override
+  String get viewResults => 'Sonuçları Gör';
+
+  @override
   String get selectedDiseases => 'Seçilen Hastalıklar';
 
   @override

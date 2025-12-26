@@ -2013,6 +2013,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get yourResults => 'आपके परिणाम';
 
   @override
+  String get viewResults => 'परिणाम देखें';
+
+  @override
   String get selectedDiseases => 'चयनित बीमारियाँ';
 
   @override

@@ -117,32 +117,35 @@ class SearchHistoryView extends StatelessWidget {
       BuildContext context, bool isTablet, AppLocalizations l10n) {
     final colors = context.colors;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search,
-            size: isTablet ? 80.sp : 64.sp,
-            color: colors.greyMedium,
-          ),
-          SizedBox(height: isTablet ? 24.h : 16.h),
-          Text(
-            l10n.search,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 20.sp : 18.sp,
-              fontWeight: FontWeight.w600,
-              color: colors.textSecondary,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search,
+              size: isTablet ? 80.sp : 64.sp,
+              color: colors.greyMedium,
             ),
-          ),
-          SizedBox(height: isTablet ? 10.h : 8.h),
-          Text(
-            l10n.searchSessions,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 15.sp : 14.sp,
-              color: colors.textSecondary,
+            SizedBox(height: isTablet ? 24.h : 16.h),
+            Text(
+              l10n.search,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 20.sp : 18.sp,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: isTablet ? 10.h : 8.h),
+            Text(
+              l10n.searchSessions,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 15.sp : 14.sp,
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

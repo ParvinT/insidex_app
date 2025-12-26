@@ -2027,6 +2027,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get yourResults => 'Ваши результаты';
 
   @override
+  String get viewResults => 'Показать результаты';
+
+  @override
   String get selectedDiseases => 'Выбранные заболевания';
 
   @override

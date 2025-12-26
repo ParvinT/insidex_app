@@ -55,6 +55,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
   // Selection state
   final Set<String> _selectedDiseaseIds = {};
   static const int _maxSelection = 10;
+  bool _hasAnimatedGender = false;
 
   @override
   void didChangeDependencies() {
@@ -134,6 +135,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           _searchController.clear();
           _searchQuery = '';
           _filteredDiseases = [];
+          _hasAnimatedGender = false;
         });
       }
     } else {
@@ -176,8 +178,6 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
     if (_pageController.hasClients) {
       _pageController.jumpToPage(0);
     }
-
-    _staggerController.forward(from: 0.0);
   }
 
   void _clearSearch() {
@@ -191,8 +191,6 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
     if (_pageController.hasClients) {
       _pageController.jumpToPage(0);
     }
-
-    _staggerController.forward(from: 0.0);
   }
 
   Future<void> _onGenderChanged(String gender) async {
@@ -259,7 +257,10 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           _pageController.jumpToPage(0);
         }
 
-        _staggerController.forward(from: 0.0);
+        if (!_hasAnimatedGender) {
+          _staggerController.forward(from: 0.0);
+          _hasAnimatedGender = true;
+        }
       }
     } catch (e) {
       debugPrint('❌ Error loading diseases: $e');
