@@ -540,6 +540,12 @@ abstract class AppLocalizations {
   /// **'min'**
   String get min;
 
+  /// No description provided for @hourShort.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get hourShort;
+
   /// No description provided for @days.
   ///
   /// In en, this message translates to:
@@ -4331,6 +4337,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search diseases, categories...'**
   String get searchQuizHint;
+
+  /// No description provided for @dailyQuotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Quotes'**
+  String get dailyQuotes;
+
+  /// No description provided for @addQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Quote'**
+  String get addQuote;
+
+  /// No description provided for @editQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Quote'**
+  String get editQuote;
+
+  /// No description provided for @noQuotesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No quotes yet'**
+  String get noQuotesYet;
+
+  /// No description provided for @addYourFirstQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first quote'**
+  String get addYourFirstQuote;
+
+  /// No description provided for @deleteQuoteConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this quote?'**
+  String get deleteQuoteConfirmation;
+
+  /// No description provided for @quoteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote Text'**
+  String get quoteText;
+
+  /// No description provided for @enterQuoteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter quote text...'**
+  String get enterQuoteText;
+
+  /// No description provided for @author.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get author;
+
+  /// No description provided for @enterAuthorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter author name'**
+  String get enterAuthorName;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get optional;
+
+  /// No description provided for @selectWhenToShowQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Select when to show this quote'**
+  String get selectWhenToShowQuote;
+
+  /// No description provided for @targetGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Goals'**
+  String get targetGoals;
+
+  /// No description provided for @selectMatchingGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Select matching user goals'**
+  String get selectMatchingGoals;
+
+  /// No description provided for @pleaseEnterAtLeastOneTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least one translation'**
+  String get pleaseEnterAtLeastOneTranslation;
+
+  /// No description provided for @languages.
+  ///
+  /// In en, this message translates to:
+  /// **'languages'**
+  String get languages;
+
+  /// No description provided for @sleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get sleep;
+
+  /// No description provided for @motivation.
+  ///
+  /// In en, this message translates to:
+  /// **'Motivation'**
+  String get motivation;
+
+  /// No description provided for @achievement.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement'**
+  String get achievement;
+
+  /// No description provided for @changesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get changesSaved;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get confirmDelete;
 }
 
 class _AppLocalizationsDelegate

@@ -96,6 +96,7 @@
   "totalSessions": "Всего сессий",
   "currentStreak": "Текущая серия",
   "min": "мин",
+  "hourShort": "ч",
   "subliminals": "сублиминалов",
   "days": "дней",
   
@@ -828,6 +829,28 @@
   "uncategorized": "Без категории",
   "sessionAvailable": "Сеанс",
   "comingSoon": "Скоро",
-  "searchQuizHint": "Поиск болезней, категорий..."
+  "searchQuizHint": "Поиск болезней, категорий...",
+
+  "dailyQuotes": "Ежедневные цитаты",
+  "addQuote": "Добавить цитату",
+  "editQuote": "Редактировать цитату",
+  "noQuotesYet": "Цитат пока нет",
+  "addYourFirstQuote": "Добавьте свою первую цитату",
+  "deleteQuoteConfirmation": "Вы уверены, что хотите удалить эту цитату?",
+  "quoteText": "Текст цитаты",
+  "enterQuoteText": "Введите текст цитаты...",
+  "author": "Автор",
+  "enterAuthorName": "Введите имя автора",
+  "optional": "необязательно",
+  "selectWhenToShowQuote": "Выберите, когда показывать эту цитату",
+  "targetGoals": "Целевые задачи",
+  "selectMatchingGoals": "Выберите соответствующие цели пользователя",
+  "pleaseEnterAtLeastOneTranslation": "Пожалуйста, введите хотя бы один перевод",
+  "languages": "языков",
+  "sleep": "Сон",
+  "motivation": "Мотивация",
+  "achievement": "Достижение",
+  "changesSaved": "Изменения сохранены",
+  "confirmDelete": "Подтвердить удаление"
   
 }

@@ -5,6 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'widgets/home_card_button.dart';
+import 'widgets/greeting_section.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/responsive_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
@@ -14,7 +16,6 @@ import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
 import '../../services/home_card_service.dart';
-import 'widgets/home_card_button.dart';
 import '../quiz/widgets/expandable_quiz_section.dart';
 import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
@@ -185,6 +186,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
+          const GreetingSection(),
           const ExpandableQuizSection(),
           SizedBox(height: 20.h),
           GridView.builder(

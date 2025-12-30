@@ -235,6 +235,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get min => 'dk';
 
   @override
+  String get hourShort => 's';
+
+  @override
   String get days => 'gün';
 
   @override
@@ -2238,4 +2241,69 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get searchQuizHint => 'Hastalık, kategori ara...';
+
+  @override
+  String get dailyQuotes => 'Günlük Sözler';
+
+  @override
+  String get addQuote => 'Söz Ekle';
+
+  @override
+  String get editQuote => 'Sözü Düzenle';
+
+  @override
+  String get noQuotesYet => 'Henüz söz yok';
+
+  @override
+  String get addYourFirstQuote => 'İlk sözünüzü ekleyin';
+
+  @override
+  String get deleteQuoteConfirmation =>
+      'Bu sözü silmek istediğinizden emin misiniz?';
+
+  @override
+  String get quoteText => 'Söz Metni';
+
+  @override
+  String get enterQuoteText => 'Söz metnini girin...';
+
+  @override
+  String get author => 'Yazar';
+
+  @override
+  String get enterAuthorName => 'Yazar adını girin';
+
+  @override
+  String get optional => 'isteğe bağlı';
+
+  @override
+  String get selectWhenToShowQuote => 'Bu sözün ne zaman gösterileceğini seçin';
+
+  @override
+  String get targetGoals => 'Hedef Amaçlar';
+
+  @override
+  String get selectMatchingGoals => 'Eşleşen kullanıcı hedeflerini seçin';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'Lütfen en az bir çeviri girin';
+
+  @override
+  String get languages => 'dil';
+
+  @override
+  String get sleep => 'Uyku';
+
+  @override
+  String get motivation => 'Motivasyon';
+
+  @override
+  String get achievement => 'Başarı';
+
+  @override
+  String get changesSaved => 'Değişiklikler kaydedildi';
+
+  @override
+  String get confirmDelete => 'Silmeyi Onayla';
 }

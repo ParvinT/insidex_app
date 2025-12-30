@@ -236,6 +236,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get min => 'मिनट';
 
   @override
+  String get hourShort => 'घं';
+
+  @override
   String get days => 'दिन';
 
   @override
@@ -2231,4 +2234,68 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get searchQuizHint => 'बीमारियाँ, श्रेणियाँ खोजें...';
+
+  @override
+  String get dailyQuotes => 'दैनिक उद्धरण';
+
+  @override
+  String get addQuote => 'उद्धरण जोड़ें';
+
+  @override
+  String get editQuote => 'उद्धरण संपादित करें';
+
+  @override
+  String get noQuotesYet => 'अभी तक कोई उद्धरण नहीं';
+
+  @override
+  String get addYourFirstQuote => 'अपना पहला उद्धरण जोड़ें';
+
+  @override
+  String get deleteQuoteConfirmation => 'क्या आप इस उद्धरण को हटाना चाहते हैं?';
+
+  @override
+  String get quoteText => 'उद्धरण पाठ';
+
+  @override
+  String get enterQuoteText => 'उद्धरण पाठ दर्ज करें...';
+
+  @override
+  String get author => 'लेखक';
+
+  @override
+  String get enterAuthorName => 'लेखक का नाम दर्ज करें';
+
+  @override
+  String get optional => 'वैकल्पिक';
+
+  @override
+  String get selectWhenToShowQuote => 'चुनें कि यह उद्धरण कब दिखाना है';
+
+  @override
+  String get targetGoals => 'लक्ष्य उद्देश्य';
+
+  @override
+  String get selectMatchingGoals => 'मिलान करने वाले उपयोगकर्ता लक्ष्य चुनें';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'कृपया कम से कम एक अनुवाद दर्ज करें';
+
+  @override
+  String get languages => 'भाषाएं';
+
+  @override
+  String get sleep => 'नींद';
+
+  @override
+  String get motivation => 'प्रेरणा';
+
+  @override
+  String get achievement => 'उपलब्धि';
+
+  @override
+  String get changesSaved => 'परिवर्तन सहेजे गए';
+
+  @override
+  String get confirmDelete => 'हटाने की पुष्टि करें';
 }

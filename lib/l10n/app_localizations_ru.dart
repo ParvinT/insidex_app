@@ -234,6 +234,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get min => 'мин';
 
   @override
+  String get hourShort => 'ч';
+
+  @override
   String get days => 'дней';
 
   @override
@@ -2245,4 +2248,70 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get searchQuizHint => 'Поиск болезней, категорий...';
+
+  @override
+  String get dailyQuotes => 'Ежедневные цитаты';
+
+  @override
+  String get addQuote => 'Добавить цитату';
+
+  @override
+  String get editQuote => 'Редактировать цитату';
+
+  @override
+  String get noQuotesYet => 'Цитат пока нет';
+
+  @override
+  String get addYourFirstQuote => 'Добавьте свою первую цитату';
+
+  @override
+  String get deleteQuoteConfirmation =>
+      'Вы уверены, что хотите удалить эту цитату?';
+
+  @override
+  String get quoteText => 'Текст цитаты';
+
+  @override
+  String get enterQuoteText => 'Введите текст цитаты...';
+
+  @override
+  String get author => 'Автор';
+
+  @override
+  String get enterAuthorName => 'Введите имя автора';
+
+  @override
+  String get optional => 'необязательно';
+
+  @override
+  String get selectWhenToShowQuote => 'Выберите, когда показывать эту цитату';
+
+  @override
+  String get targetGoals => 'Целевые задачи';
+
+  @override
+  String get selectMatchingGoals =>
+      'Выберите соответствующие цели пользователя';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'Пожалуйста, введите хотя бы один перевод';
+
+  @override
+  String get languages => 'языков';
+
+  @override
+  String get sleep => 'Сон';
+
+  @override
+  String get motivation => 'Мотивация';
+
+  @override
+  String get achievement => 'Достижение';
+
+  @override
+  String get changesSaved => 'Изменения сохранены';
+
+  @override
+  String get confirmDelete => 'Подтвердить удаление';
 }

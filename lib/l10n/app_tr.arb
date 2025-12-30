@@ -91,6 +91,7 @@
   "changePassword": "Şifre Değiştir",
   
   "min": "dk",
+  "hourShort": "s",
   "days": "gün",
   
   "analytics": "Analitik",
@@ -817,7 +818,29 @@
   "uncategorized": "Kategorisiz",
   "sessionAvailable": "Seans",
   "comingSoon": "Yakında",
-  "searchQuizHint": "Hastalık, kategori ara..."
+  "searchQuizHint": "Hastalık, kategori ara...",
+
+  "dailyQuotes": "Günlük Sözler",
+  "addQuote": "Söz Ekle",
+  "editQuote": "Sözü Düzenle",
+  "noQuotesYet": "Henüz söz yok",
+  "addYourFirstQuote": "İlk sözünüzü ekleyin",
+  "deleteQuoteConfirmation": "Bu sözü silmek istediğinizden emin misiniz?",
+  "quoteText": "Söz Metni",
+  "enterQuoteText": "Söz metnini girin...",
+  "author": "Yazar",
+  "enterAuthorName": "Yazar adını girin",
+  "optional": "isteğe bağlı",
+  "selectWhenToShowQuote": "Bu sözün ne zaman gösterileceğini seçin",
+  "targetGoals": "Hedef Amaçlar",
+  "selectMatchingGoals": "Eşleşen kullanıcı hedeflerini seçin",
+  "pleaseEnterAtLeastOneTranslation": "Lütfen en az bir çeviri girin",
+  "languages": "dil",
+  "sleep": "Uyku",
+  "motivation": "Motivasyon",
+  "achievement": "Başarı",
+  "changesSaved": "Değişiklikler kaydedildi",
+  "confirmDelete": "Silmeyi Onayla"
 
   
 }

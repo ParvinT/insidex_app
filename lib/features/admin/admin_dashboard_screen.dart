@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'disease_management_screen.dart';
 import 'disease_cause_management_screen.dart';
 import 'quiz_category_management_screen.dart';
+import 'quotes_management_screen.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -269,6 +270,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.pushNamed(context, '/admin/home-cards');
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.format_quote,
+                      title: AppLocalizations.of(context).dailyQuotes,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const QuotesManagementScreen(),
+                          ),
+                        );
                       },
                       isCompact: isSmallScreen,
                       colors: colors,

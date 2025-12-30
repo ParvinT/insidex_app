@@ -233,6 +233,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get min => 'min';
 
   @override
+  String get hourShort => 'h';
+
+  @override
   String get days => 'days';
 
   @override
@@ -2229,4 +2232,69 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchQuizHint => 'Search diseases, categories...';
+
+  @override
+  String get dailyQuotes => 'Daily Quotes';
+
+  @override
+  String get addQuote => 'Add Quote';
+
+  @override
+  String get editQuote => 'Edit Quote';
+
+  @override
+  String get noQuotesYet => 'No quotes yet';
+
+  @override
+  String get addYourFirstQuote => 'Add your first quote';
+
+  @override
+  String get deleteQuoteConfirmation =>
+      'Are you sure you want to delete this quote?';
+
+  @override
+  String get quoteText => 'Quote Text';
+
+  @override
+  String get enterQuoteText => 'Enter quote text...';
+
+  @override
+  String get author => 'Author';
+
+  @override
+  String get enterAuthorName => 'Enter author name';
+
+  @override
+  String get optional => 'optional';
+
+  @override
+  String get selectWhenToShowQuote => 'Select when to show this quote';
+
+  @override
+  String get targetGoals => 'Target Goals';
+
+  @override
+  String get selectMatchingGoals => 'Select matching user goals';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'Please enter at least one translation';
+
+  @override
+  String get languages => 'languages';
+
+  @override
+  String get sleep => 'Sleep';
+
+  @override
+  String get motivation => 'Motivation';
+
+  @override
+  String get achievement => 'Achievement';
+
+  @override
+  String get changesSaved => 'Changes saved';
+
+  @override
+  String get confirmDelete => 'Confirm Delete';
 }
