@@ -133,8 +133,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       await userProvider.loadUserData(user.uid);
 
       debugPrint('💾 Saving active device for new user...');
-      await DeviceSessionService().saveActiveDevice(user.uid);
-      debugPrint('✅ Active device saved for new user');
+      final savedToken =
+          await DeviceSessionService().saveActiveDevice(user.uid);
+      debugPrint('✅ Active device saved: ${savedToken?.substring(0, 20)}...');
+
+      await Future.delayed(const Duration(milliseconds: 500));
 
       if (!mounted) return;
 

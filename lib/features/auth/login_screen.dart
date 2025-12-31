@@ -74,8 +74,11 @@ class _LoginScreenState extends State<LoginScreen> {
         debugPrint(
             'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
         debugPrint('💾 Saving active device session...');
-        await DeviceSessionService().saveActiveDevice(user.uid);
-        debugPrint('✅ Active device saved, other devices will be logged out');
+        final savedToken =
+            await DeviceSessionService().saveActiveDevice(user.uid);
+        debugPrint('✅ Active device saved: ${savedToken?.substring(0, 20)}...');
+
+        await Future.delayed(const Duration(milliseconds: 500));
 
         await userProvider.loadUserData(user.uid);
         // Save has_logged_in flag for offline mode

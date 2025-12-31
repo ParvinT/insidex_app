@@ -27,7 +27,8 @@ class UserProvider extends ChangeNotifier {
   Map<String, dynamic>? get userData => _userData;
   bool get isLoading => _isLoading;
   bool get isLoggedIn => _firebaseUser != null;
-  bool get isAdmin => _isAdmin; // Admin getter
+  bool get isAdmin => _isAdmin;
+  bool _skipInitialSnapshot = false;
   String get userName => _userData?['name'] ?? 'User';
   String get userEmail => _userData?['email'] ?? '';
   String get userId => _firebaseUser?.uid ?? '';
@@ -57,8 +58,11 @@ class UserProvider extends ChangeNotifier {
 
     debugPrint('🔍 Starting device session monitoring for: $userId');
 
-    // 🔧 FIX: Biraz gecikme ekle ki context hazır olsun
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    // ⭐ Mark that we should skip the initial snapshot
+    _skipInitialSnapshot = true;
+
+    // Biraz gecikme ekle ki saveActiveDevice tamamlansın
+    Future.delayed(const Duration(milliseconds: 2000), () {
       _deviceSessionSubscription = FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -77,6 +81,13 @@ class UserProvider extends ChangeNotifier {
 
         debugPrint('📡 Firestore snapshot received');
 
+        // ⭐ Skip the FIRST snapshot after login (it might have stale data)
+        if (_skipInitialSnapshot) {
+          _skipInitialSnapshot = false;
+          debugPrint('⏭️ Skipping initial snapshot (just logged in)');
+          return;
+        }
+
         final activeDevice = data['activeDevice'] as Map<String, dynamic>?;
         if (activeDevice == null) {
           debugPrint('⚠️ No activeDevice field found');
@@ -84,7 +95,7 @@ class UserProvider extends ChangeNotifier {
         }
 
         debugPrint(
-            '🔑 Active device token: ${activeDevice['token']?.substring(0, 20)}...');
+            '🔑 Active device token: ${activeDevice['token']?.toString().substring(0, 20)}...');
 
         // Check if current device is still the active one
         final isActive =
