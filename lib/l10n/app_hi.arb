@@ -677,7 +677,7 @@
   "recommendedForYou": "आपके लिए अनुशंसित",
   "unlockAndListen": "अनलॉक करें और सुनें",
   "listenNow": "अभी सुनें",
-  "startEmotionalTestFree": "मेरा भावनात्मक परीक्षण शुरू करें — निःशुल्क",
+  "discoverTrueCauses": "बीमारियों के असली कारण जानें",
   "selected": "चयनित",
   "next": "आगे",
   "noDiseasesAvailable": "कोई बीमारी उपलब्ध नहीं है",
@@ -794,5 +794,11 @@
   "motivation": "प्रेरणा",
   "achievement": "उपलब्धि",
   "changesSaved": "परिवर्तन सहेजे गए",
-  "confirmDelete": "हटाने की पुष्टि करें"
+  "confirmDelete": "हटाने की पुष्टि करें",
+  "featureSlides": "फ़ीचर स्लाइड्स",
+  "enabled": "सक्षम",
+  "pages": "पृष्ठ",
+  "subtitleLabel": "उपशीर्षक",
+  "enabled": "सक्षम",
+  "deleteConfirmationMessage": "क्या आप वाकई इस आइटम को हटाना चाहते हैं?"
 }

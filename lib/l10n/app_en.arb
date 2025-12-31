@@ -777,7 +777,7 @@
   "recommendedForYou": "Recommended for you",
   "unlockAndListen": "Unlock & Listen",
   "listenNow": "Listen Now",
-  "startEmotionalTestFree": "Start My Emotional Test — Free",
+  "discoverTrueCauses": "Discover the True Causes of Disease",
   "selected": "Selected",
   "next": "Next",
   "noDiseasesAvailable": "No diseases available",
@@ -897,7 +897,14 @@
   "motivation": "Motivation",
   "achievement": "Achievement",
   "changesSaved": "Changes saved",
-  "confirmDelete": "Confirm Delete"
+  "confirmDelete": "Confirm Delete",
+  "featureSlides": "Feature Slides",
+  "enabled": "Enabled",
+  "featureSlidesImages": "Images",
+  "pages": "Pages",
+  "subtitleLabel": "Subtitle",
+  "deleteConfirmationMessage": "Are you sure you want to delete this item?"
+  
 
 
 }

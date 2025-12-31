@@ -1993,7 +1993,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listenNow => 'Listen Now';
 
   @override
-  String get startEmotionalTestFree => 'Start My Emotional Test — Free';
+  String get discoverTrueCauses => 'Discover the True Causes of Disease';
 
   @override
   String get selected => 'Selected';
@@ -2297,4 +2297,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get confirmDelete => 'Confirm Delete';
+
+  @override
+  String get featureSlides => 'Feature Slides';
+
+  @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get featureSlidesImages => 'Images';
+
+  @override
+  String get pages => 'Pages';
+
+  @override
+  String get subtitleLabel => 'Subtitle';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'Are you sure you want to delete this item?';
 }

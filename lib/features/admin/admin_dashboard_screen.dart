@@ -9,6 +9,7 @@ import 'disease_management_screen.dart';
 import 'disease_cause_management_screen.dart';
 import 'quiz_category_management_screen.dart';
 import 'quotes_management_screen.dart';
+import 'feature_slides_management_screen.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -283,6 +284,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => const QuotesManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.slideshow,
+                      title: AppLocalizations.of(context).featureSlides,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const FeatureSlidesManagementScreen(),
                           ),
                         );
                       },

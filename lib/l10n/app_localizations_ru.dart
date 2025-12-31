@@ -2008,8 +2008,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get listenNow => 'Слушать сейчас';
 
   @override
-  String get startEmotionalTestFree =>
-      'Начать мой эмоциональный тест — Бесплатно';
+  String get discoverTrueCauses => 'Узнай истинные причины болезней';
 
   @override
   String get selected => 'Выбрано';
@@ -2314,4 +2313,23 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get confirmDelete => 'Подтвердить удаление';
+
+  @override
+  String get featureSlides => 'Слайды';
+
+  @override
+  String get enabled => 'Включено';
+
+  @override
+  String get featureSlidesImages => 'Изображения';
+
+  @override
+  String get pages => 'Страницы';
+
+  @override
+  String get subtitleLabel => 'Подзаголовок';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'Вы уверены, что хотите удалить этот элемент?';
 }

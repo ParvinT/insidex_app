@@ -1994,8 +1994,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get listenNow => 'अभी सुनें';
 
   @override
-  String get startEmotionalTestFree =>
-      'मेरा भावनात्मक परीक्षण शुरू करें — निःशुल्क';
+  String get discoverTrueCauses => 'बीमारियों के असली कारण जानें';
 
   @override
   String get selected => 'चयनित';
@@ -2298,4 +2297,23 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get confirmDelete => 'हटाने की पुष्टि करें';
+
+  @override
+  String get featureSlides => 'फ़ीचर स्लाइड्स';
+
+  @override
+  String get enabled => 'सक्षम';
+
+  @override
+  String get featureSlidesImages => 'Images';
+
+  @override
+  String get pages => 'पृष्ठ';
+
+  @override
+  String get subtitleLabel => 'उपशीर्षक';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'क्या आप वाकई इस आइटम को हटाना चाहते हैं?';
 }

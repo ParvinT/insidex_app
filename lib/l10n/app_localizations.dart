@@ -3882,11 +3882,11 @@ abstract class AppLocalizations {
   /// **'Listen Now'**
   String get listenNow;
 
-  /// No description provided for @startEmotionalTestFree.
+  /// No description provided for @discoverTrueCauses.
   ///
   /// In en, this message translates to:
-  /// **'Start My Emotional Test — Free'**
-  String get startEmotionalTestFree;
+  /// **'Discover the True Causes of Disease'**
+  String get discoverTrueCauses;
 
   /// No description provided for @selected.
   ///
@@ -4463,6 +4463,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm Delete'**
   String get confirmDelete;
+
+  /// No description provided for @featureSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature Slides'**
+  String get featureSlides;
+
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// No description provided for @featureSlidesImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get featureSlidesImages;
+
+  /// No description provided for @pages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get pages;
+
+  /// No description provided for @subtitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle'**
+  String get subtitleLabel;
+
+  /// No description provided for @deleteConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this item?'**
+  String get deleteConfirmationMessage;
 }
 
 class _AppLocalizationsDelegate

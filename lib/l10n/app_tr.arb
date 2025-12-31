@@ -727,7 +727,7 @@
   "recommendedForYou": "Senin için önerilen",
   "unlockAndListen": "Kilidi Aç ve Dinle",
   "listenNow": "Şimdi Dinle",
-  "startEmotionalTestFree": "Duygusal Testimi Başlat — Ücretsiz",
+  "discoverTrueCauses": "Hastalıkların Gerçek Nedenlerini Keşfet",
   "selected": "Seçili",
   "next": "İleri",
   "noDiseasesAvailable": "Mevcut hastalık yok",
@@ -840,7 +840,13 @@
   "motivation": "Motivasyon",
   "achievement": "Başarı",
   "changesSaved": "Değişiklikler kaydedildi",
-  "confirmDelete": "Silmeyi Onayla"
+  "confirmDelete": "Silmeyi Onayla",
+  "featureSlides": "Öne Çıkan Slaytlar",
+  "enabled": "Etkin",
+  "featureSlidesImages": "Görseller",
+  "pages": "Sayfalar",
+  "subtitleLabel": "Alt Başlık",
+  "deleteConfirmationMessage": "Bu öğeyi silmek istediğinizden emin misiniz?"
 
   
 }

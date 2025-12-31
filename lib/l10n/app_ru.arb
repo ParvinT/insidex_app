@@ -738,7 +738,7 @@
   "unlockAndListen": "Разблокировать и слушать",
   "listenNow": "Слушать сейчас",
   "selected": "Выбрано",
-  "startEmotionalTestFree": "Начать мой эмоциональный тест — Бесплатно",
+  "discoverTrueCauses": "Узнай истинные причины болезней",
   "selected": "Выбрано",
   "next": "Далее",
   "noDiseasesAvailable": "Доступных заболеваний нет",
@@ -851,6 +851,12 @@
   "motivation": "Мотивация",
   "achievement": "Достижение",
   "changesSaved": "Изменения сохранены",
-  "confirmDelete": "Подтвердить удаление"
+  "confirmDelete": "Подтвердить удаление",
+  "featureSlides": "Слайды",
+  "enabled": "Включено",
+  "featureSlidesImages": "Изображения",
+  "pages": "Страницы",
+  "subtitleLabel": "Подзаголовок",
+  "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот элемент?"
   
 }

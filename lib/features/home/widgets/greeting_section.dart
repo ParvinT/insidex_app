@@ -44,10 +44,8 @@ class _GreetingSectionState extends State<GreetingSection> {
   }
 
   Future<void> _loadData() async {
-    await Future.wait([
-      _loadUserData(),
-      _loadTodayQuote(),
-    ]);
+    await _loadUserData();
+    await _loadTodayQuote();
 
     if (mounted) {
       setState(() => _isLoading = false);
@@ -78,9 +76,6 @@ class _GreetingSectionState extends State<GreetingSection> {
 
   Future<void> _loadTodayQuote() async {
     try {
-      // Wait for user data to load first
-      await Future.delayed(const Duration(milliseconds: 100));
-
       final quote = await _quoteService.getTodayQuote(
         userGoals: _userGoals,
         streak: _currentStreak,

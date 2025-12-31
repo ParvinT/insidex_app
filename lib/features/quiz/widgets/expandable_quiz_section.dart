@@ -344,16 +344,17 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
           mainAxisSize: isTablet ? MainAxisSize.max : MainAxisSize.min,
           children: [
             Flexible(
-              child: Text(
-                AppLocalizations.of(context).startEmotionalTestFree,
-                style: GoogleFonts.inter(
-                  fontSize: (isTablet ? 15.sp : 13.sp).clamp(11.0, 16.0),
-                  fontWeight: FontWeight.w700,
-                  color: context.colors.textOnPrimary,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  AppLocalizations.of(context).discoverTrueCauses,
+                  style: GoogleFonts.inter(
+                    fontSize: (isTablet ? 15.sp : 13.sp).clamp(11.0, 16.0),
+                    fontWeight: FontWeight.w700,
+                    color: context.colors.textOnPrimary,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
               ),
             ),
             SizedBox(width: 8.w),

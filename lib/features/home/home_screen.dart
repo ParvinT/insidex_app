@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'widgets/home_card_button.dart';
+import 'widgets/feature_slideshow.dart';
 import 'widgets/greeting_section.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/responsive_scaffold.dart';
@@ -186,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
+          const FeatureSlideshow(),
           const GreetingSection(),
           const ExpandableQuizSection(),
           SizedBox(height: 20.h),

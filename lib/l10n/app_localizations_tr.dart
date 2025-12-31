@@ -2001,7 +2001,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get listenNow => 'Şimdi Dinle';
 
   @override
-  String get startEmotionalTestFree => 'Duygusal Testimi Başlat — Ücretsiz';
+  String get discoverTrueCauses => 'Hastalıkların Gerçek Nedenlerini Keşfet';
 
   @override
   String get selected => 'Seçili';
@@ -2306,4 +2306,23 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get confirmDelete => 'Silmeyi Onayla';
+
+  @override
+  String get featureSlides => 'Öne Çıkan Slaytlar';
+
+  @override
+  String get enabled => 'Etkin';
+
+  @override
+  String get featureSlidesImages => 'Görseller';
+
+  @override
+  String get pages => 'Sayfalar';
+
+  @override
+  String get subtitleLabel => 'Alt Başlık';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'Bu öğeyi silmek istediğinizden emin misiniz?';
 }
