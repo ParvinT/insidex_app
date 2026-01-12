@@ -26,6 +26,8 @@
 		<true/>
 		<key>UILaunchStoryboardName</key>
 		<string>LaunchScreen</string>
+		<key>FIRAppCheckDebugToken</key>
+		<string>$(APP_CHECK_DEBUG_TOKEN)</string>
 		<key>UIMainStoryboardFile</key>
 		<string>Main</string>
 		<key>UISupportedInterfaceOrientations</key>

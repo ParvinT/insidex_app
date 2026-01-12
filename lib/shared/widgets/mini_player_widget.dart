@@ -511,41 +511,129 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   /// Progress bar at bottom (also drag zone)
   Widget _buildProgressBar(MiniPlayerProvider miniPlayer) {
     final progress = miniPlayer.progress.clamp(0.0, 1.0);
+    final colors = context.colors;
 
-    return Container(
-      height: 20.h,
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      child: SliderTheme(
-        data: SliderThemeData(
-          trackHeight: 2.5,
-          thumbShape: const RoundSliderThumbShape(
-            enabledThumbRadius: 6.0,
-            elevation: 2,
+    return GestureDetector(
+      onHorizontalDragStart: (details) {
+        _handleProgressDragStart(details, miniPlayer);
+      },
+      onHorizontalDragUpdate: (details) {
+        _handleProgressDragUpdate(details, miniPlayer);
+      },
+      onHorizontalDragEnd: (details) {
+        _handleProgressDragEnd(details, miniPlayer);
+      },
+      onTapUp: (details) {
+        _handleProgressTap(details, miniPlayer);
+      },
+      child: Container(
+        height: 20.h,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        color: Colors.transparent,
+        child: Center(
+          child: Container(
+            height: 3,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(1.5),
+              color: colors.greyLight,
+            ),
+            child: Stack(
+              children: [
+                // Active track
+                FractionallySizedBox(
+                  widthFactor: progress,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(1.5),
+                      color: colors.textPrimary,
+                    ),
+                  ),
+                ),
+                // Thumb
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final thumbPosition = constraints.maxWidth * progress - 6;
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          Positioned(
+                            left: thumbPosition.clamp(
+                                0, constraints.maxWidth - 12),
+                            top: -4.5,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: colors.textPrimary,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: colors.textPrimary
+                                        .withValues(alpha: 0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
-          overlayShape: const RoundSliderOverlayShape(
-            overlayRadius: 12.0, // Touch area
-          ),
-          activeTrackColor: context.colors.textPrimary,
-          inactiveTrackColor: context.colors.greyLight,
-          thumbColor: context.colors.textPrimary,
-          overlayColor: context.colors.textPrimary.withValues(alpha: 0.2),
-        ),
-        child: Slider(
-          value: progress,
-          min: 0.0,
-          max: 1.0,
-          onChanged: (value) {
-            final newPosition = miniPlayer.duration * value;
-            miniPlayer.updatePosition(newPosition);
-          },
-          onChangeEnd: (value) async {
-            final newPosition = miniPlayer.duration * value;
-            await _audioService.seek(newPosition);
-            debugPrint('🎵 Seeked to ${newPosition.inSeconds}s');
-          },
         ),
       ),
     );
+  }
+
+  // Progress bar drag handlers
+  void _handleProgressDragStart(
+      DragStartDetails details, MiniPlayerProvider miniPlayer) {
+    // Optional: pause during drag
+  }
+
+  void _handleProgressDragUpdate(
+      DragUpdateDetails details, MiniPlayerProvider miniPlayer) {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final localPosition = details.localPosition;
+    final width = box.size.width - 24.w; // padding
+    final progress = ((localPosition.dx - 12.w) / width).clamp(0.0, 1.0);
+
+    final newPosition = miniPlayer.duration * progress;
+    miniPlayer.updatePosition(newPosition);
+  }
+
+  void _handleProgressDragEnd(
+      DragEndDetails details, MiniPlayerProvider miniPlayer) async {
+    await _audioService.seek(miniPlayer.position);
+    debugPrint('🎵 Seeked to ${miniPlayer.position.inSeconds}s');
+  }
+
+  void _handleProgressTap(
+      TapUpDetails details, MiniPlayerProvider miniPlayer) async {
+    final box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    final localPosition = details.localPosition;
+    final width = box.size.width - 24.w; // padding
+    final progress = ((localPosition.dx - 12.w) / width).clamp(0.0, 1.0);
+
+    final newPosition = miniPlayer.duration * progress;
+    miniPlayer.updatePosition(newPosition);
+    await _audioService.seek(newPosition);
+    debugPrint('🎵 Tapped to ${newPosition.inSeconds}s');
   }
 
   // =================== ACTIONS ===================
