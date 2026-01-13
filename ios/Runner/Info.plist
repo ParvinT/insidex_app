@@ -55,10 +55,15 @@
 			<string>remote-notification</string>
 			<string>processing</string>
 		</array>
-		<!-- ✅ TIMEZONE İZNİ -->
+		<key>BGTaskSchedulerPermittedIdentifiers</key>
+		<array>
+			<string>com.transistorsoft.fetch</string>
+			<string>com.transistorsoft.customtask</string>
+		</array>
+		<!-- ✅ TIMEZONE -->
 		<key>NSTimeZoneUsageDescription</key>
 		<string>This app needs to access your timezone for scheduling notifications at the correct time.</string>
-		<!-- ✅✅✅ BİLDİRİM İZNİ - DOĞRU KEY (NotificationS - ÇOĞUL!) -->
+		<!-- Notifications Permission-->
 		<key>NSUserNotificationsUsageDescription</key>
 		<string>INSIDEX would like to send you daily reminders to maintain your wellness routine.</string>
 		<!-- ✅ MULTI-LANGUAGE SUPPORT -->
@@ -69,7 +74,7 @@
 			<string>ru</string>
 			<string>hi</string>
 		</array>
-		<!-- ✅ BİLDİRİM ALERT STİLİ (Banner olarak göster) -->
+		<!-- ✅ BİLDİRİM ALERT  -->
 		<key>NSUserNotificationAlertStyle</key>
 		<string>banner</string>
 		<!-- ✅ APP TRANSPORT SECURITY -->
@@ -94,6 +99,13 @@
 		<array>
 			<string>_insidex._tcp</string>
 		</array>
+		<!-- ✅ PHOTO LIBRARY-->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>InsideX may need photo library access for content management features.</string>
+
+		<!-- ✅ MICROPHONE -->
+		<key>NSMicrophoneUsageDescription</key>
+		<string>InsideX may need microphone access for future audio features.</string>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

@@ -1,6 +1,5 @@
 // lib/main.dart
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -60,9 +59,14 @@ void main() async {
     return true;
   };
 
-  if (!kIsWeb && Platform.isAndroid) {
-    BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-    await NotificationReliabilityService.initialize();
+  if (!kIsWeb) {
+    // Background Fetch - Optional feature (non-blocking)
+    try {
+      BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+      debugPrint('✅ Background Fetch initialized ');
+    } catch (e) {
+      debugPrint('⚠️ Background Fetch unavailable: $e');
+    }
   }
   // Notification Service
   try {
