@@ -10,10 +10,12 @@ import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../models/downloaded_session.dart';
 import '../../providers/download_provider.dart';
+import '../../providers/mini_player_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../player/audio_player_screen.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../../services/language_helper_service.dart';
+import '../../services/audio/audio_player_service.dart';
 
 /// Downloads Screen - Shows all downloaded sessions for offline playback
 class DownloadsScreen extends StatefulWidget {
@@ -478,7 +480,23 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Future<void> _playDownload(DownloadedSession download) async {
+    // ✅ FIX: Stop current audio and dismiss mini player BEFORE navigating
+    final audioService = AudioPlayerService();
+    await audioService.stop();
+
+    // ✅ FIX: Dismiss mini player to prevent state conflicts
+    if (mounted) {
+      final miniPlayer = context.read<MiniPlayerProvider>();
+      miniPlayer.dismiss();
+    }
+
+    // Small delay to ensure cleanup completes
+    await Future.delayed(const Duration(milliseconds: 100));
+
     _preloader.prioritize(download.sessionId);
+
+    if (!mounted) return;
+
     Navigator.push(
       context,
       MaterialPageRoute(

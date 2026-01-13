@@ -52,6 +52,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isLooping = false;
   bool _isTracking = false;
   bool _isDecrypting = false;
+  bool _isLoadingAudio = false;
+  bool _isPlayingTrack = false;
 
   //Audio State
   String _currentLanguage = 'en';
@@ -145,6 +147,25 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     if (!mounted) return;
 
+    // ✅ FIX: OFFLINE SESSION = SKIP SUBSCRIPTION CHECK ENTIRELY
+    // User already had permission when they downloaded, no need to re-check
+    if (_isOfflineSession) {
+      debugPrint(
+          '📥 [AudioPlayer] Offline session - skipping subscription check');
+      _accessGranted = true;
+
+      // Enable background playback for offline sessions
+      audioHandler.setShowMediaNotification(true);
+      debugPrint('🎧 [AudioPlayer] Background playback: ENABLED (offline)');
+
+      // Continue with audio initialization
+      await _setupStreamListeners();
+      context.read<MiniPlayerProvider>().hide();
+      await _initializeAudio();
+      return;
+    }
+
+    // ========== ONLINE SESSION - NORMAL FLOW ==========
     final subscriptionProvider = context.read<SubscriptionProvider>();
 
     await subscriptionProvider.waitForInitialization();
@@ -190,13 +211,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         '🎧 [AudioPlayer] Background playback: ${canUseBackground ? "ENABLED" : "DISABLED"}');
 
     // User has access - continue with audio initialization
-    _setupStreamListeners();
+    await _setupStreamListeners();
     _addToRecentSessions();
     _checkFavoriteStatus();
     _checkPlaylistStatus();
 
     context.read<MiniPlayerProvider>().hide();
-    _restoreStateFromMiniPlayer();
+    await _restoreStateFromMiniPlayer();
   }
 
   Future<void> _loadLanguageAndUrls() async {
@@ -444,9 +465,25 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _initializeAudio() async {
-    await _audioService.stop();
-    await _audioService.initialize();
-    await _setupStreamListeners();
+    // ✅ FIX: Prevent multiple simultaneous loads
+    if (_isLoadingAudio) {
+      debugPrint('⏳ [AudioPlayer] Already loading audio, skipping...');
+      return;
+    }
+
+    _isLoadingAudio = true;
+    debugPrint('🎵 [AudioPlayer] Initializing audio...');
+
+    try {
+      await _audioService.stop();
+      await Future.delayed(const Duration(milliseconds: 50));
+      await _audioService.initialize();
+      debugPrint('✅ [AudioPlayer] Audio service initialized');
+    } catch (e) {
+      debugPrint('❌ [AudioPlayer] Initialize audio error: $e');
+    } finally {
+      _isLoadingAudio = false;
+    }
     await _playCurrentTrack();
   }
 
@@ -504,54 +541,70 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _playCurrentTrack() async {
-    final l10n = AppLocalizations.of(context);
-    final unknownSessionText = l10n.unknownSession;
-    final subliminalSessionText = l10n.subliminalSession;
-    final audioNotFoundText = l10n.audioFileNotFound;
-    if (_session['_isOffline'] == true) {
-      debugPrint('📥 [AudioPlayer] Playing from offline download');
+    if (_isPlayingTrack) {
+      debugPrint('⏳ [AudioPlayer] Already playing track, skipping...');
+      return;
+    }
 
-      final downloadService = DownloadService();
-      final language =
-          _session['_downloadedLanguage'] as String? ?? _currentLanguage;
-      final sessionId = _session['id'] as String?;
+    if (_isLoadingAudio) {
+      debugPrint(
+          '⏳ [AudioPlayer] Audio loading in progress, skipping playCurrentTrack...');
+      return;
+    }
 
-      if (sessionId == null) {
-        debugPrint('❌ [AudioPlayer] Session ID is null for offline playback');
-        return;
-      }
+    _isPlayingTrack = true;
+    debugPrint('▶️ [AudioPlayer] Starting playCurrentTrack...');
 
-      final preloader = DecryptionPreloader();
-      String? decryptedPath = preloader.getCachedPath(sessionId);
+    try {
+      final l10n = AppLocalizations.of(context);
+      final unknownSessionText = l10n.unknownSession;
+      final subliminalSessionText = l10n.subliminalSession;
+      final audioNotFoundText = l10n.audioFileNotFound;
 
-      if (decryptedPath == null) {
-        debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
+      if (_session['_isOffline'] == true) {
+        debugPrint('📥 [AudioPlayer] Playing from offline download');
 
-        if (mounted) {
-          setState(() => _isDecrypting = true);
+        final downloadService = DownloadService();
+        final language =
+            _session['_downloadedLanguage'] as String? ?? _currentLanguage;
+        final sessionId = _session['id'] as String?;
+
+        if (sessionId == null) {
+          debugPrint('❌ [AudioPlayer] Session ID is null for offline playback');
+          return;
         }
 
-        decryptedPath = await downloadService.getDecryptedAudioPath(
-          sessionId,
-          language,
-        );
+        final preloader = DecryptionPreloader();
+        String? decryptedPath = preloader.getCachedPath(sessionId);
 
-        if (mounted) {
-          setState(() => _isDecrypting = false);
+        if (decryptedPath == null) {
+          debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
+
+          if (mounted) {
+            setState(() => _isDecrypting = true);
+          }
+
+          decryptedPath = await downloadService.getDecryptedAudioPath(
+            sessionId,
+            language,
+          );
+
+          if (mounted) {
+            setState(() => _isDecrypting = false);
+          }
+        } else {
+          debugPrint('⚡ [AudioPlayer] Cache hit - instant playback!');
         }
-      } else {
-        debugPrint('⚡ [AudioPlayer] Cache hit - instant playback!');
-      }
 
-      if (decryptedPath != null) {
-        if (!mounted) return;
-        try {
+        if (decryptedPath != null) {
+          if (!mounted) return;
+
           setState(() {
             _currentPosition = Duration.zero;
           });
+          await _audioService.seek(Duration.zero);
 
-          // ✅ Start tracking BEFORE audio loads
-          if (!_isTracking && _session['id'] != null) {
+          if (!_isOfflineSession && !_isTracking && _session['id'] != null) {
             _isTracking = true;
             await ListeningTrackerService.startSession(
               sessionId: _session['id'],
@@ -585,43 +638,38 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
           debugPrint(
               '🎵 Playing offline: ${_session['_displayTitle'] ?? _session['title']}');
-
           return;
-        } catch (e) {
-          debugPrint('❌ [AudioPlayer] Offline playback error: $e');
+        } else {
+          debugPrint('❌ [AudioPlayer] Could not decrypt offline file');
         }
-      } else {
-        debugPrint('❌ [AudioPlayer] Could not decrypt offline file');
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(audioNotFoundText),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
       }
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(audioNotFoundText),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+      // ========== ONLINE PLAYBACK ==========
+      if (_audioUrl == null || _audioUrl!.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).audioFileNotFound),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
-    if (_audioUrl == null || _audioUrl!.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).audioFileNotFound),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    try {
       setState(() {
         _currentPosition = Duration.zero;
       });
 
-      // ✅ Start tracking BEFORE audio loads
-      if (!_isTracking && _session['id'] != null) {
+      if (!_isOfflineSession && !_isTracking && _session['id'] != null) {
         _isTracking = true;
         await ListeningTrackerService.startSession(
           sessionId: _session['id'],
@@ -652,6 +700,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           '🎵 Playing: ${_session['_displayTitle'] ?? _session['title']}');
     } catch (e) {
       if (!mounted) return;
+      debugPrint('❌ [AudioPlayer] Playback error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -660,6 +709,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      _isPlayingTrack = false;
+      debugPrint('✅ [AudioPlayer] playCurrentTrack completed');
     }
   }
 
@@ -729,28 +781,28 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         debugPrint('🔙 [AudioPlayer] PopScope triggered');
 
-        if (_isTracking) {
-          await ListeningTrackerService.endSession();
-          debugPrint('Session tracking ended on back press');
-        }
-
-        // ✅ Only show mini player if access was granted
+        // ✅ Show mini player FIRST (non-blocking)
         if (_accessGranted && _miniPlayerProvider != null) {
           debugPrint(
-            '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}',
-          );
+              '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}');
           _session['_currentLanguage'] = _currentLanguage;
           _session['_backgroundImageUrl'] = _backgroundImageUrl;
           _miniPlayerProvider!.playSession(_session);
           _miniPlayerProvider!.show();
           debugPrint(
-            '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}',
-          );
+              '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}');
         } else if (!_accessGranted) {
           debugPrint(
               '🚫 [AudioPlayer] Access not granted - skipping mini player');
         } else {
           debugPrint('❌ Mini player provider is null');
+        }
+
+        // ✅ End tracking in background (non-blocking)
+        if (_isTracking) {
+          ListeningTrackerService.endSession().then((_) {
+            debugPrint('Session tracking ended on back press');
+          });
         }
       },
       child: Scaffold(
