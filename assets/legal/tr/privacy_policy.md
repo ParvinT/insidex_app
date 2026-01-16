@@ -129,7 +129,26 @@ Uyguladığımız önlemler:
 - **Analitik:** 14 ay sonra anonimleştirilir
 - **Yasal Yükümlülükler:** Bazı veriler yasaların gerektirdiği şekilde saklanır
 
-## 8. Haklarınız (GDPR)
+## 8. Hesap Silme
+
+Hesabınızı ve ilişkili tüm verilerinizi istediğiniz zaman silme talebinde bulunabilirsiniz.
+
+### Hesabınızı Nasıl Silebilirsiniz:
+
+- support@insidexapp.com adresine "Hesabımı Sil" konu başlığıyla bir e-posta gönderin
+- InsideX hesabınızla ilişkili e-posta adresini ekleyin
+- Kimliğinizi doğrulayıp talebinizi 30 gün içinde işleme alacağız
+
+### Neler Silinir:
+
+- Hesap bilgileriniz ve profil verileriniz
+- Dinleme geçmişi ve tercihleriniz
+- Favoriler, çalma listeleri ve ilerleme verileriniz
+- Sistemlerimizde saklanan tüm kişisel verileriniz
+
+Bazı verilerin yasal uyumluluk amacıyla Veri Saklama bölümünde açıklandığı şekilde saklanabileceğini lütfen unutmayın.
+
+## 9. Haklarınız (GDPR)
 
 Aşağıdaki haklara sahipsiniz:
 
@@ -145,7 +164,7 @@ Aşağıdaki haklara sahipsiniz:
 
 İngiltere Bilgi Komiserliği Ofisi'ne (UK ICO) ico.org.uk adresinden şikayette bulunabilirsiniz
 
-## 9. Uluslararası Veri Transferleri
+## 10. Uluslararası Veri Transferleri
 
 Veriler İngiltere/AB'de (Firebase europe-west) saklanır.  
 Avrupa Ekonomik Alanı (AEA) dışına transferler şunlarla korunur:
@@ -154,7 +173,7 @@ Avrupa Ekonomik Alanı (AEA) dışına transferler şunlarla korunur:
 - Yeterlilik kararları
 - GDPR güvenceleri
 
-## 10. Yaş Kısıtlaması
+## 11. Yaş Kısıtlaması
 
 Hizmetler yalnızca 18 yaş ve üzeri kullanıcılar içindir.  
 18 yaşın altındaki kişilerden bilerek veri toplamıyoruz.  
@@ -162,7 +181,7 @@ Bu tür verileri keşfedersek derhal sileriz.
 
 **Ebeveynler:** Çocuğunuzun verilerine sahip olduğumuzu düşünüyorsanız support@insidexapp.com adresinden iletişime geçin.
 
-## 11. Çerezler ve İzleme
+## 12. Çerezler ve İzleme
 
 Uygulama şunları kullanır:
 
@@ -170,7 +189,7 @@ Uygulama şunları kullanır:
 - Firebase Analytics (devre dışı bırakılabilir)
 - Üçüncü taraf reklam veya izleme pikselleri yok
 
-## 12. Bu Politikadaki Değişiklikler
+## 13. Bu Politikadaki Değişiklikler
 
 Bu politikayı güncelleyebiliriz. Önemli değişiklikler şu yollarla bildirilir:
 
@@ -180,7 +199,7 @@ Bu politikayı güncelleyebiliriz. Önemli değişiklikler şu yollarla bildiril
 
 Kullanmaya devam etmek kabulü temsil eder.
 
-## 13. İletişim Bilgileri
+## 14. İletişim Bilgileri
 
 **Veri Sorumlusu:**  
 ALZHAMI LTD  
