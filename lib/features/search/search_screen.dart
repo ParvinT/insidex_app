@@ -56,21 +56,11 @@ class _SearchScreenState extends State<SearchScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadSearchHistory();
-    _loadUserGender();
 
     // Auto-focus when opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
-  }
-
-  Future<void> _loadUserGender() async {
-    final gender = await SessionFilterService.getUserGender();
-    if (mounted && gender != null) {
-      setState(() {
-        _selectedGenderFilter = gender;
-      });
-    }
   }
 
   @override
@@ -489,18 +479,9 @@ class _SearchScreenState extends State<SearchScreen>
       return _buildNoResults(isTablet, AppLocalizations.of(context));
     }
 
-    return Column(
-      children: [
-        _buildGenderFilter(context.colors),
-
-        // Sessions list
-        Expanded(
-          child: ListView(
-            padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
-            children: _buildSessionItems(isTablet),
-          ),
-        ),
-      ],
+    return ListView(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      children: _buildSessionItems(isTablet),
     );
   }
 
@@ -760,70 +741,5 @@ class _SearchScreenState extends State<SearchScreen>
       await _historyService.saveSearchQuery(_searchController.text.trim());
       await _loadSearchHistory();
     }
-  }
-
-  Widget _buildGenderFilter(AppThemeExtension colors) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-      child: Row(
-        children: [
-          Text(
-            'Filter: ',
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
-              color: colors.textSecondary,
-            ),
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _buildFilterChip('all', '🌐 All', colors),
-                  SizedBox(width: 8.w),
-                  _buildFilterChip('male', '♂ Male', colors),
-                  SizedBox(width: 8.w),
-                  _buildFilterChip('female', '♀ Female', colors),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(
-      String value, String label, AppThemeExtension colors) {
-    final isSelected = _selectedGenderFilter == value;
-    return GestureDetector(
-      onTap: () {
-        if (_selectedGenderFilter != value) {
-          setState(() => _selectedGenderFilter = value);
-          // Re-run search with new filter
-          _performSearch(_searchController.text);
-        }
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? colors.textPrimary : colors.greyLight,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: isSelected ? colors.textPrimary : colors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13.sp,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? colors.textOnPrimary : colors.textSecondary,
-          ),
-        ),
-      ),
-    );
   }
 }

@@ -138,6 +138,7 @@
   "gender": "Gender",
   "male": "Male",
   "female": "Female",
+  "genderBoth": "Both",
   
   "totalListening": "Total Listening",
   "totalSessions": "Total Sessions",
@@ -903,8 +904,13 @@
   "featureSlidesImages": "Images",
   "pages": "Pages",
   "subtitleLabel": "Subtitle",
-  "deleteConfirmationMessage": "Are you sure you want to delete this item?"
-  
+  "deleteConfirmationMessage": "Are you sure you want to delete this item?",
+  "demoSession": "Demo Session",
+  "demoSession": "Demo Session",
+  "freeUsersCanPlay": "Free users can play this session",
+  "onlyPremiumCanPlay": "Only premium users can play",
+  "targetGender": "Target Gender",
+  "filterLabel": "Filter"
 
 
 }

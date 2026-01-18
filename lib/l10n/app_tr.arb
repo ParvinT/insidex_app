@@ -135,6 +135,7 @@
   "gender": "Cinsiyet",
   "male": "Erkek",
   "female": "Kadın",
+  "genderBoth": "Her İkisi",
   
   "totalListening": "Toplam Dinleme",
   "totalSessions": "Toplam Seans",
@@ -846,7 +847,11 @@
   "featureSlidesImages": "Görseller",
   "pages": "Sayfalar",
   "subtitleLabel": "Alt Başlık",
-  "deleteConfirmationMessage": "Bu öğeyi silmek istediğinizden emin misiniz?"
-
+  "deleteConfirmationMessage": "Bu öğeyi silmek istediğinizden emin misiniz?",
+  "demoSession": "Demo Oturum",
+  "freeUsersCanPlay": "Ücretsiz kullanıcılar bu oturumu dinleyebilir",
+  "onlyPremiumCanPlay": "Sadece premium kullanıcılar dinleyebilir",
+  "targetGender": "Hedef Cinsiyet",
+  "filterLabel": "Filtre"
   
 }

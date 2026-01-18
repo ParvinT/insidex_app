@@ -736,7 +736,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Demo Session',
+                                AppLocalizations.of(context).demoSession,
                                 style: GoogleFonts.inter(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
@@ -746,8 +746,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                               SizedBox(height: 2.h),
                               Text(
                                 _isDemo
-                                    ? 'Free users can play this session'
-                                    : 'Only premium users can play',
+                                    ? AppLocalizations.of(context)
+                                        .freeUsersCanPlay
+                                    : AppLocalizations.of(context)
+                                        .onlyPremiumCanPlay,
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   color: colors.textSecondary,
@@ -772,7 +774,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   SizedBox(height: 32.h),
 
                   // Gender Selection
-                  _buildSectionTitle('👤 Target Gender', colors),
+                  _buildSectionTitle(
+                      '👤 ${AppLocalizations.of(context).targetGender}',
+                      colors),
                   SizedBox(height: 12.h),
                   _buildGenderSelector(colors),
 
@@ -1099,9 +1103,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       ),
       child: Row(
         children: [
-          _buildGenderOption('male', '♂ Male', colors),
-          _buildGenderOption('female', '♀ Female', colors),
-          _buildGenderOption('both', '⚥ Both', colors),
+          _buildGenderOption(
+              'male', '♂ ${AppLocalizations.of(context).male}', colors),
+          _buildGenderOption(
+              'female', '♀ ${AppLocalizations.of(context).female}', colors),
+          _buildGenderOption(
+              'both', '⚥ ${AppLocalizations.of(context).genderBoth}', colors),
         ],
       ),
     );

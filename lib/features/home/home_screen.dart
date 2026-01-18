@@ -404,11 +404,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         item(Icons.home_outlined, l10n.home, 0, () {}),
-        item(Icons.play_circle_outline, l10n.playlist, 1, () {
+        item(Icons.headphones_outlined, l10n.sessions, 1, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const CategoriesScreen()));
+        }),
+        item(Icons.play_circle_outline, l10n.playlist, 2, () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const PlaylistScreen()));
         }),
-        item(Icons.person_outline, l10n.profile, 2, () {
+        item(Icons.person_outline, l10n.profile, 3, () {
           AppRoutes.navigateToProfile(context);
         }),
       ],

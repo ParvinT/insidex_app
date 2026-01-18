@@ -354,35 +354,51 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         ),
       );
     }
-    if (_categories.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.category_outlined,
-              size: 64.sp,
-              color: colors.greyMedium,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              AppLocalizations.of(context).noCategoriesYet,
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                color: colors.textSecondary,
+
+    final filteredCategories = _selectedGenderFilter == 'all'
+        ? _categories
+        : _categories.where((cat) {
+            return cat.gender == 'both' || cat.gender == _selectedGenderFilter;
+          }).toList();
+
+    if (filteredCategories.isEmpty) {
+      return Column(
+        children: [
+          _buildGenderFilter(colors),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.category_outlined,
+                    size: 64.sp,
+                    color: colors.greyMedium,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    AppLocalizations.of(context).noCategoriesYet,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildGenderFilter(colors),
+
         // Header
         Padding(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -407,6 +423,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         ),
 
+        SizedBox(height: 16.h),
+
         // Categories Grid
         Expanded(
           child: GridView.builder(
@@ -417,9 +435,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               mainAxisSpacing: 16.h,
               childAspectRatio: 1.0,
             ),
-            itemCount: _categories.length,
+            itemCount: filteredCategories.length,
             itemBuilder: (context, index) {
-              final category = _categories[index];
+              final category = filteredCategories[index];
               return _buildCategoryCard(category);
             },
           ),
@@ -757,7 +775,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       child: Row(
         children: [
           Text(
-            'Filter: ',
+            '${AppLocalizations.of(context).filterLabel}: ',
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
@@ -770,11 +788,14 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('all', '🌐 All', colors),
+                  _buildFilterChip(
+                      'all', '🌐 ${AppLocalizations.of(context).all}', colors),
                   SizedBox(width: 8.w),
-                  _buildFilterChip('male', '♂ Male', colors),
+                  _buildFilterChip(
+                      'male', '♂ ${AppLocalizations.of(context).male}', colors),
                   SizedBox(width: 8.w),
-                  _buildFilterChip('female', '♀ Female', colors),
+                  _buildFilterChip('female',
+                      '♀ ${AppLocalizations.of(context).female}', colors),
                 ],
               ),
             ),

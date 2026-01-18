@@ -645,7 +645,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
       child: Row(
         children: [
           Text(
-            'Filter: ',
+            '${AppLocalizations.of(context).filterLabel}: ',
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
@@ -658,11 +658,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('all', '🌐 All', colors),
+                  _buildFilterChip('all',
+                      '🌐 ${AppLocalizations.of(context).all}', colors),
                   SizedBox(width: 8.w),
-                  _buildFilterChip('male', '♂ Male', colors),
+                  _buildFilterChip('male',
+                      '♂ ${AppLocalizations.of(context).male}', colors),
                   SizedBox(width: 8.w),
-                  _buildFilterChip('female', '♀ Female', colors),
+                  _buildFilterChip('female',
+                      '♀ ${AppLocalizations.of(context).female}', colors),
                 ],
               ),
             ),

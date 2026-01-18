@@ -762,6 +762,12 @@ abstract class AppLocalizations {
   /// **'Female'**
   String get female;
 
+  /// No description provided for @genderBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get genderBoth;
+
   /// No description provided for @totalListening.
   ///
   /// In en, this message translates to:
@@ -4499,6 +4505,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to delete this item?'**
   String get deleteConfirmationMessage;
+
+  /// No description provided for @demoSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Session'**
+  String get demoSession;
+
+  /// No description provided for @freeUsersCanPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Free users can play this session'**
+  String get freeUsersCanPlay;
+
+  /// No description provided for @onlyPremiumCanPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Only premium users can play'**
+  String get onlyPremiumCanPlay;
+
+  /// No description provided for @targetGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Gender'**
+  String get targetGender;
+
+  /// No description provided for @filterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filterLabel;
 }
 
 class _AppLocalizationsDelegate

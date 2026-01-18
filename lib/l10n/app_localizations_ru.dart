@@ -345,6 +345,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get female => 'Женский';
 
   @override
+  String get genderBoth => 'Оба';
+
+  @override
   String get totalListening => 'Общее прослушивание';
 
   @override
@@ -2332,4 +2335,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get deleteConfirmationMessage =>
       'Вы уверены, что хотите удалить этот элемент?';
+
+  @override
+  String get demoSession => 'Демо сессия';
+
+  @override
+  String get freeUsersCanPlay => 'Бесплатные пользователи могут слушать';
+
+  @override
+  String get onlyPremiumCanPlay => 'Только для премиум пользователей';
+
+  @override
+  String get targetGender => 'Целевой пол';
+
+  @override
+  String get filterLabel => 'Фильтр';
 }

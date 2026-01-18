@@ -15,6 +15,81 @@ class AppIcons {
       'label': 'Meditation',
       'path': 'meditation.json',
     },
+    {
+      'name': 'skin',
+      'label': 'Allergy & Skin',
+      'path': 'skin.json',
+    },
+    {
+      'name': 'woman',
+      'label': "Women's Health",
+      'path': 'woman.json',
+    },
+    {
+      'name': 'man',
+      'label': "Men's Health",
+      'path': 'man.json',
+    },
+    {
+      'name': 'addiction',
+      'label': 'Addictions',
+      'path': 'addiction.json',
+    },
+    {
+      'name': 'child_health',
+      'label': "Children's Health",
+      'path': 'child_health.json',
+    },
+    {
+      'name': 'child_dev',
+      'label': 'Child Development',
+      'path': 'child_dev.json',
+    },
+    {
+      'name': 'digestive',
+      'label': 'Digestive System',
+      'path': 'digestive.json',
+    },
+    {
+      'name': 'heart',
+      'label': 'Heart & Blood',
+      'path': 'heart.json',
+    },
+    {
+      'name': 'bones',
+      'label': 'Bones & Muscles',
+      'path': 'bones.json',
+    },
+    {
+      'name': 'lungs',
+      'label': 'Respiratory & ENT',
+      'path': 'lungs.json',
+    },
+    {
+      'name': 'eye',
+      'label': 'Vision',
+      'path': 'eye.json',
+    },
+    {
+      'name': 'teeth',
+      'label': 'Teeth & Oral',
+      'path': 'teeth.json',
+    },
+    {
+      'name': 'kidney',
+      'label': 'Kidneys & Excretory',
+      'path': 'kidney.json',
+    },
+    {
+      'name': 'medical',
+      'label': 'Serious Diagnoses',
+      'path': 'medical.json',
+    },
+    {
+      'name': 'weight',
+      'label': 'Weight & Body',
+      'path': 'weight.json',
+    },
   ];
 
   /// Get full animation path

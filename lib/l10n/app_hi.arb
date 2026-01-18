@@ -110,6 +110,7 @@
   "gender": "लिंग",
   "male": "पुरुष",
   "female": "महिला",
+  "genderBoth": "दोनों",
   "totalListening": "कुल सुनना",
   "totalSessions": "कुल सत्र",
   "currentStreak": "वर्तमान स्ट्रीक",
@@ -800,5 +801,10 @@
   "pages": "पृष्ठ",
   "subtitleLabel": "उपशीर्षक",
   "enabled": "सक्षम",
-  "deleteConfirmationMessage": "क्या आप वाकई इस आइटम को हटाना चाहते हैं?"
+  "deleteConfirmationMessage": "क्या आप वाकई इस आइटम को हटाना चाहते हैं?",
+  "demoSession": "डेमो सत्र",
+  "freeUsersCanPlay": "मुफ्त उपयोगकर्ता इस सत्र को सुन सकते हैं",
+  "onlyPremiumCanPlay": "केवल प्रीमियम उपयोगकर्ता सुन सकते हैं",
+  "targetGender": "लक्षित लिंग",
+  "filterLabel": "फ़िल्टर"
 }

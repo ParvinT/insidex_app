@@ -140,6 +140,7 @@
   "gender": "Пол",
   "male": "Мужской",
   "female": "Женский",
+  "genderBoth": "Оба",
   "other": "Другое",
   "preferNotToSay": "Не указан",
   
@@ -857,6 +858,11 @@
   "featureSlidesImages": "Изображения",
   "pages": "Страницы",
   "subtitleLabel": "Подзаголовок",
-  "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот элемент?"
+  "deleteConfirmationMessage": "Вы уверены, что хотите удалить этот элемент?",
+  "demoSession": "Демо сессия",
+  "freeUsersCanPlay": "Бесплатные пользователи могут слушать",
+  "onlyPremiumCanPlay": "Только для премиум пользователей",
+  "targetGender": "Целевой пол",
+  "filterLabel": "Фильтр"
   
 }

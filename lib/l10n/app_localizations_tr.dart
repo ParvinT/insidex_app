@@ -348,6 +348,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get female => 'Kadın';
 
   @override
+  String get genderBoth => 'Her İkisi';
+
+  @override
   String get totalListening => 'Toplam Dinleme';
 
   @override
@@ -2325,4 +2328,20 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get deleteConfirmationMessage =>
       'Bu öğeyi silmek istediğinizden emin misiniz?';
+
+  @override
+  String get demoSession => 'Demo Oturum';
+
+  @override
+  String get freeUsersCanPlay =>
+      'Ücretsiz kullanıcılar bu oturumu dinleyebilir';
+
+  @override
+  String get onlyPremiumCanPlay => 'Sadece premium kullanıcılar dinleyebilir';
+
+  @override
+  String get targetGender => 'Hedef Cinsiyet';
+
+  @override
+  String get filterLabel => 'Filtre';
 }

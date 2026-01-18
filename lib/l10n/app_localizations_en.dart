@@ -344,6 +344,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get female => 'Female';
 
   @override
+  String get genderBoth => 'Both';
+
+  @override
   String get totalListening => 'Total Listening';
 
   @override
@@ -2316,4 +2319,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deleteConfirmationMessage =>
       'Are you sure you want to delete this item?';
+
+  @override
+  String get demoSession => 'Demo Session';
+
+  @override
+  String get freeUsersCanPlay => 'Free users can play this session';
+
+  @override
+  String get onlyPremiumCanPlay => 'Only premium users can play';
+
+  @override
+  String get targetGender => 'Target Gender';
+
+  @override
+  String get filterLabel => 'Filter';
 }

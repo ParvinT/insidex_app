@@ -348,6 +348,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get female => 'महिला';
 
   @override
+  String get genderBoth => 'दोनों';
+
+  @override
   String get totalListening => 'कुल सुनना';
 
   @override
@@ -2316,4 +2319,19 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get deleteConfirmationMessage =>
       'क्या आप वाकई इस आइटम को हटाना चाहते हैं?';
+
+  @override
+  String get demoSession => 'डेमो सत्र';
+
+  @override
+  String get freeUsersCanPlay => 'मुफ्त उपयोगकर्ता इस सत्र को सुन सकते हैं';
+
+  @override
+  String get onlyPremiumCanPlay => 'केवल प्रीमियम उपयोगकर्ता सुन सकते हैं';
+
+  @override
+  String get targetGender => 'लक्षित लिंग';
+
+  @override
+  String get filterLabel => 'फ़िल्टर';
 }

@@ -33,6 +33,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   // Selected values
   String _selectedIcon = 'meditation';
+  String _selectedGender = 'both';
   String _selectedLanguage = AppLanguages.defaultLanguage;
 
   // Loading state
@@ -67,6 +68,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     final category = widget.categoryToEdit!;
 
     _selectedIcon = category.iconName;
+    _selectedGender = category.gender;
 
     // Load names for each language
     category.names.forEach((lang, name) {
@@ -127,6 +129,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             children: [
               // Icon & Section
               _buildIconSection(isTablet, isDesktop, colors),
+
+              SizedBox(height: 24.h),
+
+              // Gender Selection
+              _buildSectionTitle(
+                  '👤 ${AppLocalizations.of(context).targetGender}', colors),
+              SizedBox(height: 12.h),
+              _buildGenderSelector(colors),
 
               SizedBox(height: 30.h),
 
@@ -486,8 +496,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                                 ? LinearGradient(
                                     colors: [
                                       colors.textPrimary,
-                                      colors.textPrimary
-                                          .withValues(alpha: 0.7),
+                                      colors.textPrimary.withValues(alpha: 0.7),
                                     ],
                                   )
                                 : LinearGradient(
@@ -573,6 +582,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       final category = CategoryModel(
         id: widget.categoryToEdit?.id ?? '',
         iconName: _selectedIcon,
+        gender: _selectedGender,
         names: names,
         backgroundImages: widget.categoryToEdit?.backgroundImages ?? [],
         createdAt: widget.categoryToEdit?.createdAt,
@@ -634,5 +644,71 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Widget _buildSectionTitle(String title, AppThemeExtension colors) {
+    return Text(
+      title,
+      style: GoogleFonts.inter(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: colors.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildGenderSelector(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: colors.greyLight,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          _buildGenderOption(
+              'male', '♂ ${AppLocalizations.of(context).male}', colors),
+          _buildGenderOption(
+              'female', '♀ ${AppLocalizations.of(context).female}', colors),
+          _buildGenderOption(
+              'both', '⚥ ${AppLocalizations.of(context).genderBoth}', colors),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenderOption(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGender == value;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedGender = value),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          decoration: BoxDecoration(
+            color: isSelected ? colors.backgroundPure : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.r),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: colors.textPrimary.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: isSelected ? colors.textPrimary : colors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
