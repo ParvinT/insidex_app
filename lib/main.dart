@@ -45,12 +45,15 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // ✅ App Check initialization
-  await FirebaseAppCheck.instance.activate(
-    androidProvider:
-        kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
-    appleProvider:
-        kReleaseMode ? AppleProvider.deviceCheck : AppleProvider.debug,
-  );
+  if (!kIsWeb) {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider:
+          kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+      appleProvider:
+          kReleaseMode ? AppleProvider.deviceCheck : AppleProvider.debug,
+    );
+    debugPrint('✅ Firebase App Check initialized');
+  }
   debugPrint('✅ Firebase App Check initialized');
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 

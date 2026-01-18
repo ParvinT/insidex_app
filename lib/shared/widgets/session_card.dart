@@ -127,6 +127,7 @@ class SessionCard extends StatelessWidget {
               borderRadius: borderRadius,
               playButtonSize: playButtonSize,
               playIconSize: playIconSize,
+              gender: session['gender'] as String?,
             ),
 
             // CONTENT SECTION
@@ -220,6 +221,7 @@ class SessionCard extends StatelessWidget {
     required double borderRadius,
     required double playButtonSize,
     required double playIconSize,
+    String? gender,
   }) {
     if (imageUrl.isEmpty) {
       return _buildImageWithGradient(
@@ -228,6 +230,7 @@ class SessionCard extends StatelessWidget {
         borderRadius: borderRadius,
         playButtonSize: playButtonSize,
         playIconSize: playIconSize,
+        gender: gender,
       );
     }
 
@@ -237,13 +240,12 @@ class SessionCard extends StatelessWidget {
         topRight: Radius.circular(borderRadius),
       ),
       child: SizedBox(
-        height: imageHeight, // ← EKLEME
+        height: imageHeight,
         width: double.infinity,
         child: Stack(
           children: [
-            // 1. CACHED IMAGE (en altta)
+            // 1. CACHED IMAGE
             Positioned.fill(
-              // ← DEĞİŞTİRDİM
               child: CachedNetworkImage(
                 imageUrl: imageUrl,
                 cacheManager: AppCacheManager.instance,
@@ -264,7 +266,7 @@ class SessionCard extends StatelessWidget {
               ),
             ),
 
-            // 2. GRADIENT OVERLAY (ortada)
+            // 2. GRADIENT OVERLAY
             Positioned(
               left: 0,
               right: 0,
@@ -317,6 +319,28 @@ class SessionCard extends StatelessWidget {
                 ),
               ),
             ),
+            // 4. GENDER BADGE
+            if (gender != null && gender != 'both')
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    gender == 'male' ? '♂' : '♀',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -329,6 +353,7 @@ class SessionCard extends StatelessWidget {
     required double borderRadius,
     required double playButtonSize,
     required double playIconSize,
+    String? gender,
   }) {
     final colors = context.colors;
     final gradientColors = [
@@ -390,7 +415,29 @@ class SessionCard extends StatelessWidget {
                   ),
                 ),
               ),
-            )
+            ),
+            // Gender Badge
+            if (gender != null && gender != 'both')
+              Positioned(
+                top: 12,
+                right: 12,
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                  child: Text(
+                    gender == 'male' ? '♂' : '♀',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

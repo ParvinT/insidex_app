@@ -54,6 +54,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   // Loading states
   bool _isLoading = false;
   bool _isDemo = false;
+  String _selectedGender = 'both';
   double _uploadProgress = 0.0;
   String _uploadStatus = '';
 
@@ -131,6 +132,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
   void _loadExistingData() {
     final session = widget.sessionToEdit!;
     _isDemo = session['isDemo'] ?? false;
+    _selectedGender = session['gender'] ?? 'both';
 
     // Load session number
     if (session['sessionNumber'] != null) {
@@ -498,6 +500,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
             : null,
 
         'categoryId': _selectedCategoryId,
+        'gender': _selectedGender,
 
         // Multi-language content
         'content': content,
@@ -767,6 +770,13 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                   ),
 
                   SizedBox(height: 32.h),
+
+                  // Gender Selection
+                  _buildSectionTitle('👤 Target Gender', colors),
+                  SizedBox(height: 12.h),
+                  _buildGenderSelector(colors),
+
+                  SizedBox(height: 24.h),
 
                   // Multi-Language Content Section (Widget)
                   MultiLanguageContentSection(
@@ -1075,6 +1085,58 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
               size: 24.sp,
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderSelector(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: colors.greyLight,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          _buildGenderOption('male', '♂ Male', colors),
+          _buildGenderOption('female', '♀ Female', colors),
+          _buildGenderOption('both', '⚥ Both', colors),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenderOption(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGender == value;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedGender = value),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          decoration: BoxDecoration(
+            color: isSelected ? colors.backgroundPure : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.r),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: colors.textPrimary.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: isSelected ? colors.textPrimary : colors.textSecondary,
+            ),
+          ),
         ),
       ),
     );

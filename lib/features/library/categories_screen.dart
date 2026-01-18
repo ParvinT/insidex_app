@@ -44,6 +44,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   bool _hasMoreSessions = true;
   bool _isLoadingSessions = false;
   int _recursiveCallCount = 0;
+  String _selectedGenderFilter = 'all';
 
   @override
   void initState() {
@@ -52,6 +53,19 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     _loadCategories();
     _prefetchImages();
     _loadInitialSessions();
+    _loadUserGender();
+  }
+
+  Future<void> _loadUserGender() async {
+    final gender = await SessionFilterService.getUserGender();
+    if (mounted && gender != null) {
+      setState(() {
+        _selectedGenderFilter = gender;
+      });
+      _loadInitialSessions();
+    } else {
+      _loadInitialSessions();
+    }
   }
 
   @override
@@ -167,8 +181,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       }
 
       // Apply language filter
-      final filtered = await SessionFilterService.filterSessionsByLanguage(
+      final filtered =
+          await SessionFilterService.filterSessionsByLanguageAndGender(
         snapshot.docs,
+        _selectedGenderFilter,
       );
       debugPrint('🌍 [Pagination] After language filter: ${filtered.length}');
 
@@ -648,57 +664,67 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     }
 
     // Sessions list with pagination
-    return ListView.builder(
-      padding: EdgeInsets.all(20.w),
-      itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
-      itemBuilder: (context, index) {
-        // See more button at the end
-        if (index == _allSessions.length) {
-          if (_isLoadingSessions) {
-            // Loading indicator
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: colors.textPrimary,
-                ),
-              ),
-            );
-          } else {
-            // See More button
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: _loadMoreSessions,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.textPrimary,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 32.w,
-                      vertical: 12.h,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).seeMore,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }
-        }
+    return Column(
+      children: [
+        // 🆕 Gender Filter
+        _buildGenderFilter(colors),
 
-        // Session item
-        final session = _allSessions[index];
-        return _buildSessionItem(context, session);
-      },
+        // Sessions list
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.all(20.w),
+            itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
+            itemBuilder: (context, index) {
+              // See more button at the end
+              if (index == _allSessions.length) {
+                if (_isLoadingSessions) {
+                  // Loading indicator
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  );
+                } else {
+                  // See More button
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    child: Center(
+                      child: ElevatedButton(
+                        onPressed: _loadMoreSessions,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.textPrimary,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 32.w,
+                            vertical: 12.h,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context).seeMore,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              }
+
+              // Session item
+              final session = _allSessions[index];
+              return _buildSessionItem(context, session);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -722,6 +748,70 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGenderFilter(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Text(
+            'Filter: ',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.textSecondary,
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('all', '🌐 All', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('male', '♂ Male', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('female', '♀ Female', colors),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGenderFilter == value;
+    return GestureDetector(
+      onTap: () {
+        if (_selectedGenderFilter != value) {
+          setState(() => _selectedGenderFilter = value);
+          _loadInitialSessions();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.textPrimary : colors.greyLight,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? colors.textPrimary : colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+          ),
+        ),
+      ),
     );
   }
 }

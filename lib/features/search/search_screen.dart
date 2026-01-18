@@ -10,7 +10,8 @@ import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
-import '../../shared/widgets/session_card.dart'; // EKLE:
+import '../../shared/widgets/session_card.dart';
+import '../../services/session_filter_service.dart';
 import '../quiz/screens/quiz_results_screen.dart';
 import 'search_service.dart';
 import 'search_history_service.dart';
@@ -40,6 +41,7 @@ class _SearchScreenState extends State<SearchScreen>
   bool _isLoadingHistory = true;
 
   bool _isSearching = false;
+  String _selectedGenderFilter = 'all';
   Map<String, dynamic> _searchResults = {
     'categories': <Map<String, dynamic>>[],
     'sessions': <Map<String, dynamic>>[],
@@ -54,11 +56,21 @@ class _SearchScreenState extends State<SearchScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _loadSearchHistory();
+    _loadUserGender();
 
     // Auto-focus when opened
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _focusNode.requestFocus();
     });
+  }
+
+  Future<void> _loadUserGender() async {
+    final gender = await SessionFilterService.getUserGender();
+    if (mounted && gender != null) {
+      setState(() {
+        _selectedGenderFilter = gender;
+      });
+    }
   }
 
   @override
@@ -167,8 +179,19 @@ class _SearchScreenState extends State<SearchScreen>
       _quizSearchService.searchAll(query),
     ]);
 
+    // 🆕 Apply gender filter to sessions
+    final searchResults = results[0];
+    final sessions = searchResults['sessions'] as List<Map<String, dynamic>>;
+    final filteredSessions = SessionFilterService.filterByGender(
+      sessions,
+      _selectedGenderFilter,
+    );
+
     setState(() {
-      _searchResults = results[0];
+      _searchResults = {
+        'categories': searchResults['categories'],
+        'sessions': filteredSessions,
+      };
       _quizSearchResults = results[1];
       _isSearching = false;
     });
@@ -466,9 +489,18 @@ class _SearchScreenState extends State<SearchScreen>
       return _buildNoResults(isTablet, AppLocalizations.of(context));
     }
 
-    return ListView(
-      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
-      children: _buildSessionItems(isTablet),
+    return Column(
+      children: [
+        _buildGenderFilter(context.colors),
+
+        // Sessions list
+        Expanded(
+          child: ListView(
+            padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+            children: _buildSessionItems(isTablet),
+          ),
+        ),
+      ],
     );
   }
 
@@ -728,5 +760,70 @@ class _SearchScreenState extends State<SearchScreen>
       await _historyService.saveSearchQuery(_searchController.text.trim());
       await _loadSearchHistory();
     }
+  }
+
+  Widget _buildGenderFilter(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Text(
+            'Filter: ',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.textSecondary,
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip('all', '🌐 All', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('male', '♂ Male', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('female', '♀ Female', colors),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGenderFilter == value;
+    return GestureDetector(
+      onTap: () {
+        if (_selectedGenderFilter != value) {
+          setState(() => _selectedGenderFilter = value);
+          // Re-run search with new filter
+          _performSearch(_searchController.text);
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.textPrimary : colors.greyLight,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? colors.textPrimary : colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+          ),
+        ),
+      ),
+    );
   }
 }
