@@ -27,6 +27,9 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+
+    <!-- In-App Purchase - BUNU EKLE -->
+    <uses-permission android:name="com.android.vending.BILLING" />
     
     <!-- Optional permissions -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />

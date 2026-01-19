@@ -10,6 +10,7 @@ import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/feature_slide_model.dart';
 import '../../../services/feature_slides_service.dart';
+import '../../../services/cache_manager_service.dart';
 
 /// Feature slideshow with auto-scroll and animated text
 class FeatureSlideshow extends StatefulWidget {
@@ -104,6 +105,10 @@ class _FeatureSlideshowState extends State<FeatureSlideshow>
       final randomImages = await _service.getRandomizedImagesForPages(
         pageCount: pages.length,
       );
+      await Future.wait(
+        randomImages.map((url) => AppCacheManager.precacheImage(url)),
+      );
+      debugPrint('✅ [FeatureSlideshow] All images precached');
 
       if (mounted) {
         setState(() {
@@ -242,15 +247,14 @@ class _FeatureSlideshowState extends State<FeatureSlideshow>
         // Background image
         CachedNetworkImage(
           imageUrl: imageUrl,
+          cacheManager: AppCacheManager.instance,
           fit: BoxFit.cover,
+          memCacheWidth: 1920,
+          memCacheHeight: 1080,
+          fadeInDuration: const Duration(milliseconds: 200),
+          fadeOutDuration: const Duration(milliseconds: 100),
           placeholder: (context, url) => Container(
             color: colors.backgroundCard,
-            child: Center(
-              child: CircularProgressIndicator(
-                color: colors.textSecondary,
-                strokeWidth: 2,
-              ),
-            ),
           ),
           errorWidget: (context, url, error) => Container(
             color: colors.backgroundCard,

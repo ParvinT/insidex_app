@@ -1,7 +1,7 @@
 name: insidex_app
-description: "INSIDEX - Sound Healing & Subliminal App"
+description: "InsideX - Sound Healing & Subliminal App"
 publish_to: "none"
-version: 1.0.0+3
+version: 1.0.0+4
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -31,6 +31,9 @@ dependencies:
 
   # Storage
   shared_preferences: ^2.2.2
+
+  # Revenuecat
+  purchases_flutter: ^9.8.0
 
   # Localization
   intl: ^0.20.2
