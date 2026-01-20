@@ -1,5 +1,7 @@
 // lib/core/constants/subscription_constants.dart
 
+import '../../config/api_keys.dart';
+
 /// Subscription system constants
 /// Contains all product IDs, entitlements, and configuration values
 ///
@@ -73,12 +75,10 @@ abstract class SubscriptionConstants {
   // ============================================================
 
   /// RevenueCat API key for iOS
-  /// TODO: Replace with actual key from RevenueCat dashboard
-  static const String revenueCatApiKeyIOS = 'appl_XXXXXXXXXXXXXXXX';
+  static const String revenueCatApiKeyIOS = ApiKeys.revenueCatIOS;
 
   /// RevenueCat API key for Android
-  /// TODO: Replace with actual key from RevenueCat dashboard
-  static const String revenueCatApiKeyAndroid = 'goog_XXXXXXXXXXXXXXXX';
+  static const String revenueCatApiKeyAndroid = ApiKeys.revenueCatAndroid;
 
   /// Default offering identifier
   static const String defaultOfferingId = 'default';

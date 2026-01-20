@@ -325,18 +325,17 @@ class SessionCard extends StatelessWidget {
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  width: 32.w,
+                  height: 32.w,
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(20.r),
+                    shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    gender == 'male' ? '♂' : '♀',
-                    style: TextStyle(
-                      fontSize: 16.sp,
+                  child: Center(
+                    child: Icon(
+                      gender == 'male' ? Icons.male : Icons.female,
+                      size: 18.sp,
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
@@ -422,18 +421,17 @@ class SessionCard extends StatelessWidget {
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                  width: 32.w,
+                  height: 32.w,
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(20.r),
+                    shape: BoxShape.circle,
                   ),
-                  child: Text(
-                    gender == 'male' ? '♂' : '♀',
-                    style: TextStyle(
-                      fontSize: 16.sp,
+                  child: Center(
+                    child: Icon(
+                      gender == 'male' ? Icons.male : Icons.female,
+                      size: 18.sp,
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
