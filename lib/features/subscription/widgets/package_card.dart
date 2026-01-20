@@ -14,12 +14,14 @@ import '../../../models/subscription_package.dart';
 class PackageCard extends StatelessWidget {
   final SubscriptionPackage package;
   final bool isSelected;
+  final bool isCurrentPlan;
   final VoidCallback onTap;
 
   const PackageCard({
     super.key,
     required this.package,
     required this.isSelected,
+    this.isCurrentPlan = false,
     required this.onTap,
   });
 
@@ -41,8 +43,10 @@ class PackageCard extends StatelessWidget {
               : colors.backgroundCard,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? colors.textPrimary : colors.border,
-            width: isSelected ? 2 : 1,
+            color: isCurrentPlan
+                ? Colors.green
+                : (isSelected ? colors.textPrimary : colors.border),
+            width: isSelected || isCurrentPlan ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
@@ -70,10 +74,16 @@ class PackageCard extends StatelessWidget {
             // Features
             _buildFeatures(context, isTablet),
 
-            // Trial banner (if applicable)
-            if (package.hasTrial) ...[
+            // Trial banner (if applicable and not current plan)
+            if (package.hasTrial && !isCurrentPlan) ...[
               SizedBox(height: 12.h),
               _buildTrialBanner(context, isTablet),
+            ],
+
+            // Current plan banner
+            if (isCurrentPlan) ...[
+              SizedBox(height: 12.h),
+              _buildCurrentPlanBanner(context, isTablet),
             ],
           ],
         ),
@@ -135,8 +145,44 @@ class PackageCard extends StatelessWidget {
   Widget _buildBadges(bool isTablet) {
     return Row(
       children: [
-        // Popular badge
-        if (package.isHighlighted)
+        // Current plan badge (priority over popular)
+        if (isCurrentPlan)
+          Builder(
+            builder: (context) {
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: isTablet ? 14.sp : 12.sp,
+                    ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'CURRENT',
+                      style: GoogleFonts.inter(
+                        fontSize: isTablet ? 11.sp : 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          )
+        // Popular badge (only if not current plan)
+        else if (package.isHighlighted)
           Builder(
             builder: (context) {
               final colors = context.colors;
@@ -162,8 +208,8 @@ class PackageCard extends StatelessWidget {
             },
           ),
 
-        // Savings badge
-        if (package.savingsPercent != null) ...[
+        // Savings badge (always show if available)
+        if (package.savingsPercent != null && !isCurrentPlan) ...[
           SizedBox(width: 8.w),
           Container(
             padding: EdgeInsets.symmetric(
@@ -279,6 +325,40 @@ class PackageCard extends StatelessWidget {
               fontSize: isTablet ? 13.sp : 12.sp,
               fontWeight: FontWeight.w600,
               color: Colors.blue.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCurrentPlanBanner(BuildContext context, bool isTablet) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: 12.w,
+        vertical: 10.h,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.green.shade50,
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: Colors.green.shade200),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.check_circle,
+            color: Colors.green.shade700,
+            size: isTablet ? 18.sp : 16.sp,
+          ),
+          SizedBox(width: 8.w),
+          Text(
+            'This is your current plan',
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 13.sp : 12.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.green.shade700,
             ),
           ),
         ],

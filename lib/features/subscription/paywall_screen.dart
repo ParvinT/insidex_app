@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../core/constants/subscription_constants.dart';
 import '../../models/subscription_package.dart';
 import '../../providers/subscription_provider.dart';
 import 'widgets/package_card.dart';
@@ -22,10 +23,14 @@ class PaywallScreen extends StatefulWidget {
   /// Optional: Callback when purchase completes successfully
   final VoidCallback? onPurchaseSuccess;
 
+  /// If true, highlights the user's current plan and shows "Current Plan" badge
+  final bool showCurrentPlan;
+
   const PaywallScreen({
     super.key,
     this.triggeredByFeature,
     this.onPurchaseSuccess,
+    this.showCurrentPlan = false,
   });
 
   @override
@@ -39,7 +44,6 @@ class _PaywallScreenState extends State<PaywallScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-select the highlighted (popular) package
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = context.read<SubscriptionProvider>();
 
@@ -51,15 +55,66 @@ class _PaywallScreenState extends State<PaywallScreen> {
           ? provider.availablePackages
           : SubscriptionPackage.getDefaultPackages();
 
-      final highlighted = packages.firstWhere(
-        (p) => p.isHighlighted,
-        orElse: () => packages.first,
-      );
+      // If showing current plan mode, pre-select user's current plan
+      if (widget.showCurrentPlan && provider.isActive) {
+        final currentTier = provider.tier;
+        final currentPeriod = provider.subscription.period;
 
-      setState(() {
-        _selectedProductId = highlighted.productId;
-      });
+        // Find the package that matches user's current subscription
+        final currentPackage = packages.firstWhere(
+          (p) => p.tier == currentTier && p.period == currentPeriod,
+          orElse: () => packages.firstWhere(
+            (p) => p.tier == currentTier,
+            orElse: () => packages.first,
+          ),
+        );
+
+        setState(() {
+          _selectedProductId = currentPackage.productId;
+        });
+
+        debugPrint(
+            '📦 [Paywall] Current plan mode - selected: ${currentPackage.productId}');
+      } else {
+        // Default: select highlighted (popular) package
+        final highlighted = packages.firstWhere(
+          (p) => p.isHighlighted,
+          orElse: () => packages.first,
+        );
+
+        setState(() {
+          _selectedProductId = highlighted.productId;
+        });
+      }
     });
+  }
+
+  /// Check if the selected package is user's current plan
+  bool _isCurrentPlan(
+      SubscriptionPackage package, SubscriptionProvider provider) {
+    if (!provider.isActive) return false;
+
+    final currentTier = provider.tier;
+    final currentPeriod = provider.subscription.period;
+
+    // Match by tier and period
+    return package.tier == currentTier && package.period == currentPeriod;
+  }
+
+  /// Check if selected package is same as current plan
+  bool _isSelectedCurrentPlan(SubscriptionProvider provider) {
+    if (!provider.isActive || _selectedProductId == null) return false;
+
+    final packages = provider.availablePackages.isNotEmpty
+        ? provider.availablePackages
+        : SubscriptionPackage.getDefaultPackages();
+
+    final selectedPackage = packages.firstWhere(
+      (p) => p.productId == _selectedProductId,
+      orElse: () => packages.first,
+    );
+
+    return _isCurrentPlan(selectedPackage, provider);
   }
 
   @override
@@ -108,7 +163,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             SizedBox(height: 20.h),
 
                             // Header
-                            _buildHeader(context, isTablet),
+                            _buildHeader(
+                                context, isTablet, subscriptionProvider),
 
                             SizedBox(height: 24.h),
 
@@ -119,6 +175,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                     package: package,
                                     isSelected:
                                         _selectedProductId == package.productId,
+                                    isCurrentPlan: widget.showCurrentPlan &&
+                                        _isCurrentPlan(
+                                            package, subscriptionProvider),
                                     onTap: () {
                                       setState(() {
                                         _selectedProductId = package.productId;
@@ -196,8 +255,19 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isTablet) {
+  Widget _buildHeader(
+      BuildContext context, bool isTablet, SubscriptionProvider provider) {
     final colors = context.colors;
+
+    // Dynamic title based on mode
+    final title = widget.showCurrentPlan && provider.isActive
+        ? 'Manage Your Plan'
+        : 'Unlock Your Full Potential';
+
+    final subtitle = widget.showCurrentPlan && provider.isActive
+        ? 'Switch plans or keep your current subscription'
+        : 'Choose the plan that works best for you';
+
     return Column(
       children: [
         // Premium icon
@@ -216,7 +286,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
             shape: BoxShape.circle,
           ),
           child: Icon(
-            Icons.workspace_premium,
+            widget.showCurrentPlan ? Icons.swap_horiz : Icons.workspace_premium,
             size: isTablet ? 40.sp : 35.sp,
             color: colors.textPrimary,
           ),
@@ -226,7 +296,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
         // Title
         Text(
-          'Unlock Your Full Potential',
+          title,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 26.sp : 22.sp,
             fontWeight: FontWeight.w700,
@@ -239,7 +309,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
         // Subtitle
         Text(
-          'Choose the plan that works best for you',
+          subtitle,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 16.sp : 14.sp,
             color: colors.textSecondary,
@@ -294,10 +364,26 @@ class _PaywallScreenState extends State<PaywallScreen> {
       orElse: () => packages.first,
     );
 
-    final buttonText = selectedPackage.hasTrial
-        ? 'Start ${selectedPackage.trialDays}-Day Free Trial'
-        : 'Subscribe Now';
+    final isCurrentPlan = _isSelectedCurrentPlan(provider);
     final colors = context.colors;
+
+    // Dynamic button text
+    String buttonText;
+    if (isCurrentPlan) {
+      buttonText = 'Current Plan';
+    } else if (widget.showCurrentPlan && provider.isActive) {
+      // User is switching plans
+      final isUpgrade = _isUpgrade(selectedPackage, provider);
+      if (isUpgrade) {
+        buttonText = 'Upgrade to ${selectedPackage.tier.displayName}';
+      } else {
+        buttonText = 'Switch to ${selectedPackage.tier.displayName}';
+      }
+    } else if (selectedPackage.hasTrial) {
+      buttonText = 'Start ${selectedPackage.trialDays}-Day Free Trial';
+    } else {
+      buttonText = 'Subscribe Now';
+    }
 
     return Container(
       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
@@ -317,12 +403,17 @@ class _PaywallScreenState extends State<PaywallScreen> {
           width: double.infinity,
           height: isTablet ? 56.h : 52.h,
           child: ElevatedButton(
-            onPressed: _isProcessing ? null : () => _handlePurchase(provider),
+            onPressed: _isProcessing || isCurrentPlan
+                ? null
+                : () => _handlePurchase(provider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: colors.textPrimary,
+              backgroundColor:
+                  isCurrentPlan ? Colors.green : colors.textPrimary,
               foregroundColor: colors.textOnPrimary,
-              disabledBackgroundColor:
-                  colors.textPrimary.withValues(alpha: 0.5),
+              disabledBackgroundColor: isCurrentPlan
+                  ? Colors.green.withValues(alpha: 0.7)
+                  : colors.textPrimary.withValues(alpha: 0.5),
+              disabledForegroundColor: colors.textOnPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16.r),
               ),
@@ -337,12 +428,24 @@ class _PaywallScreenState extends State<PaywallScreen> {
                       strokeWidth: 2,
                     ),
                   )
-                : Text(
-                    buttonText,
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 17.sp : 16.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isCurrentPlan) ...[
+                        Icon(
+                          Icons.check_circle,
+                          size: isTablet ? 22.sp : 20.sp,
+                        ),
+                        SizedBox(width: 8.w),
+                      ],
+                      Text(
+                        buttonText,
+                        style: GoogleFonts.inter(
+                          fontSize: isTablet ? 17.sp : 16.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
           ),
         ),
@@ -350,8 +453,39 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
+  /// Check if selected package is an upgrade from current plan
+  bool _isUpgrade(SubscriptionPackage selected, SubscriptionProvider provider) {
+    final currentTier = provider.tier;
+
+    // Standard is higher than Lite
+    if (selected.tier == SubscriptionTier.standard &&
+        currentTier == SubscriptionTier.lite) {
+      return true;
+    }
+
+    // Yearly is considered upgrade from monthly (same tier)
+    if (selected.tier == currentTier &&
+        selected.period == SubscriptionPeriod.yearly &&
+        provider.subscription.period == SubscriptionPeriod.monthly) {
+      return true;
+    }
+
+    return false;
+  }
+
   Future<void> _handlePurchase(SubscriptionProvider provider) async {
     if (_selectedProductId == null) return;
+
+    // Check if trying to purchase current plan
+    if (_isSelectedCurrentPlan(provider)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You are already subscribed to this plan'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
     setState(() => _isProcessing = true);
 
@@ -370,11 +504,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
       if (success && mounted) {
         widget.onPurchaseSuccess?.call();
 
-        // Show success dialog first
+        // Determine if this was an upgrade/switch
+        final wasSwitch = widget.showCurrentPlan && provider.isActive;
+
+        // Show success dialog
         await showPurchaseSuccessDialog(
           context,
           planName: package.tier.displayName,
-          isTrialStarted: package.hasTrial,
+          isTrialStarted: package.hasTrial && !wasSwitch,
         );
 
         // Then close paywall
@@ -431,6 +568,7 @@ Future<bool?> showPaywall(
   BuildContext context, {
   String? feature,
   VoidCallback? onSuccess,
+  bool showCurrentPlan = false,
 }) {
   return Navigator.of(context).push<bool>(
     MaterialPageRoute(
@@ -438,6 +576,7 @@ Future<bool?> showPaywall(
       builder: (context) => PaywallScreen(
         triggeredByFeature: feature,
         onPurchaseSuccess: onSuccess,
+        showCurrentPlan: showCurrentPlan,
       ),
     ),
   );

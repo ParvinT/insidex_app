@@ -1,5 +1,7 @@
 // lib/shared/widgets/upgrade_prompt.dart
 
+import 'dart:io' show Platform;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -7,7 +9,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/breakpoints.dart';
-import '../../core/constants/subscription_constants.dart';
 import '../../features/subscription/paywall_screen.dart';
 import '../../providers/subscription_provider.dart';
 
@@ -285,10 +286,13 @@ Future<bool?> showUpgradeBottomSheet(
 }
 
 /// Shows manage subscription bottom sheet for premium users
+/// Returns action and handles it after sheet closes
 Future<void> showManageSubscriptionSheet(BuildContext context) async {
   final subscriptionProvider = context.read<SubscriptionProvider>();
+  final navigator = Navigator.of(context, rootNavigator: true);
 
-  await showModalBottomSheet(
+  // Show bottom sheet and get action
+  final action = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
@@ -327,140 +331,146 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
 
                 SizedBox(height: 24.h),
 
-                // Current plan card
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16.w),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.amber.withValues(alpha: 0.15),
-                        Colors.orange.withValues(alpha: 0.1),
-                      ],
+                // Current plan card - NOW CLICKABLE!
+                InkWell(
+                  onTap: () {
+                    debugPrint('📦 Plan card tapped');
+                    Navigator.pop(ctx, 'change_plan');
+                  },
+                  borderRadius: BorderRadius.circular(16.r),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.amber.withValues(alpha: 0.15),
+                          Colors.orange.withValues(alpha: 0.1),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(
+                        color: Colors.amber.withValues(alpha: 0.3),
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: Colors.amber.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 50.w,
-                            height: 50.w,
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade700,
-                              borderRadius: BorderRadius.circular(12.r),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              width: 50.w,
+                              height: 50.w,
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade700,
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Icon(
+                                Icons.workspace_premium,
+                                color: colors.textOnPrimary,
+                                size: 28.sp,
+                              ),
                             ),
-                            child: Icon(
-                              Icons.workspace_premium,
-                              color: colors.textOnPrimary,
-                              size: 28.sp,
-                            ),
-                          ),
-                          SizedBox(width: 16.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${subscriptionProvider.tier.displayName} Plan',
-                                  style: GoogleFonts.inter(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: colors.textPrimary,
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${subscriptionProvider.tier.displayName} Plan',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: colors.textPrimary,
+                                    ),
                                   ),
+                                  SizedBox(height: 4.h),
+                                  Text(
+                                    _getStatusText(subscriptionProvider),
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14.sp,
+                                      color: colors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            // Arrow indicator to show it's clickable
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16.sp,
+                              color: colors.textSecondary,
+                            ),
+                          ],
+                        ),
+
+                        // Trial/Expiry info
+                        if (subscriptionProvider.isInTrial ||
+                            subscriptionProvider.daysRemaining > 0) ...[
+                          SizedBox(height: 16.h),
+                          Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.all(12.w),
+                            decoration: BoxDecoration(
+                              color: subscriptionProvider.isInTrial
+                                  ? Colors.blue.withValues(alpha: 0.1)
+                                  : Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(10.r),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  subscriptionProvider.isInTrial
+                                      ? Icons.schedule
+                                      : Icons.check_circle,
+                                  size: 20.sp,
+                                  color: subscriptionProvider.isInTrial
+                                      ? Colors.blue.shade700
+                                      : Colors.green.shade700,
                                 ),
-                                SizedBox(height: 4.h),
+                                SizedBox(width: 10.w),
                                 Text(
-                                  _getStatusText(subscriptionProvider),
+                                  subscriptionProvider.isInTrial
+                                      ? '${subscriptionProvider.trialDaysRemaining} days left in trial'
+                                      : '${subscriptionProvider.daysRemaining} days until renewal',
                                   style: GoogleFonts.inter(
-                                    fontSize: 14.sp,
-                                    color: colors.textSecondary,
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: subscriptionProvider.isInTrial
+                                        ? Colors.blue.shade700
+                                        : Colors.green.shade700,
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ],
-                      ),
 
-                      // Trial/Expiry info
-                      if (subscriptionProvider.isInTrial ||
-                          subscriptionProvider.daysRemaining > 0) ...[
-                        SizedBox(height: 16.h),
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(12.w),
-                          decoration: BoxDecoration(
-                            color: subscriptionProvider.isInTrial
-                                ? Colors.blue.withValues(alpha: 0.1)
-                                : Colors.green.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                subscriptionProvider.isInTrial
-                                    ? Icons.schedule
-                                    : Icons.check_circle,
-                                size: 20.sp,
-                                color: subscriptionProvider.isInTrial
-                                    ? Colors.blue.shade700
-                                    : Colors.green.shade700,
-                              ),
-                              SizedBox(width: 10.w),
-                              Text(
-                                subscriptionProvider.isInTrial
-                                    ? '${subscriptionProvider.trialDaysRemaining} days left in trial'
-                                    : '${subscriptionProvider.daysRemaining} days until renewal',
-                                style: GoogleFonts.inter(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: subscriptionProvider.isInTrial
-                                      ? Colors.blue.shade700
-                                      : Colors.green.shade700,
-                                ),
-                              ),
-                            ],
+                        // Hint text
+                        SizedBox(height: 12.h),
+                        Text(
+                          'Tap to view all plans',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: colors.textSecondary.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
-                    ],
+                    ),
                   ),
                 ),
 
                 SizedBox(height: 24.h),
 
-                // Actions
-                if (subscriptionProvider.tier != SubscriptionTier.standard) ...[
-                  // Upgrade option
-                  _buildManageActionTile(
-                    ctx,
-                    icon: Icons.arrow_upward,
-                    iconColor: Colors.green,
-                    title: 'Upgrade Plan',
-                    subtitle: 'Get more features with Standard',
-                    onTap: () {
-                      Navigator.pop(ctx);
-                      showPaywall(context);
-                    },
-                  ),
-                  SizedBox(height: 12.h),
-                ],
-
-                // Cancel/Manage
+                // Cancel/Manage - just return action string
                 _buildManageActionTile(
                   ctx,
                   icon: Icons.settings,
                   iconColor: colors.textSecondary,
-                  title: 'Manage in App Store',
+                  title: 'Manage in Store',
                   subtitle: 'Change or cancel subscription',
                   onTap: () {
-                    Navigator.pop(ctx);
-                    // TODO: Open App Store/Play Store subscription management
+                    debugPrint('⚙️ Manage in Store tapped');
+                    Navigator.pop(ctx, 'manage');
                   },
                 ),
 
@@ -470,6 +480,22 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
           ),
         );
       });
+
+  // Handle action AFTER bottom sheet is closed
+  debugPrint('📋 Action received: $action');
+
+  if (action == 'change_plan') {
+    debugPrint('🔄 Opening paywall with current plan mode...');
+    navigator.push(
+      MaterialPageRoute(
+        builder: (_) => const PaywallScreen(showCurrentPlan: true),
+        fullscreenDialog: true,
+      ),
+    );
+  } else if (action == 'manage') {
+    debugPrint('🏪 Opening store...');
+    await _openSubscriptionManagement();
+  }
 }
 
 String _getStatusText(SubscriptionProvider provider) {
@@ -525,7 +551,7 @@ Widget _buildManageActionTile(
                   style: GoogleFonts.inter(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
-                    color: colors.textSecondary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 Text(
@@ -547,4 +573,23 @@ Widget _buildManageActionTile(
       ),
     ),
   );
+}
+
+/// Opens the subscription management page in App Store or Play Store
+Future<void> _openSubscriptionManagement() async {
+  final Uri url;
+
+  if (Platform.isIOS) {
+    url = Uri.parse('https://apps.apple.com/account/subscriptions');
+  } else {
+    url = Uri.parse('https://play.google.com/store/account/subscriptions');
+  }
+
+  try {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    }
+  } catch (e) {
+    debugPrint('❌ Could not open subscription management: $e');
+  }
 }

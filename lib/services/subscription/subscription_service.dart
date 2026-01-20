@@ -195,7 +195,7 @@ class SubscriptionService {
   // ============================================================
 
   /// Purchase a subscription package
-  /// Returns true if successful
+  /// Handles new purchases, upgrades, and downgrades
   Future<bool> purchase(SubscriptionPackage package) async {
     debugPrint('💳 [SubscriptionService] Purchasing: ${package.productId}');
 
@@ -209,6 +209,9 @@ class SubscriptionService {
     _currentUserId = userId;
 
     try {
+      // Get current subscription to check if this is an upgrade/downgrade
+      final currentSubscription = await verifySubscription();
+
       // Get the RevenueCat package
       final offerings = await Purchases.getOfferings();
       final current = offerings.current;
@@ -225,10 +228,63 @@ class SubscriptionService {
             throw Exception('Package not found: ${package.productId}'),
       );
 
-      // Purchase using the new API (v9.x)
-      final purchaseParams = PurchaseParams.package(rcPackage);
-      final purchaseResult = await Purchases.purchase(purchaseParams);
-      final customerInfo = purchaseResult.customerInfo;
+      CustomerInfo customerInfo;
+
+      // Check if user has active subscription (upgrade/downgrade scenario)
+      if (currentSubscription != null &&
+          currentSubscription.isActive &&
+          currentSubscription.productId != null) {
+        final currentProductId = currentSubscription.productId!;
+
+        // Don't allow purchasing the exact same product
+        if (currentProductId == package.productId) {
+          debugPrint(
+              '⚠️ [SubscriptionService] Already subscribed to this plan');
+          return false;
+        }
+
+        debugPrint(
+            '🔄 [SubscriptionService] Upgrading/Downgrading from $currentProductId to ${package.productId}');
+
+        // Determine proration mode based on upgrade vs downgrade
+        final prorationMode = _getProrationMode(
+          currentTier: currentSubscription.tier,
+          currentPeriod: currentSubscription.period,
+          newTier: package.tier,
+          newPeriod: package.period,
+        );
+
+        debugPrint(
+            '📊 [SubscriptionService] Using proration mode: $prorationMode');
+
+        // For Android: Use GoogleProductChangeInfo for upgrade/downgrade
+        if (Platform.isAndroid) {
+          final googleProductChangeInfo = GoogleProductChangeInfo(
+            currentProductId,
+            prorationMode: prorationMode,
+          );
+
+          final purchaseParams = PurchaseParams.package(
+            rcPackage,
+            googleProductChangeInfo: googleProductChangeInfo,
+          );
+
+          final purchaseResult = await Purchases.purchase(purchaseParams);
+          customerInfo = purchaseResult.customerInfo;
+        } else {
+          // iOS handles upgrades/downgrades automatically
+          final purchaseParams = PurchaseParams.package(rcPackage);
+          final purchaseResult = await Purchases.purchase(purchaseParams);
+          customerInfo = purchaseResult.customerInfo;
+        }
+      } else {
+        // New purchase (no active subscription)
+        debugPrint('🆕 [SubscriptionService] New subscription purchase');
+
+        final purchaseParams = PurchaseParams.package(rcPackage);
+        final purchaseResult = await Purchases.purchase(purchaseParams);
+        customerInfo = purchaseResult.customerInfo;
+      }
 
       // Check if purchase was successful
       final hasLite = customerInfo.entitlements.active.containsKey(
@@ -262,6 +318,53 @@ class SubscriptionService {
       debugPrint('❌ [SubscriptionService] Purchase error: $e');
       return false;
     }
+  }
+
+  /// Determine the appropriate proration mode for upgrade/downgrade
+  GoogleProrationMode _getProrationMode({
+    required SubscriptionTier currentTier,
+    required SubscriptionPeriod? currentPeriod,
+    required SubscriptionTier newTier,
+    required SubscriptionPeriod newPeriod,
+  }) {
+    // Upgrade: Lite → Standard, or Monthly → Yearly (same tier)
+    final isUpgrade = _isUpgrade(
+      currentTier: currentTier,
+      currentPeriod: currentPeriod,
+      newTier: newTier,
+      newPeriod: newPeriod,
+    );
+
+    if (isUpgrade) {
+      // Immediate upgrade with time proration (credit for unused time)
+      return GoogleProrationMode.immediateWithTimeProration;
+    } else {
+      // Downgrade: takes effect at end of current billing period
+      return GoogleProrationMode.deferred;
+    }
+  }
+
+  /// Check if the plan change is an upgrade
+  bool _isUpgrade({
+    required SubscriptionTier currentTier,
+    required SubscriptionPeriod? currentPeriod,
+    required SubscriptionTier newTier,
+    required SubscriptionPeriod newPeriod,
+  }) {
+    // Tier upgrade: Lite → Standard
+    if (newTier == SubscriptionTier.standard &&
+        currentTier == SubscriptionTier.lite) {
+      return true;
+    }
+
+    // Period upgrade: Monthly → Yearly (same tier)
+    if (newTier == currentTier &&
+        newPeriod == SubscriptionPeriod.yearly &&
+        currentPeriod == SubscriptionPeriod.monthly) {
+      return true;
+    }
+
+    return false;
   }
 
   // ============================================================
