@@ -44,6 +44,12 @@ class SubscriptionModel {
   /// Product ID currently subscribed to
   final String? productId;
 
+  /// Pending tier (for deferred downgrade/upgrade)
+  final SubscriptionTier? pendingTier;
+
+  /// Pending product ID
+  final String? pendingProductId;
+
   const SubscriptionModel({
     this.tier = SubscriptionTier.free,
     this.period,
@@ -57,6 +63,8 @@ class SubscriptionModel {
     this.originalTransactionId,
     this.lastVerifiedAt,
     this.productId,
+    this.pendingTier,
+    this.pendingProductId,
   });
 
   /// Default free subscription
@@ -64,6 +72,8 @@ class SubscriptionModel {
     return const SubscriptionModel(
       tier: SubscriptionTier.free,
       status: SubscriptionStatus.none,
+      pendingTier: null,
+      pendingProductId: null,
     );
   }
 
@@ -88,6 +98,10 @@ class SubscriptionModel {
       originalTransactionId: map['originalTransactionId'] as String?,
       lastVerifiedAt: _parseTimestamp(map['lastVerifiedAt']),
       productId: map['productId'] as String?,
+      pendingTier: map['pendingTier'] != null
+          ? SubscriptionTier.fromString(map['pendingTier'] as String?)
+          : null,
+      pendingProductId: map['pendingProductId'] as String?,
     );
   }
 
@@ -108,6 +122,8 @@ class SubscriptionModel {
       'lastVerifiedAt':
           lastVerifiedAt != null ? Timestamp.fromDate(lastVerifiedAt!) : null,
       'productId': productId,
+      'pendingTier': pendingTier?.value,
+      'pendingProductId': pendingProductId,
     };
   }
 
@@ -166,6 +182,17 @@ class SubscriptionModel {
   bool get canUseBackgroundPlayback =>
       isActive && tier.canUseBackgroundPlayback;
 
+  /// Check if there's a pending plan change
+  bool get hasPendingChange => pendingTier != null;
+
+  /// Check if pending change is a downgrade
+  bool get hasPendingDowngrade =>
+      pendingTier != null && pendingTier!.priority < tier.priority;
+
+  /// Check if pending change is an upgrade
+  bool get hasPendingUpgrade =>
+      pendingTier != null && pendingTier!.priority > tier.priority;
+
   // ============================================================
   // COPY WITH
   // ============================================================
@@ -183,6 +210,8 @@ class SubscriptionModel {
     String? originalTransactionId,
     DateTime? lastVerifiedAt,
     String? productId,
+    SubscriptionTier? pendingTier,
+    String? pendingProductId,
   }) {
     return SubscriptionModel(
       tier: tier ?? this.tier,
@@ -198,13 +227,16 @@ class SubscriptionModel {
           originalTransactionId ?? this.originalTransactionId,
       lastVerifiedAt: lastVerifiedAt ?? this.lastVerifiedAt,
       productId: productId ?? this.productId,
+      pendingTier: pendingTier ?? this.pendingTier,
+      pendingProductId: pendingProductId ?? this.pendingProductId,
     );
   }
 
   @override
   String toString() {
     return 'SubscriptionModel(tier: $tier, status: $status, period: $period, '
-        'isActive: $isActive, daysRemaining: $daysRemaining)';
+        'isActive: $isActive, daysRemaining: $daysRemaining, '
+        'pendingTier: $pendingTier)';
   }
 
   @override

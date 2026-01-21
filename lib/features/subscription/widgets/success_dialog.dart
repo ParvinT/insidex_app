@@ -300,10 +300,13 @@ class _SuccessDialogState extends State<SuccessDialog>
   }
 
   Widget _buildFeaturesList() {
+    // Determine features based on plan
+    final isStandard = widget.planName?.toLowerCase() == 'standard';
+
     final features = [
       'All audio sessions',
       'Background playback',
-      'Offline downloads',
+      if (isStandard) 'Offline downloads',
     ];
 
     return Column(

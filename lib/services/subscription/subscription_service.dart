@@ -27,6 +27,10 @@ class SubscriptionService {
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // Callback for subscription changes
+  void Function(SubscriptionModel)? _onSubscriptionChanged;
+  bool _listenerActive = false;
+
   bool _isInitialized = false;
   String? _currentUserId;
 
@@ -62,12 +66,16 @@ class SubscriptionService {
     debugPrint(
         '✅ [SubscriptionService] RevenueCat configured for user: $userId');
 
+    _setupCustomerInfoListener();
+
     _isInitialized = true;
   }
 
   /// Reset service state
   Future<void> reset() async {
     debugPrint('🔄 [SubscriptionService] Resetting');
+
+    _removeCustomerInfoListener();
 
     try {
       await Purchases.logOut();
@@ -77,6 +85,54 @@ class SubscriptionService {
 
     _isInitialized = false;
     _currentUserId = null;
+    _onSubscriptionChanged = null;
+  }
+
+  // ============================================================
+  // LISTENER MANAGEMENT
+  // ============================================================
+
+  /// Set callback for subscription changes (called by Provider)
+  void setSubscriptionListener(void Function(SubscriptionModel)? callback) {
+    _onSubscriptionChanged = callback;
+    debugPrint(
+        '🎧 [SubscriptionService] Subscription listener ${callback != null ? "set" : "removed"}');
+  }
+
+  /// Setup RevenueCat CustomerInfo listener
+  void _setupCustomerInfoListener() {
+    if (_listenerActive) return;
+
+    Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
+    _listenerActive = true;
+    debugPrint('🎧 [SubscriptionService] CustomerInfo listener activated');
+  }
+
+  /// Remove RevenueCat CustomerInfo listener
+  void _removeCustomerInfoListener() {
+    if (!_listenerActive) return;
+
+    Purchases.removeCustomerInfoUpdateListener(_onCustomerInfoUpdated);
+    _listenerActive = false;
+    debugPrint('🎧 [SubscriptionService] CustomerInfo listener removed');
+  }
+
+  /// Called when RevenueCat detects subscription changes
+  void _onCustomerInfoUpdated(CustomerInfo customerInfo) {
+    debugPrint('🔔 [SubscriptionService] CustomerInfo updated from RevenueCat');
+
+    final subscription = _mapCustomerInfoToSubscription(customerInfo);
+
+    debugPrint(
+        '🔔 [SubscriptionService] New subscription state: ${subscription.tier} - ${subscription.status}');
+
+    // Sync to Firestore
+    _syncSubscriptionToFirestore(customerInfo);
+
+    // Notify provider
+    if (_onSubscriptionChanged != null) {
+      _onSubscriptionChanged!(subscription);
+    }
   }
 
   // ============================================================
@@ -456,8 +512,29 @@ class SubscriptionService {
   SubscriptionModel _mapCustomerInfoToSubscription(CustomerInfo customerInfo) {
     final entitlements = customerInfo.entitlements.active;
 
+    // Check for pending (deferred) subscription changes
+    SubscriptionTier? pendingTier;
+    String? pendingProductId;
+
+    // Parse ALL entitlements to detect pending changes
+    final allEntitlements = customerInfo.entitlements.all;
+    for (final entry in allEntitlements.entries) {
+      final entitlement = entry.value;
+      // If entitlement is not active but has a product pending
+      if (!entitlement.isActive && entitlement.productIdentifier.isNotEmpty) {
+        pendingProductId = entitlement.productIdentifier;
+        pendingTier = getTierForProduct(pendingProductId);
+        debugPrint(
+            '📋 [SubscriptionService] Found pending subscription: $pendingProductId → $pendingTier');
+      }
+    }
+
     if (entitlements.isEmpty) {
-      return SubscriptionModel.free();
+      // No active subscription, but might have pending
+      return SubscriptionModel.free().copyWith(
+        pendingTier: pendingTier,
+        pendingProductId: pendingProductId,
+      );
     }
 
     // Check which entitlement is active
@@ -473,11 +550,17 @@ class SubscriptionService {
       tier = SubscriptionTier.lite;
       activeEntitlement = entitlements[SubscriptionConstants.entitlementLite];
     } else {
-      return SubscriptionModel.free();
+      return SubscriptionModel.free().copyWith(
+        pendingTier: pendingTier,
+        pendingProductId: pendingProductId,
+      );
     }
 
     if (activeEntitlement == null) {
-      return SubscriptionModel.free();
+      return SubscriptionModel.free().copyWith(
+        pendingTier: pendingTier,
+        pendingProductId: pendingProductId,
+      );
     }
 
     // Determine period from product ID
@@ -546,6 +629,8 @@ class SubscriptionService {
       originalTransactionId: originalPurchaseDateStr,
       lastVerifiedAt: DateTime.now(),
       productId: productId,
+      pendingTier: pendingTier,
+      pendingProductId: pendingProductId,
     );
   }
 

@@ -33,7 +33,6 @@ class SubscriptionProvider extends ChangeNotifier {
   bool _isInitialized = false;
   String? _error;
 
-  StreamSubscription<DocumentSnapshot>? _subscriptionListener;
   StreamSubscription<User?>? _authSubscription;
   String? _currentUserId;
   Completer<void>? _initCompleter;
@@ -144,14 +143,14 @@ class SubscriptionProvider extends ChangeNotifier {
       // Initialize subscription service
       await _subscriptionService.initialize(userId);
 
+      // Set up RevenueCat listener (real-time updates)
+      _subscriptionService.setSubscriptionListener(_onRevenueCatUpdate);
+
       // Load current subscription
       await _loadSubscription(userId);
 
       // Load available packages
       await _loadPackages();
-
-      // Start listening for changes
-      _startSubscriptionListener(userId);
 
       _isInitialized = true;
 
@@ -184,8 +183,8 @@ class SubscriptionProvider extends ChangeNotifier {
   Future<void> reset() async {
     debugPrint('🔄 [SubscriptionProvider] Resetting state');
 
-    await _subscriptionListener?.cancel();
-    _subscriptionListener = null;
+    // Remove RevenueCat listener
+    _subscriptionService.setSubscriptionListener(null);
 
     _subscription = SubscriptionModel.free();
     _availablePackages = [];
@@ -201,77 +200,48 @@ class SubscriptionProvider extends ChangeNotifier {
   // SUBSCRIPTION LOADING
   // ============================================================
 
-  /// Load subscription
+  /// Load subscription - RevenueCat is the source of truth
   Future<void> _loadSubscription(String userId) async {
     try {
-      SubscriptionModel firestoreSubscription = SubscriptionModel.free();
+      // Get trialUsed from Firestore (we need to preserve this)
       bool firestoreTrialUsed = false;
-
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
         final data = doc.data();
         final subscriptionData = data?['subscription'] as Map<String, dynamic>?;
-        firestoreSubscription = SubscriptionModel.fromMap(subscriptionData);
         firestoreTrialUsed = subscriptionData?['trialUsed'] as bool? ?? false;
-        debugPrint(
-            '📦 [SubscriptionProvider] Loaded from Firestore: $firestoreSubscription');
       }
 
+      // RevenueCat is the source of truth
       final verifiedSubscription =
           await _subscriptionService.verifySubscription();
 
-      if (verifiedSubscription != null && verifiedSubscription.isActive) {
-        _subscription = verifiedSubscription;
-        debugPrint(
-            '📦 [SubscriptionProvider] Verified ACTIVE from RevenueCat: $_subscription');
+      if (verifiedSubscription != null) {
+        // Use RevenueCat data, but preserve trialUsed from Firestore
+        _subscription = verifiedSubscription.copyWith(
+          trialUsed: verifiedSubscription.trialUsed || firestoreTrialUsed,
+        );
 
-        if (_isSubscriptionDifferent(
-            firestoreSubscription, verifiedSubscription)) {
-          debugPrint(
-              '🔄 [SubscriptionProvider] Syncing RevenueCat → Firestore');
-          await _syncToFirestore(userId, verifiedSubscription);
-        }
+        debugPrint(
+            '📦 [SubscriptionProvider] Loaded from RevenueCat: $_subscription');
+
+        // Sync to Firestore (as cache)
+        await _syncToFirestore(userId, _subscription);
       } else {
+        // No data from RevenueCat, use free
+        _subscription = SubscriptionModel.free().copyWith(
+          trialUsed: firestoreTrialUsed,
+        );
         debugPrint(
-            '📦 [SubscriptionProvider] No active subscription in RevenueCat');
-
-        if (firestoreSubscription.isActive) {
-          debugPrint(
-              '🔄 [SubscriptionProvider] Marking as EXPIRED in Firestore');
-
-          final expiredSubscription = SubscriptionModel(
-            tier: SubscriptionTier.free,
-            status: SubscriptionStatus.expired,
-            trialUsed: firestoreTrialUsed,
-            productId: firestoreSubscription.productId,
-            expiryDate: firestoreSubscription.expiryDate,
-            source: firestoreSubscription.source,
-          );
-
-          _subscription = expiredSubscription;
-          await _syncToFirestore(userId, expiredSubscription);
-        } else {
-          _subscription = firestoreSubscription;
-        }
+            '📦 [SubscriptionProvider] No subscription, using free tier');
       }
 
       notifyListeners();
     } catch (e) {
       debugPrint('❌ [SubscriptionProvider] Error loading subscription: $e');
       _subscription = SubscriptionModel.free();
+      notifyListeners();
     }
-  }
-
-  /// Check if two subscriptions are meaningfully different
-  bool _isSubscriptionDifferent(
-      SubscriptionModel firestore, SubscriptionModel revenuecat) {
-    // Key fields that indicate a real change
-    if (firestore.tier != revenuecat.tier) return true;
-    if (firestore.status != revenuecat.status) return true;
-    if (firestore.productId != revenuecat.productId) return true;
-    if (firestore.isActive != revenuecat.isActive) return true;
-
-    return false;
   }
 
   /// Sync subscription to Firestore
@@ -288,6 +258,23 @@ class SubscriptionProvider extends ChangeNotifier {
     }
   }
 
+  /// Called when RevenueCat detects subscription changes (real-time)
+  void _onRevenueCatUpdate(SubscriptionModel newSubscription) {
+    debugPrint(
+        '🔔 [SubscriptionProvider] RevenueCat update received: ${newSubscription.tier}');
+
+    // Update local state
+    _subscription = newSubscription;
+
+    // Sync to Firestore
+    if (_currentUserId != null) {
+      _syncToFirestore(_currentUserId!, newSubscription);
+    }
+
+    // Notify UI
+    notifyListeners();
+  }
+
   /// Load available packages from RevenueCat/store
   Future<void> _loadPackages() async {
     try {
@@ -299,34 +286,6 @@ class SubscriptionProvider extends ChangeNotifier {
       // Fallback to default packages
       _availablePackages = SubscriptionPackage.getDefaultPackages();
     }
-  }
-
-  /// Start listening for subscription changes in Firestore
-  void _startSubscriptionListener(String userId) {
-    _subscriptionListener?.cancel();
-
-    _subscriptionListener = _firestore
-        .collection('users')
-        .doc(userId)
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.exists) {
-        final data = snapshot.data();
-        final subscriptionData = data?['subscription'] as Map<String, dynamic>?;
-
-        final newSubscription = SubscriptionModel.fromMap(subscriptionData);
-
-        // Only notify if changed
-        if (newSubscription != _subscription) {
-          _subscription = newSubscription;
-          debugPrint(
-              '📦 [SubscriptionProvider] Subscription updated: $_subscription');
-          notifyListeners();
-        }
-      }
-    }, onError: (e) {
-      debugPrint('❌ [SubscriptionProvider] Listener error: $e');
-    });
   }
 
   // ============================================================
@@ -521,7 +480,7 @@ class SubscriptionProvider extends ChangeNotifier {
   @override
   void dispose() {
     _authSubscription?.cancel();
-    _subscriptionListener?.cancel();
+    _subscriptionService.setSubscriptionListener(null);
     super.dispose();
   }
 }
