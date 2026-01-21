@@ -1,8 +1,8 @@
 // lib/providers/subscription_provider.dart
 
-import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
 
@@ -36,6 +36,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   String? _error;
 
   Timer? _pollingTimer;
+  Timer? _gracePeriodTimer;
   static const _pollingInterval = Duration(seconds: 30);
 
   StreamSubscription<User?>? _authSubscription;
@@ -297,6 +298,8 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> reset() async {
     debugPrint('🔄 [SubscriptionProvider] Resetting state');
     _stopPolling();
+    _gracePeriodTimer?.cancel();
+    _gracePeriodTimer = null;
     // Remove RevenueCat listener
     _subscriptionService.setSubscriptionListener(null);
 
@@ -318,6 +321,17 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> _loadSubscription(String userId) async {
     try {
       debugPrint('📥 [SubscriptionProvider] Loading subscription for: $userId');
+
+      // ============================================================
+      // Step 0: Sync purchases from store (handles deferred downgrades)
+      // ============================================================
+      try {
+        await Purchases.syncPurchases();
+        debugPrint('🔄 [SubscriptionProvider] Synced purchases from store');
+      } catch (e) {
+        debugPrint('⚠️ [SubscriptionProvider] Sync purchases warning: $e');
+        // Continue even if sync fails
+      }
 
       // ============================================================
       // Step 1: Get data from Firestore (for trialUsed and pending info)
@@ -357,7 +371,10 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
         // ============================================================
         // Step 3: Check if pending subscription has become active
         // ============================================================
-        if (pendingTier != null && verifiedSubscription.tier == pendingTier) {
+        if (pendingTier != null &&
+            pendingProductId != null &&
+            verifiedSubscription.tier == pendingTier &&
+            verifiedSubscription.productId == pendingProductId) {
           debugPrint(
               '🎉 [SubscriptionProvider] Pending subscription is now ACTIVE! Clearing pending info.');
           pendingTier = null;
@@ -400,14 +417,37 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Sync subscription to Firestore
+  /// CRITICAL: Never touches pendingTier/pendingProductId to avoid race conditions
   Future<void> _syncToFirestore(
       String userId, SubscriptionModel subscription) async {
     try {
+      // Use dot notation to update specific fields WITHOUT touching pending fields
       await _firestore.collection('users').doc(userId).update({
-        'subscription': subscription.toMap(),
+        'subscription.tier': subscription.tier.name,
+        'subscription.status': subscription.status.name,
+        'subscription.period': subscription.period?.name,
+        'subscription.source': subscription.source.name,
+        'subscription.startDate': subscription.startDate != null
+            ? Timestamp.fromDate(subscription.startDate!)
+            : null,
+        'subscription.expiryDate': subscription.expiryDate != null
+            ? Timestamp.fromDate(subscription.expiryDate!)
+            : null,
+        'subscription.trialEndDate': subscription.trialEndDate != null
+            ? Timestamp.fromDate(subscription.trialEndDate!)
+            : null,
+        'subscription.trialUsed': subscription.trialUsed,
+        'subscription.autoRenew': subscription.autoRenew,
+        'subscription.productId': subscription.productId,
+        'subscription.originalTransactionId':
+            subscription.originalTransactionId,
+        'subscription.lastVerifiedAt': subscription.lastVerifiedAt != null
+            ? Timestamp.fromDate(subscription.lastVerifiedAt!)
+            : FieldValue.serverTimestamp(),
+        // INTENTIONALLY NOT UPDATING: pendingTier, pendingProductId
       });
       debugPrint(
-          '✅ [SubscriptionProvider] Synced to Firestore: ${subscription.tier} (pending: ${subscription.pendingTier})');
+          '✅ [SubscriptionProvider] Synced to Firestore: ${subscription.tier} (pending fields untouched)');
     } catch (e) {
       debugPrint('❌ [SubscriptionProvider] Sync error: $e');
     }
@@ -416,18 +456,70 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Called when RevenueCat detects subscription changes (real-time)
   void _onRevenueCatUpdate(SubscriptionModel newSubscription) {
     debugPrint(
-        '🔔 [SubscriptionProvider] RevenueCat update received: ${newSubscription.tier}');
+        '🔔 [SubscriptionProvider] RevenueCat update received: ${newSubscription.tier}, productId: ${newSubscription.productId}');
 
     // ============================================================
-    // Check if tier changed and matches pending tier
+    // GRACE PERIOD: Protect against temporary entitlement gaps
+    // If we suddenly drop from active to FREE, wait and verify
     // ============================================================
+    if (_subscription.isActive && !newSubscription.isActive) {
+      debugPrint(
+          '⚠️ [SubscriptionProvider] Sudden drop to FREE detected - starting 5s grace period...');
+
+      // Cancel any existing grace period timer
+      _gracePeriodTimer?.cancel();
+
+      // Don't update immediately, wait and verify
+      _gracePeriodTimer = Timer(const Duration(seconds: 5), () async {
+        debugPrint(
+            '⏰ [SubscriptionProvider] Grace period ended - verifying...');
+
+        final verified =
+            await _subscriptionService.verifySubscription(forceRefresh: true);
+
+        if (verified != null && verified.isActive) {
+          debugPrint(
+              '✅ [SubscriptionProvider] False alarm - subscription still active: ${verified.tier}');
+          // Subscription is actually still active, update with correct data
+          _subscription = verified.copyWith(
+            pendingTier: _subscription.pendingTier,
+            pendingProductId: _subscription.pendingProductId,
+          );
+
+          // Sync to Firestore
+          if (_currentUserId != null) {
+            _syncToFirestore(_currentUserId!, _subscription);
+          }
+        } else {
+          debugPrint(
+              '📉 [SubscriptionProvider] Confirmed - subscription is now FREE');
+          // Actually dropped to free, apply the update
+          _applySubscriptionUpdate(newSubscription);
+        }
+
+        notifyListeners();
+      });
+
+      return; // Don't apply update immediately
+    }
+
+    // Normal update (no grace period needed)
+    _applySubscriptionUpdate(newSubscription);
+  }
+
+  /// Apply subscription update with pending info handling
+  void _applySubscriptionUpdate(SubscriptionModel newSubscription) {
     final pendingTier = _subscription.pendingTier;
     final pendingProductId = _subscription.pendingProductId;
 
     SubscriptionTier? finalPendingTier = pendingTier;
     String? finalPendingProductId = pendingProductId;
 
-    if (pendingTier != null && newSubscription.tier == pendingTier) {
+    // Check if pending subscription has become active (match BOTH tier AND productId)
+    if (pendingTier != null &&
+        pendingProductId != null &&
+        newSubscription.tier == pendingTier &&
+        newSubscription.productId == pendingProductId) {
       debugPrint(
           '🎉 [SubscriptionProvider] Pending subscription activated! Clearing pending.');
       finalPendingTier = null;
@@ -436,8 +528,6 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
       // Clear pending in Firestore
       _subscriptionService.clearPendingSubscription();
     }
-
-    // Preserve pending info from current subscription
 
     _subscription = newSubscription.copyWith(
       pendingTier: finalPendingTier,
@@ -694,6 +784,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   @override
   void dispose() {
     _stopPolling();
+    _gracePeriodTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
     _subscriptionService.setSubscriptionListener(null);

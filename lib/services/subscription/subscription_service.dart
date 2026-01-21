@@ -696,40 +696,41 @@ class SubscriptionService {
   }
 
   /// Sync RevenueCat subscription data to Firestore
-  /// IMPORTANT: Preserves existing pendingTier/pendingProductId from Firestore
+  /// CRITICAL: Uses dot notation to NEVER touch pendingTier/pendingProductId
+  /// This prevents race conditions during deferred downgrades
   Future<void> _syncSubscriptionToFirestore(CustomerInfo customerInfo) async {
     if (_currentUserId == null) return;
 
     try {
       final subscription = _mapCustomerInfoToSubscription(customerInfo);
 
-      // Get existing pending info from Firestore (don't overwrite it!)
-      final existingDoc =
-          await _firestore.collection('users').doc(_currentUserId).get();
-      final existingData =
-          existingDoc.data()?['subscription'] as Map<String, dynamic>?;
-
-      final existingPendingTier = existingData?['pendingTier'] as String?;
-      final existingPendingProductId =
-          existingData?['pendingProductId'] as String?;
-
-      // Build subscription map, preserving pending info
-      final subscriptionMap = subscription.toMap();
-
-      // Preserve existing pending info if not null
-      if (existingPendingTier != null) {
-        subscriptionMap['pendingTier'] = existingPendingTier;
-      }
-      if (existingPendingProductId != null) {
-        subscriptionMap['pendingProductId'] = existingPendingProductId;
-      }
-
+      // Use dot notation to update specific fields WITHOUT touching pending fields
+      // This completely eliminates race conditions with _savePendingSubscription
       await _firestore.collection('users').doc(_currentUserId).update({
-        'subscription': subscriptionMap,
+        'subscription.tier': subscription.tier.name,
+        'subscription.status': subscription.status.name,
+        'subscription.period': subscription.period?.name,
+        'subscription.source': subscription.source.name,
+        'subscription.startDate': subscription.startDate != null
+            ? Timestamp.fromDate(subscription.startDate!)
+            : null,
+        'subscription.expiryDate': subscription.expiryDate != null
+            ? Timestamp.fromDate(subscription.expiryDate!)
+            : null,
+        'subscription.trialEndDate': subscription.trialEndDate != null
+            ? Timestamp.fromDate(subscription.trialEndDate!)
+            : null,
+        'subscription.trialUsed': subscription.trialUsed,
+        'subscription.autoRenew': subscription.autoRenew,
+        'subscription.productId': subscription.productId,
+        'subscription.originalTransactionId':
+            subscription.originalTransactionId,
+        'subscription.lastVerifiedAt': FieldValue.serverTimestamp(),
+        // INTENTIONALLY NOT UPDATING: pendingTier, pendingProductId
       });
 
       debugPrint(
-          '✅ [SubscriptionService] Subscription synced to Firestore (preserved pending: $existingPendingTier)');
+          '✅ [SubscriptionService] Synced to Firestore (pending fields untouched)');
     } catch (e) {
       debugPrint('❌ [SubscriptionService] Error syncing to Firestore: $e');
     }
