@@ -152,47 +152,12 @@ class NotificationService {
   }
 
   Future<bool> checkAndRequestExactAlarmPermission() async {
-    if (!Platform.isAndroid) return true;
-
-    try {
-      final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
-          _notifications.resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>();
-
-      if (androidPlugin != null) {
-        final bool? canScheduleExact =
-            await androidPlugin.canScheduleExactNotifications();
-
-        if (canScheduleExact == false) {
-          debugPrint('⚠️ Exact alarm permission not granted');
-
-          final bool? granted =
-              await androidPlugin.requestExactAlarmsPermission();
-          if (granted == true) {
-            debugPrint('✅ Exact alarm permission granted');
-            return true;
-          } else {
-            debugPrint('❌ Exact alarm permission denied');
-            // Kullanıcıyı ayarlara yönlendir
-            await _showAlarmPermissionDialog();
-            return false;
-          }
-        }
-
-        return canScheduleExact ?? true;
-      }
-    } catch (e) {
-      debugPrint('Error checking exact alarm permission: $e');
-      return true;
-    }
-
+    // We use AndroidScheduleMode.inexactAllowWhileIdle which doesn't require
+    // SCHEDULE_EXACT_ALARM permission. This prevents the settings screen from
+    // opening automatically on every app launch.
+    debugPrint(
+        '✅ [NotificationService] Using inexact alarm mode - no special permission needed');
     return true;
-  }
-
-  Future<void> _showAlarmPermissionDialog() async {
-    debugPrint('💡 User needs to manually enable alarm permission in settings');
-    // Burada kullanıcıya bir dialog gösterebilirsiniz
-    // openAppSettings() çağırabilirsiniz
   }
 
   /// Create notification channels for Android

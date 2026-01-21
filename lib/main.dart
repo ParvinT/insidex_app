@@ -131,7 +131,10 @@ void main() async {
           ChangeNotifierProvider(
               create: (_) => NotificationProvider()..initialize()),
           ChangeNotifierProvider(create: (_) => MiniPlayerProvider()),
-          ChangeNotifierProvider(create: (_) => SubscriptionProvider()),
+          ChangeNotifierProvider(
+            create: (_) => SubscriptionProvider(),
+            lazy: false,
+          ),
         ],
         child: InsidexApp(localeProvider: localeProvider),
       ),

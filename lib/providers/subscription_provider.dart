@@ -3,6 +3,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'dart:async';
 
 import '../models/subscription_model.dart';
@@ -14,10 +15,11 @@ import '../services/subscription/subscription_service.dart';
 ///
 /// Responsibilities:
 /// - Track current subscription status
+/// - Manage pending subscription changes (deferred downgrades)
 /// - Provide access control helpers
 /// - Handle subscription changes
 /// - Cache subscription data locally
-class SubscriptionProvider extends ChangeNotifier {
+class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ============================================================
   // PRIVATE STATE
   // ============================================================
@@ -33,6 +35,9 @@ class SubscriptionProvider extends ChangeNotifier {
   bool _isInitialized = false;
   String? _error;
 
+  Timer? _pollingTimer;
+  static const _pollingInterval = Duration(seconds: 30);
+
   StreamSubscription<User?>? _authSubscription;
   String? _currentUserId;
   Completer<void>? _initCompleter;
@@ -42,6 +47,8 @@ class SubscriptionProvider extends ChangeNotifier {
   // ============================================================
 
   SubscriptionProvider() {
+    debugPrint('🏗️ [SubscriptionProvider] Constructor called');
+    WidgetsBinding.instance.addObserver(this);
     _initAuthListener();
   }
 
@@ -110,6 +117,12 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Check if user is standard tier
   bool get isStandard => tier == SubscriptionTier.standard;
 
+  /// Check if there's a pending subscription change
+  bool get hasPendingChange => _subscription.hasPendingChange;
+
+  /// Check if pending change is a downgrade
+  bool get hasPendingDowngrade => _subscription.hasPendingDowngrade;
+
   // ============================================================
   // INITIALIZATION
   // ============================================================
@@ -126,10 +139,19 @@ class SubscriptionProvider extends ChangeNotifier {
   /// Initialize provider for a user
   /// Call this after user login
   Future<void> initialize(String userId) async {
-    if (_isInitialized && _currentUserId == userId) return;
+    debugPrint('📦 [SubscriptionProvider] initialize() called for: $userId');
+    debugPrint(
+        '📦 [SubscriptionProvider] _isInitialized: $_isInitialized, _currentUserId: $_currentUserId');
+
+    if (_isInitialized && _currentUserId == userId) {
+      debugPrint(
+          '📦 [SubscriptionProvider] Already initialized for this user, skipping');
+      return;
+    }
 
     // Different user - reset first
     if (_currentUserId != null && _currentUserId != userId) {
+      debugPrint('📦 [SubscriptionProvider] Different user, resetting first');
       await reset();
     }
 
@@ -138,51 +160,143 @@ class SubscriptionProvider extends ChangeNotifier {
     _error = null;
 
     try {
-      debugPrint('📦 [SubscriptionProvider] Initializing for user: $userId');
+      debugPrint('📦 [SubscriptionProvider] Starting initialization...');
 
       // Initialize subscription service
       await _subscriptionService.initialize(userId);
+      debugPrint('📦 [SubscriptionProvider] SubscriptionService initialized');
 
       // Set up RevenueCat listener (real-time updates)
       _subscriptionService.setSubscriptionListener(_onRevenueCatUpdate);
+      debugPrint('📦 [SubscriptionProvider] RevenueCat listener set');
 
-      // Load current subscription
+      // Load current subscription (includes pending info from Firestore)
       await _loadSubscription(userId);
+      debugPrint('📦 [SubscriptionProvider] Subscription loaded');
 
       // Load available packages
       await _loadPackages();
+      debugPrint('📦 [SubscriptionProvider] Packages loaded');
 
       _isInitialized = true;
+      _startPolling();
 
       if (_initCompleter != null && !_initCompleter!.isCompleted) {
         _initCompleter!.complete();
       }
-      debugPrint('✅ [SubscriptionProvider] Initialized successfully');
-    } catch (e) {
+      debugPrint(
+          '✅ [SubscriptionProvider] Initialized successfully - tier: ${_subscription.tier}, isActive: ${_subscription.isActive}, pendingTier: ${_subscription.pendingTier}');
+    } catch (e, stackTrace) {
       _error = e.toString();
       debugPrint('❌ [SubscriptionProvider] Initialization error: $e');
+      debugPrint('❌ [SubscriptionProvider] Stack trace: $stackTrace');
     } finally {
       _setLoading(false);
     }
   }
 
-  /// Listen to auth state changes and auto-initialize/reset
-  void _initAuthListener() {
-    _authSubscription = _auth.authStateChanges().listen((user) {
-      if (user != null) {
-        debugPrint('🔐 [SubscriptionProvider] User logged in: ${user.uid}');
-        initialize(user.uid);
-      } else {
-        debugPrint('🔐 [SubscriptionProvider] User logged out');
-        reset();
+  void _startPolling() {
+    _stopPolling();
+    _pollingTimer = Timer.periodic(_pollingInterval, (_) {
+      if (_isInitialized && _currentUserId != null) {
+        debugPrint('⏰ [SubscriptionProvider] Polling subscription status...');
+        _pollSubscriptionStatus();
       }
     });
+    debugPrint(
+        '⏰ [SubscriptionProvider] Polling started (every ${_pollingInterval.inSeconds}s)');
+  }
+
+  void _stopPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  Future<void> _pollSubscriptionStatus() async {
+    try {
+      final verifiedSubscription =
+          await _subscriptionService.verifySubscription(forceRefresh: true);
+      if (verifiedSubscription != null) {
+        // Check if anything changed
+        if (verifiedSubscription.tier != _subscription.tier ||
+            verifiedSubscription.status != _subscription.status ||
+            verifiedSubscription.isActive != _subscription.isActive) {
+          debugPrint(
+              '🔄 [SubscriptionProvider] Subscription changed via polling!');
+          debugPrint(
+              '   Old: ${_subscription.tier}, isActive: ${_subscription.isActive}');
+          debugPrint(
+              '   New: ${verifiedSubscription.tier}, isActive: ${verifiedSubscription.isActive}');
+
+          // Preserve pending info
+          _subscription = verifiedSubscription.copyWith(
+            pendingTier: _subscription.pendingTier,
+            pendingProductId: _subscription.pendingProductId,
+          );
+
+          // Sync to Firestore
+          if (_currentUserId != null) {
+            await _syncToFirestore(_currentUserId!, _subscription);
+          }
+
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Polling error: $e');
+    }
+  }
+
+  /// Listen to auth state changes and auto-initialize/reset
+  void _initAuthListener() {
+    debugPrint('👂 [SubscriptionProvider] _initAuthListener() called');
+
+    // Check current user immediately
+    final currentUser = _auth.currentUser;
+    debugPrint(
+        '👤 [SubscriptionProvider] Immediate currentUser check: ${currentUser?.uid ?? 'null'}');
+
+    if (currentUser != null) {
+      debugPrint(
+          '🔐 [SubscriptionProvider] Current user found immediately: ${currentUser.uid}');
+      // Use Future.microtask to avoid calling async in constructor
+      Future.microtask(() => initialize(currentUser.uid));
+    }
+
+    // Listen for auth state changes (this will also fire with current user)
+    _authSubscription = _auth.authStateChanges().listen(
+      (user) {
+        debugPrint(
+            '🔄 [SubscriptionProvider] authStateChanges event: ${user?.uid ?? 'null'}');
+
+        if (user != null) {
+          if (!_isInitialized || _currentUserId != user.uid) {
+            debugPrint(
+                '🔐 [SubscriptionProvider] User logged in (from stream): ${user.uid}');
+            initialize(user.uid);
+          } else {
+            debugPrint(
+                '🔐 [SubscriptionProvider] User already initialized, skipping');
+          }
+        } else {
+          if (_isInitialized) {
+            debugPrint('🔐 [SubscriptionProvider] User logged out');
+            reset();
+          }
+        }
+      },
+      onError: (error) {
+        debugPrint('❌ [SubscriptionProvider] authStateChanges error: $error');
+      },
+    );
+
+    debugPrint('👂 [SubscriptionProvider] Auth listener setup complete');
   }
 
   /// Reset provider state (call on logout)
   Future<void> reset() async {
     debugPrint('🔄 [SubscriptionProvider] Resetting state');
-
+    _stopPolling();
     // Remove RevenueCat listener
     _subscriptionService.setSubscriptionListener(null);
 
@@ -200,30 +314,69 @@ class SubscriptionProvider extends ChangeNotifier {
   // SUBSCRIPTION LOADING
   // ============================================================
 
-  /// Load subscription - RevenueCat is the source of truth
+  /// Load subscription - RevenueCat is the source of truth, but pending info comes from Firestore
   Future<void> _loadSubscription(String userId) async {
     try {
-      // Get trialUsed from Firestore (we need to preserve this)
+      debugPrint('📥 [SubscriptionProvider] Loading subscription for: $userId');
+
+      // ============================================================
+      // Step 1: Get data from Firestore (for trialUsed and pending info)
+      // ============================================================
       bool firestoreTrialUsed = false;
+      SubscriptionTier? pendingTier;
+      String? pendingProductId;
+
       final doc = await _firestore.collection('users').doc(userId).get();
       if (doc.exists) {
         final data = doc.data();
         final subscriptionData = data?['subscription'] as Map<String, dynamic>?;
+
         firestoreTrialUsed = subscriptionData?['trialUsed'] as bool? ?? false;
+
+        // Read pending info from Firestore
+        final pendingTierStr = subscriptionData?['pendingTier'] as String?;
+        pendingProductId = subscriptionData?['pendingProductId'] as String?;
+
+        if (pendingTierStr != null) {
+          pendingTier = SubscriptionTier.fromString(pendingTierStr);
+          debugPrint(
+              '📋 [SubscriptionProvider] Found pending from Firestore: $pendingTier ($pendingProductId)');
+        }
       }
 
-      // RevenueCat is the source of truth
+      // ============================================================
+      // Step 2: Get subscription from RevenueCat (source of truth for tier/status)
+      // ============================================================
       final verifiedSubscription =
-          await _subscriptionService.verifySubscription();
+          await _subscriptionService.verifySubscription(forceRefresh: true);
+
+      debugPrint(
+          '📥 [SubscriptionProvider] RevenueCat returned: ${verifiedSubscription?.tier} - ${verifiedSubscription?.status}');
 
       if (verifiedSubscription != null) {
-        // Use RevenueCat data, but preserve trialUsed from Firestore
+        // ============================================================
+        // Step 3: Check if pending subscription has become active
+        // ============================================================
+        if (pendingTier != null && verifiedSubscription.tier == pendingTier) {
+          debugPrint(
+              '🎉 [SubscriptionProvider] Pending subscription is now ACTIVE! Clearing pending info.');
+          pendingTier = null;
+          pendingProductId = null;
+          await _subscriptionService.clearPendingSubscription();
+        }
+
+        // ============================================================
+        // Step 4: Merge RevenueCat data with Firestore pending info
+        // ============================================================
+
         _subscription = verifiedSubscription.copyWith(
           trialUsed: verifiedSubscription.trialUsed || firestoreTrialUsed,
+          pendingTier: pendingTier,
+          pendingProductId: pendingProductId,
         );
 
         debugPrint(
-            '📦 [SubscriptionProvider] Loaded from RevenueCat: $_subscription');
+            '📦 [SubscriptionProvider] Loaded: tier=${_subscription.tier}, status=${_subscription.status}, pendingTier=${_subscription.pendingTier}');
 
         // Sync to Firestore (as cache)
         await _syncToFirestore(userId, _subscription);
@@ -231,6 +384,8 @@ class SubscriptionProvider extends ChangeNotifier {
         // No data from RevenueCat, use free
         _subscription = SubscriptionModel.free().copyWith(
           trialUsed: firestoreTrialUsed,
+          pendingTier: pendingTier,
+          pendingProductId: pendingProductId,
         );
         debugPrint(
             '📦 [SubscriptionProvider] No subscription, using free tier');
@@ -252,7 +407,7 @@ class SubscriptionProvider extends ChangeNotifier {
         'subscription': subscription.toMap(),
       });
       debugPrint(
-          '✅ [SubscriptionProvider] Synced to Firestore: ${subscription.tier}');
+          '✅ [SubscriptionProvider] Synced to Firestore: ${subscription.tier} (pending: ${subscription.pendingTier})');
     } catch (e) {
       debugPrint('❌ [SubscriptionProvider] Sync error: $e');
     }
@@ -263,12 +418,35 @@ class SubscriptionProvider extends ChangeNotifier {
     debugPrint(
         '🔔 [SubscriptionProvider] RevenueCat update received: ${newSubscription.tier}');
 
-    // Update local state
-    _subscription = newSubscription;
+    // ============================================================
+    // Check if tier changed and matches pending tier
+    // ============================================================
+    final pendingTier = _subscription.pendingTier;
+    final pendingProductId = _subscription.pendingProductId;
+
+    SubscriptionTier? finalPendingTier = pendingTier;
+    String? finalPendingProductId = pendingProductId;
+
+    if (pendingTier != null && newSubscription.tier == pendingTier) {
+      debugPrint(
+          '🎉 [SubscriptionProvider] Pending subscription activated! Clearing pending.');
+      finalPendingTier = null;
+      finalPendingProductId = null;
+
+      // Clear pending in Firestore
+      _subscriptionService.clearPendingSubscription();
+    }
+
+    // Preserve pending info from current subscription
+
+    _subscription = newSubscription.copyWith(
+      pendingTier: finalPendingTier,
+      pendingProductId: finalPendingProductId,
+    );
 
     // Sync to Firestore
     if (_currentUserId != null) {
-      _syncToFirestore(_currentUserId!, newSubscription);
+      _syncToFirestore(_currentUserId!, _subscription);
     }
 
     // Notify UI
@@ -304,7 +482,7 @@ class SubscriptionProvider extends ChangeNotifier {
       final success = await _subscriptionService.purchase(package);
 
       if (success) {
-        // Refresh subscription data
+        // Refresh subscription data (this will also load pending info)
         final userId = _auth.currentUser?.uid;
         if (userId != null) {
           await _loadSubscription(userId);
@@ -444,6 +622,8 @@ class SubscriptionProvider extends ChangeNotifier {
         'subscription.trialEndDate': FieldValue.delete(),
         'subscription.productId': FieldValue.delete(),
         'subscription.autoRenew': false,
+        'subscription.pendingTier': FieldValue.delete(),
+        'subscription.pendingProductId': FieldValue.delete(),
         // trialUsed KORUNUYOR - silmiyoruz
       });
 
@@ -478,7 +658,43 @@ class SubscriptionProvider extends ChangeNotifier {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _isInitialized) {
+      debugPrint(
+          '📱 [SubscriptionProvider] App resumed - refreshing subscription');
+      _startPolling();
+      _refreshOnResume();
+    } else if (state == AppLifecycleState.paused) {
+      debugPrint('📱 [SubscriptionProvider] App paused - stopping polling');
+      _stopPolling();
+    }
+  }
+
+  Future<void> _refreshOnResume() async {
+    if (_currentUserId == null) return;
+
+    try {
+      final verifiedSubscription =
+          await _subscriptionService.verifySubscription(forceRefresh: true);
+      if (verifiedSubscription != null) {
+        // Preserve pending info
+        _subscription = verifiedSubscription.copyWith(
+          pendingTier: _subscription.pendingTier,
+          pendingProductId: _subscription.pendingProductId,
+        );
+        notifyListeners();
+        debugPrint(
+            '✅ [SubscriptionProvider] Refreshed on resume: ${_subscription.tier}, isActive: ${_subscription.isActive}');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Refresh on resume error: $e');
+    }
+  }
+
+  @override
   void dispose() {
+    _stopPolling();
+    WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
     _subscriptionService.setSubscriptionListener(null);
     super.dispose();
