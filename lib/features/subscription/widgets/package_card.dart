@@ -1,5 +1,6 @@
 // lib/features/subscription/widgets/package_card.dart
 
+import 'dart:math' show max;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,7 +37,7 @@ class PackageCard extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
-        padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
+        padding: EdgeInsets.all(isTablet ? max(20, 20.w) : max(16, 16.w)),
         decoration: BoxDecoration(
           color: isSelected
               ? colors.textPrimary.withValues(alpha: 0.05)
@@ -96,8 +97,8 @@ class PackageCard extends StatelessWidget {
       children: [
         // Tier icon
         Container(
-          width: isTablet ? 44.w : 40.w,
-          height: isTablet ? 44.w : 40.w,
+          width: isTablet ? max(44, 44.w) : max(40, 40.w),
+          height: isTablet ? max(44, 44.w) : max(40, 40.w),
           decoration: BoxDecoration(
             color: _getTierColor().withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12.r),
@@ -143,7 +144,9 @@ class PackageCard extends StatelessWidget {
   }
 
   Widget _buildBadges(bool isTablet) {
-    return Row(
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 4.h,
       children: [
         // Current plan badge (priority over popular)
         if (isCurrentPlan)
@@ -210,7 +213,6 @@ class PackageCard extends StatelessWidget {
 
         // Savings badge (always show if available)
         if (package.savingsPercent != null && !isCurrentPlan) ...[
-          SizedBox(width: 8.w),
           Container(
             padding: EdgeInsets.symmetric(
               horizontal: 10.w,

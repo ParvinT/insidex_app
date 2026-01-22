@@ -1,5 +1,6 @@
 // lib/features/subscription/paywall_screen.dart
 
+import 'dart:math' show max;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -238,8 +239,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
           // Logo
           SvgPicture.asset(
             'assets/images/logo.svg',
-            width: isTablet ? 100.w : 80.w,
-            height: isTablet ? 33.h : 27.h,
+            width: isTablet ? max(100, 100.w) : max(80, 80.w),
+            height: isTablet ? max(33, 33.h) : max(27, 27.h),
             colorFilter: ColorFilter.mode(
               colors.textPrimary,
               BlendMode.srcIn,
@@ -272,8 +273,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
       children: [
         // Premium icon
         Container(
-          width: isTablet ? 80.w : 70.w,
-          height: isTablet ? 80.w : 70.w,
+          width: isTablet ? max(80, 80.w) : max(70, 70.w),
+          height: isTablet ? max(80, 80.w) : max(70, 70.w),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
@@ -386,7 +387,12 @@ class _PaywallScreenState extends State<PaywallScreen> {
     }
 
     return Container(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 20.h),
+      padding: EdgeInsets.fromLTRB(
+        max(20, 20.w),
+        max(12, 12.h),
+        max(20, 20.w),
+        max(20, 20.h),
+      ),
       decoration: BoxDecoration(
         color: colors.backgroundElevated,
         boxShadow: [
@@ -401,7 +407,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         top: false,
         child: SizedBox(
           width: double.infinity,
-          height: isTablet ? 56.h : 52.h,
+          height: isTablet ? max(56, 56.h) : max(52, 52.h),
           child: ElevatedButton(
             onPressed: _isProcessing || isCurrentPlan
                 ? null
@@ -510,7 +516,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
         // Show success dialog
         await showPurchaseSuccessDialog(
           context,
-          planName: package.tier.displayName,
+          planName: package.displayTitle,
           isTrialStarted: package.hasTrial && !wasSwitch,
         );
 

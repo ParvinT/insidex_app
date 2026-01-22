@@ -1,6 +1,7 @@
 // lib/models/subscription_package.dart
 
 import '../core/constants/subscription_constants.dart';
+import 'package:intl/intl.dart';
 
 /// Represents a purchasable subscription package
 /// Used in paywall UI to display available options
@@ -156,7 +157,26 @@ class SubscriptionPackage {
   /// Get monthly equivalent display (for yearly)
   String? get monthlyEquivalentDisplay {
     if (monthlyEquivalent == null) return null;
-    return '\$${monthlyEquivalent!.toStringAsFixed(0)}/month';
+
+    // Use correct currency symbol
+    final symbol = _getCurrencySymbol(currencyCode);
+    return '$symbol${monthlyEquivalent!.toStringAsFixed(0)}/month';
+  }
+
+  String _getCurrencySymbol(String code) {
+    const overrides = {
+      'TRY': '₺',
+      'RUB': '₽',
+    };
+    if (overrides.containsKey(code.toUpperCase())) {
+      return overrides[code.toUpperCase()]!;
+    }
+    try {
+      final format = NumberFormat.simpleCurrency(name: code);
+      return format.currencySymbol;
+    } catch (e) {
+      return '$code ';
+    }
   }
 
   /// Get features list for this package

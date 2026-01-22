@@ -1,5 +1,6 @@
 // lib/shared/widgets/upgrade_prompt.dart
 
+import 'dart:math' show max;
 import 'dart:io' show Platform;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -63,8 +64,8 @@ class UpgradePrompt extends StatelessWidget {
         children: [
           // Icon
           Container(
-            width: isTablet ? 50.w : 44.w,
-            height: isTablet ? 50.w : 44.w,
+            width: isTablet ? max(50, 50.w) : max(44, 44.w),
+            height: isTablet ? max(50, 50.w) : max(44, 44.w),
             decoration: BoxDecoration(
               color: colors.textPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12.r),
@@ -186,8 +187,8 @@ Future<bool?> showUpgradeBottomSheet(
 
                 // Premium icon
                 Container(
-                  width: 70.w,
-                  height: 70.w,
+                  width: max(70, 70.w),
+                  height: max(70, 70.w),
                   decoration: BoxDecoration(
                     color: Colors.amber.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
@@ -230,7 +231,8 @@ Future<bool?> showUpgradeBottomSheet(
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(ctx, false),
                         style: OutlinedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          padding:
+                              EdgeInsets.symmetric(vertical: max(14, 14.h)),
                           side: BorderSide(color: colors.border),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
@@ -253,7 +255,8 @@ Future<bool?> showUpgradeBottomSheet(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.textPrimary,
                           foregroundColor: colors.textOnPrimary,
-                          padding: EdgeInsets.symmetric(vertical: 14.h),
+                          padding:
+                              EdgeInsets.symmetric(vertical: max(14, 14.h)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12.r),
                           ),
@@ -358,8 +361,8 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                         Row(
                           children: [
                             Container(
-                              width: 50.w,
-                              height: 50.w,
+                              width: max(50, 50.w),
+                              height: max(50, 50.w),
                               decoration: BoxDecoration(
                                 color: Colors.amber.shade700,
                                 borderRadius: BorderRadius.circular(12.r),
@@ -529,8 +532,8 @@ Widget _buildManageActionTile(
       child: Row(
         children: [
           Container(
-            width: 40.w,
-            height: 40.w,
+            width: max(40, 40.w),
+            height: max(40, 40.w),
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(10.r),

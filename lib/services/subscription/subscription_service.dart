@@ -99,9 +99,14 @@ class SubscriptionService {
       if (current != null && current.availablePackages.isNotEmpty) {
         debugPrint(
             '✅ [SubscriptionService] Found ${current.availablePackages.length} packages');
-        return current.availablePackages
+
+        // First, map all packages without savings
+        final packages = current.availablePackages
             .map((p) => _mapRevenueCatPackage(p))
             .toList();
+
+        // Then calculate savings by comparing same-currency prices
+        return _calculateSavings(packages);
       }
 
       debugPrint('⚠️ [SubscriptionService] No offerings, using defaults');
@@ -110,6 +115,46 @@ class SubscriptionService {
       debugPrint('❌ [SubscriptionService] Package error: $e');
       return SubscriptionPackage.getDefaultPackages();
     }
+  }
+
+  /// Calculate savings by comparing yearly vs monthly prices in same currency
+  List<SubscriptionPackage> _calculateSavings(
+      List<SubscriptionPackage> packages) {
+    // Find Standard Monthly price
+    final standardMonthly = packages.firstWhere(
+      (p) =>
+          p.tier == SubscriptionTier.standard &&
+          p.period == SubscriptionPeriod.monthly,
+      orElse: () => packages.first,
+    );
+
+    return packages.map((package) {
+      // Only calculate for Standard Yearly
+      if (package.tier == SubscriptionTier.standard &&
+          package.period == SubscriptionPeriod.yearly) {
+        final yearlyMonthly = package.price / 12;
+        final monthlyPrice = standardMonthly.price;
+
+        // Calculate real savings percentage
+        final savings =
+            ((monthlyPrice - yearlyMonthly) / monthlyPrice * 100).round();
+
+        return SubscriptionPackage(
+          productId: package.productId,
+          tier: package.tier,
+          period: package.period,
+          price: package.price,
+          currencyCode: package.currencyCode,
+          localizedPrice: package.localizedPrice,
+          hasTrial: package.hasTrial,
+          trialDays: package.trialDays,
+          isHighlighted: package.isHighlighted,
+          savingsPercent: savings > 0 ? savings : null, // Only show if positive
+          monthlyEquivalent: package.monthlyEquivalent,
+        );
+      }
+      return package;
+    }).toList();
   }
 
   /// Map RevenueCat package to our model
@@ -148,12 +193,6 @@ class SubscriptionService {
 
     if (period == SubscriptionPeriod.yearly) {
       monthlyEquivalent = product.price / 12;
-      if (tier == SubscriptionTier.standard) {
-        const monthlyPrice = SubscriptionConstants.priceStandardMonthly;
-        final yearlyMonthly = product.price / 12;
-        savingsPercent =
-            (((monthlyPrice - yearlyMonthly) / monthlyPrice) * 100).round();
-      }
     }
 
     return SubscriptionPackage(
@@ -196,7 +235,8 @@ class SubscriptionService {
 
   /// Purchase a subscription package
   /// Handles both new purchases and upgrades/downgrades for iOS & Android
-  Future<bool> purchase(SubscriptionPackage package, {SubscriptionModel? currentSubscription}) async {
+  Future<bool> purchase(SubscriptionPackage package,
+      {SubscriptionModel? currentSubscription}) async {
     debugPrint('💳 [SubscriptionService] Purchasing: ${package.productId}');
 
     if (_currentUserId == null) {

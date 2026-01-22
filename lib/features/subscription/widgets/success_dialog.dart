@@ -1,5 +1,6 @@
 // lib/features/subscription/widgets/success_dialog.dart
 
+import 'dart:math' show max;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -84,11 +85,11 @@ class _SuccessDialogState extends State<SuccessDialog>
         scale: _scaleAnimation,
         child: Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
+          insetPadding: EdgeInsets.symmetric(horizontal: max(24, 24.w)),
           child: Builder(builder: (context) {
             final colors = context.colors;
             return Container(
-                padding: EdgeInsets.all(24.w),
+                padding: EdgeInsets.all(max(24, 24.w)),
                 decoration: BoxDecoration(
                   color: colors.backgroundElevated,
                   borderRadius: BorderRadius.circular(24.r),
@@ -215,7 +216,7 @@ class _SuccessDialogState extends State<SuccessDialog>
                     // Continue button
                     SizedBox(
                       width: double.infinity,
-                      height: 52.h,
+                      height: max(52, 52.h),
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).pop();
@@ -251,8 +252,8 @@ class _SuccessDialogState extends State<SuccessDialog>
       animation: _checkController,
       builder: (context, child) {
         return Container(
-          width: 100.w,
-          height: 100.w,
+          width: max(100, 100.w),
+          height: max(100, 100.w),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -301,7 +302,8 @@ class _SuccessDialogState extends State<SuccessDialog>
 
   Widget _buildFeaturesList() {
     // Determine features based on plan
-    final isStandard = widget.planName?.toLowerCase() == 'standard';
+    final isStandard =
+        widget.planName?.toLowerCase().contains('standard') ?? false;
 
     final features = [
       'All audio sessions',
@@ -316,8 +318,8 @@ class _SuccessDialogState extends State<SuccessDialog>
           child: Row(
             children: [
               Container(
-                width: 22.w,
-                height: 22.w,
+                width: max(22, 22.w),
+                height: max(22, 22.w),
                 decoration: BoxDecoration(
                   color: Colors.green.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
