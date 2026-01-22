@@ -78,6 +78,9 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   Timer? _fallbackTimer;
   static const _fallbackInterval = Duration(minutes: 5);
 
+  // Renewal buffer - gives time for webhook to arrive during subscription renewal
+  static const _renewalBuffer = Duration(minutes: 10);
+
   // ============================================================
   // CONSTRUCTOR
   // ============================================================
@@ -477,9 +480,10 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (expiryDate == null) return SubscriptionStatus.none;
 
     final now = DateTime.now();
+    final bufferedExpiry = expiryDate.add(_renewalBuffer);
 
     // Check grace period
-    if (now.isAfter(expiryDate)) {
+    if (now.isAfter(bufferedExpiry)) {
       if (gracePeriodExpires != null && now.isBefore(gracePeriodExpires)) {
         return SubscriptionStatus.gracePeriod;
       }
@@ -927,7 +931,37 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && _isInitialized) {
       debugPrint('📱 [SubscriptionProvider] App resumed');
-      _fallbackRefresh();
+      _onAppResumed();
+    }
+  }
+
+  /// Handle app resumed - aggressively refresh subscription data from all sources
+  Future<void> _onAppResumed() async {
+    if (_currentUserId == null) return;
+
+    debugPrint(
+        '🔄 [SubscriptionProvider] Aggressive refresh after app resume...');
+
+    try {
+      // 1. Reload from Firebase Extension (primary source - webhook updated)
+      final oldTier = _subscription.tier;
+      await _loadFromExtension(_currentUserId!);
+
+      // 2. Also verify from SDK (invalidates cache internally when forceRefresh=true)
+      await _fallbackRefresh();
+
+      // 3. Notify if anything changed
+      if (oldTier != _subscription.tier) {
+        debugPrint(
+            '✅ [SubscriptionProvider] Tier changed after resume: $oldTier → ${_subscription.tier}');
+      }
+
+      notifyListeners();
+
+      debugPrint(
+          '✅ [SubscriptionProvider] Resume refresh complete - tier: ${_subscription.tier}');
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Resume refresh error: $e');
     }
   }
 
