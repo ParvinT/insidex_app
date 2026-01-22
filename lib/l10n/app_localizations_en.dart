@@ -2334,4 +2334,230 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get filterLabel => 'Filter';
+
+  @override
+  String get paywallManageYourPlan => 'Manage Your Plan';
+
+  @override
+  String get paywallUnlockPotential => 'Unlock Your Full Potential';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'Switch plans or keep your current subscription';
+
+  @override
+  String get paywallChoosePlanSubtitle =>
+      'Choose the plan that works best for you';
+
+  @override
+  String get paywallRestorePurchases => 'Restore purchases';
+
+  @override
+  String get paywallLegalText =>
+      'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. You can manage and cancel your subscription in your App Store or Google Play account settings.';
+
+  @override
+  String get paywallCurrentPlan => 'Current Plan';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return 'Upgrade to $tierName';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return 'Switch to $tierName';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return 'Start $days-Day Free Trial';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'Subscribe Now';
+
+  @override
+  String get paywallAlreadySubscribed =>
+      'You are already subscribed to this plan';
+
+  @override
+  String get paywallRestoreSuccess => 'Purchases restored successfully!';
+
+  @override
+  String get paywallRestoreNoPurchases => 'No purchases found to restore';
+
+  @override
+  String get packageBadgeCurrent => 'CURRENT';
+
+  @override
+  String get packageBadgePopular => 'POPULAR';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return '$percent% OFF';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days days FREE trial';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'This is your current plan';
+
+  @override
+  String get successDialogWelcomePremium => 'Welcome to Premium!';
+
+  @override
+  String get successDialogTrialStarted => 'Trial Started!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'You now have access to all features';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      'Enjoy full access for the next 7 days';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'You now have unlimited access to all features';
+
+  @override
+  String get successDialogTrialBanner => '7-day free trial started';
+
+  @override
+  String get successDialogStartExploring => 'Start Exploring';
+
+  @override
+  String get featureAllAudioSessions => 'All audio sessions';
+
+  @override
+  String get featureBackgroundPlayback => 'Background playback';
+
+  @override
+  String get featureOfflineDownloads => 'Offline downloads';
+
+  @override
+  String get upgradePromptTitle => 'Upgrade to Premium';
+
+  @override
+  String get upgradePromptSubtitle => 'Unlock all features and sessions';
+
+  @override
+  String get upgradePromptButton => 'Upgrade';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Premium Feature';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'Subscribe to access this feature and more';
+
+  @override
+  String get upgradeSheetMaybeLater => 'Maybe Later';
+
+  @override
+  String get upgradeSheetViewPlans => 'View Plans';
+
+  @override
+  String get manageSheetTitle => 'Your Subscription';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return '$tierName Plan';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'Trial • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'Active • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return '$days days left in trial';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return '$days days until renewal';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'Tap to view all plans';
+
+  @override
+  String get manageSheetManageInStore => 'Manage in Store';
+
+  @override
+  String get manageSheetManageSubtitle => 'Change or cancel subscription';
+
+  @override
+  String get profileSubscriptionTitle => 'Your Subscription';
+
+  @override
+  String get profileUpgradeToPremium => 'Upgrade to Premium';
+
+  @override
+  String get profileUnlockAllFeatures => 'Unlock all sessions and features';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • Trial ($days days left)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • $days days remaining';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return '$tierName Plan';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (Trial)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'Offline Downloads';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'Upgrade to Standard plan to download sessions for offline listening';
+
+  @override
+  String get premiumSessionTitle => 'Premium Session';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'Subscribe to unlock all audio sessions and features';
+
+  @override
+  String get tierYearlyStandard => 'Yearly Standard';
+
+  @override
+  String get periodMonth => '/month';
+
+  @override
+  String get periodYear => '/year';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/month';
+  }
 }

@@ -439,7 +439,7 @@ class _NotificationSettingsScreenState
               : Switch(
                   value: value,
                   onChanged: onChanged,
-                  activeColor: colors.textPrimary,
+                  activeThumbColor: colors.textPrimary,
                   activeTrackColor: colors.textPrimary.withValues(alpha: 0.5),
                   inactiveThumbColor: colors.textSecondary,
                   inactiveTrackColor: colors.greyMedium,
@@ -528,7 +528,7 @@ class _NotificationSettingsScreenState
                       onChanged: provider.allNotificationsEnabled
                           ? (value) => provider.toggleDailyReminder(value)
                           : null,
-                      activeColor: colors.textPrimary,
+                      activeThumbColor: colors.textPrimary,
                       activeTrackColor:
                           colors.textPrimary.withValues(alpha: 0.5),
                       inactiveThumbColor: colors.textSecondary,

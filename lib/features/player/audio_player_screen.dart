@@ -142,6 +142,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   /// Check if user can access this session, then initialize
   Future<void> _checkAccessAndInitialize() async {
+    // ✅ Capture context-dependent values BEFORE any async
+    final miniPlayerProvider = context.read<MiniPlayerProvider>();
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+
     // ✅ Load display info FIRST (title, image) - before access check
     await _loadLanguageAndUrls();
 
@@ -160,14 +166,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
       // Continue with audio initialization
       await _setupStreamListeners();
-      context.read<MiniPlayerProvider>().hide();
+      miniPlayerProvider.hide();
       await _initializeAudio();
       return;
     }
 
     // ========== ONLINE SESSION - NORMAL FLOW ==========
-    final subscriptionProvider = context.read<SubscriptionProvider>();
-
     await subscriptionProvider.waitForInitialization();
 
     if (!mounted) return;
@@ -190,13 +194,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       final purchased = await showUpgradeBottomSheet(
         context,
         feature: 'play_session',
-        title: 'Premium Session',
-        subtitle: 'Subscribe to unlock all audio sessions and features',
+        title: l10n.premiumSessionTitle,
+        subtitle: l10n.premiumSessionSubtitle,
       );
 
       // If not purchased, go back
       if (purchased != true && mounted) {
-        Navigator.of(context).pop();
+        navigator.pop();
         return;
       }
     }
@@ -216,7 +220,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _checkFavoriteStatus();
     _checkPlaylistStatus();
 
-    context.read<MiniPlayerProvider>().hide();
+    miniPlayerProvider.hide();
     await _restoreStateFromMiniPlayer();
   }
 

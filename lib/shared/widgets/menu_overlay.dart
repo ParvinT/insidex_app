@@ -161,7 +161,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                                     // Premium user - show subscription info
                                     return _buildMenuItem(
                                       icon: Icons.workspace_premium,
-                                      title: 'Your Subscription',
+                                      title: AppLocalizations.of(context)
+                                          .profileSubscriptionTitle,
                                       iconColor: Colors.amber.shade700,
                                       onTap: () => _closeMenuAndNavigate(() {
                                         showManageSubscriptionSheet(context);
@@ -171,7 +172,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                                   // Free user - show upgrade
                                   return _buildMenuItem(
                                     icon: Icons.workspace_premium,
-                                    title: 'Upgrade to Premium',
+                                    title: AppLocalizations.of(context)
+                                        .profileUpgradeToPremium,
                                     iconColor: Colors.amber.shade700,
                                     onTap: () => _closeMenuAndNavigate(() {
                                       showPaywall(context);

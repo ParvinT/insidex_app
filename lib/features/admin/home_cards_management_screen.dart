@@ -194,7 +194,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         value: enabled,
                         onChanged: (value) =>
                             _toggleCard(cardInfo['id'], value),
-                        activeColor: colors.textOnPrimary,
+                        activeThumbColor: colors.textOnPrimary,
                         activeTrackColor: colors.textPrimary,
                         inactiveThumbColor: colors.greyMedium,
                         inactiveTrackColor: colors.greyLight,

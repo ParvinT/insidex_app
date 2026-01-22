@@ -128,20 +128,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  String _getSubscriptionSubtitle(SubscriptionProvider provider) {
+  String _getSubscriptionSubtitle(
+      BuildContext context, SubscriptionProvider provider) {
+    final l10n = AppLocalizations.of(context);
     final tierName = provider.tier.displayName;
 
     if (provider.isInTrial) {
       final daysLeft = provider.trialDaysRemaining;
-      return '$tierName • Trial ($daysLeft days left)';
+      return l10n.profileSubtitleTrial(tierName, daysLeft);
     }
 
     final daysLeft = provider.daysRemaining;
     if (daysLeft > 0) {
-      return '$tierName • $daysLeft days remaining';
+      return l10n.profileSubtitleDaysRemaining(tierName, daysLeft);
     }
 
-    return '$tierName Plan';
+    return l10n.profileSubtitlePlan(tierName);
   }
 
   Future<void> _handleSignOut() async {
@@ -337,8 +339,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           ProfileActionButton(
                             icon: Icons.workspace_premium,
-                            title: 'Your Subscription',
-                            subtitle: _getSubscriptionSubtitle(subProvider),
+                            title: AppLocalizations.of(context)
+                                .profileSubscriptionTitle,
+                            subtitle:
+                                _getSubscriptionSubtitle(context, subProvider),
                             gradientColors: [
                               Colors.amber.withValues(alpha: 0.15),
                               Colors.orange.withValues(alpha: 0.1),
@@ -357,8 +361,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         ProfileActionButton(
                           icon: Icons.workspace_premium,
-                          title: 'Upgrade to Premium',
-                          subtitle: 'Unlock all sessions and features',
+                          title: AppLocalizations.of(context)
+                              .profileUpgradeToPremium,
+                          subtitle: AppLocalizations.of(context)
+                              .profileUnlockAllFeatures,
                           gradientColors: [
                             Colors.amber.withValues(alpha: 0.15),
                             Colors.orange.withValues(alpha: 0.1),

@@ -117,11 +117,15 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
   Future<void> _grantSubscription(SubscriptionTier tier, int days) async {
     if (_foundUserId == null) return;
 
+    // ✅ Capture context-dependent values BEFORE async
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final successMessage =
+        'Successfully granted ${tier.displayName} for $days days';
+
     setState(() => _isGranting = true);
 
     try {
-      final subscriptionProvider = context.read<SubscriptionProvider>();
-
       final success = await subscriptionProvider.grantSubscription(
         userId: _foundUserId!,
         tier: tier,
@@ -132,19 +136,16 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       );
 
       if (success && mounted) {
-        // Refresh user data
         await _searchUser();
 
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
-            content: Text(
-              'Successfully granted ${tier.displayName} for $days days',
-            ),
+            content: Text(successMessage),
             backgroundColor: Colors.green,
           ),
         );
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Failed to grant subscription'),
             backgroundColor: Colors.red,
@@ -153,7 +154,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,
@@ -170,10 +171,15 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
   Future<void> _revokeSubscription() async {
     if (_foundUserId == null) return;
 
+    // ✅ Capture context-dependent values BEFORE async
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+
     // Confirm dialog
     final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: const Text('Revoke Subscription'),
         content: const Text(
           'Are you sure you want to revoke this user\'s subscription? '
@@ -181,11 +187,11 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: Text(AppLocalizations.of(context).cancel),
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.pop(context, true),
+            onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Revoke'),
           ),
@@ -198,23 +204,20 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     setState(() => _isGranting = true);
 
     try {
-      final subscriptionProvider = context.read<SubscriptionProvider>();
-
       final success =
           await subscriptionProvider.revokeSubscription(_foundUserId!);
 
       if (success && mounted) {
-        // Refresh user data
         await _searchUser();
 
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Subscription revoked successfully'),
             backgroundColor: Colors.orange,
           ),
         );
       } else if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           const SnackBar(
             content: Text('Failed to revoke subscription'),
             backgroundColor: Colors.red,
@@ -223,7 +226,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,

@@ -4,7 +4,9 @@ import 'dart:math' show max;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import '../../../core/themes/app_theme_extension.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Success dialog shown after successful purchase
 class SuccessDialog extends StatefulWidget {
@@ -16,8 +18,8 @@ class SuccessDialog extends StatefulWidget {
 
   const SuccessDialog({
     super.key,
-    this.title = 'Welcome to Premium!',
-    this.subtitle = 'You now have access to all features',
+    required this.title,
+    required this.subtitle,
     this.planName,
     this.isTrialStarted = false,
     this.onDismiss,
@@ -194,7 +196,8 @@ class _SuccessDialogState extends State<SuccessDialog>
                             ),
                             SizedBox(width: 8.w),
                             Text(
-                              '7-day free trial started',
+                              AppLocalizations.of(context)
+                                  .successDialogTrialBanner,
                               style: GoogleFonts.inter(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w500,
@@ -231,7 +234,8 @@ class _SuccessDialogState extends State<SuccessDialog>
                           elevation: 0,
                         ),
                         child: Text(
-                          'Start Exploring',
+                          AppLocalizations.of(context)
+                              .successDialogStartExploring,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
@@ -304,11 +308,12 @@ class _SuccessDialogState extends State<SuccessDialog>
     // Determine features based on plan
     final isStandard =
         widget.planName?.toLowerCase().contains('standard') ?? false;
+    final l10n = AppLocalizations.of(context);
 
     final features = [
-      'All audio sessions',
-      'Background playback',
-      if (isStandard) 'Offline downloads',
+      l10n.featureAllAudioSessions,
+      l10n.featureBackgroundPlayback,
+      if (isStandard) l10n.featureOfflineDownloads,
     ];
 
     return Column(
@@ -353,15 +358,18 @@ Future<void> showPurchaseSuccessDialog(
   bool isTrialStarted = false,
   VoidCallback? onDismiss,
 }) {
+  final l10n = AppLocalizations.of(context);
   return showDialog(
     context: context,
     barrierDismissible: false,
     barrierColor: Colors.black.withValues(alpha: 0.6),
     builder: (context) => SuccessDialog(
-      title: isTrialStarted ? 'Trial Started!' : 'Welcome to Premium!',
+      title: isTrialStarted
+          ? l10n.successDialogTrialStarted
+          : l10n.successDialogWelcomePremium,
       subtitle: isTrialStarted
-          ? 'Enjoy full access for the next 7 days'
-          : 'You now have unlimited access to all features',
+          ? l10n.successDialogTrialSubtitle
+          : l10n.successDialogUnlimitedAccess,
       planName: planName,
       isTrialStarted: isTrialStarted,
       onDismiss: onDismiss,

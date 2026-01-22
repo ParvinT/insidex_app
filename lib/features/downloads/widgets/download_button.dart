@@ -269,13 +269,13 @@ class _DownloadButtonState extends State<DownloadButton>
     final subscriptionProvider = context.read<SubscriptionProvider>();
 
     if (!subscriptionProvider.canDownload) {
+      final l10n = AppLocalizations.of(context);
       // Show upgrade prompt first
       final purchased = await showUpgradeBottomSheet(
         context,
         feature: 'download',
-        title: 'Offline Downloads',
-        subtitle:
-            'Upgrade to Standard plan to download sessions for offline listening',
+        title: l10n.downloadFeatureTitle,
+        subtitle: l10n.downloadFeatureSubtitle,
       );
 
       // If not purchased, don't start download

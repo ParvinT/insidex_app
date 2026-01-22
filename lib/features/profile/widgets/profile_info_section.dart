@@ -112,17 +112,22 @@ class ProfileInfoSection extends StatelessWidget {
 
   String _getTierDisplayName(
       BuildContext context, SubscriptionProvider provider) {
-    if (provider.isInTrial) {
-      return '${provider.tier.displayName} (Trial)';
-    }
+    final l10n = AppLocalizations.of(context);
 
+    String tierName;
     switch (provider.tier) {
       case SubscriptionTier.free:
-        return AppLocalizations.of(context).free;
+        tierName = l10n.free;
       case SubscriptionTier.lite:
-        return 'Lite';
+        tierName = l10n.tierLite;
       case SubscriptionTier.standard:
-        return 'Standard';
+        tierName = l10n.tierStandard;
     }
+
+    if (provider.isInTrial) {
+      return l10n.tierWithTrial(tierName);
+    }
+
+    return tierName;
   }
 }

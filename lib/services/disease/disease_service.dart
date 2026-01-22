@@ -92,8 +92,9 @@ class DiseaseService {
         if (disease.gender != gender) return false;
 
         // Filter by category (if specified)
-        if (categoryId != null && disease.categoryId != categoryId)
+        if (categoryId != null && disease.categoryId != categoryId) {
           return false;
+        }
 
         return true;
       }).toList();

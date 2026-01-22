@@ -910,7 +910,147 @@
   "freeUsersCanPlay": "Free users can play this session",
   "onlyPremiumCanPlay": "Only premium users can play",
   "targetGender": "Target Gender",
-  "filterLabel": "Filter"
+  "filterLabel": "Filter",
+  "paywallManageYourPlan": "Manage Your Plan",
+  "paywallUnlockPotential": "Unlock Your Full Potential",
+  "paywallSwitchPlansSubtitle": "Switch plans or keep your current subscription",
+  "paywallChoosePlanSubtitle": "Choose the plan that works best for you",
+  "paywallRestorePurchases": "Restore purchases",
+  "paywallLegalText": "Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. You can manage and cancel your subscription in your App Store or Google Play account settings.",
+  "paywallCurrentPlan": "Current Plan",
+  "paywallUpgradeTo": "Upgrade to {tierName}",
+  "@paywallUpgradeTo": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "paywallSwitchTo": "Switch to {tierName}",
+  "@paywallSwitchTo": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "paywallStartFreeTrial": "Start {days}-Day Free Trial",
+  "@paywallStartFreeTrial": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "paywallSubscribeNow": "Subscribe Now",
+  "paywallAlreadySubscribed": "You are already subscribed to this plan",
+  "paywallRestoreSuccess": "Purchases restored successfully!",
+  "paywallRestoreNoPurchases": "No purchases found to restore",
+  "packageBadgeCurrent": "CURRENT",
+  "packageBadgePopular": "POPULAR",
+  "packageBadgeSavings": "{percent}% OFF",
+  "@packageBadgeSavings": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "packageTrialBanner": "{days} days FREE trial",
+  "@packageTrialBanner": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "packageCurrentPlanBanner": "This is your current plan",
+  "successDialogWelcomePremium": "Welcome to Premium!",
+  "successDialogTrialStarted": "Trial Started!",
+  "successDialogDefaultSubtitle": "You now have access to all features",
+  "successDialogTrialSubtitle": "Enjoy full access for the next 7 days",
+  "successDialogUnlimitedAccess": "You now have unlimited access to all features",
+  "successDialogTrialBanner": "7-day free trial started",
+  "successDialogStartExploring": "Start Exploring",
+  "featureAllAudioSessions": "All audio sessions",
+  "featureBackgroundPlayback": "Background playback",
+  "featureOfflineDownloads": "Offline downloads",
+  "upgradePromptTitle": "Upgrade to Premium",
+  "upgradePromptSubtitle": "Unlock all features and sessions",
+  "upgradePromptButton": "Upgrade",
+  "upgradeSheetPremiumFeature": "Premium Feature",
+  "upgradeSheetDefaultSubtitle": "Subscribe to access this feature and more",
+  "upgradeSheetMaybeLater": "Maybe Later",
+  "upgradeSheetViewPlans": "View Plans",
+  "manageSheetTitle": "Your Subscription",
+  "manageSheetPlanTitle": "{tierName} Plan",
+  "@manageSheetPlanTitle": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "manageSheetStatusTrial": "Trial • {period}",
+  "@manageSheetStatusTrial": {
+    "placeholders": {
+      "period": {"type": "String"}
+    }
+  },
+  "manageSheetStatusActive": "Active • {period}",
+  "@manageSheetStatusActive": {
+    "placeholders": {
+      "period": {"type": "String"}
+    }
+  },
+  "manageSheetTrialDaysLeft": "{days} days left in trial",
+  "@manageSheetTrialDaysLeft": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "manageSheetDaysUntilRenewal": "{days} days until renewal",
+  "@manageSheetDaysUntilRenewal": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "manageSheetTapToViewPlans": "Tap to view all plans",
+  "manageSheetManageInStore": "Manage in Store",
+  "manageSheetManageSubtitle": "Change or cancel subscription",
+  "profileSubscriptionTitle": "Your Subscription",
+  "profileUpgradeToPremium": "Upgrade to Premium",
+  "profileUnlockAllFeatures": "Unlock all sessions and features",
+  "profileSubtitleTrial": "{tierName} • Trial ({days} days left)",
+  "@profileSubtitleTrial": {
+    "placeholders": {
+      "tierName": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "profileSubtitleDaysRemaining": "{tierName} • {days} days remaining",
+  "@profileSubtitleDaysRemaining": {
+    "placeholders": {
+      "tierName": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "profileSubtitlePlan": "{tierName} Plan",
+  "@profileSubtitlePlan": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "tierWithTrial": "{tierName} (Trial)",
+  "@tierWithTrial": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "tierLite": "Lite",
+  "tierStandard": "Standard",
+  "downloadFeatureTitle": "Offline Downloads",
+  "downloadFeatureSubtitle": "Upgrade to Standard plan to download sessions for offline listening",
+  "premiumSessionTitle": "Premium Session",
+  "premiumSessionSubtitle": "Subscribe to unlock all audio sessions and features",
+  "tierYearlyStandard": "Yearly Standard",
+  "periodMonth": "/month",
+  "periodYear": "/year",
+  "monthlyEquivalentFormat": "{price}/month",
+  "@monthlyEquivalentFormat": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  }
+
 
 
 }

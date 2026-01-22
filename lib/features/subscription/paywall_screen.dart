@@ -12,6 +12,7 @@ import '../../core/responsive/breakpoints.dart';
 import '../../core/constants/subscription_constants.dart';
 import '../../models/subscription_package.dart';
 import '../../providers/subscription_provider.dart';
+import '../../l10n/app_localizations.dart';
 import 'widgets/package_card.dart';
 import 'widgets/success_dialog.dart';
 
@@ -259,15 +260,16 @@ class _PaywallScreenState extends State<PaywallScreen> {
   Widget _buildHeader(
       BuildContext context, bool isTablet, SubscriptionProvider provider) {
     final colors = context.colors;
+    final l10n = AppLocalizations.of(context);
 
     // Dynamic title based on mode
     final title = widget.showCurrentPlan && provider.isActive
-        ? 'Manage Your Plan'
-        : 'Unlock Your Full Potential';
+        ? l10n.paywallManageYourPlan
+        : l10n.paywallUnlockPotential;
 
     final subtitle = widget.showCurrentPlan && provider.isActive
-        ? 'Switch plans or keep your current subscription'
-        : 'Choose the plan that works best for you';
+        ? l10n.paywallSwitchPlansSubtitle
+        : l10n.paywallChoosePlanSubtitle;
 
     return Column(
       children: [
@@ -326,7 +328,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return TextButton(
       onPressed: provider.isLoading ? null : () => _handleRestore(provider),
       child: Text(
-        'Restore purchases',
+        AppLocalizations.of(context).paywallRestorePurchases,
         style: GoogleFonts.inter(
           fontSize: 14.sp,
           color: context.colors.textSecondary,
@@ -340,8 +342,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Text(
-        'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. '
-        'You can manage and cancel your subscription in your App Store or Google Play account settings.',
+        AppLocalizations.of(context).paywallLegalText,
         style: GoogleFonts.inter(
           fontSize: isTablet ? 12.sp : 11.sp,
           color: context.colors.textSecondary.withValues(alpha: 0.7),
@@ -367,23 +368,24 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
     final isCurrentPlan = _isSelectedCurrentPlan(provider);
     final colors = context.colors;
+    final l10n = AppLocalizations.of(context);
 
     // Dynamic button text
     String buttonText;
     if (isCurrentPlan) {
-      buttonText = 'Current Plan';
+      buttonText = l10n.paywallCurrentPlan;
     } else if (widget.showCurrentPlan && provider.isActive) {
       // User is switching plans
       final isUpgrade = _isUpgrade(selectedPackage, provider);
       if (isUpgrade) {
-        buttonText = 'Upgrade to ${selectedPackage.tier.displayName}';
+        buttonText = l10n.paywallUpgradeTo(selectedPackage.tier.displayName);
       } else {
-        buttonText = 'Switch to ${selectedPackage.tier.displayName}';
+        buttonText = l10n.paywallSwitchTo(selectedPackage.tier.displayName);
       }
     } else if (selectedPackage.hasTrial) {
-      buttonText = 'Start ${selectedPackage.trialDays}-Day Free Trial';
+      buttonText = l10n.paywallStartFreeTrial(selectedPackage.trialDays);
     } else {
-      buttonText = 'Subscribe Now';
+      buttonText = l10n.paywallSubscribeNow;
     }
 
     return Container(
@@ -485,8 +487,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
     // Check if trying to purchase current plan
     if (_isSelectedCurrentPlan(provider)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('You are already subscribed to this plan'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).paywallAlreadySubscribed),
           backgroundColor: Colors.orange,
         ),
       );
@@ -541,6 +543,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
 
   Future<void> _handleRestore(SubscriptionProvider provider) async {
     setState(() => _isProcessing = true);
+    final l10n = AppLocalizations.of(context);
 
     try {
       final success = await provider.restorePurchases();
@@ -550,8 +553,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
           SnackBar(
             content: Text(
               success
-                  ? 'Purchases restored successfully!'
-                  : 'No purchases found to restore',
+                  ? l10n.paywallRestoreSuccess
+                  : l10n.paywallRestoreNoPurchases,
             ),
             backgroundColor: success ? Colors.green : Colors.orange,
           ),

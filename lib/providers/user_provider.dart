@@ -220,6 +220,12 @@ class UserProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
+    // ✅ Capture context-dependent values BEFORE any async
+    final navContext = InsidexApp.navigatorKey.currentContext;
+    final subscriptionProvider = navContext != null
+        ? Provider.of<SubscriptionProvider>(navContext, listen: false)
+        : null;
+
     try {
       // Load user data
       final userDoc =
@@ -265,18 +271,13 @@ class UserProvider extends ChangeNotifier {
       _startDeviceSessionMonitoring(uid);
 
       // Initialize SubscriptionProvider
-      try {
-        final navContext = InsidexApp.navigatorKey.currentContext;
-        if (navContext != null) {
-          final subscriptionProvider = Provider.of<SubscriptionProvider>(
-            navContext,
-            listen: false,
-          );
+      if (subscriptionProvider != null) {
+        try {
           await subscriptionProvider.initialize(uid);
           debugPrint('✅ SubscriptionProvider initialized');
+        } catch (e) {
+          debugPrint('⚠️ Could not initialize SubscriptionProvider: $e');
         }
-      } catch (e) {
-        debugPrint('⚠️ Could not initialize SubscriptionProvider: $e');
       }
     } catch (e) {
       debugPrint('Error loading user data: $e');

@@ -2330,11 +2330,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu öğeyi silmek istediğinizden emin misiniz?';
 
   @override
-  String get demoSession => 'Demo Oturum';
+  String get demoSession => 'Demo Seans';
 
   @override
-  String get freeUsersCanPlay =>
-      'Ücretsiz kullanıcılar bu oturumu dinleyebilir';
+  String get freeUsersCanPlay => 'Ücretsiz kullanıcılar bu seansı dinleyebilir';
 
   @override
   String get onlyPremiumCanPlay => 'Sadece premium kullanıcılar dinleyebilir';
@@ -2344,4 +2343,231 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get filterLabel => 'Filtre';
+
+  @override
+  String get paywallManageYourPlan => 'Planınızı Yönetin';
+
+  @override
+  String get paywallUnlockPotential => 'Tüm Potansiyelinizi Açığa Çıkarın';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'Plan değiştirin veya mevcut aboneliğinizi koruyun';
+
+  @override
+  String get paywallChoosePlanSubtitle => 'Size en uygun planı seçin';
+
+  @override
+  String get paywallRestorePurchases => 'Satın alımları geri yükle';
+
+  @override
+  String get paywallLegalText =>
+      'Abonelik, mevcut dönemin bitiminden en az 24 saat önce otomatik yenileme kapatılmadığı sürece otomatik olarak yenilenir. Aboneliğinizi App Store veya Google Play hesap ayarlarınızdan yönetebilir ve iptal edebilirsiniz.';
+
+  @override
+  String get paywallCurrentPlan => 'Mevcut Plan';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return '$tierName Planına Yükselt';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return '$tierName Planına Geç';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return '$days Günlük Ücretsiz Denemeyi Başlat';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'Şimdi Abone Ol';
+
+  @override
+  String get paywallAlreadySubscribed => 'Bu plana zaten abonesiniz';
+
+  @override
+  String get paywallRestoreSuccess => 'Satın alımlar başarıyla geri yüklendi!';
+
+  @override
+  String get paywallRestoreNoPurchases =>
+      'Geri yüklenecek satın alım bulunamadı';
+
+  @override
+  String get packageBadgeCurrent => 'MEVCUT';
+
+  @override
+  String get packageBadgePopular => 'POPÜLER';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return '%$percent İNDİRİM';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days gün ÜCRETSİZ deneme';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'Bu sizin mevcut planınız';
+
+  @override
+  String get successDialogWelcomePremium => 'Premium\'a Hoş Geldiniz!';
+
+  @override
+  String get successDialogTrialStarted => 'Deneme Başladı!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'Artık tüm özelliklere erişiminiz var';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      '7 gün boyunca tüm özelliklerin keyfini çıkarın';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'Artık tüm özelliklere sınırsız erişiminiz var';
+
+  @override
+  String get successDialogTrialBanner => '7 günlük ücretsiz deneme başladı';
+
+  @override
+  String get successDialogStartExploring => 'Keşfetmeye Başla';
+
+  @override
+  String get featureAllAudioSessions => 'Tüm ses seansları';
+
+  @override
+  String get featureBackgroundPlayback => 'Arka plan oynatma';
+
+  @override
+  String get featureOfflineDownloads => 'Çevrimdışı indirmeler';
+
+  @override
+  String get upgradePromptTitle => 'Premium\'a Yükselt';
+
+  @override
+  String get upgradePromptSubtitle =>
+      'Tüm özelliklerin ve seansların kilidini aç';
+
+  @override
+  String get upgradePromptButton => 'Yükselt';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Premium Özellik';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'Bu özelliğe ve daha fazlasına erişmek için abone olun';
+
+  @override
+  String get upgradeSheetMaybeLater => 'Belki Sonra';
+
+  @override
+  String get upgradeSheetViewPlans => 'Planları Gör';
+
+  @override
+  String get manageSheetTitle => 'Aboneliğiniz';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return '$tierName Planı';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'Deneme • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'Aktif • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return 'Denemede $days gün kaldı';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return 'Yenilemeye $days gün kaldı';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'Tüm planları görmek için dokunun';
+
+  @override
+  String get manageSheetManageInStore => 'Mağazada Yönet';
+
+  @override
+  String get manageSheetManageSubtitle => 'Aboneliği değiştir veya iptal et';
+
+  @override
+  String get profileSubscriptionTitle => 'Aboneliğiniz';
+
+  @override
+  String get profileUpgradeToPremium => 'Premium\'a Yükselt';
+
+  @override
+  String get profileUnlockAllFeatures =>
+      'Tüm seansların ve özelliklerin kilidini aç';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • Deneme ($days gün kaldı)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • $days gün kaldı';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return '$tierName Planı';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (Deneme)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'Çevrimdışı İndirmeler';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'Seansları çevrimdışı dinlemek için Standard plana yükseltin';
+
+  @override
+  String get premiumSessionTitle => 'Premium Seans';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'Tüm ses seanslarının ve özelliklerin kilidini açmak için abone olun';
+
+  @override
+  String get tierYearlyStandard => 'Yıllık Standard';
+
+  @override
+  String get periodMonth => '/ay';
+
+  @override
+  String get periodYear => '/yıl';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/ay';
+  }
 }

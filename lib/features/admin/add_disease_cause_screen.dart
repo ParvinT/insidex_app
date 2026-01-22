@@ -390,7 +390,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
 
   Widget _buildDiseaseDropdown(AppThemeExtension colors) {
     return DropdownButtonFormField<String>(
-      value: _selectedDiseaseId,
+      initialValue: _selectedDiseaseId,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context).disease,
         hintText: AppLocalizations.of(context).selectADisease,
@@ -451,7 +451,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
 
   Widget _buildSessionDropdown(AppThemeExtension colors) {
     return DropdownButtonFormField<String>(
-      value: _selectedSessionId,
+      initialValue: _selectedSessionId,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context).recommendedSession,
         hintText: AppLocalizations.of(context).selectASession,

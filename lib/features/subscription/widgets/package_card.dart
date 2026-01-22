@@ -9,6 +9,7 @@ import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/subscription_constants.dart';
 import '../../../core/responsive/breakpoints.dart';
 import '../../../models/subscription_package.dart';
+import '../../../l10n/app_localizations.dart';
 
 /// Card widget for displaying a subscription package option
 /// Used in paywall screen to show available plans
@@ -118,7 +119,7 @@ class PackageCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                package.displayTitle,
+                _getLocalizedTitle(context),
                 style: GoogleFonts.inter(
                   fontSize: isTablet ? 18.sp : 16.sp,
                   fontWeight: FontWeight.w600,
@@ -127,7 +128,7 @@ class PackageCard extends StatelessWidget {
               ),
               if (package.period == SubscriptionPeriod.yearly)
                 Text(
-                  package.monthlyEquivalentDisplay ?? '',
+                  _getLocalizedMonthlyEquivalent(context) ?? '',
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 13.sp : 12.sp,
                     color: context.colors.textSecondary,
@@ -171,7 +172,7 @@ class PackageCard extends StatelessWidget {
                     ),
                     SizedBox(width: 4.w),
                     Text(
-                      'CURRENT',
+                      AppLocalizations.of(context).packageBadgeCurrent,
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 11.sp : 10.sp,
                         fontWeight: FontWeight.w700,
@@ -199,7 +200,7 @@ class PackageCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
-                  'POPULAR',
+                  AppLocalizations.of(context).packageBadgePopular,
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 11.sp : 10.sp,
                     fontWeight: FontWeight.w700,
@@ -212,28 +213,32 @@ class PackageCard extends StatelessWidget {
           ),
 
         // Savings badge (always show if available)
-        if (package.savingsPercent != null && !isCurrentPlan) ...[
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 10.w,
-              vertical: 4.h,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(color: Colors.green.shade200),
-            ),
-            child: Text(
-              '${package.savingsPercent}% OFF',
-              style: GoogleFonts.inter(
-                fontSize: isTablet ? 11.sp : 10.sp,
-                fontWeight: FontWeight.w700,
-                color: Colors.green.shade700,
-                letterSpacing: 0.5,
-              ),
-            ),
+        if (package.savingsPercent != null && !isCurrentPlan)
+          Builder(
+            builder: (context) {
+              return Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.green.shade200),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)
+                      .packageBadgeSavings(package.savingsPercent!),
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 11.sp : 10.sp,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.green.shade700,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              );
+            },
           ),
-        ],
       ],
     );
   }
@@ -254,7 +259,7 @@ class PackageCard extends StatelessWidget {
         ),
         SizedBox(width: 4.w),
         Text(
-          package.periodSuffix,
+          _getLocalizedPeriodSuffix(context),
           style: GoogleFonts.inter(
             fontSize: isTablet ? 15.sp : 14.sp,
             color: colors.textSecondary,
@@ -282,7 +287,7 @@ class PackageCard extends StatelessWidget {
               SizedBox(width: 8.w),
               Expanded(
                 child: Text(
-                  feature.title,
+                  _getLocalizedFeatureTitle(context, feature.title),
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 14.sp : 13.sp,
                     color: feature.isIncluded
@@ -322,7 +327,7 @@ class PackageCard extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Text(
-            '${package.trialDays} days FREE trial',
+            AppLocalizations.of(context).packageTrialBanner(package.trialDays),
             style: GoogleFonts.inter(
               fontSize: isTablet ? 13.sp : 12.sp,
               fontWeight: FontWeight.w600,
@@ -356,7 +361,7 @@ class PackageCard extends StatelessWidget {
           ),
           SizedBox(width: 8.w),
           Text(
-            'This is your current plan',
+            AppLocalizations.of(context).packageCurrentPlanBanner,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 13.sp : 12.sp,
               fontWeight: FontWeight.w600,
@@ -387,6 +392,60 @@ class PackageCard extends StatelessWidget {
         return Icons.star;
       case SubscriptionTier.free:
         return Icons.person;
+    }
+  }
+  // ============================================================
+// LOCALIZATION HELPERS
+// ============================================================
+
+  String _getLocalizedTitle(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    switch (package.tier) {
+      case SubscriptionTier.lite:
+        return l10n.tierLite;
+      case SubscriptionTier.standard:
+        return package.period == SubscriptionPeriod.yearly
+            ? l10n.tierYearlyStandard
+            : l10n.tierStandard;
+      case SubscriptionTier.free:
+        return l10n.free;
+    }
+  }
+
+  String _getLocalizedPeriodSuffix(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return package.period == SubscriptionPeriod.monthly
+        ? l10n.periodMonth
+        : l10n.periodYear;
+  }
+
+  String? _getLocalizedMonthlyEquivalent(BuildContext context) {
+    if (package.monthlyEquivalent == null) return null;
+    final l10n = AppLocalizations.of(context);
+    final symbol = _getCurrencySymbol(package.currencyCode);
+    final price = '$symbol${package.monthlyEquivalent!.toStringAsFixed(0)}';
+    return l10n.monthlyEquivalentFormat(price);
+  }
+
+  String _getCurrencySymbol(String code) {
+    const overrides = {'TRY': '₺', 'RUB': '₽'};
+    if (overrides.containsKey(code.toUpperCase())) {
+      return overrides[code.toUpperCase()]!;
+    }
+    return '\$';
+  }
+
+  String _getLocalizedFeatureTitle(BuildContext context, String originalTitle) {
+    final l10n = AppLocalizations.of(context);
+    switch (originalTitle) {
+      case 'All audio sessions':
+        return l10n.featureAllAudioSessions;
+      case 'Background playback':
+        return l10n.featureBackgroundPlayback;
+      case 'Offline download':
+        return l10n.featureOfflineDownloads;
+      default:
+        return originalTitle;
     }
   }
 }

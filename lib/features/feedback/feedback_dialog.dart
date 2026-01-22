@@ -189,7 +189,7 @@ class _FeedbackDialogState extends State<FeedbackDialog> {
                             borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: DropdownButtonFormField<String>(
-                            value: _selectedType,
+                            initialValue: _selectedType,
                             decoration: InputDecoration(
                               labelText: l10n.type,
                               border: InputBorder.none,

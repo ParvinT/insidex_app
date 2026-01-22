@@ -2308,7 +2308,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get enabled => 'सक्षम';
 
   @override
-  String get featureSlidesImages => 'Images';
+  String get featureSlidesImages => 'छवियाँ';
 
   @override
   String get pages => 'पृष्ठ';
@@ -2334,4 +2334,231 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get filterLabel => 'फ़िल्टर';
+
+  @override
+  String get paywallManageYourPlan => 'अपनी योजना प्रबंधित करें';
+
+  @override
+  String get paywallUnlockPotential => 'अपनी पूरी क्षमता को अनलॉक करें';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'योजना बदलें या अपनी मौजूदा सदस्यता रखें';
+
+  @override
+  String get paywallChoosePlanSubtitle =>
+      'वह योजना चुनें जो आपके लिए सबसे अच्छी हो';
+
+  @override
+  String get paywallRestorePurchases => 'खरीदारी पुनर्स्थापित करें';
+
+  @override
+  String get paywallLegalText =>
+      'सदस्यता स्वचालित रूप से नवीनीकृत होती है जब तक कि वर्तमान अवधि समाप्त होने से कम से कम 24 घंटे पहले स्वत: नवीनीकरण बंद न कर दिया जाए। आप अपनी सदस्यता को App Store या Google Play खाता सेटिंग्स में प्रबंधित और रद्द कर सकते हैं।';
+
+  @override
+  String get paywallCurrentPlan => 'वर्तमान योजना';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return '$tierName में अपग्रेड करें';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return '$tierName पर स्विच करें';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return '$days-दिन का मुफ्त ट्रायल शुरू करें';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'अभी सदस्यता लें';
+
+  @override
+  String get paywallAlreadySubscribed =>
+      'आप पहले से इस योजना की सदस्यता ले चुके हैं';
+
+  @override
+  String get paywallRestoreSuccess => 'खरीदारी सफलतापूर्वक पुनर्स्थापित!';
+
+  @override
+  String get paywallRestoreNoPurchases =>
+      'पुनर्स्थापित करने के लिए कोई खरीदारी नहीं मिली';
+
+  @override
+  String get packageBadgeCurrent => 'वर्तमान';
+
+  @override
+  String get packageBadgePopular => 'लोकप्रिय';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return '$percent% छूट';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days दिन मुफ्त ट्रायल';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'यह आपकी वर्तमान योजना है';
+
+  @override
+  String get successDialogWelcomePremium => 'Premium में आपका स्वागत है!';
+
+  @override
+  String get successDialogTrialStarted => 'ट्रायल शुरू हुआ!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'अब आपके पास सभी सुविधाओं तक पहुंच है';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      'अगले 7 दिनों के लिए पूर्ण पहुंच का आनंद लें';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'अब आपके पास सभी सुविधाओं तक असीमित पहुंच है';
+
+  @override
+  String get successDialogTrialBanner => '7-दिन का मुफ्त ट्रायल शुरू हुआ';
+
+  @override
+  String get successDialogStartExploring => 'एक्सप्लोर करना शुरू करें';
+
+  @override
+  String get featureAllAudioSessions => 'सभी ऑडियो सत्र';
+
+  @override
+  String get featureBackgroundPlayback => 'बैकग्राउंड प्लेबैक';
+
+  @override
+  String get featureOfflineDownloads => 'ऑफलाइन डाउनलोड';
+
+  @override
+  String get upgradePromptTitle => 'Premium में अपग्रेड करें';
+
+  @override
+  String get upgradePromptSubtitle => 'सभी सुविधाएं और सत्र अनलॉक करें';
+
+  @override
+  String get upgradePromptButton => 'अपग्रेड';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Premium सुविधा';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'इस सुविधा और अधिक तक पहुंचने के लिए सदस्यता लें';
+
+  @override
+  String get upgradeSheetMaybeLater => 'बाद में';
+
+  @override
+  String get upgradeSheetViewPlans => 'प्लान देखें';
+
+  @override
+  String get manageSheetTitle => 'आपकी सदस्यता';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return '$tierName प्लान';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'ट्रायल • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'सक्रिय • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return 'ट्रायल में $days दिन बाकी';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return 'नवीनीकरण में $days दिन बाकी';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'सभी प्लान देखने के लिए टैप करें';
+
+  @override
+  String get manageSheetManageInStore => 'स्टोर में प्रबंधित करें';
+
+  @override
+  String get manageSheetManageSubtitle => 'सदस्यता बदलें या रद्द करें';
+
+  @override
+  String get profileSubscriptionTitle => 'आपकी सदस्यता';
+
+  @override
+  String get profileUpgradeToPremium => 'Premium में अपग्रेड करें';
+
+  @override
+  String get profileUnlockAllFeatures => 'सभी सत्र और सुविधाएं अनलॉक करें';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • ट्रायल ($days दिन बाकी)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • $days दिन बाकी';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return '$tierName प्लान';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (ट्रायल)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'ऑफलाइन डाउनलोड';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'ऑफलाइन सुनने के लिए सत्र डाउनलोड करने हेतु Standard प्लान में अपग्रेड करें';
+
+  @override
+  String get premiumSessionTitle => 'Premium सत्र';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'सभी ऑडियो सत्र और सुविधाएं अनलॉक करने के लिए सदस्यता लें';
+
+  @override
+  String get tierYearlyStandard => 'वार्षिक Standard';
+
+  @override
+  String get periodMonth => '/माह';
+
+  @override
+  String get periodYear => '/वर्ष';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/माह';
+  }
 }

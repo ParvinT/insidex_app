@@ -41,7 +41,7 @@ class _SearchScreenState extends State<SearchScreen>
   bool _isLoadingHistory = true;
 
   bool _isSearching = false;
-  String _selectedGenderFilter = 'all';
+  final String _selectedGenderFilter = 'all';
   Map<String, dynamic> _searchResults = {
     'categories': <Map<String, dynamic>>[],
     'sessions': <Map<String, dynamic>>[],

@@ -317,7 +317,7 @@ class _AddDiseaseScreenState extends State<AddDiseaseScreen>
 
   Widget _buildGenderDropdown(AppThemeExtension colors) {
     return DropdownButtonFormField<String>(
-      value: _selectedGender,
+      initialValue: _selectedGender,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context).gender,
         hintText: AppLocalizations.of(context).selectGender,

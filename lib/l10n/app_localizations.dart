@@ -4535,6 +4535,378 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Filter'**
   String get filterLabel;
+
+  /// No description provided for @paywallManageYourPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Your Plan'**
+  String get paywallManageYourPlan;
+
+  /// No description provided for @paywallUnlockPotential.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Your Full Potential'**
+  String get paywallUnlockPotential;
+
+  /// No description provided for @paywallSwitchPlansSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch plans or keep your current subscription'**
+  String get paywallSwitchPlansSubtitle;
+
+  /// No description provided for @paywallChoosePlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the plan that works best for you'**
+  String get paywallChoosePlanSubtitle;
+
+  /// No description provided for @paywallRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get paywallRestorePurchases;
+
+  /// No description provided for @paywallLegalText.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. You can manage and cancel your subscription in your App Store or Google Play account settings.'**
+  String get paywallLegalText;
+
+  /// No description provided for @paywallCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get paywallCurrentPlan;
+
+  /// No description provided for @paywallUpgradeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to {tierName}'**
+  String paywallUpgradeTo(String tierName);
+
+  /// No description provided for @paywallSwitchTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {tierName}'**
+  String paywallSwitchTo(String tierName);
+
+  /// No description provided for @paywallStartFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {days}-Day Free Trial'**
+  String paywallStartFreeTrial(int days);
+
+  /// No description provided for @paywallSubscribeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe Now'**
+  String get paywallSubscribeNow;
+
+  /// No description provided for @paywallAlreadySubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already subscribed to this plan'**
+  String get paywallAlreadySubscribed;
+
+  /// No description provided for @paywallRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully!'**
+  String get paywallRestoreSuccess;
+
+  /// No description provided for @paywallRestoreNoPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases found to restore'**
+  String get paywallRestoreNoPurchases;
+
+  /// No description provided for @packageBadgeCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'CURRENT'**
+  String get packageBadgeCurrent;
+
+  /// No description provided for @packageBadgePopular.
+  ///
+  /// In en, this message translates to:
+  /// **'POPULAR'**
+  String get packageBadgePopular;
+
+  /// No description provided for @packageBadgeSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% OFF'**
+  String packageBadgeSavings(int percent);
+
+  /// No description provided for @packageTrialBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days FREE trial'**
+  String packageTrialBanner(int days);
+
+  /// No description provided for @packageCurrentPlanBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your current plan'**
+  String get packageCurrentPlanBanner;
+
+  /// No description provided for @successDialogWelcomePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Premium!'**
+  String get successDialogWelcomePremium;
+
+  /// No description provided for @successDialogTrialStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial Started!'**
+  String get successDialogTrialStarted;
+
+  /// No description provided for @successDialogDefaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You now have access to all features'**
+  String get successDialogDefaultSubtitle;
+
+  /// No description provided for @successDialogTrialSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy full access for the next 7 days'**
+  String get successDialogTrialSubtitle;
+
+  /// No description provided for @successDialogUnlimitedAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You now have unlimited access to all features'**
+  String get successDialogUnlimitedAccess;
+
+  /// No description provided for @successDialogTrialBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day free trial started'**
+  String get successDialogTrialBanner;
+
+  /// No description provided for @successDialogStartExploring.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Exploring'**
+  String get successDialogStartExploring;
+
+  /// No description provided for @featureAllAudioSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'All audio sessions'**
+  String get featureAllAudioSessions;
+
+  /// No description provided for @featureBackgroundPlayback.
+  ///
+  /// In en, this message translates to:
+  /// **'Background playback'**
+  String get featureBackgroundPlayback;
+
+  /// No description provided for @featureOfflineDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline downloads'**
+  String get featureOfflineDownloads;
+
+  /// No description provided for @upgradePromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradePromptTitle;
+
+  /// No description provided for @upgradePromptSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all features and sessions'**
+  String get upgradePromptSubtitle;
+
+  /// No description provided for @upgradePromptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get upgradePromptButton;
+
+  /// No description provided for @upgradeSheetPremiumFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Feature'**
+  String get upgradeSheetPremiumFeature;
+
+  /// No description provided for @upgradeSheetDefaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to access this feature and more'**
+  String get upgradeSheetDefaultSubtitle;
+
+  /// No description provided for @upgradeSheetMaybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get upgradeSheetMaybeLater;
+
+  /// No description provided for @upgradeSheetViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans'**
+  String get upgradeSheetViewPlans;
+
+  /// No description provided for @manageSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Subscription'**
+  String get manageSheetTitle;
+
+  /// No description provided for @manageSheetPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} Plan'**
+  String manageSheetPlanTitle(String tierName);
+
+  /// No description provided for @manageSheetStatusTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial • {period}'**
+  String manageSheetStatusTrial(String period);
+
+  /// No description provided for @manageSheetStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active • {period}'**
+  String manageSheetStatusActive(String period);
+
+  /// No description provided for @manageSheetTrialDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left in trial'**
+  String manageSheetTrialDaysLeft(int days);
+
+  /// No description provided for @manageSheetDaysUntilRenewal.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days until renewal'**
+  String manageSheetDaysUntilRenewal(int days);
+
+  /// No description provided for @manageSheetTapToViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view all plans'**
+  String get manageSheetTapToViewPlans;
+
+  /// No description provided for @manageSheetManageInStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage in Store'**
+  String get manageSheetManageInStore;
+
+  /// No description provided for @manageSheetManageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change or cancel subscription'**
+  String get manageSheetManageSubtitle;
+
+  /// No description provided for @profileSubscriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Subscription'**
+  String get profileSubscriptionTitle;
+
+  /// No description provided for @profileUpgradeToPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get profileUpgradeToPremium;
+
+  /// No description provided for @profileUnlockAllFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all sessions and features'**
+  String get profileUnlockAllFeatures;
+
+  /// No description provided for @profileSubtitleTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} • Trial ({days} days left)'**
+  String profileSubtitleTrial(String tierName, int days);
+
+  /// No description provided for @profileSubtitleDaysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} • {days} days remaining'**
+  String profileSubtitleDaysRemaining(String tierName, int days);
+
+  /// No description provided for @profileSubtitlePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} Plan'**
+  String profileSubtitlePlan(String tierName);
+
+  /// No description provided for @tierWithTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} (Trial)'**
+  String tierWithTrial(String tierName);
+
+  /// No description provided for @tierLite.
+  ///
+  /// In en, this message translates to:
+  /// **'Lite'**
+  String get tierLite;
+
+  /// No description provided for @tierStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get tierStandard;
+
+  /// No description provided for @downloadFeatureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Downloads'**
+  String get downloadFeatureTitle;
+
+  /// No description provided for @downloadFeatureSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Standard plan to download sessions for offline listening'**
+  String get downloadFeatureSubtitle;
+
+  /// No description provided for @premiumSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Session'**
+  String get premiumSessionTitle;
+
+  /// No description provided for @premiumSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to unlock all audio sessions and features'**
+  String get premiumSessionSubtitle;
+
+  /// No description provided for @tierYearlyStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly Standard'**
+  String get tierYearlyStandard;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/month'**
+  String get periodMonth;
+
+  /// No description provided for @periodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'/year'**
+  String get periodYear;
+
+  /// No description provided for @monthlyEquivalentFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/month'**
+  String monthlyEquivalentFormat(String price);
 }
 
 class _AppLocalizationsDelegate

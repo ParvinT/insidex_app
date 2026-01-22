@@ -646,7 +646,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       AppLocalizations.of(context).category, colors),
                   SizedBox(height: 12.h),
                   DropdownButtonFormField<String>(
-                    value: _selectedCategoryId,
+                    initialValue: _selectedCategoryId,
                     isExpanded: true,
                     decoration: InputDecoration(
                       labelText: AppLocalizations.of(context).category,
@@ -765,7 +765,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                               _isDemo = value;
                             });
                           },
-                          activeColor: Colors.green,
+                          activeThumbColor: Colors.green,
                         ),
                       ],
                     ),

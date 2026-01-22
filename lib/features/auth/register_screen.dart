@@ -468,8 +468,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
                         color: _isAgeValid
-                            ? Colors.green.withOpacity(0.1)
-                            : Colors.red.withOpacity(0.1),
+                            ? Colors.green.withValues(alpha: 0.1)
+                            : Colors.red.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
                           color: _isAgeValid ? Colors.green : Colors.red,

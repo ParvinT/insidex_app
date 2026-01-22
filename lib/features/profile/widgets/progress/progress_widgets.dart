@@ -168,7 +168,7 @@ class ProgressDonut extends StatelessWidget {
     final double inner = donutSize - 2 * stroke - 16.0;
 
     // Progress color based on theme
-    final progressColor = const Color(0xFF7DB9B6);
+    const progressColor = Color(0xFF7DB9B6);
     final bgColor = colors.greyMedium;
 
     return SizedBox(

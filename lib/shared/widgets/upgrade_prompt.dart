@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../l10n/app_localizations.dart';
 import '../../features/subscription/paywall_screen.dart';
 import '../../providers/subscription_provider.dart';
 
@@ -25,8 +26,8 @@ class UpgradePrompt extends StatelessWidget {
 
   const UpgradePrompt({
     super.key,
-    this.title = 'Upgrade to Premium',
-    this.subtitle = 'Unlock all features and sessions',
+    required this.title,
+    required this.subtitle,
     this.buttonText,
     required this.feature,
     this.onDismiss,
@@ -123,7 +124,7 @@ class UpgradePrompt extends StatelessWidget {
               elevation: 0,
             ),
             child: Text(
-              buttonText ?? 'Upgrade',
+              buttonText ?? AppLocalizations.of(context).upgradePromptButton,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 14.sp : 13.sp,
                 fontWeight: FontWeight.w600,
@@ -203,7 +204,7 @@ Future<bool?> showUpgradeBottomSheet(
                 SizedBox(height: 16.h),
 
                 Text(
-                  title ?? 'Premium Feature',
+                  title ?? AppLocalizations.of(ctx).upgradeSheetPremiumFeature,
                   style: GoogleFonts.inter(
                     fontSize: 20.sp,
                     fontWeight: FontWeight.w700,
@@ -214,7 +215,8 @@ Future<bool?> showUpgradeBottomSheet(
                 SizedBox(height: 8.h),
 
                 Text(
-                  subtitle ?? 'Subscribe to access this feature and more',
+                  subtitle ??
+                      AppLocalizations.of(ctx).upgradeSheetDefaultSubtitle,
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     color: colors.textSecondary,
@@ -239,7 +241,7 @@ Future<bool?> showUpgradeBottomSheet(
                           ),
                         ),
                         child: Text(
-                          'Maybe Later',
+                          AppLocalizations.of(ctx).upgradeSheetMaybeLater,
                           style: GoogleFonts.inter(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
@@ -263,7 +265,7 @@ Future<bool?> showUpgradeBottomSheet(
                           elevation: 0,
                         ),
                         child: Text(
-                          'View Plans',
+                          AppLocalizations.of(ctx).upgradeSheetViewPlans,
                           style: GoogleFonts.inter(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
@@ -324,7 +326,7 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
 
                 // Title
                 Text(
-                  'Your Subscription',
+                  AppLocalizations.of(ctx).manageSheetTitle,
                   style: GoogleFonts.inter(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.w700,
@@ -379,7 +381,10 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${subscriptionProvider.tier.displayName} Plan',
+                                    AppLocalizations.of(ctx)
+                                        .manageSheetPlanTitle(
+                                            subscriptionProvider
+                                                .tier.displayName),
                                     style: GoogleFonts.inter(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.w700,
@@ -388,7 +393,7 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                                   ),
                                   SizedBox(height: 4.h),
                                   Text(
-                                    _getStatusText(subscriptionProvider),
+                                    _getStatusText(ctx, subscriptionProvider),
                                     style: GoogleFonts.inter(
                                       fontSize: 14.sp,
                                       color: colors.textSecondary,
@@ -433,8 +438,14 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                                 SizedBox(width: 10.w),
                                 Text(
                                   subscriptionProvider.isInTrial
-                                      ? '${subscriptionProvider.trialDaysRemaining} days left in trial'
-                                      : '${subscriptionProvider.daysRemaining} days until renewal',
+                                      ? AppLocalizations.of(ctx)
+                                          .manageSheetTrialDaysLeft(
+                                              subscriptionProvider
+                                                  .trialDaysRemaining)
+                                      : AppLocalizations.of(ctx)
+                                          .manageSheetDaysUntilRenewal(
+                                              subscriptionProvider
+                                                  .daysRemaining),
                                   style: GoogleFonts.inter(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w500,
@@ -451,7 +462,7 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                         // Hint text
                         SizedBox(height: 12.h),
                         Text(
-                          'Tap to view all plans',
+                          AppLocalizations.of(ctx).manageSheetTapToViewPlans,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
                             color: colors.textSecondary.withValues(alpha: 0.7),
@@ -469,8 +480,8 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
                   ctx,
                   icon: Icons.settings,
                   iconColor: colors.textSecondary,
-                  title: 'Manage in Store',
-                  subtitle: 'Change or cancel subscription',
+                  title: AppLocalizations.of(ctx).manageSheetManageInStore,
+                  subtitle: AppLocalizations.of(ctx).manageSheetManageSubtitle,
                   onTap: () {
                     debugPrint('⚙️ Manage in Store tapped');
                     Navigator.pop(ctx, 'manage');
@@ -501,11 +512,13 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
   }
 }
 
-String _getStatusText(SubscriptionProvider provider) {
+String _getStatusText(BuildContext context, SubscriptionProvider provider) {
+  final l10n = AppLocalizations.of(context);
+  final period = provider.subscription.period?.displayName ?? 'Monthly';
   if (provider.isInTrial) {
-    return 'Trial • ${provider.subscription.period?.displayName ?? 'Monthly'}';
+    return l10n.manageSheetStatusTrial(period);
   }
-  return 'Active • ${provider.subscription.period?.displayName ?? 'Monthly'}';
+  return l10n.manageSheetStatusActive(period);
 }
 
 Widget _buildManageActionTile(
