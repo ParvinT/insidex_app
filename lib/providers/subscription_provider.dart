@@ -1,8 +1,34 @@
 // lib/providers/subscription_provider.dart
+//
+// Production-Ready Subscription Provider
+// Uses RevenueCat Firebase Extension as the single source of truth
+//
+// Architecture:
+// ┌─────────────────────────────────────────────────────────────────┐
+// │  Google Play / App Store                                        │
+// │            │                                                    │
+// │            ▼                                                    │
+// │      RevenueCat Server                                          │
+// │            │                                                    │
+// │            ▼ (Webhook - works even when app is closed)          │
+// │  revenuecat_customers/{userId}  ◄── Firestore Real-time Stream  │
+// │            │                                                    │
+// │            ▼                                                    │
+// │    SubscriptionProvider (this file)                             │
+// │            │                                                    │
+// │            ▼                                                    │
+// │         UI Updates                                              │
+// └─────────────────────────────────────────────────────────────────┘
+//
+// Benefits:
+// - Server-side sync (works even when app is closed)
+// - No polling needed (Firestore real-time listeners)
+// - Automatic deferred downgrade handling via webhook
+// - Race condition free (single source of truth)
+// - Graceful degradation (SDK fallback if Extension fails)
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:flutter/widgets.dart';
 import 'dart:async';
 
@@ -13,20 +39,28 @@ import '../services/subscription/subscription_service.dart';
 
 /// Provider for managing subscription state across the app
 ///
-/// Responsibilities:
-/// - Track current subscription status
-/// - Manage pending subscription changes (deferred downgrades)
-/// - Provide access control helpers
-/// - Handle subscription changes
-/// - Cache subscription data locally
+/// Uses RevenueCat Firebase Extension for real-time subscription data.
+/// The extension syncs data via webhooks, so it works even when app is closed.
+///
+/// Usage:
+/// ```dart
+/// final provider = context.read<SubscriptionProvider>();
+/// if (provider.canPlayAudio) {
+///   // Play audio
+/// }
+/// ```
 class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ============================================================
-  // PRIVATE STATE
+  // DEPENDENCIES
   // ============================================================
 
   final SubscriptionService _subscriptionService = SubscriptionService();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // ============================================================
+  // STATE
+  // ============================================================
 
   SubscriptionModel _subscription = SubscriptionModel.free();
   List<SubscriptionPackage> _availablePackages = [];
@@ -35,26 +69,27 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool _isInitialized = false;
   String? _error;
 
-  Timer? _pollingTimer;
-  Timer? _gracePeriodTimer;
-  static const _pollingInterval = Duration(seconds: 30);
-
   StreamSubscription<User?>? _authSubscription;
+  StreamSubscription<DocumentSnapshot>? _extensionSubscription;
   String? _currentUserId;
   Completer<void>? _initCompleter;
+
+  // Fallback refresh for edge cases (Extension webhook delays)
+  Timer? _fallbackTimer;
+  static const _fallbackInterval = Duration(minutes: 5);
 
   // ============================================================
   // CONSTRUCTOR
   // ============================================================
 
   SubscriptionProvider() {
-    debugPrint('🏗️ [SubscriptionProvider] Constructor called');
+    debugPrint('🏗️ [SubscriptionProvider] Initializing');
     WidgetsBinding.instance.addObserver(this);
     _initAuthListener();
   }
 
   // ============================================================
-  // GETTERS
+  // GETTERS - Subscription Data
   // ============================================================
 
   /// Current subscription data
@@ -73,7 +108,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   String? get error => _error;
 
   // ============================================================
-  // CONVENIENCE GETTERS
+  // GETTERS - Convenience Accessors (Spotify-style API)
   // ============================================================
 
   /// Current subscription tier
@@ -97,7 +132,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Whether user can download for offline
   bool get canDownload => _subscription.canDownload;
 
-  /// Whether user can use background playback & lock screen controls
+  /// Whether user can use background playback
   bool get canUseBackgroundPlayback => _subscription.canUseBackgroundPlayback;
 
   /// Days remaining in subscription
@@ -129,7 +164,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ============================================================
 
   /// Wait until subscription data is loaded
-  /// Use this before checking subscription status
+  /// Use this before accessing subscription data in async contexts
   Future<void> waitForInitialization() async {
     if (_isInitialized) return;
 
@@ -138,21 +173,17 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   /// Initialize provider for a user
-  /// Call this after user login
   Future<void> initialize(String userId) async {
-    debugPrint('📦 [SubscriptionProvider] initialize() called for: $userId');
-    debugPrint(
-        '📦 [SubscriptionProvider] _isInitialized: $_isInitialized, _currentUserId: $_currentUserId');
+    debugPrint('📦 [SubscriptionProvider] initialize() for: $userId');
 
     if (_isInitialized && _currentUserId == userId) {
-      debugPrint(
-          '📦 [SubscriptionProvider] Already initialized for this user, skipping');
+      debugPrint('📦 [SubscriptionProvider] Already initialized, skipping');
       return;
     }
 
     // Different user - reset first
     if (_currentUserId != null && _currentUserId != userId) {
-      debugPrint('📦 [SubscriptionProvider] Different user, resetting first');
+      debugPrint('📦 [SubscriptionProvider] Different user, resetting');
       await reset();
     }
 
@@ -161,147 +192,83 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     _error = null;
 
     try {
-      debugPrint('📦 [SubscriptionProvider] Starting initialization...');
-
-      // Initialize subscription service
+      // Step 1: Initialize RevenueCat SDK (for purchases only)
       await _subscriptionService.initialize(userId);
-      debugPrint('📦 [SubscriptionProvider] SubscriptionService initialized');
+      debugPrint('✅ [SubscriptionProvider] RevenueCat SDK ready');
 
-      // Set up RevenueCat listener (real-time updates)
-      _subscriptionService.setSubscriptionListener(_onRevenueCatUpdate);
-      debugPrint('📦 [SubscriptionProvider] RevenueCat listener set');
+      // Step 2: Load initial data from Extension
+      await _loadFromExtension(userId);
+      debugPrint('✅ [SubscriptionProvider] Initial data loaded');
 
-      // Load current subscription (includes pending info from Firestore)
-      await _loadSubscription(userId);
-      debugPrint('📦 [SubscriptionProvider] Subscription loaded');
+      // Step 3: Start real-time listener on Extension data
+      _startExtensionListener(userId);
+      debugPrint('✅ [SubscriptionProvider] Real-time listener active');
 
-      // Load available packages
+      // Step 4: Load available packages
       await _loadPackages();
-      debugPrint('📦 [SubscriptionProvider] Packages loaded');
+      debugPrint('✅ [SubscriptionProvider] Packages loaded');
+
+      // Step 5: Start fallback refresh (for edge cases)
+      _startFallbackTimer();
 
       _isInitialized = true;
-      _startPolling();
 
       if (_initCompleter != null && !_initCompleter!.isCompleted) {
         _initCompleter!.complete();
       }
+
       debugPrint(
-          '✅ [SubscriptionProvider] Initialized successfully - tier: ${_subscription.tier}, isActive: ${_subscription.isActive}, pendingTier: ${_subscription.pendingTier}');
+          '🎉 [SubscriptionProvider] Ready - tier: ${_subscription.tier}, '
+          'active: ${_subscription.isActive}, product: ${_subscription.productId}');
     } catch (e, stackTrace) {
       _error = e.toString();
-      debugPrint('❌ [SubscriptionProvider] Initialization error: $e');
-      debugPrint('❌ [SubscriptionProvider] Stack trace: $stackTrace');
+      debugPrint('❌ [SubscriptionProvider] Init error: $e');
+      debugPrint('❌ Stack: $stackTrace');
+
+      // Graceful degradation - use free tier on error
+      _subscription = SubscriptionModel.free();
     } finally {
       _setLoading(false);
     }
   }
 
-  void _startPolling() {
-    _stopPolling();
-    _pollingTimer = Timer.periodic(_pollingInterval, (_) {
-      if (_isInitialized && _currentUserId != null) {
-        debugPrint('⏰ [SubscriptionProvider] Polling subscription status...');
-        _pollSubscriptionStatus();
-      }
-    });
-    debugPrint(
-        '⏰ [SubscriptionProvider] Polling started (every ${_pollingInterval.inSeconds}s)');
-  }
-
-  void _stopPolling() {
-    _pollingTimer?.cancel();
-    _pollingTimer = null;
-  }
-
-  Future<void> _pollSubscriptionStatus() async {
-    try {
-      final verifiedSubscription =
-          await _subscriptionService.verifySubscription(forceRefresh: true);
-      if (verifiedSubscription != null) {
-        // Check if anything changed
-        if (verifiedSubscription.tier != _subscription.tier ||
-            verifiedSubscription.status != _subscription.status ||
-            verifiedSubscription.isActive != _subscription.isActive) {
-          debugPrint(
-              '🔄 [SubscriptionProvider] Subscription changed via polling!');
-          debugPrint(
-              '   Old: ${_subscription.tier}, isActive: ${_subscription.isActive}');
-          debugPrint(
-              '   New: ${verifiedSubscription.tier}, isActive: ${verifiedSubscription.isActive}');
-
-          // Preserve pending info
-          _subscription = verifiedSubscription.copyWith(
-            pendingTier: _subscription.pendingTier,
-            pendingProductId: _subscription.pendingProductId,
-          );
-
-          // Sync to Firestore
-          if (_currentUserId != null) {
-            await _syncToFirestore(_currentUserId!, _subscription);
-          }
-
-          notifyListeners();
-        }
-      }
-    } catch (e) {
-      debugPrint('⚠️ [SubscriptionProvider] Polling error: $e');
-    }
-  }
-
-  /// Listen to auth state changes and auto-initialize/reset
+  /// Listen to auth state changes
   void _initAuthListener() {
-    debugPrint('👂 [SubscriptionProvider] _initAuthListener() called');
-
-    // Check current user immediately
     final currentUser = _auth.currentUser;
     debugPrint(
-        '👤 [SubscriptionProvider] Immediate currentUser check: ${currentUser?.uid ?? 'null'}');
+        '👤 [SubscriptionProvider] Current user: ${currentUser?.uid ?? 'null'}');
 
     if (currentUser != null) {
-      debugPrint(
-          '🔐 [SubscriptionProvider] Current user found immediately: ${currentUser.uid}');
-      // Use Future.microtask to avoid calling async in constructor
       Future.microtask(() => initialize(currentUser.uid));
     }
 
-    // Listen for auth state changes (this will also fire with current user)
     _authSubscription = _auth.authStateChanges().listen(
       (user) {
         debugPrint(
-            '🔄 [SubscriptionProvider] authStateChanges event: ${user?.uid ?? 'null'}');
+            '🔄 [SubscriptionProvider] Auth changed: ${user?.uid ?? 'null'}');
 
         if (user != null) {
           if (!_isInitialized || _currentUserId != user.uid) {
-            debugPrint(
-                '🔐 [SubscriptionProvider] User logged in (from stream): ${user.uid}');
             initialize(user.uid);
-          } else {
-            debugPrint(
-                '🔐 [SubscriptionProvider] User already initialized, skipping');
           }
         } else {
           if (_isInitialized) {
-            debugPrint('🔐 [SubscriptionProvider] User logged out');
             reset();
           }
         }
       },
       onError: (error) {
-        debugPrint('❌ [SubscriptionProvider] authStateChanges error: $error');
+        debugPrint('❌ [SubscriptionProvider] Auth error: $error');
       },
     );
-
-    debugPrint('👂 [SubscriptionProvider] Auth listener setup complete');
   }
 
   /// Reset provider state (call on logout)
   Future<void> reset() async {
-    debugPrint('🔄 [SubscriptionProvider] Resetting state');
-    _stopPolling();
-    _gracePeriodTimer?.cancel();
-    _gracePeriodTimer = null;
-    // Remove RevenueCat listener
-    _subscriptionService.setSubscriptionListener(null);
+    debugPrint('🔄 [SubscriptionProvider] Resetting');
+
+    _stopExtensionListener();
+    _stopFallbackTimer();
 
     _subscription = SubscriptionModel.free();
     _availablePackages = [];
@@ -314,244 +281,464 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   // ============================================================
-  // SUBSCRIPTION LOADING
+  // EXTENSION DATA LOADING (Primary Source)
   // ============================================================
 
-  /// Load subscription - RevenueCat is the source of truth, but pending info comes from Firestore
-  Future<void> _loadSubscription(String userId) async {
+  /// Load subscription from RevenueCat Firebase Extension
+  /// This is the PRIMARY data source - webhook updated, always fresh
+  Future<void> _loadFromExtension(String userId) async {
     try {
-      debugPrint('📥 [SubscriptionProvider] Loading subscription for: $userId');
+      final doc =
+          await _firestore.collection('revenuecat_customers').doc(userId).get();
 
-      // ============================================================
-      // Step 0: Sync purchases from store (handles deferred downgrades)
-      // ============================================================
-      try {
-        await Purchases.syncPurchases();
-        debugPrint('🔄 [SubscriptionProvider] Synced purchases from store');
-      } catch (e) {
-        debugPrint('⚠️ [SubscriptionProvider] Sync purchases warning: $e');
-        // Continue even if sync fails
+      if (doc.exists && doc.data() != null) {
+        _subscription = _parseExtensionData(doc.data()!, userId);
+        debugPrint(
+            '📦 [SubscriptionProvider] Extension: ${_subscription.tier}');
+      } else {
+        debugPrint('📦 [SubscriptionProvider] No Extension data, using SDK');
+        await _loadFromSDK(userId);
       }
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Extension error: $e');
+      await _loadFromSDK(userId);
+    }
+  }
 
-      // ============================================================
-      // Step 1: Get data from Firestore (for trialUsed and pending info)
-      // ============================================================
-      bool firestoreTrialUsed = false;
-      SubscriptionTier? pendingTier;
-      String? pendingProductId;
-
-      final doc = await _firestore.collection('users').doc(userId).get();
-      if (doc.exists) {
-        final data = doc.data();
-        final subscriptionData = data?['subscription'] as Map<String, dynamic>?;
-
-        firestoreTrialUsed = subscriptionData?['trialUsed'] as bool? ?? false;
-
-        // Read pending info from Firestore
-        final pendingTierStr = subscriptionData?['pendingTier'] as String?;
-        pendingProductId = subscriptionData?['pendingProductId'] as String?;
-
-        if (pendingTierStr != null) {
-          pendingTier = SubscriptionTier.fromString(pendingTierStr);
-          debugPrint(
-              '📋 [SubscriptionProvider] Found pending from Firestore: $pendingTier ($pendingProductId)');
-        }
-      }
-
-      // ============================================================
-      // Step 2: Get subscription from RevenueCat (source of truth for tier/status)
-      // ============================================================
-      final verifiedSubscription =
+  /// Fallback: Load from RevenueCat SDK directly
+  Future<void> _loadFromSDK(String userId) async {
+    try {
+      final verified =
           await _subscriptionService.verifySubscription(forceRefresh: true);
 
-      debugPrint(
-          '📥 [SubscriptionProvider] RevenueCat returned: ${verifiedSubscription?.tier} - ${verifiedSubscription?.status}');
-
-      if (verifiedSubscription != null) {
-        // ============================================================
-        // Step 3: Check if pending subscription has become active
-        // ============================================================
-        if (pendingTier != null &&
-            pendingProductId != null &&
-            verifiedSubscription.tier == pendingTier &&
-            verifiedSubscription.productId == pendingProductId) {
-          debugPrint(
-              '🎉 [SubscriptionProvider] Pending subscription is now ACTIVE! Clearing pending info.');
-          pendingTier = null;
-          pendingProductId = null;
-          await _subscriptionService.clearPendingSubscription();
-        }
-
-        // ============================================================
-        // Step 4: Merge RevenueCat data with Firestore pending info
-        // ============================================================
-
-        _subscription = verifiedSubscription.copyWith(
-          trialUsed: verifiedSubscription.trialUsed || firestoreTrialUsed,
-          pendingTier: pendingTier,
-          pendingProductId: pendingProductId,
-        );
-
-        debugPrint(
-            '📦 [SubscriptionProvider] Loaded: tier=${_subscription.tier}, status=${_subscription.status}, pendingTier=${_subscription.pendingTier}');
-
-        // Sync to Firestore (as cache)
-        await _syncToFirestore(userId, _subscription);
+      if (verified != null) {
+        _subscription = verified;
+        debugPrint('📦 [SubscriptionProvider] SDK: ${_subscription.tier}');
       } else {
-        // No data from RevenueCat, use free
-        _subscription = SubscriptionModel.free().copyWith(
-          trialUsed: firestoreTrialUsed,
-          pendingTier: pendingTier,
-          pendingProductId: pendingProductId,
-        );
-        debugPrint(
-            '📦 [SubscriptionProvider] No subscription, using free tier');
+        _subscription = await _buildFreeWithTrialStatus(userId);
+        debugPrint('📦 [SubscriptionProvider] Using FREE tier');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] SDK error: $e');
+      _subscription = SubscriptionModel.free();
+    }
+  }
+
+  /// Build free subscription preserving trial status
+  Future<SubscriptionModel> _buildFreeWithTrialStatus(String userId) async {
+    try {
+      // Check if user has trial history in Extension
+      final doc =
+          await _firestore.collection('revenuecat_customers').doc(userId).get();
+
+      bool trialUsed = false;
+      if (doc.exists) {
+        final data = doc.data();
+        final subscriptions = data?['subscriptions'] as Map<String, dynamic>?;
+        trialUsed = subscriptions != null && subscriptions.isNotEmpty;
       }
 
-      notifyListeners();
-    } catch (e) {
-      debugPrint('❌ [SubscriptionProvider] Error loading subscription: $e');
-      _subscription = SubscriptionModel.free();
-      notifyListeners();
+      return SubscriptionModel.free().copyWith(trialUsed: trialUsed);
+    } catch (_) {
+      return SubscriptionModel.free();
     }
   }
 
-  /// Sync subscription to Firestore
-  /// CRITICAL: Never touches pendingTier/pendingProductId to avoid race conditions
-  Future<void> _syncToFirestore(
-      String userId, SubscriptionModel subscription) async {
-    try {
-      // Use dot notation to update specific fields WITHOUT touching pending fields
-      await _firestore.collection('users').doc(userId).update({
-        'subscription.tier': subscription.tier.name,
-        'subscription.status': subscription.status.name,
-        'subscription.period': subscription.period?.name,
-        'subscription.source': subscription.source.name,
-        'subscription.startDate': subscription.startDate != null
-            ? Timestamp.fromDate(subscription.startDate!)
-            : null,
-        'subscription.expiryDate': subscription.expiryDate != null
-            ? Timestamp.fromDate(subscription.expiryDate!)
-            : null,
-        'subscription.trialEndDate': subscription.trialEndDate != null
-            ? Timestamp.fromDate(subscription.trialEndDate!)
-            : null,
-        'subscription.trialUsed': subscription.trialUsed,
-        'subscription.autoRenew': subscription.autoRenew,
-        'subscription.productId': subscription.productId,
-        'subscription.originalTransactionId':
-            subscription.originalTransactionId,
-        'subscription.lastVerifiedAt': subscription.lastVerifiedAt != null
-            ? Timestamp.fromDate(subscription.lastVerifiedAt!)
-            : FieldValue.serverTimestamp(),
-        // INTENTIONALLY NOT UPDATING: pendingTier, pendingProductId
-      });
-      debugPrint(
-          '✅ [SubscriptionProvider] Synced to Firestore: ${subscription.tier} (pending fields untouched)');
-    } catch (e) {
-      debugPrint('❌ [SubscriptionProvider] Sync error: $e');
-    }
-  }
+  // ============================================================
+  // EXTENSION DATA PARSING
+  // ============================================================
 
-  /// Called when RevenueCat detects subscription changes (real-time)
-  void _onRevenueCatUpdate(SubscriptionModel newSubscription) {
-    debugPrint(
-        '🔔 [SubscriptionProvider] RevenueCat update received: ${newSubscription.tier}, productId: ${newSubscription.productId}');
+  /// Parse Extension document into SubscriptionModel
+  SubscriptionModel _parseExtensionData(
+      Map<String, dynamic> data, String userId) {
+    final entitlements = data['entitlements'] as Map<String, dynamic>?;
+    final subscriptions = data['subscriptions'] as Map<String, dynamic>?;
 
-    // ============================================================
-    // GRACE PERIOD: Protect against temporary entitlement gaps
-    // If we suddenly drop from active to FREE, wait and verify
-    // ============================================================
-    if (_subscription.isActive && !newSubscription.isActive) {
-      debugPrint(
-          '⚠️ [SubscriptionProvider] Sudden drop to FREE detected - starting 5s grace period...');
-
-      // Cancel any existing grace period timer
-      _gracePeriodTimer?.cancel();
-
-      // Don't update immediately, wait and verify
-      _gracePeriodTimer = Timer(const Duration(seconds: 5), () async {
-        debugPrint(
-            '⏰ [SubscriptionProvider] Grace period ended - verifying...');
-
-        final verified =
-            await _subscriptionService.verifySubscription(forceRefresh: true);
-
-        if (verified != null && verified.isActive) {
-          debugPrint(
-              '✅ [SubscriptionProvider] False alarm - subscription still active: ${verified.tier}');
-          // Subscription is actually still active, update with correct data
-          _subscription = verified.copyWith(
-            pendingTier: _subscription.pendingTier,
-            pendingProductId: _subscription.pendingProductId,
-          );
-
-          // Sync to Firestore
-          if (_currentUserId != null) {
-            _syncToFirestore(_currentUserId!, _subscription);
-          }
-        } else {
-          debugPrint(
-              '📉 [SubscriptionProvider] Confirmed - subscription is now FREE');
-          // Actually dropped to free, apply the update
-          _applySubscriptionUpdate(newSubscription);
-        }
-
-        notifyListeners();
-      });
-
-      return; // Don't apply update immediately
+    if (entitlements == null || entitlements.isEmpty) {
+      debugPrint('📋 [SubscriptionProvider] No entitlements');
+      return _buildFreeFromData(data);
     }
 
-    // Normal update (no grace period needed)
-    _applySubscriptionUpdate(newSubscription);
-  }
+    // Find active entitlement (priority: standard > lite)
+    Map<String, dynamic>? activeEntitlement;
+    SubscriptionTier tier = SubscriptionTier.free;
 
-  /// Apply subscription update with pending info handling
-  void _applySubscriptionUpdate(SubscriptionModel newSubscription) {
-    final pendingTier = _subscription.pendingTier;
-    final pendingProductId = _subscription.pendingProductId;
-
-    SubscriptionTier? finalPendingTier = pendingTier;
-    String? finalPendingProductId = pendingProductId;
-
-    // Check if pending subscription has become active (match BOTH tier AND productId)
-    if (pendingTier != null &&
-        pendingProductId != null &&
-        newSubscription.tier == pendingTier &&
-        newSubscription.productId == pendingProductId) {
-      debugPrint(
-          '🎉 [SubscriptionProvider] Pending subscription activated! Clearing pending.');
-      finalPendingTier = null;
-      finalPendingProductId = null;
-
-      // Clear pending in Firestore
-      _subscriptionService.clearPendingSubscription();
+    // Check standard first (higher priority)
+    if (entitlements.containsKey('standard')) {
+      final standard = entitlements['standard'] as Map<String, dynamic>?;
+      if (standard != null && _isEntitlementActive(standard)) {
+        activeEntitlement = standard;
+        tier = SubscriptionTier.standard;
+      }
     }
 
-    _subscription = newSubscription.copyWith(
-      pendingTier: finalPendingTier,
-      pendingProductId: finalPendingProductId,
+    // Check lite if no standard
+    if (activeEntitlement == null && entitlements.containsKey('lite')) {
+      final lite = entitlements['lite'] as Map<String, dynamic>?;
+      if (lite != null && _isEntitlementActive(lite)) {
+        activeEntitlement = lite;
+        tier = SubscriptionTier.lite;
+      }
+    }
+
+    if (activeEntitlement == null) {
+      debugPrint('📋 [SubscriptionProvider] No active entitlements');
+      return _buildFreeFromData(data);
+    }
+
+    // Parse entitlement details
+    final productId = activeEntitlement['product_identifier'] as String?;
+    final expiresStr = activeEntitlement['expires_date'] as String?;
+    final purchaseStr = activeEntitlement['purchase_date'] as String?;
+    final gracePeriodStr =
+        activeEntitlement['grace_period_expires_date'] as String?;
+
+    final expiryDate = _parseDate(expiresStr);
+    final startDate = _parseDate(purchaseStr);
+    final gracePeriodExpires = _parseDate(gracePeriodStr);
+
+    // Determine period
+    final period = (productId?.contains('yearly') ?? false)
+        ? SubscriptionPeriod.yearly
+        : SubscriptionPeriod.monthly;
+
+    // Determine status
+    final status = _determineStatus(
+      expiryDate: expiryDate,
+      gracePeriodExpires: gracePeriodExpires,
+      subscriptions: subscriptions,
+      productId: productId,
     );
 
-    // Sync to Firestore
-    if (_currentUserId != null) {
-      _syncToFirestore(_currentUserId!, _subscription);
-    }
+    // Check for pending changes (deferred downgrades)
+    final pending = _detectPendingChanges(
+      entitlements: entitlements,
+      subscriptions: subscriptions,
+      currentProductId: productId,
+    );
 
-    // Notify UI
-    notifyListeners();
+    // Trial info
+    final trialInfo = _extractTrialInfo(subscriptions, productId);
+
+    debugPrint('📋 [SubscriptionProvider] Parsed: tier=$tier, status=$status, '
+        'product=$productId, pending=${pending['tier']}');
+
+    return SubscriptionModel(
+      tier: tier,
+      period: period,
+      status: status,
+      source: SubscriptionSource.revenuecat,
+      startDate: startDate,
+      expiryDate: expiryDate,
+      trialEndDate: trialInfo['trialEndDate'] as DateTime?,
+      trialUsed: trialInfo['trialUsed'] as bool? ?? false,
+      autoRenew: _checkAutoRenew(subscriptions, productId),
+      productId: productId,
+      lastVerifiedAt: DateTime.now(),
+      pendingTier: pending['tier'] as SubscriptionTier?,
+      pendingProductId: pending['productId'] as String?,
+    );
   }
 
-  /// Load available packages from RevenueCat/store
+  /// Check if an entitlement is currently active
+  bool _isEntitlementActive(Map<String, dynamic> entitlement) {
+    final expiresStr = entitlement['expires_date'] as String?;
+    if (expiresStr == null) return false;
+
+    final expiresDate = _parseDate(expiresStr);
+    if (expiresDate == null) return false;
+
+    final now = DateTime.now();
+
+    // Check if not expired
+    if (now.isBefore(expiresDate)) {
+      return true;
+    }
+
+    // Check grace period
+    final gracePeriodStr = entitlement['grace_period_expires_date'] as String?;
+    if (gracePeriodStr != null) {
+      final gracePeriod = _parseDate(gracePeriodStr);
+      if (gracePeriod != null && now.isBefore(gracePeriod)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Determine subscription status
+  SubscriptionStatus _determineStatus({
+    required DateTime? expiryDate,
+    required DateTime? gracePeriodExpires,
+    required Map<String, dynamic>? subscriptions,
+    required String? productId,
+  }) {
+    if (expiryDate == null) return SubscriptionStatus.none;
+
+    final now = DateTime.now();
+
+    // Check grace period
+    if (now.isAfter(expiryDate)) {
+      if (gracePeriodExpires != null && now.isBefore(gracePeriodExpires)) {
+        return SubscriptionStatus.gracePeriod;
+      }
+      return SubscriptionStatus.expired;
+    }
+
+    // Check trial
+    if (_isInTrial(subscriptions, productId)) {
+      return SubscriptionStatus.trial;
+    }
+
+    // Check auto-renew
+    if (!_checkAutoRenew(subscriptions, productId)) {
+      return SubscriptionStatus.cancelled;
+    }
+
+    return SubscriptionStatus.active;
+  }
+
+  /// Check if currently in trial
+  bool _isInTrial(Map<String, dynamic>? subscriptions, String? productId) {
+    if (subscriptions == null || productId == null) return false;
+
+    for (final entry in subscriptions.entries) {
+      final sub = entry.value as Map<String, dynamic>?;
+      if (sub == null) continue;
+
+      final subProductId = sub['product_identifier'] as String?;
+      if (subProductId == productId) {
+        return sub['period_type'] == 'trial';
+      }
+    }
+
+    return false;
+  }
+
+  /// Check if subscription will auto-renew
+  bool _checkAutoRenew(Map<String, dynamic>? subscriptions, String? productId) {
+    if (subscriptions == null || productId == null) return true;
+
+    for (final entry in subscriptions.entries) {
+      final sub = entry.value as Map<String, dynamic>?;
+      if (sub == null) continue;
+
+      final subProductId = sub['product_identifier'] as String?;
+      if (subProductId == productId) {
+        // If unsubscribe_detected_at exists, auto-renew is off
+        return sub['unsubscribe_detected_at'] == null;
+      }
+    }
+
+    return true;
+  }
+
+  /// Detect pending subscription changes (deferred downgrades)
+  Map<String, dynamic> _detectPendingChanges({
+    required Map<String, dynamic>? entitlements,
+    required Map<String, dynamic>? subscriptions,
+    required String? currentProductId,
+  }) {
+    if (subscriptions == null || currentProductId == null) {
+      return {'tier': null, 'productId': null};
+    }
+
+    // Look for subscription entries that are different from current
+    // and will become active in the future
+    for (final entry in subscriptions.entries) {
+      final sub = entry.value as Map<String, dynamic>?;
+      if (sub == null) continue;
+
+      final subProductId = sub['product_identifier'] as String?;
+
+      // Skip current product
+      if (subProductId == currentProductId) continue;
+      if (subProductId == null) continue;
+
+      // Check if this subscription is pending (has future purchase date)
+      // Or check entitlements for this product
+      final litePending = entitlements?['lite'] as Map<String, dynamic>?;
+      final standardPending =
+          entitlements?['standard'] as Map<String, dynamic>?;
+
+      // If there's an entitlement for a different product, it might be pending
+      if (subProductId.contains('lite') && litePending != null) {
+        final liteProductId = litePending['product_identifier'] as String?;
+        if (liteProductId != currentProductId) {
+          return {
+            'tier': SubscriptionTier.lite,
+            'productId': liteProductId,
+          };
+        }
+      }
+
+      if (subProductId.contains('standard') && standardPending != null) {
+        final standardProductId =
+            standardPending['product_identifier'] as String?;
+        if (standardProductId != currentProductId) {
+          return {
+            'tier': SubscriptionTier.standard,
+            'productId': standardProductId,
+          };
+        }
+      }
+    }
+
+    return {'tier': null, 'productId': null};
+  }
+
+  /// Extract trial information
+  Map<String, dynamic> _extractTrialInfo(
+      Map<String, dynamic>? subscriptions, String? productId) {
+    bool trialUsed = false;
+    DateTime? trialEndDate;
+
+    if (subscriptions != null) {
+      for (final entry in subscriptions.entries) {
+        final sub = entry.value as Map<String, dynamic>?;
+        if (sub == null) continue;
+
+        // Any subscription history means trial was used
+        if (sub['original_purchase_date'] != null) {
+          trialUsed = true;
+        }
+
+        // Check if currently in trial
+        final subProductId = sub['product_identifier'] as String?;
+        if (subProductId == productId && sub['period_type'] == 'trial') {
+          trialEndDate = _parseDate(sub['expires_date'] as String?);
+        }
+      }
+    }
+
+    return {
+      'trialUsed': trialUsed,
+      'trialEndDate': trialEndDate,
+    };
+  }
+
+  /// Build free subscription from Extension data
+  SubscriptionModel _buildFreeFromData(Map<String, dynamic> data) {
+    final subscriptions = data['subscriptions'] as Map<String, dynamic>?;
+    final trialUsed = subscriptions != null && subscriptions.isNotEmpty;
+
+    return SubscriptionModel.free().copyWith(trialUsed: trialUsed);
+  }
+
+  /// Parse ISO date string
+  DateTime? _parseDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return null;
+    return DateTime.tryParse(dateStr);
+  }
+
+  // ============================================================
+  // REAL-TIME LISTENER (Extension Stream)
+  // ============================================================
+
+  /// Start listening to Extension data changes
+  void _startExtensionListener(String userId) {
+    _stopExtensionListener();
+
+    _extensionSubscription = _firestore
+        .collection('revenuecat_customers')
+        .doc(userId)
+        .snapshots()
+        .listen(
+      (snapshot) {
+        if (!snapshot.exists || snapshot.data() == null) {
+          return;
+        }
+
+        final newSubscription = _parseExtensionData(snapshot.data()!, userId);
+
+        // Only update if something meaningful changed
+        if (_hasSubscriptionChanged(newSubscription)) {
+          debugPrint(
+              '🔔 [SubscriptionProvider] Real-time update: ${newSubscription.tier}');
+
+          _subscription = newSubscription;
+          notifyListeners();
+        }
+      },
+      onError: (error) {
+        debugPrint('❌ [SubscriptionProvider] Stream error: $error');
+      },
+    );
+
+    debugPrint('🎧 [SubscriptionProvider] Extension listener started');
+  }
+
+  /// Stop Extension listener
+  void _stopExtensionListener() {
+    _extensionSubscription?.cancel();
+    _extensionSubscription = null;
+  }
+
+  /// Check if subscription has meaningfully changed
+  bool _hasSubscriptionChanged(SubscriptionModel newSub) {
+    return _subscription.tier != newSub.tier ||
+        _subscription.status != newSub.status ||
+        _subscription.productId != newSub.productId ||
+        _subscription.isActive != newSub.isActive ||
+        _subscription.pendingTier != newSub.pendingTier ||
+        _subscription.autoRenew != newSub.autoRenew;
+  }
+
+  // ============================================================
+  // FALLBACK TIMER (Edge Case Handling)
+  // ============================================================
+
+  void _startFallbackTimer() {
+    _stopFallbackTimer();
+
+    _fallbackTimer = Timer.periodic(_fallbackInterval, (_) {
+      if (_isInitialized && _currentUserId != null) {
+        _fallbackRefresh();
+      }
+    });
+  }
+
+  void _stopFallbackTimer() {
+    _fallbackTimer?.cancel();
+    _fallbackTimer = null;
+  }
+
+  /// Fallback refresh from SDK (for edge cases)
+  Future<void> _fallbackRefresh() async {
+    if (_currentUserId == null) return;
+
+    try {
+      final verified =
+          await _subscriptionService.verifySubscription(forceRefresh: true);
+
+      if (verified != null && _hasSubscriptionChanged(verified)) {
+        debugPrint('🔄 [SubscriptionProvider] Fallback detected change');
+
+        // Preserve pending info from current state
+        _subscription = verified.copyWith(
+          pendingTier: _subscription.pendingTier,
+          pendingProductId: _subscription.pendingProductId,
+        );
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Fallback error: $e');
+    }
+  }
+
+  // ============================================================
+  // PACKAGES
+  // ============================================================
+
+  /// Load available packages
   Future<void> _loadPackages() async {
     try {
       _availablePackages = await _subscriptionService.getAvailablePackages();
       debugPrint(
-          '📦 [SubscriptionProvider] Loaded ${_availablePackages.length} packages');
+          '📦 [SubscriptionProvider] ${_availablePackages.length} packages');
     } catch (e) {
-      debugPrint('❌ [SubscriptionProvider] Error loading packages: $e');
-      // Fallback to default packages
+      debugPrint('❌ [SubscriptionProvider] Package error: $e');
       _availablePackages = SubscriptionPackage.getDefaultPackages();
     }
   }
@@ -561,23 +748,28 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ============================================================
 
   /// Purchase a subscription package
-  /// Returns true if successful
   Future<bool> purchase(SubscriptionPackage package) async {
     _setLoading(true);
     _error = null;
 
     try {
       debugPrint('💳 [SubscriptionProvider] Purchasing: ${package.productId}');
+      debugPrint(
+          '📋 [SubscriptionProvider] Current subscription: ${_subscription.tier}, productId: ${_subscription.productId}');
 
-      final success = await _subscriptionService.purchase(package);
+      final success = await _subscriptionService.purchase(
+        package,
+        currentSubscription:
+            _subscription.productId != null ? _subscription : null,
+      );
 
       if (success) {
-        // Refresh subscription data (this will also load pending info)
-        final userId = _auth.currentUser?.uid;
-        if (userId != null) {
-          await _loadSubscription(userId);
-        }
         debugPrint('✅ [SubscriptionProvider] Purchase successful');
+
+        // Extension will update via webhook
+        // Also do immediate SDK refresh for instant feedback
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _fallbackRefresh();
       }
 
       return success;
@@ -601,11 +793,8 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
       final success = await _subscriptionService.restorePurchases();
 
       if (success) {
-        final userId = _auth.currentUser?.uid;
-        if (userId != null) {
-          await _loadSubscription(userId);
-        }
         debugPrint('✅ [SubscriptionProvider] Restore successful');
+        await _fallbackRefresh();
       }
 
       return success;
@@ -623,19 +812,14 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   // ============================================================
 
   /// Check if user can play a specific session
-  /// Returns true if session is demo OR user has active subscription
   bool canPlaySession(Map<String, dynamic> sessionData) {
-    // Demo sessions are always playable
     final isDemo = sessionData['isDemo'] as bool? ?? false;
     if (isDemo) return true;
-
-    // Check subscription
     return canPlayAudio;
   }
 
   /// Check if user can download a specific session
   bool canDownloadSession(Map<String, dynamic> sessionData) {
-    // Must be standard tier with active subscription
     return canDownload;
   }
 
@@ -653,7 +837,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   // ============================================================
-  // ADMIN METHODS (for testing/admin use)
+  // ADMIN METHODS
   // ============================================================
 
   /// Grant subscription manually (admin only)
@@ -664,30 +848,27 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     SubscriptionPeriod period = SubscriptionPeriod.monthly,
   }) async {
     try {
-      debugPrint(
-          '👑 [SubscriptionProvider] Granting $tier to $userId for $durationDays days');
+      debugPrint('👑 [SubscriptionProvider] Granting $tier to $userId');
 
       final now = DateTime.now();
       final expiryDate = now.add(Duration(days: durationDays));
 
-      final subscription = SubscriptionModel(
-        tier: tier,
-        period: period,
-        status: SubscriptionStatus.active,
-        source: SubscriptionSource.admin,
-        startDate: now,
-        expiryDate: expiryDate,
-        trialUsed: true,
-        autoRenew: false,
-      );
-
       await _firestore.collection('users').doc(userId).update({
-        'subscription': subscription.toMap(),
+        'subscription': {
+          'tier': tier.value,
+          'period': period.value,
+          'status': 'active',
+          'source': 'admin',
+          'startDate': Timestamp.fromDate(now),
+          'expiryDate': Timestamp.fromDate(expiryDate),
+          'trialUsed': true,
+          'autoRenew': false,
+        },
       });
 
-      // Reload if this is current user
       if (userId == _auth.currentUser?.uid) {
-        await _loadSubscription(userId);
+        await _loadFromExtension(userId);
+        notifyListeners();
       }
 
       return true;
@@ -700,26 +881,17 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Revoke subscription (admin only)
   Future<bool> revokeSubscription(String userId) async {
     try {
-      debugPrint('🚫 [SubscriptionProvider] Revoking subscription for $userId');
+      debugPrint('🚫 [SubscriptionProvider] Revoking for $userId');
 
-      // Keep trialUsed info, just reset to free
       await _firestore.collection('users').doc(userId).update({
         'subscription.tier': 'free',
         'subscription.status': 'none',
-        'subscription.period': FieldValue.delete(),
-        'subscription.startDate': FieldValue.delete(),
-        'subscription.expiryDate': FieldValue.delete(),
-        'subscription.trialEndDate': FieldValue.delete(),
-        'subscription.productId': FieldValue.delete(),
         'subscription.autoRenew': false,
-        'subscription.pendingTier': FieldValue.delete(),
-        'subscription.pendingProductId': FieldValue.delete(),
-        // trialUsed KORUNUYOR - silmiyoruz
       });
 
-      // Reload if this is current user
       if (userId == _auth.currentUser?.uid) {
-        await _loadSubscription(userId);
+        _subscription = SubscriptionModel.free();
+        notifyListeners();
       }
 
       return true;
@@ -738,56 +910,33 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     notifyListeners();
   }
 
-  /// Refresh subscription data
+  /// Manual refresh
   Future<void> refresh() async {
-    final userId = _auth.currentUser?.uid;
-    if (userId != null) {
-      await _loadSubscription(userId);
-      await _loadPackages();
-    }
+    if (_currentUserId == null) return;
+
+    await _loadFromExtension(_currentUserId!);
+    await _loadPackages();
+    notifyListeners();
   }
+
+  // ============================================================
+  // LIFECYCLE
+  // ============================================================
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && _isInitialized) {
-      debugPrint(
-          '📱 [SubscriptionProvider] App resumed - refreshing subscription');
-      _startPolling();
-      _refreshOnResume();
-    } else if (state == AppLifecycleState.paused) {
-      debugPrint('📱 [SubscriptionProvider] App paused - stopping polling');
-      _stopPolling();
-    }
-  }
-
-  Future<void> _refreshOnResume() async {
-    if (_currentUserId == null) return;
-
-    try {
-      final verifiedSubscription =
-          await _subscriptionService.verifySubscription(forceRefresh: true);
-      if (verifiedSubscription != null) {
-        // Preserve pending info
-        _subscription = verifiedSubscription.copyWith(
-          pendingTier: _subscription.pendingTier,
-          pendingProductId: _subscription.pendingProductId,
-        );
-        notifyListeners();
-        debugPrint(
-            '✅ [SubscriptionProvider] Refreshed on resume: ${_subscription.tier}, isActive: ${_subscription.isActive}');
-      }
-    } catch (e) {
-      debugPrint('⚠️ [SubscriptionProvider] Refresh on resume error: $e');
+      debugPrint('📱 [SubscriptionProvider] App resumed');
+      _fallbackRefresh();
     }
   }
 
   @override
   void dispose() {
-    _stopPolling();
-    _gracePeriodTimer?.cancel();
+    _stopExtensionListener();
+    _stopFallbackTimer();
     WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();
-    _subscriptionService.setSubscriptionListener(null);
     super.dispose();
   }
 }

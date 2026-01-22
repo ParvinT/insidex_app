@@ -1,36 +1,37 @@
 // lib/services/subscription/subscription_service.dart
+//
+// Simplified Subscription Service
+// Only handles purchase operations - RevenueCat Firebase Extension handles data sync
+//
+// Responsibilities:
+// - Initialize RevenueCat SDK
+// - Fetch available packages
+// - Handle purchase flow (including upgrade/downgrade) for iOS & Android
+// - Restore purchases
+// - Verify subscription from SDK (fallback only)
+//
+// NOT responsible for (Extension handles these):
+// - Firestore sync
+// - Pending subscription tracking
+// - Real-time updates
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:io' show Platform;
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../../models/subscription_model.dart';
 import '../../models/subscription_package.dart';
 import '../../core/constants/subscription_constants.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
-/// Service for handling subscription operations
+/// Service for handling subscription purchase operations
 ///
-/// Integrates with RevenueCat for in-app purchases.
-///
-/// Responsibilities:
-/// - Fetch available packages from store
-/// - Handle purchase flow (including upgrade/downgrade)
-/// - Track pending subscription changes
-/// - Verify receipts
-/// - Restore purchases
+/// This is a simplified service that only handles RevenueCat SDK operations.
+/// All data sync is handled automatically by RevenueCat Firebase Extension.
 class SubscriptionService {
   static final SubscriptionService _instance = SubscriptionService._internal();
   factory SubscriptionService() => _instance;
   SubscriptionService._internal();
-
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // Callback for subscription changes
-  void Function(SubscriptionModel)? _onSubscriptionChanged;
-  bool _listenerActive = false;
 
   bool _isInitialized = false;
   String? _currentUserId;
@@ -42,19 +43,20 @@ class SubscriptionService {
   // INITIALIZATION
   // ============================================================
 
-  /// Initialize service for a user
+  /// Initialize RevenueCat SDK for a user
   Future<void> initialize(String userId) async {
     if (_isInitialized && _currentUserId == userId) return;
 
-    debugPrint('🔧 [SubscriptionService] Initializing for user: $userId');
+    debugPrint('🔧 [SubscriptionService] Initializing for: $userId');
 
     _currentUserId = userId;
 
-    // Configure RevenueCat
+    // Get platform-specific API key
     final apiKey = Platform.isIOS
         ? SubscriptionConstants.revenueCatApiKeyIOS
         : SubscriptionConstants.revenueCatApiKeyAndroid;
 
+    // Configure RevenueCat
     final configuration = PurchasesConfiguration(apiKey)..appUserID = userId;
 
     await Purchases.configure(configuration);
@@ -64,87 +66,31 @@ class SubscriptionService {
       await Purchases.setLogLevel(LogLevel.debug);
     }
 
-    debugPrint(
-        '✅ [SubscriptionService] RevenueCat configured for user: $userId');
-
-    _setupCustomerInfoListener();
-
     _isInitialized = true;
+    debugPrint('✅ [SubscriptionService] RevenueCat SDK ready');
   }
 
   /// Reset service state
   Future<void> reset() async {
     debugPrint('🔄 [SubscriptionService] Resetting');
 
-    _removeCustomerInfoListener();
-
     try {
       await Purchases.logOut();
     } catch (e) {
-      debugPrint('⚠️ [SubscriptionService] RevenueCat logout error: $e');
+      debugPrint('⚠️ [SubscriptionService] Logout warning: $e');
     }
 
     _isInitialized = false;
     _currentUserId = null;
-    _onSubscriptionChanged = null;
-  }
-
-  // ============================================================
-  // LISTENER MANAGEMENT
-  // ============================================================
-
-  /// Set callback for subscription changes (called by Provider)
-  void setSubscriptionListener(void Function(SubscriptionModel)? callback) {
-    _onSubscriptionChanged = callback;
-    debugPrint(
-        '🎧 [SubscriptionService] Subscription listener ${callback != null ? "set" : "removed"}');
-  }
-
-  /// Setup RevenueCat CustomerInfo listener
-  void _setupCustomerInfoListener() {
-    if (_listenerActive) return;
-
-    Purchases.addCustomerInfoUpdateListener(_onCustomerInfoUpdated);
-    _listenerActive = true;
-    debugPrint('🎧 [SubscriptionService] CustomerInfo listener activated');
-  }
-
-  /// Remove RevenueCat CustomerInfo listener
-  void _removeCustomerInfoListener() {
-    if (!_listenerActive) return;
-
-    Purchases.removeCustomerInfoUpdateListener(_onCustomerInfoUpdated);
-    _listenerActive = false;
-    debugPrint('🎧 [SubscriptionService] CustomerInfo listener removed');
-  }
-
-  /// Called when RevenueCat detects subscription changes
-  void _onCustomerInfoUpdated(CustomerInfo customerInfo) {
-    debugPrint('🔔 [SubscriptionService] CustomerInfo updated from RevenueCat');
-
-    // Note: We don't pass pending info here - that's managed separately via Firestore
-    final subscription = _mapCustomerInfoToSubscription(customerInfo);
-
-    debugPrint(
-        '🔔 [SubscriptionService] New subscription state: ${subscription.tier} - ${subscription.status}');
-
-    // Sync to Firestore (this preserves pending info from Firestore)
-    _syncSubscriptionToFirestore(customerInfo);
-
-    // Notify provider
-    if (_onSubscriptionChanged != null) {
-      _onSubscriptionChanged!(subscription);
-    }
   }
 
   // ============================================================
   // PACKAGES
   // ============================================================
 
-  /// Get available subscription packages
-  /// Returns packages from RevenueCat offerings or mock data
+  /// Get available subscription packages from RevenueCat
   Future<List<SubscriptionPackage>> getAvailablePackages() async {
-    debugPrint('📦 [SubscriptionService] Fetching available packages');
+    debugPrint('📦 [SubscriptionService] Fetching packages');
 
     try {
       final offerings = await Purchases.getOfferings();
@@ -158,29 +104,20 @@ class SubscriptionService {
             .toList();
       }
 
-      debugPrint('⚠️ [SubscriptionService] No offerings found, using defaults');
-      return _getMockPackages();
+      debugPrint('⚠️ [SubscriptionService] No offerings, using defaults');
+      return SubscriptionPackage.getDefaultPackages();
     } catch (e) {
-      debugPrint('❌ [SubscriptionService] Error fetching packages: $e');
-      return _getMockPackages();
+      debugPrint('❌ [SubscriptionService] Package error: $e');
+      return SubscriptionPackage.getDefaultPackages();
     }
   }
 
-  /// Get mock packages for development
-  List<SubscriptionPackage> _getMockPackages() {
-    return [
-      SubscriptionPackage.liteMonthly(),
-      SubscriptionPackage.standardMonthly(),
-      SubscriptionPackage.standardYearly(),
-    ];
-  }
-
-  /// Map RevenueCat package to our SubscriptionPackage model
+  /// Map RevenueCat package to our model
   SubscriptionPackage _mapRevenueCatPackage(Package rcPackage) {
     final product = rcPackage.storeProduct;
     final productId = product.identifier;
 
-    // Determine tier from product ID
+    // Determine tier
     SubscriptionTier tier;
     if (productId.contains('lite')) {
       tier = SubscriptionTier.lite;
@@ -190,7 +127,7 @@ class SubscriptionService {
       tier = SubscriptionTier.free;
     }
 
-    // Determine period from package type or product ID
+    // Determine period
     SubscriptionPeriod period;
     if (productId.contains('yearly') ||
         rcPackage.packageType == PackageType.annual) {
@@ -199,19 +136,24 @@ class SubscriptionService {
       period = SubscriptionPeriod.monthly;
     }
 
-    // Check for introductory offer (free trial)
-    final hasFreeTrial = product.introductoryPrice != null &&
+    // Check for free trial
+    final hasTrial = product.introductoryPrice != null &&
         product.introductoryPrice!.price == 0;
 
-    final trialDays =
-        hasFreeTrial ? _getTrialDays(product.introductoryPrice!) : 0;
+    final trialDays = hasTrial ? _getTrialDays(product.introductoryPrice!) : 0;
 
     // Calculate savings for yearly
     int? savingsPercent;
     double? monthlyEquivalent;
+
     if (period == SubscriptionPeriod.yearly) {
-      savingsPercent = SubscriptionConstants.yearlySavingsPercent;
       monthlyEquivalent = product.price / 12;
+      if (tier == SubscriptionTier.standard) {
+        const monthlyPrice = SubscriptionConstants.priceStandardMonthly;
+        final yearlyMonthly = product.price / 12;
+        savingsPercent =
+            (((monthlyPrice - yearlyMonthly) / monthlyPrice) * 100).round();
+      }
     }
 
     return SubscriptionPackage(
@@ -219,9 +161,9 @@ class SubscriptionService {
       tier: tier,
       period: period,
       price: product.price,
-      currencyCode: product.currencyCode,
       localizedPrice: product.priceString,
-      hasTrial: hasFreeTrial,
+      currencyCode: product.currencyCode,
+      hasTrial: hasTrial,
       trialDays: trialDays,
       isHighlighted: productId == SubscriptionConstants.productStandardMonthly,
       savingsPercent: savingsPercent,
@@ -229,10 +171,10 @@ class SubscriptionService {
     );
   }
 
-  /// Extract trial days from introductory price
-  int _getTrialDays(IntroductoryPrice introPrice) {
-    final periodUnit = introPrice.periodUnit;
-    final periodCount = introPrice.periodNumberOfUnits;
+  /// Get trial days from introductory price
+  int _getTrialDays(IntroductoryPrice intro) {
+    final periodUnit = intro.periodUnit;
+    final periodCount = intro.periodNumberOfUnits;
 
     switch (periodUnit) {
       case PeriodUnit.day:
@@ -249,36 +191,29 @@ class SubscriptionService {
   }
 
   // ============================================================
-  // PURCHASE
+  // PURCHASE (iOS & Android)
   // ============================================================
 
   /// Purchase a subscription package
-  /// Handles new purchases, upgrades, and downgrades
-  ///
-  /// For DEFERRED downgrades (Android), saves pending info to Firestore
-  /// so we can track it even after app restart.
-  Future<bool> purchase(SubscriptionPackage package) async {
+  /// Handles both new purchases and upgrades/downgrades for iOS & Android
+  Future<bool> purchase(SubscriptionPackage package, {SubscriptionModel? currentSubscription}) async {
     debugPrint('💳 [SubscriptionService] Purchasing: ${package.productId}');
 
-    final userId = _currentUserId ?? FirebaseAuth.instance.currentUser?.uid;
-
-    if (userId == null) {
+    if (_currentUserId == null) {
       debugPrint('❌ [SubscriptionService] No user ID');
       return false;
     }
 
-    _currentUserId = userId;
-
     try {
-      // Get current subscription to check if this is an upgrade/downgrade
-      final currentSubscription = await verifySubscription();
+      // Get current subscription to determine upgrade/downgrade
+      //final currentSubscription = await verifySubscription();
 
-      // Get the RevenueCat package
+      // Get RevenueCat offerings
       final offerings = await Purchases.getOfferings();
       final current = offerings.current;
 
       if (current == null) {
-        debugPrint('❌ [SubscriptionService] No offerings available');
+        debugPrint('❌ [SubscriptionService] No offerings');
         return false;
       }
 
@@ -291,16 +226,13 @@ class SubscriptionService {
 
       CustomerInfo customerInfo;
 
-      // Track if this is a deferred downgrade
-      bool isDeferredDowngrade = false;
-
       // Check if user has active subscription (upgrade/downgrade scenario)
       if (currentSubscription != null &&
           currentSubscription.isActive &&
           currentSubscription.productId != null) {
         final currentProductId = currentSubscription.productId!;
 
-        // Don't allow purchasing the exact same product
+        // Don't allow purchasing the same product
         if (currentProductId == package.productId) {
           debugPrint(
               '⚠️ [SubscriptionService] Already subscribed to this plan');
@@ -308,9 +240,9 @@ class SubscriptionService {
         }
 
         debugPrint(
-            '🔄 [SubscriptionService] Upgrading/Downgrading from $currentProductId to ${package.productId}');
+            '🔄 [SubscriptionService] Plan change: $currentProductId → ${package.productId}');
 
-        // Determine proration mode based on upgrade vs downgrade
+        // Determine if this is an upgrade or downgrade
         final isUpgrade = _isUpgrade(
           currentTier: currentSubscription.tier,
           currentPeriod: currentSubscription.period,
@@ -318,18 +250,16 @@ class SubscriptionService {
           newPeriod: package.period,
         );
 
-        final prorationMode = isUpgrade
-            ? GoogleProrationMode.immediateWithTimeProration
-            : GoogleProrationMode.deferred;
-
-        // Track deferred downgrade for pending info
-        isDeferredDowngrade = !isUpgrade && Platform.isAndroid;
-
-        debugPrint(
-            '📊 [SubscriptionService] Using proration mode: $prorationMode (isUpgrade: $isUpgrade)');
-
-        // For Android: Use GoogleProductChangeInfo for upgrade/downgrade
+        // Platform-specific handling
         if (Platform.isAndroid) {
+          // Android: Use GoogleProductChangeInfo with proration mode
+          final prorationMode = isUpgrade
+              ? GoogleProrationMode.immediateWithTimeProration
+              : GoogleProrationMode.deferred;
+
+          debugPrint(
+              '📊 [SubscriptionService] Android proration: ${prorationMode.name} (isUpgrade: $isUpgrade)');
+
           final googleProductChangeInfo = GoogleProductChangeInfo(
             currentProductId,
             prorationMode: prorationMode,
@@ -343,7 +273,9 @@ class SubscriptionService {
           final purchaseResult = await Purchases.purchase(purchaseParams);
           customerInfo = purchaseResult.customerInfo;
         } else {
-          // iOS handles upgrades/downgrades automatically
+          // iOS: Handles upgrades/downgrades automatically
+          debugPrint('📊 [SubscriptionService] iOS automatic plan change');
+
           final purchaseParams = PurchaseParams.package(rcPackage);
           final purchaseResult = await Purchases.purchase(purchaseParams);
           customerInfo = purchaseResult.customerInfo;
@@ -357,34 +289,14 @@ class SubscriptionService {
         customerInfo = purchaseResult.customerInfo;
       }
 
-      // Check if purchase was successful
-      final hasLite = customerInfo.entitlements.active.containsKey(
-        SubscriptionConstants.entitlementLite,
-      );
-      final hasStandard = customerInfo.entitlements.active.containsKey(
-        SubscriptionConstants.entitlementStandard,
-      );
+      // Check if entitlements are active
+      final hasLite = customerInfo.entitlements.active
+          .containsKey(SubscriptionConstants.entitlementLite);
+      final hasStandard = customerInfo.entitlements.active
+          .containsKey(SubscriptionConstants.entitlementStandard);
 
       if (hasLite || hasStandard) {
         debugPrint('✅ [SubscriptionService] Purchase successful');
-
-        // ============================================================
-        // CRITICAL: Save pending info for DEFERRED downgrades
-        // ============================================================
-        if (isDeferredDowngrade) {
-          debugPrint(
-              '📋 [SubscriptionService] Saving DEFERRED downgrade pending info');
-          await _savePendingSubscription(
-            userId: userId,
-            pendingTier: package.tier,
-            pendingProductId: package.productId,
-          );
-        } else {
-          // Not a deferred downgrade - clear any existing pending info
-          await _clearPendingSubscription(userId);
-        }
-
-        await _syncSubscriptionToFirestore(customerInfo);
         return true;
       }
 
@@ -392,11 +304,7 @@ class SubscriptionService {
           '⚠️ [SubscriptionService] Purchase completed but no entitlements');
       return false;
     } on PlatformException catch (e) {
-      // Handle user cancellation and other errors
-      final errorCode = e.code;
-      if (errorCode == '1' ||
-          e.message?.toLowerCase().contains('cancel') == true ||
-          e.message?.toLowerCase().contains('cancelled') == true) {
+      if (_isPurchaseCancelled(e)) {
         debugPrint('ℹ️ [SubscriptionService] Purchase cancelled by user');
       } else {
         debugPrint('❌ [SubscriptionService] Purchase error: $e');
@@ -408,55 +316,7 @@ class SubscriptionService {
     }
   }
 
-  // ============================================================
-  // PENDING SUBSCRIPTION MANAGEMENT
-  // ============================================================
-
-  /// Save pending subscription info to Firestore
-  /// Called when a DEFERRED downgrade is made
-  Future<void> _savePendingSubscription({
-    required String userId,
-    required SubscriptionTier pendingTier,
-    required String pendingProductId,
-  }) async {
-    try {
-      await _firestore.collection('users').doc(userId).update({
-        'subscription.pendingTier': pendingTier.name,
-        'subscription.pendingProductId': pendingProductId,
-      });
-      debugPrint(
-          '✅ [SubscriptionService] Saved pending: $pendingTier ($pendingProductId)');
-    } catch (e) {
-      debugPrint('❌ [SubscriptionService] Error saving pending info: $e');
-    }
-  }
-
-  /// Clear pending subscription info from Firestore
-  /// Called when pending subscription becomes active or on upgrade
-  Future<void> _clearPendingSubscription(String userId) async {
-    try {
-      await _firestore.collection('users').doc(userId).update({
-        'subscription.pendingTier': null,
-        'subscription.pendingProductId': null,
-      });
-      debugPrint('✅ [SubscriptionService] Cleared pending subscription info');
-    } catch (e) {
-      debugPrint('❌ [SubscriptionService] Error clearing pending info: $e');
-    }
-  }
-
-  /// Clear pending subscription (public method for provider to use)
-  Future<void> clearPendingSubscription() async {
-    if (_currentUserId != null) {
-      await _clearPendingSubscription(_currentUserId!);
-    }
-  }
-
-  // ============================================================
-  // PRORATION HELPERS
-  // ============================================================
-
-  /// Check if the plan change is an upgrade
+  /// Check if plan change is an upgrade
   bool _isUpgrade({
     required SubscriptionTier currentTier,
     required SubscriptionPeriod? currentPeriod,
@@ -479,6 +339,13 @@ class SubscriptionService {
     return false;
   }
 
+  /// Check if error is purchase cancellation
+  bool _isPurchaseCancelled(PlatformException e) {
+    return e.code == '1' ||
+        e.message?.toLowerCase().contains('cancel') == true ||
+        e.message?.toLowerCase().contains('cancelled') == true;
+  }
+
   // ============================================================
   // RESTORE
   // ============================================================
@@ -495,16 +362,10 @@ class SubscriptionService {
     try {
       final customerInfo = await Purchases.restorePurchases();
 
-      final hasLite = customerInfo.entitlements.active.containsKey(
-        SubscriptionConstants.entitlementLite,
-      );
-      final hasStandard = customerInfo.entitlements.active.containsKey(
-        SubscriptionConstants.entitlementStandard,
-      );
+      final hasEntitlements = customerInfo.entitlements.active.isNotEmpty;
 
-      if (hasLite || hasStandard) {
+      if (hasEntitlements) {
         debugPrint('✅ [SubscriptionService] Restore successful');
-        await _syncSubscriptionToFirestore(customerInfo);
         return true;
       }
 
@@ -517,87 +378,40 @@ class SubscriptionService {
   }
 
   // ============================================================
-  // VERIFICATION
+  // VERIFICATION (Fallback - Primary source is Extension)
   // ============================================================
 
-  /// Verify current subscription status with store
-  /// Note: This does NOT include pending info - that comes from Firestore
+  /// Verify current subscription from RevenueCat SDK
+  /// This is a FALLBACK - primary data comes from Firebase Extension
   Future<SubscriptionModel?> verifySubscription(
       {bool forceRefresh = false}) async {
-    debugPrint(
-        '🔍 [SubscriptionService] Verifying subscription (forceRefresh: $forceRefresh)');
+    debugPrint('🔍 [SubscriptionService] Verifying (fallback)');
 
     if (_currentUserId == null) return null;
 
     try {
-      // Force fresh data from server if requested
       if (forceRefresh) {
         await Purchases.invalidateCustomerInfoCache();
-        debugPrint(
-            '🔄 [SubscriptionService] Cache invalidated, fetching fresh data');
       }
 
       final customerInfo = await Purchases.getCustomerInfo();
       return _mapCustomerInfoToSubscription(customerInfo);
     } catch (e) {
       debugPrint('❌ [SubscriptionService] Verify error: $e');
-      // Fallback to Firestore
-      try {
-        final doc =
-            await _firestore.collection('users').doc(_currentUserId).get();
-        final data = doc.data()?['subscription'] as Map<String, dynamic>?;
-        return SubscriptionModel.fromMap(data);
-      } catch (_) {
-        return null;
-      }
+      return null;
     }
   }
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
-
-  /// Check if a product ID grants a specific entitlement
-  SubscriptionTier getTierForProduct(String productId) {
-    switch (productId) {
-      case SubscriptionConstants.productLiteMonthly:
-        return SubscriptionTier.lite;
-      case SubscriptionConstants.productStandardMonthly:
-      case SubscriptionConstants.productStandardYearly:
-        return SubscriptionTier.standard;
-      default:
-        return SubscriptionTier.free;
-    }
-  }
-
-  // ============================================================
-  // REVENUECAT HELPERS
-  // ============================================================
-
-  /// Map RevenueCat CustomerInfo to our SubscriptionModel
-  ///
-  /// IMPORTANT: This method does NOT handle pending subscription detection.
-  /// Pending info is managed separately via Firestore (set during purchase,
-  /// read during load, cleared when pending becomes active).
-  ///
-  /// This approach is more reliable than trying to detect pending from
-  /// RevenueCat's entitlements, which can incorrectly identify expired
-  /// subscriptions as "pending".
+  /// Map RevenueCat CustomerInfo to SubscriptionModel
   SubscriptionModel _mapCustomerInfoToSubscription(CustomerInfo customerInfo) {
     final entitlements = customerInfo.entitlements.active;
 
-    // ============================================================
-    // REMOVED: Old buggy pending detection logic
-    // The old code incorrectly marked EXPIRED entitlements as "pending".
-    // Pending info is now managed via Firestore during purchase flow.
-    // ============================================================
-
     if (entitlements.isEmpty) {
-      debugPrint('📋 [SubscriptionService] No active entitlements - FREE tier');
+      debugPrint('📋 [SubscriptionService] No active entitlements');
       return SubscriptionModel.free();
     }
 
-    // Check which entitlement is active
+    // Determine tier (priority: standard > lite)
     SubscriptionTier tier;
     EntitlementInfo? activeEntitlement;
 
@@ -610,8 +424,7 @@ class SubscriptionService {
       tier = SubscriptionTier.lite;
       activeEntitlement = entitlements[SubscriptionConstants.entitlementLite];
     } else {
-      debugPrint(
-          '📋 [SubscriptionService] Unknown entitlement - defaulting to FREE');
+      debugPrint('📋 [SubscriptionService] Unknown entitlement');
       return SubscriptionModel.free();
     }
 
@@ -619,7 +432,7 @@ class SubscriptionService {
       return SubscriptionModel.free();
     }
 
-    // Determine period from product ID
+    // Parse details
     final productId = activeEntitlement.productIdentifier;
     final period = productId.contains('yearly')
         ? SubscriptionPeriod.yearly
@@ -635,7 +448,7 @@ class SubscriptionService {
       status = SubscriptionStatus.cancelled;
     }
 
-    // Parse dates safely
+    // Parse dates
     DateTime? startDate;
     DateTime? expiryDate;
     DateTime? trialEndDate;
@@ -644,35 +457,19 @@ class SubscriptionService {
     final expirationDateStr = activeEntitlement.expirationDate;
 
     if (originalPurchaseDateStr.isNotEmpty) {
-      try {
-        startDate = DateTime.parse(originalPurchaseDateStr);
-      } catch (_) {
-        startDate = DateTime.now();
-      }
-    } else {
-      startDate = DateTime.now();
+      startDate = DateTime.tryParse(originalPurchaseDateStr) ?? DateTime.now();
     }
 
     if (expirationDateStr != null && expirationDateStr.isNotEmpty) {
-      try {
-        expiryDate = DateTime.parse(expirationDateStr);
-      } catch (_) {
-        expiryDate = null;
-      }
+      expiryDate = DateTime.tryParse(expirationDateStr);
     }
 
     if (activeEntitlement.periodType == PeriodType.trial &&
-        expirationDateStr != null &&
-        expirationDateStr.isNotEmpty) {
-      try {
-        trialEndDate = DateTime.parse(expirationDateStr);
-      } catch (_) {
-        trialEndDate = null;
-      }
+        expirationDateStr != null) {
+      trialEndDate = DateTime.tryParse(expirationDateStr);
     }
 
-    debugPrint(
-        '📋 [SubscriptionService] Mapped: tier=$tier, status=$status, willRenew=${activeEntitlement.willRenew}');
+    debugPrint('📋 [SubscriptionService] Mapped: tier=$tier, status=$status');
 
     return SubscriptionModel(
       tier: tier,
@@ -682,57 +479,24 @@ class SubscriptionService {
       startDate: startDate,
       expiryDate: expiryDate,
       trialEndDate: trialEndDate,
-      trialUsed: customerInfo.nonSubscriptionTransactions.isNotEmpty ||
-          activeEntitlement.periodType != PeriodType.trial,
+      trialUsed: activeEntitlement.periodType != PeriodType.trial,
       autoRenew: activeEntitlement.willRenew,
-      originalTransactionId: originalPurchaseDateStr,
-      lastVerifiedAt: DateTime.now(),
       productId: productId,
-      // NOTE: pendingTier and pendingProductId are NOT set here.
-      // They are managed separately via Firestore and merged in the Provider.
-      pendingTier: null,
-      pendingProductId: null,
+      lastVerifiedAt: DateTime.now(),
     );
   }
 
-  /// Sync RevenueCat subscription data to Firestore
-  /// CRITICAL: Uses dot notation to NEVER touch pendingTier/pendingProductId
-  /// This prevents race conditions during deferred downgrades
-  Future<void> _syncSubscriptionToFirestore(CustomerInfo customerInfo) async {
-    if (_currentUserId == null) return;
+  // ============================================================
+  // HELPERS
+  // ============================================================
 
-    try {
-      final subscription = _mapCustomerInfoToSubscription(customerInfo);
-
-      // Use dot notation to update specific fields WITHOUT touching pending fields
-      // This completely eliminates race conditions with _savePendingSubscription
-      await _firestore.collection('users').doc(_currentUserId).update({
-        'subscription.tier': subscription.tier.name,
-        'subscription.status': subscription.status.name,
-        'subscription.period': subscription.period?.name,
-        'subscription.source': subscription.source.name,
-        'subscription.startDate': subscription.startDate != null
-            ? Timestamp.fromDate(subscription.startDate!)
-            : null,
-        'subscription.expiryDate': subscription.expiryDate != null
-            ? Timestamp.fromDate(subscription.expiryDate!)
-            : null,
-        'subscription.trialEndDate': subscription.trialEndDate != null
-            ? Timestamp.fromDate(subscription.trialEndDate!)
-            : null,
-        'subscription.trialUsed': subscription.trialUsed,
-        'subscription.autoRenew': subscription.autoRenew,
-        'subscription.productId': subscription.productId,
-        'subscription.originalTransactionId':
-            subscription.originalTransactionId,
-        'subscription.lastVerifiedAt': FieldValue.serverTimestamp(),
-        // INTENTIONALLY NOT UPDATING: pendingTier, pendingProductId
-      });
-
-      debugPrint(
-          '✅ [SubscriptionService] Synced to Firestore (pending fields untouched)');
-    } catch (e) {
-      debugPrint('❌ [SubscriptionService] Error syncing to Firestore: $e');
+  /// Get tier for a product ID
+  SubscriptionTier getTierForProduct(String productId) {
+    if (productId.contains('lite')) {
+      return SubscriptionTier.lite;
+    } else if (productId.contains('standard')) {
+      return SubscriptionTier.standard;
     }
+    return SubscriptionTier.free;
   }
 }
