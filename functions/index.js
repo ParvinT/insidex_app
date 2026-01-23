@@ -3,6 +3,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
+const { onRevenueCatEvent, checkTrialEnding } = require("./subscriptionEmails");
 
 // Import email templates
 const { 
@@ -51,7 +52,17 @@ exports.sendEmailFromQueue = functions.firestore
       }
 
       
-      const allowedTypes = ["otp", "welcome", "password_reset", "password_reset_custom"];
+      const allowedTypes = [
+        "otp",
+        "welcome", 
+        "password_reset", 
+        "password_reset_custom",
+        "subscription_started",
+        "trial_ending",
+        "subscription_expired",
+        "payment_failed",
+        "plan_changed"
+      ];
       if (!allowedTypes.includes(mailData.type)) {
         console.error("Invalid email type:", mailData.type);
         await snap.ref.update({
@@ -93,7 +104,19 @@ exports.sendEmailFromQueue = functions.firestore
           console.log(`Sending welcome email to ${mailData.to} (${lang})`);
         }
         
+        // ========== SUBSCRIPTION EMAILS ==========
+        else if (mailData.type === "subscription_started" || 
+                 mailData.type === "trial_ending" ||
+                 mailData.type === "subscription_expired" ||
+                 mailData.type === "payment_failed" ||
+                 mailData.type === "plan_changed") {
           
+          
+          mailOptions.subject = mailData.subject;
+          mailOptions.html = mailData.html;
+          
+          console.log(`Sending ${mailData.type} email to ${mailData.to} (${lang})`);
+        } 
 
         // Send email
         const info = await transporter.sendMail(mailOptions);
@@ -188,7 +211,7 @@ exports.rateLimitOTP = functions.firestore
       const data = snap.data();
 
       try {
-      // Son 1 saat içinde bu email için kaç OTP oluşturulmuş kontrol et
+      
         const oneHourAgo = admin.firestore.Timestamp.fromDate(
             new Date(Date.now() - 60 * 60 * 1000),
         );
@@ -462,3 +485,6 @@ exports.checkEmailExists = functions.https.onCall(async (data, context) => {
     throw new functions.https.HttpsError('internal', 'Failed to check email');
   }
 });
+
+exports.onRevenueCatEvent = onRevenueCatEvent;
+exports.checkTrialEnding = checkTrialEnding;

@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:ui' as ui;
 
 import '../services/notifications/daily_reminder_service.dart';
@@ -67,6 +69,20 @@ class LocaleProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language_code', locale.languageCode);
     debugPrint('🟢 Saved to SharedPreferences: ${locale.languageCode}');
+
+    // Save to Firestore for email language preference
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({'preferredLanguage': locale.languageCode});
+        debugPrint('🟢 Saved to Firestore: ${locale.languageCode}');
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error saving language to Firestore: $e');
+    }
 
     LanguageHelperService.clearCache();
 

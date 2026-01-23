@@ -4,6 +4,11 @@
 const { getOtpTemplate } = require('./otp');
 const { getWelcomeTemplate } = require('./welcome');
 const { getPasswordResetTemplate } = require('./passwordReset');
+const { getSubscriptionStartedTemplate } = require('./subscriptionStarted');
+const { getTrialEndingTemplate } = require('./trialEnding');
+const { getSubscriptionExpiredTemplate } = require('./subscriptionExpired');
+const { getPaymentFailedTemplate } = require('./paymentFailed');
+const { getPlanChangedTemplate } = require('./planChanged');
 
 // Supported languages
 const SUPPORTED_LANGUAGES = ['en', 'tr', 'ru', 'hi'];
@@ -28,5 +33,10 @@ module.exports = {
   getPasswordResetTemplate,
   normalizeLanguage,
   SUPPORTED_LANGUAGES,
-  DEFAULT_LANGUAGE
+  DEFAULT_LANGUAGE,
+  getSubscriptionStartedTemplate,
+  getTrialEndingTemplate,
+  getSubscriptionExpiredTemplate,
+  getPaymentFailedTemplate,
+  getPlanChangedTemplate
 };
