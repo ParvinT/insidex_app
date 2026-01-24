@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +7,7 @@ import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
@@ -20,6 +22,7 @@ import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../../services/audio/audio_handler.dart';
+import '../../services/cache_manager_service.dart';
 import '../downloads/widgets/download_button.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
 import '../../core/themes/app_theme_extension.dart';
@@ -813,108 +816,134 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         backgroundColor: colors.background,
         body: Stack(
           children: [
-            Container(
-              color: colors.background,
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    PlayerHeader(
-                      onBack: () => Navigator.pop(context),
-                      onInfo: () {
-                        SessionInfoModal.show(
-                          context: context,
-                          session: _session,
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final Widget inner = Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              PlayerAlbumArt(
-                                imageUrl: _backgroundImageUrl,
-                                localImagePath: _session['_localImagePath'],
-                                equalizerController: _eqController,
-                                isPlaying: _isPlaying,
-                              ),
-                              SizedBox(height: 40.h),
-                              PlayerSessionInfo(
-                                title: _session['_displayTitle'] ??
-                                    _session['_localizedTitle'] ??
-                                    _session['title'] ??
-                                    AppLocalizations.of(
-                                      context,
-                                    ).untitledSession,
-                                subtitle: AppLocalizations.of(
-                                  context,
-                                ).subliminalSession,
-                              ),
-                              SizedBox(height: 30.h),
-                              IntroductionButton(onTap: _showIntroductionModal),
-                              SizedBox(height: 30.h),
-                              PlayerProgressBar(
-                                position: _currentPosition,
-                                duration: _totalDuration,
-                                onSeek: (duration) =>
-                                    _audioService.seek(duration),
-                              ),
-                              SizedBox(height: 30.h),
-                              PlayerPlayControls(
-                                isPlaying: _isPlaying,
-                                onPlayPause: _togglePlayPause,
-                                onReplay10: _replay10,
-                                onForward10: _forward10,
-                              ),
-                              SizedBox(height: 25.h),
-                              PlayerBottomActions(
-                                isLooping: _isLooping,
-                                isFavorite: _isFavorite,
-                                isInPlaylist: _isInPlaylist,
-                                isOffline: _isOfflineSession,
-                                isTimerActive: _sleepTimerMinutes != null,
-                                onLoop: _toggleLoop,
-                                onFavorite: _toggleFavorite,
-                                onPlaylist: _togglePlaylist,
-                                onTimer: _showSleepTimerModal,
-                                downloadButton: _isOfflineSession
-                                    ? null
-                                    : DownloadButton(
-                                        session: _session,
-                                        size: 24.sp,
-                                        showBackground: false,
-                                      ),
-                              ),
-                            ],
-                          );
-                          final bool isSmallPhone =
-                              constraints.maxWidth <= 400 ||
-                                  constraints.maxHeight <= 700;
-                          return SingleChildScrollView(
-                            padding: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).padding.bottom + 12,
-                            ),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: constraints.maxHeight,
-                              ),
-                              child: Align(
-                                alignment: isSmallPhone
-                                    ? Alignment.topCenter
-                                    : Alignment.center,
-                                child: inner,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+            // 1. BLUR BACKGROUND IMAGE
+            if (_backgroundImageUrl != null && _backgroundImageUrl!.isNotEmpty)
+              Positioned.fill(
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                  child: CachedNetworkImage(
+                    imageUrl: _backgroundImageUrl!,
+                    cacheManager: AppCacheManager.instance,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => Container(color: colors.background),
+                    errorWidget: (_, __, ___) =>
+                        Container(color: colors.background),
+                  ),
+                ),
+              ),
+
+            // 2. DARK OVERLAY FOR READABILITY
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(
+                  alpha: _backgroundImageUrl != null &&
+                          _backgroundImageUrl!.isNotEmpty
+                      ? 0.35
+                      : 0.0,
                 ),
               ),
             ),
+
+            // 3. MAIN CONTENT
+            SafeArea(
+              child: Column(
+                children: [
+                  PlayerHeader(
+                    onBack: () => Navigator.pop(context),
+                    onInfo: () {
+                      SessionInfoModal.show(
+                        context: context,
+                        session: _session,
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final Widget inner = Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            PlayerAlbumArt(
+                              imageUrl: _backgroundImageUrl,
+                              localImagePath: _session['_localImagePath'],
+                              equalizerController: _eqController,
+                              isPlaying: _isPlaying,
+                            ),
+                            SizedBox(height: 40.h),
+                            PlayerSessionInfo(
+                              title: _session['_displayTitle'] ??
+                                  _session['_localizedTitle'] ??
+                                  _session['title'] ??
+                                  AppLocalizations.of(
+                                    context,
+                                  ).untitledSession,
+                              subtitle: AppLocalizations.of(
+                                context,
+                              ).subliminalSession,
+                            ),
+                            SizedBox(height: 30.h),
+                            IntroductionButton(onTap: _showIntroductionModal),
+                            SizedBox(height: 30.h),
+                            PlayerProgressBar(
+                              position: _currentPosition,
+                              duration: _totalDuration,
+                              onSeek: (duration) =>
+                                  _audioService.seek(duration),
+                            ),
+                            SizedBox(height: 30.h),
+                            PlayerPlayControls(
+                              isPlaying: _isPlaying,
+                              onPlayPause: _togglePlayPause,
+                              onReplay10: _replay10,
+                              onForward10: _forward10,
+                            ),
+                            SizedBox(height: 25.h),
+                            PlayerBottomActions(
+                              isLooping: _isLooping,
+                              isFavorite: _isFavorite,
+                              isInPlaylist: _isInPlaylist,
+                              isOffline: _isOfflineSession,
+                              isTimerActive: _sleepTimerMinutes != null,
+                              onLoop: _toggleLoop,
+                              onFavorite: _toggleFavorite,
+                              onPlaylist: _togglePlaylist,
+                              onTimer: _showSleepTimerModal,
+                              downloadButton: _isOfflineSession
+                                  ? null
+                                  : DownloadButton(
+                                      session: _session,
+                                      size: 24.sp,
+                                      showBackground: false,
+                                    ),
+                            ),
+                          ],
+                        );
+                        final bool isSmallPhone = constraints.maxWidth <= 400 ||
+                            constraints.maxHeight <= 700;
+                        return SingleChildScrollView(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).padding.bottom + 12,
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Align(
+                              alignment: isSmallPhone
+                                  ? Alignment.topCenter
+                                  : Alignment.center,
+                              child: inner,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 4. DECRYPTING OVERLAY
             if (_isDecrypting)
               Container(
                 color: colors.textPrimary.withValues(alpha: 0.85),

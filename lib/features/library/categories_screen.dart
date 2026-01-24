@@ -12,6 +12,7 @@ import 'sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
@@ -37,6 +38,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   // Categories list
   List<CategoryModel> _categories = [];
   bool _isLoadingCategories = true;
+  Map<String, String> _categoryImages = {};
 
   // PAGINATION STATE
   List<Map<String, dynamic>> _allSessions = [];
@@ -53,19 +55,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     _loadCategories();
     _prefetchImages();
     _loadInitialSessions();
-    _loadUserGender();
-  }
-
-  Future<void> _loadUserGender() async {
-    final gender = await SessionFilterService.getUserGender();
-    if (mounted && gender != null) {
-      setState(() {
-        _selectedGenderFilter = gender;
-      });
-      _loadInitialSessions();
-    } else {
-      _loadInitialSessions();
-    }
   }
 
   @override
@@ -110,8 +99,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         return nameA.compareTo(nameB);
       });
 
+      final Map<String, String> images = {};
+      for (final category in categories) {
+        if (category.backgroundImages.isNotEmpty) {
+          images[category.id] =
+              _categoryService.getRandomBackgroundImage(category) ?? '';
+        }
+      }
+
       setState(() {
         _categories = categories;
+        _categoryImages = images;
         _isLoadingCategories = false;
       });
 
@@ -430,7 +428,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           child: GridView.builder(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount:
+                  context.isDesktop ? 4 : (context.isTablet ? 3 : 2),
               crossAxisSpacing: 16.w,
               mainAxisSpacing: 16.h,
               childAspectRatio: 1.0,
@@ -479,7 +478,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                     cardColor.withValues(alpha: 0.4),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(20.r),
+                borderRadius: BorderRadius.circular(24.r),
               ),
               child: Stack(
                 children: [
@@ -488,9 +487,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24.r),
                         child: CachedNetworkImage(
-                          imageUrl: _categoryService
-                                  .getRandomBackgroundImage(category) ??
-                              '',
+                          imageUrl: _categoryImages[category.id] ?? '',
                           cacheManager: AppCacheManager.instance,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
@@ -819,7 +816,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isSelected ? colors.textPrimary : colors.greyLight,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(24.r),
           border: Border.all(
             color: isSelected ? colors.textPrimary : colors.border,
           ),

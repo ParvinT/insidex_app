@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:marquee/marquee.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/themes/app_theme_extension.dart';
+import '../../../core/constants/app_colors.dart';
 
 /// Header with back button, title, and info button
 class PlayerHeader extends StatelessWidget {
@@ -45,17 +46,10 @@ class PlayerHeader extends StatelessWidget {
             ),
           ),
           IconButton(
-            icon: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: colors.greyLight,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.info_outline,
-                color: colors.textPrimary,
-                size: 22.sp,
-              ),
+            icon: Icon(
+              Icons.info_outline,
+              color: colors.textPrimary,
+              size: 26.sp,
             ),
             onPressed: onInfo,
           ),
@@ -163,7 +157,6 @@ class IntroductionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 60.w),
       child: Material(
@@ -174,10 +167,10 @@ class IntroductionButton extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 24.w),
             decoration: BoxDecoration(
-              color: colors.greyLight,
+              color: AppColors.darkBackgroundElevated.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(25.r),
               border: Border.all(
-                color: colors.border,
+                color: AppColors.darkTextPrimary.withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
@@ -186,7 +179,7 @@ class IntroductionButton extends StatelessWidget {
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: colors.textPrimary,
+                  color: AppColors.darkTextPrimary,
                   size: 18.sp,
                 ),
                 SizedBox(width: 8.w),
@@ -195,7 +188,7 @@ class IntroductionButton extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: colors.textPrimary,
+                    color: AppColors.darkTextPrimary,
                   ),
                 ),
               ],
@@ -243,7 +236,7 @@ class PlayerProgressBar extends StatelessWidget {
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
               activeTrackColor: colors.textPrimary,
-              inactiveTrackColor: colors.greyLight,
+              inactiveTrackColor: colors.textPrimary.withValues(alpha: 0.3),
               thumbColor: colors.textPrimary,
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
               trackHeight: 3.h,
@@ -305,20 +298,31 @@ class PlayerPlayControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          icon: Icon(
-            Icons.replay_10,
-            color:
-                context.isDarkMode ? colors.textSecondary : colors.textPrimary,
+        // Skip backward
+        Container(
+          width: 48.w,
+          height: 48.w,
+          decoration: BoxDecoration(
+            color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
           ),
-          iconSize: 32.sp,
-          onPressed: onReplay10,
+          child: IconButton(
+            icon: const Icon(
+              Icons.replay_10,
+              color: AppColors.darkTextPrimary,
+            ),
+            iconSize: 26.sp,
+            padding: EdgeInsets.zero,
+            onPressed: onReplay10,
+          ),
         ),
+
         SizedBox(width: 20.w),
+
+        // Play/Pause
         GestureDetector(
           onTap: onPlayPause,
           child: Container(
@@ -326,15 +330,10 @@ class PlayerPlayControls extends StatelessWidget {
             height: 70.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: context.isDarkMode
-                  ? colors.textSecondary
-                  : colors.textPrimary,
+              color: AppColors.darkTextPrimary.withValues(alpha: 0.5),
               boxShadow: [
                 BoxShadow(
-                  color: (context.isDarkMode
-                          ? colors.textSecondary
-                          : colors.textPrimary)
-                      .withValues(alpha: 0.12),
+                  color: AppColors.darkBackgroundPure.withValues(alpha: 0.3),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -342,20 +341,31 @@ class PlayerPlayControls extends StatelessWidget {
             ),
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
-              color: colors.textOnPrimary,
+              color: AppColors.darkTextOnLight,
               size: 35.sp,
             ),
           ),
         ),
+
         SizedBox(width: 20.w),
-        IconButton(
-          icon: Icon(
-            Icons.forward_10,
-            color:
-                context.isDarkMode ? colors.textSecondary : colors.textPrimary,
+
+        // Skip forward
+        Container(
+          width: 48.w,
+          height: 48.w,
+          decoration: BoxDecoration(
+            color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
           ),
-          iconSize: 32.sp,
-          onPressed: onForward10,
+          child: IconButton(
+            icon: const Icon(
+              Icons.forward_10,
+              color: AppColors.darkTextPrimary,
+            ),
+            iconSize: 26.sp,
+            padding: EdgeInsets.zero,
+            onPressed: onForward10,
+          ),
         ),
       ],
     );
@@ -392,15 +402,24 @@ class PlayerBottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50.w),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 30.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: colors.background.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(30.r),
+        border: Border.all(
+          color: colors.textPrimary.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           IconButton(
             icon: Icon(
               Icons.loop,
-              color: isLooping ? colors.textPrimary : colors.textLight,
+              color: isLooping ? colors.textPrimary : colors.textSecondary,
             ),
             onPressed: onLoop,
           ),
@@ -409,7 +428,7 @@ class PlayerBottomActions extends StatelessWidget {
             IconButton(
               icon: Icon(
                 isInPlaylist ? Icons.playlist_add_check : Icons.playlist_add,
-                color: isInPlaylist ? colors.textPrimary : colors.textLight,
+                color: isInPlaylist ? colors.textPrimary : colors.textSecondary,
               ),
               onPressed: onPlaylist,
             ),
@@ -419,7 +438,7 @@ class PlayerBottomActions extends StatelessWidget {
             IconButton(
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : colors.textLight,
+                color: isFavorite ? Colors.red : colors.textSecondary,
               ),
               onPressed: onFavorite,
             ),
@@ -428,7 +447,7 @@ class PlayerBottomActions extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.access_time,
-              color: isTimerActive ? colors.textPrimary : colors.textLight,
+              color: isTimerActive ? colors.textPrimary : colors.textSecondary,
             ),
             onPressed: onTimer,
           ),
