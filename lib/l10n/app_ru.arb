@@ -925,11 +925,16 @@
   "tierYearlyStandard": "Годовой Standard",
   "periodMonth": "/мес",
   "periodYear": "/год",
+  "periodMonthly": "Ежемесячный",
+  "periodYearly": "Годовой",
   "monthlyEquivalentFormat": "{price}/мес",
   "@monthlyEquivalentFormat": {
     "placeholders": {
       "price": {"type": "String"}
     }
-  }
+  },
+  "offlinePlaybackTitle": "Требуется Standard",
+  "offlinePlaybackSubtitle": "Офлайн прослушивание включено в план Standard",
+  "offlineNoInternetUpgrade": "Подключитесь к интернету, чтобы обновить план"
   
 }

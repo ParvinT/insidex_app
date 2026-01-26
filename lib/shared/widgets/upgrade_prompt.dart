@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../core/constants/subscription_constants.dart';
 import '../../l10n/app_localizations.dart';
 import '../../features/subscription/paywall_screen.dart';
 import '../../providers/subscription_provider.dart';
@@ -284,7 +285,7 @@ Future<bool?> showUpgradeBottomSheet(
 
   // If user wants to view plans, show paywall and return result
   if (wantsToViewPlans == true && context.mounted) {
-    return showPaywall(context, feature: feature);
+    return showPaywall(context, feature: feature, showCurrentPlan: true);
   }
 
   return false;
@@ -512,9 +513,156 @@ Future<void> showManageSubscriptionSheet(BuildContext context) async {
   }
 }
 
+/// Shows offline-only info sheet when user can't upgrade (no internet)
+/// Just informational - no upgrade button, only OK to dismiss
+Future<void> showOfflineUpgradeInfo(
+  BuildContext context, {
+  String? title,
+  String? subtitle,
+}) async {
+  await showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    builder: (ctx) {
+      final colors = ctx.colors;
+      final l10n = AppLocalizations.of(ctx);
+
+      return Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundElevated,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Handle
+              Container(
+                width: 40.w,
+                height: 4.h,
+                decoration: BoxDecoration(
+                  color: colors.greyMedium,
+                  borderRadius: BorderRadius.circular(2.r),
+                ),
+              ),
+              SizedBox(height: 20.h),
+
+              // Lock icon (instead of premium icon)
+              Container(
+                width: max(70, 70.w),
+                height: max(70, 70.w),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.lock_outline_rounded,
+                  size: 35.sp,
+                  color: Colors.orange.shade700,
+                ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              // Title
+              Text(
+                title ?? l10n.offlinePlaybackTitle,
+                style: GoogleFonts.inter(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              // Subtitle
+              Text(
+                subtitle ?? l10n.offlinePlaybackSubtitle,
+                style: GoogleFonts.inter(
+                  fontSize: 14.sp,
+                  color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              SizedBox(height: 16.h),
+
+              // No internet warning
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                decoration: BoxDecoration(
+                  color: colors.textSecondary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.wifi_off_rounded,
+                      size: 18.sp,
+                      color: colors.textSecondary,
+                    ),
+                    SizedBox(width: 8.w),
+                    Flexible(
+                      child: Text(
+                        l10n.offlineNoInternetUpgrade,
+                        style: GoogleFonts.inter(
+                          fontSize: 13.sp,
+                          color: colors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24.h),
+
+              // OK button only
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colors.textPrimary,
+                    foregroundColor: colors.textOnPrimary,
+                    padding: EdgeInsets.symmetric(vertical: max(14, 14.h)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    l10n.ok,
+                    style: GoogleFonts.inter(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textOnPrimary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 String _getStatusText(BuildContext context, SubscriptionProvider provider) {
   final l10n = AppLocalizations.of(context);
-  final period = provider.subscription.period?.displayName ?? 'Monthly';
+
+  // Get localized period
+  String period = '';
+  if (provider.subscription.period == SubscriptionPeriod.monthly) {
+    period = l10n.periodMonthly;
+  } else if (provider.subscription.period == SubscriptionPeriod.yearly) {
+    period = l10n.periodYearly;
+  }
+
   if (provider.isInTrial) {
     return l10n.manageSheetStatusTrial(period);
   }

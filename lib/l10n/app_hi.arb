@@ -869,10 +869,15 @@
   "tierYearlyStandard": "वार्षिक Standard",
   "periodMonth": "/माह",
   "periodYear": "/वर्ष",
+  "periodMonthly": "मासिक",
+  "periodYearly": "वार्षिक",
   "monthlyEquivalentFormat": "{price}/माह",
   "@monthlyEquivalentFormat": {
     "placeholders": {
       "price": {"type": "String"}
     }
-  }
+  },
+  "offlinePlaybackTitle": "Standard आवश्यक",
+  "offlinePlaybackSubtitle": "ऑफ़लाइन सुनना Standard प्लान में शामिल है",
+  "offlineNoInternetUpgrade": "अपना प्लान अपग्रेड करने के लिए इंटरनेट से कनेक्ट करें"
 }

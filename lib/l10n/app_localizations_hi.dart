@@ -2558,7 +2558,24 @@ class AppLocalizationsHi extends AppLocalizations {
   String get periodYear => '/वर्ष';
 
   @override
+  String get periodMonthly => 'मासिक';
+
+  @override
+  String get periodYearly => 'वार्षिक';
+
+  @override
   String monthlyEquivalentFormat(String price) {
     return '$price/माह';
   }
+
+  @override
+  String get offlinePlaybackTitle => 'Standard आवश्यक';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'ऑफ़लाइन सुनना Standard प्लान में शामिल है';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'अपना प्लान अपग्रेड करने के लिए इंटरनेट से कनेक्ट करें';
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -816,28 +817,18 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         backgroundColor: colors.background,
         body: Stack(
           children: [
-            // 1. BLUR BACKGROUND IMAGE
-            if (_backgroundImageUrl != null && _backgroundImageUrl!.isNotEmpty)
-              Positioned.fill(
-                child: ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
-                  child: CachedNetworkImage(
-                    imageUrl: _backgroundImageUrl!,
-                    cacheManager: AppCacheManager.instance,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(color: colors.background),
-                    errorWidget: (_, __, ___) =>
-                        Container(color: colors.background),
-                  ),
-                ),
-              ),
+            // 1. BLUR BACKGROUND IMAGE (Network or Local)
+            _buildBlurBackground(colors),
 
             // 2. DARK OVERLAY FOR READABILITY
             Positioned.fill(
               child: Container(
                 color: Colors.black.withValues(
-                  alpha: _backgroundImageUrl != null &&
-                          _backgroundImageUrl!.isNotEmpty
+                  alpha: (_backgroundImageUrl != null &&
+                              _backgroundImageUrl!.isNotEmpty) ||
+                          (_session['_localImagePath'] != null &&
+                              (_session['_localImagePath'] as String)
+                                  .isNotEmpty)
                       ? 0.35
                       : 0.0,
                 ),
@@ -974,6 +965,66 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBlurBackground(AppThemeExtension colors) {
+    final localImagePath = _session['_localImagePath'] as String?;
+    final hasLocalImage = localImagePath != null && localImagePath.isNotEmpty;
+    final hasNetworkImage =
+        _backgroundImageUrl != null && _backgroundImageUrl!.isNotEmpty;
+
+    // No image available
+    if (!hasLocalImage && !hasNetworkImage) {
+      return const SizedBox.shrink();
+    }
+
+    Widget imageWidget;
+
+    if (hasLocalImage) {
+      // Offline - use local file
+      final file = File(localImagePath);
+      imageWidget = FutureBuilder<bool>(
+        future: file.exists(),
+        builder: (context, snapshot) {
+          if (snapshot.data == true) {
+            return Image.file(
+              file,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) => Container(color: colors.background),
+            );
+          }
+          // Fallback to network if local doesn't exist
+          if (hasNetworkImage) {
+            return CachedNetworkImage(
+              imageUrl: _backgroundImageUrl!,
+              cacheManager: AppCacheManager.instance,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(color: colors.background),
+              errorWidget: (_, __, ___) => Container(color: colors.background),
+            );
+          }
+          return Container(color: colors.background);
+        },
+      );
+    } else {
+      // Online - use network image
+      imageWidget = CachedNetworkImage(
+        imageUrl: _backgroundImageUrl!,
+        cacheManager: AppCacheManager.instance,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => Container(color: colors.background),
+        errorWidget: (_, __, ___) => Container(color: colors.background),
+      );
+    }
+
+    return Positioned.fill(
+      child: ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: imageWidget,
       ),
     );
   }

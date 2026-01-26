@@ -914,11 +914,16 @@
   "tierYearlyStandard": "Yıllık Standard",
   "periodMonth": "/ay",
   "periodYear": "/yıl",
+  "periodMonthly": "Aylık",
+  "periodYearly": "Yıllık",
   "monthlyEquivalentFormat": "{price}/ay",
   "@monthlyEquivalentFormat": {
     "placeholders": {
       "price": {"type": "String"}
     }
-  }
+  },
+  "offlinePlaybackTitle": "Standard Gerekli",
+  "offlinePlaybackSubtitle": "Çevrimdışı dinleme Standard pakete dahildir",
+  "offlineNoInternetUpgrade": "Planınızı yükseltmek için internete bağlanın"
   
 }

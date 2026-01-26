@@ -2572,7 +2572,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get periodYear => '/год';
 
   @override
+  String get periodMonthly => 'Ежемесячный';
+
+  @override
+  String get periodYearly => 'Годовой';
+
+  @override
   String monthlyEquivalentFormat(String price) {
     return '$price/мес';
   }
+
+  @override
+  String get offlinePlaybackTitle => 'Требуется Standard';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'Офлайн прослушивание включено в план Standard';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'Подключитесь к интернету, чтобы обновить план';
 }

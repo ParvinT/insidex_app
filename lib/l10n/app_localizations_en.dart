@@ -2557,7 +2557,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get periodYear => '/year';
 
   @override
+  String get periodMonthly => 'Monthly';
+
+  @override
+  String get periodYearly => 'Yearly';
+
+  @override
   String monthlyEquivalentFormat(String price) {
     return '$price/month';
   }
+
+  @override
+  String get offlinePlaybackTitle => 'Standard Required';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'Offline listening is included in the Standard plan';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'Connect to internet to upgrade your plan';
 }

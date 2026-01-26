@@ -1044,12 +1044,17 @@
   "tierYearlyStandard": "Yearly Standard",
   "periodMonth": "/month",
   "periodYear": "/year",
+  "periodMonthly": "Monthly",
+  "periodYearly": "Yearly",
   "monthlyEquivalentFormat": "{price}/month",
   "@monthlyEquivalentFormat": {
     "placeholders": {
       "price": {"type": "String"}
     }
-  }
+  },
+  "offlinePlaybackTitle": "Standard Required",
+  "offlinePlaybackSubtitle": "Offline listening is included in the Standard plan",
+  "offlineNoInternetUpgrade": "Connect to internet to upgrade your plan"
 
 
 

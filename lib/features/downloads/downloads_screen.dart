@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
@@ -11,7 +12,9 @@ import '../../core/responsive/context_ext.dart';
 import '../../models/downloaded_session.dart';
 import '../../providers/download_provider.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/upgrade_prompt.dart';
 import '../player/audio_player_screen.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../../services/language_helper_service.dart';
@@ -417,13 +420,19 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     double size,
     double borderRadius,
   ) {
+    // Check if user can play offline (Standard tier)
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final isLocked = !subscriptionProvider.canDownload;
+
     // Check if local image exists
     final hasLocalImage = download.imagePath.isNotEmpty;
+
+    Widget imageWidget;
 
     if (hasLocalImage) {
       final imageFile = File(download.imagePath);
 
-      return FutureBuilder<bool>(
+      imageWidget = FutureBuilder<bool>(
         future: imageFile.exists(),
         builder: (context, snapshot) {
           if (snapshot.data == true) {
@@ -442,9 +451,42 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           return _buildPlaceholder(size, borderRadius);
         },
       );
+    } else {
+      imageWidget = _buildPlaceholder(size, borderRadius);
     }
 
-    return _buildPlaceholder(size, borderRadius);
+    // If locked, add overlay with lock icon
+    if (isLocked) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Stack(
+          children: [
+            // Image
+            imageWidget,
+
+            // Dark overlay + lock icon
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(borderRadius - 4),
+                ),
+                child: Center(
+                  child: Icon(
+                    Icons.lock_rounded,
+                    color: Colors.white,
+                    size: size * 0.35,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return imageWidget;
   }
 
   Widget _buildPlaceholder(double size, double borderRadius) {
@@ -480,11 +522,44 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Future<void> _playDownload(DownloadedSession download) async {
-    // ✅ FIX: Stop current audio and dismiss mini player BEFORE navigating
+    // ✅ CHECK SUBSCRIPTION - Can user play offline content?
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+
+    if (!subscriptionProvider.canDownload) {
+      // User is Lite or Free - check internet status
+      final connectivityResult = await Connectivity().checkConnectivity();
+      final hasInternet = connectivityResult.any(
+        (result) => result != ConnectivityResult.none,
+      );
+
+      if (hasInternet) {
+        // Online - show upgrade prompt with upgrade option
+        final l10n = AppLocalizations.of(context);
+        final purchased = await showUpgradeBottomSheet(
+          context,
+          feature: 'offline_playback',
+          title: l10n.offlinePlaybackTitle,
+          subtitle: l10n.offlinePlaybackSubtitle,
+        );
+
+        // If not purchased, don't play
+        if (purchased != true) return;
+
+        // Re-check after potential purchase
+        if (!subscriptionProvider.canDownload) return;
+      } else {
+        // Offline - show info-only modal (no upgrade button)
+        await showOfflineUpgradeInfo(context);
+        return;
+      }
+    }
+
+    // ✅ User has Standard - proceed with playback
+    // Stop current audio and dismiss mini player BEFORE navigating
     final audioService = AudioPlayerService();
     await audioService.stop();
 
-    // ✅ FIX: Dismiss mini player to prevent state conflicts
+    // Dismiss mini player to prevent state conflicts
     if (mounted) {
       final miniPlayer = context.read<MiniPlayerProvider>();
       miniPlayer.dismiss();

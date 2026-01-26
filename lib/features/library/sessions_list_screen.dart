@@ -53,26 +53,10 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserGender();
     if (widget.isShowingAllSessions) {
       _loadInitialAllSessions();
     } else {
       _loadInitialCategorySessions();
-    }
-  }
-
-  Future<void> _loadUserGender() async {
-    final gender = await SessionFilterService.getUserGender();
-    if (mounted && gender != null) {
-      setState(() {
-        _selectedGenderFilter = gender;
-      });
-      // Reload with gender filter
-      if (widget.isShowingAllSessions) {
-        _loadInitialAllSessions();
-      } else {
-        _loadInitialCategorySessions();
-      }
     }
   }
 
@@ -658,11 +642,11 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip('all',
-                      '🌐 ${AppLocalizations.of(context).all}', colors),
+                  _buildFilterChip(
+                      'all', '🌐 ${AppLocalizations.of(context).all}', colors),
                   SizedBox(width: 8.w),
-                  _buildFilterChip('male',
-                      '♂ ${AppLocalizations.of(context).male}', colors),
+                  _buildFilterChip(
+                      'male', '♂ ${AppLocalizations.of(context).male}', colors),
                   SizedBox(width: 8.w),
                   _buildFilterChip('female',
                       '♀ ${AppLocalizations.of(context).female}', colors),

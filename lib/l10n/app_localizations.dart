@@ -4902,11 +4902,41 @@ abstract class AppLocalizations {
   /// **'/year'**
   String get periodYear;
 
+  /// No description provided for @periodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get periodMonthly;
+
+  /// No description provided for @periodYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get periodYearly;
+
   /// No description provided for @monthlyEquivalentFormat.
   ///
   /// In en, this message translates to:
   /// **'{price}/month'**
   String monthlyEquivalentFormat(String price);
+
+  /// No description provided for @offlinePlaybackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Required'**
+  String get offlinePlaybackTitle;
+
+  /// No description provided for @offlinePlaybackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline listening is included in the Standard plan'**
+  String get offlinePlaybackSubtitle;
+
+  /// No description provided for @offlineNoInternetUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to internet to upgrade your plan'**
+  String get offlineNoInternetUpgrade;
 }
 
 class _AppLocalizationsDelegate
