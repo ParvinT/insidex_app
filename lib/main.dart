@@ -50,11 +50,10 @@ void main() async {
       androidProvider:
           kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
       appleProvider:
-          kReleaseMode ? AppleProvider.deviceCheck : AppleProvider.debug,
+          kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
     );
     debugPrint('✅ Firebase App Check initialized');
   }
-  debugPrint('✅ Firebase App Check initialized');
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   PlatformDispatcher.instance.onError = (error, stack) {
