@@ -238,6 +238,7 @@ class FirebaseService {
       return {
         'success': true,
         'user': user,
+        'password': password,
         'message': 'Account created successfully!',
       };
     } on FirebaseAuthException catch (e) {

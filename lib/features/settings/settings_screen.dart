@@ -3,9 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/constants/app_info.dart';
@@ -384,14 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           debugPrint('⚠️ [Settings] Mini player dismiss error: $e');
         }
 
-        await AuthPersistenceService.clearSession();
-
-        await FirebaseAuth.instance.signOut();
-
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove('has_logged_in');
-        await prefs.remove('cached_user_id');
-        await prefs.remove('cached_user_email');
+        await AuthPersistenceService.fullLogout();
 
         if (mounted) {
           Navigator.pushNamedAndRemoveUntil(

@@ -39,10 +39,15 @@ class CustomTextField extends StatelessWidget {
       onChanged: onChanged,
       readOnly: readOnly,
       maxLines: maxLines,
-      style: GoogleFonts.inter(
-        fontSize: 16.sp,
-        color: colors.textPrimary,
-      ),
+      style: obscureText
+          ? GoogleFonts.robotoMono(
+              fontSize: 16.sp,
+              color: colors.textPrimary,
+            )
+          : GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: colors.textPrimary,
+            ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.inter(

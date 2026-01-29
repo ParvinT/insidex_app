@@ -89,6 +89,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _showDatePicker() {
     final colors = context.colors;
+    final isDarkMode = context.isDarkMode;
     showModalBottomSheet(
       context: context,
       backgroundColor: colors.background,
@@ -116,14 +117,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
             Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _selectedBirthDate ?? DateTime(2000, 1, 1),
-                maximumDate: DateTime.now(),
-                minimumDate: DateTime(1920),
-                onDateTimeChanged: (date) {
-                  setState(() => _selectedBirthDate = date);
-                },
+              child: CupertinoTheme(
+                data: CupertinoThemeData(
+                  brightness: isDarkMode ? Brightness.dark : Brightness.light,
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 20.sp,
+                    ),
+                  ),
+                ),
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: _selectedBirthDate ?? DateTime(2000, 1, 1),
+                  maximumDate: DateTime.now(),
+                  minimumDate: DateTime(1920),
+                  onDateTimeChanged: (date) {
+                    setState(() => _selectedBirthDate = date);
+                  },
+                ),
               ),
             ),
           ],

@@ -67,6 +67,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   bool _isLoading = false;
   bool _isInitialized = false;
+  bool _isTrialEligible = true;
   String? _error;
 
   StreamSubscription<User?>? _authSubscription;
@@ -128,6 +129,10 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Whether user can start a free trial
   bool get canStartTrial => _subscription.canStartTrial;
+
+  /// Whether user is eligible for free trial (checked from RevenueCat)
+  /// This is the SOURCE OF TRUTH for trial eligibility in UI
+  bool get isTrialEligible => _isTrialEligible;
 
   /// Whether user can play audio sessions (non-demo)
   bool get canPlayAudio => _subscription.canPlayAudio;
@@ -211,7 +216,12 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
       await _loadPackages();
       debugPrint('✅ [SubscriptionProvider] Packages loaded');
 
-      // Step 5: Start fallback refresh (for edge cases)
+      // Step 5: Check trial eligibility from RevenueCat
+      await _checkTrialEligibility();
+      debugPrint(
+          '✅ [SubscriptionProvider] Trial eligibility checked: $_isTrialEligible');
+
+      // Step 6: Start fallback refresh (for edge cases)
       _startFallbackTimer();
 
       _isInitialized = true;
@@ -276,6 +286,7 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     _subscription = SubscriptionModel.free();
     _availablePackages = [];
     _isInitialized = false;
+    _isTrialEligible = true;
     _currentUserId = null;
     _initCompleter = null;
     _error = null;
@@ -903,6 +914,28 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
       debugPrint('❌ [SubscriptionProvider] Revoke error: $e');
       return false;
     }
+  }
+
+  // ============================================================
+  // TRIAL ELIGIBILITY
+  // ============================================================
+
+  /// Check trial eligibility from RevenueCat SDK
+  Future<void> _checkTrialEligibility() async {
+    try {
+      _isTrialEligible = await _subscriptionService.checkTrialEligibility();
+      debugPrint('📋 [SubscriptionProvider] Trial eligible: $_isTrialEligible');
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Trial eligibility error: $e');
+      // Default to checking subscription history
+      _isTrialEligible = !_subscription.trialUsed;
+    }
+  }
+
+  /// Refresh trial eligibility (call after purchase or restore)
+  Future<void> refreshTrialEligibility() async {
+    await _checkTrialEligibility();
+    notifyListeners();
   }
 
   // ============================================================

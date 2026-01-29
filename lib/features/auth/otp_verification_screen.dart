@@ -13,6 +13,7 @@ import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../services/analytics_service.dart';
+import '../../services/auth_persistence_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/device_session_service.dart';
 
@@ -130,6 +131,8 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
 
       // Success! Load user data
       final user = result['user'] as User;
+      final password = result['password'] as String;
+      await AuthPersistenceService.saveAuthSession(user, password: password);
       await userProvider.loadUserData(user.uid);
 
       debugPrint('💾 Saving active device for new user...');

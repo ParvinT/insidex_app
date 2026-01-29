@@ -17,6 +17,7 @@ class PackageCard extends StatelessWidget {
   final SubscriptionPackage package;
   final bool isSelected;
   final bool isCurrentPlan;
+  final bool isTrialEligible;
   final VoidCallback onTap;
 
   const PackageCard({
@@ -24,6 +25,7 @@ class PackageCard extends StatelessWidget {
     required this.package,
     required this.isSelected,
     this.isCurrentPlan = false,
+    this.isTrialEligible = true,
     required this.onTap,
   });
 
@@ -77,7 +79,7 @@ class PackageCard extends StatelessWidget {
             _buildFeatures(context, isTablet),
 
             // Trial banner (if applicable and not current plan)
-            if (package.hasTrial && !isCurrentPlan) ...[
+            if (package.hasTrial && !isCurrentPlan && isTrialEligible) ...[
               SizedBox(height: 12.h),
               _buildTrialBanner(context, isTablet),
             ],

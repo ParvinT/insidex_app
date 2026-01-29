@@ -180,6 +180,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
                                     isCurrentPlan: widget.showCurrentPlan &&
                                         _isCurrentPlan(
                                             package, subscriptionProvider),
+                                    isTrialEligible:
+                                        subscriptionProvider.isTrialEligible,
                                     onTap: () {
                                       setState(() {
                                         _selectedProductId = package.productId;
@@ -382,7 +384,8 @@ class _PaywallScreenState extends State<PaywallScreen> {
       } else {
         buttonText = l10n.paywallSwitchTo(selectedPackage.tier.displayName);
       }
-    } else if (selectedPackage.hasTrial) {
+    } else if (selectedPackage.hasTrial && provider.isTrialEligible) {
+      // Show trial text ONLY if package has trial AND user is eligible
       buttonText = l10n.paywallStartFreeTrial(selectedPackage.trialDays);
     } else {
       buttonText = l10n.paywallSubscribeNow;
@@ -515,12 +518,20 @@ class _PaywallScreenState extends State<PaywallScreen> {
         // Determine if this was an upgrade/switch
         final wasSwitch = widget.showCurrentPlan && provider.isActive;
 
+        // Check if trial was actually started
+        // Trial starts ONLY if: package has trial + user was eligible + not a switch
+        final trialStarted =
+            package.hasTrial && provider.isTrialEligible && !wasSwitch;
+
         // Show success dialog
         await showPurchaseSuccessDialog(
           context,
           planName: package.displayTitle,
-          isTrialStarted: package.hasTrial && !wasSwitch,
+          isTrialStarted: trialStarted,
         );
+
+        // Refresh trial eligibility after purchase
+        await provider.refreshTrialEligibility();
 
         // Then close paywall
         if (mounted) {

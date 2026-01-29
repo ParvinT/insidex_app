@@ -391,6 +391,7 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
 
   void _showDatePicker() {
     final colors = context.colors;
+    final isDarkMode = context.isDarkMode;
     showModalBottomSheet(
       context: context,
       backgroundColor: colors.backgroundElevated,
@@ -423,14 +424,25 @@ class _BirthDateScreenState extends State<BirthDateScreen> {
               ),
             ),
             Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                maximumDate: DateTime.now(),
-                initialDateTime: _selectedDate ?? DateTime(2000, 1, 1),
-                onDateTimeChanged: (date) => setState(() {
-                  _selectedDate = date;
-                  _errorMessage = null;
-                }),
+              child: CupertinoTheme(
+                data: CupertinoThemeData(
+                  brightness: isDarkMode ? Brightness.dark : Brightness.light,
+                  textTheme: CupertinoTextThemeData(
+                    dateTimePickerTextStyle: TextStyle(
+                      color: colors.textPrimary,
+                      fontSize: 20.sp,
+                    ),
+                  ),
+                ),
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  maximumDate: DateTime.now(),
+                  initialDateTime: _selectedDate ?? DateTime(2000, 1, 1),
+                  onDateTimeChanged: (date) => setState(() {
+                    _selectedDate = date;
+                    _errorMessage = null;
+                  }),
+                ),
               ),
             ),
           ],

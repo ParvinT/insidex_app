@@ -195,8 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } catch (e) {
         debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
       }
-      await AuthPersistenceService.clearSession();
-      await FirebaseAuth.instance.signOut();
+      await AuthPersistenceService.fullLogout();
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(
           context,

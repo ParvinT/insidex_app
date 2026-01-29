@@ -530,6 +530,94 @@ class SubscriptionService {
   // HELPERS
   // ============================================================
 
+  // ============================================================
+  // TRIAL ELIGIBILITY CHECK
+  // ============================================================
+
+  /// Check if user is eligible for free trial
+  /// Returns true if user has never used a trial before
+  ///
+  /// RevenueCat automatically tracks trial usage per subscription group.
+  /// iOS: StoreKit handles eligibility automatically
+  /// Android: RevenueCat SDK checks against Google Play records
+  Future<bool> checkTrialEligibility() async {
+    debugPrint('🔍 [SubscriptionService] Checking trial eligibility');
+
+    if (_currentUserId == null) {
+      debugPrint('⚠️ [SubscriptionService] No user, assuming eligible');
+      return true;
+    }
+
+    try {
+      // Get all product IDs that have trials
+      final productIds = [
+        SubscriptionConstants.productLiteMonthly,
+        SubscriptionConstants.productStandardMonthly,
+        SubscriptionConstants.productStandardYearly,
+      ];
+
+      // Check eligibility with RevenueCat SDK
+      final eligibilityMap =
+          await Purchases.checkTrialOrIntroductoryPriceEligibility(productIds);
+
+      // User is eligible if ANY product shows eligible OR unknown status
+      // Unknown means we can't determine - default to eligible (benefit of the doubt)
+      for (final entry in eligibilityMap.entries) {
+        final status = entry.value.status;
+        debugPrint('📋 [SubscriptionService] ${entry.key}: ${status.name}');
+
+        if (status == IntroEligibilityStatus.introEligibilityStatusEligible) {
+          debugPrint('✅ [SubscriptionService] User IS trial eligible');
+          return true;
+        }
+
+        if (status == IntroEligibilityStatus.introEligibilityStatusUnknown) {
+          // Unknown durumunda CustomerInfo'dan kontrol et
+          debugPrint(
+              '⚠️ [SubscriptionService] Unknown status, checking CustomerInfo...');
+          return await _checkEligibilityFromCustomerInfo();
+        }
+      }
+
+      debugPrint('❌ [SubscriptionService] User is NOT trial eligible');
+      return false;
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionService] Eligibility check error: $e');
+      // On error, check from CustomerInfo as fallback
+      return await _checkEligibilityFromCustomerInfo();
+    }
+  }
+
+  /// Fallback: Check eligibility from CustomerInfo
+  Future<bool> _checkEligibilityFromCustomerInfo() async {
+    try {
+      final customerInfo = await Purchases.getCustomerInfo();
+
+      // If user has any subscription history, they've likely used trial
+      final allPurchaseDates = customerInfo.allPurchaseDates;
+
+      if (allPurchaseDates.isEmpty) {
+        debugPrint('✅ [SubscriptionService] No purchase history, eligible');
+        return true;
+      }
+
+      // Check if user currently has active entitlements
+      // If they do, they're not eligible for another trial
+      if (customerInfo.entitlements.active.isNotEmpty) {
+        debugPrint('❌ [SubscriptionService] Active subscription, not eligible');
+        return false;
+      }
+
+      // Has purchase history but no active subscription
+      // They've used trial before
+      debugPrint('❌ [SubscriptionService] Has purchase history, not eligible');
+      return false;
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionService] Fallback check error: $e');
+      return true; // Default to eligible on error
+    }
+  }
+
   /// Get tier for a product ID
   SubscriptionTier getTierForProduct(String productId) {
     if (productId.contains('lite')) {
