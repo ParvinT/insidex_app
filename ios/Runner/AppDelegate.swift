@@ -1,6 +1,8 @@
 import Flutter
 import UIKit
 import UserNotifications
+import FirebaseCore
+import FirebaseAppCheck
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -8,6 +10,13 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    
+    // ✅ App Check Debug Token (DEBUG builds only)
+    #if DEBUG
+    let providerFactory = AppCheckDebugProviderFactory()
+    AppCheck.setAppCheckProviderFactory(providerFactory)
+    UserDefaults.standard.set("2A776E74-330E-4157-B533-ECF3DD4C157D", forKey: "FIRAAppCheckDebugToken")
+    #endif
     
     // ✅ iOS Foreground Notification Delegate
     if #available(iOS 10.0, *) {
