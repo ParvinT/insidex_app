@@ -114,6 +114,22 @@ class ProfileInfoSection extends StatelessWidget {
       BuildContext context, SubscriptionProvider provider) {
     final l10n = AppLocalizations.of(context);
 
+    if (provider.hasAdminPremium && provider.adminPremiumReason != null) {
+      switch (provider.adminPremiumReason) {
+        case 'vip':
+          return '⭐ VIP';
+        case 'tester':
+          return '🧪 ${l10n.adminPremiumReasonTester}';
+        case 'employee':
+          return '🏢 ${l10n.adminPremiumReasonEmployee}';
+        case 'influencer':
+          return '📢 ${l10n.adminPremiumReasonInfluencer}';
+        default:
+          return l10n.tierStandard;
+      }
+    }
+
+    // Normal subscription
     String tierName;
     switch (provider.tier) {
       case SubscriptionTier.free:

@@ -2577,4 +2577,112 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get offlineNoInternetUpgrade =>
       'Connect to internet to upgrade your plan';
+
+  @override
+  String get adminPremiumSearchUser => 'Search User';
+
+  @override
+  String get adminPremiumSearchHint => 'Enter user email address or UID';
+
+  @override
+  String get adminPremiumSearchPlaceholder => 'email@example.com or user-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'Please enter an email or UID';
+
+  @override
+  String get adminPremiumUserNotFound => 'User not found';
+
+  @override
+  String get adminPremiumSearchError => 'Error searching';
+
+  @override
+  String get adminPremiumCurrentStatus => 'Current Status';
+
+  @override
+  String get adminPremiumAdminStatus => 'Admin Premium';
+
+  @override
+  String get adminPremiumStoreStatus => 'Store Subscription';
+
+  @override
+  String get adminPremiumInactive => 'NOT ACTIVE';
+
+  @override
+  String get adminPremiumNoSubscription => 'No subscription';
+
+  @override
+  String get adminPremiumTier => 'Tier';
+
+  @override
+  String get adminPremiumReason => 'Reason';
+
+  @override
+  String get adminPremiumGrantedBy => 'Granted by';
+
+  @override
+  String get adminPremiumManage => 'Manage Admin Premium';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'Grant full premium access independent of store subscriptions';
+
+  @override
+  String get adminPremiumSelectReason => 'Select reason';
+
+  @override
+  String get adminPremiumGrantButton => 'Grant Full Premium';
+
+  @override
+  String get adminPremiumGrantSuccess => 'Admin Premium granted successfully!';
+
+  @override
+  String get adminPremiumGrantError => 'Failed to grant premium';
+
+  @override
+  String get adminPremiumRevokeTitle => 'Revoke Admin Premium';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'Are you sure you want to revoke this user\'s admin premium? They will lose premium access unless they have a store subscription.';
+
+  @override
+  String get adminPremiumRevokeButton => 'Revoke Admin Premium';
+
+  @override
+  String get adminPremiumRevokeSuccess => 'Admin Premium revoked successfully';
+
+  @override
+  String get adminPremiumRevokeError => 'Failed to revoke premium';
+
+  @override
+  String get adminPremiumAlreadyActive => 'Admin Premium Active';
+
+  @override
+  String get adminPremiumFullAccess => 'This user has full premium access';
+
+  @override
+  String get adminPremiumUidCopied => 'UID copied to clipboard';
+
+  @override
+  String get adminPremiumEmptyTitle => 'Search for a user';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'Enter an email address or UID to find a user and manage their premium access';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'Tester';
+
+  @override
+  String get adminPremiumReasonEmployee => 'Employee';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'Influencer';
+
+  @override
+  String get adminPremiumReasonOther => 'Other';
 }

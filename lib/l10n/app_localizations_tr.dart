@@ -2587,4 +2587,113 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get offlineNoInternetUpgrade =>
       'Planınızı yükseltmek için internete bağlanın';
+
+  @override
+  String get adminPremiumSearchUser => 'Kullanıcı Ara';
+
+  @override
+  String get adminPremiumSearchHint => 'E-posta adresi veya UID girin';
+
+  @override
+  String get adminPremiumSearchPlaceholder =>
+      'email@example.com veya kullanıcı-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'Lütfen bir e-posta veya UID girin';
+
+  @override
+  String get adminPremiumUserNotFound => 'Kullanıcı bulunamadı';
+
+  @override
+  String get adminPremiumSearchError => 'Arama hatası';
+
+  @override
+  String get adminPremiumCurrentStatus => 'Mevcut Durum';
+
+  @override
+  String get adminPremiumAdminStatus => 'Admin Premium';
+
+  @override
+  String get adminPremiumStoreStatus => 'Mağaza Aboneliği';
+
+  @override
+  String get adminPremiumInactive => 'AKTİF DEĞİL';
+
+  @override
+  String get adminPremiumNoSubscription => 'Abonelik yok';
+
+  @override
+  String get adminPremiumTier => 'Paket';
+
+  @override
+  String get adminPremiumReason => 'Sebep';
+
+  @override
+  String get adminPremiumGrantedBy => 'Veren';
+
+  @override
+  String get adminPremiumManage => 'Admin Premium Yönet';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'Mağaza aboneliklerinden bağımsız tam premium erişim ver';
+
+  @override
+  String get adminPremiumSelectReason => 'Sebep seçin';
+
+  @override
+  String get adminPremiumGrantButton => 'Full Premium Ver';
+
+  @override
+  String get adminPremiumGrantSuccess => 'Admin Premium başarıyla verildi!';
+
+  @override
+  String get adminPremiumGrantError => 'Premium verilemedi';
+
+  @override
+  String get adminPremiumRevokeTitle => 'Admin Premium Kaldır';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'Bu kullanıcının admin premium erişimini kaldırmak istediğinize emin misiniz? Mağaza aboneliği yoksa premium erişimini kaybedecek.';
+
+  @override
+  String get adminPremiumRevokeButton => 'Admin Premium Kaldır';
+
+  @override
+  String get adminPremiumRevokeSuccess => 'Admin Premium başarıyla kaldırıldı';
+
+  @override
+  String get adminPremiumRevokeError => 'Premium kaldırılamadı';
+
+  @override
+  String get adminPremiumAlreadyActive => 'Admin Premium Aktif';
+
+  @override
+  String get adminPremiumFullAccess => 'Bu kullanıcı tam premium erişime sahip';
+
+  @override
+  String get adminPremiumUidCopied => 'UID panoya kopyalandı';
+
+  @override
+  String get adminPremiumEmptyTitle => 'Kullanıcı ara';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'Bir kullanıcı bulmak ve premium erişimini yönetmek için e-posta adresi veya UID girin';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'Test Kullanıcısı';
+
+  @override
+  String get adminPremiumReasonEmployee => 'Çalışan';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'Influencer';
+
+  @override
+  String get adminPremiumReasonOther => 'Diğer';
 }

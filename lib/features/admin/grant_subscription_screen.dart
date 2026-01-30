@@ -5,15 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../core/themes/app_theme_extension.dart';
-import '../../core/constants/subscription_constants.dart';
 import '../../core/responsive/breakpoints.dart';
-import '../../models/subscription_model.dart';
-import '../../providers/subscription_provider.dart';
 import '../../l10n/app_localizations.dart';
 
+/// Admin Premium Grant Screen
+/// Allows admins to grant/revoke premium access to users
+/// Independent of RevenueCat - stored in users/{uid}/adminPremium
 class GrantSubscriptionScreen extends StatefulWidget {
   const GrantSubscriptionScreen({super.key});
 
@@ -24,6 +24,7 @@ class GrantSubscriptionScreen extends StatefulWidget {
 
 class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _searchController = TextEditingController();
 
   bool _isSearching = false;
@@ -32,18 +33,26 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
   Map<String, dynamic>? _foundUser;
   String? _foundUserId;
 
+  // Selected reason for granting premium
+  AdminPremiumReason _selectedReason = AdminPremiumReason.vip;
+
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
   }
 
+  // ============================================================
+  // SEARCH USER
+  // ============================================================
+
   Future<void> _searchUser() async {
     final query = _searchController.text.trim();
+    final l10n = AppLocalizations.of(context);
 
     if (query.isEmpty) {
       setState(() {
-        _errorMessage = 'Please enter an email or UID';
+        _errorMessage = l10n.adminPremiumEnterEmailOrUid;
         _foundUser = null;
         _foundUserId = null;
       });
@@ -62,12 +71,12 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
 
       // Check if query looks like an email
       if (query.contains('@')) {
-        // Search by email - try multiple variations
+        // Search by email
         final emailVariations = [
-          query, // Original
-          query.toLowerCase(), // lowercase
-          query.trim(), // trimmed
-          query.toLowerCase().trim(), // lowercase + trimmed
+          query,
+          query.toLowerCase(),
+          query.trim(),
+          query.toLowerCase().trim(),
         ];
 
         for (final emailVariant in emailVariations) {
@@ -100,12 +109,12 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
         });
       } else {
         setState(() {
-          _errorMessage = 'User not found';
+          _errorMessage = l10n.adminPremiumUserNotFound;
         });
       }
     } catch (e) {
       setState(() {
-        _errorMessage = 'Error searching: ${e.toString()}';
+        _errorMessage = '${l10n.adminPremiumSearchError}: ${e.toString()}';
       });
     } finally {
       setState(() {
@@ -114,41 +123,39 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     }
   }
 
-  Future<void> _grantSubscription(SubscriptionTier tier, int days) async {
+  // ============================================================
+  // GRANT ADMIN PREMIUM
+  // ============================================================
+
+  Future<void> _grantAdminPremium() async {
     if (_foundUserId == null) return;
 
-    // ✅ Capture context-dependent values BEFORE async
-    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    final successMessage =
-        'Successfully granted ${tier.displayName} for $days days';
+    final currentAdmin = _auth.currentUser;
 
     setState(() => _isGranting = true);
 
     try {
-      final success = await subscriptionProvider.grantSubscription(
-        userId: _foundUserId!,
-        tier: tier,
-        durationDays: days,
-        period: days >= 365
-            ? SubscriptionPeriod.yearly
-            : SubscriptionPeriod.monthly,
-      );
+      await _firestore.collection('users').doc(_foundUserId).update({
+        'adminPremium': {
+          'enabled': true,
+          'tier': 'standard',
+          'grantedAt': FieldValue.serverTimestamp(),
+          'grantedBy': currentAdmin?.uid ?? 'unknown',
+          'grantedByEmail': currentAdmin?.email ?? 'unknown',
+          'reason': _selectedReason.value,
+        },
+      });
 
-      if (success && mounted) {
-        await _searchUser();
+      // Refresh user data
+      await _searchUser();
 
+      if (mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text(successMessage),
+            content: Text(l10n.adminPremiumGrantSuccess),
             backgroundColor: Colors.green,
-          ),
-        );
-      } else if (mounted) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Failed to grant subscription'),
-            backgroundColor: Colors.red,
           ),
         );
       }
@@ -156,7 +163,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       if (mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text('${l10n.adminPremiumGrantError}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -168,23 +175,22 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     }
   }
 
-  Future<void> _revokeSubscription() async {
+  // ============================================================
+  // REVOKE ADMIN PREMIUM
+  // ============================================================
+
+  Future<void> _revokeAdminPremium() async {
     if (_foundUserId == null) return;
 
-    // ✅ Capture context-dependent values BEFORE async
-    final subscriptionProvider = context.read<SubscriptionProvider>();
-    final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
 
     // Confirm dialog
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Revoke Subscription'),
-        content: const Text(
-          'Are you sure you want to revoke this user\'s subscription? '
-          'They will lose access to premium features immediately.',
-        ),
+        title: Text(l10n.adminPremiumRevokeTitle),
+        content: Text(l10n.adminPremiumRevokeConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
@@ -193,7 +199,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Revoke'),
+            child: Text(l10n.remove),
           ),
         ],
       ),
@@ -204,23 +210,22 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     setState(() => _isGranting = true);
 
     try {
-      final success =
-          await subscriptionProvider.revokeSubscription(_foundUserId!);
+      await _firestore.collection('users').doc(_foundUserId).update({
+        'adminPremium': {
+          'enabled': false,
+          'revokedAt': FieldValue.serverTimestamp(),
+          'revokedBy': _auth.currentUser?.uid ?? 'unknown',
+        },
+      });
 
-      if (success && mounted) {
-        await _searchUser();
+      // Refresh user data
+      await _searchUser();
 
+      if (mounted) {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Subscription revoked successfully'),
+          SnackBar(
+            content: Text(l10n.adminPremiumRevokeSuccess),
             backgroundColor: Colors.orange,
-          ),
-        );
-      } else if (mounted) {
-        messenger.showSnackBar(
-          const SnackBar(
-            content: Text('Failed to revoke subscription'),
-            backgroundColor: Colors.red,
           ),
         );
       }
@@ -228,7 +233,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
       if (mounted) {
         messenger.showSnackBar(
           SnackBar(
-            content: Text('Error: ${e.toString()}'),
+            content: Text('${l10n.adminPremiumRevokeError}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -240,9 +245,14 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     }
   }
 
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final l10n = AppLocalizations.of(context);
 
     final width = MediaQuery.of(context).size.width;
     final isTablet =
@@ -263,7 +273,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Grant Subscription',
+          l10n.grantSubscription,
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
@@ -284,25 +294,25 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Search Section
-                _buildSearchSection(isTablet, colors),
+                _buildSearchSection(isTablet, colors, l10n),
 
                 SizedBox(height: 24.h),
 
                 // Error Message
-                if (_errorMessage != null) _buildErrorMessage(),
+                if (_errorMessage != null) _buildErrorMessage(colors),
 
                 // User Info Card
                 if (_foundUser != null) ...[
-                  _buildUserInfoCard(isTablet, colors),
+                  _buildUserInfoCard(isTablet, colors, l10n),
                   SizedBox(height: 24.h),
-                  _buildSubscriptionOptions(isTablet, colors),
+                  _buildAdminPremiumSection(isTablet, colors, l10n),
                 ],
 
                 // Empty State
                 if (_foundUser == null &&
                     _errorMessage == null &&
                     !_isSearching)
-                  _buildEmptyState(isTablet, colors),
+                  _buildEmptyState(isTablet, colors, l10n),
               ],
             ),
           ),
@@ -311,7 +321,12 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildSearchSection(bool isTablet, AppThemeExtension colors) {
+  // ============================================================
+  // UI COMPONENTS
+  // ============================================================
+
+  Widget _buildSearchSection(
+      bool isTablet, AppThemeExtension colors, AppLocalizations l10n) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
@@ -330,7 +345,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Search User',
+            l10n.adminPremiumSearchUser,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 18.sp : 16.sp,
               fontWeight: FontWeight.w600,
@@ -339,7 +354,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Enter user email address or UID',
+            l10n.adminPremiumSearchHint,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
               color: colors.textSecondary,
@@ -352,7 +367,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                 child: TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'email@example.com or user-uid',
+                    hintText: l10n.adminPremiumSearchPlaceholder,
                     hintStyle: GoogleFonts.inter(
                       fontSize: isTablet ? 15.sp : 14.sp,
                       color: colors.textSecondary,
@@ -405,7 +420,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                           ),
                         )
                       : Text(
-                          'Search',
+                          l10n.search,
                           style: GoogleFonts.inter(
                             fontSize: isTablet ? 15.sp : 14.sp,
                             fontWeight: FontWeight.w600,
@@ -420,7 +435,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildErrorMessage() {
+  Widget _buildErrorMessage(AppThemeExtension colors) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(16.w),
@@ -447,16 +462,20 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildUserInfoCard(bool isTablet, AppThemeExtension colors) {
-    final subscription = _foundUser!['subscription'] as Map<String, dynamic>?;
-    final subModel = SubscriptionModel.fromMap(subscription);
+  Widget _buildUserInfoCard(
+      bool isTablet, AppThemeExtension colors, AppLocalizations l10n) {
+    final adminPremium = _foundUser!['adminPremium'] as Map<String, dynamic>?;
+    final hasAdminPremium = adminPremium?['enabled'] == true;
 
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
         color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: colors.border),
+        border: Border.all(
+          color: hasAdminPremium ? Colors.purple : colors.border,
+          width: hasAdminPremium ? 2 : 1,
+        ),
         boxShadow: [
           BoxShadow(
             color: colors.textPrimary.withValues(alpha: 0.03),
@@ -475,25 +494,29 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                 width: isTablet ? 60.w : 50.w,
                 height: isTablet ? 60.w : 50.w,
                 decoration: BoxDecoration(
-                  color: subModel.isActive
-                      ? Colors.amber.withValues(alpha: 0.15)
+                  color: hasAdminPremium
+                      ? Colors.purple.withValues(alpha: 0.15)
                       : colors.greyLight,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: Text(
-                    (_foundUser!['name'] as String?)
-                            ?.substring(0, 1)
-                            .toUpperCase() ??
-                        'U',
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 24.sp : 20.sp,
-                      fontWeight: FontWeight.w700,
-                      color: subModel.isActive
-                          ? Colors.amber.shade700
-                          : colors.textSecondary,
-                    ),
-                  ),
+                  child: hasAdminPremium
+                      ? Icon(
+                          Icons.verified,
+                          color: Colors.purple,
+                          size: isTablet ? 28.sp : 24.sp,
+                        )
+                      : Text(
+                          (_foundUser!['name'] as String?)
+                                  ?.substring(0, 1)
+                                  .toUpperCase() ??
+                              'U',
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 24.sp : 20.sp,
+                            fontWeight: FontWeight.w700,
+                            color: colors.textSecondary,
+                          ),
+                        ),
                 ),
               ),
               SizedBox(width: 16.w),
@@ -501,13 +524,41 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _foundUser!['name'] ?? 'Unknown User',
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 18.sp : 16.sp,
-                        fontWeight: FontWeight.w700,
-                        color: colors.textPrimary,
-                      ),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            _foundUser!['name'] ?? l10n.unknown,
+                            style: GoogleFonts.inter(
+                              fontSize: isTablet ? 18.sp : 16.sp,
+                              fontWeight: FontWeight.w700,
+                              color: colors.textPrimary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (hasAdminPremium) ...[
+                          SizedBox(width: 8.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 2.h,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.purple.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(6.r),
+                            ),
+                            child: Text(
+                              'VIP',
+                              style: GoogleFonts.inter(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.purple,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     SizedBox(height: 4.h),
                     Text(
@@ -553,15 +604,16 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             isTablet,
             showCopy: true,
             colors: colors,
+            l10n: l10n,
           ),
 
           SizedBox(height: 12.h),
           Divider(color: colors.border.withValues(alpha: 0.5)),
           SizedBox(height: 12.h),
 
-          // Subscription Info
+          // Subscription Status
           Text(
-            'Current Subscription',
+            l10n.adminPremiumCurrentStatus,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 16.sp : 14.sp,
               fontWeight: FontWeight.w600,
@@ -570,46 +622,261 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           ),
           SizedBox(height: 12.h),
 
-          _buildSubscriptionInfoRow(
-            'Tier',
-            subModel.tier.displayName,
+          // Admin Premium Status
+          _buildStatusRow(
+            l10n.adminPremiumAdminStatus,
+            hasAdminPremium ? l10n.active : l10n.adminPremiumInactive,
+            hasAdminPremium ? Colors.purple : colors.textSecondary,
             isTablet,
-            colors: colors,
-            valueColor: subModel.isActive ? Colors.amber.shade700 : null,
+            colors,
           ),
-          SizedBox(height: 8.h),
-          _buildSubscriptionInfoRow(
-            'Status',
-            subModel.status.value.toUpperCase(),
-            isTablet,
-            colors: colors,
-            valueColor: _getStatusColor(subModel.status, colors),
-          ),
-          SizedBox(height: 8.h),
-          _buildSubscriptionInfoRow(
-            'Source',
-            subModel.source.value,
-            isTablet,
-            colors: colors,
-          ),
-          if (subModel.expiryDate != null) ...[
+
+          if (hasAdminPremium && adminPremium != null) ...[
             SizedBox(height: 8.h),
-            _buildSubscriptionInfoRow(
-              'Expires',
-              _formatDate(subModel.expiryDate!),
+            _buildStatusRow(
+              l10n.adminPremiumTier,
+              (adminPremium['tier'] as String?)?.toUpperCase() ?? 'STANDARD',
+              Colors.amber.shade700,
               isTablet,
-              colors: colors,
-              valueColor: subModel.isExpired ? Colors.red : Colors.green,
+              colors,
             ),
-          ],
-          if (subModel.isInTrial && subModel.trialEndDate != null) ...[
             SizedBox(height: 8.h),
-            _buildSubscriptionInfoRow(
-              'Trial Ends',
-              _formatDate(subModel.trialEndDate!),
+            _buildStatusRow(
+              l10n.adminPremiumReason,
+              _getReasonDisplayName(adminPremium['reason'] as String?, l10n),
+              Colors.blue,
               isTablet,
-              colors: colors,
-              valueColor: Colors.blue,
+              colors,
+            ),
+            if (adminPremium['grantedByEmail'] != null) ...[
+              SizedBox(height: 8.h),
+              _buildStatusRow(
+                l10n.adminPremiumGrantedBy,
+                adminPremium['grantedByEmail'] as String,
+                colors.textSecondary,
+                isTablet,
+                colors,
+              ),
+            ],
+          ],
+
+          SizedBox(height: 8.h),
+
+          // RevenueCat Status
+          _buildStatusRow(
+            l10n.adminPremiumStoreStatus,
+            _getStoreSubscriptionStatus(l10n),
+            _hasStoreSubscription() ? Colors.green : colors.textSecondary,
+            isTablet,
+            colors,
+          ),
+        ],
+      ),
+    );
+  }
+
+  bool _hasStoreSubscription() {
+    // Check subscription data if available
+    final subscription = _foundUser!['subscription'] as Map<String, dynamic>?;
+    if (subscription == null) return false;
+
+    final tier = subscription['tier'] as String?;
+    final source = subscription['source'] as String?;
+
+    return tier != null && tier != 'free' && source == 'revenuecat';
+  }
+
+  String _getStoreSubscriptionStatus(AppLocalizations l10n) {
+    final subscription = _foundUser!['subscription'] as Map<String, dynamic>?;
+    if (subscription == null) return l10n.adminPremiumNoSubscription;
+
+    final tier = subscription['tier'] as String?;
+    final source = subscription['source'] as String?;
+
+    if (tier == null || tier == 'free') {
+      return l10n.adminPremiumNoSubscription;
+    }
+
+    if (source == 'revenuecat') {
+      return tier.toUpperCase();
+    }
+
+    return l10n.adminPremiumNoSubscription;
+  }
+
+  Widget _buildAdminPremiumSection(
+      bool isTablet, AppThemeExtension colors, AppLocalizations l10n) {
+    final adminPremium = _foundUser!['adminPremium'] as Map<String, dynamic>?;
+    final hasAdminPremium = adminPremium?['enabled'] == true;
+
+    return Container(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      decoration: BoxDecoration(
+        color: colors.backgroundPure,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: colors.border),
+        boxShadow: [
+          BoxShadow(
+            color: colors.textPrimary.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.admin_panel_settings,
+                color: Colors.purple,
+                size: isTablet ? 28.sp : 24.sp,
+              ),
+              SizedBox(width: 12.w),
+              Text(
+                l10n.adminPremiumManage,
+                style: GoogleFonts.inter(
+                  fontSize: isTablet ? 18.sp : 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: colors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            l10n.adminPremiumManageDesc,
+            style: GoogleFonts.inter(
+              fontSize: isTablet ? 14.sp : 13.sp,
+              color: colors.textSecondary,
+            ),
+          ),
+          SizedBox(height: 20.h),
+          if (!hasAdminPremium) ...[
+            // Reason Selector
+            Text(
+              l10n.adminPremiumSelectReason,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 14.sp : 13.sp,
+                fontWeight: FontWeight.w500,
+                color: colors.textPrimary,
+              ),
+            ),
+            SizedBox(height: 12.h),
+            _buildReasonSelector(isTablet, colors, l10n),
+            SizedBox(height: 20.h),
+
+            // Grant Button
+            SizedBox(
+              width: double.infinity,
+              height: isTablet ? 56.h : 52.h,
+              child: ElevatedButton.icon(
+                onPressed: _isGranting ? null : _grantAdminPremium,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  elevation: 0,
+                ),
+                icon: _isGranting
+                    ? SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Icon(Icons.verified, size: isTablet ? 24.sp : 22.sp),
+                label: Text(
+                  l10n.adminPremiumGrantButton,
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 16.sp : 15.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            // Already has admin premium - show revoke option
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Colors.purple.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.purple.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.purple,
+                    size: isTablet ? 28.sp : 24.sp,
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.adminPremiumAlreadyActive,
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 15.sp : 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.purple,
+                          ),
+                        ),
+                        SizedBox(height: 2.h),
+                        Text(
+                          l10n.adminPremiumFullAccess,
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 13.sp : 12.sp,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 16.h),
+
+            // Revoke Button
+            SizedBox(
+              width: double.infinity,
+              height: isTablet ? 52.h : 48.h,
+              child: OutlinedButton.icon(
+                onPressed: _isGranting ? null : _revokeAdminPremium,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                ),
+                icon: _isGranting
+                    ? SizedBox(
+                        width: 20.w,
+                        height: 20.w,
+                        child: const CircularProgressIndicator(
+                          color: Colors.red,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Icon(Icons.remove_circle_outline,
+                        size: isTablet ? 22.sp : 20.sp),
+                label: Text(
+                  l10n.adminPremiumRevokeButton,
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 15.sp : 14.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
           ],
         ],
@@ -617,8 +884,64 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildInfoRow(String label, String value, bool isTablet,
-      {required AppThemeExtension colors, bool showCopy = false}) {
+  Widget _buildReasonSelector(
+      bool isTablet, AppThemeExtension colors, AppLocalizations l10n) {
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 8.h,
+      children: AdminPremiumReason.values.map((reason) {
+        final isSelected = _selectedReason == reason;
+        return InkWell(
+          onTap: () => setState(() => _selectedReason = reason),
+          borderRadius: BorderRadius.circular(20.r),
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 8.h,
+            ),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? Colors.purple.withValues(alpha: 0.15)
+                  : colors.greyLight,
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(
+                color: isSelected ? Colors.purple : colors.border,
+                width: isSelected ? 2 : 1,
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  reason.icon,
+                  size: isTablet ? 18.sp : 16.sp,
+                  color: isSelected ? Colors.purple : colors.textSecondary,
+                ),
+                SizedBox(width: 6.w),
+                Text(
+                  _getReasonDisplayName(reason.value, l10n),
+                  style: GoogleFonts.inter(
+                    fontSize: isTablet ? 14.sp : 13.sp,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    color: isSelected ? Colors.purple : colors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildInfoRow(
+    String label,
+    String value,
+    bool isTablet, {
+    required AppThemeExtension colors,
+    required AppLocalizations l10n,
+    bool showCopy = false,
+  }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -649,9 +972,9 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
             onPressed: () {
               Clipboard.setData(ClipboardData(text: value));
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('UID copied to clipboard'),
-                  duration: Duration(seconds: 1),
+                SnackBar(
+                  content: Text(l10n.adminPremiumUidCopied),
+                  duration: const Duration(seconds: 1),
                 ),
               );
             },
@@ -667,8 +990,13 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildSubscriptionInfoRow(String label, String value, bool isTablet,
-      {required AppThemeExtension colors, Color? valueColor}) {
+  Widget _buildStatusRow(
+    String label,
+    String value,
+    Color valueColor,
+    bool isTablet,
+    AppThemeExtension colors,
+  ) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -681,18 +1009,16 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
         ),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-          decoration: valueColor != null
-              ? BoxDecoration(
-                  color: valueColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.r),
-                )
-              : null,
+          decoration: BoxDecoration(
+            color: valueColor.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
           child: Text(
             value,
             style: GoogleFonts.inter(
-              fontSize: isTablet ? 14.sp : 13.sp,
+              fontSize: isTablet ? 13.sp : 12.sp,
               fontWeight: FontWeight.w600,
-              color: valueColor ?? colors.textPrimary,
+              color: valueColor,
             ),
           ),
         ),
@@ -700,195 +1026,8 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Widget _buildSubscriptionOptions(bool isTablet, AppThemeExtension colors) {
-    return Container(
-      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
-      decoration: BoxDecoration(
-        color: colors.backgroundPure,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: colors.border),
-        boxShadow: [
-          BoxShadow(
-            color: colors.textPrimary.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Grant Subscription',
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 18.sp : 16.sp,
-              fontWeight: FontWeight.w600,
-              color: colors.textPrimary,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Select a plan to grant to this user',
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 14.sp : 13.sp,
-              color: colors.textSecondary,
-            ),
-          ),
-          SizedBox(height: 20.h),
-
-          // Plan options grid
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final availableWidth = constraints.maxWidth;
-              final crossAxisSpacing = 12.w;
-              final itemWidth = (availableWidth - crossAxisSpacing) / 2;
-              final itemHeight = isTablet ? 90.h : 80.h;
-              final childAspectRatio = itemWidth / itemHeight;
-
-              return GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: 2,
-                mainAxisSpacing: 12.h,
-                crossAxisSpacing: crossAxisSpacing,
-                childAspectRatio: childAspectRatio,
-                children: [
-                  _buildPlanOption(
-                    tier: SubscriptionTier.lite,
-                    days: 30,
-                    label: 'Lite',
-                    subtitle: '30 days',
-                    color: Colors.blue,
-                    isTablet: isTablet,
-                    colors: colors,
-                  ),
-                  _buildPlanOption(
-                    tier: SubscriptionTier.standard,
-                    days: 30,
-                    label: 'Standard',
-                    subtitle: '30 days',
-                    color: Colors.amber,
-                    isTablet: isTablet,
-                    colors: colors,
-                  ),
-                  _buildPlanOption(
-                    tier: SubscriptionTier.lite,
-                    days: 365,
-                    label: 'Lite',
-                    subtitle: '1 year',
-                    color: Colors.blue,
-                    isTablet: isTablet,
-                    colors: colors,
-                  ),
-                  _buildPlanOption(
-                    tier: SubscriptionTier.standard,
-                    days: 365,
-                    label: 'Standard',
-                    subtitle: '1 year',
-                    color: Colors.amber,
-                    isTablet: isTablet,
-                    colors: colors,
-                  ),
-                ],
-              );
-            },
-          ),
-
-          SizedBox(height: 20.h),
-          Divider(color: colors.border.withValues(alpha: 0.5)),
-          SizedBox(height: 16.h),
-
-          // Revoke button
-          SizedBox(
-            width: double.infinity,
-            height: isTablet ? 52.h : 48.h,
-            child: OutlinedButton.icon(
-              onPressed: _isGranting ? null : _revokeSubscription,
-              style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-              ),
-              icon: Icon(Icons.remove_circle_outline,
-                  size: isTablet ? 22.sp : 20.sp),
-              label: Text(
-                'Revoke Subscription',
-                style: GoogleFonts.inter(
-                  fontSize: isTablet ? 15.sp : 14.sp,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPlanOption({
-    required SubscriptionTier tier,
-    required int days,
-    required String label,
-    required String subtitle,
-    required Color color,
-    required bool isTablet,
-    required AppThemeExtension colors,
-  }) {
-    return InkWell(
-      onTap: _isGranting ? null : () => _grantSubscription(tier, days),
-      borderRadius: BorderRadius.circular(12.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isTablet ? 12.w : 8.w,
-          vertical: isTablet ? 8.h : 6.h,
-        ),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: color.withValues(alpha: 0.3)),
-        ),
-        child: _isGranting
-            ? const Center(child: CircularProgressIndicator(strokeWidth: 2))
-            : Row(
-                children: [
-                  Icon(
-                    Icons.workspace_premium,
-                    color: color,
-                    size: isTablet ? 24.sp : 20.sp,
-                  ),
-                  SizedBox(width: 8.w),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: GoogleFonts.inter(
-                            fontSize: isTablet ? 14.sp : 13.sp,
-                            fontWeight: FontWeight.w700,
-                            color: color,
-                          ),
-                        ),
-                        Text(
-                          subtitle,
-                          style: GoogleFonts.inter(
-                            fontSize: isTablet ? 12.sp : 11.sp,
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(bool isTablet, AppThemeExtension colors) {
+  Widget _buildEmptyState(
+      bool isTablet, AppThemeExtension colors, AppLocalizations l10n) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 40.w : 32.w),
       child: Column(
@@ -900,7 +1039,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Search for a user',
+            l10n.adminPremiumEmptyTitle,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 18.sp : 16.sp,
               fontWeight: FontWeight.w600,
@@ -909,7 +1048,7 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Enter an email address or UID to find a user\nand manage their subscription',
+            l10n.adminPremiumEmptyDesc,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 14.sp : 13.sp,
               color: colors.textSecondary,
@@ -921,24 +1060,34 @@ class _GrantSubscriptionScreenState extends State<GrantSubscriptionScreen> {
     );
   }
 
-  Color _getStatusColor(SubscriptionStatus status, AppThemeExtension colors) {
-    switch (status) {
-      case SubscriptionStatus.active:
-        return Colors.green;
-      case SubscriptionStatus.trial:
-        return Colors.blue;
-      case SubscriptionStatus.expired:
-        return Colors.red;
-      case SubscriptionStatus.cancelled:
-        return Colors.orange;
-      case SubscriptionStatus.gracePeriod:
-        return Colors.amber;
-      case SubscriptionStatus.none:
-        return colors.textSecondary;
+  String _getReasonDisplayName(String? reason, AppLocalizations l10n) {
+    switch (reason) {
+      case 'vip':
+        return l10n.adminPremiumReasonVip;
+      case 'tester':
+        return l10n.adminPremiumReasonTester;
+      case 'employee':
+        return l10n.adminPremiumReasonEmployee;
+      case 'influencer':
+        return l10n.adminPremiumReasonInfluencer;
+      case 'other':
+        return l10n.adminPremiumReasonOther;
+      default:
+        return reason ?? l10n.unknown;
     }
   }
+}
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
+/// Admin Premium Reason enum
+enum AdminPremiumReason {
+  vip('vip', Icons.star),
+  tester('tester', Icons.bug_report),
+  employee('employee', Icons.badge),
+  influencer('influencer', Icons.campaign),
+  other('other', Icons.more_horiz);
+
+  final String value;
+  final IconData icon;
+
+  const AdminPremiumReason(this.value, this.icon);
 }

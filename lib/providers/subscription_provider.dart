@@ -68,10 +68,13 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool _isLoading = false;
   bool _isInitialized = false;
   bool _isTrialEligible = true;
+  bool _hasAdminPremium = false;
   String? _error;
 
   StreamSubscription<User?>? _authSubscription;
   StreamSubscription<DocumentSnapshot>? _extensionSubscription;
+  StreamSubscription<DocumentSnapshot>? _adminPremiumSubscription;
+  String? _adminPremiumReason;
   String? _currentUserId;
   Completer<void>? _initCompleter;
 
@@ -108,6 +111,9 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Whether provider has been initialized
   bool get isInitialized => _isInitialized;
 
+  /// Whether user has admin-granted premium
+  bool get hasAdminPremium => _hasAdminPremium;
+
   /// Last error message
   String? get error => _error;
 
@@ -120,6 +126,9 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
 
   /// Current subscription status
   SubscriptionStatus get status => _subscription.status;
+
+  /// Admin premium reason (vip, tester, employee, influencer, other)
+  String? get adminPremiumReason => _adminPremiumReason;
 
   /// Whether user has an active subscription (paid or trial)
   bool get isActive => _subscription.isActive;
@@ -204,6 +213,18 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
       await _subscriptionService.initialize(userId);
       debugPrint('✅ [SubscriptionProvider] RevenueCat SDK ready');
 
+      // Step 1.5: Check Admin Premium FIRST (highest priority)
+      final adminPremium = await _checkAdminPremium(userId);
+      if (adminPremium != null) {
+        _subscription = adminPremium;
+        _hasAdminPremium = true;
+        debugPrint('👑 [SubscriptionProvider] Admin Premium active');
+      } else {
+        _hasAdminPremium = false;
+      }
+
+      _startAdminPremiumListener(userId);
+
       // Step 2: Load initial data from Extension
       await _loadFromExtension(userId);
       debugPrint('✅ [SubscriptionProvider] Initial data loaded');
@@ -281,13 +302,16 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     debugPrint('🔄 [SubscriptionProvider] Resetting');
 
     _stopExtensionListener();
+    _stopAdminPremiumListener();
     _stopFallbackTimer();
 
     _subscription = SubscriptionModel.free();
     _availablePackages = [];
     _isInitialized = false;
     _isTrialEligible = true;
+    _hasAdminPremium = false;
     _currentUserId = null;
+    _adminPremiumReason = null;
     _initCompleter = null;
     _error = null;
 
@@ -301,6 +325,12 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Load subscription from RevenueCat Firebase Extension
   /// This is the PRIMARY data source - webhook updated, always fresh
   Future<void> _loadFromExtension(String userId) async {
+    // Skip if admin premium is active
+    if (_hasAdminPremium) {
+      debugPrint(
+          '📦 [SubscriptionProvider] Skipping Extension (Admin Premium active)');
+      return;
+    }
     try {
       final doc =
           await _firestore.collection('revenuecat_customers').doc(userId).get();
@@ -661,6 +691,11 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
         .snapshots()
         .listen(
       (snapshot) {
+        if (_hasAdminPremium) {
+          debugPrint(
+              '🔔 [SubscriptionProvider] Skipping Extension update (Admin Premium active)');
+          return;
+        }
         if (!snapshot.exists || snapshot.data() == null) {
           return;
         }
@@ -722,6 +757,12 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   /// Fallback refresh from SDK (for edge cases)
   Future<void> _fallbackRefresh() async {
     if (_currentUserId == null) return;
+
+    if (_hasAdminPremium) {
+      debugPrint(
+          '🔄 [SubscriptionProvider] Skipping fallback (Admin Premium active)');
+      return;
+    }
 
     try {
       final verified =
@@ -852,71 +893,6 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
   }
 
   // ============================================================
-  // ADMIN METHODS
-  // ============================================================
-
-  /// Grant subscription manually (admin only)
-  Future<bool> grantSubscription({
-    required String userId,
-    required SubscriptionTier tier,
-    required int durationDays,
-    SubscriptionPeriod period = SubscriptionPeriod.monthly,
-  }) async {
-    try {
-      debugPrint('👑 [SubscriptionProvider] Granting $tier to $userId');
-
-      final now = DateTime.now();
-      final expiryDate = now.add(Duration(days: durationDays));
-
-      await _firestore.collection('users').doc(userId).update({
-        'subscription': {
-          'tier': tier.value,
-          'period': period.value,
-          'status': 'active',
-          'source': 'admin',
-          'startDate': Timestamp.fromDate(now),
-          'expiryDate': Timestamp.fromDate(expiryDate),
-          'trialUsed': true,
-          'autoRenew': false,
-        },
-      });
-
-      if (userId == _auth.currentUser?.uid) {
-        await _loadFromExtension(userId);
-        notifyListeners();
-      }
-
-      return true;
-    } catch (e) {
-      debugPrint('❌ [SubscriptionProvider] Grant error: $e');
-      return false;
-    }
-  }
-
-  /// Revoke subscription (admin only)
-  Future<bool> revokeSubscription(String userId) async {
-    try {
-      debugPrint('🚫 [SubscriptionProvider] Revoking for $userId');
-
-      await _firestore.collection('users').doc(userId).update({
-        'subscription.tier': 'free',
-        'subscription.status': 'none',
-        'subscription.autoRenew': false,
-      });
-
-      if (userId == _auth.currentUser?.uid) {
-        _subscription = SubscriptionModel.free();
-        notifyListeners();
-      }
-
-      return true;
-    } catch (e) {
-      debugPrint('❌ [SubscriptionProvider] Revoke error: $e');
-      return false;
-    }
-  }
-
-  // ============================================================
   // TRIAL ELIGIBILITY
   // ============================================================
 
@@ -975,6 +951,18 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     debugPrint(
         '🔄 [SubscriptionProvider] Aggressive refresh after app resume...');
 
+    if (_hasAdminPremium) {
+      debugPrint(
+          '📦 [SubscriptionProvider] Admin Premium active, skipping store refresh');
+      final adminPremium = await _checkAdminPremium(_currentUserId!);
+      if (adminPremium == null) {
+        _hasAdminPremium = false;
+        await _loadFromExtension(_currentUserId!);
+        notifyListeners();
+      }
+      return;
+    }
+
     try {
       // 1. Reload from Firebase Extension (primary source - webhook updated)
       final oldTier = _subscription.tier;
@@ -998,9 +986,108 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
     }
   }
 
+  // ============================================================
+// ADMIN PREMIUM (Highest Priority)
+// ============================================================
+
+  /// Check if user has admin-granted premium
+  Future<SubscriptionModel?> _checkAdminPremium(String userId) async {
+    try {
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final data = userDoc.data();
+
+      if (data == null) return null;
+
+      final adminPremium = data['adminPremium'] as Map<String, dynamic>?;
+      if (adminPremium == null || adminPremium['enabled'] != true) {
+        return null;
+      }
+
+      // Admin Premium is active!
+      final tierStr = adminPremium['tier'] as String? ?? 'standard';
+      final tier = SubscriptionTier.fromString(tierStr);
+      final grantedAt = (adminPremium['grantedAt'] as Timestamp?)?.toDate();
+
+      _adminPremiumReason = adminPremium['reason'] as String?;
+
+      debugPrint('👑 [SubscriptionProvider] Admin Premium found: $tier');
+
+      return SubscriptionModel(
+        tier: tier,
+        status: SubscriptionStatus.active,
+        source: SubscriptionSource.admin,
+        startDate: grantedAt,
+        autoRenew: false,
+        lastVerifiedAt: DateTime.now(),
+      );
+    } catch (e) {
+      debugPrint('⚠️ [SubscriptionProvider] Admin Premium check error: $e');
+      return null;
+    }
+  }
+
+  /// Start listening to admin premium changes
+  void _startAdminPremiumListener(String userId) {
+    _stopAdminPremiumListener();
+
+    _adminPremiumSubscription =
+        _firestore.collection('users').doc(userId).snapshots().listen(
+      (snapshot) async {
+        if (!snapshot.exists || snapshot.data() == null) return;
+
+        final data = snapshot.data()!;
+        final adminPremium = data['adminPremium'] as Map<String, dynamic>?;
+        final isEnabled = adminPremium?['enabled'] == true;
+
+        // Admin premium status changed
+        if (isEnabled != _hasAdminPremium) {
+          debugPrint(
+              '🔔 [SubscriptionProvider] Admin Premium changed: $isEnabled');
+
+          if (isEnabled) {
+            // Admin premium enabled
+            final tierStr = adminPremium?['tier'] as String? ?? 'standard';
+            final tier = SubscriptionTier.fromString(tierStr);
+            final grantedAt =
+                (adminPremium?['grantedAt'] as Timestamp?)?.toDate();
+
+            _adminPremiumReason = adminPremium?['reason'] as String?;
+
+            _subscription = SubscriptionModel(
+              tier: tier,
+              status: SubscriptionStatus.active,
+              source: SubscriptionSource.admin,
+              startDate: grantedAt,
+              autoRenew: false,
+              lastVerifiedAt: DateTime.now(),
+            );
+            _hasAdminPremium = true;
+          } else {
+            // Admin premium disabled - fall back to RevenueCat
+            _hasAdminPremium = false;
+            _adminPremiumReason = null;
+            await _loadFromExtension(userId);
+          }
+
+          notifyListeners();
+        }
+      },
+      onError: (error) {
+        debugPrint('❌ [SubscriptionProvider] Admin listener error: $error');
+      },
+    );
+  }
+
+  /// Stop admin premium listener
+  void _stopAdminPremiumListener() {
+    _adminPremiumSubscription?.cancel();
+    _adminPremiumSubscription = null;
+  }
+
   @override
   void dispose() {
     _stopExtensionListener();
+    _stopAdminPremiumListener();
     _stopFallbackTimer();
     WidgetsBinding.instance.removeObserver(this);
     _authSubscription?.cancel();

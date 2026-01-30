@@ -2578,4 +2578,114 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get offlineNoInternetUpgrade =>
       'अपना प्लान अपग्रेड करने के लिए इंटरनेट से कनेक्ट करें';
+
+  @override
+  String get adminPremiumSearchUser => 'उपयोगकर्ता खोजें';
+
+  @override
+  String get adminPremiumSearchHint => 'ईमेल पता या UID दर्ज करें';
+
+  @override
+  String get adminPremiumSearchPlaceholder => 'email@example.com या user-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'कृपया ईमेल या UID दर्ज करें';
+
+  @override
+  String get adminPremiumUserNotFound => 'उपयोगकर्ता नहीं मिला';
+
+  @override
+  String get adminPremiumSearchError => 'खोज में त्रुटि';
+
+  @override
+  String get adminPremiumCurrentStatus => 'वर्तमान स्थिति';
+
+  @override
+  String get adminPremiumAdminStatus => 'एडमिन प्रीमियम';
+
+  @override
+  String get adminPremiumStoreStatus => 'स्टोर सदस्यता';
+
+  @override
+  String get adminPremiumInactive => 'निष्क्रिय';
+
+  @override
+  String get adminPremiumNoSubscription => 'कोई सदस्यता नहीं';
+
+  @override
+  String get adminPremiumTier => 'टियर';
+
+  @override
+  String get adminPremiumReason => 'कारण';
+
+  @override
+  String get adminPremiumGrantedBy => 'द्वारा दिया गया';
+
+  @override
+  String get adminPremiumManage => 'एडमिन प्रीमियम प्रबंधित करें';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'स्टोर सदस्यता से स्वतंत्र पूर्ण प्रीमियम पहुंच प्रदान करें';
+
+  @override
+  String get adminPremiumSelectReason => 'कारण चुनें';
+
+  @override
+  String get adminPremiumGrantButton => 'पूर्ण प्रीमियम दें';
+
+  @override
+  String get adminPremiumGrantSuccess => 'एडमिन प्रीमियम सफलतापूर्वक दिया गया!';
+
+  @override
+  String get adminPremiumGrantError => 'प्रीमियम देने में विफल';
+
+  @override
+  String get adminPremiumRevokeTitle => 'एडमिन प्रीमियम रद्द करें';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'क्या आप सुनिश्चित हैं कि इस उपयोगकर्ता का एडमिन प्रीमियम रद्द करना चाहते हैं? यदि उनके पास स्टोर सदस्यता नहीं है तो वे प्रीमियम पहुंच खो देंगे।';
+
+  @override
+  String get adminPremiumRevokeButton => 'एडमिन प्रीमियम रद्द करें';
+
+  @override
+  String get adminPremiumRevokeSuccess =>
+      'एडमिन प्रीमियम सफलतापूर्वक रद्द किया गया';
+
+  @override
+  String get adminPremiumRevokeError => 'प्रीमियम रद्द करने में विफल';
+
+  @override
+  String get adminPremiumAlreadyActive => 'एडमिन प्रीमियम सक्रिय';
+
+  @override
+  String get adminPremiumFullAccess =>
+      'इस उपयोगकर्ता के पास पूर्ण प्रीमियम पहुंच है';
+
+  @override
+  String get adminPremiumUidCopied => 'UID क्लिपबोर्ड पर कॉपी किया गया';
+
+  @override
+  String get adminPremiumEmptyTitle => 'उपयोगकर्ता खोजें';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'उपयोगकर्ता खोजने और उनकी प्रीमियम पहुंच प्रबंधित करने के लिए ईमेल या UID दर्ज करें';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'परीक्षक';
+
+  @override
+  String get adminPremiumReasonEmployee => 'कर्मचारी';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'इन्फ्लुएंसर';
+
+  @override
+  String get adminPremiumReasonOther => 'अन्य';
 }

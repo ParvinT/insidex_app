@@ -4937,6 +4937,216 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect to internet to upgrade your plan'**
   String get offlineNoInternetUpgrade;
+
+  /// No description provided for @adminPremiumSearchUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Search User'**
+  String get adminPremiumSearchUser;
+
+  /// No description provided for @adminPremiumSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter user email address or UID'**
+  String get adminPremiumSearchHint;
+
+  /// No description provided for @adminPremiumSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'email@example.com or user-uid'**
+  String get adminPremiumSearchPlaceholder;
+
+  /// No description provided for @adminPremiumEnterEmailOrUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an email or UID'**
+  String get adminPremiumEnterEmailOrUid;
+
+  /// No description provided for @adminPremiumUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found'**
+  String get adminPremiumUserNotFound;
+
+  /// No description provided for @adminPremiumSearchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error searching'**
+  String get adminPremiumSearchError;
+
+  /// No description provided for @adminPremiumCurrentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Status'**
+  String get adminPremiumCurrentStatus;
+
+  /// No description provided for @adminPremiumAdminStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium'**
+  String get adminPremiumAdminStatus;
+
+  /// No description provided for @adminPremiumStoreStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Subscription'**
+  String get adminPremiumStoreStatus;
+
+  /// No description provided for @adminPremiumInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'NOT ACTIVE'**
+  String get adminPremiumInactive;
+
+  /// No description provided for @adminPremiumNoSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription'**
+  String get adminPremiumNoSubscription;
+
+  /// No description provided for @adminPremiumTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier'**
+  String get adminPremiumTier;
+
+  /// No description provided for @adminPremiumReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get adminPremiumReason;
+
+  /// No description provided for @adminPremiumGrantedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted by'**
+  String get adminPremiumGrantedBy;
+
+  /// No description provided for @adminPremiumManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Admin Premium'**
+  String get adminPremiumManage;
+
+  /// No description provided for @adminPremiumManageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant full premium access independent of store subscriptions'**
+  String get adminPremiumManageDesc;
+
+  /// No description provided for @adminPremiumSelectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Select reason'**
+  String get adminPremiumSelectReason;
+
+  /// No description provided for @adminPremiumGrantButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Full Premium'**
+  String get adminPremiumGrantButton;
+
+  /// No description provided for @adminPremiumGrantSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium granted successfully!'**
+  String get adminPremiumGrantSuccess;
+
+  /// No description provided for @adminPremiumGrantError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to grant premium'**
+  String get adminPremiumGrantError;
+
+  /// No description provided for @adminPremiumRevokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Admin Premium'**
+  String get adminPremiumRevokeTitle;
+
+  /// No description provided for @adminPremiumRevokeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to revoke this user\'s admin premium? They will lose premium access unless they have a store subscription.'**
+  String get adminPremiumRevokeConfirm;
+
+  /// No description provided for @adminPremiumRevokeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Admin Premium'**
+  String get adminPremiumRevokeButton;
+
+  /// No description provided for @adminPremiumRevokeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium revoked successfully'**
+  String get adminPremiumRevokeSuccess;
+
+  /// No description provided for @adminPremiumRevokeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to revoke premium'**
+  String get adminPremiumRevokeError;
+
+  /// No description provided for @adminPremiumAlreadyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium Active'**
+  String get adminPremiumAlreadyActive;
+
+  /// No description provided for @adminPremiumFullAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'This user has full premium access'**
+  String get adminPremiumFullAccess;
+
+  /// No description provided for @adminPremiumUidCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'UID copied to clipboard'**
+  String get adminPremiumUidCopied;
+
+  /// No description provided for @adminPremiumEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a user'**
+  String get adminPremiumEmptyTitle;
+
+  /// No description provided for @adminPremiumEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an email address or UID to find a user and manage their premium access'**
+  String get adminPremiumEmptyDesc;
+
+  /// No description provided for @adminPremiumReasonVip.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP'**
+  String get adminPremiumReasonVip;
+
+  /// No description provided for @adminPremiumReasonTester.
+  ///
+  /// In en, this message translates to:
+  /// **'Tester'**
+  String get adminPremiumReasonTester;
+
+  /// No description provided for @adminPremiumReasonEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get adminPremiumReasonEmployee;
+
+  /// No description provided for @adminPremiumReasonInfluencer.
+  ///
+  /// In en, this message translates to:
+  /// **'Influencer'**
+  String get adminPremiumReasonInfluencer;
+
+  /// No description provided for @adminPremiumReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get adminPremiumReasonOther;
 }
 
 class _AppLocalizationsDelegate

@@ -2592,4 +2592,113 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get offlineNoInternetUpgrade =>
       'Подключитесь к интернету, чтобы обновить план';
+
+  @override
+  String get adminPremiumSearchUser => 'Поиск пользователя';
+
+  @override
+  String get adminPremiumSearchHint => 'Введите email или UID пользователя';
+
+  @override
+  String get adminPremiumSearchPlaceholder => 'email@example.com или user-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'Пожалуйста, введите email или UID';
+
+  @override
+  String get adminPremiumUserNotFound => 'Пользователь не найден';
+
+  @override
+  String get adminPremiumSearchError => 'Ошибка поиска';
+
+  @override
+  String get adminPremiumCurrentStatus => 'Текущий статус';
+
+  @override
+  String get adminPremiumAdminStatus => 'Админ Премиум';
+
+  @override
+  String get adminPremiumStoreStatus => 'Подписка в магазине';
+
+  @override
+  String get adminPremiumInactive => 'НЕ АКТИВНО';
+
+  @override
+  String get adminPremiumNoSubscription => 'Нет подписки';
+
+  @override
+  String get adminPremiumTier => 'Уровень';
+
+  @override
+  String get adminPremiumReason => 'Причина';
+
+  @override
+  String get adminPremiumGrantedBy => 'Выдал';
+
+  @override
+  String get adminPremiumManage => 'Управление Админ Премиум';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'Предоставить полный премиум-доступ независимо от подписок в магазине';
+
+  @override
+  String get adminPremiumSelectReason => 'Выберите причину';
+
+  @override
+  String get adminPremiumGrantButton => 'Выдать Полный Премиум';
+
+  @override
+  String get adminPremiumGrantSuccess => 'Админ Премиум успешно выдан!';
+
+  @override
+  String get adminPremiumGrantError => 'Не удалось выдать премиум';
+
+  @override
+  String get adminPremiumRevokeTitle => 'Отозвать Админ Премиум';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'Вы уверены, что хотите отозвать админ премиум у этого пользователя? Он потеряет премиум-доступ, если у него нет подписки в магазине.';
+
+  @override
+  String get adminPremiumRevokeButton => 'Отозвать Админ Премиум';
+
+  @override
+  String get adminPremiumRevokeSuccess => 'Админ Премиум успешно отозван';
+
+  @override
+  String get adminPremiumRevokeError => 'Не удалось отозвать премиум';
+
+  @override
+  String get adminPremiumAlreadyActive => 'Админ Премиум Активен';
+
+  @override
+  String get adminPremiumFullAccess =>
+      'У этого пользователя полный премиум-доступ';
+
+  @override
+  String get adminPremiumUidCopied => 'UID скопирован в буфер обмена';
+
+  @override
+  String get adminPremiumEmptyTitle => 'Поиск пользователя';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'Введите email или UID, чтобы найти пользователя и управлять его премиум-доступом';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'Тестировщик';
+
+  @override
+  String get adminPremiumReasonEmployee => 'Сотрудник';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'Инфлюенсер';
+
+  @override
+  String get adminPremiumReasonOther => 'Другое';
 }
