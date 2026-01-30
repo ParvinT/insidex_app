@@ -20,7 +20,9 @@ class SessionFilterService {
       // Check if session has audio for user's language
       final audioUrls = data['subliminal']?['audioUrls'];
 
-      if (audioUrls is Map && audioUrls.containsKey(userLanguage)) {
+      if (audioUrls is Map &&
+          (audioUrls.containsKey(userLanguage) ||
+              audioUrls.containsKey('en'))) {
         // Has audio for this language
         filteredSessions.add({
           'id': doc.id,
@@ -41,7 +43,7 @@ class SessionFilterService {
     final audioUrls = session['subliminal']?['audioUrls'];
 
     if (audioUrls is Map) {
-      return audioUrls.containsKey(userLanguage);
+      return audioUrls.containsKey(userLanguage) || audioUrls.containsKey('en');
     }
 
     return false;
@@ -59,8 +61,10 @@ class SessionFilterService {
       // Check if session has audio for user's language
       final audioUrls = session['subliminal']?['audioUrls'];
 
-      if (audioUrls is Map && audioUrls.containsKey(userLanguage)) {
-        // Has audio for this language
+      if (audioUrls is Map &&
+          (audioUrls.containsKey(userLanguage) ||
+              audioUrls.containsKey('en'))) {
+        // Has audio for user's language OR English fallback
         filteredSessions.add(session);
       }
       // Else: Skip this session (no compatible audio)
@@ -129,10 +133,12 @@ class SessionFilterService {
     for (final doc in docs) {
       final data = doc.data() as Map<String, dynamic>;
 
-      // 1. Check language
+      // 1. Check language (with English fallback)
       final audioUrls = data['subliminal']?['audioUrls'];
-      if (audioUrls is! Map || !audioUrls.containsKey(userLanguage)) {
-        continue; // Skip - no audio for user's language
+      if (audioUrls is! Map ||
+          (!audioUrls.containsKey(userLanguage) &&
+              !audioUrls.containsKey('en'))) {
+        continue; // Skip - no audio for user's language and no English fallback
       }
 
       // 2. Check gender

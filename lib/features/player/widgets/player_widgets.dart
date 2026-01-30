@@ -324,6 +324,7 @@ class PlayerPlayControls extends StatelessWidget {
 
         // Play/Pause
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: onPlayPause,
           child: Container(
             width: 70.w,

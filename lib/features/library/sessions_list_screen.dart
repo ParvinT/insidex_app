@@ -1,6 +1,7 @@
 // lib/features/library/session_list_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -388,17 +389,42 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                                     ),
                                   SizedBox(width: 6.w),
                                   Flexible(
-                                    child: Text(
-                                      rightTitleText,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.center,
-                                      style: GoogleFonts.inter(
-                                        fontSize: (18.sp).clamp(16.0, 22.0),
-                                        fontWeight: FontWeight.w700,
-                                        color: colors.textPrimary,
-                                      ),
-                                    ),
+                                    child: rightTitleText.length > 15
+                                        ? SizedBox(
+                                            height: 24.h,
+                                            child: Marquee(
+                                              text: rightTitleText,
+                                              style: GoogleFonts.inter(
+                                                fontSize:
+                                                    (16.sp).clamp(14.0, 18.0),
+                                                fontWeight: FontWeight.w700,
+                                                color: colors.textPrimary,
+                                              ),
+                                              scrollAxis: Axis.horizontal,
+                                              blankSpace: 40.0,
+                                              velocity: 30.0,
+                                              pauseAfterRound:
+                                                  const Duration(seconds: 2),
+                                              startPadding: 0,
+                                              accelerationDuration:
+                                                  const Duration(seconds: 1),
+                                              decelerationDuration:
+                                                  const Duration(
+                                                      milliseconds: 500),
+                                            ),
+                                          )
+                                        : Text(
+                                            rightTitleText,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.inter(
+                                              fontSize:
+                                                  (16.sp).clamp(14.0, 18.0),
+                                              fontWeight: FontWeight.w700,
+                                              color: colors.textPrimary,
+                                            ),
+                                          ),
                                   ),
                                 ],
                               ),

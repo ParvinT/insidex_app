@@ -1,6 +1,7 @@
 // lib/features/subscription/widgets/package_card.dart
 
 import 'dart:math' show max;
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -434,7 +435,12 @@ class PackageCard extends StatelessWidget {
     if (overrides.containsKey(code.toUpperCase())) {
       return overrides[code.toUpperCase()]!;
     }
-    return '\$';
+    try {
+      final format = NumberFormat.simpleCurrency(name: code);
+      return format.currencySymbol;
+    } catch (e) {
+      return '$code ';
+    }
   }
 
   String _getLocalizedFeatureTitle(BuildContext context, String originalTitle) {

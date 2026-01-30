@@ -61,6 +61,7 @@ functions/node_modules/
 
 # Firebase Hosting (contains API keys)
 hosting/public/
+web/app_check_config.js
 
 
 #lib/l10n/app_localizations.dart

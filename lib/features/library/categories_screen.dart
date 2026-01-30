@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../core/themes/app_theme_extension.dart';
 import 'sessions_list_screen.dart';
@@ -534,40 +535,45 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
                   // Content
                   Padding(
-                    padding: EdgeInsets.all(16.w),
+                    padding: EdgeInsets.all(14.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Icon
-                        SizedBox(
-                          width: 60.w,
-                          height: 60.w,
-                          child: Lottie.asset(
-                            AppIcons.getAnimationPath(
-                              AppIcons.getIconByName(
-                                      category.iconName)?['path'] ??
-                                  'meditation.json',
+                        // Icon - Flexible, kalan alanı kullanır
+                        Flexible(
+                          flex: 1,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: SizedBox(
+                              width: 50.w,
+                              height: 50.w,
+                              child: Lottie.asset(
+                                AppIcons.getAnimationPath(
+                                  AppIcons.getIconByName(
+                                          category.iconName)?['path'] ??
+                                      'meditation.json',
+                                ),
+                                fit: BoxFit.contain,
+                                repeat: true,
+                              ),
                             ),
-                            fit: BoxFit.contain,
-                            repeat: true,
                           ),
                         ),
 
-                        const Spacer(),
-
                         // Title
-                        Text(
+                        AutoSizeText(
                           localizedName,
-                          maxLines: 1,
+                          maxLines: 2,
+                          minFontSize: 11,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 18.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
 
-                        SizedBox(height: 4.h),
+                        SizedBox(height: 2.h),
 
                         // Session Count
                         StreamBuilder<QuerySnapshot>(
@@ -655,26 +661,33 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
     // Empty state
     if (_allSessions.isEmpty && !_hasMoreSessions) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.library_music,
-              size: 64.sp,
-              color: colors.greyLight,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              AppLocalizations.of(context).noSessionsAvailable,
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: colors.textSecondary,
+      return Column(
+        children: [
+          _buildGenderFilter(colors),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.library_music,
+                    size: 64.sp,
+                    color: colors.greyLight,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    AppLocalizations.of(context).noSessionsAvailable,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 

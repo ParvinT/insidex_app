@@ -58,7 +58,7 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
 
     return Container(
       width: imageSize,
-      height: imageSize,
+      height: imageSize * 9 / 16,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
