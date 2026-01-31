@@ -43,9 +43,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/auth/login');
       });
     } else {
-      final userProvider = context.read<UserProvider>();
-      _nameController.text = userProvider.userName;
-      _selectedAvatar = userProvider.avatarEmoji;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final userProvider = context.read<UserProvider>();
+        setState(() {
+          _nameController.text = userProvider.userName;
+          _selectedAvatar = userProvider.avatarEmoji;
+        });
+      });
     }
   }
 
