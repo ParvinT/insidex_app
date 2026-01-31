@@ -48,8 +48,7 @@ void main() async {
   await FirebaseAppCheck.instance.activate(
     androidProvider:
         kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
-    appleProvider:
-        kReleaseMode ? AppleProvider.deviceCheck : AppleProvider.debug,
+    appleProvider: kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
     webProvider:
         ReCaptchaV3Provider('6Lc9aFssAAAAAEojp9FJJkOnIr7dEqSV4wK4nmdn'),
   );

@@ -1610,7 +1610,7 @@ PODS:
     - Flutter
     - FlutterMacOS
   - SwiftyGif (5.4.5)
-  - TSBackgroundFetch (4.0.5)
+  - TSBackgroundFetch (4.0.6)
   - url_launcher_ios (0.0.1):
     - Flutter
 
@@ -1812,7 +1812,7 @@ SPEC CHECKSUMS:
   shared_preferences_foundation: 9e1978ff2562383bd5676f64ec4e9aa8fa06a6f7
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   SwiftyGif: 706c60cf65fa2bc5ee0313beece843c8eb8194d4
-  TSBackgroundFetch: e91020924db32f27d0a43df7dec6f73f10743571
+  TSBackgroundFetch: 0afbeaae4e1132866e1d4b6e55265af26b5958ae
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
 
 PODFILE CHECKSUM: 7c05285d3b2b466be88aad4dda93b2a42d1a5f13
