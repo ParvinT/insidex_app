@@ -10,6 +10,7 @@ import '../../services/disease/disease_cause_service.dart';
 import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'add_disease_cause_screen.dart';
+import 'widgets/admin_search_bar.dart';
 
 class DiseaseCauseManagementScreen extends StatefulWidget {
   const DiseaseCauseManagementScreen({super.key});
@@ -28,10 +29,20 @@ class _DiseaseCauseManagementScreenState
   Map<String, DiseaseModel> _diseasesById = {};
   bool _isLoading = true;
 
+  // Search
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadData() async {
@@ -64,6 +75,50 @@ class _DiseaseCauseManagementScreenState
         );
       }
     }
+  }
+
+  List<DiseaseCauseModel> get _filteredCauses {
+    var causes = _causes;
+
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      causes = causes.where((cause) {
+        // Search by disease name
+        final disease = _diseasesById[cause.diseaseId];
+        if (disease != null) {
+          final searchableNames = [
+            disease.getLocalizedName('en'),
+            disease.getLocalizedName('tr'),
+            disease.getLocalizedName('ru'),
+            disease.getLocalizedName('hi'),
+          ];
+          if (searchableNames
+              .any((name) => name.toLowerCase().contains(query))) {
+            return true;
+          }
+        }
+
+        // Search by session number
+        if (cause.sessionNumber.toString().contains(query)) return true;
+
+        // Search by content
+        final searchableContent = [
+          cause.getLocalizedContent('en'),
+          cause.getLocalizedContent('tr'),
+          cause.getLocalizedContent('ru'),
+          cause.getLocalizedContent('hi'),
+        ];
+        if (searchableContent
+            .any((content) => content.toLowerCase().contains(query))) {
+          return true;
+        }
+
+        return false;
+      }).toList();
+    }
+
+    return causes;
   }
 
   Future<void> _deleteCause(DiseaseCauseModel cause) async {
@@ -158,16 +213,38 @@ class _DiseaseCauseManagementScreenState
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
-          : _causes.isEmpty
-              ? _buildEmptyState(colors)
-              : ListView.builder(
-                  padding: EdgeInsets.all(20.w),
-                  itemCount: _causes.length,
-                  itemBuilder: (context, index) {
-                    final cause = _causes[index];
-                    return _buildCauseCard(cause, colors);
-                  },
+          : Column(
+              children: [
+                // Search Bar
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  child: AdminSearchBar(
+                    controller: _searchController,
+                    onSearchChanged: (query) {
+                      setState(() => _searchQuery = query);
+                    },
+                    onClear: () {
+                      setState(() => _searchQuery = '');
+                    },
+                  ),
                 ),
+
+                // Cause List
+                Expanded(
+                  child: _filteredCauses.isEmpty
+                      ? _buildEmptyState(colors)
+                      : ListView.builder(
+                          padding: EdgeInsets.all(20.w),
+                          itemCount: _filteredCauses.length,
+                          itemBuilder: (context, index) {
+                            final cause = _filteredCauses[index];
+                            return _buildCauseCard(cause, colors);
+                          },
+                        ),
+                ),
+              ],
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _navigateToAddEdit(),
         backgroundColor: colors.textPrimary,
@@ -292,18 +369,24 @@ class _DiseaseCauseManagementScreenState
   }
 
   Widget _buildEmptyState(AppThemeExtension colors) {
+    final isSearching = _searchQuery.isNotEmpty;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.medical_information_outlined,
+            isSearching
+                ? Icons.search_off_rounded
+                : Icons.medical_information_outlined,
             size: 80.sp,
             color: colors.greyMedium,
           ),
           SizedBox(height: 16.h),
           Text(
-            AppLocalizations.of(context).noDiseaseCausesFound,
+            isSearching
+                ? AppLocalizations.of(context).noResultsFound
+                : AppLocalizations.of(context).noDiseaseCausesFound,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -312,7 +395,9 @@ class _DiseaseCauseManagementScreenState
           ),
           SizedBox(height: 8.h),
           Text(
-            AppLocalizations.of(context).tapToAddDiseaseCause,
+            isSearching
+                ? AppLocalizations.of(context).tryDifferentKeywords
+                : AppLocalizations.of(context).tapToAddDiseaseCause,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: colors.textSecondary,

@@ -16,6 +16,7 @@ import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'add_category_screen.dart';
 import 'category_images_screen.dart';
+import 'widgets/admin_search_bar.dart';
 
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
@@ -29,12 +30,22 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   final CategoryService _categoryService = CategoryService();
   List<CategoryModel> _filteredCategories = [];
   bool _isLoading = true;
-  bool _showOnlyUserLanguage = true; // Toggle filter
+  bool _showOnlyUserLanguage = true;
+
+  // Search
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCategories() async {
@@ -135,13 +146,95 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(color: colors.textPrimary),
-            )
-          : _filteredCategories.isEmpty
-              ? _buildEmptyState(isTablet, isDesktop, colors)
-              : _buildCategoryList(isTablet, isDesktop, colors),
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            child: AdminSearchBar(
+              controller: _searchController,
+              onSearchChanged: (query) {
+                setState(() => _searchQuery = query);
+              },
+              onClear: () {
+                setState(() => _searchQuery = '');
+              },
+            ),
+          ),
+
+          // Content
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(color: colors.textPrimary),
+                  )
+                : _buildCategoryContent(isTablet, isDesktop, colors),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryContent(
+      bool isTablet, bool isDesktop, AppThemeExtension colors) {
+    // Apply search filter
+    var displayCategories = _filteredCategories;
+
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      displayCategories = _filteredCategories.where((category) {
+        // Search in all language names
+        for (final name in category.names.values) {
+          if (name.toLowerCase().contains(query)) return true;
+        }
+        // Search in icon name
+        if (category.iconName.toLowerCase().contains(query)) return true;
+        return false;
+      }).toList();
+    }
+
+    if (displayCategories.isEmpty) {
+      // Show different message based on search vs no data
+      if (_searchQuery.isNotEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search_off_rounded,
+                size: isTablet ? 80.sp : 64.sp,
+                color: colors.greyMedium,
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                AppLocalizations.of(context).noResultsFound,
+                style: GoogleFonts.inter(
+                  fontSize: isTablet ? 20.sp : 18.sp,
+                  color: colors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                AppLocalizations.of(context).tryDifferentKeywords,
+                style: GoogleFonts.inter(
+                  fontSize: isTablet ? 16.sp : 14.sp,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+      return _buildEmptyState(isTablet, isDesktop, colors);
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      itemCount: displayCategories.length,
+      itemBuilder: (context, index) {
+        final category = displayCategories[index];
+        return _buildCategoryCard(category, isTablet, isDesktop, colors);
+      },
     );
   }
 
@@ -191,18 +284,6 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildCategoryList(
-      bool isTablet, bool isDesktop, AppThemeExtension colors) {
-    return ListView.builder(
-      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
-      itemCount: _filteredCategories.length,
-      itemBuilder: (context, index) {
-        final category = _filteredCategories[index];
-        return _buildCategoryCard(category, isTablet, isDesktop, colors);
-      },
     );
   }
 

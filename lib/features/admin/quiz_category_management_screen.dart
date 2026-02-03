@@ -9,6 +9,7 @@ import '../../models/quiz_category_model.dart';
 import '../../features/quiz/services/quiz_category_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'add_quiz_category_screen.dart';
+import 'widgets/admin_search_bar.dart';
 
 class QuizCategoryManagementScreen extends StatefulWidget {
   const QuizCategoryManagementScreen({super.key});
@@ -27,10 +28,20 @@ class _QuizCategoryManagementScreenState
   Map<String, int> _femaleCounts = {};
   bool _isLoading = true;
 
+  // Search
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadCategories();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCategories() async {
@@ -174,11 +185,33 @@ class _QuizCategoryManagementScreenState
           ),
         ),
       ),
-      body: _isLoading
-          ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
-          : _categories.isEmpty
-              ? _buildEmptyState(colors)
-              : _buildCategoryList(colors, isTablet),
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            child: AdminSearchBar(
+              controller: _searchController,
+              onSearchChanged: (query) {
+                setState(() => _searchQuery = query);
+              },
+              onClear: () {
+                setState(() => _searchQuery = '');
+              },
+            ),
+          ),
+
+          // Content
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(color: colors.textPrimary))
+                : _categories.isEmpty
+                    ? _buildEmptyState(colors)
+                    : _buildCategoryList(colors, isTablet),
+          ),
+        ],
+      ),
     );
   }
 
@@ -215,11 +248,60 @@ class _QuizCategoryManagementScreenState
   }
 
   Widget _buildCategoryList(AppThemeExtension colors, bool isTablet) {
+    // Apply search filter
+    var displayCategories = _categories;
+
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      displayCategories = _categories.where((category) {
+        // Search in all language names
+        for (final name in category.names.values) {
+          if (name.toLowerCase().contains(query)) return true;
+        }
+        // Search in icon name
+        if (category.iconName.toLowerCase().contains(query)) return true;
+        return false;
+      }).toList();
+    }
+
+    // Show empty search result
+    if (displayCategories.isEmpty && _searchQuery.isNotEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 80.sp,
+              color: colors.textSecondary.withValues(alpha: 0.5),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              AppLocalizations.of(context).noResultsFound,
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              AppLocalizations.of(context).tryDifferentKeywords,
+              style: GoogleFonts.inter(
+                fontSize: 14.sp,
+                color: colors.textSecondary.withValues(alpha: 0.7),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
       padding: EdgeInsets.all(isTablet ? 24.w : 16.w),
-      itemCount: _categories.length,
+      itemCount: displayCategories.length,
       itemBuilder: (context, index) {
-        final category = _categories[index];
+        final category = displayCategories[index];
         return _buildCategoryCard(
           category: category,
           colors: colors,

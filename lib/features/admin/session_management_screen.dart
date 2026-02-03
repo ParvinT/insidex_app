@@ -12,6 +12,8 @@ import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
 import '../../services/storage_service.dart';
 import 'add_session_screen.dart';
+import 'widgets/admin_search_bar.dart';
+import 'services/admin_search_service.dart';
 
 class SessionManagementScreen extends StatefulWidget {
   const SessionManagementScreen({super.key});
@@ -26,10 +28,21 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
   List<CategoryModel> _categories = [];
   final CategoryService _categoryService = CategoryService();
 
+  // Search
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+  final AdminSearchService _adminSearchService = AdminSearchService();
+
   @override
   void initState() {
     super.initState();
     _loadCategories();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCategories() async {
@@ -189,6 +202,19 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
       ),
       body: Column(
         children: [
+          // Search Bar
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            child: AdminSearchBar(
+              controller: _searchController,
+              onSearchChanged: (query) {
+                setState(() => _searchQuery = query);
+              },
+              onClear: () {
+                setState(() => _searchQuery = '');
+              },
+            ),
+          ),
           // Category Filter - Horizontal Scroll
           Container(
             height: 50.h,
@@ -293,6 +319,14 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
                 var sessions = snapshot.data!.docs;
 
+                // Apply search filter
+                if (_searchQuery.isNotEmpty) {
+                  sessions = _adminSearchService.filterSessionsLocally(
+                    sessions,
+                    _searchQuery,
+                  );
+                }
+
                 // ✅ Client-side sorting when filtering by category
                 if (_selectedCategoryId != null && sessions.isNotEmpty) {
                   sessions = sessions.toList()
@@ -316,18 +350,32 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.library_music,
+                          _searchQuery.isNotEmpty
+                              ? Icons.search_off_rounded
+                              : Icons.library_music,
                           size: 64.sp,
                           color: colors.textSecondary,
                         ),
                         SizedBox(height: 16.h),
                         Text(
-                          AppLocalizations.of(context).noSessionsFound,
+                          _searchQuery.isNotEmpty
+                              ? AppLocalizations.of(context).noResultsFound
+                              : AppLocalizations.of(context).noSessionsFound,
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             color: colors.textSecondary,
                           ),
                         ),
+                        if (_searchQuery.isNotEmpty) ...[
+                          SizedBox(height: 8.h),
+                          Text(
+                            AppLocalizations.of(context).tryDifferentKeywords,
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   );

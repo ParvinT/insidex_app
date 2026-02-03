@@ -9,6 +9,7 @@ import '../../models/disease_model.dart';
 import '../../services/disease/disease_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'add_disease_screen.dart';
+import 'widgets/admin_search_bar.dart';
 
 class DiseaseManagementScreen extends StatefulWidget {
   const DiseaseManagementScreen({super.key});
@@ -25,10 +26,20 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
   bool _isLoading = true;
   String _selectedGender = 'all';
 
+  // Search
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _loadDiseases();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDiseases() async {
@@ -61,6 +72,22 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
     var diseases = _selectedGender == 'all'
         ? _diseases
         : _diseases.where((s) => s.gender == _selectedGender).toList();
+
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      diseases = diseases.where((disease) {
+        // Search in all language names
+        final searchableNames = [
+          disease.getLocalizedName('en'),
+          disease.getLocalizedName('tr'),
+          disease.getLocalizedName('ru'),
+          disease.getLocalizedName('hi'),
+        ];
+        return searchableNames
+            .any((name) => name.toLowerCase().contains(query));
+      }).toList();
+    }
 
     diseases.sort((a, b) {
       final nameA = a.getLocalizedName('en').toLowerCase();
@@ -162,6 +189,21 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
           : Column(
               children: [
+                // Search Bar
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  child: AdminSearchBar(
+                    controller: _searchController,
+                    onSearchChanged: (query) {
+                      setState(() => _searchQuery = query);
+                    },
+                    onClear: () {
+                      setState(() => _searchQuery = '');
+                    },
+                  ),
+                ),
+
                 _buildGenderFilter(colors),
 
                 // Disease List
@@ -331,18 +373,22 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
   }
 
   Widget _buildEmptyState(AppThemeExtension colors) {
+    final isSearching = _searchQuery.isNotEmpty;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            Icons.psychology_outlined,
+            isSearching ? Icons.search_off_rounded : Icons.psychology_outlined,
             size: 80.sp,
             color: colors.greyMedium,
           ),
           SizedBox(height: 16.h),
           Text(
-            AppLocalizations.of(context).noDiseasesFound,
+            isSearching
+                ? AppLocalizations.of(context).noResultsFound
+                : AppLocalizations.of(context).noDiseasesFound,
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -351,7 +397,9 @@ class _DiseaseManagementScreenState extends State<DiseaseManagementScreen> {
           ),
           SizedBox(height: 8.h),
           Text(
-            AppLocalizations.of(context).tapToAddDisease,
+            isSearching
+                ? AppLocalizations.of(context).tryDifferentKeywords
+                : AppLocalizations.of(context).tapToAddDisease,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               color: colors.textSecondary,
