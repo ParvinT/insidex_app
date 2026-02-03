@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import '../../../core/constants/app_colors.dart';
+import 'package:country_flags/country_flags.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../core/responsive/context_ext.dart';
 
@@ -13,6 +14,7 @@ class LanguageSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Consumer<LocaleProvider>(
       builder: (context, localeProvider, _) {
         return InkWell(
@@ -20,30 +22,23 @@ class LanguageSelector extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: AppColors.greyBorder,
+                color: colors.border,
                 width: 1,
               ),
             ),
             child: Row(
               children: [
                 // Icon
-                Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: const BoxDecoration(
-                    color: AppColors.greyLight,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      localeProvider.getLanguageFlag(
-                        localeProvider.locale.languageCode,
-                      ),
-                      style: TextStyle(fontSize: 20.sp),
-                    ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: CountryFlag.fromCountryCode(
+                    localeProvider
+                        .getCountryCode(localeProvider.locale.languageCode),
+                    height: 20,
+                    width: 28,
                   ),
                 ),
                 SizedBox(width: 16.w),
@@ -58,7 +53,7 @@ class LanguageSelector extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 2.h),
@@ -68,7 +63,7 @@ class LanguageSelector extends StatelessWidget {
                         ),
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -79,7 +74,7 @@ class LanguageSelector extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_ios,
                   size: 16.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ],
             ),
@@ -132,19 +127,11 @@ class LanguageSelector extends StatelessWidget {
             child: Container(
               constraints: BoxConstraints(
                 maxWidth: 400.w,
-                maxHeight: 500.h, // ← Max yükseklik ekle (overflow önlenir)
+                maxHeight: 500.h,
               ),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius:
-                    BorderRadius.circular(24.r), // ← Tüm köşeler yuvarlak
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+                color: context.colors.backgroundElevated,
+                borderRadius: BorderRadius.circular(24.r),
               ),
               child: SingleChildScrollView(
                 child: Column(
@@ -162,7 +149,7 @@ class LanguageSelector extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: titleSize,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: context.colors.textPrimary,
                               ),
                             ),
                           ),
@@ -170,7 +157,7 @@ class LanguageSelector extends StatelessWidget {
                             onPressed: () => Navigator.pop(context),
                             icon: Icon(
                               Icons.close,
-                              color: AppColors.textSecondary,
+                              color: context.colors.textSecondary,
                               size: 24.sp,
                             ),
                             padding: EdgeInsets.zero,
@@ -180,7 +167,7 @@ class LanguageSelector extends StatelessWidget {
                       ),
                     ),
 
-                    const Divider(height: 1, color: AppColors.greyBorder),
+                    Divider(height: 1, color: context.colors.border),
 
                     // Language Options
                     ...LocaleProvider.supportedLocales.map((locale) {
@@ -215,30 +202,25 @@ class LanguageSelector extends StatelessWidget {
     required LocaleProvider localeProvider,
     required double itemSize,
   }) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.textPrimary.withValues(alpha: 0.1)
+              ? colors.textPrimary.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
         child: Row(
           children: [
             // Flag emoji
-            Container(
-              width: 36.w,
-              height: 36.w,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  localeProvider.getLanguageFlag(locale.languageCode),
-                  style: TextStyle(fontSize: 18.sp),
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: CountryFlag.fromCountryCode(
+                localeProvider.getCountryCode(locale.languageCode),
+                height: 18,
+                width: 26,
               ),
             ),
             SizedBox(width: 12.w),
@@ -250,9 +232,7 @@ class LanguageSelector extends StatelessWidget {
                 style: GoogleFonts.inter(
                   fontSize: itemSize,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected
-                      ? AppColors.textPrimary
-                      : AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ),
@@ -261,7 +241,7 @@ class LanguageSelector extends StatelessWidget {
             if (isSelected)
               Icon(
                 Icons.check_circle,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 size: 24.sp,
               ),
           ],

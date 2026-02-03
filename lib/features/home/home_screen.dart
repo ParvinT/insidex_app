@@ -5,7 +5,10 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../core/constants/app_colors.dart';
+import 'widgets/home_card_button.dart';
+import 'widgets/feature_slideshow.dart';
+import 'widgets/greeting_section.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/responsive_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../features/library/categories_screen.dart';
@@ -14,7 +17,6 @@ import '../../shared/widgets/menu_overlay.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
 import '../../services/home_card_service.dart';
-import 'widgets/home_card_button.dart';
 import '../quiz/widgets/expandable_quiz_section.dart';
 import '../../l10n/app_localizations.dart';
 import '../search/search_screen.dart';
@@ -86,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return PopScope(
       canPop: true,
       child: ResponsiveScaffold(
@@ -94,13 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           children: [
             // Background + Main Content
             Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFF9F9F9), Color(0xFFEFEFEF)],
-                ),
-              ),
+              color: colors.background,
               child: Column(
                 children: [
                   // Header (Logo + Search + Quiz)
@@ -141,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildScrollableContent() {
     if (_isLoadingCards) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: context.colors.textPrimary,
         ),
       );
     }
@@ -154,7 +151,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           AppLocalizations.of(context).noCardsAvailable,
           style: GoogleFonts.inter(
             fontSize: 16.sp,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
       );
@@ -190,6 +187,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
+          const FeatureSlideshow(),
+          const GreetingSection(),
           const ExpandableQuizSection(),
           SizedBox(height: 20.h),
           GridView.builder(
@@ -266,8 +265,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   'assets/images/logo.svg',
                   height: isDesktop ? 32.h : (isTablet ? 28.h : 26.h),
                   fit: BoxFit.contain,
-                  colorFilter: const ColorFilter.mode(
-                    AppColors.textPrimary,
+                  colorFilter: ColorFilter.mode(
+                    context.colors.textPrimary,
                     BlendMode.srcIn,
                   ),
                 ),
@@ -324,9 +323,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           vertical: (8.h).clamp(6.0, 10.0),
         ),
         decoration: BoxDecoration(
-          color: isFilled ? Colors.black : Colors.transparent,
+          color: isFilled
+              ? (context.isDarkMode
+                  ? context.colors.textPrimary.withValues(alpha: 0.85)
+                  : context.colors.textPrimary)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20.r),
-          border: isFilled ? null : Border.all(color: Colors.black, width: 1),
+          border: isFilled
+              ? null
+              : Border.all(color: context.colors.textPrimary, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -337,14 +342,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 fontSize:
                     (12.sp).clamp(11.0, 14.0), // 🎯 IMPROVED: Clamped font size
                 fontWeight: FontWeight.w600,
-                color: isFilled ? Colors.white : Colors.black,
+                color: isFilled
+                    ? context.colors.textOnPrimary
+                    : context.colors.textPrimary,
               ),
             ),
             SizedBox(width: 6.w),
             Icon(
               Icons.menu,
               size: (14.sp).clamp(12.0, 16.0), // 🎯 IMPROVED: Clamped icon size
-              color: isFilled ? Colors.white : Colors.black,
+              color: isFilled
+                  ? context.colors.textOnPrimary
+                  : context.colors.textPrimary,
             ),
           ],
         ),
@@ -354,6 +363,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // Bottom nav content (only content; height/shape is in ResponsiveScaffold)
   Widget _buildBottomNavContent() {
+    final colors = context.colors;
     int current = 0;
 
     Widget item(IconData icon, String label, int idx, VoidCallback onTap) {
@@ -366,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               Icon(icon,
                   size: context.isTablet ? 24 : 22,
-                  color: selected ? AppColors.textPrimary : Colors.grey[500]),
+                  color: selected ? colors.textPrimary : colors.textSecondary),
               const SizedBox(height: 4),
               SizedBox(
                 width: context.isTablet ? 76 : 64,
@@ -378,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   style: GoogleFonts.inter(
                     fontSize: context.isTablet ? 11 : 10,
                     fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-                    color: selected ? AppColors.textPrimary : Colors.grey[500],
+                    color: selected ? colors.textPrimary : colors.textSecondary,
                   ),
                 ),
               ),
@@ -394,11 +404,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         item(Icons.home_outlined, l10n.home, 0, () {}),
-        item(Icons.play_circle_outline, l10n.playlist, 1, () {
+        item(Icons.headphones_outlined, l10n.sessions, 1, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const CategoriesScreen()));
+        }),
+        item(Icons.play_circle_outline, l10n.playlist, 2, () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const PlaylistScreen()));
         }),
-        item(Icons.person_outline, l10n.profile, 2, () {
+        item(Icons.person_outline, l10n.profile, 3, () {
           AppRoutes.navigateToProfile(context);
         }),
       ],

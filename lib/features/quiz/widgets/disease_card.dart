@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
 import '../../../services/language_helper_service.dart';
@@ -37,7 +37,7 @@ class DiseaseCard extends StatelessWidget {
       builder: (context, snapshot) {
         final currentLanguage = snapshot.data ?? 'en';
         final diseaseName = disease.getLocalizedName(currentLanguage);
-
+        final colors = context.colors;
         return InkWell(
           onTap: isDisabled && !isSelected ? null : onTap,
           borderRadius: BorderRadius.circular(borderRadius),
@@ -49,24 +49,19 @@ class DiseaseCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Colors.black
-                  : (isDisabled ? Colors.grey[100] : Colors.white),
+                  ? (context.isDarkMode
+                      ? colors.textPrimary.withValues(alpha: 0.85)
+                      : colors.textPrimary)
+                  : (isDisabled ? colors.greyLight : colors.backgroundCard),
               borderRadius: BorderRadius.circular(borderRadius),
               border: Border.all(
                 color: isSelected
-                    ? Colors.black
-                    : AppColors.greyBorder.withValues(alpha: 0.3),
+                    ? (context.isDarkMode
+                        ? colors.textPrimary.withValues(alpha: 0.85)
+                        : colors.textPrimary)
+                    : colors.border.withValues(alpha: 0.3),
                 width: isSelected ? 2 : 1,
               ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
             ),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -90,10 +85,10 @@ class DiseaseCard extends StatelessWidget {
                             fontWeight:
                                 isSelected ? FontWeight.w600 : FontWeight.w500,
                             color: isSelected
-                                ? Colors.white
+                                ? colors.textOnPrimary
                                 : (isDisabled
-                                    ? Colors.grey[400]
-                                    : AppColors.textPrimary),
+                                    ? colors.textLight
+                                    : colors.textPrimary),
                             height: 1.3,
                           ),
                           maxLines: 2,

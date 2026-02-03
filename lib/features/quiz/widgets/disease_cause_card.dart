@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 
 class DiseaseCauseCard extends StatelessWidget {
@@ -26,18 +26,19 @@ class DiseaseCauseCard extends StatelessWidget {
         isTablet ? 15.sp.clamp(14.0, 16.0) : 14.sp.clamp(13.0, 15.0);
     final double borderRadius = isTablet ? 18.r : 16.r;
 
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: AppColors.greyBorder.withValues(alpha: 0.3),
+          color: colors.border.withValues(alpha: 0.3),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: colors.textPrimary.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -52,7 +53,7 @@ class DiseaseCauseCard extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: contentSize,
               fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               height: 1.6,
             ),
             maxLines: 6,

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../models/category_model.dart';
@@ -33,6 +33,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   // Selected values
   String _selectedIcon = 'meditation';
+  String _selectedGender = 'both';
   String _selectedLanguage = AppLanguages.defaultLanguage;
 
   // Loading state
@@ -67,6 +68,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     final category = widget.categoryToEdit!;
 
     _selectedIcon = category.iconName;
+    _selectedGender = category.gender;
 
     // Load names for each language
     category.names.forEach((lang, name) {
@@ -82,6 +84,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -95,12 +98,12 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     final double verticalPadding = isDesktop ? 30.h : (isTablet ? 25.h : 20.h);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -110,7 +113,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -125,17 +128,25 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Icon & Section
-              _buildIconSection(isTablet, isDesktop),
+              _buildIconSection(isTablet, isDesktop, colors),
+
+              SizedBox(height: 24.h),
+
+              // Gender Selection
+              _buildSectionTitle(
+                  '👤 ${AppLocalizations.of(context).targetGender}', colors),
+              SizedBox(height: 12.h),
+              _buildGenderSelector(colors),
 
               SizedBox(height: 30.h),
 
               // Multi-Language Names Section
-              _buildMultiLanguageNamesSection(isTablet, isDesktop),
+              _buildMultiLanguageNamesSection(isTablet, isDesktop, colors),
 
               SizedBox(height: 40.h),
 
               // Save Button
-              _buildSaveButton(isTablet, isDesktop),
+              _buildSaveButton(isTablet, isDesktop, colors),
 
               SizedBox(height: 20.h),
             ],
@@ -145,13 +156,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     );
   }
 
-  Widget _buildIconSection(bool isTablet, bool isDesktop) {
+  Widget _buildIconSection(
+      bool isTablet, bool isDesktop, AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
@@ -162,10 +174,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               width: isTablet ? 80.w : 70.w,
               height: isTablet ? 80.w : 70.w,
               decoration: BoxDecoration(
-                color: AppColors.textPrimary.withValues(alpha: 0.1),
+                color: colors.textPrimary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                   width: 2,
                 ),
               ),
@@ -197,7 +209,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 16.sp : 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -205,7 +217,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                   AppLocalizations.of(context).tapToChooseIcon,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -216,13 +228,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     );
   }
 
-  Widget _buildMultiLanguageNamesSection(bool isTablet, bool isDesktop) {
+  Widget _buildMultiLanguageNamesSection(
+      bool isTablet, bool isDesktop, AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -233,7 +246,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 18.sp : 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
 
@@ -246,7 +259,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               children: AppLanguages.supportedLanguages.map((lang) {
                 return Padding(
                   padding: EdgeInsets.only(right: 8.w),
-                  child: _buildLanguageTab(lang, isTablet),
+                  child: _buildLanguageTab(lang, isTablet, colors),
                 );
               }).toList(),
             ),
@@ -258,7 +271,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
-              color: AppColors.textPrimary.withValues(alpha: 0.1),
+              color: colors.textPrimary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
@@ -266,7 +279,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 14.sp : 12.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
           ),
@@ -285,8 +298,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12.r),
-                borderSide: const BorderSide(
-                  color: AppColors.textPrimary,
+                borderSide: BorderSide(
+                  color: colors.textPrimary,
                   width: 2,
                 ),
               ),
@@ -305,7 +318,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             AppLocalizations.of(context).pleaseEnterTitleInOneLang,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               fontStyle: FontStyle.italic,
             ),
           ),
@@ -314,7 +327,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     );
   }
 
-  Widget _buildLanguageTab(String lang, bool isTablet) {
+  Widget _buildLanguageTab(
+      String lang, bool isTablet, AppThemeExtension colors) {
     final isSelected = _selectedLanguage == lang;
     final hasContent = _nameControllers[lang]!.text.trim().isNotEmpty;
 
@@ -326,17 +340,16 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     if (hasContent) {
       // Has content
       borderColor = Colors.green;
-      backgroundColor =
-          isSelected ? AppColors.textPrimary : Colors.green.shade50;
+      backgroundColor = isSelected ? colors.textPrimary : Colors.green.shade50;
       statusIcon = Icon(Icons.check_circle,
-          size: 16.sp, color: isSelected ? Colors.white : Colors.green);
+          size: 16.sp, color: isSelected ? colors.textOnPrimary : Colors.green);
     } else {
       // Empty
-      borderColor = Colors.grey.shade300;
-      backgroundColor =
-          isSelected ? AppColors.textPrimary : Colors.grey.shade100;
+      borderColor = colors.border;
+      backgroundColor = isSelected ? colors.textPrimary : colors.greyLight;
       statusIcon = Icon(Icons.circle_outlined,
-          size: 16.sp, color: isSelected ? Colors.white : Colors.grey);
+          size: 16.sp,
+          color: isSelected ? colors.textOnPrimary : colors.textSecondary);
     }
 
     return GestureDetector(
@@ -358,7 +371,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               AppLanguages.getLabel(lang),
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 15.sp : 14.sp,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? colors.textOnPrimary : colors.textPrimary,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -370,13 +383,14 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
     );
   }
 
-  Widget _buildSaveButton(bool isTablet, bool isDesktop) {
+  Widget _buildSaveButton(
+      bool isTablet, bool isDesktop, AppThemeExtension colors) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveCategory,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.textPrimary,
+          backgroundColor: colors.textPrimary,
           padding: EdgeInsets.symmetric(
             vertical: isTablet ? 18.h : 16.h,
           ),
@@ -389,8 +403,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
             ? SizedBox(
                 height: 20.h,
                 width: 20.h,
-                child: const CircularProgressIndicator(
-                  color: Colors.white,
+                child: CircularProgressIndicator(
+                  color: colors.textOnPrimary,
                   strokeWidth: 2,
                 ),
               )
@@ -401,7 +415,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                 style: GoogleFonts.inter(
                   fontSize: isTablet ? 18.sp : 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: colors.textOnPrimary,
                 ),
               ),
       ),
@@ -411,6 +425,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
   // =================== ACTIONS ===================
 
   void _showIconPicker() {
+    final colors = context.colors;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -418,7 +433,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       builder: (context) => Container(
         height: 500.h,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.backgroundElevated,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20.r),
             topRight: Radius.circular(20.r),
@@ -432,7 +447,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: colors.border,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -445,7 +460,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
 
@@ -480,21 +495,20 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             gradient: isSelected
                                 ? LinearGradient(
                                     colors: [
-                                      AppColors.textPrimary,
-                                      AppColors.textPrimary
-                                          .withValues(alpha: 0.7),
+                                      colors.textPrimary,
+                                      colors.textPrimary.withValues(alpha: 0.7),
                                     ],
                                   )
                                 : LinearGradient(
                                     colors: [
-                                      Colors.grey.shade200,
-                                      Colors.grey.shade300,
+                                      colors.greyLight,
+                                      colors.greyMedium,
                                     ],
                                   ),
                             borderRadius: BorderRadius.circular(16.r),
                             border: isSelected
                                 ? Border.all(
-                                    color: AppColors.textPrimary,
+                                    color: colors.textPrimary,
                                     width: 3,
                                   )
                                 : null,
@@ -516,8 +530,8 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                             fontWeight:
                                 isSelected ? FontWeight.w600 : FontWeight.w400,
                             color: isSelected
-                                ? AppColors.textPrimary
-                                : AppColors.textSecondary,
+                                ? colors.textPrimary
+                                : colors.textSecondary,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 2,
@@ -568,6 +582,7 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
       final category = CategoryModel(
         id: widget.categoryToEdit?.id ?? '',
         iconName: _selectedIcon,
+        gender: _selectedGender,
         names: names,
         backgroundImages: widget.categoryToEdit?.backgroundImages ?? [],
         createdAt: widget.categoryToEdit?.createdAt,
@@ -629,5 +644,71 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Widget _buildSectionTitle(String title, AppThemeExtension colors) {
+    return Text(
+      title,
+      style: GoogleFonts.inter(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: colors.textPrimary,
+      ),
+    );
+  }
+
+  Widget _buildGenderSelector(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.all(4.w),
+      decoration: BoxDecoration(
+        color: colors.greyLight,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        children: [
+          _buildGenderOption(
+              'male', '♂ ${AppLocalizations.of(context).male}', colors),
+          _buildGenderOption(
+              'female', '♀ ${AppLocalizations.of(context).female}', colors),
+          _buildGenderOption(
+              'both', '⚥ ${AppLocalizations.of(context).genderBoth}', colors),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGenderOption(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGender == value;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _selectedGender = value),
+        child: Container(
+          padding: EdgeInsets.symmetric(vertical: 14.h),
+          decoration: BoxDecoration(
+            color: isSelected ? colors.backgroundPure : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.r),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: colors.textPrimary.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                : null,
+          ),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: isSelected ? colors.textPrimary : colors.textSecondary,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

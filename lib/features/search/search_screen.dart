@@ -4,16 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
-import 'search_service.dart';
 import '../library/sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
+import '../../services/session_filter_service.dart';
+import '../quiz/screens/quiz_results_screen.dart';
+import 'search_service.dart';
 import 'search_history_service.dart';
 import 'widgets/search_history_view.dart';
+import 'quiz_search_service.dart';
+import 'widgets/quiz_category_search_card.dart';
+import 'widgets/disease_search_card.dart';
+import 'widgets/quiz_category_diseases_sheet.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -26,6 +32,7 @@ class _SearchScreenState extends State<SearchScreen>
     with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   final SearchService _searchService = SearchService();
+  final QuizSearchService _quizSearchService = QuizSearchService();
   final FocusNode _focusNode = FocusNode();
   final SearchHistoryService _historyService = SearchHistoryService();
   late TabController _tabController;
@@ -34,15 +41,20 @@ class _SearchScreenState extends State<SearchScreen>
   bool _isLoadingHistory = true;
 
   bool _isSearching = false;
+  final String _selectedGenderFilter = 'all';
   Map<String, dynamic> _searchResults = {
     'categories': <Map<String, dynamic>>[],
     'sessions': <Map<String, dynamic>>[],
+  };
+  Map<String, dynamic> _quizSearchResults = {
+    'quizCategories': <QuizCategorySearchResult>[],
+    'diseases': <DiseaseSearchResult>[],
   };
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _loadSearchHistory();
 
     // Auto-focus when opened
@@ -103,7 +115,7 @@ class _SearchScreenState extends State<SearchScreen>
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: GoogleFonts.inter(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: context.colors.textSecondary),
             ),
           ),
           TextButton(
@@ -125,7 +137,7 @@ class _SearchScreenState extends State<SearchScreen>
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.searchHistoryCleared),
-            backgroundColor: AppColors.textPrimary,
+            backgroundColor: context.colors.textPrimary,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -140,6 +152,10 @@ class _SearchScreenState extends State<SearchScreen>
           'categories': <Map<String, dynamic>>[],
           'sessions': <Map<String, dynamic>>[],
         };
+        _quizSearchResults = {
+          'quizCategories': <QuizCategorySearchResult>[],
+          'diseases': <DiseaseSearchResult>[],
+        };
         _isSearching = false;
       });
       return;
@@ -147,25 +163,50 @@ class _SearchScreenState extends State<SearchScreen>
 
     setState(() => _isSearching = true);
 
-    final results = await _searchService.search(query);
+    // Search in parallel
+    final results = await Future.wait([
+      _searchService.search(query),
+      _quizSearchService.searchAll(query),
+    ]);
+
+    // 🆕 Apply gender filter to sessions
+    final searchResults = results[0];
+    final sessions = searchResults['sessions'] as List<Map<String, dynamic>>;
+    final filteredSessions = SessionFilterService.filterByGender(
+      sessions,
+      _selectedGenderFilter,
+    );
 
     setState(() {
-      _searchResults = results;
+      _searchResults = {
+        'categories': searchResults['categories'],
+        'sessions': filteredSessions,
+      };
+      _quizSearchResults = results[1];
       _isSearching = false;
     });
   }
 
-  int get _totalResults => _searchService.getTotalResultCount(_searchResults);
+  int get _totalResults =>
+      _searchService.getTotalResultCount(_searchResults) +
+      _quizSearchService.getTotalQuizResultCount(_quizSearchResults);
   int get _categoryCount => (_searchResults['categories'] as List).length;
   int get _sessionCount => (_searchResults['sessions'] as List).length;
+  int get _quizCategoryCount => // 🆕
+      (_quizSearchResults['quizCategories'] as List<QuizCategorySearchResult>)
+          .length;
+  int get _diseaseCount => // 🆕
+      (_quizSearchResults['diseases'] as List<DiseaseSearchResult>).length;
+  int get _quizTotalCount => _quizCategoryCount + _diseaseCount;
 
   @override
   Widget build(BuildContext context) {
     final isTablet = context.isTablet;
     final l10n = AppLocalizations.of(context);
 
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
           child: Column(
         children: [
@@ -186,7 +227,6 @@ class _SearchScreenState extends State<SearchScreen>
                 ? _buildLoadingState()
                 : _searchController.text.isEmpty
                     ? SearchHistoryView(
-                        // ⭐ BURAYI DEĞİŞTİR
                         searches: _recentSearches,
                         onSearchTap: _onHistoryItemTap,
                         onClearAll: _clearAllHistory,
@@ -201,6 +241,7 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildSearchTextField(bool isTablet, AppLocalizations l10n) {
+    final colors = context.colors;
     return Container(
       margin: EdgeInsets.symmetric(
         horizontal: isTablet ? 24.w : 20.w,
@@ -210,10 +251,10 @@ class _SearchScreenState extends State<SearchScreen>
         horizontal: isTablet ? 18.w : 16.w,
       ),
       decoration: BoxDecoration(
-        color: AppColors.greyLight,
+        color: colors.greyLight,
         borderRadius: BorderRadius.circular(isTablet ? 14.r : 12.r),
         border: Border.all(
-          color: AppColors.greyBorder.withValues(alpha: 0.3),
+          color: colors.border.withValues(alpha: 0.3),
           width: 1,
         ),
       ),
@@ -221,7 +262,7 @@ class _SearchScreenState extends State<SearchScreen>
         children: [
           Icon(
             Icons.search,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
             size: isTablet ? 22.sp : 20.sp,
           ),
           SizedBox(width: isTablet ? 14.w : 12.w),
@@ -231,15 +272,18 @@ class _SearchScreenState extends State<SearchScreen>
               focusNode: _focusNode,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 16.sp : 15.sp,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
               decoration: InputDecoration(
                 hintText: l10n.searchSessions,
                 hintStyle: GoogleFonts.inter(
                   fontSize: isTablet ? 16.sp : 15.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) {
                 _performSearch(value);
@@ -250,7 +294,7 @@ class _SearchScreenState extends State<SearchScreen>
             IconButton(
               icon: Icon(
                 Icons.clear,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 size: isTablet ? 22.sp : 20.sp,
               ),
               onPressed: () {
@@ -262,7 +306,7 @@ class _SearchScreenState extends State<SearchScreen>
             IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 size: isTablet ? 22.sp : 20.sp,
               ),
               onPressed: () => Navigator.pop(context),
@@ -284,7 +328,7 @@ class _SearchScreenState extends State<SearchScreen>
           l10n.foundResults(_totalResults.toString()),
           style: GoogleFonts.inter(
             fontSize: isTablet ? 15.sp : 14.sp,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -293,36 +337,37 @@ class _SearchScreenState extends State<SearchScreen>
   }
 
   Widget _buildTabs(bool isTablet, AppLocalizations l10n) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 20.w),
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.textPrimary,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.textPrimary,
-        isScrollable: false,
-        labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 12.w : 8.w),
-        labelStyle: GoogleFonts.inter(
-          fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: GoogleFonts.inter(
-          fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
-          fontWeight: FontWeight.w500,
-        ),
-        tabs: [
-          Tab(text: '${l10n.allResults} ($_totalResults)'),
-          Tab(text: '${l10n.searchCategories} ($_categoryCount)'),
-          Tab(text: '${l10n.searchSessionsTab} ($_sessionCount)'),
-        ],
+    final colors = context.colors;
+    return TabBar(
+      controller: _tabController,
+      labelColor: colors.textPrimary,
+      unselectedLabelColor: colors.textSecondary,
+      indicatorColor: colors.textPrimary,
+      isScrollable: true,
+      tabAlignment: TabAlignment.start,
+      padding: EdgeInsets.symmetric(horizontal: isTablet ? 24.w : 20.w),
+      labelPadding: EdgeInsets.symmetric(horizontal: isTablet ? 16.w : 12.w),
+      labelStyle: GoogleFonts.inter(
+        fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
+        fontWeight: FontWeight.w600,
       ),
+      unselectedLabelStyle: GoogleFonts.inter(
+        fontSize: (isTablet ? 14.sp : 13.sp).clamp(11.0, 16.0),
+        fontWeight: FontWeight.w500,
+      ),
+      tabs: [
+        Tab(text: '${l10n.allResults} ($_totalResults)'),
+        Tab(text: '${l10n.searchCategories} ($_categoryCount)'),
+        Tab(text: '${l10n.searchSessionsTab} ($_sessionCount)'),
+        Tab(text: '${l10n.quizTab} ($_quizTotalCount)'),
+      ],
     );
   }
 
   Widget _buildLoadingState() {
-    return const Center(
+    return Center(
       child: CircularProgressIndicator(
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
     );
   }
@@ -338,38 +383,43 @@ class _SearchScreenState extends State<SearchScreen>
         _buildAllResults(isTablet),
         _buildCategoriesTab(isTablet),
         _buildSessionsTab(isTablet),
+        _buildQuizTab(isTablet),
       ],
     );
   }
 
   Widget _buildNoResults(bool isTablet, AppLocalizations l10n) {
+    final colors = context.colors;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: isTablet ? 80.sp : 64.sp,
-            color: AppColors.greyLight,
-          ),
-          SizedBox(height: isTablet ? 24.h : 16.h),
-          Text(
-            l10n.noResultsFound,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 20.sp : 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: isTablet ? 80.sp : 64.sp,
+              color: colors.greyMedium,
             ),
-          ),
-          SizedBox(height: isTablet ? 10.h : 8.h),
-          Text(
-            l10n.tryDifferentKeywords,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 15.sp : 14.sp,
-              color: AppColors.textSecondary,
+            SizedBox(height: isTablet ? 24.h : 16.h),
+            Text(
+              l10n.noResultsFound,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 20.sp : 18.sp,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: isTablet ? 10.h : 8.h),
+            Text(
+              l10n.tryDifferentKeywords,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 15.sp : 14.sp,
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -390,6 +440,24 @@ class _SearchScreenState extends State<SearchScreen>
               isTablet, AppLocalizations.of(context).searchSessionsTab),
           SizedBox(height: isTablet ? 14.h : 12.h),
           ..._buildSessionItems(isTablet),
+          SizedBox(height: isTablet ? 28.h : 24.h),
+        ],
+
+// 🆕 Quiz Categories
+        if (_quizCategoryCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).quizCategoriesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildQuizCategoryItems(isTablet),
+          SizedBox(height: isTablet ? 28.h : 24.h),
+        ],
+
+// 🆕 Diseases
+        if (_diseaseCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).diseasesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildDiseaseItems(isTablet),
         ],
       ],
     );
@@ -423,7 +491,7 @@ class _SearchScreenState extends State<SearchScreen>
       style: GoogleFonts.inter(
         fontSize: isTablet ? 18.sp : 16.sp,
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: context.colors.textPrimary,
       ),
     );
   }
@@ -459,81 +527,86 @@ class _SearchScreenState extends State<SearchScreen>
           ),
         );
       },
-      child: Container(
-        padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
-          border: Border.all(
-            color: AppColors.greyBorder,
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Icon with colored background
-            Container(
-              width: isTablet ? 56.w : 48.w,
-              height: isTablet ? 56.w : 48.w,
-              padding: EdgeInsets.all(8.w),
-              child: Lottie.asset(
-                AppIcons.getAnimationPath(
-                  AppIcons.getIconByName(category['iconName'])?['path'] ??
-                      'meditation.json',
+      child: Builder(
+        builder: (context) {
+          final colors = context.colors;
+          return Container(
+            padding: EdgeInsets.all(isTablet ? 18.w : 16.w),
+            decoration: BoxDecoration(
+              color: colors.backgroundCard,
+              borderRadius: BorderRadius.circular(isTablet ? 18.r : 16.r),
+              border: Border.all(
+                color: colors.border,
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: colors.textPrimary.withValues(alpha: 0.06),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                fit: BoxFit.contain,
-                repeat: true,
-              ),
+              ],
             ),
-
-            SizedBox(width: isTablet ? 18.w : 16.w),
-
-            // Text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    category['name'],
-                    style: GoogleFonts.inter(
-                      fontSize: isTablet ? 18.sp : 16.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+            child: Row(
+              children: [
+                // Icon with colored background
+                Container(
+                  width: isTablet ? 56.w : 48.w,
+                  height: isTablet ? 56.w : 48.w,
+                  padding: EdgeInsets.all(8.w),
+                  child: Lottie.asset(
+                    AppIcons.getAnimationPath(
+                      AppIcons.getIconByName(category['iconName'])?['path'] ??
+                          'meditation.json',
                     ),
+                    fit: BoxFit.contain,
+                    repeat: true,
                   ),
-                  if ((category['description'] ?? '')
-                      .toString()
-                      .isNotEmpty) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      category['description'] ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.inter(
-                        fontSize: isTablet ? 13.sp : 12.sp,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
+                ),
 
-            // Arrow
-            Icon(
-              Icons.arrow_forward_ios,
-              color: AppColors.textSecondary,
-              size: isTablet ? 20.sp : 18.sp,
+                SizedBox(width: isTablet ? 18.w : 16.w),
+
+                // Text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        category['name'],
+                        style: GoogleFonts.inter(
+                          fontSize: isTablet ? 18.sp : 16.sp,
+                          fontWeight: FontWeight.w700,
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                      if ((category['description'] ?? '')
+                          .toString()
+                          .isNotEmpty) ...[
+                        SizedBox(height: 4.h),
+                        Text(
+                          category['description'] ?? '',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            fontSize: isTablet ? 13.sp : 12.sp,
+                            color: colors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+
+                // Arrow
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: colors.textSecondary,
+                  size: isTablet ? 20.sp : 18.sp,
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -572,5 +645,101 @@ class _SearchScreenState extends State<SearchScreen>
         );
       },
     );
+  }
+
+  // 🆕 Quiz Tab
+  Widget _buildQuizTab(bool isTablet) {
+    if (_quizTotalCount == 0) {
+      return _buildNoResults(isTablet, AppLocalizations.of(context));
+    }
+
+    return ListView(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      children: [
+        // Quiz Categories
+        if (_quizCategoryCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).quizCategoriesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildQuizCategoryItems(isTablet),
+          SizedBox(height: isTablet ? 28.h : 24.h),
+        ],
+
+        // Diseases
+        if (_diseaseCount > 0) ...[
+          _buildSectionHeader(
+              isTablet, AppLocalizations.of(context).diseasesSection),
+          SizedBox(height: isTablet ? 14.h : 12.h),
+          ..._buildDiseaseItems(isTablet),
+        ],
+      ],
+    );
+  }
+
+// 🆕 Quiz Category Items
+  List<Widget> _buildQuizCategoryItems(bool isTablet) {
+    final quizCategories =
+        _quizSearchResults['quizCategories'] as List<QuizCategorySearchResult>;
+    final currentLang = Localizations.localeOf(context).languageCode;
+
+    return quizCategories.map((result) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: isTablet ? 14.h : 12.h),
+        child: QuizCategorySearchCard(
+          result: result,
+          locale: currentLang,
+          onTap: () async {
+            await _saveSearchAndNavigate();
+            if (!mounted) return;
+
+            // Show bottom sheet with diseases
+            QuizCategoryDiseasesSheet.show(
+              context,
+              category: result.category,
+              locale: currentLang,
+            );
+          },
+        ),
+      );
+    }).toList();
+  }
+
+// 🆕 Disease Items
+  List<Widget> _buildDiseaseItems(bool isTablet) {
+    final diseases =
+        _quizSearchResults['diseases'] as List<DiseaseSearchResult>;
+    final currentLang = Localizations.localeOf(context).languageCode;
+
+    return diseases.map((result) {
+      return Padding(
+        padding: EdgeInsets.only(bottom: isTablet ? 14.h : 12.h),
+        child: DiseaseSearchCard(
+          result: result,
+          locale: currentLang,
+          onTap: () async {
+            await _saveSearchAndNavigate();
+            if (!mounted) return;
+
+            // Navigate to QuizResultsScreen with this disease
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => QuizResultsScreen(
+                  selectedDiseases: [result.disease],
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }).toList();
+  }
+
+// 🆕 Helper: Save search and navigate
+  Future<void> _saveSearchAndNavigate() async {
+    if (_searchController.text.trim().isNotEmpty) {
+      await _historyService.saveSearchQuery(_searchController.text.trim());
+      await _loadSearchHistory();
+    }
   }
 }

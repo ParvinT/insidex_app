@@ -153,4 +153,27 @@ class AuthPersistenceService {
       return false;
     }
   }
+
+  /// Full logout - clears all session data and SharedPreferences
+  static Future<void> fullLogout() async {
+    // 1. Clear secure storage (email, password, token)
+    await clearSession();
+
+    // 2. Firebase sign out
+    await FirebaseAuth.instance.signOut();
+
+    // 3. Clear all user-related SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('has_logged_in');
+    await prefs.remove('cached_user_id');
+    await prefs.remove('cached_user_email');
+    await prefs.remove('birthDate');
+    await prefs.remove('userAge');
+    await prefs.remove('gender');
+    await prefs.remove('goals');
+    await prefs.remove('onboardingSkipped');
+    await prefs.remove('onboardingComplete');
+
+    debugPrint('✅ Full logout completed - all session data cleared');
+  }
 }

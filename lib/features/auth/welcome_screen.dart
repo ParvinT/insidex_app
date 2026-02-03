@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../l10n/app_localizations.dart';
@@ -15,10 +15,11 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // NOTE: We provide a scrollable body to AuthScaffold (bodyIsScrollable: true)
     // so it won't wrap with an extra scroll and it will only add safe bottom padding if needed.
     return AuthScaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
+      backgroundColor: colors.background,
       bodyIsScrollable: true,
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -61,8 +62,8 @@ class WelcomeScreen extends StatelessWidget {
                             width: logoWidth,
                             height: logoHeight,
                             fit: BoxFit.contain,
-                            colorFilter: const ColorFilter.mode(
-                              AppColors.textPrimary,
+                            colorFilter: ColorFilter.mode(
+                              colors.textPrimary,
                               BlendMode.srcIn,
                             ),
                           ),
@@ -80,7 +81,7 @@ class WelcomeScreen extends StatelessWidget {
                         fontSize:
                             48.sp, // Keep your styling; ScreenUtil will adapt
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                         height: 1.15,
                       ),
                     ),
@@ -94,7 +95,7 @@ class WelcomeScreen extends StatelessWidget {
                       style: GoogleFonts.inter(
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w400,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -127,7 +128,7 @@ class WelcomeScreen extends StatelessWidget {
                           style: GoogleFonts.inter(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                         InkWell(
@@ -141,7 +142,7 @@ class WelcomeScreen extends StatelessWidget {
                               style: GoogleFonts.inter(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
@@ -171,11 +172,12 @@ class _OutlinedBigButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Material(
-      color: Colors.white,
+      color: colors.backgroundCard,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.black.withValues(alpha: 0.15), width: 1),
+        side: BorderSide(color: colors.border, width: 1),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(14),
@@ -186,16 +188,14 @@ class _OutlinedBigButton extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Left icon placeholder (envelope) – replace with your SVG if needed
-              Icon(Icons.mail_outline,
-                  size: 22.sp, color: AppColors.textPrimary),
+              Icon(Icons.mail_outline, size: 22.sp, color: colors.textPrimary),
               SizedBox(width: 10.w),
               Text(
                 label,
                 style: GoogleFonts.inter(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
             ],

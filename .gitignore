@@ -24,6 +24,7 @@ migrate_working_dir/
 #.vscode/
 
 # Flutter/Dart/Pub related
+lib/config/api_keys.dart
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
@@ -47,6 +48,8 @@ app.*.map.json
 # Firebase - NEVER commit!
 lib/firebase_options.dart
 android/app/google-services.json
+ios/Flutter/Debug.xcconfig
+android/app/src/debug/
 ios/Runner/GoogleService-Info.plist
 ios/Firebase/GoogleService-Info.plist
 firebase.json
@@ -55,6 +58,10 @@ firebase.json
 functions/.env
 functions/node_modules/
 .firebase/
+
+# Firebase Hosting (contains API keys)
+hosting/public/
+web/app_check_config.js
 
 
 #lib/l10n/app_localizations.dart

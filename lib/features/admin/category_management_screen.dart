@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../core/constants/app_icons.dart';
@@ -16,6 +16,7 @@ import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
 import 'add_category_screen.dart';
 import 'category_images_screen.dart';
+import 'widgets/admin_search_bar.dart';
 
 class CategoryManagementScreen extends StatefulWidget {
   const CategoryManagementScreen({super.key});
@@ -29,12 +30,22 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
   final CategoryService _categoryService = CategoryService();
   List<CategoryModel> _filteredCategories = [];
   bool _isLoading = true;
-  bool _showOnlyUserLanguage = true; // Toggle filter
+  bool _showOnlyUserLanguage = true;
+
+  // Search
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadCategories();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadCategories() async {
@@ -88,6 +99,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -97,12 +109,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     final bool isDesktop = width >= Breakpoints.desktopMin;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -110,7 +122,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 22.sp : 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         actions: [
@@ -119,8 +131,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             icon: Icon(
               _showOnlyUserLanguage ? Icons.language : Icons.language_outlined,
               color: _showOnlyUserLanguage
-                  ? AppColors.textPrimary
-                  : AppColors.textSecondary,
+                  ? colors.textPrimary
+                  : colors.textSecondary,
             ),
             onPressed: _toggleLanguageFilter,
             tooltip: _showOnlyUserLanguage
@@ -129,22 +141,105 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           ),
           // Add button
           IconButton(
-            icon: const Icon(Icons.add_circle, color: AppColors.textPrimary),
+            icon: Icon(Icons.add_circle, color: colors.textPrimary),
             onPressed: _navigateToAddCategory,
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.textPrimary),
-            )
-          : _filteredCategories.isEmpty
-              ? _buildEmptyState(isTablet, isDesktop)
-              : _buildCategoryList(isTablet, isDesktop),
+      body: Column(
+        children: [
+          // Search Bar
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            child: AdminSearchBar(
+              controller: _searchController,
+              onSearchChanged: (query) {
+                setState(() => _searchQuery = query);
+              },
+              onClear: () {
+                setState(() => _searchQuery = '');
+              },
+            ),
+          ),
+
+          // Content
+          Expanded(
+            child: _isLoading
+                ? Center(
+                    child: CircularProgressIndicator(color: colors.textPrimary),
+                  )
+                : _buildCategoryContent(isTablet, isDesktop, colors),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildEmptyState(bool isTablet, bool isDesktop) {
+  Widget _buildCategoryContent(
+      bool isTablet, bool isDesktop, AppThemeExtension colors) {
+    // Apply search filter
+    var displayCategories = _filteredCategories;
+
+    if (_searchQuery.isNotEmpty) {
+      final query = _searchQuery.toLowerCase();
+      displayCategories = _filteredCategories.where((category) {
+        // Search in all language names
+        for (final name in category.names.values) {
+          if (name.toLowerCase().contains(query)) return true;
+        }
+        // Search in icon name
+        if (category.iconName.toLowerCase().contains(query)) return true;
+        return false;
+      }).toList();
+    }
+
+    if (displayCategories.isEmpty) {
+      // Show different message based on search vs no data
+      if (_searchQuery.isNotEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.search_off_rounded,
+                size: isTablet ? 80.sp : 64.sp,
+                color: colors.greyMedium,
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                AppLocalizations.of(context).noResultsFound,
+                style: GoogleFonts.inter(
+                  fontSize: isTablet ? 20.sp : 18.sp,
+                  color: colors.textSecondary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                AppLocalizations.of(context).tryDifferentKeywords,
+                style: GoogleFonts.inter(
+                  fontSize: isTablet ? 16.sp : 14.sp,
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+      return _buildEmptyState(isTablet, isDesktop, colors);
+    }
+
+    return ListView.builder(
+      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
+      itemCount: displayCategories.length,
+      itemBuilder: (context, index) {
+        final category = displayCategories[index];
+        return _buildCategoryCard(category, isTablet, isDesktop, colors);
+      },
+    );
+  }
+
+  Widget _buildEmptyState(
+      bool isTablet, bool isDesktop, AppThemeExtension colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -152,14 +247,14 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           Icon(
             Icons.category_outlined,
             size: isTablet ? 80.sp : 64.sp,
-            color: AppColors.greyMedium,
+            color: colors.greyMedium,
           ),
           SizedBox(height: 16.h),
           Text(
             AppLocalizations.of(context).noCategoriesYet,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 20.sp : 18.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -167,7 +262,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             AppLocalizations.of(context).addFirstCategory,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 16.sp : 14.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 24.h),
@@ -176,7 +271,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             icon: const Icon(Icons.add),
             label: Text(AppLocalizations.of(context).addNewCategory),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
+              backgroundColor: colors.textPrimary,
+              foregroundColor: colors.textOnPrimary,
               padding: EdgeInsets.symmetric(
                 horizontal: isTablet ? 32.w : 24.w,
                 vertical: isTablet ? 16.h : 14.h,
@@ -191,19 +287,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     );
   }
 
-  Widget _buildCategoryList(bool isTablet, bool isDesktop) {
-    return ListView.builder(
-      padding: EdgeInsets.all(isTablet ? 24.w : 20.w),
-      itemCount: _filteredCategories.length,
-      itemBuilder: (context, index) {
-        final category = _filteredCategories[index];
-        return _buildCategoryCard(category, isTablet, isDesktop);
-      },
-    );
-  }
-
-  Widget _buildCategoryCard(
-      CategoryModel category, bool isTablet, bool isDesktop) {
+  Widget _buildCategoryCard(CategoryModel category, bool isTablet,
+      bool isDesktop, AppThemeExtension colors) {
     return FutureBuilder<String>(
       future: CategoryLocalizationService.getLocalizedNameAuto(category),
       builder: (context, snapshot) {
@@ -213,12 +298,12 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           margin: EdgeInsets.only(bottom: 16.h),
           padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.backgroundPure,
             borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColors.greyBorder),
+            border: Border.all(color: colors.border),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.03),
+                color: colors.textPrimary.withValues(alpha: 0.03),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -233,8 +318,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.textPrimary,
-                      AppColors.textPrimary.withValues(alpha: 0.7),
+                      colors.textPrimary,
+                      colors.textPrimary.withValues(alpha: 0.7),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(12.r),
@@ -267,14 +352,14 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             style: GoogleFonts.inter(
                               fontSize: isTablet ? 18.sp : 16.sp,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                              color: colors.textPrimary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         SizedBox(width: 8.w),
-                        _buildLanguageBadges(category, isTablet),
+                        _buildLanguageBadges(category, isTablet, colors),
                       ],
                     ),
 
@@ -287,7 +372,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         Icon(
                           Icons.play_circle_filled,
                           size: isTablet ? 18.sp : 16.sp,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                         SizedBox(width: 4.w),
                         Flexible(
@@ -295,7 +380,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             '${category.sessionCount} ${AppLocalizations.of(context).sessions}',
                             style: GoogleFonts.inter(
                               fontSize: isTablet ? 14.sp : 12.sp,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -304,13 +389,13 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     ),
                     SizedBox(width: 16.w),
 
-// Image count
+                    // Image count
                     Row(
                       children: [
                         Icon(
                           Icons.image,
                           size: isTablet ? 18.sp : 16.sp,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                         SizedBox(width: 4.w),
                         Flexible(
@@ -318,7 +403,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                             '${category.backgroundImages.length} ${AppLocalizations.of(context).images}',
                             style: GoogleFonts.inter(
                               fontSize: isTablet ? 14.sp : 12.sp,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -340,7 +425,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     onPressed: () => _manageImages(category),
                     icon: Icon(
                       Icons.photo_library,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                       size: isTablet ? 24.sp : 22.sp,
                     ),
                     tooltip: AppLocalizations.of(context).manageImages,
@@ -350,7 +435,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     onPressed: () => _navigateToEditCategory(category),
                     icon: Icon(
                       Icons.edit,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                       size: isTablet ? 24.sp : 22.sp,
                     ),
                     tooltip: AppLocalizations.of(context).editCategory,
@@ -374,7 +459,8 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
     );
   }
 
-  Widget _buildLanguageBadges(CategoryModel category, bool isTablet) {
+  Widget _buildLanguageBadges(
+      CategoryModel category, bool isTablet, AppThemeExtension colors) {
     final availableLanguages = category.availableLanguages;
 
     // Show max 3 flags to prevent overflow
@@ -398,7 +484,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
             '+${availableLanguages.length - 3}',
             style: GoogleFonts.inter(
               fontSize: 11.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               fontWeight: FontWeight.w600,
             ),
           ),

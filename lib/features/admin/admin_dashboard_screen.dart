@@ -5,9 +5,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../core/constants/app_colors.dart';
 import 'disease_management_screen.dart';
 import 'disease_cause_management_screen.dart';
+import 'quiz_category_management_screen.dart';
+import 'quotes_management_screen.dart';
+import 'feature_slides_management_screen.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -134,6 +137,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   void _showAdminMenu() {
+    final colors = context.colors;
     final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenHeight < 700;
 
@@ -146,14 +150,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       builder: (context) => Container(
         decoration: BoxDecoration(
-          color: AppColors.backgroundWhite,
+          color: colors.backgroundElevated,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(20.r),
             topRight: Radius.circular(20.r),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: colors.textPrimary.withValues(alpha: 0.1),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -168,7 +172,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: AppColors.greyBorder,
+                color: colors.border,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -181,7 +185,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               style: GoogleFonts.inter(
                 fontSize: isSmallScreen ? 16.sp : 18.sp,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
 
@@ -199,6 +203,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       title: AppLocalizations.of(context).dashboard,
                       onTap: () => Navigator.pop(context),
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.category,
@@ -208,6 +213,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Navigator.pushNamed(context, '/admin/categories');
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+
+                    _buildCompactMenuItem(
+                      icon: Icons.category_outlined,
+                      title: AppLocalizations.of(context).quizCategories,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const QuizCategoryManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
                     ),
 
                     _buildCompactMenuItem(
@@ -223,6 +246,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         );
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.map,
@@ -238,6 +262,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         );
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
 
                     _buildCompactMenuItem(
@@ -248,6 +273,38 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Navigator.pushNamed(context, '/admin/home-cards');
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.format_quote,
+                      title: AppLocalizations.of(context).dailyQuotes,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const QuotesManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.slideshow,
+                      title: AppLocalizations.of(context).featureSlides,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const FeatureSlidesManagementScreen(),
+                          ),
+                        );
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.music_note,
@@ -257,6 +314,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Navigator.pushNamed(context, '/admin/sessions');
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.add_circle,
@@ -266,6 +324,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Navigator.pushNamed(context, '/admin/add-session');
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.people,
@@ -275,6 +334,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Navigator.pushNamed(context, '/admin/users');
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+                    _buildCompactMenuItem(
+                      icon: Icons.card_giftcard,
+                      title: AppLocalizations.of(context).grantSubscription,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(
+                            context, '/admin/grant-subscription');
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
                     ),
                     _buildCompactMenuItem(
                       icon: Icons.settings,
@@ -284,6 +355,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         Navigator.pushNamed(context, '/admin/settings');
                       },
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
 
                     // Divider
@@ -291,7 +363,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       padding: EdgeInsets.symmetric(
                           vertical: isSmallScreen ? 8.h : 12.h),
                       child: Divider(
-                        color: AppColors.greyBorder.withValues(alpha: 0.5),
+                        color: colors.border.withValues(alpha: 0.5),
                       ),
                     ),
 
@@ -309,6 +381,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       },
                       color: Colors.red,
                       isCompact: isSmallScreen,
+                      colors: colors,
                     ),
 
                     // Current User Info
@@ -317,7 +390,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                         margin: EdgeInsets.only(top: 16.h, bottom: 8.h),
                         padding: EdgeInsets.all(12.w),
                         decoration: BoxDecoration(
-                          color: AppColors.greyLight.withValues(alpha: 0.3),
+                          color: colors.greyLight.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Row(
@@ -326,14 +399,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             Icon(
                               Icons.account_circle,
                               size: 16.sp,
-                              color: AppColors.textSecondary,
+                              color: colors.textSecondary,
                             ),
                             SizedBox(width: 8.w),
                             Text(
                               _currentUser!.email ?? 'Admin',
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
-                                color: AppColors.textSecondary,
+                                color: colors.textSecondary,
                               ),
                             ),
                           ],
@@ -355,6 +428,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    required AppThemeExtension colors,
     Color? color,
     required bool isCompact,
   }) {
@@ -370,11 +444,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         decoration: BoxDecoration(
           color: color != null
               ? color.withValues(alpha: 0.05)
-              : AppColors.backgroundWhite,
+              : colors.backgroundPure,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: color?.withValues(alpha: 0.2) ??
-                AppColors.greyBorder.withValues(alpha: 0.3),
+                colors.border.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -382,7 +456,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           children: [
             Icon(
               icon,
-              color: color ?? AppColors.textPrimary,
+              color: color ?? colors.textPrimary,
               size: isCompact ? 18.sp : 20.sp,
             ),
             SizedBox(width: 12.w),
@@ -391,7 +465,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               style: GoogleFonts.inter(
                 fontSize: isCompact ? 14.sp : 15.sp,
                 fontWeight: FontWeight.w500,
-                color: color ?? AppColors.textPrimary,
+                color: color ?? colors.textPrimary,
               ),
             ),
           ],
@@ -401,10 +475,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildMainContent() {
+    final colors = context.colors;
+
     if (_isLoading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: colors.textPrimary,
         ),
       );
     }
@@ -420,7 +496,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             style: GoogleFonts.inter(
               fontSize: 24.sp,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -428,24 +504,24 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             AppLocalizations.of(context).welcomeToAdminDashboard,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 24.h),
 
           // Statistics Grid
-          _buildStatisticsGrid(),
+          _buildStatisticsGrid(colors),
 
           SizedBox(height: 32.h),
 
           // Recent Activity
-          _buildRecentActivity(),
+          _buildRecentActivity(colors),
         ],
       ),
     );
   }
 
-  Widget _buildStatisticsGrid() {
+  Widget _buildStatisticsGrid(AppThemeExtension colors) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final crossAxisCount = constraints.maxWidth > 600 ? 2 : 1;
@@ -463,25 +539,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               value: '${_statistics['totalUsers'] ?? 0}',
               icon: Icons.people,
               color: Colors.blue,
+              colors: colors,
             ),
             _buildStatCard(
               title: AppLocalizations.of(context).premiumUsers,
               value: '${_statistics['premiumUsers'] ?? 0}',
               icon: Icons.star,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
+              colors: colors,
             ),
             _buildStatCard(
-              title: AppLocalizations.of(context).totalSessions,
-              value: '${_statistics['totalSessions'] ?? 0}',
-              icon: Icons.music_note,
-              color: Colors.green,
-            ),
+                title: AppLocalizations.of(context).totalSessions,
+                value: '${_statistics['totalSessions'] ?? 0}',
+                icon: Icons.music_note,
+                color: Colors.green,
+                colors: colors),
             _buildStatCard(
-              title: AppLocalizations.of(context).totalCategories,
-              value: '${_statistics['totalCategories'] ?? 0}',
-              icon: Icons.category,
-              color: Colors.purple,
-            ),
+                title: AppLocalizations.of(context).totalCategories,
+                value: '${_statistics['totalCategories'] ?? 0}',
+                icon: Icons.category,
+                color: Colors.purple,
+                colors: colors),
           ],
         );
       },
@@ -493,19 +571,20 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     required String value,
     required IconData icon,
     required Color color,
+    required AppThemeExtension colors,
   }) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder.withValues(alpha: 0.5),
+          color: colors.border.withValues(alpha: 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -546,7 +625,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               SizedBox(height: 4.h),
@@ -554,7 +633,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 title,
                 style: GoogleFonts.inter(
                   fontSize: 12.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
@@ -564,19 +643,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildRecentActivity() {
+  Widget _buildRecentActivity(AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
-          color: AppColors.greyBorder.withValues(alpha: 0.5),
+          color: colors.border.withValues(alpha: 0.5),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -590,7 +669,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 16.h),
@@ -607,8 +686,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Container(
                     width: 8.w,
                     height: 8.w,
-                    decoration: const BoxDecoration(
-                      color: AppColors.textPrimary,
+                    decoration: BoxDecoration(
+                      color: colors.textPrimary,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -618,7 +697,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       'New session added to Sleep category',
                       style: GoogleFonts.inter(
                         fontSize: 13.sp,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                       ),
                     ),
                   ),
@@ -626,7 +705,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     '2h ago',
                     style: GoogleFonts.inter(
                       fontSize: 11.sp,
-                      color: AppColors.textSecondary,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -639,13 +718,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   Widget _buildMobileHeader() {
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: AppColors.backgroundWhite,
+        color: colors.background,
         border: Border(
           bottom: BorderSide(
-            color: AppColors.greyBorder.withValues(alpha: 0.5),
+            color: colors.border.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -659,16 +739,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               width: 36.w,
               height: 36.w,
               decoration: BoxDecoration(
-                color: AppColors.backgroundWhite,
+                color: colors.backgroundPure,
                 borderRadius: BorderRadius.circular(10.r),
                 border: Border.all(
-                  color: AppColors.greyBorder,
+                  color: colors.border,
                   width: 1,
                 ),
               ),
               child: Icon(
                 Icons.arrow_back,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 size: 18.sp,
               ),
             ),
@@ -686,14 +766,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
                 Text(
                   AppLocalizations.of(context).manageYourApp,
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -707,11 +787,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               width: 36.w,
               height: 36.w,
               decoration: BoxDecoration(
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 borderRadius: BorderRadius.circular(10.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: colors.textPrimary.withValues(alpha: 0.1),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -720,7 +800,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Icon(
                 Icons.menu,
                 size: 18.sp,
-                color: Colors.white,
+                color: colors.textOnPrimary,
               ),
             ),
           ),
@@ -731,8 +811,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Column(
           children: [

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/responsive/context_ext.dart';
 import 'search_history_item.dart';
@@ -30,10 +30,11 @@ class SearchHistoryView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // Loading state
+    // Loading state
     if (isLoading) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: context.colors.textPrimary,
         ),
       );
     }
@@ -85,7 +86,7 @@ class SearchHistoryView extends StatelessWidget {
             l10n.recentSearches,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 16.sp : 15.sp,
-              color: AppColors.textPrimary,
+              color: context.colors.textPrimary,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -114,33 +115,37 @@ class SearchHistoryView extends StatelessWidget {
 
   Widget _buildEmptyState(
       BuildContext context, bool isTablet, AppLocalizations l10n) {
+    final colors = context.colors;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search,
-            size: isTablet ? 80.sp : 64.sp,
-            color: AppColors.greyLight,
-          ),
-          SizedBox(height: isTablet ? 24.h : 16.h),
-          Text(
-            l10n.search,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 20.sp : 18.sp,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search,
+              size: isTablet ? 80.sp : 64.sp,
+              color: colors.greyMedium,
             ),
-          ),
-          SizedBox(height: isTablet ? 10.h : 8.h),
-          Text(
-            l10n.searchSessions,
-            style: GoogleFonts.inter(
-              fontSize: isTablet ? 15.sp : 14.sp,
-              color: AppColors.textSecondary,
+            SizedBox(height: isTablet ? 24.h : 16.h),
+            Text(
+              l10n.search,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 20.sp : 18.sp,
+                fontWeight: FontWeight.w600,
+                color: colors.textSecondary,
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: isTablet ? 10.h : 8.h),
+            Text(
+              l10n.searchSessions,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 15.sp : 14.sp,
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

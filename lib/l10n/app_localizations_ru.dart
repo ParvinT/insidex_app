@@ -9,7 +9,7 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'Звуковое Исцеление и Сублиминалы';
@@ -57,7 +57,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sendFeedback => 'Отправить отзыв';
 
   @override
-  String get sendFeedbackSubtitle => 'Помогите нам улучшить INSIDEX';
+  String get sendFeedbackSubtitle => 'Помогите нам улучшить InsideX';
 
   @override
   String get reportBug => 'Сообщить об ошибке';
@@ -207,7 +207,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Отслеживайте свои привычки прослушивания и улучшения';
 
   @override
-  String get myInsights => 'Мои данные';
+  String get myInsights => 'Моя статистика';
 
   @override
   String get viewPersonalizedWellness =>
@@ -232,6 +232,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get min => 'мин';
+
+  @override
+  String get hourShort => 'ч';
 
   @override
   String get days => 'дней';
@@ -288,6 +291,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sun => 'Вс';
 
   @override
+  String get allCategories => 'Все категории';
+
+  @override
   String get categories => 'Категории';
 
   @override
@@ -337,6 +343,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get female => 'Женский';
+
+  @override
+  String get genderBoth => 'Оба';
 
   @override
   String get totalListening => 'Общее прослушивание';
@@ -999,7 +1008,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'Найдите минутку расслабиться и исцелиться с INSIDEX';
+      'Найдите минутку расслабиться и исцелиться с InsideX';
 
   @override
   String get notificationStreak3Title => '🎉 Поздравляем!';
@@ -1039,7 +1048,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'Полвека! Вы настоящий мастер INSIDEX!';
+      'Полвека! Вы настоящий мастер InsideX!';
 
   @override
   String get notificationStreak100Title => '👑 Чемпион 100 дней!';
@@ -1820,7 +1829,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noSessionsFound => 'Сессии не найдены';
 
   @override
-  String get uncategorized => 'अवर्गीकृत';
+  String get uncategorized => 'Без категории';
 
   @override
   String get adminSettings => 'Настройки администратора';
@@ -2002,8 +2011,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get listenNow => 'Слушать сейчас';
 
   @override
-  String get startEmotionalTestFree =>
-      'Начать мой эмоциональный тест — Бесплатно';
+  String get discoverTrueCauses => 'Узнай истинные причины болезней';
 
   @override
   String get selected => 'Выбрано';
@@ -2022,6 +2030,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get yourResults => 'Ваши результаты';
+
+  @override
+  String get viewResults => 'Показать результаты';
 
   @override
   String get selectedDiseases => 'Выбранные заболевания';
@@ -2145,4 +2156,549 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get preparing => 'Подготовка...';
+
+  @override
+  String get appearance => 'Оформление';
+
+  @override
+  String get lightMode => 'Светлая';
+
+  @override
+  String get lightModeSubtitle => 'Классическая светлая тема';
+
+  @override
+  String get darkMode => 'Тёмная';
+
+  @override
+  String get darkModeSubtitle => 'Комфортно для глаз';
+
+  @override
+  String get systemDefault => 'Системная';
+
+  @override
+  String get systemDefaultSubtitle => 'Следовать настройкам устройства';
+
+  @override
+  String get minutesThisWeek => 'минут за неделю';
+
+  @override
+  String get minutesThisMonth => 'минут за месяц';
+
+  @override
+  String get minutesThisYear => 'минут за год';
+
+  @override
+  String get minutesAllTime => 'минут всего';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'Слишком много запросов. Попробуйте через час.';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'Достигнут дневной лимит. Попробуйте завтра.';
+
+  @override
+  String get quizCategories => 'Категории теста';
+
+  @override
+  String get icon => 'Иконка';
+
+  @override
+  String get both => 'Оба';
+
+  @override
+  String get names => 'Названия';
+
+  @override
+  String get selectCategoryOptional => 'Выберите категорию (необязательно)';
+
+  @override
+  String get noCategory => 'Без категории';
+
+  @override
+  String get addYourFirstQuizCategory => 'Добавьте свою первую категорию теста';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return 'Вы уверены, что хотите удалить \"$categoryName\"?\n\nПримечание: Заболевания в этой категории не будут удалены, но их ссылка на категорию будет удалена.';
+  }
+
+  @override
+  String get failedToSaveCategory => 'Не удалось сохранить категорию';
+
+  @override
+  String get failedToDeleteCategory => 'Не удалось удалить категорию';
+
+  @override
+  String get grantSubscription => 'Предоставить подписку';
+
+  @override
+  String get quizTab => 'Тест';
+
+  @override
+  String get quizCategoriesSection => 'Категории теста';
+
+  @override
+  String get diseasesSection => 'Заболевания';
+
+  @override
+  String get sessionAvailable => 'Сеанс';
+
+  @override
+  String get comingSoon => 'Скоро';
+
+  @override
+  String get searchQuizHint => 'Поиск болезней, категорий...';
+
+  @override
+  String get dailyQuotes => 'Ежедневные цитаты';
+
+  @override
+  String get addQuote => 'Добавить цитату';
+
+  @override
+  String get editQuote => 'Редактировать цитату';
+
+  @override
+  String get noQuotesYet => 'Цитат пока нет';
+
+  @override
+  String get addYourFirstQuote => 'Добавьте свою первую цитату';
+
+  @override
+  String get deleteQuoteConfirmation =>
+      'Вы уверены, что хотите удалить эту цитату?';
+
+  @override
+  String get quoteText => 'Текст цитаты';
+
+  @override
+  String get enterQuoteText => 'Введите текст цитаты...';
+
+  @override
+  String get author => 'Автор';
+
+  @override
+  String get enterAuthorName => 'Введите имя автора';
+
+  @override
+  String get optional => 'необязательно';
+
+  @override
+  String get selectWhenToShowQuote => 'Выберите, когда показывать эту цитату';
+
+  @override
+  String get targetGoals => 'Целевые задачи';
+
+  @override
+  String get selectMatchingGoals =>
+      'Выберите соответствующие цели пользователя';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'Пожалуйста, введите хотя бы один перевод';
+
+  @override
+  String get languages => 'языков';
+
+  @override
+  String get sleep => 'Сон';
+
+  @override
+  String get motivation => 'Мотивация';
+
+  @override
+  String get achievement => 'Достижение';
+
+  @override
+  String get changesSaved => 'Изменения сохранены';
+
+  @override
+  String get confirmDelete => 'Подтвердить удаление';
+
+  @override
+  String get featureSlides => 'Слайды';
+
+  @override
+  String get enabled => 'Включено';
+
+  @override
+  String get featureSlidesImages => 'Изображения';
+
+  @override
+  String get pages => 'Страницы';
+
+  @override
+  String get subtitleLabel => 'Подзаголовок';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'Вы уверены, что хотите удалить этот элемент?';
+
+  @override
+  String get demoSession => 'Демо сессия';
+
+  @override
+  String get freeUsersCanPlay => 'Бесплатные пользователи могут слушать';
+
+  @override
+  String get onlyPremiumCanPlay => 'Только для премиум пользователей';
+
+  @override
+  String get targetGender => 'Целевой пол';
+
+  @override
+  String get filterLabel => 'Фильтр';
+
+  @override
+  String get paywallManageYourPlan => 'Управление подпиской';
+
+  @override
+  String get paywallUnlockPotential => 'Раскройте весь потенциал';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'Смените план или сохраните текущую подписку';
+
+  @override
+  String get paywallChoosePlanSubtitle => 'Выберите подходящий вам план';
+
+  @override
+  String get paywallRestorePurchases => 'Восстановить покупки';
+
+  @override
+  String get paywallLegalText =>
+      'Подписка автоматически продлевается, если автопродление не отключено минимум за 24 часа до окончания текущего периода. Вы можете управлять подпиской и отменить её в настройках App Store или Google Play.';
+
+  @override
+  String get paywallCurrentPlan => 'Текущий план';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return 'Перейти на $tierName';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return 'Сменить на $tierName';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return 'Начать $days-дневный пробный период';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'Подписаться';
+
+  @override
+  String get paywallAlreadySubscribed => 'Вы уже подписаны на этот план';
+
+  @override
+  String get paywallRestoreSuccess => 'Покупки успешно восстановлены!';
+
+  @override
+  String get paywallRestoreNoPurchases =>
+      'Покупки для восстановления не найдены';
+
+  @override
+  String get packageBadgeCurrent => 'ТЕКУЩИЙ';
+
+  @override
+  String get packageBadgePopular => 'ПОПУЛЯРНЫЙ';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return 'СКИДКА $percent%';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days дней БЕСПЛАТНО';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'Это ваш текущий план';
+
+  @override
+  String get successDialogWelcomePremium => 'Добро пожаловать в Premium!';
+
+  @override
+  String get successDialogTrialStarted => 'Пробный период начался!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'Теперь у вас есть доступ ко всем функциям';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      'Наслаждайтесь полным доступом в течение 7 дней';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'Теперь у вас неограниченный доступ ко всем функциям';
+
+  @override
+  String get successDialogTrialBanner => '7-дневный бесплатный период начался';
+
+  @override
+  String get successDialogStartExploring => 'Начать';
+
+  @override
+  String get featureAllAudioSessions => 'Все аудиосессии';
+
+  @override
+  String get featureBackgroundPlayback => 'Фоновое воспроизведение';
+
+  @override
+  String get featureOfflineDownloads => 'Офлайн загрузки';
+
+  @override
+  String get upgradePromptTitle => 'Перейти на Premium';
+
+  @override
+  String get upgradePromptSubtitle => 'Разблокируйте все функции и сессии';
+
+  @override
+  String get upgradePromptButton => 'Улучшить';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Премиум функция';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'Подпишитесь, чтобы получить доступ к этой и другим функциям';
+
+  @override
+  String get upgradeSheetMaybeLater => 'Позже';
+
+  @override
+  String get upgradeSheetViewPlans => 'Посмотреть планы';
+
+  @override
+  String get manageSheetTitle => 'Ваша подписка';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return 'План $tierName';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'Пробный • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'Активный • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return 'Осталось $days дней пробного периода';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return '$days дней до продления';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'Нажмите, чтобы увидеть все планы';
+
+  @override
+  String get manageSheetManageInStore => 'Управление в магазине';
+
+  @override
+  String get manageSheetManageSubtitle => 'Изменить или отменить подписку';
+
+  @override
+  String get profileSubscriptionTitle => 'Ваша подписка';
+
+  @override
+  String get profileUpgradeToPremium => 'Перейти на Premium';
+
+  @override
+  String get profileUnlockAllFeatures => 'Разблокируйте все сессии и функции';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • Пробный ($days дней осталось)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • Осталось $days дней';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return 'План $tierName';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (Пробный)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'Офлайн загрузки';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'Перейдите на план Standard, чтобы скачивать сессии для прослушивания офлайн';
+
+  @override
+  String get premiumSessionTitle => 'Премиум сессия';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'Подпишитесь, чтобы разблокировать все аудиосессии и функции';
+
+  @override
+  String get tierYearlyStandard => 'Годовой Standard';
+
+  @override
+  String get periodMonth => '/мес';
+
+  @override
+  String get periodYear => '/год';
+
+  @override
+  String get periodMonthly => 'Ежемесячный';
+
+  @override
+  String get periodYearly => 'Годовой';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/мес';
+  }
+
+  @override
+  String get offlinePlaybackTitle => 'Требуется Standard';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'Офлайн прослушивание включено в план Standard';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'Подключитесь к интернету, чтобы обновить план';
+
+  @override
+  String get adminPremiumSearchUser => 'Поиск пользователя';
+
+  @override
+  String get adminPremiumSearchHint => 'Введите email или UID пользователя';
+
+  @override
+  String get adminPremiumSearchPlaceholder => 'email@example.com или user-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'Пожалуйста, введите email или UID';
+
+  @override
+  String get adminPremiumUserNotFound => 'Пользователь не найден';
+
+  @override
+  String get adminPremiumSearchError => 'Ошибка поиска';
+
+  @override
+  String get adminPremiumCurrentStatus => 'Текущий статус';
+
+  @override
+  String get adminPremiumAdminStatus => 'Админ Премиум';
+
+  @override
+  String get adminPremiumStoreStatus => 'Подписка в магазине';
+
+  @override
+  String get adminPremiumInactive => 'НЕ АКТИВНО';
+
+  @override
+  String get adminPremiumNoSubscription => 'Нет подписки';
+
+  @override
+  String get adminPremiumTier => 'Уровень';
+
+  @override
+  String get adminPremiumReason => 'Причина';
+
+  @override
+  String get adminPremiumGrantedBy => 'Выдал';
+
+  @override
+  String get adminPremiumManage => 'Управление Админ Премиум';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'Предоставить полный премиум-доступ независимо от подписок в магазине';
+
+  @override
+  String get adminPremiumSelectReason => 'Выберите причину';
+
+  @override
+  String get adminPremiumGrantButton => 'Выдать Полный Премиум';
+
+  @override
+  String get adminPremiumGrantSuccess => 'Админ Премиум успешно выдан!';
+
+  @override
+  String get adminPremiumGrantError => 'Не удалось выдать премиум';
+
+  @override
+  String get adminPremiumRevokeTitle => 'Отозвать Админ Премиум';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'Вы уверены, что хотите отозвать админ премиум у этого пользователя? Он потеряет премиум-доступ, если у него нет подписки в магазине.';
+
+  @override
+  String get adminPremiumRevokeButton => 'Отозвать Админ Премиум';
+
+  @override
+  String get adminPremiumRevokeSuccess => 'Админ Премиум успешно отозван';
+
+  @override
+  String get adminPremiumRevokeError => 'Не удалось отозвать премиум';
+
+  @override
+  String get adminPremiumAlreadyActive => 'Админ Премиум Активен';
+
+  @override
+  String get adminPremiumFullAccess =>
+      'У этого пользователя полный премиум-доступ';
+
+  @override
+  String get adminPremiumUidCopied => 'UID скопирован в буфер обмена';
+
+  @override
+  String get adminPremiumEmptyTitle => 'Поиск пользователя';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'Введите email или UID, чтобы найти пользователя и управлять его премиум-доступом';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'Тестировщик';
+
+  @override
+  String get adminPremiumReasonEmployee => 'Сотрудник';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'Инфлюенсер';
+
+  @override
+  String get adminPremiumReasonOther => 'Другое';
 }

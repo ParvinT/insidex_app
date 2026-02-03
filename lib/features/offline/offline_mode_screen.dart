@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 
 import '../downloads/downloads_screen.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/download_provider.dart';
 import '../../core/routes/app_routes.dart';
@@ -102,10 +102,11 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final l10n = AppLocalizations.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -119,13 +120,13 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                 width: 120.w,
                 height: 120.w,
                 decoration: BoxDecoration(
-                  color: AppColors.greyLight.withValues(alpha: 0.3),
+                  color: colors.greyLight.withValues(alpha: 0.3),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.cloud_off_rounded,
                   size: 60.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
 
@@ -137,7 +138,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -149,7 +150,7 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                 l10n.offlineDescription,
                 style: GoogleFonts.inter(
                   fontSize: 15.sp,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
@@ -179,8 +180,8 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
-                    foregroundColor: Colors.white,
+                    backgroundColor: colors.textPrimary,
+                    foregroundColor: colors.textOnPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16.r),
                     ),
@@ -201,10 +202,10 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                       ? SizedBox(
                           width: 20.w,
                           height: 20.w,
-                          child: const CircularProgressIndicator(
+                          child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColors.textPrimary,
+                              colors.textPrimary,
                             ),
                           ),
                         )
@@ -217,9 +218,9 @@ class _OfflineModeScreenState extends State<OfflineModeScreen> {
                     ),
                   ),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.textPrimary,
+                    foregroundColor: colors.textPrimary,
                     side: BorderSide(
-                      color: AppColors.textPrimary.withValues(alpha: 0.3),
+                      color: colors.textPrimary.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
                     shape: RoundedRectangleBorder(

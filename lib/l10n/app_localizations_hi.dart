@@ -9,7 +9,7 @@ class AppLocalizationsHi extends AppLocalizations {
   AppLocalizationsHi([String locale = 'hi']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'ध्वनि उपचार और अवचेतन';
@@ -58,7 +58,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get sendFeedbackSubtitle =>
-      'INSIDEX को बेहतर बनाने में हमारी मदद करें';
+      'InsideX को बेहतर बनाने में हमारी मदद करें';
 
   @override
   String get reportBug => 'बग की रिपोर्ट करें';
@@ -209,7 +209,7 @@ class AppLocalizationsHi extends AppLocalizations {
       'अपनी सुनने की आदतों और सुधारों को ट्रैक करें';
 
   @override
-  String get myInsights => 'मेरी अंतर्दृष्टि';
+  String get myInsights => 'मेरे आँकड़े';
 
   @override
   String get viewPersonalizedWellness =>
@@ -236,6 +236,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get min => 'मिनट';
 
   @override
+  String get hourShort => 'घं';
+
+  @override
   String get days => 'दिन';
 
   @override
@@ -260,7 +263,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get topSessions => 'शीर्ष सत्र';
 
   @override
-  String get minutesToday => 'आज मिनट';
+  String get minutesToday => 'मिनट आज';
 
   @override
   String get total => 'कुल';
@@ -288,6 +291,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get sun => 'रवि';
+
+  @override
+  String get allCategories => 'सभी श्रेणियां';
 
   @override
   String get categories => 'श्रेणियाँ';
@@ -340,6 +346,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get female => 'महिला';
+
+  @override
+  String get genderBoth => 'दोनों';
 
   @override
   String get totalListening => 'कुल सुनना';
@@ -991,7 +1000,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'INSIDEX के साथ आराम करने और ठीक होने के लिए एक पल लें';
+      'InsideX के साथ आराम करने और ठीक होने के लिए एक पल लें';
 
   @override
   String get notificationStreak3Title => '🎉 बधाई हो!';
@@ -1031,7 +1040,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'आधी शताब्दी! आप एक सच्चे INSIDEX मास्टर हैं!';
+      'आधी शताब्दी! आप एक सच्चे InsideX मास्टर हैं!';
 
   @override
   String get notificationStreak100Title => '👑 100 दिन के चैंपियन!';
@@ -1808,7 +1817,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get noSessionsFound => 'कोई सत्र नहीं मिला';
 
   @override
-  String get uncategorized => 'बिना श्रेणी';
+  String get uncategorized => 'श्रेणीबद्ध नहीं';
 
   @override
   String get adminSettings => 'प्रशासक सेटिंग्स';
@@ -1967,17 +1976,16 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unknownDisease => 'अज्ञात बीमारी';
 
   @override
-  String get browseAllSubliminals => 'Browse all available subliminal sessions';
+  String get browseAllSubliminals => 'सभी उपलब्ध सबलिमिनल सत्र ब्राउज़ करें';
 
   @override
-  String get yourPersonalizedCollection =>
-      'Your personalized subliminal collection';
+  String get yourPersonalizedCollection => 'आपका व्यक्तिगत सबलिमिनल संग्रह';
 
   @override
-  String get deletingSessionAndFiles => 'Deleting session and files...';
+  String get deletingSessionAndFiles => 'सत्र और फ़ाइलें हटाई जा रही हैं...';
 
   @override
-  String get errorDeletingSession => 'Error deleting session';
+  String get errorDeletingSession => 'सत्र हटाने में त्रुटि';
 
   @override
   String get recommendedForYou => 'आपके लिए अनुशंसित';
@@ -1989,8 +1997,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get listenNow => 'अभी सुनें';
 
   @override
-  String get startEmotionalTestFree =>
-      'मेरा भावनात्मक परीक्षण शुरू करें — निःशुल्क';
+  String get discoverTrueCauses => 'बीमारियों के असली कारण जानें';
 
   @override
   String get selected => 'चयनित';
@@ -2009,6 +2016,9 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get yourResults => 'आपके परिणाम';
+
+  @override
+  String get viewResults => 'परिणाम देखें';
 
   @override
   String get selectedDiseases => 'चयनित बीमारियाँ';
@@ -2132,4 +2142,550 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get preparing => 'तैयार हो रहा है...';
+
+  @override
+  String get appearance => 'दिखावट';
+
+  @override
+  String get lightMode => 'लाइट';
+
+  @override
+  String get lightModeSubtitle => 'क्लासिक ब्राइट थीम';
+
+  @override
+  String get darkMode => 'डार्क';
+
+  @override
+  String get darkModeSubtitle => 'आंखों के लिए आरामदायक';
+
+  @override
+  String get systemDefault => 'सिस्टम';
+
+  @override
+  String get systemDefaultSubtitle => 'डिवाइस सेटिंग्स का पालन करें';
+
+  @override
+  String get minutesThisWeek => 'मिनट इस सप्ताह';
+
+  @override
+  String get minutesThisMonth => 'मिनट इस महीने';
+
+  @override
+  String get minutesThisYear => 'मिनट इस साल';
+
+  @override
+  String get minutesAllTime => 'मिनट कुल';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'बहुत सारे अनुरोध। कृपया एक घंटे बाद पुनः प्रयास करें।';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'दैनिक सीमा समाप्त। कृपया कल पुनः प्रयास करें।';
+
+  @override
+  String get quizCategories => 'प्रश्नोत्तरी श्रेणियाँ';
+
+  @override
+  String get icon => 'आइकन';
+
+  @override
+  String get both => 'दोनों';
+
+  @override
+  String get names => 'नाम';
+
+  @override
+  String get selectCategoryOptional => 'श्रेणी चुनें (वैकल्पिक)';
+
+  @override
+  String get noCategory => 'कोई श्रेणी नहीं';
+
+  @override
+  String get addYourFirstQuizCategory => 'अपनी पहली प्रश्नोत्तरी श्रेणी जोड़ें';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return 'क्या आप वाकई \"$categoryName\" को हटाना चाहते हैं?\n\nनोट: इस श्रेणी में बीमारियाँ हटाई नहीं जाएंगी, लेकिन उनका श्रेणी संदर्भ हटा दिया जाएगा।';
+  }
+
+  @override
+  String get failedToSaveCategory => 'श्रेणी सहेजने में विफल';
+
+  @override
+  String get failedToDeleteCategory => 'श्रेणी हटाने में विफल';
+
+  @override
+  String get grantSubscription => 'सदस्यता प्रदान करें';
+
+  @override
+  String get quizTab => 'परीक्षण';
+
+  @override
+  String get quizCategoriesSection => 'परीक्षण श्रेणियाँ';
+
+  @override
+  String get diseasesSection => 'बीमारियाँ';
+
+  @override
+  String get sessionAvailable => 'सत्र';
+
+  @override
+  String get comingSoon => 'जल्द आ रहा है';
+
+  @override
+  String get searchQuizHint => 'बीमारियाँ, श्रेणियाँ खोजें...';
+
+  @override
+  String get dailyQuotes => 'दैनिक उद्धरण';
+
+  @override
+  String get addQuote => 'उद्धरण जोड़ें';
+
+  @override
+  String get editQuote => 'उद्धरण संपादित करें';
+
+  @override
+  String get noQuotesYet => 'अभी तक कोई उद्धरण नहीं';
+
+  @override
+  String get addYourFirstQuote => 'अपना पहला उद्धरण जोड़ें';
+
+  @override
+  String get deleteQuoteConfirmation => 'क्या आप इस उद्धरण को हटाना चाहते हैं?';
+
+  @override
+  String get quoteText => 'उद्धरण पाठ';
+
+  @override
+  String get enterQuoteText => 'उद्धरण पाठ दर्ज करें...';
+
+  @override
+  String get author => 'लेखक';
+
+  @override
+  String get enterAuthorName => 'लेखक का नाम दर्ज करें';
+
+  @override
+  String get optional => 'वैकल्पिक';
+
+  @override
+  String get selectWhenToShowQuote => 'चुनें कि यह उद्धरण कब दिखाना है';
+
+  @override
+  String get targetGoals => 'लक्ष्य उद्देश्य';
+
+  @override
+  String get selectMatchingGoals => 'मिलान करने वाले उपयोगकर्ता लक्ष्य चुनें';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'कृपया कम से कम एक अनुवाद दर्ज करें';
+
+  @override
+  String get languages => 'भाषाएं';
+
+  @override
+  String get sleep => 'नींद';
+
+  @override
+  String get motivation => 'प्रेरणा';
+
+  @override
+  String get achievement => 'उपलब्धि';
+
+  @override
+  String get changesSaved => 'परिवर्तन सहेजे गए';
+
+  @override
+  String get confirmDelete => 'हटाने की पुष्टि करें';
+
+  @override
+  String get featureSlides => 'फ़ीचर स्लाइड्स';
+
+  @override
+  String get enabled => 'सक्षम';
+
+  @override
+  String get featureSlidesImages => 'छवियाँ';
+
+  @override
+  String get pages => 'पृष्ठ';
+
+  @override
+  String get subtitleLabel => 'उपशीर्षक';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'क्या आप वाकई इस आइटम को हटाना चाहते हैं?';
+
+  @override
+  String get demoSession => 'डेमो सत्र';
+
+  @override
+  String get freeUsersCanPlay => 'मुफ्त उपयोगकर्ता इस सत्र को सुन सकते हैं';
+
+  @override
+  String get onlyPremiumCanPlay => 'केवल प्रीमियम उपयोगकर्ता सुन सकते हैं';
+
+  @override
+  String get targetGender => 'लक्षित लिंग';
+
+  @override
+  String get filterLabel => 'फ़िल्टर';
+
+  @override
+  String get paywallManageYourPlan => 'अपनी योजना प्रबंधित करें';
+
+  @override
+  String get paywallUnlockPotential => 'अपनी पूरी क्षमता को अनलॉक करें';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'योजना बदलें या अपनी मौजूदा सदस्यता रखें';
+
+  @override
+  String get paywallChoosePlanSubtitle =>
+      'वह योजना चुनें जो आपके लिए सबसे अच्छी हो';
+
+  @override
+  String get paywallRestorePurchases => 'खरीदारी पुनर्स्थापित करें';
+
+  @override
+  String get paywallLegalText =>
+      'सदस्यता स्वचालित रूप से नवीनीकृत होती है जब तक कि वर्तमान अवधि समाप्त होने से कम से कम 24 घंटे पहले स्वत: नवीनीकरण बंद न कर दिया जाए। आप अपनी सदस्यता को App Store या Google Play खाता सेटिंग्स में प्रबंधित और रद्द कर सकते हैं।';
+
+  @override
+  String get paywallCurrentPlan => 'वर्तमान योजना';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return '$tierName में अपग्रेड करें';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return '$tierName पर स्विच करें';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return '$days-दिन का मुफ्त ट्रायल शुरू करें';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'अभी सदस्यता लें';
+
+  @override
+  String get paywallAlreadySubscribed =>
+      'आप पहले से इस योजना की सदस्यता ले चुके हैं';
+
+  @override
+  String get paywallRestoreSuccess => 'खरीदारी सफलतापूर्वक पुनर्स्थापित!';
+
+  @override
+  String get paywallRestoreNoPurchases =>
+      'पुनर्स्थापित करने के लिए कोई खरीदारी नहीं मिली';
+
+  @override
+  String get packageBadgeCurrent => 'वर्तमान';
+
+  @override
+  String get packageBadgePopular => 'लोकप्रिय';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return '$percent% छूट';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days दिन मुफ्त ट्रायल';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'यह आपकी वर्तमान योजना है';
+
+  @override
+  String get successDialogWelcomePremium => 'Premium में आपका स्वागत है!';
+
+  @override
+  String get successDialogTrialStarted => 'ट्रायल शुरू हुआ!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'अब आपके पास सभी सुविधाओं तक पहुंच है';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      'अगले 7 दिनों के लिए पूर्ण पहुंच का आनंद लें';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'अब आपके पास सभी सुविधाओं तक असीमित पहुंच है';
+
+  @override
+  String get successDialogTrialBanner => '7-दिन का मुफ्त ट्रायल शुरू हुआ';
+
+  @override
+  String get successDialogStartExploring => 'एक्सप्लोर करना शुरू करें';
+
+  @override
+  String get featureAllAudioSessions => 'सभी ऑडियो सत्र';
+
+  @override
+  String get featureBackgroundPlayback => 'बैकग्राउंड प्लेबैक';
+
+  @override
+  String get featureOfflineDownloads => 'ऑफलाइन डाउनलोड';
+
+  @override
+  String get upgradePromptTitle => 'Premium में अपग्रेड करें';
+
+  @override
+  String get upgradePromptSubtitle => 'सभी सुविधाएं और सत्र अनलॉक करें';
+
+  @override
+  String get upgradePromptButton => 'अपग्रेड';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Premium सुविधा';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'इस सुविधा और अधिक तक पहुंचने के लिए सदस्यता लें';
+
+  @override
+  String get upgradeSheetMaybeLater => 'बाद में';
+
+  @override
+  String get upgradeSheetViewPlans => 'प्लान देखें';
+
+  @override
+  String get manageSheetTitle => 'आपकी सदस्यता';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return '$tierName प्लान';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'ट्रायल • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'सक्रिय • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return 'ट्रायल में $days दिन बाकी';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return 'नवीनीकरण में $days दिन बाकी';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'सभी प्लान देखने के लिए टैप करें';
+
+  @override
+  String get manageSheetManageInStore => 'स्टोर में प्रबंधित करें';
+
+  @override
+  String get manageSheetManageSubtitle => 'सदस्यता बदलें या रद्द करें';
+
+  @override
+  String get profileSubscriptionTitle => 'आपकी सदस्यता';
+
+  @override
+  String get profileUpgradeToPremium => 'Premium में अपग्रेड करें';
+
+  @override
+  String get profileUnlockAllFeatures => 'सभी सत्र और सुविधाएं अनलॉक करें';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • ट्रायल ($days दिन बाकी)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • $days दिन बाकी';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return '$tierName प्लान';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (ट्रायल)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'ऑफलाइन डाउनलोड';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'ऑफलाइन सुनने के लिए सत्र डाउनलोड करने हेतु Standard प्लान में अपग्रेड करें';
+
+  @override
+  String get premiumSessionTitle => 'Premium सत्र';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'सभी ऑडियो सत्र और सुविधाएं अनलॉक करने के लिए सदस्यता लें';
+
+  @override
+  String get tierYearlyStandard => 'वार्षिक Standard';
+
+  @override
+  String get periodMonth => '/माह';
+
+  @override
+  String get periodYear => '/वर्ष';
+
+  @override
+  String get periodMonthly => 'मासिक';
+
+  @override
+  String get periodYearly => 'वार्षिक';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/माह';
+  }
+
+  @override
+  String get offlinePlaybackTitle => 'Standard आवश्यक';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'ऑफ़लाइन सुनना Standard प्लान में शामिल है';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'अपना प्लान अपग्रेड करने के लिए इंटरनेट से कनेक्ट करें';
+
+  @override
+  String get adminPremiumSearchUser => 'उपयोगकर्ता खोजें';
+
+  @override
+  String get adminPremiumSearchHint => 'ईमेल पता या UID दर्ज करें';
+
+  @override
+  String get adminPremiumSearchPlaceholder => 'email@example.com या user-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'कृपया ईमेल या UID दर्ज करें';
+
+  @override
+  String get adminPremiumUserNotFound => 'उपयोगकर्ता नहीं मिला';
+
+  @override
+  String get adminPremiumSearchError => 'खोज में त्रुटि';
+
+  @override
+  String get adminPremiumCurrentStatus => 'वर्तमान स्थिति';
+
+  @override
+  String get adminPremiumAdminStatus => 'एडमिन प्रीमियम';
+
+  @override
+  String get adminPremiumStoreStatus => 'स्टोर सदस्यता';
+
+  @override
+  String get adminPremiumInactive => 'निष्क्रिय';
+
+  @override
+  String get adminPremiumNoSubscription => 'कोई सदस्यता नहीं';
+
+  @override
+  String get adminPremiumTier => 'टियर';
+
+  @override
+  String get adminPremiumReason => 'कारण';
+
+  @override
+  String get adminPremiumGrantedBy => 'द्वारा दिया गया';
+
+  @override
+  String get adminPremiumManage => 'एडमिन प्रीमियम प्रबंधित करें';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'स्टोर सदस्यता से स्वतंत्र पूर्ण प्रीमियम पहुंच प्रदान करें';
+
+  @override
+  String get adminPremiumSelectReason => 'कारण चुनें';
+
+  @override
+  String get adminPremiumGrantButton => 'पूर्ण प्रीमियम दें';
+
+  @override
+  String get adminPremiumGrantSuccess => 'एडमिन प्रीमियम सफलतापूर्वक दिया गया!';
+
+  @override
+  String get adminPremiumGrantError => 'प्रीमियम देने में विफल';
+
+  @override
+  String get adminPremiumRevokeTitle => 'एडमिन प्रीमियम रद्द करें';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'क्या आप सुनिश्चित हैं कि इस उपयोगकर्ता का एडमिन प्रीमियम रद्द करना चाहते हैं? यदि उनके पास स्टोर सदस्यता नहीं है तो वे प्रीमियम पहुंच खो देंगे।';
+
+  @override
+  String get adminPremiumRevokeButton => 'एडमिन प्रीमियम रद्द करें';
+
+  @override
+  String get adminPremiumRevokeSuccess =>
+      'एडमिन प्रीमियम सफलतापूर्वक रद्द किया गया';
+
+  @override
+  String get adminPremiumRevokeError => 'प्रीमियम रद्द करने में विफल';
+
+  @override
+  String get adminPremiumAlreadyActive => 'एडमिन प्रीमियम सक्रिय';
+
+  @override
+  String get adminPremiumFullAccess =>
+      'इस उपयोगकर्ता के पास पूर्ण प्रीमियम पहुंच है';
+
+  @override
+  String get adminPremiumUidCopied => 'UID क्लिपबोर्ड पर कॉपी किया गया';
+
+  @override
+  String get adminPremiumEmptyTitle => 'उपयोगकर्ता खोजें';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'उपयोगकर्ता खोजने और उनकी प्रीमियम पहुंच प्रबंधित करने के लिए ईमेल या UID दर्ज करें';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'परीक्षक';
+
+  @override
+  String get adminPremiumReasonEmployee => 'कर्मचारी';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'इन्फ्लुएंसर';
+
+  @override
+  String get adminPremiumReasonOther => 'अन्य';
 }

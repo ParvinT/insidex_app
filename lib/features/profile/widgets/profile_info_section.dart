@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import '../../../core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../providers/user_provider.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../core/constants/subscription_constants.dart';
 
 class ProfileInfoSection extends StatelessWidget {
   final UserProvider userProvider;
@@ -16,6 +19,7 @@ class ProfileInfoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final userData = userProvider.userData ?? {};
     final createdAt = userData['createdAt']?.toDate() ?? DateTime.now();
     final locale = Localizations.localeOf(context).languageCode;
@@ -26,12 +30,12 @@ class ProfileInfoSection extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundCard,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder, width: 1.5),
+        border: Border.all(color: colors.border, width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: colors.textPrimary.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -45,22 +49,29 @@ class ProfileInfoSection extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 16.h),
-          _buildInfoRow(AppLocalizations.of(context).memberSince, memberSince),
-          SizedBox(height: 12.h),
           _buildInfoRow(
-            AppLocalizations.of(context).accountType,
-            userProvider.isPremium
-                ? AppLocalizations.of(context).premium
-                : AppLocalizations.of(context).free,
-            isPremium: userProvider.isPremium,
+              context, AppLocalizations.of(context).memberSince, memberSince),
+          SizedBox(height: 12.h),
+          Consumer<SubscriptionProvider>(
+            builder: (context, subProvider, _) {
+              final tierName = _getTierDisplayName(context, subProvider);
+              final isSubscribed = subProvider.isActive;
+
+              return _buildInfoRow(
+                context,
+                AppLocalizations.of(context).accountType,
+                tierName,
+                isPremium: isSubscribed,
+              );
+            },
           ),
           if (userProvider.isAdmin) ...[
             SizedBox(height: 12.h),
-            _buildInfoRow(AppLocalizations.of(context).role,
+            _buildInfoRow(context, AppLocalizations.of(context).role,
                 AppLocalizations.of(context).administrator,
                 isAdmin: true),
           ],
@@ -74,8 +85,9 @@ class ProfileInfoSection extends StatelessWidget {
     return text[0].toUpperCase() + text.substring(1);
   }
 
-  Widget _buildInfoRow(String label, String value,
+  Widget _buildInfoRow(BuildContext context, String label, String value,
       {bool isPremium = false, bool isAdmin = false}) {
+    final colors = context.colors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -83,39 +95,55 @@ class ProfileInfoSection extends StatelessWidget {
           label,
           style: GoogleFonts.inter(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: colors.textSecondary,
           ),
         ),
-        Container(
-          padding: isPremium || isAdmin
-              ? EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h)
-              : null,
-          decoration: isPremium || isAdmin
-              ? BoxDecoration(
-                  color: isAdmin
-                      ? Colors.red.withValues(alpha: 0.1)
-                      : AppColors.textPrimary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(
-                    color: isAdmin ? Colors.red : AppColors.textPrimary,
-                  ),
-                )
-              : null,
-          child: Text(
-            value,
-            style: GoogleFonts.inter(
-              fontSize: 14.sp,
-              fontWeight:
-                  isPremium || isAdmin ? FontWeight.w600 : FontWeight.w500,
-              color: isAdmin
-                  ? Colors.red
-                  : isPremium
-                      ? AppColors.textPrimary
-                      : AppColors.textPrimary,
-            ),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            color: isAdmin ? Colors.red : colors.textPrimary,
           ),
         ),
       ],
     );
+  }
+
+  String _getTierDisplayName(
+      BuildContext context, SubscriptionProvider provider) {
+    final l10n = AppLocalizations.of(context);
+
+    if (provider.hasAdminPremium && provider.adminPremiumReason != null) {
+      switch (provider.adminPremiumReason) {
+        case 'vip':
+          return '⭐ VIP';
+        case 'tester':
+          return '🧪 ${l10n.adminPremiumReasonTester}';
+        case 'employee':
+          return '🏢 ${l10n.adminPremiumReasonEmployee}';
+        case 'influencer':
+          return '📢 ${l10n.adminPremiumReasonInfluencer}';
+        default:
+          return l10n.tierStandard;
+      }
+    }
+
+    // Normal subscription
+    String tierName;
+    switch (provider.tier) {
+      case SubscriptionTier.free:
+        tierName = l10n.free;
+      case SubscriptionTier.lite:
+        tierName = l10n.tierLite;
+      case SubscriptionTier.standard:
+        tierName = l10n.tierStandard;
+    }
+
+    if (provider.isInTrial) {
+      return l10n.tierWithTrial(tierName);
+    }
+
+    return tierName;
   }
 }

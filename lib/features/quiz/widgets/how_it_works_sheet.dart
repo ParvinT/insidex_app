@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../providers/locale_provider.dart';
 import '../../../services/markdown_content_service.dart';
@@ -82,19 +82,20 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
     final double handleWidth = isTablet ? 50.w : 40.w;
     final double handleHeight = isTablet ? 5.h : 4.h;
 
+    final colors = context.colors;
     return Container(
       constraints: BoxConstraints(
         maxHeight: maxHeight,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundElevated,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(borderRadius),
           topRight: Radius.circular(borderRadius),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: colors.textPrimary.withValues(alpha: 0.15),
             blurRadius: 20,
             offset: const Offset(0, -5),
           ),
@@ -113,7 +114,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
           Divider(
             height: 1,
             thickness: 1,
-            color: AppColors.greyBorder.withValues(alpha: 0.3),
+            color: colors.border.withValues(alpha: 0.3),
           ),
 
           // Content
@@ -138,13 +139,14 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: AppColors.greyBorder.withValues(alpha: 0.5),
+        color: context.colors.greyMedium,
         borderRadius: BorderRadius.circular(height / 2),
       ),
     );
   }
 
   Widget _buildHeader(bool isTablet, double horizontalPadding) {
+    final colors = context.colors;
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: horizontalPadding,
@@ -160,7 +162,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
                 Icon(
                   Icons.help_outline_rounded,
                   size: isTablet ? 24.sp : 22.sp,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
                 SizedBox(width: 10.w),
                 Flexible(
@@ -169,7 +171,7 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
                     style: GoogleFonts.inter(
                       fontSize: isTablet ? 20.sp : 18.sp,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -185,13 +187,13 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: AppColors.greyLight.withValues(alpha: 0.5),
+                color: colors.greyLight.withValues(alpha: 0.5),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.close_rounded,
                 size: isTablet ? 22.sp : 20.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ),
@@ -203,9 +205,9 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
   Widget _buildLoadingState() {
     return SizedBox(
       height: 200.h,
-      child: const Center(
+      child: Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: context.colors.textPrimary,
           strokeWidth: 2,
         ),
       ),
@@ -239,31 +241,32 @@ class _HowItWorksSheetState extends State<HowItWorksSheet> {
   }
 
   MarkdownStyleSheet _buildMarkdownStyleSheet(bool isTablet, bool isDesktop) {
+    final colors = context.colors;
     return MarkdownStyleSheet(
       h1: GoogleFonts.inter(
         fontSize: isDesktop ? 22.sp : (isTablet ? 20.sp : 18.sp),
         fontWeight: FontWeight.w700,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
         height: 1.3,
       ),
       h2: GoogleFonts.inter(
         fontSize: isDesktop ? 18.sp : (isTablet ? 17.sp : 16.sp),
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
         height: 1.3,
       ),
       p: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 14.sp),
         height: 1.6,
-        color: AppColors.textSecondary,
+        color: colors.textSecondary,
       ),
       listBullet: GoogleFonts.inter(
         fontSize: isDesktop ? 15.sp : (isTablet ? 14.sp : 14.sp),
-        color: AppColors.textSecondary,
+        color: colors.textSecondary,
       ),
       strong: GoogleFonts.inter(
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
       ),
       em: GoogleFonts.inter(
         fontStyle: FontStyle.italic,

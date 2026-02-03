@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../models/disease_cause_model.dart';
 import '../../models/disease_model.dart';
@@ -283,14 +283,15 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     if (_isLoadingData) {
       return Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         appBar: AppBar(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.close, color: AppColors.textPrimary),
+            icon: Icon(Icons.close, color: colors.textPrimary),
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
@@ -300,21 +301,22 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
             style: GoogleFonts.inter(
               fontSize: 20.sp,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
         ),
-        body: const Center(child: CircularProgressIndicator()),
+        body:
+            Center(child: CircularProgressIndicator(color: colors.textPrimary)),
       );
     }
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close, color: AppColors.textPrimary),
+          icon: Icon(Icons.close, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -324,7 +326,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -333,7 +335,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
         child: Column(
           children: [
             // Tab Bar
-            _buildTabBar(),
+            _buildTabBar(colors),
 
             // Form Content
             Expanded(
@@ -343,22 +345,22 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Disease Selection
-                    _buildDiseaseDropdown(),
+                    _buildDiseaseDropdown(colors),
 
                     SizedBox(height: 16.h),
 
                     // Session Selection
-                    _buildSessionDropdown(),
+                    _buildSessionDropdown(colors),
 
                     SizedBox(height: 24.h),
 
                     // Language-specific content fields
-                    _buildLanguageFields(),
+                    _buildLanguageFields(colors),
 
                     SizedBox(height: 32.h),
 
                     // Save Button
-                    _buildSaveButton(),
+                    _buildSaveButton(colors),
                   ],
                 ),
               ),
@@ -369,14 +371,14 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     );
   }
 
-  Widget _buildTabBar() {
+  Widget _buildTabBar(AppThemeExtension colors) {
     return Container(
-      color: Colors.white,
+      color: colors.background,
       child: TabBar(
         controller: _tabController,
-        labelColor: AppColors.textPrimary,
-        unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.textPrimary,
+        labelColor: colors.textPrimary,
+        unselectedLabelColor: colors.textSecondary,
+        indicatorColor: colors.textPrimary,
         tabs: AppLanguages.supportedLanguages.map((langCode) {
           return Tab(
             text: AppLanguages.getLabel(langCode),
@@ -386,9 +388,9 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     );
   }
 
-  Widget _buildDiseaseDropdown() {
+  Widget _buildDiseaseDropdown(AppThemeExtension colors) {
     return DropdownButtonFormField<String>(
-      value: _selectedDiseaseId,
+      initialValue: _selectedDiseaseId,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context).disease,
         hintText: AppLocalizations.of(context).selectADisease,
@@ -447,16 +449,16 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     );
   }
 
-  Widget _buildSessionDropdown() {
+  Widget _buildSessionDropdown(AppThemeExtension colors) {
     return DropdownButtonFormField<String>(
-      value: _selectedSessionId,
+      initialValue: _selectedSessionId,
       decoration: InputDecoration(
         labelText: AppLocalizations.of(context).recommendedSession,
         hintText: AppLocalizations.of(context).selectASession,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
         ),
-        prefixIcon: const Icon(Icons.music_note, color: AppColors.textPrimary),
+        prefixIcon: Icon(Icons.music_note, color: colors.textPrimary),
       ),
       isExpanded: true,
       items: _sessions.map((session) {
@@ -493,7 +495,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     );
   }
 
-  Widget _buildLanguageFields() {
+  Widget _buildLanguageFields(AppThemeExtension colors) {
     return SizedBox(
       height: 300.h,
       child: TabBarView(
@@ -538,20 +540,21 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     );
   }
 
-  Widget _buildSaveButton() {
+  Widget _buildSaveButton(AppThemeExtension colors) {
     return SizedBox(
       width: double.infinity,
       height: 50.h,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _saveDiseaseCause,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.textPrimary,
+          backgroundColor: colors.textPrimary,
+          foregroundColor: colors.textOnPrimary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12.r),
           ),
         ),
         child: _isLoading
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? CircularProgressIndicator(color: colors.textOnPrimary)
             : Text(
                 widget.causeToEdit != null
                     ? AppLocalizations.of(context).updateDiseaseCause

@@ -95,12 +95,10 @@ class DailyReminderService {
           localizedMessage,
           scheduledDate,
           notificationDetails,
-          androidScheduleMode:
-              AndroidScheduleMode.exactAllowWhileIdle, // ÇOK ÖNEMLİ!
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation:
               UILocalNotificationDateInterpretation.absoluteTime,
-          matchDateTimeComponents:
-              DateTimeComponents.time, // Her gün aynı saatte
+          matchDateTimeComponents: DateTimeComponents.time,
         );
       } else {
         // iOS için normal schedule

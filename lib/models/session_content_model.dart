@@ -103,14 +103,22 @@ class MultiLanguageContent {
   SessionContentModel getContent(String locale) {
     switch (locale) {
       case 'tr':
-        return tr ?? en ?? _getFirstAvailable();
+        return _getNonEmpty(tr) ?? _getNonEmpty(en) ?? _getFirstAvailable();
       case 'ru':
-        return ru ?? en ?? _getFirstAvailable();
+        return _getNonEmpty(ru) ?? _getNonEmpty(en) ?? _getFirstAvailable();
       case 'hi':
-        return hi ?? en ?? _getFirstAvailable();
+        return _getNonEmpty(hi) ?? _getNonEmpty(en) ?? _getFirstAvailable();
       default:
-        return en ?? _getFirstAvailable();
+        return _getNonEmpty(en) ?? _getFirstAvailable();
     }
+  }
+
+// Helper: Returns content only if it has a non-empty title
+  SessionContentModel? _getNonEmpty(SessionContentModel? content) {
+    if (content != null && content.title.trim().isNotEmpty) {
+      return content;
+    }
+    return null;
   }
 
   SessionContentModel _getFirstAvailable() {

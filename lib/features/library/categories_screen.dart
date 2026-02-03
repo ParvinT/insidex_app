@@ -6,12 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import 'sessions_list_screen.dart';
 import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../core/responsive/breakpoints.dart';
+import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
@@ -37,6 +39,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   // Categories list
   List<CategoryModel> _categories = [];
   bool _isLoadingCategories = true;
+  Map<String, String> _categoryImages = {};
 
   // PAGINATION STATE
   List<Map<String, dynamic>> _allSessions = [];
@@ -44,6 +47,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   bool _hasMoreSessions = true;
   bool _isLoadingSessions = false;
   int _recursiveCallCount = 0;
+  String _selectedGenderFilter = 'all';
 
   @override
   void initState() {
@@ -96,8 +100,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         return nameA.compareTo(nameB);
       });
 
+      final Map<String, String> images = {};
+      for (final category in categories) {
+        if (category.backgroundImages.isNotEmpty) {
+          images[category.id] =
+              _categoryService.getRandomBackgroundImage(category) ?? '';
+        }
+      }
+
       setState(() {
         _categories = categories;
+        _categoryImages = images;
         _isLoadingCategories = false;
       });
 
@@ -167,8 +180,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       }
 
       // Apply language filter
-      final filtered = await SessionFilterService.filterSessionsByLanguage(
+      final filtered =
+          await SessionFilterService.filterSessionsByLanguageAndGender(
         snapshot.docs,
+        _selectedGenderFilter,
       );
       debugPrint('🌍 [Pagination] After language filter: ${filtered.length}');
 
@@ -203,6 +218,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -224,17 +240,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     return MediaQuery(
       data: mq.copyWith(textScaler: TextScaler.linear(ts)),
       child: Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         appBar: AppBar(
           toolbarHeight: toolbarH,
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           elevation: 0,
           leadingWidth: leadingWidth,
           titleSpacing: isTablet ? 8 : 4,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: (24.sp).clamp(20.0, 28.0),
             ),
             padding: EdgeInsets.only(left: leadingPad),
@@ -254,8 +270,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         width: logoW,
                         height: logoH,
                         fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.textPrimary,
+                        colorFilter: ColorFilter.mode(
+                          colors.textPrimary,
                           BlendMode.srcIn,
                         ),
                       ),
@@ -266,7 +282,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                   Container(
                     height: dividerH,
                     width: 1.5,
-                    color: AppColors.textPrimary.withValues(alpha: 0.2),
+                    color: colors.textPrimary.withValues(alpha: 0.2),
                     margin: EdgeInsets.symmetric(
                         horizontal: 8.w), // ← Biraz margin ekle
                   ),
@@ -281,7 +297,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         style: GoogleFonts.inter(
                           fontSize: (15.sp).clamp(14.0, 20.0),
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                     ),
@@ -299,10 +315,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             indicatorPadding:
                 EdgeInsets.symmetric(horizontal: isTablet ? 10 : 6),
             controller: _tabController,
-            indicatorColor: AppColors.textPrimary,
+            indicatorColor: colors.textPrimary,
             indicatorWeight: 3,
-            labelColor: AppColors.textPrimary,
-            unselectedLabelColor: AppColors.textSecondary,
+            labelColor: colors.textPrimary,
+            unselectedLabelColor: colors.textSecondary,
             labelStyle: GoogleFonts.inter(
               fontSize: (14.sp).clamp(12.0, 18.0),
               fontWeight: FontWeight.w600,
@@ -329,42 +345,59 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildCategoriesTab() {
+    final colors = context.colors;
     if (_isLoadingCategories) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: colors.textPrimary,
         ),
       );
     }
-    if (_categories.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.category_outlined,
-              size: 64.sp,
-              color: AppColors.greyMedium,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              AppLocalizations.of(context).noCategoriesYet,
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                color: AppColors.textSecondary,
+
+    final filteredCategories = _selectedGenderFilter == 'all'
+        ? _categories
+        : _categories.where((cat) {
+            return cat.gender == 'both' || cat.gender == _selectedGenderFilter;
+          }).toList();
+
+    if (filteredCategories.isEmpty) {
+      return Column(
+        children: [
+          _buildGenderFilter(colors),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.category_outlined,
+                    size: 64.sp,
+                    color: colors.greyMedium,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    AppLocalizations.of(context).noCategoriesYet,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildGenderFilter(colors),
+
         // Header
         Padding(
-          padding: EdgeInsets.all(20.w),
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -373,7 +406,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 style: GoogleFonts.inter(
                   fontSize: 24.sp.clamp(22.0, 34.0),
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: colors.textPrimary,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -382,26 +415,29 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                 style: GoogleFonts.inter(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.textSecondary,
+                  color: colors.textSecondary,
                 ),
               ),
             ],
           ),
         ),
 
+        SizedBox(height: 16.h),
+
         // Categories Grid
         Expanded(
           child: GridView.builder(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
+              crossAxisCount:
+                  context.isDesktop ? 4 : (context.isTablet ? 3 : 2),
               crossAxisSpacing: 16.w,
               mainAxisSpacing: 16.h,
               childAspectRatio: 1.0,
             ),
-            itemCount: _categories.length,
+            itemCount: filteredCategories.length,
             itemBuilder: (context, index) {
-              final category = _categories[index];
+              final category = filteredCategories[index];
               return _buildCategoryCard(category);
             },
           ),
@@ -411,8 +447,9 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildCategoryCard(CategoryModel category) {
+    final colors = context.colors;
     // Parse color
-    Color cardColor = AppColors.textPrimary;
+    Color cardColor = colors.textPrimary;
 
     return FutureBuilder<String>(
         future: CategoryLocalizationService.getLocalizedNameAuto(category),
@@ -442,14 +479,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                     cardColor.withValues(alpha: 0.4),
                   ],
                 ),
-                borderRadius: BorderRadius.circular(20.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: cardColor.withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
+                borderRadius: BorderRadius.circular(24.r),
               ),
               child: Stack(
                 children: [
@@ -458,9 +488,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(24.r),
                         child: CachedNetworkImage(
-                          imageUrl: _categoryService
-                                  .getRandomBackgroundImage(category) ??
-                              '',
+                          imageUrl: _categoryImages[category.id] ?? '',
                           cacheManager: AppCacheManager.instance,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
@@ -507,40 +535,45 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
                   // Content
                   Padding(
-                    padding: EdgeInsets.all(16.w),
+                    padding: EdgeInsets.all(14.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Icon
-                        SizedBox(
-                          width: 60.w,
-                          height: 60.w,
-                          child: Lottie.asset(
-                            AppIcons.getAnimationPath(
-                              AppIcons.getIconByName(
-                                      category.iconName)?['path'] ??
-                                  'meditation.json',
+                        // Icon - Flexible, kalan alanı kullanır
+                        Flexible(
+                          flex: 1,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: SizedBox(
+                              width: 50.w,
+                              height: 50.w,
+                              child: Lottie.asset(
+                                AppIcons.getAnimationPath(
+                                  AppIcons.getIconByName(
+                                          category.iconName)?['path'] ??
+                                      'meditation.json',
+                                ),
+                                fit: BoxFit.contain,
+                                repeat: true,
+                              ),
                             ),
-                            fit: BoxFit.contain,
-                            repeat: true,
                           ),
                         ),
 
-                        const Spacer(),
-
                         // Title
-                        Text(
+                        AutoSizeText(
                           localizedName,
-                          maxLines: 1,
+                          maxLines: 2,
+                          minFontSize: 11,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.inter(
-                            fontSize: 18.sp,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w700,
                             color: Colors.white,
                           ),
                         ),
 
-                        SizedBox(height: 4.h),
+                        SizedBox(height: 2.h),
 
                         // Session Count
                         StreamBuilder<QuerySnapshot>(
@@ -616,92 +649,110 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildAllSessionsTab() {
-    // Loading state (ilk yükleme)
+    final colors = context.colors;
+    // Loading state
     if (_isLoadingSessions && _allSessions.isEmpty) {
-      return const Center(
+      return Center(
         child: CircularProgressIndicator(
-          color: AppColors.textPrimary,
+          color: colors.textPrimary,
         ),
       );
     }
 
     // Empty state
     if (_allSessions.isEmpty && !_hasMoreSessions) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.library_music,
-              size: 64.sp,
-              color: AppColors.greyLight,
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              AppLocalizations.of(context).noSessionsAvailable,
-              style: GoogleFonts.inter(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+      return Column(
+        children: [
+          _buildGenderFilter(colors),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.library_music,
+                    size: 64.sp,
+                    color: colors.greyLight,
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    AppLocalizations.of(context).noSessionsAvailable,
+                    style: GoogleFonts.inter(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: colors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
     // Sessions list with pagination
-    return ListView.builder(
-      padding: EdgeInsets.all(20.w),
-      itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
-      itemBuilder: (context, index) {
-        // See more button at the end
-        if (index == _allSessions.length) {
-          if (_isLoadingSessions) {
-            // Loading indicator
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            );
-          } else {
-            // See More button
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: _loadMoreSessions,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackgroundCard,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 32.w,
-                      vertical: 12.h,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).seeMore,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }
-        }
+    return Column(
+      children: [
+        // 🆕 Gender Filter
+        _buildGenderFilter(colors),
 
-        // Session item
-        final session = _allSessions[index];
-        return _buildSessionItem(context, session);
-      },
+        // Sessions list
+        Expanded(
+          child: ListView.builder(
+            padding: EdgeInsets.all(20.w),
+            itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
+            itemBuilder: (context, index) {
+              // See more button at the end
+              if (index == _allSessions.length) {
+                if (_isLoadingSessions) {
+                  // Loading indicator
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: colors.textPrimary,
+                      ),
+                    ),
+                  );
+                } else {
+                  // See More button
+                  return Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    child: Center(
+                      child: ElevatedButton(
+                        onPressed: _loadMoreSessions,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.textPrimary,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 32.w,
+                            vertical: 12.h,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          AppLocalizations.of(context).seeMore,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              }
+
+              // Session item
+              final session = _allSessions[index];
+              return _buildSessionItem(context, session);
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -725,6 +776,73 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGenderFilter(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Text(
+            '${AppLocalizations.of(context).filterLabel}: ',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.textSecondary,
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip(
+                      'all', '🌐 ${AppLocalizations.of(context).all}', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip(
+                      'male', '♂ ${AppLocalizations.of(context).male}', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('female',
+                      '♀ ${AppLocalizations.of(context).female}', colors),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGenderFilter == value;
+    return GestureDetector(
+      onTap: () {
+        if (_selectedGenderFilter != value) {
+          setState(() => _selectedGenderFilter = value);
+          _loadInitialSessions();
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.textPrimary : colors.greyLight,
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(
+            color: isSelected ? colors.textPrimary : colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+          ),
+        ),
+      ),
     );
   }
 }

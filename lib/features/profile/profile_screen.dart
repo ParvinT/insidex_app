@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../providers/user_provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
@@ -18,6 +18,9 @@ import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../shared/widgets/upgrade_prompt.dart';
+import '../../providers/subscription_provider.dart';
+import '../subscription/paywall_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -40,9 +43,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Navigator.pushReplacementNamed(context, '/auth/login');
       });
     } else {
-      final userProvider = context.read<UserProvider>();
-      _nameController.text = userProvider.userName;
-      _selectedAvatar = userProvider.avatarEmoji;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final userProvider = context.read<UserProvider>();
+        setState(() {
+          _nameController.text = userProvider.userName;
+          _selectedAvatar = userProvider.avatarEmoji;
+        });
+      });
     }
   }
 
@@ -125,6 +132,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  String _getSubscriptionSubtitle(
+      BuildContext context, SubscriptionProvider provider) {
+    final l10n = AppLocalizations.of(context);
+    final tierName = provider.tier.displayName;
+
+    if (provider.isInTrial) {
+      final daysLeft = provider.trialDaysRemaining;
+      return l10n.profileSubtitleTrial(tierName, daysLeft);
+    }
+
+    final daysLeft = provider.daysRemaining;
+    if (daysLeft > 0) {
+      return l10n.profileSubtitleDaysRemaining(tierName, daysLeft);
+    }
+
+    return l10n.profileSubtitlePlan(tierName);
+  }
+
   Future<void> _handleSignOut() async {
     final miniPlayerProvider = context.read<MiniPlayerProvider>();
     final shouldSignOut = await showDialog<bool>(
@@ -143,7 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               AppLocalizations.of(context).cancel,
-              style: GoogleFonts.inter(color: AppColors.textSecondary),
+              style: GoogleFonts.inter(color: context.colors.textSecondary),
             ),
           ),
           TextButton(
@@ -174,8 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } catch (e) {
         debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
       }
-      await AuthPersistenceService.clearSession();
-      await FirebaseAuth.instance.signOut();
+      await AuthPersistenceService.fullLogout();
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(
           context,
@@ -188,6 +212,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final screenSize = mq.size;
     final screenWidth = screenSize.width;
@@ -199,23 +224,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser == null) {
-      return const Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        backgroundColor: colors.background,
+        body:
+            Center(child: CircularProgressIndicator(color: colors.textPrimary)),
       );
     }
 
     return Consumer<UserProvider>(
       builder: (context, userProvider, child) {
         return Scaffold(
-          backgroundColor: AppColors.backgroundWhite,
+          backgroundColor: colors.background,
           appBar: AppBar(
-            backgroundColor: AppColors.backgroundWhite,
+            backgroundColor: colors.background,
             elevation: 0,
             centerTitle: true,
             toolbarHeight: (isTablet || isDesktop) ? 72 : kToolbarHeight,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+              icon: Icon(Icons.arrow_back, color: colors.textPrimary),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -223,7 +249,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: GoogleFonts.inter(
                 fontSize: 20.sp.clamp(20.0, 22.0),
                 fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             actions: [
@@ -236,7 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp.clamp(14.0, 18.0),
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
@@ -308,6 +334,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
 
                 SizedBox(height: 20.h),
+                Consumer<SubscriptionProvider>(
+                  builder: (context, subProvider, _) {
+                    // Premium user - show subscription info
+                    if (subProvider.isActive) {
+                      return Column(
+                        children: [
+                          ProfileActionButton(
+                            icon: Icons.workspace_premium,
+                            title: AppLocalizations.of(context)
+                                .profileSubscriptionTitle,
+                            subtitle:
+                                _getSubscriptionSubtitle(context, subProvider),
+                            gradientColors: [
+                              Colors.amber.withValues(alpha: 0.15),
+                              Colors.orange.withValues(alpha: 0.1),
+                            ],
+                            borderColor: Colors.amber,
+                            iconBackgroundColor: Colors.amber.shade700,
+                            onTap: () => showManageSubscriptionSheet(context),
+                          ),
+                          SizedBox(height: 20.h),
+                        ],
+                      );
+                    }
+
+                    // Free user - show upgrade button
+                    return Column(
+                      children: [
+                        ProfileActionButton(
+                          icon: Icons.workspace_premium,
+                          title: AppLocalizations.of(context)
+                              .profileUpgradeToPremium,
+                          subtitle: AppLocalizations.of(context)
+                              .profileUnlockAllFeatures,
+                          gradientColors: [
+                            Colors.amber.withValues(alpha: 0.15),
+                            Colors.orange.withValues(alpha: 0.1),
+                          ],
+                          borderColor: Colors.amber,
+                          iconBackgroundColor: Colors.amber.shade700,
+                          onTap: () => showPaywall(context),
+                        ),
+                        SizedBox(height: 20.h),
+                      ],
+                    );
+                  },
+                ),
                 if (userProvider.isAdmin) ...[
                   ProfileActionButton(
                     icon: Icons.admin_panel_settings,

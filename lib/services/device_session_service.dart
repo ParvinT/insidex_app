@@ -20,6 +20,13 @@ class DeviceSessionService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
 
+  static const String _localTokenKey = 'device_session_token';
+  static const String _localLoginTimestampKey = 'device_session_login_time';
+
+  // In-memory cache
+  String? _cachedToken;
+  int? _loginTimestamp;
+
   void initializeTokenRefreshListener() {
     debugPrint('🔄 FCM Token Refresh Listener initialized');
 
@@ -48,50 +55,62 @@ class DeviceSessionService {
   }
 
   /// Save current device as active device for user
-  /// This will trigger logout on any other device
-  Future<void> saveActiveDevice(String userId) async {
+  /// Returns the saved token for verification
+  Future<String?> saveActiveDevice(String userId) async {
     String? fcmToken;
     String? platform;
+
     try {
       final hasPermission = await requestNotificationPermission();
       if (!hasPermission) {
         debugPrint(
             '⚠️ Notification permission denied - device session may not work properly');
       }
+
       // Get FCM token
       fcmToken = await _messaging.getToken();
 
       if (fcmToken == null) {
         debugPrint('⚠️ FCM token is null, cannot save device');
-        return;
+        return null;
       }
 
       platform = Platform.isIOS ? 'ios' : 'android';
+      final loginTimestamp = DateTime.now().millisecondsSinceEpoch;
 
-      // Update user's active device
+      // ⭐ STEP 1: Save to LOCAL first (immediate)
+      await _saveLocalToken(fcmToken);
+      await _saveLoginTimestamp(loginTimestamp);
+      debugPrint('💾 Token saved to local cache');
+
+      // ⭐ STEP 2: Then save to Firestore
       await _firestore.collection('users').doc(userId).update({
         'activeDevice': {
           'token': fcmToken,
           'platform': platform,
           'loginAt': FieldValue.serverTimestamp(),
+          'loginTimestamp': loginTimestamp,
         },
         'lastActiveAt': FieldValue.serverTimestamp(),
       });
 
       debugPrint(
           '✅ Active device saved: $platform - ${fcmToken.substring(0, 20)}...');
+
+      return fcmToken;
     } on FirebaseException catch (e) {
-      // Network hatalarını yakala
       if (e.code == 'unavailable' || e.code == 'deadline-exceeded') {
         debugPrint('⚠️ Network error, queueing offline update...');
         if (fcmToken != null && platform != null) {
           await _queueOfflineDeviceUpdate(userId, fcmToken, platform);
-        } else {
-          debugPrint('❌ Firebase error: ${e.code} - ${e.message}');
         }
+      } else {
+        debugPrint('❌ Firebase error: ${e.code} - ${e.message}');
       }
+      return fcmToken;
     } catch (e) {
       debugPrint('❌ Unexpected error saving active device: $e');
+      return fcmToken;
     }
   }
 
@@ -106,10 +125,17 @@ class DeviceSessionService {
   }
 
   /// Check if current device is the active device
+  /// Uses local cached token to avoid race conditions
   Future<bool> isCurrentDeviceActive(String userId) async {
     try {
-      final currentToken = await getCurrentDeviceToken();
-      if (currentToken == null) return false;
+      // ⭐ Use LOCAL token first (faster, no race condition)
+      String? currentToken = await getLocalToken();
+
+      // Fallback to FCM if no local token
+      if (currentToken == null) {
+        currentToken = await getCurrentDeviceToken();
+        if (currentToken == null) return false;
+      }
 
       final userDoc = await _firestore.collection('users').doc(userId).get();
       final data = userDoc.data();
@@ -124,7 +150,7 @@ class DeviceSessionService {
       return currentToken == activeToken;
     } catch (e) {
       debugPrint('❌ Error checking device status: $e');
-      return false;
+      return true; // ⭐ Return TRUE on error (don't logout on errors)
     }
   }
 
@@ -155,6 +181,8 @@ class DeviceSessionService {
       await _firestore.collection('users').doc(userId).update({
         'activeDevice': FieldValue.delete(),
       });
+
+      await clearLocalSession();
 
       debugPrint('✅ Active device cleared');
     } catch (e) {
@@ -266,5 +294,46 @@ class DeviceSessionService {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('pending_device_update');
     }
+  }
+
+  /// Save token to local storage
+  Future<void> _saveLocalToken(String token) async {
+    _cachedToken = token;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_localTokenKey, token);
+  }
+
+  /// Save login timestamp
+  Future<void> _saveLoginTimestamp(int timestamp) async {
+    _loginTimestamp = timestamp;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_localLoginTimestampKey, timestamp);
+  }
+
+  /// Get local token (memory first, then SharedPreferences)
+  Future<String?> getLocalToken() async {
+    if (_cachedToken != null) return _cachedToken;
+
+    final prefs = await SharedPreferences.getInstance();
+    _cachedToken = prefs.getString(_localTokenKey);
+    return _cachedToken;
+  }
+
+  /// Get login timestamp
+  Future<int?> getLoginTimestamp() async {
+    if (_loginTimestamp != null) return _loginTimestamp;
+
+    final prefs = await SharedPreferences.getInstance();
+    _loginTimestamp = prefs.getInt(_localLoginTimestampKey);
+    return _loginTimestamp;
+  }
+
+  /// Clear local session data
+  Future<void> clearLocalSession() async {
+    _cachedToken = null;
+    _loginTimestamp = null;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_localTokenKey);
+    await prefs.remove(_localLoginTimestampKey);
   }
 }

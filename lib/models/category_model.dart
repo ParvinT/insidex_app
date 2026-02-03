@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CategoryModel {
   final String id;
   final String iconName;
+  final String gender;
   final Map<String, String> names;
   final List<String> backgroundImages;
   final DateTime? createdAt;
@@ -16,6 +17,7 @@ class CategoryModel {
   CategoryModel({
     required this.id,
     required this.iconName,
+    this.gender = 'both',
     required this.names,
     this.backgroundImages = const [],
     this.createdAt,
@@ -45,6 +47,7 @@ class CategoryModel {
       return CategoryModel(
         id: id,
         iconName: map['iconName'] ?? 'meditation',
+        gender: map['gender'] as String? ?? 'both',
         names: Map<String, String>.from(map['names'] ?? {}),
         backgroundImages: map['backgroundImages'] is List
             ? List<String>.from(map['backgroundImages'])
@@ -60,6 +63,7 @@ class CategoryModel {
     return CategoryModel(
       id: id,
       iconName: map['iconName'] ?? 'meditation',
+      gender: map['gender'] as String? ?? 'both',
       names: {'en': map['title'] ?? 'Untitled'},
       backgroundImages: map['backgroundImages'] is List
           ? List<String>.from(map['backgroundImages'])
@@ -74,6 +78,7 @@ class CategoryModel {
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
       'iconName': iconName,
+      'gender': gender,
       'names': names,
       'backgroundImages': backgroundImages,
       'sessionCount': sessionCount,
@@ -93,6 +98,7 @@ class CategoryModel {
   CategoryModel copyWith({
     String? id,
     String? iconName,
+    String? gender,
     Map<String, String>? names,
     List<String>? backgroundImages,
     DateTime? createdAt,
@@ -102,6 +108,7 @@ class CategoryModel {
     return CategoryModel(
       id: id ?? this.id,
       iconName: iconName ?? this.iconName,
+      gender: gender ?? this.gender,
       names: names ?? this.names,
       backgroundImages: backgroundImages ?? this.backgroundImages,
       createdAt: createdAt ?? this.createdAt,

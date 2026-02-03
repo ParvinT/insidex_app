@@ -109,30 +109,34 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper>
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final shouldHideMiniPlayer = hiddenRoutes.contains(currentRoute);
 
-    debugPrint(
-        '🏗️ [NavigationWrapper] Building with route: $currentRoute (hide: $shouldHideMiniPlayer)');
+    return Overlay(
+      initialEntries: [
+        OverlayEntry(
+          builder: (context) => Stack(
+            children: [
+              widget.child,
+              if (!shouldHideMiniPlayer)
+                Consumer<MiniPlayerProvider>(
+                  builder: (context, miniPlayer, _) {
+                    if (!miniPlayer.isVisible) {
+                      return const SizedBox.shrink();
+                    }
 
-    return Stack(
-      children: [
-        widget.child,
-
-        // Mini player göster/gizle
-        if (!shouldHideMiniPlayer)
-          Consumer<MiniPlayerProvider>(
-            builder: (context, miniPlayer, _) {
-              if (!miniPlayer.isVisible) {
-                return const SizedBox.shrink();
-              }
-
-              return Positioned(
-                left: 0,
-                right: 0,
-                top: miniPlayer.isAtTop ? 0 : null,
-                bottom: miniPlayer.isAtTop ? null : 0,
-                child: const MiniPlayerWidget(),
-              );
-            },
+                    return Positioned(
+                      left: 0,
+                      right: 0,
+                      top: miniPlayer.isAtTop ? 0 : null,
+                      bottom: miniPlayer.isAtTop ? null : 0,
+                      child: const Material(
+                        type: MaterialType.transparency,
+                        child: MiniPlayerWidget(),
+                      ),
+                    );
+                  },
+                ),
+            ],
           ),
+        ),
       ],
     );
   }

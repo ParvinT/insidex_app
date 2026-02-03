@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -31,6 +31,7 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
@@ -38,31 +39,38 @@ class CustomTextField extends StatelessWidget {
       onChanged: onChanged,
       readOnly: readOnly,
       maxLines: maxLines,
-      style: GoogleFonts.inter(
-        fontSize: 16.sp,
-        color: AppColors.textPrimary,
-      ),
+      style: obscureText
+          ? GoogleFonts.robotoMono(
+              fontSize: 16.sp,
+              color: colors.textPrimary,
+            )
+          : GoogleFonts.inter(
+              fontSize: 16.sp,
+              color: colors.textPrimary,
+            ),
       decoration: InputDecoration(
         labelText: label,
         labelStyle: GoogleFonts.inter(
-          color: AppColors.textSecondary,
+          color: colors.textSecondary,
         ),
         hintText: hint,
         hintStyle: GoogleFonts.inter(
-          color: AppColors.textLight,
+          color: colors.textLight,
         ),
         suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: colors.backgroundCard,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: const BorderSide(
-            color: AppColors.greyBorder,
+          borderSide: BorderSide(
+            color: colors.border,
             width: 1.5,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
-          borderSide: const BorderSide(
-            color: AppColors.textPrimary,
+          borderSide: BorderSide(
+            color: colors.textPrimary,
             width: 1.5,
           ),
         ),

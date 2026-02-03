@@ -1,12 +1,13 @@
 // lib/features/library/session_list_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:marquee/marquee.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../shared/widgets/session_card.dart';
 import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
@@ -40,12 +41,15 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
   bool _isLoadingAllSessions = false;
   int _allSessionsRecursiveCount = 0;
 
-// Category Sessions pagination
+  // Category Sessions pagination
   List<Map<String, dynamic>> _categorySessions = [];
   DocumentSnapshot? _lastCategoryDocument;
   bool _hasMoreCategorySessions = true;
   bool _isLoadingCategorySessions = false;
   int _categorySessionsRecursiveCount = 0;
+
+  // Gender filter
+  String _selectedGenderFilter = 'all';
 
   @override
   void initState() {
@@ -140,8 +144,10 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
       }
 
       // Apply language filter
-      final filtered = await SessionFilterService.filterSessionsByLanguage(
+      final filtered =
+          await SessionFilterService.filterSessionsByLanguageAndGender(
         snapshot.docs,
+        _selectedGenderFilter,
       );
       debugPrint('🌍 [All Sessions] After filter: ${filtered.length}');
 
@@ -234,8 +240,10 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
       }
 
       // Apply language filter
-      final filtered = await SessionFilterService.filterSessionsByLanguage(
+      final filtered =
+          await SessionFilterService.filterSessionsByLanguageAndGender(
         snapshot.docs,
+        _selectedGenderFilter,
       );
       debugPrint('🌍 [Category] After filter: ${filtered.length}');
 
@@ -270,6 +278,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
 
@@ -294,127 +303,160 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         : widget.categoryTitle;
 
     return MediaQuery(
-      data: mq.copyWith(textScaler: TextScaler.linear(ts)),
-      child: Scaffold(
-        backgroundColor: AppColors.backgroundWhite,
-        appBar: AppBar(
-          toolbarHeight: toolbarH,
-          backgroundColor: AppColors.backgroundWhite,
-          elevation: 0,
-          leadingWidth: leadingWidth,
-          titleSpacing: isTablet ? 4 : 0,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: AppColors.textPrimary,
-              size: (24.sp).clamp(20.0, 28.0),
+        data: mq.copyWith(textScaler: TextScaler.linear(ts)),
+        child: Scaffold(
+          backgroundColor: colors.background,
+          appBar: AppBar(
+            toolbarHeight: toolbarH,
+            backgroundColor: colors.background,
+            elevation: 0,
+            leadingWidth: leadingWidth,
+            titleSpacing: isTablet ? 4 : 0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back,
+                color: colors.textPrimary,
+                size: (24.sp).clamp(20.0, 28.0),
+              ),
+              padding: EdgeInsets.only(left: leadingPad),
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              onPressed: () => Navigator.pop(context),
             ),
-            padding: EdgeInsets.only(left: leadingPad),
-            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            onPressed: () => Navigator.pop(context),
-          ),
-          title: LayoutBuilder(
-            builder: (context, c) {
-              return Row(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  // SOL: Logo
-                  Expanded(
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/images/logo.svg',
-                        width: logoW,
-                        height: logoH,
-                        fit: BoxFit.contain,
-                        colorFilter: const ColorFilter.mode(
-                          AppColors.textPrimary,
-                          BlendMode.srcIn,
+            title: LayoutBuilder(
+              builder: (context, c) {
+                return Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    // SOL: Logo
+                    Expanded(
+                      child: Center(
+                        child: SvgPicture.asset(
+                          'assets/images/logo.svg',
+                          width: logoW,
+                          height: logoH,
+                          fit: BoxFit.contain,
+                          colorFilter: ColorFilter.mode(
+                            colors.textPrimary,
+                            BlendMode.srcIn,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  // ORTA: Ayraç
-                  Container(
-                    height: dividerH,
-                    width: 1.5,
-                    color: AppColors.textPrimary.withValues(alpha: 0.2),
-                    margin: EdgeInsets.symmetric(horizontal: 8.w),
-                  ),
+                    // ORTA: Ayraç
+                    Container(
+                      height: dividerH,
+                      width: 1.5,
+                      color: colors.textPrimary.withValues(alpha: 0.2),
+                      margin: EdgeInsets.symmetric(horizontal: 8.w),
+                    ),
 
-                  // SAĞ: Başlık varyantı
-                  Expanded(
-                    child: Center(
-                      child: widget.isShowingAllSessions
-                          ? Text(
-                              rightTitleText,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.inter(
-                                fontSize: (15.sp).clamp(14.0, 20.0),
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                // Icon animation
-                                if (widget.categoryIconName != null)
-                                  SizedBox(
-                                    width: 32.w,
-                                    height: 32.w,
-                                    child: Transform.scale(
-                                      scale: 1.2,
-                                      child: Lottie.asset(
-                                        AppIcons.getAnimationPath(
-                                          AppIcons.getIconByName(widget
-                                                      .categoryIconName!)?[
-                                                  'path'] ??
-                                              'meditation.json',
+                    Expanded(
+                      child: Center(
+                        child: widget.isShowingAllSessions
+                            ? Text(
+                                rightTitleText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.inter(
+                                  fontSize: (15.sp).clamp(14.0, 20.0),
+                                  fontWeight: FontWeight.w600,
+                                  color: colors.textPrimary,
+                                ),
+                              )
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  // Icon animation
+                                  if (widget.categoryIconName != null)
+                                    SizedBox(
+                                      width: 32.w,
+                                      height: 32.w,
+                                      child: Transform.scale(
+                                        scale: 1.2,
+                                        child: Lottie.asset(
+                                          AppIcons.getAnimationPath(
+                                            AppIcons.getIconByName(widget
+                                                        .categoryIconName!)?[
+                                                    'path'] ??
+                                                'meditation.json',
+                                          ),
+                                          fit: BoxFit.contain,
+                                          repeat: true,
                                         ),
-                                        fit: BoxFit.contain,
-                                        repeat: true,
                                       ),
                                     ),
+                                  SizedBox(width: 6.w),
+                                  Flexible(
+                                    child: rightTitleText.length > 15
+                                        ? SizedBox(
+                                            height: 24.h,
+                                            child: Marquee(
+                                              text: rightTitleText,
+                                              style: GoogleFonts.inter(
+                                                fontSize:
+                                                    (16.sp).clamp(14.0, 18.0),
+                                                fontWeight: FontWeight.w700,
+                                                color: colors.textPrimary,
+                                              ),
+                                              scrollAxis: Axis.horizontal,
+                                              blankSpace: 40.0,
+                                              velocity: 30.0,
+                                              pauseAfterRound:
+                                                  const Duration(seconds: 2),
+                                              startPadding: 0,
+                                              accelerationDuration:
+                                                  const Duration(seconds: 1),
+                                              decelerationDuration:
+                                                  const Duration(
+                                                      milliseconds: 500),
+                                            ),
+                                          )
+                                        : Text(
+                                            rightTitleText,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.inter(
+                                              fontSize:
+                                                  (16.sp).clamp(14.0, 18.0),
+                                              fontWeight: FontWeight.w700,
+                                              color: colors.textPrimary,
+                                            ),
+                                          ),
                                   ),
-                                SizedBox(width: 6.w),
-                                Flexible(
-                                  child: Text(
-                                    rightTitleText,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.inter(
-                                      fontSize: (18.sp).clamp(16.0, 22.0),
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              ),
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
-        ),
-        body: widget.isShowingAllSessions
-            ? _buildAllSessionsList()
-            : _buildCategorySessionsList(),
-      ),
-    );
+          body: Column(
+            children: [
+              // 🆕 Gender Filter
+              _buildGenderFilter(colors),
+
+              Expanded(
+                child: widget.isShowingAllSessions
+                    ? _buildAllSessionsList()
+                    : _buildCategorySessionsList(),
+              ),
+            ],
+          ),
+        ));
   }
 
   // 🆕 ========== ALL SESSIONS LIST ==========
   Widget _buildAllSessionsList() {
+    final colors = context.colors;
     // Loading state (ilk yükleme)
     if (_isLoadingAllSessions && _allSessions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.textPrimary),
+      return Center(
+        child: CircularProgressIndicator(color: colors.textPrimary),
       );
     }
 
@@ -424,14 +466,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.music_off, size: 64.sp, color: AppColors.greyLight),
+            Icon(Icons.music_off, size: 64.sp, color: colors.greyLight),
             SizedBox(height: 16.h),
             Text(
               AppLocalizations.of(context).noSessionsAvailable,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -449,8 +491,8 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           if (_isLoadingAllSessions) {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.textPrimary),
+              child: Center(
+                child: CircularProgressIndicator(color: colors.textPrimary),
               ),
             );
           } else {
@@ -460,7 +502,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                 child: ElevatedButton(
                   onPressed: _loadMoreAllSessions,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackgroundCard,
+                    backgroundColor: colors.textPrimary,
                     padding:
                         EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
@@ -472,7 +514,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),
@@ -493,10 +535,11 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
 
 // 🆕 ========== CATEGORY SESSIONS LIST ==========
   Widget _buildCategorySessionsList() {
-    // Loading state (ilk yükleme)
+    final colors = context.colors;
+    // Loading state
     if (_isLoadingCategorySessions && _categorySessions.isEmpty) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.textPrimary),
+      return Center(
+        child: CircularProgressIndicator(color: colors.textPrimary),
       );
     }
 
@@ -506,14 +549,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.music_off, size: 64.sp, color: AppColors.greyLight),
+            Icon(Icons.music_off, size: 64.sp, color: colors.greyLight),
             SizedBox(height: 16.h),
             Text(
               AppLocalizations.of(context).noSessionsAvailable,
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
             SizedBox(height: 8.h),
@@ -521,7 +564,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
               AppLocalizations.of(context).checkBackLater,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
@@ -539,8 +582,8 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           if (_isLoadingCategorySessions) {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.textPrimary),
+              child: Center(
+                child: CircularProgressIndicator(color: colors.textPrimary),
               ),
             );
           } else {
@@ -550,7 +593,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                 child: ElevatedButton(
                   onPressed: _loadMoreCategorySessions,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.darkBackgroundCard,
+                    backgroundColor: colors.textPrimary,
                     padding:
                         EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
@@ -562,7 +605,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),
@@ -603,6 +646,78 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGenderFilter(AppThemeExtension colors) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Text(
+            '${AppLocalizations.of(context).filterLabel}: ',
+            style: GoogleFonts.inter(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: colors.textSecondary,
+            ),
+          ),
+          SizedBox(width: 8.w),
+          Expanded(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFilterChip(
+                      'all', '🌐 ${AppLocalizations.of(context).all}', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip(
+                      'male', '♂ ${AppLocalizations.of(context).male}', colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('female',
+                      '♀ ${AppLocalizations.of(context).female}', colors),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGenderFilter == value;
+    return GestureDetector(
+      onTap: () {
+        if (_selectedGenderFilter != value) {
+          setState(() => _selectedGenderFilter = value);
+          // Reload sessions with new filter
+          if (widget.isShowingAllSessions) {
+            _loadInitialAllSessions();
+          } else {
+            _loadInitialCategorySessions();
+          }
+        }
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.textPrimary : colors.greyLight,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? colors.textPrimary : colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 13.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+          ),
+        ),
+      ),
     );
   }
 }

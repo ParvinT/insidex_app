@@ -1,8 +1,8 @@
 // lib/main.dart
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +13,11 @@ import 'providers/user_provider.dart';
 import 'providers/mini_player_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/download_provider.dart';
+import 'providers/subscription_provider.dart';
 import 'services/audio/audio_handler.dart';
 import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
+import 'core/constants/app_info.dart';
 import 'providers/notification_provider.dart';
 import 'package:device_preview/device_preview.dart';
 import 'services/notifications/notification_service.dart';
@@ -36,11 +38,22 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await AppInfo.initialize();
 
   // Firebase'i başlat
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // ✅ App Check initialization
+  await FirebaseAppCheck.instance.activate(
+    androidProvider:
+        kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+    appleProvider: kReleaseMode ? AppleProvider.appAttest : AppleProvider.debug,
+    webProvider:
+        ReCaptchaV3Provider('6Lc9aFssAAAAAEojp9FJJkOnIr7dEqSV4wK4nmdn'),
+  );
+  debugPrint('✅ Firebase App Check initialized');
+
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
 
   PlatformDispatcher.instance.onError = (error, stack) {
@@ -48,9 +61,14 @@ void main() async {
     return true;
   };
 
-  if (!kIsWeb && Platform.isAndroid) {
-    BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-    await NotificationReliabilityService.initialize();
+  if (!kIsWeb) {
+    // Background Fetch - Optional feature (non-blocking)
+    try {
+      BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+      debugPrint('✅ Background Fetch initialized ');
+    } catch (e) {
+      debugPrint('⚠️ Background Fetch unavailable: $e');
+    }
   }
   // Notification Service
   try {
@@ -112,6 +130,10 @@ void main() async {
           ChangeNotifierProvider(
               create: (_) => NotificationProvider()..initialize()),
           ChangeNotifierProvider(create: (_) => MiniPlayerProvider()),
+          ChangeNotifierProvider(
+            create: (_) => SubscriptionProvider(),
+            lazy: false,
+          ),
         ],
         child: InsidexApp(localeProvider: localeProvider),
       ),

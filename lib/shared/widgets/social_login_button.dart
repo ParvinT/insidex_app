@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class SocialLoginButton extends StatelessWidget {
   final VoidCallback onTap;
@@ -23,6 +23,7 @@ class SocialLoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final bool canTap = !isLoading && !isDisabled;
 
     return GestureDetector(
@@ -35,13 +36,13 @@ class SocialLoginButton extends StatelessWidget {
           color: isDisabled
               ? (isDark
                   ? Colors.black.withValues(alpha: 0.3)
-                  : Colors.white.withValues(alpha: 0.5))
-              : (isDark ? Colors.black : Colors.white),
+                  : colors.backgroundCard.withValues(alpha: 0.5))
+              : (isDark ? Colors.black : colors.backgroundCard),
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isDisabled
-                ? AppColors.greyBorder.withValues(alpha: 0.3)
-                : (isDark ? Colors.black : AppColors.greyBorder),
+                ? colors.border.withValues(alpha: 0.3)
+                : (isDark ? Colors.black : colors.border),
             width: 1.5,
           ),
         ),
@@ -53,7 +54,7 @@ class SocialLoginButton extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      isDark ? Colors.white : AppColors.textPrimary,
+                      isDark ? Colors.white : colors.textPrimary,
                     ),
                   ),
                 )
@@ -68,8 +69,8 @@ class SocialLoginButton extends StatelessWidget {
                       color: isDisabled
                           ? (isDark
                               ? Colors.white.withValues(alpha: 0.3)
-                              : AppColors.textPrimary.withValues(alpha: 0.3))
-                          : (isDark ? Colors.white : AppColors.textPrimary),
+                              : colors.textPrimary.withValues(alpha: 0.3))
+                          : (isDark ? Colors.white : colors.textPrimary),
                       size: 24.sp,
                     ),
                     SizedBox(width: 8.w),
@@ -81,8 +82,8 @@ class SocialLoginButton extends StatelessWidget {
                         color: isDisabled
                             ? (isDark
                                 ? Colors.white.withValues(alpha: 0.3)
-                                : AppColors.textPrimary.withValues(alpha: 0.3))
-                            : (isDark ? Colors.white : AppColors.textPrimary),
+                                : colors.textPrimary.withValues(alpha: 0.3))
+                            : (isDark ? Colors.white : colors.textPrimary),
                       ),
                     ),
                   ],

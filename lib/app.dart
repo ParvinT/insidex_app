@@ -45,7 +45,7 @@ class InsidexApp extends StatelessWidget {
                   supportedLocales: LocaleProvider.supportedLocales,
                   theme: AppTheme.lightTheme,
                   darkTheme: AppTheme.darkTheme,
-                  themeMode: ThemeMode.light,
+                  themeMode: themeProvider.themeMode,
                   navigatorKey: navigatorKey,
                   initialRoute: AppRoutes.splash,
                   routes: AppRoutes.routes,

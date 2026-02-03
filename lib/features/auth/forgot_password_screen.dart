@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/auth_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/utils/form_validators.dart';
@@ -78,7 +78,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   onPressed: () => Navigator.pop(context),
                   child: Text(
                     AppLocalizations.of(context).cancel,
-                    style: GoogleFonts.inter(color: AppColors.textSecondary),
+                    style:
+                        GoogleFonts.inter(color: context.colors.textSecondary),
                   ),
                 ),
                 ElevatedButton(
@@ -87,7 +88,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Navigator.pushReplacementNamed(context, '/auth/register');
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.textPrimary,
+                    backgroundColor: context.colors.textPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.r),
                     ),
@@ -95,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   child: Text(
                     AppLocalizations.of(context).signUp,
                     style: GoogleFonts.inter(
-                      color: Colors.white,
+                      color: context.colors.textOnPrimary,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -135,13 +136,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return AuthScaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -162,7 +164,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildResetForm() {
-    // Sizin context extension'larınızı kullanıyoruz
+    final colors = context.colors;
+
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
     final isCompact = context.isCompactH;
@@ -188,8 +191,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 : isTablet
                     ? 47.h
                     : 40.h,
-            colorFilter: const ColorFilter.mode(
-              AppColors.textPrimary,
+            colorFilter: ColorFilter.mode(
+              colors.textPrimary,
               BlendMode.srcIn,
             ),
           ),
@@ -201,12 +204,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             width: isTablet ? 90.w : 80.w,
             height: isTablet ? 90.w : 80.w,
             decoration: BoxDecoration(
-              color: AppColors.textPrimary.withValues(alpha: 0.1),
+              color: colors.textPrimary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.lock_reset_rounded,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               size: isTablet ? 45.sp : 40.sp,
             ),
           ),
@@ -220,7 +223,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               fontSize:
                   isTablet ? 32.sp.clamp(28.0, 36.0) : 28.sp.clamp(24.0, 32.0),
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
@@ -236,7 +239,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               l10n.forgotPasswordDescription,
               style: GoogleFonts.inter(
                 fontSize: isTablet ? 17.sp : 16.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -259,7 +262,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               readOnly: _isLoading,
               suffixIcon: Icon(
                 Icons.email_outlined,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
                 size: isTablet ? 22.sp : 20.sp,
               ),
             ),
@@ -291,18 +294,15 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Icon(
                   Icons.arrow_back,
                   size: isTablet ? 18.sp : 16.sp,
-                  color: _isLoading
-                      ? AppColors.textSecondary
-                      : AppColors.textPrimary,
+                  color: _isLoading ? colors.textSecondary : colors.textPrimary,
                 ),
                 SizedBox(width: 8.w),
                 Text(
                   l10n.backToLogin,
                   style: GoogleFonts.inter(
                     fontSize: isTablet ? 15.sp : 14.sp,
-                    color: _isLoading
-                        ? AppColors.textSecondary
-                        : AppColors.textPrimary,
+                    color:
+                        _isLoading ? colors.textSecondary : colors.textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -320,10 +320,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Container(
               padding: EdgeInsets.all(isTablet ? 20.w : 16.w),
               decoration: BoxDecoration(
-                color: AppColors.greyLight.withValues(alpha: 0.5),
+                color: colors.greyLight.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
-                  color: AppColors.greyBorder,
+                  color: colors.border,
                   width: 1,
                 ),
               ),
@@ -332,7 +332,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 children: [
                   Icon(
                     Icons.info_outline_rounded,
-                    color: AppColors.textSecondary,
+                    color: colors.textSecondary,
                     size: isTablet ? 22.sp : 20.sp,
                   ),
                   SizedBox(width: 12.w),
@@ -341,7 +341,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       l10n.securityReasonNote,
                       style: GoogleFonts.inter(
                         fontSize: isTablet ? 13.sp : 12.sp,
-                        color: AppColors.textSecondary,
+                        color: colors.textSecondary,
                         height: 1.4,
                       ),
                     ),
@@ -358,7 +358,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   }
 
   Widget _buildSuccessView() {
-    // Context extension kullanımı (daha basit ve çalışıyor)
+    final colors = context.colors;
+
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
     final l10n = AppLocalizations.of(context);
@@ -381,8 +382,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               : isTablet
                   ? 47.h
                   : 40.h,
-          colorFilter: const ColorFilter.mode(
-            AppColors.textPrimary,
+          colorFilter: ColorFilter.mode(
+            colors.textPrimary,
             BlendMode.srcIn,
           ),
         ),
@@ -412,7 +413,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           style: GoogleFonts.inter(
             fontSize: isTablet ? 32.sp : 28.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
 
@@ -425,7 +426,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             vertical: isTablet ? 10.h : 8.h,
           ),
           decoration: BoxDecoration(
-            color: AppColors.greyLight,
+            color: colors.greyLight,
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Text(
@@ -433,7 +434,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             style: GoogleFonts.inter(
               fontSize: isTablet ? 17.sp : 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
         ),
@@ -453,7 +454,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             l10n.resetLinkSentMessage,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 17.sp : 16.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               height: 1.5,
             ),
             textAlign: TextAlign.center,
@@ -498,7 +499,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         style: GoogleFonts.inter(
                           fontSize: isTablet ? 15.sp : 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 4.h),
@@ -506,7 +507,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         l10n.checkSpamFolder,
                         style: GoogleFonts.inter(
                           fontSize: isTablet ? 13.sp : 12.sp,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                           height: 1.4,
                         ),
                       ),
@@ -550,7 +551,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             l10n.tryDifferentEmail,
             style: GoogleFonts.inter(
               fontSize: isTablet ? 15.sp : 14.sp,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
               fontWeight: FontWeight.w500,
               decoration: TextDecoration.underline,
             ),

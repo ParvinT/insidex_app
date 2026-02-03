@@ -1,7 +1,7 @@
 {
   "@@locale": "en",
   
-  "appName": "INSIDEX",
+  "appName": "InsideX",
   "appTagline": "Sound Healing & Subliminal",
   
   "settings": "Settings",
@@ -21,7 +21,7 @@
   
   "supportAndFeedback": "Support & Feedback",
   "sendFeedback": "Send Feedback",
-  "sendFeedbackSubtitle": "Help us improve INSIDEX",
+  "sendFeedbackSubtitle": "Help us improve InsideX",
   "reportBug": "Report a Bug",
   "reportBugSubtitle": "Something not working?",
   
@@ -93,6 +93,7 @@
   
   
   "min": "min",
+  "hourShort": "h",
   "days": "days",
   
   "analytics": "Analytics",
@@ -115,6 +116,7 @@
   "sat": "Sat",
   "sun": "Sun",
 
+  "allCategories": "All Categories",
   "categories": "Categories",
   "allSessions": "All Sessions",
   "chooseCategory": "Choose a Category",
@@ -136,6 +138,7 @@
   "gender": "Gender",
   "male": "Male",
   "female": "Female",
+  "genderBoth": "Both",
   
   "totalListening": "Total Listening",
   "totalSessions": "Total Sessions",
@@ -380,7 +383,7 @@
   "notificationsEnabledSuccess": "Notifications enabled! 🔔",
 
   "notificationDailyReminderTitle": "Time for Your Daily Session 🎧",
-  "notificationDailyReminderMessage": "Take a moment to relax and heal with INSIDEX",
+  "notificationDailyReminderMessage": "Take a moment to relax and heal with InsideX",
 
   "notificationStreak3Title": "🎉 Congratulations!",
   "notificationStreak3Message": "🔥 3 day streak! Great start!",
@@ -398,7 +401,7 @@
   "notificationStreak30Message": "One full month! Incredible dedication!",
 
   "notificationStreak50Title": "💎 50 Day Diamond Streak!",
-  "notificationStreak50Message": "Half a century! You're a true INSIDEX master!",
+  "notificationStreak50Message": "Half a century! You're a true InsideX master!",
 
   "notificationStreak100Title": "👑 100 Day Champion!",
   "notificationStreak100Message": "One hundred days! You're absolutely legendary! 🎊",
@@ -775,13 +778,14 @@
   "recommendedForYou": "Recommended for you",
   "unlockAndListen": "Unlock & Listen",
   "listenNow": "Listen Now",
-  "startEmotionalTestFree": "Start My Emotional Test — Free",
+  "discoverTrueCauses": "Discover the True Causes of Disease",
   "selected": "Selected",
   "next": "Next",
   "noDiseasesAvailable": "No diseases available",
   "mensTest": "Men's Test",
   "womensTest": "Women's Test",
   "yourResults": "Your Results",
+  "viewResults": "View Results",
   "selectedDiseases": "Selected Diseases",
   "disease": "Disease",
   "diseases": "Diseases",
@@ -833,7 +837,260 @@
   "stillOffline": "Still offline. Please check your connection.",
   "noInternet": "No Internet",
   "internetRequiredForFirstLogin": "Internet connection is required for first login. Please connect and try again.",
-  "preparing": "Preparing..."
+  "preparing": "Preparing...",
+  "appearance": "Appearance",
+  "lightMode": "Light",
+  "lightModeSubtitle": "Classic bright theme",
+  "darkMode": "Dark",
+  "darkModeSubtitle": "Easy on the eyes",
+  "systemDefault": "System",
+  "systemDefaultSubtitle": "Follow device settings",
+  "minutesToday": "minutes today",
+  "minutesThisWeek": "minutes this week",
+  "minutesThisMonth": "minutes this month",
+  "minutesThisYear": "minutes this year",
+  "minutesAllTime": "minutes all time",
+  "tooManyResetRequestsHourly": "Too many requests. Please try again in an hour.",
+  "tooManyResetRequestsDaily": "Daily limit reached. Please try again tomorrow.",
+  "quizCategories": "Quiz Categories",
+  "icon": "Icon",
+  "both": "Both",
+  "names": "Names",
+  "selectCategoryOptional": "Select Category (Optional)",
+  "noCategory": "No Category",
+  "addYourFirstQuizCategory": "Add your first quiz category",
+  "deleteCategoryWithDiseaseNote": "Are you sure you want to delete \"{categoryName}\"?\n\nNote: Diseases in this category will not be deleted, but their category reference will be removed.",
+  "@deleteCategoryWithDiseaseNote": {
+    "placeholders": {
+      "categoryName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToSaveCategory": "Failed to save category",
+  "failedToDeleteCategory": "Failed to delete category",
+  "grantSubscription": "Grant Subscription",
+  "quizTab": "Quiz",
+  "quizCategoriesSection": "Quiz Categories",
+  "diseasesSection": "Diseases",
+  "uncategorized": "Uncategorized",
+  "sessionAvailable": "Session",
+  "comingSoon": "Coming",
+  "searchQuizHint": "Search diseases, categories...",
+
+  "dailyQuotes": "Daily Quotes",
+  "addQuote": "Add Quote",
+  "editQuote": "Edit Quote",
+  "noQuotesYet": "No quotes yet",
+  "addYourFirstQuote": "Add your first quote",
+  "deleteQuoteConfirmation": "Are you sure you want to delete this quote?",
+  "quoteText": "Quote Text",
+  "enterQuoteText": "Enter quote text...",
+  "author": "Author",
+  "enterAuthorName": "Enter author name",
+  "optional": "optional",
+  "selectWhenToShowQuote": "Select when to show this quote",
+  "targetGoals": "Target Goals",
+  "selectMatchingGoals": "Select matching user goals",
+  "pleaseEnterAtLeastOneTranslation": "Please enter at least one translation",
+  "languages": "languages",
+  "sleep": "Sleep",
+  "motivation": "Motivation",
+  "achievement": "Achievement",
+  "changesSaved": "Changes saved",
+  "confirmDelete": "Confirm Delete",
+  "featureSlides": "Feature Slides",
+  "enabled": "Enabled",
+  "featureSlidesImages": "Images",
+  "pages": "Pages",
+  "subtitleLabel": "Subtitle",
+  "deleteConfirmationMessage": "Are you sure you want to delete this item?",
+  "demoSession": "Demo Session",
+  "demoSession": "Demo Session",
+  "freeUsersCanPlay": "Free users can play this session",
+  "onlyPremiumCanPlay": "Only premium users can play",
+  "targetGender": "Target Gender",
+  "filterLabel": "Filter",
+  "paywallManageYourPlan": "Manage Your Plan",
+  "paywallUnlockPotential": "Unlock Your Full Potential",
+  "paywallSwitchPlansSubtitle": "Switch plans or keep your current subscription",
+  "paywallChoosePlanSubtitle": "Choose the plan that works best for you",
+  "paywallRestorePurchases": "Restore purchases",
+  "paywallLegalText": "Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. You can manage and cancel your subscription in your App Store or Google Play account settings.",
+  "paywallCurrentPlan": "Current Plan",
+  "paywallUpgradeTo": "Upgrade to {tierName}",
+  "@paywallUpgradeTo": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "paywallSwitchTo": "Switch to {tierName}",
+  "@paywallSwitchTo": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "paywallStartFreeTrial": "Start {days}-Day Free Trial",
+  "@paywallStartFreeTrial": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "paywallSubscribeNow": "Subscribe Now",
+  "paywallAlreadySubscribed": "You are already subscribed to this plan",
+  "paywallRestoreSuccess": "Purchases restored successfully!",
+  "paywallRestoreNoPurchases": "No purchases found to restore",
+  "packageBadgeCurrent": "CURRENT",
+  "packageBadgePopular": "POPULAR",
+  "packageBadgeSavings": "{percent}% OFF",
+  "@packageBadgeSavings": {
+    "placeholders": {
+      "percent": {"type": "int"}
+    }
+  },
+  "packageTrialBanner": "{days} days FREE trial",
+  "@packageTrialBanner": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "packageCurrentPlanBanner": "This is your current plan",
+  "successDialogWelcomePremium": "Welcome to Premium!",
+  "successDialogTrialStarted": "Trial Started!",
+  "successDialogDefaultSubtitle": "You now have access to all features",
+  "successDialogTrialSubtitle": "Enjoy full access for the next 7 days",
+  "successDialogUnlimitedAccess": "You now have unlimited access to all features",
+  "successDialogTrialBanner": "7-day free trial started",
+  "successDialogStartExploring": "Start Exploring",
+  "featureAllAudioSessions": "All audio sessions",
+  "featureBackgroundPlayback": "Background playback",
+  "featureOfflineDownloads": "Offline downloads",
+  "upgradePromptTitle": "Upgrade to Premium",
+  "upgradePromptSubtitle": "Unlock all features and sessions",
+  "upgradePromptButton": "Upgrade",
+  "upgradeSheetPremiumFeature": "Premium Feature",
+  "upgradeSheetDefaultSubtitle": "Subscribe to access this feature and more",
+  "upgradeSheetMaybeLater": "Maybe Later",
+  "upgradeSheetViewPlans": "View Plans",
+  "manageSheetTitle": "Your Subscription",
+  "manageSheetPlanTitle": "{tierName} Plan",
+  "@manageSheetPlanTitle": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "manageSheetStatusTrial": "Trial • {period}",
+  "@manageSheetStatusTrial": {
+    "placeholders": {
+      "period": {"type": "String"}
+    }
+  },
+  "manageSheetStatusActive": "Active • {period}",
+  "@manageSheetStatusActive": {
+    "placeholders": {
+      "period": {"type": "String"}
+    }
+  },
+  "manageSheetTrialDaysLeft": "{days} days left in trial",
+  "@manageSheetTrialDaysLeft": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "manageSheetDaysUntilRenewal": "{days} days until renewal",
+  "@manageSheetDaysUntilRenewal": {
+    "placeholders": {
+      "days": {"type": "int"}
+    }
+  },
+  "manageSheetTapToViewPlans": "Tap to view all plans",
+  "manageSheetManageInStore": "Manage in Store",
+  "manageSheetManageSubtitle": "Change or cancel subscription",
+  "profileSubscriptionTitle": "Your Subscription",
+  "profileUpgradeToPremium": "Upgrade to Premium",
+  "profileUnlockAllFeatures": "Unlock all sessions and features",
+  "profileSubtitleTrial": "{tierName} • Trial ({days} days left)",
+  "@profileSubtitleTrial": {
+    "placeholders": {
+      "tierName": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "profileSubtitleDaysRemaining": "{tierName} • {days} days remaining",
+  "@profileSubtitleDaysRemaining": {
+    "placeholders": {
+      "tierName": {"type": "String"},
+      "days": {"type": "int"}
+    }
+  },
+  "profileSubtitlePlan": "{tierName} Plan",
+  "@profileSubtitlePlan": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "tierWithTrial": "{tierName} (Trial)",
+  "@tierWithTrial": {
+    "placeholders": {
+      "tierName": {"type": "String"}
+    }
+  },
+  "tierLite": "Lite",
+  "tierStandard": "Standard",
+  "downloadFeatureTitle": "Offline Downloads",
+  "downloadFeatureSubtitle": "Upgrade to Standard plan to download sessions for offline listening",
+  "premiumSessionTitle": "Premium Session",
+  "premiumSessionSubtitle": "Subscribe to unlock all audio sessions and features",
+  "tierYearlyStandard": "Yearly Standard",
+  "periodMonth": "/month",
+  "periodYear": "/year",
+  "periodMonthly": "Monthly",
+  "periodYearly": "Yearly",
+  "monthlyEquivalentFormat": "{price}/month",
+  "@monthlyEquivalentFormat": {
+    "placeholders": {
+      "price": {"type": "String"}
+    }
+  },
+  "offlinePlaybackTitle": "Standard Required",
+  "offlinePlaybackSubtitle": "Offline listening is included in the Standard plan",
+  "offlineNoInternetUpgrade": "Connect to internet to upgrade your plan",
+  "adminPremiumSearchUser": "Search User",
+  "adminPremiumSearchHint": "Enter user email address or UID",
+  "adminPremiumSearchPlaceholder": "email@example.com or user-uid",
+  "adminPremiumEnterEmailOrUid": "Please enter an email or UID",
+  "adminPremiumUserNotFound": "User not found",
+  "adminPremiumSearchError": "Error searching",
+  "adminPremiumCurrentStatus": "Current Status",
+  "adminPremiumAdminStatus": "Admin Premium",
+  "adminPremiumStoreStatus": "Store Subscription",
+  "adminPremiumInactive": "NOT ACTIVE",
+  "adminPremiumNoSubscription": "No subscription",
+  "adminPremiumTier": "Tier",
+  "adminPremiumReason": "Reason",
+  "adminPremiumGrantedBy": "Granted by",
+  "adminPremiumManage": "Manage Admin Premium",
+  "adminPremiumManageDesc": "Grant full premium access independent of store subscriptions",
+  "adminPremiumSelectReason": "Select reason",
+  "adminPremiumGrantButton": "Grant Full Premium",
+  "adminPremiumGrantSuccess": "Admin Premium granted successfully!",
+  "adminPremiumGrantError": "Failed to grant premium",
+  "adminPremiumRevokeTitle": "Revoke Admin Premium",
+  "adminPremiumRevokeConfirm": "Are you sure you want to revoke this user's admin premium? They will lose premium access unless they have a store subscription.",
+  "adminPremiumRevokeButton": "Revoke Admin Premium",
+  "adminPremiumRevokeSuccess": "Admin Premium revoked successfully",
+  "adminPremiumRevokeError": "Failed to revoke premium",
+  "adminPremiumAlreadyActive": "Admin Premium Active",
+  "adminPremiumFullAccess": "This user has full premium access",
+  "adminPremiumUidCopied": "UID copied to clipboard",
+  "adminPremiumEmptyTitle": "Search for a user",
+  "adminPremiumEmptyDesc": "Enter an email address or UID to find a user and manage their premium access",
+  "adminPremiumReasonVip": "VIP",
+  "adminPremiumReasonTester": "Tester",
+  "adminPremiumReasonEmployee": "Employee",
+  "adminPremiumReasonInfluencer": "Influencer",
+  "adminPremiumReasonOther": "Other"
+
 
 
 }

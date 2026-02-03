@@ -6,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:marquee/marquee.dart';
 import '../../../l10n/app_localizations.dart';
+import '../../../core/themes/app_theme_extension.dart';
+import '../../../core/constants/app_colors.dart';
 
 /// Header with back button, title, and info button
 class PlayerHeader extends StatelessWidget {
@@ -20,6 +22,7 @@ class PlayerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
       child: Row(
@@ -28,7 +31,7 @@ class PlayerHeader extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.keyboard_arrow_down,
-              color: Colors.black,
+              color: colors.textPrimary,
               size: 30.sp,
             ),
             onPressed: onBack,
@@ -38,22 +41,15 @@ class PlayerHeader extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF5A5A5A),
+              color: colors.textSecondary,
               letterSpacing: 1.2,
             ),
           ),
           IconButton(
-            icon: Container(
-              padding: EdgeInsets.all(8.w),
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.info_outline,
-                color: Colors.black,
-                size: 22.sp,
-              ),
+            icon: Icon(
+              Icons.info_outline,
+              color: colors.textPrimary,
+              size: 26.sp,
             ),
             onPressed: onInfo,
           ),
@@ -76,6 +72,7 @@ class PlayerVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return SizedBox(
       width: 220.w,
       height: 220.w,
@@ -89,7 +86,12 @@ class PlayerVisualizer extends StatelessWidget {
             return 60 + 60 * s; // 60..120 px
           }).toList();
 
-          return CustomPaint(painter: EqPainter(bars));
+          return CustomPaint(
+              painter: EqPainter(
+            bars,
+            ringColor: colors.greyMedium,
+            barColor: colors.textPrimary,
+          ));
         },
       ),
     );
@@ -109,6 +111,7 @@ class PlayerSessionInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
@@ -120,7 +123,7 @@ class PlayerSessionInfo extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
-                color: Colors.black87,
+                color: colors.textPrimary,
               ),
               maxWidth: MediaQuery.of(context).size.width - 40.w,
             ),
@@ -132,7 +135,7 @@ class PlayerSessionInfo extends StatelessWidget {
               text: subtitle,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: const Color(0xFF7A7A7A),
+                color: colors.textSecondary,
               ),
               maxWidth: 150.w,
             ),
@@ -164,10 +167,10 @@ class IntroductionButton extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 24.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
+              color: AppColors.darkBackgroundElevated.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(25.r),
               border: Border.all(
-                color: const Color(0xFFE0E0E0),
+                color: AppColors.darkTextPrimary.withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
@@ -176,7 +179,7 @@ class IntroductionButton extends StatelessWidget {
               children: [
                 Icon(
                   Icons.info_outline,
-                  color: const Color(0xFF191919),
+                  color: AppColors.darkTextPrimary,
                   size: 18.sp,
                 ),
                 SizedBox(width: 8.w),
@@ -185,7 +188,7 @@ class IntroductionButton extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF191919),
+                    color: AppColors.darkTextPrimary,
                   ),
                 ),
               ],
@@ -218,6 +221,7 @@ class PlayerProgressBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final total =
         duration.inMilliseconds > 0 ? duration : const Duration(minutes: 10);
 
@@ -231,13 +235,13 @@ class PlayerProgressBar extends StatelessWidget {
         children: [
           SliderTheme(
             data: SliderTheme.of(context).copyWith(
-              activeTrackColor: Colors.black,
-              inactiveTrackColor: const Color(0xFFE6E6E6),
-              thumbColor: Colors.black,
+              activeTrackColor: colors.textPrimary,
+              inactiveTrackColor: colors.textPrimary.withValues(alpha: 0.3),
+              thumbColor: colors.textPrimary,
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6.r),
               trackHeight: 3.h,
               overlayShape: RoundSliderOverlayShape(overlayRadius: 12.r),
-              overlayColor: Colors.black.withValues(alpha: 0.1),
+              overlayColor: colors.textPrimary.withValues(alpha: 0.1),
             ),
             child: Slider(
               value: value,
@@ -256,7 +260,7 @@ class PlayerProgressBar extends StatelessWidget {
                   _formatDuration(position),
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
-                    color: const Color(0xFF6E6E6E),
+                    color: colors.textSecondary,
                   ),
                 ),
                 Text(
@@ -265,7 +269,7 @@ class PlayerProgressBar extends StatelessWidget {
                       : '--:--',
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
-                    color: const Color(0xFF6E6E6E),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -297,23 +301,40 @@ class PlayerPlayControls extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        IconButton(
-          icon: const Icon(Icons.replay_10, color: Color(0xFF353535)),
-          iconSize: 32.sp,
-          onPressed: onReplay10,
+        // Skip backward
+        Container(
+          width: 48.w,
+          height: 48.w,
+          decoration: BoxDecoration(
+            color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.replay_10,
+              color: AppColors.darkTextPrimary,
+            ),
+            iconSize: 26.sp,
+            padding: EdgeInsets.zero,
+            onPressed: onReplay10,
+          ),
         ),
+
         SizedBox(width: 20.w),
+
+        // Play/Pause
         GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: onPlayPause,
           child: Container(
             width: 70.w,
             height: 70.w,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.black,
+              color: AppColors.darkTextPrimary.withValues(alpha: 0.5),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.12),
+                  color: AppColors.darkBackgroundPure.withValues(alpha: 0.3),
                   blurRadius: 20,
                   spreadRadius: 2,
                 ),
@@ -321,16 +342,31 @@ class PlayerPlayControls extends StatelessWidget {
             ),
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.white,
+              color: AppColors.darkTextOnLight,
               size: 35.sp,
             ),
           ),
         ),
+
         SizedBox(width: 20.w),
-        IconButton(
-          icon: const Icon(Icons.forward_10, color: Color(0xFF353535)),
-          iconSize: 32.sp,
-          onPressed: onForward10,
+
+        // Skip forward
+        Container(
+          width: 48.w,
+          height: 48.w,
+          decoration: BoxDecoration(
+            color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            icon: const Icon(
+              Icons.forward_10,
+              color: AppColors.darkTextPrimary,
+            ),
+            iconSize: 26.sp,
+            padding: EdgeInsets.zero,
+            onPressed: onForward10,
+          ),
         ),
       ],
     );
@@ -366,36 +402,44 @@ class PlayerBottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 50.w),
+    final colors = context.colors;
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 30.w),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      decoration: BoxDecoration(
+        color: colors.background.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(30.r),
+        border: Border.all(
+          color: colors.textPrimary.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          // Loop - her zaman göster
           IconButton(
             icon: Icon(
               Icons.loop,
-              color: isLooping ? Colors.black : const Color(0xFFBDBDBD),
+              color: isLooping ? colors.textPrimary : colors.textSecondary,
             ),
             onPressed: onLoop,
           ),
 
-          // Playlist - offline'da gizle
           if (!isOffline)
             IconButton(
               icon: Icon(
                 isInPlaylist ? Icons.playlist_add_check : Icons.playlist_add,
-                color: isInPlaylist ? Colors.black : const Color(0xFFBDBDBD),
+                color: isInPlaylist ? colors.textPrimary : colors.textSecondary,
               ),
               onPressed: onPlaylist,
             ),
 
-          // Favorite - offline'da gizle
+          // Favorite
           if (!isOffline)
             IconButton(
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : const Color(0xFFBDBDBD),
+                color: isFavorite ? Colors.red : colors.textSecondary,
               ),
               onPressed: onFavorite,
             ),
@@ -404,12 +448,11 @@ class PlayerBottomActions extends StatelessWidget {
           IconButton(
             icon: Icon(
               Icons.access_time,
-              color: isTimerActive ? Colors.black : const Color(0xFFBDBDBD),
+              color: isTimerActive ? colors.textPrimary : colors.textSecondary,
             ),
             onPressed: onTimer,
           ),
 
-          // Download - offline'da zaten null geliyor
           if (downloadButton != null) downloadButton!,
         ],
       ),
@@ -474,8 +517,9 @@ class ScrollingText extends StatelessWidget {
 /// Equalizer painter for visualizer
 class EqPainter extends CustomPainter {
   final List<double> bars;
-
-  EqPainter(this.bars);
+  final Color ringColor;
+  final Color barColor;
+  EqPainter(this.bars, {required this.ringColor, required this.barColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -487,14 +531,13 @@ class EqPainter extends CustomPainter {
     final ringPaint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
-      ..color = Colors.grey.shade300;
+      ..color = ringColor;
     canvas.drawCircle(Offset(cx, cy), ringRadius, ringPaint);
 
     // Draw bars
     final barPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = Colors.black87;
-
+      ..color = barColor;
     const barWidth = 8.0;
     const spacing = 14.0;
     final totalW = (bars.length * barWidth) + ((bars.length - 1) * spacing);
@@ -512,5 +555,7 @@ class EqPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant EqPainter oldDelegate) =>
-      bars != oldDelegate.bars;
+      bars != oldDelegate.bars ||
+      ringColor != oldDelegate.ringColor ||
+      barColor != oldDelegate.barColor;
 }

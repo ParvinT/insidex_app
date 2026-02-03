@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../downloads_screen.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/breakpoints.dart';
 import '../../../providers/download_provider.dart';
 import '../../../providers/locale_provider.dart';
+import '../../../providers/subscription_provider.dart';
+import '../../../shared/widgets/upgrade_prompt.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../models/downloaded_session.dart';
 
@@ -85,6 +87,7 @@ class _DownloadButtonState extends State<DownloadButton>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final mq = MediaQuery.of(context);
     final width = mq.size.width;
     final isTablet =
@@ -117,7 +120,7 @@ class _DownloadButtonState extends State<DownloadButton>
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.textSecondary.withValues(alpha: 0.5),
+                    colors.textSecondary.withValues(alpha: 0.5),
                   ),
                 ),
               ),
@@ -168,6 +171,7 @@ class _DownloadButtonState extends State<DownloadButton>
     required bool isOffline,
     required VoidCallback onDownload,
   }) {
+    final colors = context.colors;
     return GestureDetector(
       onTap: isOffline ? null : onDownload,
       child: Container(
@@ -176,15 +180,15 @@ class _DownloadButtonState extends State<DownloadButton>
         decoration: widget.showBackground
             ? BoxDecoration(
                 color: isOffline
-                    ? AppColors.greyLight.withValues(alpha: 0.5)
-                    : AppColors.textPrimary.withValues(alpha: 0.08),
+                    ? colors.greyLight.withValues(alpha: 0.5)
+                    : colors.textPrimary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(buttonSize / 2),
               )
             : null,
         child: Icon(
           Icons.download_rounded,
           size: iconSize,
-          color: isOffline ? AppColors.textLight : AppColors.textPrimary,
+          color: isOffline ? colors.textLight : colors.textPrimary,
         ),
       ),
     );
@@ -196,6 +200,7 @@ class _DownloadButtonState extends State<DownloadButton>
     required double progress,
     required VoidCallback onCancel,
   }) {
+    final colors = context.colors;
     final double containerSize = widget.showBackground ? buttonSize : iconSize;
     final double progressSize =
         widget.showBackground ? buttonSize * 0.85 : iconSize;
@@ -216,16 +221,15 @@ class _DownloadButtonState extends State<DownloadButton>
               child: CircularProgressIndicator(
                 value: progress,
                 strokeWidth: widget.showBackground ? 2.5 : 2.0,
-                backgroundColor: AppColors.greyLight,
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(AppColors.textPrimary),
+                backgroundColor: colors.greyLight,
+                valueColor: AlwaysStoppedAnimation<Color>(colors.textPrimary),
               ),
             ),
             // Stop icon
             Icon(
               Icons.stop_rounded,
               size: stopIconSize,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ],
         ),
@@ -261,6 +265,23 @@ class _DownloadButtonState extends State<DownloadButton>
 
   Future<void> _startDownload(
       DownloadProvider provider, String language) async {
+    // ✅ Check if user can download (Standard tier only)
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+
+    if (!subscriptionProvider.canDownload) {
+      final l10n = AppLocalizations.of(context);
+      // Show upgrade prompt first
+      final purchased = await showUpgradeBottomSheet(
+        context,
+        feature: 'download',
+        title: l10n.downloadFeatureTitle,
+        subtitle: l10n.downloadFeatureSubtitle,
+      );
+
+      // If not purchased, don't start download
+      if (purchased != true) return;
+    }
+
     widget.onDownloadStarted?.call();
 
     // ✅ Cancel previous subscription if exists
@@ -329,7 +350,7 @@ class _DownloadButtonState extends State<DownloadButton>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: context.colors.backgroundElevated,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
@@ -338,14 +359,14 @@ class _DownloadButtonState extends State<DownloadButton>
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w600,
-            color: AppColors.textPrimary,
+            color: context.colors.textPrimary,
           ),
         ),
         content: Text(
           l10n.removeDownloadMessage,
           style: TextStyle(
             fontSize: 14.sp,
-            color: AppColors.textSecondary,
+            color: context.colors.textSecondary,
           ),
         ),
         actions: [
@@ -353,8 +374,8 @@ class _DownloadButtonState extends State<DownloadButton>
             onPressed: () => Navigator.pop(context, false),
             child: Text(
               l10n.cancel,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
+              style: TextStyle(
+                color: context.colors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),

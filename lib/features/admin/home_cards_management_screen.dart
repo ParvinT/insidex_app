@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -76,14 +76,15 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     final predefinedCards = _getPredefinedCards();
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -91,7 +92,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
       ),
@@ -100,13 +101,14 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
         itemCount: predefinedCards.length,
         itemBuilder: (context, index) {
           final cardInfo = predefinedCards[index];
-          return _buildCardManager(cardInfo);
+          return _buildCardManager(cardInfo, colors);
         },
       ),
     );
   }
 
-  Widget _buildCardManager(Map<String, dynamic> cardInfo) {
+  Widget _buildCardManager(
+      Map<String, dynamic> cardInfo, AppThemeExtension colors) {
     return StreamBuilder<DocumentSnapshot>(
       stream:
           _firestore.collection('home_cards').doc(cardInfo['id']).snapshots(),
@@ -116,7 +118,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
         }
 
         if (!snapshot.hasData) {
-          return _buildLoadingCard(cardInfo);
+          return _buildLoadingCard(cardInfo, colors);
         }
 
         final data = snapshot.data?.data() as Map<String, dynamic>?;
@@ -127,17 +129,17 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
           margin: EdgeInsets.only(bottom: 24.h),
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colors.backgroundPure,
             borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
               color: enabled
-                  ? AppColors.textPrimary.withValues(alpha: 0.3)
-                  : AppColors.greyBorder,
+                  ? colors.textPrimary.withValues(alpha: 0.3)
+                  : colors.border,
               width: 2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: colors.textPrimary.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -152,12 +154,12 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                   Container(
                     padding: EdgeInsets.all(12.w),
                     decoration: BoxDecoration(
-                      color: AppColors.textPrimary.withValues(alpha: 0.1),
+                      color: colors.textPrimary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(
                       cardInfo['icon'],
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                       size: 28.sp,
                     ),
                   ),
@@ -171,7 +173,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                           style: GoogleFonts.inter(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                         ),
                         SizedBox(height: 4.h),
@@ -179,7 +181,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                           cardInfo['description'],
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: AppColors.textSecondary,
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -192,7 +194,10 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         value: enabled,
                         onChanged: (value) =>
                             _toggleCard(cardInfo['id'], value),
-                        activeColor: AppColors.textPrimary,
+                        activeThumbColor: colors.textOnPrimary,
+                        activeTrackColor: colors.textPrimary,
+                        inactiveThumbColor: colors.greyMedium,
+                        inactiveTrackColor: colors.greyLight,
                       ),
                       Text(
                         enabled
@@ -201,7 +206,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
-                          color: enabled ? Colors.green : Colors.grey,
+                          color: enabled ? Colors.green : colors.greyMedium,
                         ),
                       ),
                     ],
@@ -210,7 +215,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
               ),
 
               SizedBox(height: 20.h),
-              Divider(color: AppColors.greyBorder.withValues(alpha: 0.5)),
+              Divider(color: colors.border.withValues(alpha: 0.5)),
               SizedBox(height: 20.h),
 
               // Images Section
@@ -225,7 +230,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary,
+                          color: colors.textPrimary,
                         ),
                       ),
                       SizedBox(height: 4.h),
@@ -234,7 +239,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                             .imagesRandomRotation(images.length.toString()),
                         style: GoogleFonts.inter(
                           fontSize: 12.sp,
-                          color: AppColors.textSecondary,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -244,8 +249,8 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                     icon: const Icon(Icons.photo_library, size: 18),
                     label: Text(AppLocalizations.of(context).manage),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.textPrimary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: colors.textPrimary,
+                      foregroundColor: colors.textOnPrimary,
                       padding: EdgeInsets.symmetric(
                         horizontal: 16.w,
                         vertical: 10.h,
@@ -267,6 +272,7 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
                         images[index],
                         cardInfo['id'],
                         index,
+                        colors,
                       );
                     },
                   ),
@@ -279,13 +285,14 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
     );
   }
 
-  Widget _buildImageThumbnail(String url, String cardId, int index) {
+  Widget _buildImageThumbnail(
+      String url, String cardId, int index, AppThemeExtension colors) {
     return Container(
       margin: EdgeInsets.only(right: 12.w),
       width: 100.w,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
         image: DecorationImage(
           image: NetworkImage(url),
           fit: BoxFit.cover,
@@ -294,28 +301,29 @@ class _HomeCardsManagementScreenState extends State<HomeCardsManagementScreen> {
     );
   }
 
-  Widget _buildLoadingCard(Map<String, dynamic> cardInfo) {
+  Widget _buildLoadingCard(
+      Map<String, dynamic> cardInfo, AppThemeExtension colors) {
     return Container(
       margin: EdgeInsets.only(bottom: 24.h),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColors.greyBorder),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         children: [
-          Icon(cardInfo['icon'], color: AppColors.textSecondary, size: 28.sp),
+          Icon(cardInfo['icon'], color: colors.textSecondary, size: 28.sp),
           SizedBox(width: 16.w),
           Text(
             '${AppLocalizations.of(context).loadingText} ${cardInfo['title']}...',
             style: GoogleFonts.inter(
               fontSize: 16.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           const Spacer(),
-          const CircularProgressIndicator(),
+          CircularProgressIndicator(color: colors.textPrimary),
         ],
       ),
     );
@@ -432,13 +440,14 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.backgroundWhite,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.backgroundWhite,
+        backgroundColor: colors.background,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -446,7 +455,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           style: GoogleFonts.inter(
             fontSize: 20.sp,
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: colors.textPrimary,
           ),
         ),
         actions: [
@@ -456,13 +465,13 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
               icon: const Icon(Icons.save),
               label: Text(AppLocalizations.of(context).save),
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
+                foregroundColor: colors.textPrimary,
               ),
             ),
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
           : Column(
               children: [
                 // Info Banner
@@ -470,17 +479,17 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                   margin: EdgeInsets.all(20.w),
                   padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary.withValues(alpha: 0.1),
+                    color: colors.textPrimary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
-                      color: AppColors.textPrimary.withValues(alpha: 0.3),
+                      color: colors.textPrimary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                         size: 24.sp,
                       ),
                       SizedBox(width: 12.w),
@@ -494,7 +503,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                               ),
                             ),
                             SizedBox(height: 4.h),
@@ -502,7 +511,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                               AppLocalizations.of(context).addImagesInfo,
                               style: GoogleFonts.inter(
                                 fontSize: 12.sp,
-                                color: AppColors.textSecondary,
+                                color: colors.textSecondary,
                               ),
                             ),
                           ],
@@ -524,8 +533,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                         AppLocalizations.of(context).addImages,
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: colors.textPrimary,
+                        foregroundColor: colors.textOnPrimary,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -540,7 +549,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                 // Images Grid
                 Expanded(
                   child: _images.isEmpty
-                      ? _buildEmptyState()
+                      ? _buildEmptyState(colors)
                       : GridView.builder(
                           padding: EdgeInsets.all(20.w),
                           gridDelegate:
@@ -552,7 +561,8 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
                           ),
                           itemCount: _images.length,
                           itemBuilder: (context, index) {
-                            return _buildImageCard(_images[index], index);
+                            return _buildImageCard(
+                                _images[index], index, colors);
                           },
                         ),
                 ),
@@ -561,7 +571,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppThemeExtension colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -569,7 +579,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           Icon(
             Icons.photo_library_outlined,
             size: 80.sp,
-            color: AppColors.textSecondary.withValues(alpha: 0.5),
+            color: colors.textSecondary.withValues(alpha: 0.5),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -577,7 +587,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
             style: GoogleFonts.inter(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -585,7 +595,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
             AppLocalizations.of(context).addImagesToGetStarted,
             style: GoogleFonts.inter(
               fontSize: 14.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -593,13 +603,13 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
     );
   }
 
-  Widget _buildImageCard(String url, int index) {
+  Widget _buildImageCard(String url, int index, AppThemeExtension colors) {
     return Stack(
       children: [
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.greyBorder, width: 2),
+            border: Border.all(color: colors.border, width: 2),
             image: DecorationImage(
               image: NetworkImage(url),
               fit: BoxFit.cover,
@@ -626,7 +636,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
               ),
               child: Icon(
                 Icons.close,
-                color: Colors.white,
+                color: colors.textOnPrimary,
                 size: 18.sp,
               ),
             ),
@@ -639,7 +649,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.7),
+              color: colors.textPrimary.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
@@ -647,7 +657,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: colors.textOnPrimary,
               ),
             ),
           ),
@@ -692,9 +702,7 @@ class _ImageManagerScreenState extends State<ImageManagerScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                '$successCount ${AppLocalizations.of(context).imagesUploaded}${failCount > 0
-                        ? ', $failCount ${AppLocalizations.of(context).failed}'
-                        : ''}',
+                '$successCount ${AppLocalizations.of(context).imagesUploaded}${failCount > 0 ? ', $failCount ${AppLocalizations.of(context).failed}' : ''}',
               ),
               backgroundColor: successCount > 0 ? Colors.green : Colors.red,
             ),

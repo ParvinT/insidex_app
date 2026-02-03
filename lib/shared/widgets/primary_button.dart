@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -27,20 +27,21 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return SizedBox(
       width: width ?? double.infinity,
       height: height.h,
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? AppColors.textPrimary,
-          foregroundColor: textColor ?? Colors.white,
-          disabledBackgroundColor: AppColors.greyLight,
+          backgroundColor: backgroundColor ?? colors.textPrimary,
+          foregroundColor: textColor ?? colors.textOnPrimary,
+          disabledBackgroundColor: colors.greyLight,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r), // Reduced from 16.r
+            borderRadius: BorderRadius.circular(12.r),
           ),
           elevation: 0,
-          padding: const EdgeInsets.symmetric(vertical: 0), 
+          padding: const EdgeInsets.symmetric(vertical: 0),
         ),
         child: Center(
           // Explicit center
@@ -51,7 +52,7 @@ class PrimaryButton extends StatelessWidget {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      textColor ?? Colors.white,
+                      textColor ?? colors.textOnPrimary,
                     ),
                   ),
                 )

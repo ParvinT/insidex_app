@@ -1,22 +1,20 @@
-# INSIDEX Hakkında
-
-**Sürüm 1.0.0**
+# InsideX Hakkında
 
 ---
 
 ## Yeni Nesil Sağlıklı Yaşam
 
-INSIDEX, bilinçaltı programlama, nörobilim ve ses terapisini birleştirerek günlük hayatta dengeyi, özgüveni ve canlılığı yeniden kazanmanıza yardımcı olan yeni nesil bir sağlıklı yaşam uygulamasıdır.
+InsideX, bilinçaltı programlama, nörobilim ve ses terapisini birleştirerek günlük hayatta dengeyi, özgüveni ve canlılığı yeniden kazanmanıza yardımcı olan yeni nesil bir sağlıklı yaşam uygulamasıdır.
 
-## 🎯 Neler Sunuyoruz
+## Neler Sunuyoruz
 
 Uyku, rahatlama, fitness, araba kullanırken, iş, meditasyon, odaklanma, duygusal iyileşme ve daha fazlası için kişiselleştirilmiş ses seansları sunuyoruz. Her seans, bilinçli algı eşiğinin altına gömülü olumlamalar kullanır — bilinçaltı zihninizin pozitif değişimi doğal ve nazik bir şekilde özümsemesini sağlar.
 
-## ✨ Felsefemiz
+## Felsefemiz
 
-INSIDEX sadece iyileşme ile ilgili değil — daha derin bir seviyede kendinizle yeniden bağlantı kurmakla ilgilidir. Açıklık, duygusal özgürleşme, enerji veya özgüven arıyor olun, INSIDEX yolculuğunuz için rehberli destek sunar.
+InsideX sadece iyileşme ile ilgili değil — daha derin bir seviyede kendinizle yeniden bağlantı kurmakla ilgilidir. Açıklık, duygusal özgürleşme, enerji veya özgüven arıyor olun, InsideX yolculuğunuz için rehberli destek sunar.
 
-## 🎵 Seans Türleri
+## Seans Türleri
 
 Çeşitli bilinçaltı türleri sağlıyoruz:
 
@@ -24,20 +22,24 @@ INSIDEX sadece iyileşme ile ilgili değil — daha derin bir seviyede kendinizl
 - Egzersiz, araba kullanma ve yüksek odaklanma gerektiren görevler için aktif parçalar
 - Ölçülebilir sonuçlarla günlük ilerleme için tasarlanmış iyileştirme programları
 
-## 💛 Misyonumuz
+## Misyonumuz
 
 **Zihinsel sağlığı erişilebilir, modern ve sezgisel hale getirmek.**
 
-## 📧 Bize Ulaşın
+## Bize Ulaşın
 
 **E-posta:** hello@insidexapp.com
 
-## 📧 Destek İçin
+## Destek İçin
 
 **E-posta:** support@insidexapp.com
+
+## Teşekkürler
+
+Bu uygulama, Lottie Simple License kapsamında [LottieFiles](https://lottiefiles.com) platformundan animasyonlar ve ikonlar kullanmaktadır.
 
 ---
 
 **İstanbul'da ❤️ ile yapıldı**
 
-© 2025 INSIDEX. Tüm hakları saklıdır.
+© 2025 InsideX. Tüm hakları saklıdır.

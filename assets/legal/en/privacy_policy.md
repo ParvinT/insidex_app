@@ -9,7 +9,7 @@ Registered Office: 85 Great Portland Street, London, England W1W 7LT
 
 ---
 
-ALZHAMI LTD ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our INSIDEX mobile application and related services.
+ALZHAMI LTD ("we," "our," or "us") respects your privacy and is committed to protecting your personal data. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our InsideX mobile application and related services.
 
 ## 1. Information We Collect
 
@@ -129,7 +129,26 @@ Report breaches to: support@insidexapp.com
 - **Analytics:** Anonymized after 14 months
 - **Legal Obligations:** Some data retained as required by law
 
-## 8. Your Rights (GDPR)
+## 8. Account Deletion
+
+You can request deletion of your account and all associated data at any time.
+
+### How to Delete Your Account:
+
+- Send an email to support@insidexapp.com with the subject line "Delete My Account"
+- Include the email address associated with your InsideX account
+- We will verify your identity and process your request within 30 days
+
+### What Gets Deleted:
+
+- Your account credentials and profile information
+- Listening history and preferences
+- Favorites, playlists, and progress data
+- All personal data stored in our systems
+
+Please note that some data may be retained for legal compliance purposes as described in our Data Retention section.
+
+## 9. Your Rights (GDPR)
 
 You have the right to:
 
@@ -145,7 +164,7 @@ You have the right to:
 
 You may lodge complaints with the UK ICO at ico.org.uk
 
-## 9. International Data Transfers
+## 10. International Data Transfers
 
 Data is stored in UK/EU (Firebase europe-west).  
 Transfers outside EEA are protected by:
@@ -154,7 +173,7 @@ Transfers outside EEA are protected by:
 - Adequacy decisions
 - GDPR safeguards
 
-## 10. Age Restriction
+## 11. Age Restriction
 
 The Services are for users 18+ only.  
 We do not knowingly collect data from anyone under 18.  
@@ -162,7 +181,7 @@ If we discover such data, we delete it immediately.
 
 **Parents:** Contact support@insidexapp.com if you believe we have your child's data.
 
-## 11. Cookies and Tracking
+## 12. Cookies and Tracking
 
 The App uses:
 
@@ -170,7 +189,7 @@ The App uses:
 - Firebase Analytics (can be disabled)
 - No third-party advertising or tracking pixels
 
-## 12. Changes to This Policy
+## 13. Changes to This Policy
 
 We may update this policy. Material changes notified via:
 
@@ -180,7 +199,7 @@ We may update this policy. Material changes notified via:
 
 Continued use constitutes acceptance.
 
-## 13. Contact Information
+## 14. Contact Information
 
 **Data Controller:**  
 ALZHAMI LTD  

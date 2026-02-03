@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../change_password_screen.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -53,32 +53,32 @@ class ProfileMenuSection extends StatelessWidget {
     required String title,
     required VoidCallback onTap,
   }) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16.h),
         decoration: BoxDecoration(
           border: Border(
-            bottom:
-                BorderSide(color: AppColors.greyBorder.withValues(alpha: 0.3)),
+            bottom: BorderSide(color: colors.border.withValues(alpha: 0.3)),
           ),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppColors.textSecondary, size: 20.sp),
+            Icon(icon, color: colors.textSecondary, size: 20.sp),
             SizedBox(width: 16.w),
             Text(
               title,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               size: 20.sp,
             ),
           ],

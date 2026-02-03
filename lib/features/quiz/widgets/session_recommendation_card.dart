@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -37,20 +37,21 @@ class SessionRecommendationCard extends StatelessWidget {
     final double buttonPadding = isTablet ? 16.h : 14.h;
     final double borderRadius = isTablet ? 18.r : 16.r;
 
+    final colors = context.colors;
     return Container(
       padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            AppColors.textPrimary.withValues(alpha: 0.1),
-            AppColors.textPrimary.withValues(alpha: 0.05),
+            colors.textPrimary.withValues(alpha: 0.1),
+            colors.textPrimary.withValues(alpha: 0.05),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(borderRadius),
         border: Border.all(
-          color: AppColors.textPrimary.withValues(alpha: 0.3),
+          color: colors.textPrimary.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
@@ -62,7 +63,7 @@ class SessionRecommendationCard extends StatelessWidget {
             children: [
               Icon(
                 Icons.recommend,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
                 size: isTablet ? 24.sp : 22.sp,
               ),
               SizedBox(width: 8.w),
@@ -72,7 +73,7 @@ class SessionRecommendationCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: titleSize,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                   ),
                 ),
               ),
@@ -84,7 +85,7 @@ class SessionRecommendationCard extends StatelessWidget {
                     vertical: 4.h,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Row(
@@ -92,7 +93,7 @@ class SessionRecommendationCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.lock,
-                        color: Colors.white,
+                        color: colors.textOnPrimary,
                         size: 12.sp,
                       ),
                       SizedBox(width: 4.w),
@@ -101,7 +102,7 @@ class SessionRecommendationCard extends StatelessWidget {
                         style: GoogleFonts.inter(
                           fontSize: 10.sp.clamp(9.0, 11.0),
                           fontWeight: FontWeight.w700,
-                          color: Colors.white,
+                          color: colors.textOnPrimary,
                           letterSpacing: 0.5,
                         ),
                       ),
@@ -117,10 +118,10 @@ class SessionRecommendationCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.backgroundCard,
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: AppColors.greyBorder.withValues(alpha: 0.3),
+                color: colors.border.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -133,7 +134,7 @@ class SessionRecommendationCard extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: sessionTitleSize,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: colors.textPrimary,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -147,13 +148,13 @@ class SessionRecommendationCard extends StatelessWidget {
                   width: isTablet ? 44.w : 40.w,
                   height: isTablet ? 44.w : 40.w,
                   decoration: BoxDecoration(
-                    color: AppColors.textPrimary.withValues(alpha: 0.1),
+                    color: colors.textPrimary.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
                   child: Icon(
                     Icons.play_arrow_rounded,
-                    color: AppColors.textPrimary,
+                    color: colors.textPrimary,
                     size: isTablet ? 28.sp : 26.sp,
                   ),
                 ),
@@ -169,7 +170,7 @@ class SessionRecommendationCard extends StatelessWidget {
             child: ElevatedButton(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.textPrimary,
+                backgroundColor: colors.textPrimary,
                 padding: EdgeInsets.symmetric(vertical: buttonPadding),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -182,7 +183,7 @@ class SessionRecommendationCard extends StatelessWidget {
                   if (isPremium && !userHasPremium) ...[
                     Icon(
                       Icons.lock_open,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                       size: 18.sp,
                     ),
                     SizedBox(width: 8.w),
@@ -194,7 +195,7 @@ class SessionRecommendationCard extends StatelessWidget {
                     style: GoogleFonts.inter(
                       fontSize: isTablet ? 16.sp : 15.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      color: colors.textOnPrimary,
                     ),
                   ),
                 ],

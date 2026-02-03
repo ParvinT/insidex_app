@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'Sound Healing & Subliminal';
@@ -57,7 +57,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sendFeedback => 'Send Feedback';
 
   @override
-  String get sendFeedbackSubtitle => 'Help us improve INSIDEX';
+  String get sendFeedbackSubtitle => 'Help us improve InsideX';
 
   @override
   String get reportBug => 'Report a Bug';
@@ -233,6 +233,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get min => 'min';
 
   @override
+  String get hourShort => 'h';
+
+  @override
   String get days => 'days';
 
   @override
@@ -287,6 +290,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sun => 'Sun';
 
   @override
+  String get allCategories => 'All Categories';
+
+  @override
   String get categories => 'Categories';
 
   @override
@@ -336,6 +342,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get female => 'Female';
+
+  @override
+  String get genderBoth => 'Both';
 
   @override
   String get totalListening => 'Total Listening';
@@ -993,7 +1002,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'Take a moment to relax and heal with INSIDEX';
+      'Take a moment to relax and heal with InsideX';
 
   @override
   String get notificationStreak3Title => '🎉 Congratulations!';
@@ -1034,7 +1043,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'Half a century! You\'re a true INSIDEX master!';
+      'Half a century! You\'re a true InsideX master!';
 
   @override
   String get notificationStreak100Title => '👑 100 Day Champion!';
@@ -1987,7 +1996,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listenNow => 'Listen Now';
 
   @override
-  String get startEmotionalTestFree => 'Start My Emotional Test — Free';
+  String get discoverTrueCauses => 'Discover the True Causes of Disease';
 
   @override
   String get selected => 'Selected';
@@ -2006,6 +2015,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get yourResults => 'Your Results';
+
+  @override
+  String get viewResults => 'View Results';
 
   @override
   String get selectedDiseases => 'Selected Diseases';
@@ -2129,4 +2141,548 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get preparing => 'Preparing...';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get lightMode => 'Light';
+
+  @override
+  String get lightModeSubtitle => 'Classic bright theme';
+
+  @override
+  String get darkMode => 'Dark';
+
+  @override
+  String get darkModeSubtitle => 'Easy on the eyes';
+
+  @override
+  String get systemDefault => 'System';
+
+  @override
+  String get systemDefaultSubtitle => 'Follow device settings';
+
+  @override
+  String get minutesThisWeek => 'minutes this week';
+
+  @override
+  String get minutesThisMonth => 'minutes this month';
+
+  @override
+  String get minutesThisYear => 'minutes this year';
+
+  @override
+  String get minutesAllTime => 'minutes all time';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'Too many requests. Please try again in an hour.';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'Daily limit reached. Please try again tomorrow.';
+
+  @override
+  String get quizCategories => 'Quiz Categories';
+
+  @override
+  String get icon => 'Icon';
+
+  @override
+  String get both => 'Both';
+
+  @override
+  String get names => 'Names';
+
+  @override
+  String get selectCategoryOptional => 'Select Category (Optional)';
+
+  @override
+  String get noCategory => 'No Category';
+
+  @override
+  String get addYourFirstQuizCategory => 'Add your first quiz category';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return 'Are you sure you want to delete \"$categoryName\"?\n\nNote: Diseases in this category will not be deleted, but their category reference will be removed.';
+  }
+
+  @override
+  String get failedToSaveCategory => 'Failed to save category';
+
+  @override
+  String get failedToDeleteCategory => 'Failed to delete category';
+
+  @override
+  String get grantSubscription => 'Grant Subscription';
+
+  @override
+  String get quizTab => 'Quiz';
+
+  @override
+  String get quizCategoriesSection => 'Quiz Categories';
+
+  @override
+  String get diseasesSection => 'Diseases';
+
+  @override
+  String get sessionAvailable => 'Session';
+
+  @override
+  String get comingSoon => 'Coming';
+
+  @override
+  String get searchQuizHint => 'Search diseases, categories...';
+
+  @override
+  String get dailyQuotes => 'Daily Quotes';
+
+  @override
+  String get addQuote => 'Add Quote';
+
+  @override
+  String get editQuote => 'Edit Quote';
+
+  @override
+  String get noQuotesYet => 'No quotes yet';
+
+  @override
+  String get addYourFirstQuote => 'Add your first quote';
+
+  @override
+  String get deleteQuoteConfirmation =>
+      'Are you sure you want to delete this quote?';
+
+  @override
+  String get quoteText => 'Quote Text';
+
+  @override
+  String get enterQuoteText => 'Enter quote text...';
+
+  @override
+  String get author => 'Author';
+
+  @override
+  String get enterAuthorName => 'Enter author name';
+
+  @override
+  String get optional => 'optional';
+
+  @override
+  String get selectWhenToShowQuote => 'Select when to show this quote';
+
+  @override
+  String get targetGoals => 'Target Goals';
+
+  @override
+  String get selectMatchingGoals => 'Select matching user goals';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'Please enter at least one translation';
+
+  @override
+  String get languages => 'languages';
+
+  @override
+  String get sleep => 'Sleep';
+
+  @override
+  String get motivation => 'Motivation';
+
+  @override
+  String get achievement => 'Achievement';
+
+  @override
+  String get changesSaved => 'Changes saved';
+
+  @override
+  String get confirmDelete => 'Confirm Delete';
+
+  @override
+  String get featureSlides => 'Feature Slides';
+
+  @override
+  String get enabled => 'Enabled';
+
+  @override
+  String get featureSlidesImages => 'Images';
+
+  @override
+  String get pages => 'Pages';
+
+  @override
+  String get subtitleLabel => 'Subtitle';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'Are you sure you want to delete this item?';
+
+  @override
+  String get demoSession => 'Demo Session';
+
+  @override
+  String get freeUsersCanPlay => 'Free users can play this session';
+
+  @override
+  String get onlyPremiumCanPlay => 'Only premium users can play';
+
+  @override
+  String get targetGender => 'Target Gender';
+
+  @override
+  String get filterLabel => 'Filter';
+
+  @override
+  String get paywallManageYourPlan => 'Manage Your Plan';
+
+  @override
+  String get paywallUnlockPotential => 'Unlock Your Full Potential';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'Switch plans or keep your current subscription';
+
+  @override
+  String get paywallChoosePlanSubtitle =>
+      'Choose the plan that works best for you';
+
+  @override
+  String get paywallRestorePurchases => 'Restore purchases';
+
+  @override
+  String get paywallLegalText =>
+      'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. You can manage and cancel your subscription in your App Store or Google Play account settings.';
+
+  @override
+  String get paywallCurrentPlan => 'Current Plan';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return 'Upgrade to $tierName';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return 'Switch to $tierName';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return 'Start $days-Day Free Trial';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'Subscribe Now';
+
+  @override
+  String get paywallAlreadySubscribed =>
+      'You are already subscribed to this plan';
+
+  @override
+  String get paywallRestoreSuccess => 'Purchases restored successfully!';
+
+  @override
+  String get paywallRestoreNoPurchases => 'No purchases found to restore';
+
+  @override
+  String get packageBadgeCurrent => 'CURRENT';
+
+  @override
+  String get packageBadgePopular => 'POPULAR';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return '$percent% OFF';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days days FREE trial';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'This is your current plan';
+
+  @override
+  String get successDialogWelcomePremium => 'Welcome to Premium!';
+
+  @override
+  String get successDialogTrialStarted => 'Trial Started!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'You now have access to all features';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      'Enjoy full access for the next 7 days';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'You now have unlimited access to all features';
+
+  @override
+  String get successDialogTrialBanner => '7-day free trial started';
+
+  @override
+  String get successDialogStartExploring => 'Start Exploring';
+
+  @override
+  String get featureAllAudioSessions => 'All audio sessions';
+
+  @override
+  String get featureBackgroundPlayback => 'Background playback';
+
+  @override
+  String get featureOfflineDownloads => 'Offline downloads';
+
+  @override
+  String get upgradePromptTitle => 'Upgrade to Premium';
+
+  @override
+  String get upgradePromptSubtitle => 'Unlock all features and sessions';
+
+  @override
+  String get upgradePromptButton => 'Upgrade';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Premium Feature';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'Subscribe to access this feature and more';
+
+  @override
+  String get upgradeSheetMaybeLater => 'Maybe Later';
+
+  @override
+  String get upgradeSheetViewPlans => 'View Plans';
+
+  @override
+  String get manageSheetTitle => 'Your Subscription';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return '$tierName Plan';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'Trial • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'Active • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return '$days days left in trial';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return '$days days until renewal';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'Tap to view all plans';
+
+  @override
+  String get manageSheetManageInStore => 'Manage in Store';
+
+  @override
+  String get manageSheetManageSubtitle => 'Change or cancel subscription';
+
+  @override
+  String get profileSubscriptionTitle => 'Your Subscription';
+
+  @override
+  String get profileUpgradeToPremium => 'Upgrade to Premium';
+
+  @override
+  String get profileUnlockAllFeatures => 'Unlock all sessions and features';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • Trial ($days days left)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • $days days remaining';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return '$tierName Plan';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (Trial)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'Offline Downloads';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'Upgrade to Standard plan to download sessions for offline listening';
+
+  @override
+  String get premiumSessionTitle => 'Premium Session';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'Subscribe to unlock all audio sessions and features';
+
+  @override
+  String get tierYearlyStandard => 'Yearly Standard';
+
+  @override
+  String get periodMonth => '/month';
+
+  @override
+  String get periodYear => '/year';
+
+  @override
+  String get periodMonthly => 'Monthly';
+
+  @override
+  String get periodYearly => 'Yearly';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/month';
+  }
+
+  @override
+  String get offlinePlaybackTitle => 'Standard Required';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'Offline listening is included in the Standard plan';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'Connect to internet to upgrade your plan';
+
+  @override
+  String get adminPremiumSearchUser => 'Search User';
+
+  @override
+  String get adminPremiumSearchHint => 'Enter user email address or UID';
+
+  @override
+  String get adminPremiumSearchPlaceholder => 'email@example.com or user-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'Please enter an email or UID';
+
+  @override
+  String get adminPremiumUserNotFound => 'User not found';
+
+  @override
+  String get adminPremiumSearchError => 'Error searching';
+
+  @override
+  String get adminPremiumCurrentStatus => 'Current Status';
+
+  @override
+  String get adminPremiumAdminStatus => 'Admin Premium';
+
+  @override
+  String get adminPremiumStoreStatus => 'Store Subscription';
+
+  @override
+  String get adminPremiumInactive => 'NOT ACTIVE';
+
+  @override
+  String get adminPremiumNoSubscription => 'No subscription';
+
+  @override
+  String get adminPremiumTier => 'Tier';
+
+  @override
+  String get adminPremiumReason => 'Reason';
+
+  @override
+  String get adminPremiumGrantedBy => 'Granted by';
+
+  @override
+  String get adminPremiumManage => 'Manage Admin Premium';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'Grant full premium access independent of store subscriptions';
+
+  @override
+  String get adminPremiumSelectReason => 'Select reason';
+
+  @override
+  String get adminPremiumGrantButton => 'Grant Full Premium';
+
+  @override
+  String get adminPremiumGrantSuccess => 'Admin Premium granted successfully!';
+
+  @override
+  String get adminPremiumGrantError => 'Failed to grant premium';
+
+  @override
+  String get adminPremiumRevokeTitle => 'Revoke Admin Premium';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'Are you sure you want to revoke this user\'s admin premium? They will lose premium access unless they have a store subscription.';
+
+  @override
+  String get adminPremiumRevokeButton => 'Revoke Admin Premium';
+
+  @override
+  String get adminPremiumRevokeSuccess => 'Admin Premium revoked successfully';
+
+  @override
+  String get adminPremiumRevokeError => 'Failed to revoke premium';
+
+  @override
+  String get adminPremiumAlreadyActive => 'Admin Premium Active';
+
+  @override
+  String get adminPremiumFullAccess => 'This user has full premium access';
+
+  @override
+  String get adminPremiumUidCopied => 'UID copied to clipboard';
+
+  @override
+  String get adminPremiumEmptyTitle => 'Search for a user';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'Enter an email address or UID to find a user and manage their premium access';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'Tester';
+
+  @override
+  String get adminPremiumReasonEmployee => 'Employee';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'Influencer';
+
+  @override
+  String get adminPremiumReasonOther => 'Other';
 }

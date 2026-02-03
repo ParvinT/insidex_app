@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'measure_size.dart';
 
+import '../themes/app_theme_extension.dart';
+
 /// AuthScaffold v4
 /// - Fixes assertion on short-height screens when BODY is a Column with Expanded.
 /// - Uses IntrinsicHeight ONLY when body is NOT scrollable (Column/Stack).
@@ -88,10 +90,11 @@ class _AuthScaffoldState extends State<AuthScaffold> {
         child: widget.body,
       );
     }
+    final colors = context.colors;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      backgroundColor: widget.backgroundColor ?? const Color(0xFFFFFFFF),
+      backgroundColor: widget.backgroundColor ?? colors.background,
       appBar: widget.appBar,
       body: SafeArea(
         top: true,

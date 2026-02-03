@@ -4,9 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/constants/app_colors.dart';
+import 'package:provider/provider.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/constants/app_info.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/subscription_provider.dart';
+import '../../features/subscription/paywall_screen.dart';
+import 'upgrade_prompt.dart';
 
 class MenuOverlay extends StatefulWidget {
   final VoidCallback onClose;
@@ -75,6 +80,7 @@ class _MenuOverlayState extends State<MenuOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return AnimatedBuilder(
       animation: _animationController,
       builder: (context, child) {
@@ -100,18 +106,11 @@ class _MenuOverlayState extends State<MenuOverlay>
                   width: 280.w,
                   height: double.infinity,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colors.backgroundElevated,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(30.r),
                       bottomLeft: Radius.circular(30.r),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 20,
-                        offset: const Offset(-5, 0),
-                      ),
-                    ],
                   ),
                   child: SafeArea(
                     child: Column(
@@ -128,14 +127,14 @@ class _MenuOverlayState extends State<MenuOverlay>
                                 style: GoogleFonts.inter(
                                   fontSize: 24.sp,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                 ),
                               ),
                               IconButton(
                                 onPressed: _closeMenu,
                                 icon: Icon(
                                   Icons.close,
-                                  color: AppColors.textPrimary,
+                                  color: colors.textPrimary,
                                   size: 24.sp,
                                 ),
                               ),
@@ -143,17 +142,58 @@ class _MenuOverlayState extends State<MenuOverlay>
                           ),
                         ),
 
-                        const Divider(
-                          color: AppColors.greyBorder,
+                        Divider(
+                          color: colors.border,
                           thickness: 1,
                           height: 1,
                         ),
 
                         // Menu Items
+                        // Menu Items
                         Expanded(
                           child: ListView(
                             padding: EdgeInsets.symmetric(vertical: 20.h),
                             children: [
+                              // Premium/Subscription item
+                              Consumer<SubscriptionProvider>(
+                                builder: (context, subProvider, _) {
+                                  if (subProvider.isActive) {
+                                    // Premium user - show subscription info
+                                    return _buildMenuItem(
+                                      icon: Icons.workspace_premium,
+                                      title: AppLocalizations.of(context)
+                                          .profileSubscriptionTitle,
+                                      iconColor: Colors.amber.shade700,
+                                      onTap: () => _closeMenuAndNavigate(() {
+                                        showManageSubscriptionSheet(context);
+                                      }),
+                                    );
+                                  }
+                                  // Free user - show upgrade
+                                  return _buildMenuItem(
+                                    icon: Icons.workspace_premium,
+                                    title: AppLocalizations.of(context)
+                                        .profileUpgradeToPremium,
+                                    iconColor: Colors.amber.shade700,
+                                    onTap: () => _closeMenuAndNavigate(() {
+                                      showPaywall(context);
+                                    }),
+                                  );
+                                },
+                              ),
+
+                              // Divider
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 24.w,
+                                  vertical: 8.h,
+                                ),
+                                child: Divider(
+                                  color: colors.border.withValues(alpha: 0.5),
+                                  height: 1,
+                                ),
+                              ),
+
                               _buildMenuItem(
                                 icon: Icons.person_outline,
                                 title: AppLocalizations.of(context).profile,
@@ -174,8 +214,8 @@ class _MenuOverlayState extends State<MenuOverlay>
                         ),
 
                         // Bottom section
-                        const Divider(
-                          color: AppColors.greyBorder,
+                        Divider(
+                          color: colors.border,
                           thickness: 1,
                           height: 1,
                         ),
@@ -186,11 +226,11 @@ class _MenuOverlayState extends State<MenuOverlay>
                             children: [
                               // Version info
                               Text(
-                                '${AppLocalizations.of(context).version} 1.0.0',
+                                '${AppLocalizations.of(context).version} ${AppInfo.version}',
                                 style: GoogleFonts.inter(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w400,
-                                  color: AppColors.textSecondary,
+                                  color: colors.textSecondary,
                                 ),
                               ),
                               SizedBox(height: 8.h),
@@ -203,8 +243,7 @@ class _MenuOverlayState extends State<MenuOverlay>
                                   height: 24.h,
                                   fit: BoxFit.contain,
                                   colorFilter: ColorFilter.mode(
-                                    AppColors.textPrimary
-                                        .withValues(alpha: 0.8),
+                                    colors.textPrimary.withValues(alpha: 0.8),
                                     BlendMode.srcIn,
                                   ),
                                 ),
@@ -228,7 +267,9 @@ class _MenuOverlayState extends State<MenuOverlay>
     required IconData icon,
     required String title,
     required VoidCallback onTap,
+    Color? iconColor,
   }) {
+    final colors = context.colors;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -237,7 +278,7 @@ class _MenuOverlayState extends State<MenuOverlay>
           children: [
             Icon(
               icon,
-              color: AppColors.textPrimary,
+              color: iconColor ?? colors.textPrimary,
               size: 24.sp,
             ),
             SizedBox(width: 16.w),
@@ -246,13 +287,13 @@ class _MenuOverlayState extends State<MenuOverlay>
               style: GoogleFonts.inter(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                color: iconColor ?? colors.textPrimary,
               ),
             ),
             const Spacer(),
             Icon(
               Icons.chevron_right,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
               size: 20.sp,
             ),
           ],

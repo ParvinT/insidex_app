@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 
 class QuizFilterChip extends StatelessWidget {
@@ -32,6 +32,7 @@ class QuizFilterChip extends StatelessWidget {
     final double fontSize =
         isTablet ? 14.sp.clamp(13.0, 15.0) : 13.sp.clamp(12.0, 14.0);
     final double borderRadius = isTablet ? 24.r : 22.r;
+    final colors = context.colors;
 
     return GestureDetector(
       onTap: onTap,
@@ -43,12 +44,12 @@ class QuizFilterChip extends StatelessWidget {
           vertical: verticalPadding,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.black : Colors.white,
+          color: isSelected ? colors.textPrimary : colors.backgroundCard,
           borderRadius: BorderRadius.circular(borderRadius),
           border: Border.all(
             color: isSelected
-                ? Colors.black
-                : AppColors.greyBorder.withValues(alpha: 0.5),
+                ? colors.textPrimary
+                : colors.border.withValues(alpha: 0.5),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -61,7 +62,7 @@ class QuizFilterChip extends StatelessWidget {
               style: GoogleFonts.inter(
                 fontSize: fontSize,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? colors.textOnPrimary : colors.textPrimary,
               ),
             ),
 
@@ -75,8 +76,8 @@ class QuizFilterChip extends StatelessWidget {
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : AppColors.greyLight,
+                      ? colors.textOnPrimary.withValues(alpha: 0.3)
+                      : colors.greyLight,
                   borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Text(
@@ -84,7 +85,9 @@ class QuizFilterChip extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: (fontSize - 2).clamp(10.0, 12.0),
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : AppColors.textSecondary,
+                    color: isSelected
+                        ? colors.textOnPrimary
+                        : colors.textSecondary,
                   ),
                 ),
               ),

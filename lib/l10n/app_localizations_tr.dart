@@ -9,7 +9,7 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appName => 'INSIDEX';
+  String get appName => 'InsideX';
 
   @override
   String get appTagline => 'Ses İyileştirme ve Bilinçaltı';
@@ -58,7 +58,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sendFeedback => 'Geri Bildirim Gönder';
 
   @override
-  String get sendFeedbackSubtitle => 'INSIDEX\'i geliştirmemize yardımcı olun';
+  String get sendFeedbackSubtitle => 'InsideX\'i geliştirmemize yardımcı olun';
 
   @override
   String get reportBug => 'Hata Bildir';
@@ -208,7 +208,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Dinleme alışkanlıklarınızı ve gelişimlerinizi takip edin';
 
   @override
-  String get myInsights => 'İçgörülerim';
+  String get myInsights => 'İstatistiklerim';
 
   @override
   String get viewPersonalizedWellness =>
@@ -233,6 +233,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get min => 'dk';
+
+  @override
+  String get hourShort => 's';
 
   @override
   String get days => 'gün';
@@ -289,6 +292,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get sun => 'Paz';
 
   @override
+  String get allCategories => 'Tüm Kategoriler';
+
+  @override
   String get categories => 'Kategoriler';
 
   @override
@@ -340,6 +346,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get female => 'Kadın';
+
+  @override
+  String get genderBoth => 'Her İkisi';
 
   @override
   String get totalListening => 'Toplam Dinleme';
@@ -998,7 +1007,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notificationDailyReminderMessage =>
-      'INSIDEX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın';
+      'InsideX ile rahatlamak ve iyileşmek için bir dakikanızı ayırın';
 
   @override
   String get notificationStreak3Title => '🎉 Tebrikler!';
@@ -1039,7 +1048,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get notificationStreak50Message =>
-      'Yarım yüzyıl! Gerçek bir INSIDEX ustasısın!';
+      'Yarım yüzyıl! Gerçek bir InsideX ustasısın!';
 
   @override
   String get notificationStreak100Title => '👑 100 Günlük Şampiyon!';
@@ -1995,7 +2004,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get listenNow => 'Şimdi Dinle';
 
   @override
-  String get startEmotionalTestFree => 'Duygusal Testimi Başlat — Ücretsiz';
+  String get discoverTrueCauses => 'Hastalıkların Gerçek Nedenlerini Keşfet';
 
   @override
   String get selected => 'Seçili';
@@ -2014,6 +2023,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get yourResults => 'Sonuçların';
+
+  @override
+  String get viewResults => 'Sonuçları Gör';
 
   @override
   String get selectedDiseases => 'Seçilen Hastalıklar';
@@ -2138,4 +2150,550 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get preparing => 'Hazırlanıyor...';
+
+  @override
+  String get appearance => 'Görünüm';
+
+  @override
+  String get lightMode => 'Açık';
+
+  @override
+  String get lightModeSubtitle => 'Klasik aydınlık tema';
+
+  @override
+  String get darkMode => 'Koyu';
+
+  @override
+  String get darkModeSubtitle => 'Gözleri yormaz';
+
+  @override
+  String get systemDefault => 'Sistem';
+
+  @override
+  String get systemDefaultSubtitle => 'Cihaz ayarlarını takip et';
+
+  @override
+  String get minutesThisWeek => 'dakika bu hafta';
+
+  @override
+  String get minutesThisMonth => 'dakika bu ay';
+
+  @override
+  String get minutesThisYear => 'dakika bu yıl';
+
+  @override
+  String get minutesAllTime => 'dakika toplam';
+
+  @override
+  String get tooManyResetRequestsHourly =>
+      'Çok fazla istek. Lütfen bir saat sonra tekrar deneyin.';
+
+  @override
+  String get tooManyResetRequestsDaily =>
+      'Günlük limit aşıldı. Lütfen yarın tekrar deneyin.';
+
+  @override
+  String get quizCategories => 'Test Kategorileri';
+
+  @override
+  String get icon => 'İkon';
+
+  @override
+  String get both => 'Her İkisi';
+
+  @override
+  String get names => 'İsimler';
+
+  @override
+  String get selectCategoryOptional => 'Kategori Seçin (Opsiyonel)';
+
+  @override
+  String get noCategory => 'Kategori Yok';
+
+  @override
+  String get addYourFirstQuizCategory => 'İlk test kategorinizi ekleyin';
+
+  @override
+  String deleteCategoryWithDiseaseNote(String categoryName) {
+    return '\"$categoryName\" kategorisini silmek istediğinizden emin misiniz?\n\nNot: Bu kategorideki hastalıklar silinmeyecek, ancak kategori referansları kaldırılacaktır.';
+  }
+
+  @override
+  String get failedToSaveCategory => 'Kategori kaydedilemedi';
+
+  @override
+  String get failedToDeleteCategory => 'Kategori silinemedi';
+
+  @override
+  String get grantSubscription => 'Abonelik Ver';
+
+  @override
+  String get quizTab => 'Test';
+
+  @override
+  String get quizCategoriesSection => 'Test Kategorileri';
+
+  @override
+  String get diseasesSection => 'Hastalıklar';
+
+  @override
+  String get sessionAvailable => 'Seans';
+
+  @override
+  String get comingSoon => 'Yakında';
+
+  @override
+  String get searchQuizHint => 'Hastalık, kategori ara...';
+
+  @override
+  String get dailyQuotes => 'Günlük Sözler';
+
+  @override
+  String get addQuote => 'Söz Ekle';
+
+  @override
+  String get editQuote => 'Sözü Düzenle';
+
+  @override
+  String get noQuotesYet => 'Henüz söz yok';
+
+  @override
+  String get addYourFirstQuote => 'İlk sözünüzü ekleyin';
+
+  @override
+  String get deleteQuoteConfirmation =>
+      'Bu sözü silmek istediğinizden emin misiniz?';
+
+  @override
+  String get quoteText => 'Söz Metni';
+
+  @override
+  String get enterQuoteText => 'Söz metnini girin...';
+
+  @override
+  String get author => 'Yazar';
+
+  @override
+  String get enterAuthorName => 'Yazar adını girin';
+
+  @override
+  String get optional => 'isteğe bağlı';
+
+  @override
+  String get selectWhenToShowQuote => 'Bu sözün ne zaman gösterileceğini seçin';
+
+  @override
+  String get targetGoals => 'Hedef Amaçlar';
+
+  @override
+  String get selectMatchingGoals => 'Eşleşen kullanıcı hedeflerini seçin';
+
+  @override
+  String get pleaseEnterAtLeastOneTranslation =>
+      'Lütfen en az bir çeviri girin';
+
+  @override
+  String get languages => 'dil';
+
+  @override
+  String get sleep => 'Uyku';
+
+  @override
+  String get motivation => 'Motivasyon';
+
+  @override
+  String get achievement => 'Başarı';
+
+  @override
+  String get changesSaved => 'Değişiklikler kaydedildi';
+
+  @override
+  String get confirmDelete => 'Silmeyi Onayla';
+
+  @override
+  String get featureSlides => 'Öne Çıkan Slaytlar';
+
+  @override
+  String get enabled => 'Etkin';
+
+  @override
+  String get featureSlidesImages => 'Görseller';
+
+  @override
+  String get pages => 'Sayfalar';
+
+  @override
+  String get subtitleLabel => 'Alt Başlık';
+
+  @override
+  String get deleteConfirmationMessage =>
+      'Bu öğeyi silmek istediğinizden emin misiniz?';
+
+  @override
+  String get demoSession => 'Demo Seans';
+
+  @override
+  String get freeUsersCanPlay => 'Ücretsiz kullanıcılar bu seansı dinleyebilir';
+
+  @override
+  String get onlyPremiumCanPlay => 'Sadece premium kullanıcılar dinleyebilir';
+
+  @override
+  String get targetGender => 'Hedef Cinsiyet';
+
+  @override
+  String get filterLabel => 'Filtre';
+
+  @override
+  String get paywallManageYourPlan => 'Planınızı Yönetin';
+
+  @override
+  String get paywallUnlockPotential => 'Tüm Potansiyelinizi Açığa Çıkarın';
+
+  @override
+  String get paywallSwitchPlansSubtitle =>
+      'Plan değiştirin veya mevcut aboneliğinizi koruyun';
+
+  @override
+  String get paywallChoosePlanSubtitle => 'Size en uygun planı seçin';
+
+  @override
+  String get paywallRestorePurchases => 'Satın alımları geri yükle';
+
+  @override
+  String get paywallLegalText =>
+      'Abonelik, mevcut dönemin bitiminden en az 24 saat önce otomatik yenileme kapatılmadığı sürece otomatik olarak yenilenir. Aboneliğinizi App Store veya Google Play hesap ayarlarınızdan yönetebilir ve iptal edebilirsiniz.';
+
+  @override
+  String get paywallCurrentPlan => 'Mevcut Plan';
+
+  @override
+  String paywallUpgradeTo(String tierName) {
+    return '$tierName Planına Yükselt';
+  }
+
+  @override
+  String paywallSwitchTo(String tierName) {
+    return '$tierName Planına Geç';
+  }
+
+  @override
+  String paywallStartFreeTrial(int days) {
+    return '$days Günlük Ücretsiz Denemeyi Başlat';
+  }
+
+  @override
+  String get paywallSubscribeNow => 'Şimdi Abone Ol';
+
+  @override
+  String get paywallAlreadySubscribed => 'Bu plana zaten abonesiniz';
+
+  @override
+  String get paywallRestoreSuccess => 'Satın alımlar başarıyla geri yüklendi!';
+
+  @override
+  String get paywallRestoreNoPurchases =>
+      'Geri yüklenecek satın alım bulunamadı';
+
+  @override
+  String get packageBadgeCurrent => 'MEVCUT';
+
+  @override
+  String get packageBadgePopular => 'POPÜLER';
+
+  @override
+  String packageBadgeSavings(int percent) {
+    return '%$percent İNDİRİM';
+  }
+
+  @override
+  String packageTrialBanner(int days) {
+    return '$days gün ÜCRETSİZ deneme';
+  }
+
+  @override
+  String get packageCurrentPlanBanner => 'Bu sizin mevcut planınız';
+
+  @override
+  String get successDialogWelcomePremium => 'Premium\'a Hoş Geldiniz!';
+
+  @override
+  String get successDialogTrialStarted => 'Deneme Başladı!';
+
+  @override
+  String get successDialogDefaultSubtitle =>
+      'Artık tüm özelliklere erişiminiz var';
+
+  @override
+  String get successDialogTrialSubtitle =>
+      '7 gün boyunca tüm özelliklerin keyfini çıkarın';
+
+  @override
+  String get successDialogUnlimitedAccess =>
+      'Artık tüm özelliklere sınırsız erişiminiz var';
+
+  @override
+  String get successDialogTrialBanner => '7 günlük ücretsiz deneme başladı';
+
+  @override
+  String get successDialogStartExploring => 'Keşfetmeye Başla';
+
+  @override
+  String get featureAllAudioSessions => 'Tüm ses seansları';
+
+  @override
+  String get featureBackgroundPlayback => 'Arka plan oynatma';
+
+  @override
+  String get featureOfflineDownloads => 'Çevrimdışı indirmeler';
+
+  @override
+  String get upgradePromptTitle => 'Premium\'a Yükselt';
+
+  @override
+  String get upgradePromptSubtitle =>
+      'Tüm özelliklerin ve seansların kilidini aç';
+
+  @override
+  String get upgradePromptButton => 'Yükselt';
+
+  @override
+  String get upgradeSheetPremiumFeature => 'Premium Özellik';
+
+  @override
+  String get upgradeSheetDefaultSubtitle =>
+      'Bu özelliğe ve daha fazlasına erişmek için abone olun';
+
+  @override
+  String get upgradeSheetMaybeLater => 'Belki Sonra';
+
+  @override
+  String get upgradeSheetViewPlans => 'Planları Gör';
+
+  @override
+  String get manageSheetTitle => 'Aboneliğiniz';
+
+  @override
+  String manageSheetPlanTitle(String tierName) {
+    return '$tierName Planı';
+  }
+
+  @override
+  String manageSheetStatusTrial(String period) {
+    return 'Deneme • $period';
+  }
+
+  @override
+  String manageSheetStatusActive(String period) {
+    return 'Aktif • $period';
+  }
+
+  @override
+  String manageSheetTrialDaysLeft(int days) {
+    return 'Denemede $days gün kaldı';
+  }
+
+  @override
+  String manageSheetDaysUntilRenewal(int days) {
+    return 'Yenilemeye $days gün kaldı';
+  }
+
+  @override
+  String get manageSheetTapToViewPlans => 'Tüm planları görmek için dokunun';
+
+  @override
+  String get manageSheetManageInStore => 'Mağazada Yönet';
+
+  @override
+  String get manageSheetManageSubtitle => 'Aboneliği değiştir veya iptal et';
+
+  @override
+  String get profileSubscriptionTitle => 'Aboneliğiniz';
+
+  @override
+  String get profileUpgradeToPremium => 'Premium\'a Yükselt';
+
+  @override
+  String get profileUnlockAllFeatures =>
+      'Tüm seansların ve özelliklerin kilidini aç';
+
+  @override
+  String profileSubtitleTrial(String tierName, int days) {
+    return '$tierName • Deneme ($days gün kaldı)';
+  }
+
+  @override
+  String profileSubtitleDaysRemaining(String tierName, int days) {
+    return '$tierName • $days gün kaldı';
+  }
+
+  @override
+  String profileSubtitlePlan(String tierName) {
+    return '$tierName Planı';
+  }
+
+  @override
+  String tierWithTrial(String tierName) {
+    return '$tierName (Deneme)';
+  }
+
+  @override
+  String get tierLite => 'Lite';
+
+  @override
+  String get tierStandard => 'Standard';
+
+  @override
+  String get downloadFeatureTitle => 'Çevrimdışı İndirmeler';
+
+  @override
+  String get downloadFeatureSubtitle =>
+      'Seansları çevrimdışı dinlemek için Standard plana yükseltin';
+
+  @override
+  String get premiumSessionTitle => 'Premium Seans';
+
+  @override
+  String get premiumSessionSubtitle =>
+      'Tüm ses seanslarının ve özelliklerin kilidini açmak için abone olun';
+
+  @override
+  String get tierYearlyStandard => 'Yıllık Standard';
+
+  @override
+  String get periodMonth => '/ay';
+
+  @override
+  String get periodYear => '/yıl';
+
+  @override
+  String get periodMonthly => 'Aylık';
+
+  @override
+  String get periodYearly => 'Yıllık';
+
+  @override
+  String monthlyEquivalentFormat(String price) {
+    return '$price/ay';
+  }
+
+  @override
+  String get offlinePlaybackTitle => 'Standard Gerekli';
+
+  @override
+  String get offlinePlaybackSubtitle =>
+      'Çevrimdışı dinleme Standard pakete dahildir';
+
+  @override
+  String get offlineNoInternetUpgrade =>
+      'Planınızı yükseltmek için internete bağlanın';
+
+  @override
+  String get adminPremiumSearchUser => 'Kullanıcı Ara';
+
+  @override
+  String get adminPremiumSearchHint => 'E-posta adresi veya UID girin';
+
+  @override
+  String get adminPremiumSearchPlaceholder =>
+      'email@example.com veya kullanıcı-uid';
+
+  @override
+  String get adminPremiumEnterEmailOrUid => 'Lütfen bir e-posta veya UID girin';
+
+  @override
+  String get adminPremiumUserNotFound => 'Kullanıcı bulunamadı';
+
+  @override
+  String get adminPremiumSearchError => 'Arama hatası';
+
+  @override
+  String get adminPremiumCurrentStatus => 'Mevcut Durum';
+
+  @override
+  String get adminPremiumAdminStatus => 'Admin Premium';
+
+  @override
+  String get adminPremiumStoreStatus => 'Mağaza Aboneliği';
+
+  @override
+  String get adminPremiumInactive => 'AKTİF DEĞİL';
+
+  @override
+  String get adminPremiumNoSubscription => 'Abonelik yok';
+
+  @override
+  String get adminPremiumTier => 'Paket';
+
+  @override
+  String get adminPremiumReason => 'Sebep';
+
+  @override
+  String get adminPremiumGrantedBy => 'Veren';
+
+  @override
+  String get adminPremiumManage => 'Admin Premium Yönet';
+
+  @override
+  String get adminPremiumManageDesc =>
+      'Mağaza aboneliklerinden bağımsız tam premium erişim ver';
+
+  @override
+  String get adminPremiumSelectReason => 'Sebep seçin';
+
+  @override
+  String get adminPremiumGrantButton => 'Full Premium Ver';
+
+  @override
+  String get adminPremiumGrantSuccess => 'Admin Premium başarıyla verildi!';
+
+  @override
+  String get adminPremiumGrantError => 'Premium verilemedi';
+
+  @override
+  String get adminPremiumRevokeTitle => 'Admin Premium Kaldır';
+
+  @override
+  String get adminPremiumRevokeConfirm =>
+      'Bu kullanıcının admin premium erişimini kaldırmak istediğinize emin misiniz? Mağaza aboneliği yoksa premium erişimini kaybedecek.';
+
+  @override
+  String get adminPremiumRevokeButton => 'Admin Premium Kaldır';
+
+  @override
+  String get adminPremiumRevokeSuccess => 'Admin Premium başarıyla kaldırıldı';
+
+  @override
+  String get adminPremiumRevokeError => 'Premium kaldırılamadı';
+
+  @override
+  String get adminPremiumAlreadyActive => 'Admin Premium Aktif';
+
+  @override
+  String get adminPremiumFullAccess => 'Bu kullanıcı tam premium erişime sahip';
+
+  @override
+  String get adminPremiumUidCopied => 'UID panoya kopyalandı';
+
+  @override
+  String get adminPremiumEmptyTitle => 'Kullanıcı ara';
+
+  @override
+  String get adminPremiumEmptyDesc =>
+      'Bir kullanıcı bulmak ve premium erişimini yönetmek için e-posta adresi veya UID girin';
+
+  @override
+  String get adminPremiumReasonVip => 'VIP';
+
+  @override
+  String get adminPremiumReasonTester => 'Test Kullanıcısı';
+
+  @override
+  String get adminPremiumReasonEmployee => 'Çalışan';
+
+  @override
+  String get adminPremiumReasonInfluencer => 'Influencer';
+
+  @override
+  String get adminPremiumReasonOther => 'Diğer';
 }

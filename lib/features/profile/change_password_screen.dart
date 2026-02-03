@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../core/utils/form_validators.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../core/utils/firebase_error_handler.dart';
@@ -112,7 +112,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             child: Text(
               AppLocalizations.of(context).ok,
               style: GoogleFonts.inter(
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -137,12 +137,12 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               width: 60.w.clamp(60.0, 80.0),
               height: 60.w.clamp(60.0, 80.0),
               decoration: BoxDecoration(
-                color: AppColors.textPrimary.withValues(alpha: 0.1),
+                color: context.colors.textPrimary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.check_circle,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 size: 36.sp.clamp(36.0, 48.0),
               ),
             ),
@@ -152,7 +152,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18.sp.clamp(18.0, 22.0),
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
               ),
             ),
             SizedBox(height: 12.h),
@@ -160,7 +160,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               AppLocalizations.of(context).passwordChangedSuccess,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: AppColors.textSecondary,
+                color: context.colors.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -178,13 +178,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 vertical: 10.h.clamp(10.0, 14.0),
               ),
               decoration: BoxDecoration(
-                color: AppColors.textPrimary,
+                color: context.colors.textPrimary,
                 borderRadius: BorderRadius.circular(25.r),
               ),
               child: Text(
                 AppLocalizations.of(context).done,
                 style: GoogleFonts.inter(
-                  color: Colors.white,
+                  color: context.colors.textOnPrimary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -197,6 +197,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     // Use context extensions
     final isTablet = context.isTablet;
     final isDesktop = context.isDesktop;
@@ -232,7 +233,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         isTablet ? 14.sp.clamp(13.0, 15.0) : 13.sp.clamp(12.0, 14.0);
 
     return Scaffold(
-      backgroundColor: AppColors.dividerDark,
+      backgroundColor: colors.background,
       body: Stack(
         children: [
           // Main Content
@@ -258,15 +259,16 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             icon: Container(
                               padding: EdgeInsets.all(8.w.clamp(6.0, 10.0)),
                               decoration: BoxDecoration(
-                                color: AppColors.backgroundWhite,
+                                color: colors.backgroundCard,
                                 borderRadius: BorderRadius.circular(10.r),
                                 border: Border.all(
-                                  color: AppColors.greyBorder,
+                                  color: colors.border,
                                   width: 1,
                                 ),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.05),
+                                    color: colors.textPrimary
+                                        .withValues(alpha: 0.05),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
                                   ),
@@ -274,7 +276,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               ),
                               child: Icon(
                                 Icons.arrow_back,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                                 size: 18.sp.clamp(16.0, 22.0),
                               ),
                             ),
@@ -285,8 +287,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             'assets/images/logo.svg',
                             width: logoWidth,
                             height: logoHeight,
-                            colorFilter: const ColorFilter.mode(
-                              AppColors.textPrimary,
+                            colorFilter: ColorFilter.mode(
+                              colors.textPrimary,
                               BlendMode.srcIn,
                             ),
                           ),
@@ -303,11 +305,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         padding: EdgeInsets.all(
                             isTablet ? 20.w.clamp(16.0, 24.0) : 16.w),
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundWhite,
+                          color: colors.backgroundCard,
                           borderRadius: BorderRadius.circular(16.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
+                              color: colors.textPrimary.withValues(alpha: 0.06),
                               blurRadius: 15,
                               offset: const Offset(0, 4),
                             ),
@@ -326,10 +328,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
                                   colors: [
-                                    AppColors.textPrimary
-                                        .withValues(alpha: 0.1),
-                                    AppColors.textPrimary
-                                        .withValues(alpha: 0.05),
+                                    colors.textPrimary.withValues(alpha: 0.1),
+                                    colors.textPrimary.withValues(alpha: 0.05),
                                   ],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
@@ -338,7 +338,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               ),
                               child: Icon(
                                 Icons.lock_outline,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                                 size: isTablet
                                     ? 28.sp.clamp(24.0, 35.0)
                                     : 24.sp.clamp(22.0, 30.0),
@@ -352,7 +352,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               style: GoogleFonts.inter(
                                 fontSize: titleSize,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
+                                color: colors.textPrimary,
                               ),
                             ),
 
@@ -362,7 +362,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                               AppLocalizations.of(context).createStrongPassword,
                               style: GoogleFonts.inter(
                                 fontSize: bodyTextSize,
-                                color: AppColors.textSecondary,
+                                color: colors.textSecondary,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -378,11 +378,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                             ? 24.w.clamp(20.0, 32.0)
                             : 20.w.clamp(16.0, 24.0)),
                         decoration: BoxDecoration(
-                          color: AppColors.backgroundWhite,
+                          color: colors.backgroundCard,
                           borderRadius: BorderRadius.circular(16.r),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.06),
+                              color: colors.textPrimary.withValues(alpha: 0.06),
                               blurRadius: 15,
                               offset: const Offset(0, 4),
                             ),
@@ -409,7 +409,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     _isCurrentPasswordVisible
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
-                                    color: AppColors.textSecondary,
+                                    color: colors.textSecondary,
                                     size: 18.sp.clamp(16.0, 20.0),
                                   ),
                                   onPressed: () {
@@ -452,7 +452,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     _isNewPasswordVisible
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
-                                    color: AppColors.textSecondary,
+                                    color: colors.textSecondary,
                                     size: 18.sp.clamp(16.0, 20.0),
                                   ),
                                   onPressed: () {
@@ -493,7 +493,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                     _isConfirmPasswordVisible
                                         ? Icons.visibility_outlined
                                         : Icons.visibility_off_outlined,
-                                    color: AppColors.textSecondary,
+                                    color: colors.textSecondary,
                                     size: 18.sp.clamp(16.0, 20.0),
                                   ),
                                   onPressed: () {

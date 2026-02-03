@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../core/constants/app_colors.dart';
+import '../../core/themes/app_theme_extension.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
 
@@ -205,13 +205,14 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Scaffold(
-      backgroundColor: AppColors.darkBackgroundCard,
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.backgroundPure,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: colors.textPrimary),
           onPressed: () => Navigator.pop(context),
         ),
         title: Column(
@@ -222,33 +223,33 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: colors.textPrimary,
               ),
             ),
             Text(
               widget.categoryName,
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
-                color: AppColors.textSecondary,
+                color: colors.textSecondary,
               ),
             ),
           ],
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator(color: colors.textPrimary))
           : Column(
               children: [
                 // Info banner
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(20.w),
-                  color: AppColors.textPrimary.withValues(alpha: 0.1),
+                  color: colors.textPrimary.withValues(alpha: 0.1),
                   child: Row(
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: AppColors.textPrimary,
+                        color: colors.textPrimary,
                         size: 20.sp,
                       ),
                       SizedBox(width: 12.w),
@@ -257,7 +258,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
                           AppLocalizations.of(context).categoryImagesInfo,
                           style: GoogleFonts.inter(
                             fontSize: 12.sp,
-                            color: AppColors.textPrimary,
+                            color: colors.textPrimary,
                           ),
                         ),
                       ),
@@ -267,18 +268,19 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
 
                 // Images grid
                 Expanded(
-                  child:
-                      _images.isEmpty ? _buildEmptyState() : _buildImagesGrid(),
+                  child: _images.isEmpty
+                      ? _buildEmptyState(colors)
+                      : _buildImagesGrid(colors),
                 ),
 
                 // Bottom buttons
-                _buildBottomButtons(),
+                _buildBottomButtons(colors),
               ],
             ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(AppThemeExtension colors) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -286,7 +288,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
           Icon(
             Icons.image_outlined,
             size: 80.sp,
-            color: AppColors.textSecondary.withValues(alpha: 0.3),
+            color: colors.textSecondary.withValues(alpha: 0.3),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -294,7 +296,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
             style: GoogleFonts.inter(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
           SizedBox(height: 8.h),
@@ -302,7 +304,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
             AppLocalizations.of(context).addImagesToGetStarted,
             style: GoogleFonts.inter(
               fontSize: 12.sp,
-              color: AppColors.textSecondary,
+              color: colors.textSecondary,
             ),
           ),
         ],
@@ -310,7 +312,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
     );
   }
 
-  Widget _buildImagesGrid() {
+  Widget _buildImagesGrid(AppThemeExtension colors) {
     return GridView.builder(
       padding: EdgeInsets.all(20.w),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -321,18 +323,18 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
       ),
       itemCount: _images.length,
       itemBuilder: (context, index) {
-        return _buildImageCard(_images[index], index);
+        return _buildImageCard(_images[index], index, colors);
       },
     );
   }
 
-  Widget _buildImageCard(String url, int index) {
+  Widget _buildImageCard(String url, int index, AppThemeExtension colors) {
     return Stack(
       children: [
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: AppColors.greyBorder, width: 2),
+            border: Border.all(color: colors.border, width: 2),
             image: DecorationImage(
               image: NetworkImage(url),
               fit: BoxFit.cover,
@@ -352,14 +354,14 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
+                    color: colors.textPrimary.withValues(alpha: 0.2),
                     blurRadius: 4,
                   ),
                 ],
               ),
               child: Icon(
                 Icons.close,
-                color: Colors.white,
+                color: colors.textOnPrimary,
                 size: 18.sp,
               ),
             ),
@@ -372,7 +374,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.7),
+              color: colors.textPrimary.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
@@ -380,7 +382,7 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
               style: GoogleFonts.inter(
                 fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: colors.textOnPrimary,
               ),
             ),
           ),
@@ -389,14 +391,14 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
     );
   }
 
-  Widget _buildBottomButtons() {
+  Widget _buildBottomButtons(AppThemeExtension colors) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.backgroundPure,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: colors.textPrimary.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -411,8 +413,8 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
               icon: const Icon(Icons.add_photo_alternate),
               label: Text(AppLocalizations.of(context).addImages),
               style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.textPrimary,
-                side: const BorderSide(color: AppColors.textPrimary, width: 2),
+                foregroundColor: colors.textPrimary,
+                side: BorderSide(color: colors.textPrimary, width: 2),
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
@@ -430,13 +432,13 @@ class _CategoryImagesScreenState extends State<CategoryImagesScreen> {
               icon: const Icon(Icons.save),
               label: Text(AppLocalizations.of(context).saveImages),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.textPrimary,
-                foregroundColor: Colors.white,
+                backgroundColor: colors.textPrimary,
+                foregroundColor: colors.textOnPrimary,
                 padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12.r),
                 ),
-                disabledBackgroundColor: Colors.grey.shade300,
+                disabledBackgroundColor: colors.greyMedium,
               ),
             ),
           ),

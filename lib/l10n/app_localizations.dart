@@ -105,7 +105,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'INSIDEX'**
+  /// **'InsideX'**
   String get appName;
 
   /// No description provided for @appTagline.
@@ -201,7 +201,7 @@ abstract class AppLocalizations {
   /// No description provided for @sendFeedbackSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Help us improve INSIDEX'**
+  /// **'Help us improve InsideX'**
   String get sendFeedbackSubtitle;
 
   /// No description provided for @reportBug.
@@ -540,6 +540,12 @@ abstract class AppLocalizations {
   /// **'min'**
   String get min;
 
+  /// No description provided for @hourShort.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get hourShort;
+
   /// No description provided for @days.
   ///
   /// In en, this message translates to:
@@ -648,6 +654,12 @@ abstract class AppLocalizations {
   /// **'Sun'**
   String get sun;
 
+  /// No description provided for @allCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All Categories'**
+  String get allCategories;
+
   /// No description provided for @categories.
   ///
   /// In en, this message translates to:
@@ -749,6 +761,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Female'**
   String get female;
+
+  /// No description provided for @genderBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get genderBoth;
 
   /// No description provided for @totalListening.
   ///
@@ -2025,7 +2043,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationDailyReminderMessage.
   ///
   /// In en, this message translates to:
-  /// **'Take a moment to relax and heal with INSIDEX'**
+  /// **'Take a moment to relax and heal with InsideX'**
   String get notificationDailyReminderMessage;
 
   /// No description provided for @notificationStreak3Title.
@@ -2097,7 +2115,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationStreak50Message.
   ///
   /// In en, this message translates to:
-  /// **'Half a century! You\'re a true INSIDEX master!'**
+  /// **'Half a century! You\'re a true InsideX master!'**
   String get notificationStreak50Message;
 
   /// No description provided for @notificationStreak100Title.
@@ -3870,11 +3888,11 @@ abstract class AppLocalizations {
   /// **'Listen Now'**
   String get listenNow;
 
-  /// No description provided for @startEmotionalTestFree.
+  /// No description provided for @discoverTrueCauses.
   ///
   /// In en, this message translates to:
-  /// **'Start My Emotional Test — Free'**
-  String get startEmotionalTestFree;
+  /// **'Discover the True Causes of Disease'**
+  String get discoverTrueCauses;
 
   /// No description provided for @selected.
   ///
@@ -3911,6 +3929,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your Results'**
   String get yourResults;
+
+  /// No description provided for @viewResults.
+  ///
+  /// In en, this message translates to:
+  /// **'View Results'**
+  String get viewResults;
 
   /// No description provided for @selectedDiseases.
   ///
@@ -4139,6 +4163,990 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Preparing...'**
   String get preparing;
+
+  /// No description provided for @appearance.
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// No description provided for @lightMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get lightMode;
+
+  /// No description provided for @lightModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic bright theme'**
+  String get lightModeSubtitle;
+
+  /// No description provided for @darkMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get darkMode;
+
+  /// No description provided for @darkModeSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy on the eyes'**
+  String get darkModeSubtitle;
+
+  /// No description provided for @systemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemDefault;
+
+  /// No description provided for @systemDefaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow device settings'**
+  String get systemDefaultSubtitle;
+
+  /// No description provided for @minutesThisWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes this week'**
+  String get minutesThisWeek;
+
+  /// No description provided for @minutesThisMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes this month'**
+  String get minutesThisMonth;
+
+  /// No description provided for @minutesThisYear.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes this year'**
+  String get minutesThisYear;
+
+  /// No description provided for @minutesAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'minutes all time'**
+  String get minutesAllTime;
+
+  /// No description provided for @tooManyResetRequestsHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many requests. Please try again in an hour.'**
+  String get tooManyResetRequestsHourly;
+
+  /// No description provided for @tooManyResetRequestsDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily limit reached. Please try again tomorrow.'**
+  String get tooManyResetRequestsDaily;
+
+  /// No description provided for @quizCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Categories'**
+  String get quizCategories;
+
+  /// No description provided for @icon.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon'**
+  String get icon;
+
+  /// No description provided for @both.
+  ///
+  /// In en, this message translates to:
+  /// **'Both'**
+  String get both;
+
+  /// No description provided for @names.
+  ///
+  /// In en, this message translates to:
+  /// **'Names'**
+  String get names;
+
+  /// No description provided for @selectCategoryOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Category (Optional)'**
+  String get selectCategoryOptional;
+
+  /// No description provided for @noCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No Category'**
+  String get noCategory;
+
+  /// No description provided for @addYourFirstQuizCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first quiz category'**
+  String get addYourFirstQuizCategory;
+
+  /// No description provided for @deleteCategoryWithDiseaseNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{categoryName}\"?\n\nNote: Diseases in this category will not be deleted, but their category reference will be removed.'**
+  String deleteCategoryWithDiseaseNote(String categoryName);
+
+  /// No description provided for @failedToSaveCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save category'**
+  String get failedToSaveCategory;
+
+  /// No description provided for @failedToDeleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete category'**
+  String get failedToDeleteCategory;
+
+  /// No description provided for @grantSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Subscription'**
+  String get grantSubscription;
+
+  /// No description provided for @quizTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz'**
+  String get quizTab;
+
+  /// No description provided for @quizCategoriesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiz Categories'**
+  String get quizCategoriesSection;
+
+  /// No description provided for @diseasesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Diseases'**
+  String get diseasesSection;
+
+  /// No description provided for @sessionAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get sessionAvailable;
+
+  /// No description provided for @comingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming'**
+  String get comingSoon;
+
+  /// No description provided for @searchQuizHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search diseases, categories...'**
+  String get searchQuizHint;
+
+  /// No description provided for @dailyQuotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Quotes'**
+  String get dailyQuotes;
+
+  /// No description provided for @addQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Quote'**
+  String get addQuote;
+
+  /// No description provided for @editQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Quote'**
+  String get editQuote;
+
+  /// No description provided for @noQuotesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No quotes yet'**
+  String get noQuotesYet;
+
+  /// No description provided for @addYourFirstQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first quote'**
+  String get addYourFirstQuote;
+
+  /// No description provided for @deleteQuoteConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this quote?'**
+  String get deleteQuoteConfirmation;
+
+  /// No description provided for @quoteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Quote Text'**
+  String get quoteText;
+
+  /// No description provided for @enterQuoteText.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter quote text...'**
+  String get enterQuoteText;
+
+  /// No description provided for @author.
+  ///
+  /// In en, this message translates to:
+  /// **'Author'**
+  String get author;
+
+  /// No description provided for @enterAuthorName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter author name'**
+  String get enterAuthorName;
+
+  /// No description provided for @optional.
+  ///
+  /// In en, this message translates to:
+  /// **'optional'**
+  String get optional;
+
+  /// No description provided for @selectWhenToShowQuote.
+  ///
+  /// In en, this message translates to:
+  /// **'Select when to show this quote'**
+  String get selectWhenToShowQuote;
+
+  /// No description provided for @targetGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Goals'**
+  String get targetGoals;
+
+  /// No description provided for @selectMatchingGoals.
+  ///
+  /// In en, this message translates to:
+  /// **'Select matching user goals'**
+  String get selectMatchingGoals;
+
+  /// No description provided for @pleaseEnterAtLeastOneTranslation.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter at least one translation'**
+  String get pleaseEnterAtLeastOneTranslation;
+
+  /// No description provided for @languages.
+  ///
+  /// In en, this message translates to:
+  /// **'languages'**
+  String get languages;
+
+  /// No description provided for @sleep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep'**
+  String get sleep;
+
+  /// No description provided for @motivation.
+  ///
+  /// In en, this message translates to:
+  /// **'Motivation'**
+  String get motivation;
+
+  /// No description provided for @achievement.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement'**
+  String get achievement;
+
+  /// No description provided for @changesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes saved'**
+  String get changesSaved;
+
+  /// No description provided for @confirmDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Delete'**
+  String get confirmDelete;
+
+  /// No description provided for @featureSlides.
+  ///
+  /// In en, this message translates to:
+  /// **'Feature Slides'**
+  String get featureSlides;
+
+  /// No description provided for @enabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get enabled;
+
+  /// No description provided for @featureSlidesImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get featureSlidesImages;
+
+  /// No description provided for @pages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get pages;
+
+  /// No description provided for @subtitleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Subtitle'**
+  String get subtitleLabel;
+
+  /// No description provided for @deleteConfirmationMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this item?'**
+  String get deleteConfirmationMessage;
+
+  /// No description provided for @demoSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Demo Session'**
+  String get demoSession;
+
+  /// No description provided for @freeUsersCanPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Free users can play this session'**
+  String get freeUsersCanPlay;
+
+  /// No description provided for @onlyPremiumCanPlay.
+  ///
+  /// In en, this message translates to:
+  /// **'Only premium users can play'**
+  String get onlyPremiumCanPlay;
+
+  /// No description provided for @targetGender.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Gender'**
+  String get targetGender;
+
+  /// No description provided for @filterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter'**
+  String get filterLabel;
+
+  /// No description provided for @paywallManageYourPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Your Plan'**
+  String get paywallManageYourPlan;
+
+  /// No description provided for @paywallUnlockPotential.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock Your Full Potential'**
+  String get paywallUnlockPotential;
+
+  /// No description provided for @paywallSwitchPlansSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch plans or keep your current subscription'**
+  String get paywallSwitchPlansSubtitle;
+
+  /// No description provided for @paywallChoosePlanSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the plan that works best for you'**
+  String get paywallChoosePlanSubtitle;
+
+  /// No description provided for @paywallRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get paywallRestorePurchases;
+
+  /// No description provided for @paywallLegalText.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription automatically renews unless auto-renew is turned off at least 24 hours before the end of the current period. You can manage and cancel your subscription in your App Store or Google Play account settings.'**
+  String get paywallLegalText;
+
+  /// No description provided for @paywallCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Plan'**
+  String get paywallCurrentPlan;
+
+  /// No description provided for @paywallUpgradeTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to {tierName}'**
+  String paywallUpgradeTo(String tierName);
+
+  /// No description provided for @paywallSwitchTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to {tierName}'**
+  String paywallSwitchTo(String tierName);
+
+  /// No description provided for @paywallStartFreeTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Start {days}-Day Free Trial'**
+  String paywallStartFreeTrial(int days);
+
+  /// No description provided for @paywallSubscribeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe Now'**
+  String get paywallSubscribeNow;
+
+  /// No description provided for @paywallAlreadySubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'You are already subscribed to this plan'**
+  String get paywallAlreadySubscribed;
+
+  /// No description provided for @paywallRestoreSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases restored successfully!'**
+  String get paywallRestoreSuccess;
+
+  /// No description provided for @paywallRestoreNoPurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'No purchases found to restore'**
+  String get paywallRestoreNoPurchases;
+
+  /// No description provided for @packageBadgeCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'CURRENT'**
+  String get packageBadgeCurrent;
+
+  /// No description provided for @packageBadgePopular.
+  ///
+  /// In en, this message translates to:
+  /// **'POPULAR'**
+  String get packageBadgePopular;
+
+  /// No description provided for @packageBadgeSavings.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% OFF'**
+  String packageBadgeSavings(int percent);
+
+  /// No description provided for @packageTrialBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days FREE trial'**
+  String packageTrialBanner(int days);
+
+  /// No description provided for @packageCurrentPlanBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'This is your current plan'**
+  String get packageCurrentPlanBanner;
+
+  /// No description provided for @successDialogWelcomePremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Premium!'**
+  String get successDialogWelcomePremium;
+
+  /// No description provided for @successDialogTrialStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial Started!'**
+  String get successDialogTrialStarted;
+
+  /// No description provided for @successDialogDefaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You now have access to all features'**
+  String get successDialogDefaultSubtitle;
+
+  /// No description provided for @successDialogTrialSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enjoy full access for the next 7 days'**
+  String get successDialogTrialSubtitle;
+
+  /// No description provided for @successDialogUnlimitedAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'You now have unlimited access to all features'**
+  String get successDialogUnlimitedAccess;
+
+  /// No description provided for @successDialogTrialBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day free trial started'**
+  String get successDialogTrialBanner;
+
+  /// No description provided for @successDialogStartExploring.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Exploring'**
+  String get successDialogStartExploring;
+
+  /// No description provided for @featureAllAudioSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'All audio sessions'**
+  String get featureAllAudioSessions;
+
+  /// No description provided for @featureBackgroundPlayback.
+  ///
+  /// In en, this message translates to:
+  /// **'Background playback'**
+  String get featureBackgroundPlayback;
+
+  /// No description provided for @featureOfflineDownloads.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline downloads'**
+  String get featureOfflineDownloads;
+
+  /// No description provided for @upgradePromptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get upgradePromptTitle;
+
+  /// No description provided for @upgradePromptSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all features and sessions'**
+  String get upgradePromptSubtitle;
+
+  /// No description provided for @upgradePromptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade'**
+  String get upgradePromptButton;
+
+  /// No description provided for @upgradeSheetPremiumFeature.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Feature'**
+  String get upgradeSheetPremiumFeature;
+
+  /// No description provided for @upgradeSheetDefaultSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to access this feature and more'**
+  String get upgradeSheetDefaultSubtitle;
+
+  /// No description provided for @upgradeSheetMaybeLater.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe Later'**
+  String get upgradeSheetMaybeLater;
+
+  /// No description provided for @upgradeSheetViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'View Plans'**
+  String get upgradeSheetViewPlans;
+
+  /// No description provided for @manageSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Subscription'**
+  String get manageSheetTitle;
+
+  /// No description provided for @manageSheetPlanTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} Plan'**
+  String manageSheetPlanTitle(String tierName);
+
+  /// No description provided for @manageSheetStatusTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'Trial • {period}'**
+  String manageSheetStatusTrial(String period);
+
+  /// No description provided for @manageSheetStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active • {period}'**
+  String manageSheetStatusActive(String period);
+
+  /// No description provided for @manageSheetTrialDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days left in trial'**
+  String manageSheetTrialDaysLeft(int days);
+
+  /// No description provided for @manageSheetDaysUntilRenewal.
+  ///
+  /// In en, this message translates to:
+  /// **'{days} days until renewal'**
+  String manageSheetDaysUntilRenewal(int days);
+
+  /// No description provided for @manageSheetTapToViewPlans.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to view all plans'**
+  String get manageSheetTapToViewPlans;
+
+  /// No description provided for @manageSheetManageInStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage in Store'**
+  String get manageSheetManageInStore;
+
+  /// No description provided for @manageSheetManageSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change or cancel subscription'**
+  String get manageSheetManageSubtitle;
+
+  /// No description provided for @profileSubscriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Subscription'**
+  String get profileSubscriptionTitle;
+
+  /// No description provided for @profileUpgradeToPremium.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Premium'**
+  String get profileUpgradeToPremium;
+
+  /// No description provided for @profileUnlockAllFeatures.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all sessions and features'**
+  String get profileUnlockAllFeatures;
+
+  /// No description provided for @profileSubtitleTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} • Trial ({days} days left)'**
+  String profileSubtitleTrial(String tierName, int days);
+
+  /// No description provided for @profileSubtitleDaysRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} • {days} days remaining'**
+  String profileSubtitleDaysRemaining(String tierName, int days);
+
+  /// No description provided for @profileSubtitlePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} Plan'**
+  String profileSubtitlePlan(String tierName);
+
+  /// No description provided for @tierWithTrial.
+  ///
+  /// In en, this message translates to:
+  /// **'{tierName} (Trial)'**
+  String tierWithTrial(String tierName);
+
+  /// No description provided for @tierLite.
+  ///
+  /// In en, this message translates to:
+  /// **'Lite'**
+  String get tierLite;
+
+  /// No description provided for @tierStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard'**
+  String get tierStandard;
+
+  /// No description provided for @downloadFeatureTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Downloads'**
+  String get downloadFeatureTitle;
+
+  /// No description provided for @downloadFeatureSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade to Standard plan to download sessions for offline listening'**
+  String get downloadFeatureSubtitle;
+
+  /// No description provided for @premiumSessionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Session'**
+  String get premiumSessionTitle;
+
+  /// No description provided for @premiumSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe to unlock all audio sessions and features'**
+  String get premiumSessionSubtitle;
+
+  /// No description provided for @tierYearlyStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly Standard'**
+  String get tierYearlyStandard;
+
+  /// No description provided for @periodMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'/month'**
+  String get periodMonth;
+
+  /// No description provided for @periodYear.
+  ///
+  /// In en, this message translates to:
+  /// **'/year'**
+  String get periodYear;
+
+  /// No description provided for @periodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get periodMonthly;
+
+  /// No description provided for @periodYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get periodYearly;
+
+  /// No description provided for @monthlyEquivalentFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/month'**
+  String monthlyEquivalentFormat(String price);
+
+  /// No description provided for @offlinePlaybackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Standard Required'**
+  String get offlinePlaybackTitle;
+
+  /// No description provided for @offlinePlaybackSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline listening is included in the Standard plan'**
+  String get offlinePlaybackSubtitle;
+
+  /// No description provided for @offlineNoInternetUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect to internet to upgrade your plan'**
+  String get offlineNoInternetUpgrade;
+
+  /// No description provided for @adminPremiumSearchUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Search User'**
+  String get adminPremiumSearchUser;
+
+  /// No description provided for @adminPremiumSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter user email address or UID'**
+  String get adminPremiumSearchHint;
+
+  /// No description provided for @adminPremiumSearchPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'email@example.com or user-uid'**
+  String get adminPremiumSearchPlaceholder;
+
+  /// No description provided for @adminPremiumEnterEmailOrUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter an email or UID'**
+  String get adminPremiumEnterEmailOrUid;
+
+  /// No description provided for @adminPremiumUserNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found'**
+  String get adminPremiumUserNotFound;
+
+  /// No description provided for @adminPremiumSearchError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error searching'**
+  String get adminPremiumSearchError;
+
+  /// No description provided for @adminPremiumCurrentStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Status'**
+  String get adminPremiumCurrentStatus;
+
+  /// No description provided for @adminPremiumAdminStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium'**
+  String get adminPremiumAdminStatus;
+
+  /// No description provided for @adminPremiumStoreStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Store Subscription'**
+  String get adminPremiumStoreStatus;
+
+  /// No description provided for @adminPremiumInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'NOT ACTIVE'**
+  String get adminPremiumInactive;
+
+  /// No description provided for @adminPremiumNoSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'No subscription'**
+  String get adminPremiumNoSubscription;
+
+  /// No description provided for @adminPremiumTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier'**
+  String get adminPremiumTier;
+
+  /// No description provided for @adminPremiumReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get adminPremiumReason;
+
+  /// No description provided for @adminPremiumGrantedBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Granted by'**
+  String get adminPremiumGrantedBy;
+
+  /// No description provided for @adminPremiumManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Admin Premium'**
+  String get adminPremiumManage;
+
+  /// No description provided for @adminPremiumManageDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant full premium access independent of store subscriptions'**
+  String get adminPremiumManageDesc;
+
+  /// No description provided for @adminPremiumSelectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Select reason'**
+  String get adminPremiumSelectReason;
+
+  /// No description provided for @adminPremiumGrantButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant Full Premium'**
+  String get adminPremiumGrantButton;
+
+  /// No description provided for @adminPremiumGrantSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium granted successfully!'**
+  String get adminPremiumGrantSuccess;
+
+  /// No description provided for @adminPremiumGrantError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to grant premium'**
+  String get adminPremiumGrantError;
+
+  /// No description provided for @adminPremiumRevokeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Admin Premium'**
+  String get adminPremiumRevokeTitle;
+
+  /// No description provided for @adminPremiumRevokeConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to revoke this user\'s admin premium? They will lose premium access unless they have a store subscription.'**
+  String get adminPremiumRevokeConfirm;
+
+  /// No description provided for @adminPremiumRevokeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke Admin Premium'**
+  String get adminPremiumRevokeButton;
+
+  /// No description provided for @adminPremiumRevokeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium revoked successfully'**
+  String get adminPremiumRevokeSuccess;
+
+  /// No description provided for @adminPremiumRevokeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to revoke premium'**
+  String get adminPremiumRevokeError;
+
+  /// No description provided for @adminPremiumAlreadyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Premium Active'**
+  String get adminPremiumAlreadyActive;
+
+  /// No description provided for @adminPremiumFullAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'This user has full premium access'**
+  String get adminPremiumFullAccess;
+
+  /// No description provided for @adminPremiumUidCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'UID copied to clipboard'**
+  String get adminPremiumUidCopied;
+
+  /// No description provided for @adminPremiumEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a user'**
+  String get adminPremiumEmptyTitle;
+
+  /// No description provided for @adminPremiumEmptyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter an email address or UID to find a user and manage their premium access'**
+  String get adminPremiumEmptyDesc;
+
+  /// No description provided for @adminPremiumReasonVip.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP'**
+  String get adminPremiumReasonVip;
+
+  /// No description provided for @adminPremiumReasonTester.
+  ///
+  /// In en, this message translates to:
+  /// **'Tester'**
+  String get adminPremiumReasonTester;
+
+  /// No description provided for @adminPremiumReasonEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get adminPremiumReasonEmployee;
+
+  /// No description provided for @adminPremiumReasonInfluencer.
+  ///
+  /// In en, this message translates to:
+  /// **'Influencer'**
+  String get adminPremiumReasonInfluencer;
+
+  /// No description provided for @adminPremiumReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get adminPremiumReasonOther;
 }
 
 class _AppLocalizationsDelegate

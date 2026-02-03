@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:file_picker/file_picker.dart';
-import '../../../core/constants/app_colors.dart';
+import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_languages.dart';
 import '../../../l10n/app_localizations.dart';
 
@@ -26,12 +26,13 @@ class MultiLanguageContentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Section title
         _buildSectionTitle(
-            context, AppLocalizations.of(context).contentMultiLanguage),
+            context, AppLocalizations.of(context).contentMultiLanguage, colors),
 
         SizedBox(height: 16.h),
 
@@ -45,7 +46,8 @@ class MultiLanguageContentSection extends StatelessWidget {
                 child: _buildLanguageTab(
                   context,
                   lang,
-                  AppLanguages.getLabel(lang), // 🆕 Dynamic label
+                  AppLanguages.getLabel(lang),
+                  colors, // 🆕 Dynamic label
                 ),
               );
             }).toList(),
@@ -55,23 +57,25 @@ class MultiLanguageContentSection extends StatelessWidget {
         SizedBox(height: 20.h),
 
         // Current Language Fields
-        _buildLanguageFields(context, selectedLanguage),
+        _buildLanguageFields(context, selectedLanguage, colors),
       ],
     );
   }
 
-  Widget _buildSectionTitle(BuildContext context, String title) {
+  Widget _buildSectionTitle(
+      BuildContext context, String title, AppThemeExtension colors) {
     return Text(
       title,
       style: GoogleFonts.inter(
         fontSize: 18.sp,
         fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
+        color: colors.textPrimary,
       ),
     );
   }
 
-  Widget _buildLanguageTab(BuildContext context, String lang, String label) {
+  Widget _buildLanguageTab(BuildContext context, String lang, String label,
+      AppThemeExtension colors) {
     final isSelected = selectedLanguage == lang;
 
     // Check if this language has content
@@ -88,21 +92,19 @@ class MultiLanguageContentSection extends StatelessWidget {
     if (hasContent && hasAudio) {
       // Full: content + audio
       borderColor = Colors.green;
-      backgroundColor =
-          isSelected ? AppColors.textPrimary : Colors.green.shade50;
+      backgroundColor = isSelected ? colors.textPrimary : Colors.green.shade50;
       statusIcon = Icon(Icons.check_circle, size: 16.sp, color: Colors.green);
     } else if (hasContent || hasAudio) {
       // Partial: only content OR only audio
       borderColor = Colors.orange;
-      backgroundColor =
-          isSelected ? AppColors.textPrimary : Colors.orange.shade50;
+      backgroundColor = isSelected ? colors.textPrimary : Colors.orange.shade50;
       statusIcon = Icon(Icons.warning, size: 16.sp, color: Colors.orange);
     } else {
       // Empty
-      borderColor = Colors.grey.shade300;
-      backgroundColor =
-          isSelected ? AppColors.textPrimary : Colors.grey.shade100;
-      statusIcon = Icon(Icons.circle_outlined, size: 16.sp, color: Colors.grey);
+      borderColor = colors.greyMedium;
+      backgroundColor = isSelected ? colors.textPrimary : colors.greyLight;
+      statusIcon =
+          Icon(Icons.circle_outlined, size: 16.sp, color: colors.greyMedium);
     }
 
     return GestureDetector(
@@ -121,7 +123,7 @@ class MultiLanguageContentSection extends StatelessWidget {
               label,
               style: GoogleFonts.inter(
                 fontSize: 14.sp,
-                color: isSelected ? Colors.white : AppColors.textPrimary,
+                color: isSelected ? colors.textOnPrimary : colors.textPrimary,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -133,7 +135,8 @@ class MultiLanguageContentSection extends StatelessWidget {
     );
   }
 
-  Widget _buildLanguageFields(BuildContext context, String lang) {
+  Widget _buildLanguageFields(
+      BuildContext context, String lang, AppThemeExtension colors) {
     final controllers = contentControllers[lang]!;
 
     return Column(
@@ -143,7 +146,7 @@ class MultiLanguageContentSection extends StatelessWidget {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
           decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: 0.1),
+            color: colors.textPrimary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6.r),
           ),
           child: Text(
@@ -151,7 +154,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             style: GoogleFonts.inter(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              color: colors.textPrimary,
             ),
           ),
         ),
@@ -169,7 +172,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: BorderSide(color: colors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 16.sp),
@@ -189,7 +192,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: BorderSide(color: colors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 14.sp),
@@ -209,7 +212,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: BorderSide(color: colors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 16.sp),
@@ -230,7 +233,7 @@ class MultiLanguageContentSection extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
-              borderSide: const BorderSide(color: AppColors.textPrimary, width: 2),
+              borderSide: BorderSide(color: colors.textPrimary, width: 2),
             ),
           ),
           style: GoogleFonts.inter(fontSize: 14.sp),

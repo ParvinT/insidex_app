@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:ui';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,6 +8,7 @@ import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
@@ -14,11 +17,16 @@ import '../../services/listening_tracker_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/download/decryption_preloader.dart';
+import '../../services/audio/audio_handler.dart';
+import '../../services/cache_manager_service.dart';
 import '../downloads/widgets/download_button.dart';
+import '../../shared/widgets/upgrade_prompt.dart';
+import '../../core/themes/app_theme_extension.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
@@ -29,7 +37,7 @@ class AudioPlayerScreen extends StatefulWidget {
 }
 
 class _AudioPlayerScreenState extends State<AudioPlayerScreen>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   // Equalizer animation (replaces old rotating note)
   late final AnimationController _eqController = AnimationController(
     vsync: this,
@@ -48,6 +56,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isLooping = false;
   bool _isTracking = false;
   bool _isDecrypting = false;
+  bool _isLoadingAudio = false;
+  bool _isPlayingTrack = false;
 
   //Audio State
   String _currentLanguage = 'en';
@@ -56,6 +66,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
   bool _hasAddedToRecent = false;
+  bool _accessGranted = false;
 
   // Session
   late Map<String, dynamic> _session;
@@ -114,6 +125,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     _session = widget.sessionData ??
         {
@@ -125,16 +137,95 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           'subliminal': {'audioUrls': {}, 'durations': {}},
           'backgroundImages': {},
         };
-    _loadLanguageAndUrls();
-    _setupStreamListeners();
+
+    // ✅ Premium/Demo check - must be done after frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkAccessAndInitialize();
+    });
+  }
+
+  /// Check if user can access this session, then initialize
+  Future<void> _checkAccessAndInitialize() async {
+    // ✅ Capture context-dependent values BEFORE any async
+    final miniPlayerProvider = context.read<MiniPlayerProvider>();
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
+
+    // ✅ Load display info FIRST (title, image) - before access check
+    await _loadLanguageAndUrls();
+
+    if (!mounted) return;
+
+    // ✅ FIX: OFFLINE SESSION = SKIP SUBSCRIPTION CHECK ENTIRELY
+    // User already had permission when they downloaded, no need to re-check
+    if (_isOfflineSession) {
+      debugPrint(
+          '📥 [AudioPlayer] Offline session - skipping subscription check');
+      _accessGranted = true;
+
+      // Enable background playback for offline sessions
+      audioHandler.setShowMediaNotification(true);
+      debugPrint('🎧 [AudioPlayer] Background playback: ENABLED (offline)');
+
+      // Continue with audio initialization
+      await _setupStreamListeners();
+      miniPlayerProvider.hide();
+      await _initializeAudio();
+      return;
+    }
+
+    // ========== ONLINE SESSION - NORMAL FLOW ==========
+    await subscriptionProvider.waitForInitialization();
+
+    if (!mounted) return;
+
+    // Check if session is demo
+    final isDemo = _session['isDemo'] as bool? ?? false;
+
+    // Can play if demo OR has active subscription
+    final canPlay = isDemo || subscriptionProvider.canPlayAudio;
+
+    debugPrint('🔍 [AccessCheck] isDemo: $isDemo');
+    debugPrint('🔍 [AccessCheck] tier: ${subscriptionProvider.tier}');
+    debugPrint('🔍 [AccessCheck] isActive: ${subscriptionProvider.isActive}');
+    debugPrint(
+        '🔍 [AccessCheck] canPlayAudio: ${subscriptionProvider.canPlayAudio}');
+    debugPrint('🔍 [AccessCheck] canPlay result: $canPlay');
+
+    if (!canPlay) {
+      // Show upgrade prompt - returns true if purchased
+      final purchased = await showUpgradeBottomSheet(
+        context,
+        feature: 'play_session',
+        title: l10n.premiumSessionTitle,
+        subtitle: l10n.premiumSessionSubtitle,
+      );
+
+      // If not purchased, go back
+      if (purchased != true && mounted) {
+        navigator.pop();
+        return;
+      }
+    }
+
+    if (!mounted) return;
+
+    _accessGranted = true;
+
+    final canUseBackground = subscriptionProvider.canUseBackgroundPlayback;
+    audioHandler.setShowMediaNotification(canUseBackground);
+    debugPrint(
+        '🎧 [AudioPlayer] Background playback: ${canUseBackground ? "ENABLED" : "DISABLED"}');
+
+    // User has access - continue with audio initialization
+    await _setupStreamListeners();
     _addToRecentSessions();
     _checkFavoriteStatus();
     _checkPlaylistStatus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MiniPlayerProvider>().hide();
 
-      _restoreStateFromMiniPlayer();
-    });
+    miniPlayerProvider.hide();
+    await _restoreStateFromMiniPlayer();
   }
 
   Future<void> _loadLanguageAndUrls() async {
@@ -372,18 +463,35 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       if (m == null && hadTimer) {
         setState(() => _isLooping = false);
         debugPrint('🔁 [Timer] Timer ended - loop disabled');
-      }
-      if (m == null && _isTracking) {
-        ListeningTrackerService.endSession();
-        _isTracking = false;
+
+        if (_isTracking) {
+          ListeningTrackerService.endSession();
+          _isTracking = false;
+        }
       }
     });
   }
 
   Future<void> _initializeAudio() async {
-    await _audioService.stop();
-    await _audioService.initialize();
-    await _setupStreamListeners();
+    // ✅ FIX: Prevent multiple simultaneous loads
+    if (_isLoadingAudio) {
+      debugPrint('⏳ [AudioPlayer] Already loading audio, skipping...');
+      return;
+    }
+
+    _isLoadingAudio = true;
+    debugPrint('🎵 [AudioPlayer] Initializing audio...');
+
+    try {
+      await _audioService.stop();
+      await Future.delayed(const Duration(milliseconds: 50));
+      await _audioService.initialize();
+      debugPrint('✅ [AudioPlayer] Audio service initialized');
+    } catch (e) {
+      debugPrint('❌ [AudioPlayer] Initialize audio error: $e');
+    } finally {
+      _isLoadingAudio = false;
+    }
     await _playCurrentTrack();
   }
 
@@ -421,7 +529,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         await ListeningTrackerService.startSession(
           sessionId: _session['id'],
-          sessionTitle: _session['title'] ?? unknownSessionText,
+          sessionTitle: _session['_displayTitle'] ??
+              _session['_localizedTitle'] ??
+              _session['title'] ??
+              unknownSessionText,
           categoryId: _session['categoryId'],
         );
       } else if (_isTracking) {
@@ -438,50 +549,80 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _playCurrentTrack() async {
-    if (_session['_isOffline'] == true) {
-      debugPrint('📥 [AudioPlayer] Playing from offline download');
+    if (_isPlayingTrack) {
+      debugPrint('⏳ [AudioPlayer] Already playing track, skipping...');
+      return;
+    }
 
-      final downloadService = DownloadService();
-      final language =
-          _session['_downloadedLanguage'] as String? ?? _currentLanguage;
-      final sessionId = _session['id'] as String?;
+    if (_isLoadingAudio) {
+      debugPrint(
+          '⏳ [AudioPlayer] Audio loading in progress, skipping playCurrentTrack...');
+      return;
+    }
 
-      if (sessionId == null) {
-        debugPrint('❌ [AudioPlayer] Session ID is null for offline playback');
-        return;
-      }
+    _isPlayingTrack = true;
+    debugPrint('▶️ [AudioPlayer] Starting playCurrentTrack...');
 
-      // 🆕 1. Check preloader cache first (instant playback!)
-      final preloader = DecryptionPreloader();
-      String? decryptedPath = preloader.getCachedPath(sessionId);
+    try {
+      final l10n = AppLocalizations.of(context);
+      final unknownSessionText = l10n.unknownSession;
+      final subliminalSessionText = l10n.subliminalSession;
+      final audioNotFoundText = l10n.audioFileNotFound;
 
-      // 🆕 2. If not cached, fall back to normal decryption
-      if (decryptedPath == null) {
-        debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
+      if (_session['_isOffline'] == true) {
+        debugPrint('📥 [AudioPlayer] Playing from offline download');
 
-        // 🆕 Show loading
-        if (mounted) {
-          setState(() => _isDecrypting = true);
+        final downloadService = DownloadService();
+        final language =
+            _session['_downloadedLanguage'] as String? ?? _currentLanguage;
+        final sessionId = _session['id'] as String?;
+
+        if (sessionId == null) {
+          debugPrint('❌ [AudioPlayer] Session ID is null for offline playback');
+          return;
         }
 
-        decryptedPath = await downloadService.getDecryptedAudioPath(
-          sessionId,
-          language,
-        );
+        final preloader = DecryptionPreloader();
+        String? decryptedPath = preloader.getCachedPath(sessionId);
 
-        if (mounted) {
-          setState(() => _isDecrypting = false);
+        if (decryptedPath == null) {
+          debugPrint('⏳ [AudioPlayer] Cache miss - decrypting now...');
+
+          if (mounted) {
+            setState(() => _isDecrypting = true);
+          }
+
+          decryptedPath = await downloadService.getDecryptedAudioPath(
+            sessionId,
+            language,
+          );
+
+          if (mounted) {
+            setState(() => _isDecrypting = false);
+          }
+        } else {
+          debugPrint('⚡ [AudioPlayer] Cache hit - instant playback!');
         }
-      } else {
-        debugPrint('⚡ [AudioPlayer] Cache hit - instant playback!');
-      }
 
-      if (decryptedPath != null) {
-        if (!mounted) return;
-        try {
+        if (decryptedPath != null) {
+          if (!mounted) return;
+
           setState(() {
             _currentPosition = Duration.zero;
           });
+          await _audioService.seek(Duration.zero);
+
+          if (!_isOfflineSession && !_isTracking && _session['id'] != null) {
+            _isTracking = true;
+            await ListeningTrackerService.startSession(
+              sessionId: _session['id'],
+              sessionTitle: _session['_displayTitle'] ??
+                  _session['_localizedTitle'] ??
+                  _session['title'] ??
+                  unknownSessionText,
+              categoryId: _session['categoryId'],
+            );
+          }
 
           final localImagePath = _session['_localImagePath'] as String?;
 
@@ -489,7 +630,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             'file://$decryptedPath',
             title: _session['_displayTitle'] ??
                 _session['title'] ??
-                AppLocalizations.of(context).subliminalSession,
+                subliminalSessionText,
             artist: 'InsideX',
             artworkUrl: null,
             localArtworkPath: localImagePath,
@@ -503,49 +644,57 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             setState(() => _totalDuration = resolved);
           }
 
-          debugPrint('🎵 Playing offline: ${_session['title']}');
-          return; // ← ÖNEMLİ: Online flow'u atla
-        } catch (e) {
-          debugPrint('❌ [AudioPlayer] Offline playback error: $e');
-          // Fall through to show error
+          debugPrint(
+              '🎵 Playing offline: ${_session['_displayTitle'] ?? _session['title']}');
+          return;
+        } else {
+          debugPrint('❌ [AudioPlayer] Could not decrypt offline file');
         }
-      } else {
-        debugPrint('❌ [AudioPlayer] Could not decrypt offline file');
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(audioNotFoundText),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
       }
 
-      // Show error for offline playback failure
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).audioFileNotFound),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-    if (_audioUrl == null || _audioUrl!.isEmpty) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).audioFileNotFound),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+      // ========== ONLINE PLAYBACK ==========
+      if (_audioUrl == null || _audioUrl!.isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).audioFileNotFound),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
 
-    try {
       setState(() {
         _currentPosition = Duration.zero;
-        // _totalDuration already set in _loadLanguageAndUrls
       });
+
+      if (!_isOfflineSession && !_isTracking && _session['id'] != null) {
+        _isTracking = true;
+        await ListeningTrackerService.startSession(
+          sessionId: _session['id'],
+          sessionTitle: _session['_displayTitle'] ??
+              _session['_localizedTitle'] ??
+              _session['title'] ??
+              AppLocalizations.of(context).unknownSession,
+          categoryId: _session['categoryId'],
+        );
+      }
 
       final resolved = await _audioService.playFromUrl(
         _audioUrl!,
         title: _session['_displayTitle'] ??
             _session['_localizedTitle'] ??
             _session['title'] ??
-            AppLocalizations.of(context).subliminalSession,
+            subliminalSessionText,
         artist: 'InsideX',
         artworkUrl: _backgroundImageUrl,
         sessionId: _session['id'],
@@ -555,9 +704,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         setState(() => _totalDuration = resolved);
       }
 
-      debugPrint('🎵 Playing: ${_session['title']}');
+      debugPrint(
+          '🎵 Playing: ${_session['_displayTitle'] ?? _session['title']}');
     } catch (e) {
       if (!mounted) return;
+      debugPrint('❌ [AudioPlayer] Playback error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -566,6 +717,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           backgroundColor: Colors.red,
         ),
       );
+    } finally {
+      _isPlayingTrack = false;
+      debugPrint('✅ [AudioPlayer] playCurrentTrack completed');
     }
   }
 
@@ -584,8 +738,32 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     );
   }
 
+  // =================== LIFECYCLE OBSERVER ===================
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // Only handle for free users (non-background playback)
+    final subscriptionProvider = context.read<SubscriptionProvider>();
+    if (subscriptionProvider.canUseBackgroundPlayback) {
+      return; // Premium users - do nothing, let audio continue
+    }
+
+    // Free user - pause when app goes to background
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      if (_isPlaying) {
+        debugPrint(
+            '⏸️ [AudioPlayer] Free user - pausing audio (app backgrounded)');
+        _audioService.pause();
+      }
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     if (_isTracking) {
       ListeningTrackerService.endSession().then((_) {
         debugPrint('Listening session ended and saved');
@@ -603,6 +781,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
@@ -610,135 +789,155 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         debugPrint('🔙 [AudioPlayer] PopScope triggered');
 
-        if (_isTracking) {
-          await ListeningTrackerService.endSession();
-          debugPrint('Session tracking ended on back press');
-        }
-
-        if (_miniPlayerProvider != null) {
+        // ✅ Show mini player FIRST (non-blocking)
+        if (_accessGranted && _miniPlayerProvider != null) {
           debugPrint(
-            '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}',
-          );
+              '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}');
           _session['_currentLanguage'] = _currentLanguage;
           _session['_backgroundImageUrl'] = _backgroundImageUrl;
           _miniPlayerProvider!.playSession(_session);
           _miniPlayerProvider!.show();
           debugPrint(
-            '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}',
-          );
+              '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}');
+        } else if (!_accessGranted) {
+          debugPrint(
+              '🚫 [AudioPlayer] Access not granted - skipping mini player');
         } else {
           debugPrint('❌ Mini player provider is null');
         }
+
+        // ✅ End tracking in background (non-blocking)
+        if (_isTracking) {
+          ListeningTrackerService.endSession().then((_) {
+            debugPrint('Session tracking ended on back press');
+          });
+        }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: colors.background,
         body: Stack(
           children: [
-            Container(
-              color: Colors.white,
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    PlayerHeader(
-                      onBack: () => Navigator.pop(context),
-                      onInfo: () {
-                        SessionInfoModal.show(
-                          context: context,
-                          session: _session,
-                        );
-                      },
-                    ),
-                    Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, constraints) {
-                          final Widget inner = Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              PlayerAlbumArt(
-                                imageUrl: _backgroundImageUrl,
-                                localImagePath: _session['_localImagePath'],
-                                equalizerController: _eqController,
-                                isPlaying: _isPlaying,
-                              ),
-                              SizedBox(height: 40.h),
-                              PlayerSessionInfo(
-                                title: _session['_displayTitle'] ??
-                                    _session['_localizedTitle'] ??
-                                    _session['title'] ??
-                                    AppLocalizations.of(
-                                      context,
-                                    ).untitledSession,
-                                subtitle: AppLocalizations.of(
-                                  context,
-                                ).subliminalSession,
-                              ),
-                              SizedBox(height: 30.h),
-                              IntroductionButton(onTap: _showIntroductionModal),
-                              SizedBox(height: 30.h),
-                              PlayerProgressBar(
-                                position: _currentPosition,
-                                duration: _totalDuration,
-                                onSeek: (duration) =>
-                                    _audioService.seek(duration),
-                              ),
-                              SizedBox(height: 30.h),
-                              PlayerPlayControls(
-                                isPlaying: _isPlaying,
-                                onPlayPause: _togglePlayPause,
-                                onReplay10: _replay10,
-                                onForward10: _forward10,
-                              ),
-                              SizedBox(height: 25.h),
-                              PlayerBottomActions(
-                                isLooping: _isLooping,
-                                isFavorite: _isFavorite,
-                                isInPlaylist: _isInPlaylist,
-                                isOffline: _isOfflineSession,
-                                isTimerActive: _sleepTimerMinutes != null,
-                                onLoop: _toggleLoop,
-                                onFavorite: _toggleFavorite,
-                                onPlaylist: _togglePlaylist,
-                                onTimer: _showSleepTimerModal,
-                                downloadButton: _isOfflineSession
-                                    ? null
-                                    : DownloadButton(
-                                        session: _session,
-                                        size: 24.sp,
-                                        showBackground: false,
-                                      ),
-                              ),
-                            ],
-                          );
-                          final bool isSmallPhone =
-                              constraints.maxWidth <= 400 ||
-                                  constraints.maxHeight <= 700;
-                          return SingleChildScrollView(
-                            padding: EdgeInsets.only(
-                              bottom:
-                                  MediaQuery.of(context).padding.bottom + 12,
-                            ),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: constraints.maxHeight,
-                              ),
-                              child: Align(
-                                alignment: isSmallPhone
-                                    ? Alignment.topCenter
-                                    : Alignment.center,
-                                child: inner,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+            // 1. BLUR BACKGROUND IMAGE (Network or Local)
+            _buildBlurBackground(colors),
+
+            // 2. DARK OVERLAY FOR READABILITY
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(
+                  alpha: (_backgroundImageUrl != null &&
+                              _backgroundImageUrl!.isNotEmpty) ||
+                          (_session['_localImagePath'] != null &&
+                              (_session['_localImagePath'] as String)
+                                  .isNotEmpty)
+                      ? 0.35
+                      : 0.0,
                 ),
               ),
             ),
+
+            // 3. MAIN CONTENT
+            SafeArea(
+              child: Column(
+                children: [
+                  PlayerHeader(
+                    onBack: () => Navigator.pop(context),
+                    onInfo: () {
+                      SessionInfoModal.show(
+                        context: context,
+                        session: _session,
+                      );
+                    },
+                  ),
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final Widget inner = Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            PlayerAlbumArt(
+                              imageUrl: _backgroundImageUrl,
+                              localImagePath: _session['_localImagePath'],
+                              equalizerController: _eqController,
+                              isPlaying: _isPlaying,
+                            ),
+                            SizedBox(height: 40.h),
+                            PlayerSessionInfo(
+                              title: _session['_displayTitle'] ??
+                                  _session['_localizedTitle'] ??
+                                  _session['title'] ??
+                                  AppLocalizations.of(
+                                    context,
+                                  ).untitledSession,
+                              subtitle: AppLocalizations.of(
+                                context,
+                              ).subliminalSession,
+                            ),
+                            SizedBox(height: 30.h),
+                            IntroductionButton(onTap: _showIntroductionModal),
+                            SizedBox(height: 30.h),
+                            PlayerProgressBar(
+                              position: _currentPosition,
+                              duration: _totalDuration,
+                              onSeek: (duration) =>
+                                  _audioService.seek(duration),
+                            ),
+                            SizedBox(height: 30.h),
+                            PlayerPlayControls(
+                              isPlaying: _isPlaying,
+                              onPlayPause: _togglePlayPause,
+                              onReplay10: _replay10,
+                              onForward10: _forward10,
+                            ),
+                            SizedBox(height: 25.h),
+                            PlayerBottomActions(
+                              isLooping: _isLooping,
+                              isFavorite: _isFavorite,
+                              isInPlaylist: _isInPlaylist,
+                              isOffline: _isOfflineSession,
+                              isTimerActive: _sleepTimerMinutes != null,
+                              onLoop: _toggleLoop,
+                              onFavorite: _toggleFavorite,
+                              onPlaylist: _togglePlaylist,
+                              onTimer: _showSleepTimerModal,
+                              downloadButton: _isOfflineSession
+                                  ? null
+                                  : DownloadButton(
+                                      session: _session,
+                                      size: 24.sp,
+                                      showBackground: false,
+                                    ),
+                            ),
+                          ],
+                        );
+                        final bool isSmallPhone = constraints.maxWidth <= 400 ||
+                            constraints.maxHeight <= 700;
+                        return SingleChildScrollView(
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).padding.bottom + 12,
+                          ),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Align(
+                              alignment: isSmallPhone
+                                  ? Alignment.topCenter
+                                  : Alignment.center,
+                              child: inner,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 4. DECRYPTING OVERLAY
             if (_isDecrypting)
               Container(
-                color: Colors.black.withValues(alpha: 0.7),
+                color: colors.textPrimary.withValues(alpha: 0.85),
                 child: Center(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -746,8 +945,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                       SizedBox(
                         width: 48.w,
                         height: 48.w,
-                        child: const CircularProgressIndicator(
-                          color: Colors.white,
+                        child: CircularProgressIndicator(
+                          color: colors.textOnPrimary,
                           strokeWidth: 3,
                         ),
                       ),
@@ -757,7 +956,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                         style: GoogleFonts.inter(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white,
+                          color: colors.textOnPrimary,
                         ),
                       ),
                     ],
@@ -766,6 +965,66 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBlurBackground(AppThemeExtension colors) {
+    final localImagePath = _session['_localImagePath'] as String?;
+    final hasLocalImage = localImagePath != null && localImagePath.isNotEmpty;
+    final hasNetworkImage =
+        _backgroundImageUrl != null && _backgroundImageUrl!.isNotEmpty;
+
+    // No image available
+    if (!hasLocalImage && !hasNetworkImage) {
+      return const SizedBox.shrink();
+    }
+
+    Widget imageWidget;
+
+    if (hasLocalImage) {
+      // Offline - use local file
+      final file = File(localImagePath);
+      imageWidget = FutureBuilder<bool>(
+        future: file.exists(),
+        builder: (context, snapshot) {
+          if (snapshot.data == true) {
+            return Image.file(
+              file,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+              errorBuilder: (_, __, ___) => Container(color: colors.background),
+            );
+          }
+          // Fallback to network if local doesn't exist
+          if (hasNetworkImage) {
+            return CachedNetworkImage(
+              imageUrl: _backgroundImageUrl!,
+              cacheManager: AppCacheManager.instance,
+              fit: BoxFit.cover,
+              placeholder: (_, __) => Container(color: colors.background),
+              errorWidget: (_, __, ___) => Container(color: colors.background),
+            );
+          }
+          return Container(color: colors.background);
+        },
+      );
+    } else {
+      // Online - use network image
+      imageWidget = CachedNetworkImage(
+        imageUrl: _backgroundImageUrl!,
+        cacheManager: AppCacheManager.instance,
+        fit: BoxFit.cover,
+        placeholder: (_, __) => Container(color: colors.background),
+        errorWidget: (_, __, ___) => Container(color: colors.background),
+      );
+    }
+
+    return Positioned.fill(
+      child: ImageFiltered(
+        imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+        child: imageWidget,
       ),
     );
   }
@@ -780,7 +1039,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               ? AppLocalizations.of(context).loopEnabled
               : AppLocalizations.of(context).loopDisabled,
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: context.colors.textSecondary,
         duration: const Duration(seconds: 1),
       ),
     );
@@ -805,7 +1064,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).addedToPlaylist),
-              backgroundColor: Colors.green,
+              backgroundColor: Colors.green.shade700,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -821,7 +1080,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).removedFromPlaylist),
-              backgroundColor: Colors.orange,
+              backgroundColor: Colors.orange.shade700,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -852,7 +1111,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).addedToFavorites),
-              backgroundColor: Colors.red,
+              backgroundColor: Colors.red.shade700,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -868,7 +1127,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context).removedFromFavorites),
-              backgroundColor: Colors.grey,
+              backgroundColor: context.colors.textSecondary,
               duration: const Duration(seconds: 1),
             ),
           );
@@ -930,7 +1189,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.7,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.colors.backgroundElevated,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
         child: Column(
@@ -941,7 +1200,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: context.colors.greyMedium,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -957,19 +1216,20 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                       style: GoogleFonts.inter(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
-                        color: Colors.black87,
+                        color: context.colors.textPrimary,
                       ),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close),
+                    icon:
+                        Icon(Icons.close, color: context.colors.textSecondary),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
             ),
 
-            Divider(height: 1, color: Colors.grey[300]),
+            Divider(height: 1, color: context.colors.border),
 
             // Content
             Expanded(
@@ -980,7 +1240,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                   style: GoogleFonts.inter(
                     fontSize: 16.sp,
                     height: 1.6,
-                    color: Colors.black87,
+                    color: context.colors.textPrimary,
                   ),
                 ),
               ),
