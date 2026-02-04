@@ -2685,4 +2685,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get adminPremiumReasonOther => 'Other';
+
+  @override
+  String get ourApproach => 'Our Approach';
+
+  @override
+  String get currentSession => 'Current Session';
 }

@@ -49,4 +49,32 @@ The content "$contentName" could not be loaded.
 Please try again later or contact support at support@insidexapp.com
 ''';
   }
+
+  /// Load plain text content for a specific document and language
+  static Future<String> loadTextContent({
+    required String contentName,
+    required String languageCode,
+  }) async {
+    try {
+      final content = await rootBundle.loadString(
+        'assets/content/$languageCode/$contentName.txt',
+      );
+      debugPrint('✅ Text content loaded: $contentName ($languageCode)');
+      return content;
+    } catch (e) {
+      debugPrint(
+          '⚠️ Text content not found in $languageCode, falling back to English');
+
+      try {
+        final content = await rootBundle.loadString(
+          'assets/content/en/$contentName.txt',
+        );
+        debugPrint('✅ Text content loaded (fallback): $contentName (en)');
+        return content;
+      } catch (e) {
+        debugPrint('❌ Text content not found: $contentName');
+        return '';
+      }
+    }
+  }
 }

@@ -2696,4 +2696,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get adminPremiumReasonOther => 'Diğer';
+
+  @override
+  String get ourApproach => 'Yaklaşımımız';
+
+  @override
+  String get currentSession => 'Mevcut Seans';
 }

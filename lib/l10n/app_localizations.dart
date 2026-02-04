@@ -5147,6 +5147,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get adminPremiumReasonOther;
+
+  /// No description provided for @ourApproach.
+  ///
+  /// In en, this message translates to:
+  /// **'Our Approach'**
+  String get ourApproach;
+
+  /// No description provided for @currentSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Session'**
+  String get currentSession;
 }
 
 class _AppLocalizationsDelegate

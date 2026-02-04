@@ -62,7 +62,6 @@ class QuizCategoryChips extends StatelessWidget {
               context: context,
               id: null,
               name: allCategoriesLabel,
-              iconName: 'category',
               isSelected: selectedCategoryId == null,
             );
           }
@@ -72,7 +71,6 @@ class QuizCategoryChips extends StatelessWidget {
             context: context,
             id: category.id,
             name: category.getName(currentLanguage),
-            iconName: category.iconName,
             isSelected: selectedCategoryId == category.id,
           );
         },
@@ -84,7 +82,6 @@ class QuizCategoryChips extends StatelessWidget {
     required BuildContext context,
     required String? id,
     required String name,
-    required String iconName,
     required bool isSelected,
   }) {
     final colors = context.colors;
@@ -111,12 +108,6 @@ class QuizCategoryChips extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              _getCategoryIcon(iconName),
-              size: isTablet ? 16.sp : 14.sp,
-              color: isSelected ? colors.textOnPrimary : colors.textSecondary,
-            ),
-            SizedBox(width: 6.w),
             Text(
               name,
               style: GoogleFonts.inter(
@@ -129,40 +120,5 @@ class QuizCategoryChips extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String iconName) {
-    const iconMap = {
-      'face': Icons.face,
-      'person': Icons.person,
-      'no_drinks': Icons.no_drinks,
-      'child_care': Icons.child_care,
-      'psychology': Icons.psychology,
-      'psychology_alt': Icons.psychology_alt,
-      'restaurant': Icons.restaurant,
-      'favorite': Icons.favorite,
-      'accessibility_new': Icons.accessibility_new,
-      'air': Icons.air,
-      'visibility': Icons.visibility,
-      'mood': Icons.mood,
-      'water_drop': Icons.water_drop,
-      'medical_services': Icons.medical_services,
-      'health_and_safety': Icons.health_and_safety,
-      'fitness_center': Icons.fitness_center,
-      'category': Icons.category,
-      'healing': Icons.healing,
-      'local_hospital': Icons.local_hospital,
-      'monitor_heart': Icons.monitor_heart,
-      'medication': Icons.medication,
-      'vaccines': Icons.vaccines,
-      'bloodtype': Icons.bloodtype,
-      'sick': Icons.sick,
-      'elderly': Icons.elderly,
-      'pregnant_woman': Icons.pregnant_woman,
-      'male': Icons.male,
-      'female': Icons.female,
-    };
-
-    return iconMap[iconName] ?? Icons.category;
   }
 }

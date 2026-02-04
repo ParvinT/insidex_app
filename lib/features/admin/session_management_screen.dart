@@ -517,22 +517,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                                     ),
                                   ],
                                 ),
-                                SizedBox(height: 12.h),
-                                // Description
-                                FutureBuilder<String>(
-                                  future: _getDisplayDescription(session),
-                                  builder: (context, descSnapshot) {
-                                    return Text(
-                                      descSnapshot.data ?? '',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 14.sp,
-                                        color: colors.textSecondary,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    );
-                                  },
-                                ),
+
                                 SizedBox(height: 12.h),
                                 // Language badges
                                 _buildLanguageBadges(session, colors),
@@ -564,15 +549,6 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     }
 
     return localizedContent.title;
-  }
-
-  // Get display description
-  Future<String> _getDisplayDescription(Map<String, dynamic> session) async {
-    final currentLanguage = await LanguageHelperService.getCurrentLanguage();
-    final localizedContent = SessionLocalizationService.getLocalizedContent(
-        session, currentLanguage);
-
-    return localizedContent.description;
   }
 
   // Build language availability badges

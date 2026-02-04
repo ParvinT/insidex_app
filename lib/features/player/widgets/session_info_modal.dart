@@ -6,6 +6,7 @@ import 'package:marquee/marquee.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../services/session_localization_service.dart';
 import '../../../services/language_helper_service.dart';
+import '../../../services/markdown_content_service.dart';
 import '../../../core/themes/app_theme_extension.dart';
 
 class SessionInfoModal {
@@ -32,10 +33,12 @@ class SessionInfoModal {
         : (session['title'] ?? 'Untitled Session');
 
     localizedSession['_displayTitle'] = title;
-    localizedSession['_displayDescription'] =
-        localizedContent.description.isNotEmpty
-            ? localizedContent.description
-            : (session['description'] ?? '');
+    // Load philosophy text from assets (not Firebase)
+    final philosophyText = await MarkdownContentService.loadTextContent(
+      contentName: 'session_philosophy',
+      languageCode: language,
+    );
+    localizedSession['_displayDescription'] = philosophyText;
 
     showGeneralDialog(
       context: context,
@@ -178,7 +181,7 @@ class _SessionInfoContent extends StatelessWidget {
           SizedBox(width: 12.w),
           Expanded(
             child: Text(
-              AppLocalizations.of(context).sessionDetails,
+              AppLocalizations.of(context).currentSession,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.inter(
@@ -254,7 +257,7 @@ class _SessionInfoContent extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          AppLocalizations.of(context).aboutThisSession,
+          AppLocalizations.of(context).ourApproach,
           style: GoogleFonts.inter(
             fontSize: 11.sp,
             fontWeight: FontWeight.w600,

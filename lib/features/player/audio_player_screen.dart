@@ -286,8 +286,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
       _session['_localizedTitle'] = title;
       _session['_displayTitle'] = title;
-      _session['_localizedDescription'] = localizedContent.description;
-      _session['_localizedIntroTitle'] = localizedContent.introduction.title;
       _session['_localizedIntroContent'] =
           localizedContent.introduction.content;
     });
@@ -1163,9 +1161,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   void _showIntroductionModal() {
-    final title = _session['_localizedIntroTitle'] ??
-        _session['introduction']?['title'] ??
-        AppLocalizations.of(context).introduction;
+    final title = AppLocalizations.of(context).introduction;
 
     final content = _session['_localizedIntroContent'] ??
         _session['introduction']?['content'] ??

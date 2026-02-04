@@ -914,5 +914,7 @@
   "adminPremiumReasonTester": "परीक्षक",
   "adminPremiumReasonEmployee": "कर्मचारी",
   "adminPremiumReasonInfluencer": "इन्फ्लुएंसर",
-  "adminPremiumReasonOther": "अन्य"
+  "adminPremiumReasonOther": "अन्य",
+  "ourApproach": "हमारा दृष्टिकोण",
+  "currentSession": "वर्तमान सत्र"
 }

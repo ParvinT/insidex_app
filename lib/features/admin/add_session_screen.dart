@@ -67,8 +67,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       for (final lang in AppLanguages.supportedLanguages)
         lang: {
           'title': TextEditingController(),
-          'description': TextEditingController(),
-          'introTitle': TextEditingController(),
           'introContent': TextEditingController(),
         }
     };
@@ -177,19 +175,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     if (contentMap != null && contentMap.isNotEmpty) {
       // NEW STRUCTURE: Multi-language content
       for (final lang in AppLanguages.supportedLanguages) {
-        // 🆕
         final langContent = contentMap[lang] as Map<String, dynamic>?;
 
         if (langContent != null) {
           _contentControllers[lang]!['title']!.text =
               langContent['title'] ?? '';
-          _contentControllers[lang]!['description']!.text =
-              langContent['description'] ?? '';
 
           final intro = langContent['introduction'] as Map<String, dynamic>?;
           if (intro != null) {
-            _contentControllers[lang]!['introTitle']!.text =
-                intro['title'] ?? '';
             _contentControllers[lang]!['introContent']!.text =
                 intro['content'] ?? '';
           }
@@ -197,14 +190,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       }
     } else {
       // OLD STRUCTURE: Single language (backward compatibility)
-      // Load as English content
       _contentControllers['en']!['title']!.text = session['title'] ?? '';
-      _contentControllers['en']!['description']!.text =
-          session['description'] ?? '';
 
       final intro = session['introduction'] as Map<String, dynamic>?;
       if (intro != null) {
-        _contentControllers['en']!['introTitle']!.text = intro['title'] ?? '';
         _contentControllers['en']!['introContent']!.text =
             intro['content'] ?? '';
       }
@@ -480,10 +469,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         for (final lang in AppLanguages.supportedLanguages)
           lang: {
             'title': _contentControllers[lang]!['title']!.text.trim(),
-            'description':
-                _contentControllers[lang]!['description']!.text.trim(),
             'introduction': {
-              'title': _contentControllers[lang]!['introTitle']!.text.trim(),
               'content':
                   _contentControllers[lang]!['introContent']!.text.trim(),
             },

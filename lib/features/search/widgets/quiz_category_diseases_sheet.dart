@@ -205,24 +205,6 @@ class _QuizCategoryDiseasesSheetState extends State<QuizCategoryDiseasesSheet> {
       ),
       child: Row(
         children: [
-          // Category icon
-          Container(
-            width: isTablet ? 48.w : 40.w,
-            height: isTablet ? 48.w : 40.w,
-            decoration: BoxDecoration(
-              color: _getGenderColor(widget.category.gender)
-                  .withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(
-              _getIconData(widget.category.iconName),
-              color: _getGenderColor(widget.category.gender),
-              size: isTablet ? 24.sp : 20.sp,
-            ),
-          ),
-
-          SizedBox(width: 14.w),
-
           // Title
           Expanded(
             child: Column(
@@ -546,60 +528,5 @@ class _QuizCategoryDiseasesSheetState extends State<QuizCategoryDiseasesSheet> {
       default:
         return Colors.purple;
     }
-  }
-
-  IconData _getIconData(String? iconName) {
-    const iconMap = {
-      // Health & Medical
-      'psychology': Icons.psychology,
-      'favorite': Icons.favorite,
-      'self_improvement': Icons.self_improvement,
-      'fitness_center': Icons.fitness_center,
-      'local_hospital': Icons.local_hospital,
-      'healing': Icons.healing,
-      'health_and_safety': Icons.health_and_safety,
-      'monitor_heart': Icons.monitor_heart,
-      'medication': Icons.medication,
-      'medical_services': Icons.medical_services,
-      // Body & Wellness
-      'body': Icons.accessibility_new,
-      'brain': Icons.psychology,
-      'heart': Icons.favorite,
-      'lungs': Icons.air,
-      'stomach': Icons.restaurant,
-      'bones': Icons.accessibility,
-      'skin': Icons.face,
-      'eye': Icons.visibility,
-      'ear': Icons.hearing,
-      'sleep': Icons.bedtime,
-      'energy': Icons.bolt,
-      'stress': Icons.sentiment_dissatisfied,
-      'anxiety': Icons.psychology,
-      'depression': Icons.mood_bad,
-      'pain': Icons.healing,
-      'immune': Icons.shield,
-      'digestion': Icons.restaurant_menu,
-      'weight': Icons.monitor_weight,
-      'hormone': Icons.science,
-      'fertility': Icons.child_friendly,
-      'pregnancy': Icons.pregnant_woman,
-      'menstrual': Icons.water_drop,
-      'menopause': Icons.thermostat,
-      'prostate': Icons.male,
-      'sexual': Icons.favorite_border,
-      'addiction': Icons.smoke_free,
-      'aging': Icons.elderly,
-      'memory': Icons.lightbulb,
-      'focus': Icons.center_focus_strong,
-      'confidence': Icons.star,
-      'relationships': Icons.people,
-      'work': Icons.work,
-      'money': Icons.attach_money,
-      'success': Icons.emoji_events,
-      'creativity': Icons.palette,
-      'spiritual': Icons.spa,
-    };
-
-    return iconMap[iconName] ?? Icons.category;
   }
 }

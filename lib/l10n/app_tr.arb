@@ -959,6 +959,8 @@
   "adminPremiumReasonTester": "Test Kullanıcısı",
   "adminPremiumReasonEmployee": "Çalışan",
   "adminPremiumReasonInfluencer": "Influencer",
-  "adminPremiumReasonOther": "Diğer"
+  "adminPremiumReasonOther": "Diğer",
+  "ourApproach": "Yaklaşımımız",
+  "currentSession": "Mevcut Seans"
   
 }

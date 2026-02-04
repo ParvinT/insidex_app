@@ -2701,4 +2701,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get adminPremiumReasonOther => 'Другое';
+
+  @override
+  String get ourApproach => 'Наш подход';
+
+  @override
+  String get currentSession => 'Текущая сессия';
 }

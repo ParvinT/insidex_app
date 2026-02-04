@@ -970,6 +970,8 @@
   "adminPremiumReasonTester": "Тестировщик",
   "adminPremiumReasonEmployee": "Сотрудник",
   "adminPremiumReasonInfluencer": "Инфлюенсер",
-  "adminPremiumReasonOther": "Другое"
+  "adminPremiumReasonOther": "Другое",
+  "ourApproach": "Наш подход",
+  "currentSession": "Текущая сессия"
   
 }

@@ -1089,7 +1089,9 @@
   "adminPremiumReasonTester": "Tester",
   "adminPremiumReasonEmployee": "Employee",
   "adminPremiumReasonInfluencer": "Influencer",
-  "adminPremiumReasonOther": "Other"
+  "adminPremiumReasonOther": "Other",
+  "ourApproach": "Our Approach",
+  "currentSession": "Current Session"
 
 
 

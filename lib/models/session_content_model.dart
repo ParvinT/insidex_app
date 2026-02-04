@@ -2,12 +2,10 @@
 
 class SessionContentModel {
   final String title;
-  final String description;
   final IntroductionContent introduction;
 
   SessionContentModel({
     required this.title,
-    required this.description,
     required this.introduction,
   });
 
@@ -15,7 +13,6 @@ class SessionContentModel {
   factory SessionContentModel.fromMap(Map<String, dynamic> map) {
     return SessionContentModel(
       title: map['title'] ?? '',
-      description: map['description'] ?? '',
       introduction: IntroductionContent.fromMap(
         map['introduction'] ?? {},
       ),
@@ -26,42 +23,34 @@ class SessionContentModel {
   Map<String, dynamic> toMap() {
     return {
       'title': title,
-      'description': description,
       'introduction': introduction.toMap(),
     };
   }
 
   // Check if content is empty
-  bool get isEmpty =>
-      title.trim().isEmpty &&
-      description.trim().isEmpty &&
-      introduction.isEmpty;
+  bool get isEmpty => title.trim().isEmpty && introduction.isEmpty;
 }
 
 class IntroductionContent {
-  final String title;
   final String content;
 
   IntroductionContent({
-    required this.title,
     required this.content,
   });
 
   factory IntroductionContent.fromMap(Map<String, dynamic> map) {
     return IntroductionContent(
-      title: map['title'] ?? '',
       content: map['content'] ?? '',
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'title': title,
       'content': content,
     };
   }
 
-  bool get isEmpty => title.trim().isEmpty && content.trim().isEmpty;
+  bool get isEmpty => content.trim().isEmpty;
 }
 
 class MultiLanguageContent {
@@ -128,8 +117,7 @@ class MultiLanguageContent {
         hi ??
         SessionContentModel(
           title: 'Untitled',
-          description: '',
-          introduction: IntroductionContent(title: '', content: ''),
+          introduction: IntroductionContent(content: ''),
         );
   }
 

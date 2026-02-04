@@ -32,68 +32,8 @@ class _AddQuizCategoryScreenState extends State<AddQuizCategoryScreen>
   final Map<String, TextEditingController> _nameControllers = {};
 
   // Fields
-  String _selectedIconName = 'category';
   String _selectedGender = 'both'; // 'male', 'female', 'both'
   bool _isLoading = false;
-
-  // Available icons for selection
-  static const List<Map<String, dynamic>> _availableIcons = [
-    {'name': 'face', 'icon': Icons.face, 'label': 'Face'},
-    {'name': 'person', 'icon': Icons.person, 'label': 'Person'},
-    {'name': 'no_drinks', 'icon': Icons.no_drinks, 'label': 'No Drinks'},
-    {'name': 'child_care', 'icon': Icons.child_care, 'label': 'Child'},
-    {'name': 'psychology', 'icon': Icons.psychology, 'label': 'Psychology'},
-    {'name': 'psychology_alt', 'icon': Icons.psychology_alt, 'label': 'Brain'},
-    {'name': 'restaurant', 'icon': Icons.restaurant, 'label': 'Digestion'},
-    {'name': 'favorite', 'icon': Icons.favorite, 'label': 'Heart'},
-    {
-      'name': 'accessibility_new',
-      'icon': Icons.accessibility_new,
-      'label': 'Body'
-    },
-    {'name': 'air', 'icon': Icons.air, 'label': 'Respiratory'},
-    {'name': 'visibility', 'icon': Icons.visibility, 'label': 'Vision'},
-    {'name': 'mood', 'icon': Icons.mood, 'label': 'Mood'},
-    {'name': 'water_drop', 'icon': Icons.water_drop, 'label': 'Kidneys'},
-    {
-      'name': 'medical_services',
-      'icon': Icons.medical_services,
-      'label': 'Medical'
-    },
-    {
-      'name': 'health_and_safety',
-      'icon': Icons.health_and_safety,
-      'label': 'Health'
-    },
-    {
-      'name': 'fitness_center',
-      'icon': Icons.fitness_center,
-      'label': 'Fitness'
-    },
-    {'name': 'healing', 'icon': Icons.healing, 'label': 'Healing'},
-    {
-      'name': 'local_hospital',
-      'icon': Icons.local_hospital,
-      'label': 'Hospital'
-    },
-    {
-      'name': 'monitor_heart',
-      'icon': Icons.monitor_heart,
-      'label': 'Heart Monitor'
-    },
-    {'name': 'medication', 'icon': Icons.medication, 'label': 'Medication'},
-    {'name': 'vaccines', 'icon': Icons.vaccines, 'label': 'Vaccines'},
-    {'name': 'bloodtype', 'icon': Icons.bloodtype, 'label': 'Blood'},
-    {'name': 'sick', 'icon': Icons.sick, 'label': 'Sick'},
-    {'name': 'elderly', 'icon': Icons.elderly, 'label': 'Elderly'},
-    {
-      'name': 'pregnant_woman',
-      'icon': Icons.pregnant_woman,
-      'label': 'Pregnancy'
-    },
-    {'name': 'male', 'icon': Icons.male, 'label': 'Male'},
-    {'name': 'female', 'icon': Icons.female, 'label': 'Female'},
-  ];
 
   @override
   void initState() {
@@ -118,7 +58,6 @@ class _AddQuizCategoryScreenState extends State<AddQuizCategoryScreen>
   void _loadExistingData() {
     final category = widget.categoryToEdit!;
 
-    _selectedIconName = category.iconName;
     _selectedGender = category.gender;
 
     // Load names
@@ -170,7 +109,6 @@ class _AddQuizCategoryScreenState extends State<AddQuizCategoryScreen>
       // Create category model
       final category = QuizCategoryModel(
         id: widget.categoryToEdit?.id ?? '',
-        iconName: _selectedIconName,
         gender: _selectedGender,
         names: names,
         createdAt: widget.categoryToEdit?.createdAt ?? DateTime.now(),
@@ -277,9 +215,6 @@ class _AddQuizCategoryScreenState extends State<AddQuizCategoryScreen>
               // Icon Selection
               _buildSectionTitle(AppLocalizations.of(context).icon, colors),
               SizedBox(height: 8.h),
-              _buildIconSelector(colors),
-
-              SizedBox(height: 24.h),
 
               // Gender Selection
               _buildSectionTitle(AppLocalizations.of(context).gender, colors),
@@ -308,46 +243,6 @@ class _AddQuizCategoryScreenState extends State<AddQuizCategoryScreen>
         fontSize: 14.sp,
         fontWeight: FontWeight.w600,
         color: colors.textSecondary,
-      ),
-    );
-  }
-
-  Widget _buildIconSelector(AppThemeExtension colors) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: colors.backgroundElevated,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: colors.border.withValues(alpha: 0.3)),
-      ),
-      child: Wrap(
-        spacing: 8.w,
-        runSpacing: 8.h,
-        children: _availableIcons.map((iconData) {
-          final isSelected = _selectedIconName == iconData['name'];
-          return GestureDetector(
-            onTap: () => setState(() => _selectedIconName = iconData['name']),
-            child: Container(
-              width: 48.w,
-              height: 48.w,
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? colors.textPrimary.withValues(alpha: 0.2)
-                    : colors.background,
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(
-                  color: isSelected ? colors.textPrimary : colors.border,
-                  width: isSelected ? 2 : 1,
-                ),
-              ),
-              child: Icon(
-                iconData['icon'],
-                color: isSelected ? colors.textPrimary : colors.textSecondary,
-                size: 24.sp,
-              ),
-            ),
-          );
-        }).toList(),
       ),
     );
   }

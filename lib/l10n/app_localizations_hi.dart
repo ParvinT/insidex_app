@@ -2688,4 +2688,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get adminPremiumReasonOther => 'अन्य';
+
+  @override
+  String get ourApproach => 'हमारा दृष्टिकोण';
+
+  @override
+  String get currentSession => 'वर्तमान सत्र';
 }

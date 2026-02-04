@@ -316,11 +316,8 @@ class DownloadService {
         sessionData,
         language,
       );
-      final title = localizedContent.title;
-      final description = localizedContent.description;
-      final introTitle = localizedContent.introduction.title;
+      final displayTitle = localizedContent.title;
       final introContent = localizedContent.introduction.content;
-      final displayTitle = title;
 
       // 4. Get duration
       final duration = LanguageHelperService.getDuration(
@@ -377,8 +374,6 @@ class DownloadService {
         fileSizeBytes: fileSize,
         title: displayTitle,
         durationSeconds: finalDuration,
-        description: description,
-        introTitle: introTitle,
         introContent: introContent,
       );
 

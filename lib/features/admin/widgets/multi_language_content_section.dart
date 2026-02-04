@@ -180,46 +180,6 @@ class MultiLanguageContentSection extends StatelessWidget {
 
         SizedBox(height: 16.h),
 
-        // Description Field
-        TextField(
-          controller: controllers['description']!,
-          maxLines: 3,
-          decoration: InputDecoration(
-            labelText: '${AppLocalizations.of(context).description} ($lang)',
-            hintText: AppLocalizations.of(context).enterSessionDescription,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: colors.textPrimary, width: 2),
-            ),
-          ),
-          style: GoogleFonts.inter(fontSize: 14.sp),
-        ),
-
-        SizedBox(height: 16.h),
-
-        // Introduction Title
-        TextField(
-          controller: controllers['introTitle']!,
-          decoration: InputDecoration(
-            labelText:
-                '${AppLocalizations.of(context).introductionTitle} ($lang)',
-            hintText: AppLocalizations.of(context).aboutThisSession,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              borderSide: BorderSide(color: colors.textPrimary, width: 2),
-            ),
-          ),
-          style: GoogleFonts.inter(fontSize: 16.sp),
-        ),
-
-        SizedBox(height: 16.h),
-
         // Introduction Content
         TextField(
           controller: controllers['introContent']!,

@@ -108,8 +108,6 @@ class DownloadedSession {
     required int fileSizeBytes,
     required String title,
     required int durationSeconds,
-    String? description,
-    String? introTitle,
     String? introContent,
   }) {
     final now = DateTime.now();
@@ -132,8 +130,6 @@ class DownloadedSession {
       categoryId: sessionData['categoryId'] as String?,
       categoryName: sessionData['categoryName'] as String?,
       sessionNumber: sessionData['sessionNumber'] as int?,
-      description: description,
-      introTitle: introTitle,
       introContent: introContent,
     );
   }
@@ -216,8 +212,6 @@ class DownloadedSession {
 
       // Content
       'title': title,
-      'description': description,
-      '_localizedIntroTitle': introTitle ?? 'Introduction',
       '_localizedIntroContent': introContent ?? '',
 
       // Pre-formatted display titles (SKIP formatting in player)
