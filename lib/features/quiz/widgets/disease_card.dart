@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
@@ -63,43 +64,35 @@ class DiseaseCard extends StatelessWidget {
                 width: isSelected ? 2 : 1,
               ),
             ),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth: constraints.maxWidth,
-                      minHeight: isTablet ? 36.h : 32.h,
-                      maxHeight: isTablet ? 52.h : 48.h,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: isTablet ? 36.h : 32.h,
+                  maxHeight: isTablet ? 48.h : 44.h,
+                ),
+                child: Center(
+                  child: AutoSizeText(
+                    diseaseName,
+                    style: GoogleFonts.inter(
+                      fontSize: fontSize,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected
+                          ? colors.textOnPrimary
+                          : (isDisabled
+                              ? colors.textLight
+                              : colors.textPrimary),
+                      height: 1.3,
                     ),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: constraints.maxWidth,
-                        ),
-                        child: Text(
-                          diseaseName,
-                          style: GoogleFonts.inter(
-                            fontSize: fontSize,
-                            fontWeight:
-                                isSelected ? FontWeight.w600 : FontWeight.w500,
-                            color: isSelected
-                                ? colors.textOnPrimary
-                                : (isDisabled
-                                    ? colors.textLight
-                                    : colors.textPrimary),
-                            height: 1.3,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
+                    maxLines: 2,
+                    minFontSize: isTablet ? 10 : 9,
+                    stepGranularity: 0.5,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    wrapWords: true,
                   ),
-                );
-              },
+                ),
+              ),
             ),
           ),
         );

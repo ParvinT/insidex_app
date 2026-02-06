@@ -55,7 +55,7 @@ class _QuizCategoryDiseasesSheetState extends State<QuizCategoryDiseasesSheet> {
   final Set<String> _selectedIds = {};
   bool _isLoading = true;
 
-  static const int _maxSelection = 10;
+  static const int _maxSelection = 30;
 
   @override
   void initState() {

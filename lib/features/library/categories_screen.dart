@@ -724,6 +724,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                         onPressed: _loadMoreSessions,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: colors.textPrimary,
+                          foregroundColor: colors.background,
                           padding: EdgeInsets.symmetric(
                             horizontal: 32.w,
                             vertical: 12.h,
@@ -737,7 +738,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
                           style: GoogleFonts.inter(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
-                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -798,14 +798,17 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip(
-                      'all', '🌐 ${AppLocalizations.of(context).all}', colors),
+                  _buildFilterChip('all', AppLocalizations.of(context).all,
+                      Icons.public, colors),
+                  SizedBox(width: 8.w),
+                  _buildFilterChip('male', AppLocalizations.of(context).male,
+                      Icons.male, colors),
                   SizedBox(width: 8.w),
                   _buildFilterChip(
-                      'male', '♂ ${AppLocalizations.of(context).male}', colors),
-                  SizedBox(width: 8.w),
-                  _buildFilterChip('female',
-                      '♀ ${AppLocalizations.of(context).female}', colors),
+                      'female',
+                      AppLocalizations.of(context).female,
+                      Icons.female,
+                      colors),
                 ],
               ),
             ),
@@ -816,7 +819,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   }
 
   Widget _buildFilterChip(
-      String value, String label, AppThemeExtension colors) {
+      String value, String label, IconData? icon, AppThemeExtension colors) {
     final isSelected = _selectedGenderFilter == value;
     return GestureDetector(
       onTap: () {
@@ -826,7 +829,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         }
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isSelected ? colors.textPrimary : colors.greyLight,
           borderRadius: BorderRadius.circular(24.r),
@@ -834,13 +837,28 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             color: isSelected ? colors.textPrimary : colors.border,
           ),
         ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 13.sp,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? colors.textOnPrimary : colors.textSecondary,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 16.sp,
+                color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+              ),
+              SizedBox(width: 4.w),
+            ],
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: isSelected ? colors.textOnPrimary : colors.textSecondary,
+                height: 1.0,
+              ),
+            ),
+          ],
         ),
       ),
     );

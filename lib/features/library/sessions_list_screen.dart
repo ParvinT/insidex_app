@@ -503,6 +503,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                   onPressed: _loadMoreAllSessions,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.textPrimary,
+                    foregroundColor: colors.background,
                     padding:
                         EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
@@ -514,7 +515,6 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),
@@ -594,6 +594,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                   onPressed: _loadMoreCategorySessions,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.textPrimary,
+                    foregroundColor: colors.background,
                     padding:
                         EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
                     shape: RoundedRectangleBorder(
@@ -605,7 +606,6 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                     style: GoogleFonts.inter(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: colors.textOnPrimary,
                     ),
                   ),
                 ),

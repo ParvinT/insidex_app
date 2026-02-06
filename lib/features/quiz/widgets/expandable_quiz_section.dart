@@ -54,7 +54,7 @@ class _ExpandableQuizSectionState extends State<ExpandableQuizSection>
 
   // Selection state
   final Set<String> _selectedDiseaseIds = {};
-  static const int _maxSelection = 10;
+  static const int _maxSelection = 30;
   bool _hasAnimatedGender = false;
 
   @override
