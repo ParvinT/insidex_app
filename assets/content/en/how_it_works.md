@@ -10,8 +10,8 @@ You select the conditions that affect you physically or emotionally. Each select
 **2. Root Cause Analysis**
 Our system reveals the subconscious patterns and emotional roots behind each condition you select. Most physical ailments stem from unnoticed emotional blocks.
 
-**3. Your Personal Subliminal Program**
-Subliminal audio programs specially prepared for you are recommended. These programs are matched to target exactly your subconscious patterns.
+**3. Your Personal HypnoTrack Program**
+HypnoTrack audio programs specially prepared for you are recommended. These programs are matched to target exactly your subconscious patterns.
 
 ## WHY IS IT SO EFFECTIVE?
 

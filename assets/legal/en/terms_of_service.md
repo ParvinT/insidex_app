@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Effective Date:** September 11, 2025
+**Effective Date:** February 6, 2026
 
 **ALZHAMI LTD**  
 Company Number: 16545604  
@@ -75,7 +75,7 @@ For iOS: Managed through Apple ID.
 
 **THE SERVICES ARE PROVIDED "AS IS" WITHOUT WARRANTIES.**
 
-The App's subliminal audio is for self-improvement only. It does NOT:
+The App's HypnoTrack audio is for self-improvement only. It does NOT:
 - Diagnose, treat, or cure any condition
 - Replace medical or psychological advice
 - Substitute for professional care

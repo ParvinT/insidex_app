@@ -1,6 +1,6 @@
 # Gizlilik Politikası
 
-**Yürürlük Tarihi:** 11 Eylül 2025
+**Yürürlük Tarihi:** 6 Şubat 2026
 
 **Veri Sorumlusu:**  
 ALZHAMI LTD  
@@ -13,7 +13,7 @@ ALZHAMI LTD ("biz", "bizim" veya "bize") gizliliğinize saygı duyar ve kişisel
 
 ## 1. Topladığımız Bilgiler
 
-Kişiselleştirilmiş bilinçaltı ses önerileri sunmak ve Uygulamayı geliştirmek için bilgi topluyoruz.
+Kişiselleştirilmiş Hipnotrek ses önerileri sunmak ve Uygulamayı geliştirmek için bilgi topluyoruz.
 
 ### Kişisel Bilgiler:
 
@@ -55,7 +55,7 @@ Kişiselleştirilmiş bilinçaltı ses önerileri sunmak ve Uygulamayı gelişti
 
 ### Hizmet Sunumu:
 
-- Bilinçaltı ses seanslarına erişim sağlama
+- Hipnotrek ses seanslarına erişim sağlama
 - İlerlemenizi ve dinleme geçmişinizi takip etme
 - Favorilerinizi ve çalma listelerinizi koruma
 - Günlük seans limitlerini uygulama (ücretsiz kullanıcılar için günde 3 seans)

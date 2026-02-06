@@ -108,7 +108,7 @@ const welcomeTemplates = {
     </div>
     <div class="content">
       <h1 class="title">Welcome to InsideX</h1>
-      <p class="text">Hello ${userName}, your account has been created successfully. Start your journey with subliminal audio sessions designed to transform your wellbeing.</p>
+      <p class="text">Hello ${userName}, your account has been created successfully. Start your journey with HypnoTrack audio sessions designed to transform your wellbeing.</p>
       <div class="divider"></div>
       <p class="signature">Best regards,<br><strong>The InsideX Team</strong></p>
     </div>
@@ -140,7 +140,7 @@ const welcomeTemplates = {
     </div>
     <div class="content">
       <h1 class="title">InsideX'e hoş geldiniz</h1>
-      <p class="text">Merhaba ${userName}, hesabınız başarıyla oluşturuldu. Yaşamınızı dönüştürmek için tasarlanmış bilinçaltı ses seanslarıyla yolculuğunuza başlayın.</p>
+      <p class="text">Merhaba ${userName}, hesabınız başarıyla oluşturuldu. Yaşamınızı dönüştürmek için tasarlanmış Hipnotrek ses seanslarıyla yolculuğunuza başlayın.</p>
       <div class="divider"></div>
       <p class="signature">Saygılarımızla,<br><strong>InsideX Ekibi</strong></p>
     </div>
@@ -172,7 +172,7 @@ const welcomeTemplates = {
     </div>
     <div class="content">
       <h1 class="title">Добро пожаловать в InsideX</h1>
-      <p class="text">Здравствуйте ${userName}, ваш аккаунт успешно создан. Начните свой путь с сублиминальных аудиосеансов, созданных для улучшения вашего самочувствия.</p>
+      <p class="text">Здравствуйте ${userName}, ваш аккаунт успешно создан. Начните свой путь с аудиосессий Гипнотрек, созданных для улучшения вашего самочувствия.</p>
       <div class="divider"></div>
       <p class="signature">С уважением,<br><strong>Команда InsideX</strong></p>
     </div>
@@ -204,7 +204,7 @@ const welcomeTemplates = {
     </div>
     <div class="content">
       <h1 class="title">InsideX में आपका स्वागत है</h1>
-      <p class="text">नमस्ते ${userName}, आपका खाता सफलतापूर्वक बनाया गया है। अपनी भलाई को बदलने के लिए डिज़ाइन किए गए सबलिमिनल ऑडियो सत्रों के साथ अपनी यात्रा शुरू करें।</p>
+      <p class="text">नमस्ते ${userName}, आपका खाता सफलतापूर्वक बनाया गया है। अपनी भलाई को बदलने के लिए डिज़ाइन किए गए हिप्नोट्रैक ऑडियो सत्रों के साथ अपनी यात्रा शुरू करें।</p>
       <div class="divider"></div>
       <p class="signature">सादर,<br><strong>InsideX टीम</strong></p>
     </div>

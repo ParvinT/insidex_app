@@ -20,6 +20,6 @@ void main() {
     );
 
     // Verify that splash screen is shown
-    expect(find.text('Sound Healing & Subliminal'), findsOneWidget);
+    expect(find.text('Sound Healing & HypnoTracks'), findsOneWidget);
   });
 }

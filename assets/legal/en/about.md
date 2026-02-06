@@ -4,7 +4,7 @@
 
 ## Next-Generation Wellness
 
-InsideX is a next-generation wellness app that combines subliminal programming, neuroscience, and sound therapy to help you restore balance, confidence, and vitality in daily life.
+InsideX is a next-generation wellness app that combines HypnoTrack programming, neuroscience, and sound therapy to help you restore balance, confidence, and vitality in daily life.
 
 ## What We Offer
 
@@ -16,7 +16,7 @@ InsideX is not just about healing — it's about reconnecting with yourself on a
 
 ## Types of Sessions
 
-We provide various types of subliminals:
+We provide various types of HypnoTracks:
 
 - Relaxing tracks for deep rest and emotional reset
 - Active tracks for workouts, driving, and high-focus tasks
@@ -42,4 +42,4 @@ This app uses animations and icons from [LottieFiles](https://lottiefiles.com) u
 
 **Made with ❤️ in Istanbul**
 
-© 2025 InsideX. All rights reserved.
+© 2026 InsideX. All rights reserved.

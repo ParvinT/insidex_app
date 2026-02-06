@@ -12,7 +12,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appName => 'InsideX';
 
   @override
-  String get appTagline => 'Sound Healing & Subliminal';
+  String get appTagline => 'Sound Healing & HypnoTrack';
 
   @override
   String get settings => 'Settings';
@@ -102,7 +102,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profile => 'Profile';
 
   @override
-  String get allSubliminals => 'All Subliminals';
+  String get allSubliminals => 'All HypnoTracks';
 
   @override
   String get yourPlaylist => 'Your Playlist';
@@ -329,7 +329,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journey => 'Journey';
 
   @override
-  String get subliminals => 'subliminals';
+  String get subliminals => 'HypnoTracks';
 
   @override
   String get personalInformation => 'Personal Information';
@@ -786,7 +786,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get createYourPersonalProfile =>
-      'Create your personal profile\nto get custom subliminal sessions';
+      'Create your personal profile\nto get custom HypnoTrack sessions';
 
   @override
   String get emailPassword => 'Email + Password';
@@ -1070,7 +1070,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get introduction => 'Introduction';
 
   @override
-  String get subliminalSession => 'Subliminal Session';
+  String get subliminalSession => 'HypnoTrack Session';
 
   @override
   String get noIntroductionAvailable => 'No introduction available';
@@ -1085,7 +1085,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToPlayAudio => 'Failed to play audio';
 
   @override
-  String get subliminal => 'Subliminal';
+  String get subliminal => 'HypnoTrack';
 
   @override
   String get sessionDetails => 'Session Details';
@@ -1611,7 +1611,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get audioFiles => 'Audio Files';
 
   @override
-  String get subliminalAudio => 'Subliminal Audio';
+  String get subliminalAudio => 'HypnoTrack Audio';
 
   @override
   String get backgroundImages => 'Background Images';
@@ -1974,11 +1974,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownDisease => 'Unknown Disease';
 
   @override
-  String get browseAllSubliminals => 'Browse all available subliminal sessions';
+  String get browseAllSubliminals => 'Browse all available HypnoTrack sessions';
 
   @override
   String get yourPersonalizedCollection =>
-      'Your personalized subliminal collection';
+      'Your personalized HypnoTrack collection';
 
   @override
   String get deletingSessionAndFiles => 'Deleting session and files...';

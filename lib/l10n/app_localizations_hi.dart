@@ -12,7 +12,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get appName => 'InsideX';
 
   @override
-  String get appTagline => 'ध्वनि उपचार और अवचेतन';
+  String get appTagline => 'ध्वनि उपचार & हिप्नोट्रैक';
 
   @override
   String get settings => 'सेटिंग्स';
@@ -103,7 +103,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get profile => 'प्रोफ़ाइल';
 
   @override
-  String get allSubliminals => 'सभी सबलिमिनल';
+  String get allSubliminals => 'सभी हिप्नोट्रैक';
 
   @override
   String get yourPlaylist => 'आपकी प्लेलिस्ट';
@@ -333,7 +333,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get journey => 'यात्रा';
 
   @override
-  String get subliminals => 'सबलिमिनल';
+  String get subliminals => 'हिप्नोट्रैक';
 
   @override
   String get personalInformation => 'व्यक्तिगत जानकारी';
@@ -785,7 +785,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get createYourPersonalProfile =>
-      'अपनी व्यक्तिगत प्रोफ़ाइल बनाएं\nकस्टम सबलिमिनल सत्र प्राप्त करने के लिए';
+      'अपनी व्यक्तिगत प्रोफ़ाइल बनाएं\nकस्टम हिप्नोट्रैक सत्र पाने के लिए';
 
   @override
   String get emailPassword => 'ईमेल + पासवर्ड';
@@ -1067,7 +1067,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get introduction => 'परिचय';
 
   @override
-  String get subliminalSession => 'सबलिमिनल सत्र';
+  String get subliminalSession => 'हिप्नोट्रैक सत्र';
 
   @override
   String get noIntroductionAvailable => 'परिचय उपलब्ध नहीं है';
@@ -1082,7 +1082,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get failedToPlayAudio => 'ऑडियो चलाने में विफल';
 
   @override
-  String get subliminal => 'सबलिमिनल';
+  String get subliminal => 'हिप्नोट्रैक';
 
   @override
   String get sessionDetails => 'सत्र विवरण';
@@ -1613,7 +1613,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get audioFiles => 'ऑडियो फ़ाइलें';
 
   @override
-  String get subliminalAudio => 'सबलिमिनल ऑडियो';
+  String get subliminalAudio => 'हिप्नोट्रैक ऑडियो';
 
   @override
   String get backgroundImages => 'पृष्ठभूमि छवियां';
@@ -1976,10 +1976,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get unknownDisease => 'अज्ञात बीमारी';
 
   @override
-  String get browseAllSubliminals => 'सभी उपलब्ध सबलिमिनल सत्र ब्राउज़ करें';
+  String get browseAllSubliminals => 'सभी उपलब्ध हिप्नोट्रैक सत्र देखें';
 
   @override
-  String get yourPersonalizedCollection => 'आपका व्यक्तिगत सबलिमिनल संग्रह';
+  String get yourPersonalizedCollection => 'आपका व्यक्तिगत हिप्नोट्रैक संग्रह';
 
   @override
   String get deletingSessionAndFiles => 'सत्र और फ़ाइलें हटाई जा रही हैं...';

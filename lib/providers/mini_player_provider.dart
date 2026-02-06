@@ -24,7 +24,7 @@ class MiniPlayerProvider extends ChangeNotifier {
   Duration _duration = Duration.zero;
   Duration get duration => _duration;
 
-  String _currentTrack = 'intro'; // 'intro' or 'subliminal'
+  String _currentTrack = 'intro'; 
   String get currentTrack => _currentTrack;
 
   // =================== UI STATE ===================
@@ -37,7 +37,7 @@ class MiniPlayerProvider extends ChangeNotifier {
   bool _isDragging = false;
   bool get isDragging => _isDragging;
 
-  double _dragOffset = 0.0; // 0.0 = collapsed at bottom, 1.0 = full screen
+  double _dragOffset = 0.0; 
   double get dragOffset => _dragOffset;
 
   // =================== STREAM SUBSCRIPTIONS ===================

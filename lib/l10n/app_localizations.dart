@@ -111,7 +111,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTagline.
   ///
   /// In en, this message translates to:
-  /// **'Sound Healing & Subliminal'**
+  /// **'Sound Healing & HypnoTrack'**
   String get appTagline;
 
   /// No description provided for @settings.
@@ -291,7 +291,7 @@ abstract class AppLocalizations {
   /// No description provided for @allSubliminals.
   ///
   /// In en, this message translates to:
-  /// **'All Subliminals'**
+  /// **'All HypnoTracks'**
   String get allSubliminals;
 
   /// No description provided for @yourPlaylist.
@@ -735,7 +735,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminals.
   ///
   /// In en, this message translates to:
-  /// **'subliminals'**
+  /// **'HypnoTracks'**
   String get subliminals;
 
   /// No description provided for @personalInformation.
@@ -1629,7 +1629,7 @@ abstract class AppLocalizations {
   /// No description provided for @createYourPersonalProfile.
   ///
   /// In en, this message translates to:
-  /// **'Create your personal profile\nto get custom subliminal sessions'**
+  /// **'Create your personal profile\nto get custom HypnoTrack sessions'**
   String get createYourPersonalProfile;
 
   /// No description provided for @emailPassword.
@@ -2163,7 +2163,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminalSession.
   ///
   /// In en, this message translates to:
-  /// **'Subliminal Session'**
+  /// **'HypnoTrack Session'**
   String get subliminalSession;
 
   /// No description provided for @noIntroductionAvailable.
@@ -2193,7 +2193,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminal.
   ///
   /// In en, this message translates to:
-  /// **'Subliminal'**
+  /// **'HypnoTrack'**
   String get subliminal;
 
   /// No description provided for @sessionDetails.
@@ -3171,7 +3171,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminalAudio.
   ///
   /// In en, this message translates to:
-  /// **'Subliminal Audio'**
+  /// **'HypnoTrack Audio'**
   String get subliminalAudio;
 
   /// No description provided for @backgroundImages.
@@ -3849,13 +3849,13 @@ abstract class AppLocalizations {
   /// No description provided for @browseAllSubliminals.
   ///
   /// In en, this message translates to:
-  /// **'Browse all available subliminal sessions'**
+  /// **'Browse all available HypnoTrack sessions'**
   String get browseAllSubliminals;
 
   /// No description provided for @yourPersonalizedCollection.
   ///
   /// In en, this message translates to:
-  /// **'Your personalized subliminal collection'**
+  /// **'Your personalized HypnoTrack collection'**
   String get yourPersonalizedCollection;
 
   /// No description provided for @deletingSessionAndFiles.
