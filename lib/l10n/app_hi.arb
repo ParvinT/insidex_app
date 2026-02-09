@@ -916,5 +916,9 @@
   "adminPremiumReasonInfluencer": "इन्फ्लुएंसर",
   "adminPremiumReasonOther": "अन्य",
   "ourApproach": "हमारा दृष्टिकोण",
-  "currentSession": "वर्तमान सत्र"
+  "currentSession": "वर्तमान सत्र",
+  "sessionNotAssigned": "⚠️ सत्र निर्धारित नहीं",
+  "hasSession": "✅ सत्र है",
+  "noSession": "⚠️ सत्र नहीं",
+  "statsSessionStatus": "सत्र है: {hasCount} | सत्र नहीं: {noCount}"
 }

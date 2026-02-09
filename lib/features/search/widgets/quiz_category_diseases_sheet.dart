@@ -84,8 +84,7 @@ class _QuizCategoryDiseasesSheetState extends State<QuizCategoryDiseasesSheet> {
       final availability = <String, bool>{};
       for (final disease in filtered) {
         final cause = causeMap[disease.id];
-        availability[disease.id] =
-            cause != null && cause.recommendedSessionId.isNotEmpty;
+        availability[disease.id] = cause != null && cause.hasRecommendedSession;
       }
 
       if (mounted) {

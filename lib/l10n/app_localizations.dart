@@ -5159,6 +5159,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Current Session'**
   String get currentSession;
+
+  /// No description provided for @sessionNotAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Session not assigned'**
+  String get sessionNotAssigned;
+
+  /// No description provided for @hasSession.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Has Session'**
+  String get hasSession;
+
+  /// No description provided for @noSession.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ No Session'**
+  String get noSession;
+
+  /// No description provided for @statsSessionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Session: {hasCount} | No Session: {noCount}'**
+  String statsSessionStatus(int hasCount, int noCount);
 }
 
 class _AppLocalizationsDelegate

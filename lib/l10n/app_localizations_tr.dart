@@ -2701,4 +2701,18 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get currentSession => 'Mevcut Seans';
+
+  @override
+  String get sessionNotAssigned => '⚠️ Session atanmamış';
+
+  @override
+  String get hasSession => '✅ Session Var';
+
+  @override
+  String get noSession => '⚠️ Session Yok';
+
+  @override
+  String statsSessionStatus(int hasCount, int noCount) {
+    return 'Session Var: $hasCount | Session Yok: $noCount';
+  }
 }

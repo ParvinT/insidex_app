@@ -65,33 +65,22 @@ class DiseaseCard extends StatelessWidget {
               ),
             ),
             child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: isTablet ? 36.h : 32.h,
-                  maxHeight: isTablet ? 48.h : 44.h,
+              child: AutoSizeText(
+                diseaseName,
+                style: GoogleFonts.inter(
+                  fontSize: fontSize,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  color: isSelected
+                      ? colors.textOnPrimary
+                      : (isDisabled ? colors.textLight : colors.textPrimary),
+                  height: 1.2,
                 ),
-                child: Center(
-                  child: AutoSizeText(
-                    diseaseName,
-                    style: GoogleFonts.inter(
-                      fontSize: fontSize,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.w500,
-                      color: isSelected
-                          ? colors.textOnPrimary
-                          : (isDisabled
-                              ? colors.textLight
-                              : colors.textPrimary),
-                      height: 1.3,
-                    ),
-                    maxLines: 2,
-                    minFontSize: isTablet ? 10 : 9,
-                    stepGranularity: 0.5,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    wrapWords: true,
-                  ),
-                ),
+                maxLines: 2,
+                minFontSize: 7,
+                stepGranularity: 0.5,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                wrapWords: true,
               ),
             ),
           ),

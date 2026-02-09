@@ -1091,9 +1091,17 @@
   "adminPremiumReasonInfluencer": "Influencer",
   "adminPremiumReasonOther": "Other",
   "ourApproach": "Our Approach",
-  "currentSession": "Current Session"
-
-
+  "currentSession": "Current Session",
+  "sessionNotAssigned": "⚠️ Session not assigned",
+  "hasSession": "✅ Has Session",
+  "noSession": "⚠️ No Session",
+  "statsSessionStatus": "Has Session: {hasCount} | No Session: {noCount}",
+  "@statsSessionStatus": {
+    "placeholders": {
+      "hasCount": {"type": "int"},
+      "noCount": {"type": "int"}
+    }
+  }
 
 }
 

@@ -321,7 +321,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                   ],
                 ),
               ),
-              if (cause != null) ...[
+              if (cause != null && cause.hasRecommendedSession) ...[
                 SizedBox(height: 16.h),
 
                 // Divider
@@ -399,7 +399,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
 
                 // Recommended session
                 GestureDetector(
-                  onTap: () => _navigateToSession(cause.recommendedSessionId),
+                  onTap: () => _navigateToSession(cause.recommendedSessionId!),
                   child: Container(
                     padding: EdgeInsets.all(
                         (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
@@ -420,7 +420,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                             Expanded(
                               child: FutureBuilder<String>(
                                 future: _getSessionTitle(
-                                    cause.recommendedSessionId,
+                                    cause.recommendedSessionId!,
                                     currentLanguage),
                                 builder: (context, snapshot) {
                                   final sessionTitle = snapshot.data ??

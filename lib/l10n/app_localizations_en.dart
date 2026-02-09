@@ -2691,4 +2691,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get currentSession => 'Current Session';
+
+  @override
+  String get sessionNotAssigned => '⚠️ Session not assigned';
+
+  @override
+  String get hasSession => '✅ Has Session';
+
+  @override
+  String get noSession => '⚠️ No Session';
+
+  @override
+  String statsSessionStatus(int hasCount, int noCount) {
+    return 'Has Session: $hasCount | No Session: $noCount';
+  }
 }

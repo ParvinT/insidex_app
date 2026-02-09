@@ -582,290 +582,290 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           ),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Loading indicator
-                  if (_isLoading) _buildUploadProgress(colors),
+          // 🔒 Fixed loading indicator (always visible at top)
+          if (_isLoading)
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.w, 20.w, 0),
+              child: _buildUploadProgress(colors),
+            ),
 
-                  // Session Number
-                  _buildSectionTitle(
-                      AppLocalizations.of(context).sessionNumber, colors),
-                  SizedBox(height: 12.h),
-                  TextField(
-                    controller: _sessionNumberController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    decoration: InputDecoration(
-                      labelText:
-                          AppLocalizations.of(context).sessionNumberLabel,
-                      hintText: AppLocalizations.of(context).sessionNumberHint,
-                      helperText:
-                          AppLocalizations.of(context).sessionNumberHelper,
-                      errorText: null,
-                      prefixIcon:
-                          Icon(Icons.numbers, color: colors.textPrimary),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide:
-                            BorderSide(color: colors.textPrimary, width: 2),
-                      ),
-                    ),
-                    style: GoogleFonts.inter(fontSize: 16.sp),
-                  ),
-
-                  SizedBox(height: 24.h),
-
-                  // Category Dropdown
-                  _buildSectionTitle(
-                      AppLocalizations.of(context).category, colors),
-                  SizedBox(height: 12.h),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedCategoryId,
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).category,
-                      prefixIcon:
-                          Icon(Icons.category, color: colors.textPrimary),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(
-                          color: colors.textPrimary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    hint:
-                        Text(AppLocalizations.of(context).pleaseSelectCategory),
-                    items: _categories.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category.id,
-                        child: FutureBuilder<String>(
-                          future:
-                              CategoryLocalizationService.getLocalizedNameAuto(
-                                  category),
-                          builder: (context, snapshot) {
-                            final name =
-                                snapshot.data ?? category.getName('en');
-                            return Row(
-                              children: [
-                                SizedBox(
-                                  width: 32.w,
-                                  height: 32.w,
-                                  child: Lottie.asset(
-                                    AppIcons.getAnimationPath(
-                                      AppIcons.getIconByName(
-                                              category.iconName)?['path'] ??
-                                          'meditation.json',
-                                    ),
-                                    fit: BoxFit.contain,
-                                    repeat: true,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Expanded(child: Text(name)),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategoryId = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)
-                            .pleaseSelectCategory;
-                      }
-                      return null;
-                    },
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: _isDemo ? Colors.green.shade50 : colors.greyLight,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: _isDemo ? Colors.green.shade300 : colors.border,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _isDemo ? Icons.lock_open : Icons.lock,
-                          color: _isDemo ? Colors.green : colors.textSecondary,
-                          size: 24.sp,
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context).demoSession,
-                                style: GoogleFonts.inter(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                _isDemo
-                                    ? AppLocalizations.of(context)
-                                        .freeUsersCanPlay
-                                    : AppLocalizations.of(context)
-                                        .onlyPremiumCanPlay,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: colors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: _isDemo,
-                          onChanged: (value) {
-                            setState(() {
-                              _isDemo = value;
-                            });
-                          },
-                          activeThumbColor: Colors.green,
-                        ),
+          // 📜 Scrollable content
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Session Number
+                    _buildSectionTitle(
+                        AppLocalizations.of(context).sessionNumber, colors),
+                    SizedBox(height: 12.h),
+                    TextField(
+                      controller: _sessionNumberController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
                       ],
-                    ),
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  // Gender Selection
-                  _buildSectionTitle(
-                      '👤 ${AppLocalizations.of(context).targetGender}',
-                      colors),
-                  SizedBox(height: 12.h),
-                  _buildGenderSelector(colors),
-
-                  SizedBox(height: 24.h),
-
-                  // Multi-Language Content Section (Widget)
-                  MultiLanguageContentSection(
-                    contentControllers: _contentControllers,
-                    selectedLanguage: _selectedLanguage,
-                    onLanguageChanged: (lang) =>
-                        setState(() => _selectedLanguage = lang),
-                    existingAudioUrls: widget.sessionToEdit?['subliminal']
-                        ?['audioUrls'],
-                    uploadedAudios: _subliminalAudios,
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  // Audio Upload Section
-                  _buildSectionTitle(
-                      '🎵 ${AppLocalizations.of(context).audioFiles}', colors),
-                  SizedBox(height: 12.h),
-                  _buildLanguageTabs(colors),
-                  SizedBox(height: 16.h),
-                  _buildFileUploadCard(
-                    title:
-                        '${AppLocalizations.of(context).subliminalAudio} ($_selectedLanguage)',
-                    subtitle: _subliminalAudios[_selectedLanguage] != null
-                        ? _subliminalAudios[_selectedLanguage]!.name
-                        : AppLocalizations.of(context).noAudioSelected,
-                    icon: Icons.audiotrack,
-                    onTap: () =>
-                        _pickSubliminalAudioForLanguage(_selectedLanguage),
-                    hasFile: _subliminalAudios[_selectedLanguage] != null,
-                    colors: colors,
-                    languageCode: _selectedLanguage,
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  // Image Upload Section
-                  _buildSectionTitle(
-                      '🖼️ ${AppLocalizations.of(context).backgroundImages}',
-                      colors),
-                  SizedBox(height: 12.h),
-                  _buildFileUploadCard(
-                    title:
-                        '${AppLocalizations.of(context).backgroundImage} ($_selectedLanguage)',
-                    subtitle: _backgroundImages[_selectedLanguage] != null
-                        ? _backgroundImages[_selectedLanguage]!.name
-                        : AppLocalizations.of(context).noImageSelected,
-                    icon: Icons.image,
-                    onTap: () =>
-                        _pickBackgroundImageForLanguage(_selectedLanguage),
-                    hasFile: _backgroundImages[_selectedLanguage] != null,
-                    colors: colors,
-                    languageCode: _selectedLanguage,
-                  ),
-
-                  SizedBox(height: 40.h),
-
-                  // Save Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56.h,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _saveSession,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.textPrimary,
-                        foregroundColor: colors.textOnPrimary,
-                        shape: RoundedRectangleBorder(
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context).sessionNumberLabel,
+                        hintText:
+                            AppLocalizations.of(context).sessionNumberHint,
+                        helperText:
+                            AppLocalizations.of(context).sessionNumberHelper,
+                        errorText: null,
+                        prefixIcon:
+                            Icon(Icons.numbers, color: colors.textPrimary),
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide:
+                              BorderSide(color: colors.textPrimary, width: 2),
+                        ),
                       ),
-                      child: Text(
-                        widget.sessionToEdit != null
-                            ? AppLocalizations.of(context).updateSession
-                            : AppLocalizations.of(context).createSession,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textOnPrimary,
+                      style: GoogleFonts.inter(fontSize: 16.sp),
+                    ),
+
+                    SizedBox(height: 24.h),
+
+                    // Category Dropdown
+                    _buildSectionTitle(
+                        AppLocalizations.of(context).category, colors),
+                    SizedBox(height: 12.h),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedCategoryId,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context).category,
+                        prefixIcon:
+                            Icon(Icons.category, color: colors.textPrimary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(
+                            color: colors.textPrimary,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      hint: Text(
+                          AppLocalizations.of(context).pleaseSelectCategory),
+                      items: _categories.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category.id,
+                          child: FutureBuilder<String>(
+                            future: CategoryLocalizationService
+                                .getLocalizedNameAuto(category),
+                            builder: (context, snapshot) {
+                              final name =
+                                  snapshot.data ?? category.getName('en');
+                              return Row(
+                                children: [
+                                  SizedBox(
+                                    width: 32.w,
+                                    height: 32.w,
+                                    child: Lottie.asset(
+                                      AppIcons.getAnimationPath(
+                                        AppIcons.getIconByName(
+                                                category.iconName)?['path'] ??
+                                            'meditation.json',
+                                      ),
+                                      fit: BoxFit.contain,
+                                      repeat: true,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Expanded(child: Text(name)),
+                                ],
+                              );
+                            },
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context)
+                              .pleaseSelectCategory;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color:
+                            _isDemo ? Colors.green.shade50 : colors.greyLight,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color:
+                              _isDemo ? Colors.green.shade300 : colors.border,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isDemo ? Icons.lock_open : Icons.lock,
+                            color:
+                                _isDemo ? Colors.green : colors.textSecondary,
+                            size: 24.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context).demoSession,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  _isDemo
+                                      ? AppLocalizations.of(context)
+                                          .freeUsersCanPlay
+                                      : AppLocalizations.of(context)
+                                          .onlyPremiumCanPlay,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    color: colors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _isDemo,
+                            onChanged: (value) {
+                              setState(() {
+                                _isDemo = value;
+                              });
+                            },
+                            activeThumbColor: Colors.green,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    // Gender Selection
+                    _buildSectionTitle(
+                        '👤 ${AppLocalizations.of(context).targetGender}',
+                        colors),
+                    SizedBox(height: 12.h),
+                    _buildGenderSelector(colors),
+
+                    SizedBox(height: 24.h),
+
+                    // Multi-Language Content Section (Widget)
+                    MultiLanguageContentSection(
+                      contentControllers: _contentControllers,
+                      selectedLanguage: _selectedLanguage,
+                      onLanguageChanged: (lang) =>
+                          setState(() => _selectedLanguage = lang),
+                      existingAudioUrls: widget.sessionToEdit?['subliminal']
+                          ?['audioUrls'],
+                      uploadedAudios: _subliminalAudios,
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    // Audio Upload Section
+                    _buildSectionTitle(
+                        '🎵 ${AppLocalizations.of(context).audioFiles}',
+                        colors),
+                    SizedBox(height: 12.h),
+                    _buildLanguageTabs(colors),
+                    SizedBox(height: 16.h),
+                    _buildFileUploadCard(
+                      title:
+                          '${AppLocalizations.of(context).subliminalAudio} ($_selectedLanguage)',
+                      subtitle: _subliminalAudios[_selectedLanguage] != null
+                          ? _subliminalAudios[_selectedLanguage]!.name
+                          : AppLocalizations.of(context).noAudioSelected,
+                      icon: Icons.audiotrack,
+                      onTap: () =>
+                          _pickSubliminalAudioForLanguage(_selectedLanguage),
+                      hasFile: _subliminalAudios[_selectedLanguage] != null,
+                      colors: colors,
+                      languageCode: _selectedLanguage,
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    // Image Upload Section
+                    _buildSectionTitle(
+                        '🖼️ ${AppLocalizations.of(context).backgroundImages}',
+                        colors),
+                    SizedBox(height: 12.h),
+                    _buildFileUploadCard(
+                      title:
+                          '${AppLocalizations.of(context).backgroundImage} ($_selectedLanguage)',
+                      subtitle: _backgroundImages[_selectedLanguage] != null
+                          ? _backgroundImages[_selectedLanguage]!.name
+                          : AppLocalizations.of(context).noImageSelected,
+                      icon: Icons.image,
+                      onTap: () =>
+                          _pickBackgroundImageForLanguage(_selectedLanguage),
+                      hasFile: _backgroundImages[_selectedLanguage] != null,
+                      colors: colors,
+                      languageCode: _selectedLanguage,
+                    ),
+
+                    SizedBox(height: 40.h),
+
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56.h,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveSession,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.textPrimary,
+                          foregroundColor: colors.textOnPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          widget.sessionToEdit != null
+                              ? AppLocalizations.of(context).updateSession
+                              : AppLocalizations.of(context).createSession,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textOnPrimary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  SizedBox(height: 40.h),
-                ],
-              ),
-            ),
-          ),
-
-          // Loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: colors.textPrimary,
+                    SizedBox(height: 40.h),
+                  ],
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

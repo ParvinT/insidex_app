@@ -2694,4 +2694,18 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get currentSession => 'वर्तमान सत्र';
+
+  @override
+  String get sessionNotAssigned => '⚠️ सत्र निर्धारित नहीं';
+
+  @override
+  String get hasSession => '✅ सत्र है';
+
+  @override
+  String get noSession => '⚠️ सत्र नहीं';
+
+  @override
+  String statsSessionStatus(int hasCount, int noCount) {
+    return 'सत्र है: $hasCount | सत्र नहीं: $noCount';
+  }
 }

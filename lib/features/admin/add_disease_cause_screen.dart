@@ -319,16 +319,6 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       return;
     }
 
-    if (_selectedSessionId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseSelectSession),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
     setState(() => _isLoading = true);
 
     try {
@@ -350,7 +340,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
         id: widget.causeToEdit?.id ?? '',
         diseaseId: _selectedDiseaseId!,
         content: content,
-        recommendedSessionId: _selectedSessionId!,
+        recommendedSessionId: _selectedSessionId,
         sessionNumber: _selectedSessionNumber,
         createdAt: widget.causeToEdit?.createdAt ?? DateTime.now(),
       );
@@ -536,7 +526,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       icon: Icons.music_note,
       value: _getSelectedSessionName(),
       onTap: _showSessionPicker,
-      isRequired: true,
+      isRequired: false,
       isEmpty: _selectedSessionId == null,
     );
   }

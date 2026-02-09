@@ -961,6 +961,10 @@
   "adminPremiumReasonInfluencer": "Influencer",
   "adminPremiumReasonOther": "Diğer",
   "ourApproach": "Yaklaşımımız",
-  "currentSession": "Mevcut Seans"
+  "currentSession": "Mevcut Seans",
+  "sessionNotAssigned": "⚠️ Session atanmamış",
+  "hasSession": "✅ Session Var",
+  "noSession": "⚠️ Session Yok",
+  "statsSessionStatus": "Session Var: {hasCount} | Session Yok: {noCount}"
   
 }

@@ -967,6 +967,10 @@
   "adminPremiumReasonInfluencer": "Инфлюенсер",
   "adminPremiumReasonOther": "Другое",
   "ourApproach": "Наш подход",
-  "currentSession": "Текущая сессия"
+  "currentSession": "Текущая сессия",
+  "sessionNotAssigned": "⚠️ Сессия не назначена",
+  "hasSession": "✅ Сессия есть",
+  "noSession": "⚠️ Сессии нет",
+  "statsSessionStatus": "С сессией: {hasCount} | Без сессии: {noCount}"
   
 }

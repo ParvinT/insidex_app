@@ -2709,4 +2709,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get currentSession => 'Текущая сессия';
+
+  @override
+  String get sessionNotAssigned => '⚠️ Сессия не назначена';
+
+  @override
+  String get hasSession => '✅ Сессия есть';
+
+  @override
+  String get noSession => '⚠️ Сессии нет';
+
+  @override
+  String statsSessionStatus(int hasCount, int noCount) {
+    return 'С сессией: $hasCount | Без сессии: $noCount';
+  }
 }

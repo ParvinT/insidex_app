@@ -1,7 +1,7 @@
 name: insidex_app
 description: "InsideX - Sound Healing & HypnoTrack"
 publish_to: "none"
-version: 1.0.0+8
+version: 1.0.0+11
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
