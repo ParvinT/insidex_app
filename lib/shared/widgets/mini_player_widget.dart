@@ -8,9 +8,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:just_audio/just_audio.dart' show PlayerState, ProcessingState;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'auto_marquee_text.dart';
 import '../../app.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../services/audio/audio_player_service.dart';
+import '../../services/language_helper_service.dart';
+import '../../services/download/download_service.dart';
+import '../../services/download/decryption_preloader.dart';
+import '../../services/session_localization_service.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../features/player/audio_player_screen.dart';
@@ -41,6 +48,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   // Drag state
   double _dragOffset = 0.0;
   bool _isDragging = false;
+  bool _isTransitioning = false;
 
   //  Smooth position animation
   late AnimationController _positionController;
@@ -113,13 +121,24 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     _playerStateSub = _audioService.playerState.listen((state) {
       if (!mounted || _miniPlayerProvider == null) return;
 
+      // Ignore events if mini player is not visible
+      if (!_miniPlayerProvider!.isVisible) return;
+
       if (state.processingState == ProcessingState.completed) {
-        debugPrint('🎵 [MiniPlayer] Session completed - auto hiding');
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted && _miniPlayerProvider != null) {
-            _miniPlayerProvider!.dismiss();
-          }
-        });
+        if (_miniPlayerProvider!.hasNext && !_isTransitioning) {
+          debugPrint('🎵 [MiniPlayer] Session completed - auto-playing next');
+          _playNextInMiniPlayer();
+        } else if (!_miniPlayerProvider!.hasNext && !_isTransitioning) {
+          debugPrint(
+              '🎵 [MiniPlayer] Session completed - no next, stopping & dismissing');
+          _isTransitioning = true;
+          _audioService.stop().then((_) {
+            if (mounted && _miniPlayerProvider != null) {
+              _miniPlayerProvider!.dismiss();
+            }
+            _isTransitioning = false;
+          });
+        }
       }
     });
   }
@@ -404,18 +423,15 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
   /// Session title with marquee if too long
   Widget _buildSessionTitle(MiniPlayerProvider miniPlayer) {
-    final title = miniPlayer.sessionTitle;
-
-    return Text(
-      title,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+    return AutoMarqueeText(
+      text: miniPlayer.sessionTitle,
       style: GoogleFonts.inter(
         fontSize: 14.sp,
         fontWeight: FontWeight.w600,
         color: context.colors.textPrimary,
-        decoration: TextDecoration.none, // Remove any underline
+        decoration: TextDecoration.none,
       ),
+      velocity: 25.0,
     );
   }
 
@@ -709,6 +725,188 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     await _audioService.seek(
       newPosition.isNegative ? Duration.zero : newPosition,
     );
+  }
+
+  // =================== AUTO-PLAY ===================
+
+  Future<void> _playNextInMiniPlayer() async {
+    if (_miniPlayerProvider == null || _isTransitioning) return;
+
+    _isTransitioning = true;
+
+    try {
+      final nextSession = _miniPlayerProvider!.playNext();
+      if (nextSession == null) {
+        debugPrint('⏹️ [MiniPlayer] No next session - queue ended');
+        _isTransitioning = false;
+        return;
+      }
+
+      debugPrint('⏭️ [MiniPlayer] Switching to: ${nextSession['title']}');
+
+      final isOffline = nextSession['_isOffline'] == true;
+
+      if (isOffline) {
+        await _playNextOffline(nextSession);
+      } else {
+        await _playNextOnline(nextSession);
+      }
+
+      // Add to recent sessions (only for online)
+      if (!isOffline) {
+        _addToRecentSessions(nextSession);
+      }
+    } catch (e) {
+      debugPrint('❌ [MiniPlayer] Auto-play error: $e');
+    } finally {
+      _isTransitioning = false;
+    }
+  }
+
+  Future<void> _playNextOnline(Map<String, dynamic> nextSession) async {
+    final language = await LanguageHelperService.getCurrentLanguage();
+
+    final localizedContent = SessionLocalizationService.getLocalizedContent(
+      nextSession,
+      language,
+    );
+
+    final audioUrl = LanguageHelperService.getAudioUrl(
+      nextSession['subliminal']?['audioUrls'],
+      language,
+    );
+
+    final imageUrl = LanguageHelperService.getImageUrl(
+      nextSession['backgroundImages'],
+      language,
+    );
+
+    final durationSeconds = LanguageHelperService.getDuration(
+      nextSession['subliminal']?['durations'],
+      language,
+    );
+
+    if (audioUrl.isEmpty) {
+      debugPrint('❌ [MiniPlayer] No audio URL for next session, skipping');
+      if (_miniPlayerProvider!.hasNext) {
+        _isTransitioning = false;
+        _playNextInMiniPlayer();
+        return;
+      }
+      return;
+    }
+
+    final displayTitle = localizedContent.title.isNotEmpty
+        ? localizedContent.title
+        : nextSession['title'] ?? 'InsideX';
+
+    final updatedSession = Map<String, dynamic>.from(nextSession);
+    updatedSession['_localizedTitle'] = displayTitle;
+    updatedSession['_displayTitle'] = displayTitle;
+    updatedSession['_backgroundImageUrl'] = imageUrl;
+    updatedSession['_currentLanguage'] = language;
+
+    _miniPlayerProvider!.playSession(updatedSession);
+
+    await _audioService.stop();
+    await Future.delayed(const Duration(milliseconds: 50));
+    await _audioService.initialize();
+
+    final resolved = await _audioService.playFromUrl(
+      audioUrl,
+      title: displayTitle,
+      artist: 'InsideX',
+      artworkUrl: imageUrl,
+      sessionId: nextSession['id'],
+      duration: durationSeconds > 0 ? Duration(seconds: durationSeconds) : null,
+    );
+
+    if (resolved != null && mounted && _miniPlayerProvider != null) {
+      _miniPlayerProvider!.updateDuration(resolved);
+    }
+
+    debugPrint('✅ [MiniPlayer] Now playing: $displayTitle');
+  }
+
+  Future<void> _playNextOffline(Map<String, dynamic> nextSession) async {
+    final sessionId = nextSession['id'] as String?;
+    final language = nextSession['_downloadedLanguage'] as String? ?? 'en';
+    final displayTitle =
+        nextSession['_displayTitle'] ?? nextSession['title'] ?? 'InsideX';
+    final localImagePath = nextSession['_localImagePath'] as String?;
+
+    if (sessionId == null) {
+      debugPrint('❌ [MiniPlayer] Offline session ID is null, skipping');
+      return;
+    }
+
+    // Try cache first, then decrypt
+    final preloader = DecryptionPreloader();
+    String? decryptedPath = preloader.getCachedPath(sessionId);
+
+    if (decryptedPath == null) {
+      debugPrint('⏳ [MiniPlayer] Decrypting offline session...');
+      final downloadService = DownloadService();
+      decryptedPath = await downloadService.getDecryptedAudioPath(
+        sessionId,
+        language,
+      );
+    }
+
+    if (decryptedPath == null) {
+      debugPrint('❌ [MiniPlayer] Could not decrypt, skipping');
+      if (_miniPlayerProvider!.hasNext) {
+        _isTransitioning = false;
+        _playNextInMiniPlayer();
+        return;
+      }
+      return;
+    }
+
+    // Update provider
+    final updatedSession = Map<String, dynamic>.from(nextSession);
+    updatedSession['_displayTitle'] = displayTitle;
+    _miniPlayerProvider!.playSession(updatedSession);
+
+    // Play
+    await _audioService.stop();
+    await Future.delayed(const Duration(milliseconds: 50));
+    await _audioService.initialize();
+
+    final durationSeconds = nextSession['_offlineDurationSeconds'] as int? ?? 0;
+
+    final resolved = await _audioService.playFromUrl(
+      'file://$decryptedPath',
+      title: displayTitle,
+      artist: 'InsideX',
+      artworkUrl: null,
+      localArtworkPath: localImagePath,
+      sessionId: sessionId,
+      duration: durationSeconds > 0 ? Duration(seconds: durationSeconds) : null,
+    );
+
+    if (resolved != null && mounted && _miniPlayerProvider != null) {
+      _miniPlayerProvider!.updateDuration(resolved);
+    }
+
+    debugPrint('✅ [MiniPlayer] Now playing offline: $displayTitle');
+  }
+
+  void _addToRecentSessions(Map<String, dynamic> session) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && session['id'] != null) {
+      try {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .update({
+          'recentSessionIds': FieldValue.arrayUnion([session['id']]),
+          'lastActiveAt': FieldValue.serverTimestamp(),
+        });
+      } catch (e) {
+        debugPrint('❌ [MiniPlayer] Error adding to recent: $e');
+      }
+    }
   }
 
   void _skipForward() async {

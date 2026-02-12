@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marquee/marquee.dart';
 
 import '../../../l10n/app_localizations.dart';
 import '../../../services/session_localization_service.dart';
 import '../../../services/language_helper_service.dart';
 import '../../../services/markdown_content_service.dart';
 import '../../../core/themes/app_theme_extension.dart';
+import '../../../shared/widgets/auto_marquee_text.dart';
 
 class SessionInfoModal {
   static Future<void> show({
@@ -335,70 +335,25 @@ class _SessionInfoContent extends StatelessWidget {
   }
 
   Widget _buildSessionTitleWithMarquee(BuildContext context) {
-    String rawTitle =
-        session['_displayTitle'] ?? (session['title'] ?? 'Unknown Session');
+    String sessionTitle =
+        (session['_displayTitle'] ?? session['title'] ?? 'Unknown Session')
+            .replaceAll(RegExp(r'<[^>]*>'), '')
+            .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), r'$1')
+            .replaceAll(RegExp(r'__([^_]*)__'), r'$1')
+            .replaceAll(RegExp(r'\*([^\*]*)\*'), r'$1')
+            .replaceAll(RegExp(r'_([^_]*)_'), r'$1')
+            .replaceAll(RegExp(r'<u>([^<]*)</u>'), r'$1')
+            .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), r'$1')
+            .trim();
 
-    String sessionTitle = rawTitle
-        .replaceAll(RegExp(r'<[^>]*>'), '')
-        .replaceAll(RegExp(r'\*\*([^\*]*)\*\*'), r'$1')
-        .replaceAll(RegExp(r'__([^_]*)__'), r'$1')
-        .replaceAll(RegExp(r'\*([^\*]*)\*'), r'$1')
-        .replaceAll(RegExp(r'_([^_]*)_'), r'$1')
-        .replaceAll(RegExp(r'<u>([^<]*)</u>'), r'$1')
-        .replaceAll(RegExp(r'<mark>([^<]*)</mark>'), r'$1')
-        .trim();
-
-    // Text uzunluğunu hesapla (basit kontrol)
-    final textPainter = TextPainter(
-      text: TextSpan(
-        text: sessionTitle,
-        style: GoogleFonts.inter(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: double.infinity);
-
-    final textWidth = textPainter.size.width;
-    final availableWidth = MediaQuery.of(context).size.width * 0.5;
-
-    if (textWidth > availableWidth) {
-      return SizedBox(
-        height: 24.h,
-        child: Marquee(
-          text: sessionTitle,
-          style: GoogleFonts.inter(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w600,
-            color: context.colors.textOnPrimary,
-            decoration: TextDecoration.none,
-          ),
-          scrollAxis: Axis.horizontal,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          blankSpace: 40.0,
-          velocity: 30.0,
-          pauseAfterRound: const Duration(seconds: 1),
-          startPadding: 0.0,
-          accelerationDuration: const Duration(milliseconds: 500),
-          accelerationCurve: Curves.linear,
-          decelerationDuration: const Duration(milliseconds: 500),
-          decelerationCurve: Curves.linear,
-        ),
-      );
-    }
-
-    return Text(
-      sessionTitle,
+    return AutoMarqueeText(
+      text: sessionTitle,
       style: GoogleFonts.inter(
         fontSize: 16.sp,
         fontWeight: FontWeight.w600,
         color: context.colors.textOnPrimary,
         decoration: TextDecoration.none,
       ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }

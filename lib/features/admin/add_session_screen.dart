@@ -809,6 +809,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       hasFile: _subliminalAudios[_selectedLanguage] != null,
                       colors: colors,
                       languageCode: _selectedLanguage,
+                      fileType: 'audio',
                     ),
 
                     SizedBox(height: 32.h),
@@ -830,6 +831,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                       hasFile: _backgroundImages[_selectedLanguage] != null,
                       colors: colors,
                       languageCode: _selectedLanguage,
+                      fileType: 'image',
                     ),
 
                     SizedBox(height: 40.h),
@@ -983,32 +985,42 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     required bool hasFile,
     required AppThemeExtension colors,
     String? languageCode,
+    required String fileType,
   }) {
     String displaySubtitle = subtitle;
     bool hasExistingFile = false;
 
     if (languageCode != null && widget.sessionToEdit != null && !hasFile) {
       // Check for existing audio URL
-      if (title.contains('Audio')) {
+      if (fileType == 'audio') {
         final existingUrl =
             widget.sessionToEdit!['subliminal']?['audioUrls']?[languageCode];
         if (existingUrl != null) {
           hasExistingFile = true;
-          // Extract filename from URL
-          final uri = Uri.parse(existingUrl.toString());
-          final filename = uri.pathSegments.last.split('?').first;
+          // Extract filename from URL (decode Firebase Storage URL)
+          final decodedUrl = Uri.decodeFull(existingUrl.toString());
+          final fullFilename = decodedUrl.split('/').last.split('?').first;
+          // Remove timestamp prefix if exists (e.g., "1707654321_relaxation.mp3" → "relaxation.mp3")
+          final filename = fullFilename.contains('_')
+              ? fullFilename.substring(fullFilename.indexOf('_') + 1)
+              : fullFilename;
           displaySubtitle =
               '✅ ${AppLocalizations.of(context).existing}: $filename';
         }
       }
       // Check for existing image URL
-      else if (title.contains('Image')) {
+      else if (fileType == 'image') {
         final existingUrl =
             widget.sessionToEdit!['backgroundImages']?[languageCode];
         if (existingUrl != null) {
           hasExistingFile = true;
-          final uri = Uri.parse(existingUrl.toString());
-          final filename = uri.pathSegments.last.split('?').first;
+          // Extract filename from URL (decode Firebase Storage URL)
+          final decodedUrl = Uri.decodeFull(existingUrl.toString());
+          final fullFilename = decodedUrl.split('/').last.split('?').first;
+          // Remove timestamp prefix if exists (e.g., "1707654321_background.jpg" → "background.jpg")
+          final filename = fullFilename.contains('_')
+              ? fullFilename.substring(fullFilename.indexOf('_') + 1)
+              : fullFilename;
           displaySubtitle =
               '✅ ${AppLocalizations.of(context).existing}: $filename';
         }

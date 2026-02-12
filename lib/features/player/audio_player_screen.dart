@@ -13,6 +13,7 @@ import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
 import 'widgets/player_album_art.dart';
+import '../../models/play_context.dart';
 import '../../services/listening_tracker_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
@@ -30,7 +31,8 @@ import '../../core/themes/app_theme_extension.dart';
 
 class AudioPlayerScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionData;
-  const AudioPlayerScreen({super.key, this.sessionData});
+  final PlayContext? playContext;
+  const AudioPlayerScreen({super.key, this.sessionData, this.playContext});
 
   @override
   State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
@@ -58,6 +60,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isDecrypting = false;
   bool _isLoadingAudio = false;
   bool _isPlayingTrack = false;
+  bool _isTransitioning = false;
 
   //Audio State
   String _currentLanguage = 'en';
@@ -119,6 +122,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         );
         debugPrint('   New: $newSessionId (offline: $newIsOffline)');
       }
+
+      // Set play context if provided
+      if (widget.playContext != null) {
+        _miniPlayerProvider!.setPlayContext(widget.playContext);
+        debugPrint('🎯 [AudioPlayer] PlayContext set: ${widget.playContext}');
+      }
     }
   }
 
@@ -171,7 +180,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       // Continue with audio initialization
       await _setupStreamListeners();
       miniPlayerProvider.hide();
-      await _initializeAudio();
+      await _restoreStateFromMiniPlayer();
       return;
     }
 
@@ -301,12 +310,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     final isSameSession =
         miniPlayer.currentSession?['id'] == widget.sessionData?['id'];
-
-    if (_isOfflineSession) {
-      debugPrint('📥 [AudioPlayer] Offline session - starting fresh');
-      await _initializeAudio();
-      return;
-    }
 
     if (!isSameSession) {
       debugPrint('🆕 Different session, starting fresh');
@@ -450,6 +453,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         if (_isLooping) {
           _audioService.seek(Duration.zero);
           _audioService.play();
+        } else if (_miniPlayerProvider?.hasNext == true && !_isTransitioning) {
+          debugPrint('⏭️ [AudioPlayer] Auto-playing next session...');
+          _playNextSession();
         }
       }
     });
@@ -460,7 +466,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       setState(() => _sleepTimerMinutes = m);
       if (m == null && hadTimer) {
         setState(() => _isLooping = false);
-        debugPrint('🔁 [Timer] Timer ended - loop disabled');
+        _miniPlayerProvider?.setPlayContext(null);
+        debugPrint('🔁 [Timer] Timer ended - loop & auto-play disabled');
 
         if (_isTracking) {
           ListeningTrackerService.endSession();
@@ -734,6 +741,53 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     await _audioService.seek(
       newPos < total ? newPos : total - const Duration(milliseconds: 500),
     );
+  }
+
+  // =================== AUTO-PLAY ===================
+
+  Future<void> _playNextSession() async {
+    if (_miniPlayerProvider == null || _isTransitioning) return;
+
+    _isTransitioning = true;
+
+    final nextSession = _miniPlayerProvider!.playNext();
+    if (nextSession == null) {
+      debugPrint('⏹️ [AudioPlayer] No next session - queue ended');
+      return;
+    }
+
+    debugPrint('⏭️ [AudioPlayer] Switching to: ${nextSession['title']}');
+
+    // Reset state for new session
+    setState(() {
+      _session = Map<String, dynamic>.from(nextSession);
+      _currentPosition = Duration.zero;
+      _totalDuration = Duration.zero;
+      _isPlaying = false;
+      _hasAddedToRecent = false;
+      _isPlayingTrack = false;
+      _audioUrl = null;
+      _backgroundImageUrl = null;
+      _isFavorite = false;
+      _isInPlaylist = false;
+    });
+
+    // End current tracking session
+    if (_isTracking) {
+      await ListeningTrackerService.endSession();
+      _isTracking = false;
+    }
+
+    // Load URLs, title, and image for new session
+    await _loadLanguageAndUrls();
+
+    // Check favorite/playlist status for new session
+    _checkFavoriteStatus();
+    _checkPlaylistStatus();
+    _addToRecentSessions();
+
+    await _initializeAudio();
+    _isTransitioning = false;
   }
 
   // =================== LIFECYCLE OBSERVER ===================

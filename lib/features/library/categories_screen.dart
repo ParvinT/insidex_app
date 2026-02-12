@@ -18,6 +18,7 @@ import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
 import '../../models/category_model.dart';
+import '../../models/play_context.dart';
 import '../../services/category/category_service.dart';
 import '../../services/category/category_localization_service.dart';
 import '../../services/language_helper_service.dart';
@@ -748,7 +749,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
               // Session item
               final session = _allSessions[index];
-              return _buildSessionItem(context, session);
+              return _buildSessionItem(context, session, index);
             },
           ),
         ),
@@ -756,8 +757,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     );
   }
 
-  Widget _buildSessionItem(BuildContext context, Map<String, dynamic> session) {
-    // Add session ID if not present
+  Widget _buildSessionItem(
+      BuildContext context, Map<String, dynamic> session, int index) {
     if (!session.containsKey('id')) {
       final sessionDoc = _firestore.collection('sessions').doc();
       session['id'] = sessionDoc.id;
@@ -766,12 +767,19 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     return SessionCard(
       session: session,
       onTap: () {
-        // Navigate to Audio Player
+        final playContext = PlayContext(
+          type: PlayContextType.allSessions,
+          sourceTitle: AppLocalizations.of(context).allSessions,
+          sessionList: _allSessions,
+          currentIndex: index,
+        );
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => AudioPlayerScreen(
               sessionData: session,
+              playContext: playContext,
             ),
           ),
         );

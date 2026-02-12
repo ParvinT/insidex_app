@@ -11,6 +11,9 @@ import '../../core/constants/app_info.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/subscription_provider.dart';
 import '../../features/subscription/paywall_screen.dart';
+import '../../providers/user_provider.dart';
+import '../../features/downloads/downloads_screen.dart';
+import '../../features/profile/progress_screen.dart';
 import 'upgrade_prompt.dart';
 
 class MenuOverlay extends StatefulWidget {
@@ -195,6 +198,49 @@ class _MenuOverlayState extends State<MenuOverlay>
                               ),
 
                               _buildMenuItem(
+                                icon: Icons.download_rounded,
+                                title: AppLocalizations.of(context).downloads,
+                                onTap: () => _closeMenuAndNavigate(() {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              const DownloadsScreen()));
+                                }),
+                              ),
+
+                              _buildMenuItem(
+                                icon: Icons.bar_chart_rounded,
+                                title:
+                                    AppLocalizations.of(context).yourProgress,
+                                onTap: () => _closeMenuAndNavigate(() {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              const ProgressScreen()));
+                                }),
+                              ),
+
+                              _buildMenuItem(
+                                icon: Icons.insights_outlined,
+                                title: AppLocalizations.of(context).myInsights,
+                                onTap: () => _closeMenuAndNavigate(() {
+                                  Navigator.pushNamed(
+                                      context, AppRoutes.myInsights);
+                                }),
+                              ),
+
+// Divider
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24.w, vertical: 8.h),
+                                child: Divider(
+                                    color: colors.border.withValues(alpha: 0.5),
+                                    height: 1),
+                              ),
+
+                              _buildMenuItem(
                                 icon: Icons.person_outline,
                                 title: AppLocalizations.of(context).profile,
                                 onTap: () => _closeMenuAndNavigate(() {
@@ -209,9 +255,40 @@ class _MenuOverlayState extends State<MenuOverlay>
                                       context, AppRoutes.settings);
                                 }),
                               ),
-                            ],
+
+                              // Admin Dashboard (only visible to admins)
+                              Consumer<UserProvider>(
+                                builder: (context, userProvider, _) {
+                                  if (!userProvider.isAdmin) {
+                                    return const SizedBox.shrink();
+                                  }
+                                  return Column(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 24.w, vertical: 8.h),
+                                        child: Divider(
+                                            color: colors.border
+                                                .withValues(alpha: 0.5),
+                                            height: 1),
+                                      ),
+                                      _buildMenuItem(
+                                        icon: Icons.admin_panel_settings,
+                                        title: AppLocalizations.of(context)
+                                            .adminDashboard,
+                                        iconColor: Colors.red,
+                                        onTap: () => _closeMenuAndNavigate(() {
+                                          Navigator.pushNamed(context,
+                                              AppRoutes.adminDashboard);
+                                        }),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ),
+                            ], // ← ListView children kapanışı
                           ),
-                        ),
+                        ), // ← Expanded kapanışı
 
                         // Bottom section
                         Divider(
@@ -282,15 +359,19 @@ class _MenuOverlayState extends State<MenuOverlay>
               size: 24.sp,
             ),
             SizedBox(width: 16.w),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w500,
-                color: iconColor ?? colors.textPrimary,
+            Expanded(
+              child: Text(
+                title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: iconColor ?? colors.textPrimary,
+                ),
               ),
             ),
-            const Spacer(),
+            SizedBox(width: 8.w),
             Icon(
               Icons.chevron_right,
               color: colors.textSecondary,

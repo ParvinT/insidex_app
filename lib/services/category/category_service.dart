@@ -20,6 +20,7 @@ class CategoryService {
   List<CategoryModel>? _cachedCategories;
   DateTime? _cacheTime;
   static const _cacheDuration = Duration(minutes: 5);
+  Map<String, String> _randomImageCache = {};
 
   /// Get all categories
   Future<List<CategoryModel>> getAllCategories({
@@ -199,6 +200,7 @@ class CategoryService {
   void _clearCache() {
     _cachedCategories = null;
     _cacheTime = null;
+    _randomImageCache = {};
   }
 
   /// Force refresh cache
@@ -208,17 +210,25 @@ class CategoryService {
 
   /// Get random background image for a category
   /// Returns null if category has no images
+  /// Uses session-level cache: same image until app restart or cache clear
   String? getRandomBackgroundImage(CategoryModel category) {
     if (category.backgroundImages.isEmpty) {
       debugPrint('⚠️ No background images for category: ${category.id}');
       return null;
     }
 
+    // Return cached random image if available
+    if (_randomImageCache.containsKey(category.id)) {
+      return _randomImageCache[category.id];
+    }
+
+    // Select random and cache for this session
     final index = _random.nextInt(category.backgroundImages.length);
     final selectedImage = category.backgroundImages[index];
+    _randomImageCache[category.id] = selectedImage;
 
     debugPrint(
-        '🎲 Random image for ${category.id}: Image ${index + 1}/${category.backgroundImages.length}');
+        '🎲 Random image for ${category.id}: Image ${index + 1}/${category.backgroundImages.length} (cached)');
     return selectedImage;
   }
 

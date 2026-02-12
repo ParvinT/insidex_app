@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:lottie/lottie.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
@@ -368,7 +369,7 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                     // Metadata
                     Row(
                       children: [
-                        // Session count
+                        // Session count - Real-time from Firestore
                         Icon(
                           Icons.play_circle_filled,
                           size: isTablet ? 18.sp : 16.sp,
@@ -376,13 +377,22 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                         ),
                         SizedBox(width: 4.w),
                         Flexible(
-                          child: Text(
-                            '${category.sessionCount} ${AppLocalizations.of(context).sessions}',
-                            style: GoogleFonts.inter(
-                              fontSize: isTablet ? 14.sp : 12.sp,
-                              color: colors.textSecondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                          child: StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('sessions')
+                                .where('categoryId', isEqualTo: category.id)
+                                .snapshots(),
+                            builder: (context, snapshot) {
+                              final count = snapshot.data?.docs.length ?? 0;
+                              return Text(
+                                '$count ${AppLocalizations.of(context).sessions}',
+                                style: GoogleFonts.inter(
+                                  fontSize: isTablet ? 14.sp : 12.sp,
+                                  color: colors.textSecondary,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              );
+                            },
                           ),
                         ),
                       ],

@@ -10,6 +10,7 @@ import 'dart:io';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../models/downloaded_session.dart';
+import '../../models/play_context.dart';
 import '../../providers/download_provider.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../providers/subscription_provider.dart';
@@ -273,6 +274,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           provider,
           isTablet,
           index == downloads.length - 1,
+          index,
         );
       },
     );
@@ -283,6 +285,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     DownloadProvider provider,
     bool isTablet,
     bool isLast,
+    int index,
   ) {
     final colors = context.colors;
     final double imageSize = isTablet ? 80.w : 70.w;
@@ -295,7 +298,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _playDownload(download),
+          onTap: () => _playDownload(download, index),
           borderRadius: BorderRadius.circular(borderRadius),
           child: Container(
             padding: EdgeInsets.all(12.w),
@@ -521,7 +524,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     }
   }
 
-  Future<void> _playDownload(DownloadedSession download) async {
+  Future<void> _playDownload(DownloadedSession download, int index) async {
     // ✅ CHECK SUBSCRIPTION - Can user play offline content?
     final subscriptionProvider = context.read<SubscriptionProvider>();
 
@@ -572,11 +575,24 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
     if (!mounted) return;
 
+    final downloadProvider = context.read<DownloadProvider>();
+    final sessionList =
+        downloadProvider.downloads.map((d) => d.toPlayerSessionData()).toList();
+
+    final playContext = PlayContext(
+      type: PlayContextType.playlist,
+      sourceTitle: AppLocalizations.of(context).downloads,
+      sessionList: sessionList,
+      currentIndex: index,
+    );
+
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            AudioPlayerScreen(sessionData: download.toPlayerSessionData()),
+        builder: (_) => AudioPlayerScreen(
+          sessionData: download.toPlayerSessionData(),
+          playContext: playContext,
+        ),
       ),
     );
   }

@@ -1,12 +1,12 @@
 // lib/features/library/session_list_screen.dart
 
 import 'package:flutter/material.dart';
-import 'package:marquee/marquee.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
+import '../../models/play_context.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../shared/widgets/session_card.dart';
 import '../player/audio_player_screen.dart';
@@ -14,6 +14,7 @@ import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
 import '../../core/constants/app_icons.dart';
+import '../../shared/widgets/auto_marquee_text.dart';
 
 class SessionsListScreen extends StatefulWidget {
   final String categoryTitle;
@@ -389,42 +390,14 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                                     ),
                                   SizedBox(width: 6.w),
                                   Flexible(
-                                    child: rightTitleText.length > 15
-                                        ? SizedBox(
-                                            height: 24.h,
-                                            child: Marquee(
-                                              text: rightTitleText,
-                                              style: GoogleFonts.inter(
-                                                fontSize:
-                                                    (16.sp).clamp(14.0, 18.0),
-                                                fontWeight: FontWeight.w700,
-                                                color: colors.textPrimary,
-                                              ),
-                                              scrollAxis: Axis.horizontal,
-                                              blankSpace: 40.0,
-                                              velocity: 30.0,
-                                              pauseAfterRound:
-                                                  const Duration(seconds: 2),
-                                              startPadding: 0,
-                                              accelerationDuration:
-                                                  const Duration(seconds: 1),
-                                              decelerationDuration:
-                                                  const Duration(
-                                                      milliseconds: 500),
-                                            ),
-                                          )
-                                        : Text(
-                                            rightTitleText,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.inter(
-                                              fontSize:
-                                                  (16.sp).clamp(14.0, 18.0),
-                                              fontWeight: FontWeight.w700,
-                                              color: colors.textPrimary,
-                                            ),
-                                          ),
+                                    child: AutoMarqueeText(
+                                      text: rightTitleText,
+                                      style: GoogleFonts.inter(
+                                        fontSize: (16.sp).clamp(14.0, 18.0),
+                                        fontWeight: FontWeight.w700,
+                                        color: colors.textPrimary,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -528,6 +501,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         return _buildSessionCard(
           sessionId: session['id'],
           sessionData: session,
+          index: index,
         );
       },
     );
@@ -619,6 +593,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         return _buildSessionCard(
           sessionId: session['id'],
           sessionData: session,
+          index: index,
         );
       },
     );
@@ -627,21 +602,31 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
   Widget _buildSessionCard({
     required String sessionId,
     required Map<String, dynamic> sessionData,
+    required int index,
   }) {
-    // Yeni SessionCard widget'ını kullan
     return SessionCard(
       session: sessionData,
       onTap: () {
-        // Prepare complete session data with ID
         final completeSessionData = Map<String, dynamic>.from(sessionData);
         completeSessionData['id'] = sessionId;
 
-        // Navigate to audio player
+        final playContext = PlayContext(
+          type: widget.isShowingAllSessions
+              ? PlayContextType.allSessions
+              : PlayContextType.category,
+          sourceId: widget.categoryId,
+          sourceTitle: widget.categoryTitle,
+          sessionList:
+              widget.isShowingAllSessions ? _allSessions : _categorySessions,
+          currentIndex: index,
+        );
+
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => AudioPlayerScreen(
               sessionData: completeSessionData,
+              playContext: playContext,
             ),
           ),
         );

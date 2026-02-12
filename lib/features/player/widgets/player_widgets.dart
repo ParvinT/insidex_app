@@ -4,10 +4,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marquee/marquee.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/auto_marquee_text.dart';
 
 /// Header with back button, title, and info button
 class PlayerHeader extends StatelessWidget {
@@ -112,36 +112,43 @@ class PlayerSessionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: ScrollingText(
-              text: title,
-              style: GoogleFonts.inter(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = MediaQuery.of(context).size.width >= 600;
+        final horizontalPadding = isTablet ? 60.w : 40.w;
+        final subtitleWidth = isTablet ? 220.w : 180.w;
+        final titleFontSize = isTablet ? 24.sp : 20.sp;
+        final subtitleFontSize = isTablet ? 16.sp : 14.sp;
+
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Column(
+            children: [
+              AutoMarqueeText(
+                text: title,
+                style: GoogleFonts.inter(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                ),
+                alignment: Alignment.center,
               ),
-              maxWidth: MediaQuery.of(context).size.width - 40.w,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          SizedBox(
-            width: 150.w,
-            child: ScrollingText(
-              text: subtitle,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                color: colors.textSecondary,
+              SizedBox(height: 8.h),
+              SizedBox(
+                width: subtitleWidth,
+                child: AutoMarqueeText(
+                  text: subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: subtitleFontSize,
+                    color: colors.textSecondary,
+                  ),
+                  alignment: Alignment.center,
+                ),
               ),
-              maxWidth: 150.w,
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -455,60 +462,6 @@ class PlayerBottomActions extends StatelessWidget {
 
           if (downloadButton != null) downloadButton!,
         ],
-      ),
-    );
-  }
-}
-
-/// Scrolling text widget for long titles
-class ScrollingText extends StatelessWidget {
-  final String text;
-  final TextStyle style;
-  final double maxWidth;
-
-  const ScrollingText({
-    super.key,
-    required this.text,
-    required this.style,
-    required this.maxWidth,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: maxWidth);
-
-    final needsScrolling = textPainter.didExceedMaxLines;
-
-    if (!needsScrolling) {
-      return Text(
-        text,
-        style: style,
-        maxLines: 1,
-        overflow: TextOverflow.visible,
-        textAlign: TextAlign.center,
-      );
-    }
-
-    return SizedBox(
-      width: maxWidth,
-      height: style.fontSize! * 1.5,
-      child: Marquee(
-        text: text,
-        style: style,
-        scrollAxis: Axis.horizontal,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        blankSpace: 40.w,
-        velocity: 30.0,
-        pauseAfterRound: const Duration(seconds: 2),
-        startPadding: 10.w,
-        accelerationDuration: const Duration(milliseconds: 500),
-        accelerationCurve: Curves.easeInOut,
-        decelerationDuration: const Duration(milliseconds: 500),
-        decelerationCurve: Curves.easeInOut,
       ),
     );
   }

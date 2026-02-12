@@ -32,6 +32,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   final AdminSearchService _adminSearchService = AdminSearchService();
+  String _selectedGenderFilter = 'all';
 
   @override
   void initState() {
@@ -271,6 +272,31 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
             ),
           ),
 
+          // Gender Filter Row - Horizontal Scroll
+          Container(
+            height: 44.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            margin: EdgeInsets.only(bottom: 8.h),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildGenderChip(
+                      'all', '⚥ ${AppLocalizations.of(context).all}', colors),
+                  SizedBox(width: 8.w),
+                  _buildGenderChip(
+                      'male', '♂ ${AppLocalizations.of(context).male}', colors),
+                  SizedBox(width: 8.w),
+                  _buildGenderChip('female',
+                      '♀ ${AppLocalizations.of(context).female}', colors),
+                  SizedBox(width: 8.w),
+                  _buildGenderChip('both',
+                      '⚥ ${AppLocalizations.of(context).genderBoth}', colors),
+                ],
+              ),
+            ),
+          ),
+
           // Sessions List
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -325,6 +351,21 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                     sessions,
                     _searchQuery,
                   );
+                }
+
+                // Apply gender filter
+                if (_selectedGenderFilter != 'all') {
+                  sessions = sessions.where((doc) {
+                    final data = doc.data() as Map<String, dynamic>;
+                    final sessionGender = data['gender'] as String? ?? 'both';
+
+                    if (_selectedGenderFilter == 'both') {
+                      return sessionGender == 'both';
+                    }
+                    // Show sessions that match the filter OR are for 'both' genders
+                    return sessionGender == _selectedGenderFilter ||
+                        sessionGender == 'both';
+                  }).toList();
                 }
 
                 // ✅ Client-side sorting when filtering by category
@@ -584,6 +625,34 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildGenderChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGenderFilter == value;
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedGenderFilter = value);
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.textPrimary : colors.greyLight,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected ? colors.textPrimary : colors.border,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 12.sp,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? colors.textOnPrimary : colors.textPrimary,
+          ),
+        ),
+      ),
     );
   }
 }

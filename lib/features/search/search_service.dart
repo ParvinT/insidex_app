@@ -72,7 +72,7 @@ class SearchService {
       // 🆕 TEMPORARY PATCH: Limit to 50 sessions for cost control
       final snapshot = await _firestore
           .collection('sessions')
-          .limit(50) // Max 50 sessions to prevent excessive reads
+          .limit(500) // Max 500 sessions to prevent excessive reads
           .get();
 
       // ✅ LANGUAGE FILTER - Apply FIRST to get only sessions with current language
