@@ -13,12 +13,14 @@ import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
 import 'widgets/player_album_art.dart';
+import 'widgets/up_next_card.dart';
 import '../../models/play_context.dart';
 import '../../services/listening_tracker_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../../providers/auto_play_provider.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../services/download/download_service.dart';
@@ -60,7 +62,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   bool _isDecrypting = false;
   bool _isLoadingAudio = false;
   bool _isPlayingTrack = false;
-  bool _isTransitioning = false;
 
   //Audio State
   String _currentLanguage = 'en';
@@ -453,9 +454,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         if (_isLooping) {
           _audioService.seek(Duration.zero);
           _audioService.play();
-        } else if (_miniPlayerProvider?.hasNext == true && !_isTransitioning) {
-          debugPrint('⏭️ [AudioPlayer] Auto-playing next session...');
-          _playNextSession();
+        } else if (_miniPlayerProvider?.hasNext == true &&
+            !(_miniPlayerProvider?.isAutoPlayTransitioning ?? false)) {
+          final autoPlay = context.read<AutoPlayProvider>();
+          if (autoPlay.isEnabled) {
+            debugPrint('⏭️ [AudioPlayer] Auto-playing next session...');
+            _playNextSession();
+          } else {
+            debugPrint('⏹️ [AudioPlayer] Auto-play disabled - stopping');
+          }
         }
       }
     });
@@ -478,7 +485,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _initializeAudio() async {
-    // ✅ FIX: Prevent multiple simultaneous loads
     if (_isLoadingAudio) {
       debugPrint('⏳ [AudioPlayer] Already loading audio, skipping...');
       return;
@@ -497,6 +503,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     } finally {
       _isLoadingAudio = false;
     }
+    await _setupStreamListeners();
     await _playCurrentTrack();
   }
 
@@ -746,13 +753,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   // =================== AUTO-PLAY ===================
 
   Future<void> _playNextSession() async {
-    if (_miniPlayerProvider == null || _isTransitioning) return;
+    if (_miniPlayerProvider == null ||
+        _miniPlayerProvider!.isAutoPlayTransitioning) return;
 
-    _isTransitioning = true;
+    _miniPlayerProvider!.setAutoPlayTransitioning(true);
 
     final nextSession = _miniPlayerProvider!.playNext();
     if (nextSession == null) {
       debugPrint('⏹️ [AudioPlayer] No next session - queue ended');
+      _miniPlayerProvider!.setAutoPlayTransitioning(false);
       return;
     }
 
@@ -787,7 +796,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _addToRecentSessions();
 
     await _initializeAudio();
-    _isTransitioning = false;
+    _miniPlayerProvider!.setAutoPlayTransitioning(false);
   }
 
   // =================== LIFECYCLE OBSERVER ===================
@@ -940,7 +949,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                               onReplay10: _replay10,
                               onForward10: _forward10,
                             ),
-                            SizedBox(height: 25.h),
+                            SizedBox(height: 16.h),
+                            UpNextCard(
+                              currentLanguage: _currentLanguage,
+                              onTap: () => _playNextSession(),
+                              onSkipNext: () => _playNextSession(),
+                            ),
+                            SizedBox(height: 16.h),
                             PlayerBottomActions(
                               isLooping: _isLooping,
                               isFavorite: _isFavorite,

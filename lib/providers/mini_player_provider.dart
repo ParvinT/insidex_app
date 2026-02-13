@@ -105,6 +105,16 @@ class MiniPlayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // =================== AUTO-PLAY TRANSITION ===================
+
+  bool _isAutoPlayTransitioning = false;
+  bool get isAutoPlayTransitioning => _isAutoPlayTransitioning;
+
+  void setAutoPlayTransitioning(bool value) {
+    _isAutoPlayTransitioning = value;
+    debugPrint('[MiniPlayer] Auto-play transitioning: $value');
+  }
+
   /// Whether there is a next session in the queue
   bool get hasNext => _playContext?.hasNext ?? false;
 
@@ -232,6 +242,7 @@ class MiniPlayerProvider extends ChangeNotifier {
     _position = Duration.zero;
     _duration = Duration.zero;
     _isPlaying = false;
+    _isAutoPlayTransitioning = false;
 
     debugPrint('[MiniPlayer] Dismissed');
     notifyListeners();

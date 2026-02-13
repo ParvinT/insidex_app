@@ -1101,7 +1101,11 @@
       "hasCount": {"type": "int"},
       "noCount": {"type": "int"}
     }
-  }
+  },
+  "upNext": "UP NEXT",
+  "autoPlayOff": "AUTO-PLAY OFF",
+  "autoPlayNextSession": "Auto-play next session",
+  "autoPlayNextSessionSubtitle": "Automatically play the next session when current one ends"
 
 }
 

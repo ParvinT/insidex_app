@@ -2705,4 +2705,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String statsSessionStatus(int hasCount, int noCount) {
     return 'Has Session: $hasCount | No Session: $noCount';
   }
+
+  @override
+  String get upNext => 'UP NEXT';
+
+  @override
+  String get autoPlayOff => 'AUTO-PLAY OFF';
+
+  @override
+  String get autoPlayNextSession => 'Auto-play next session';
+
+  @override
+  String get autoPlayNextSessionSubtitle =>
+      'Automatically play the next session when current one ends';
 }

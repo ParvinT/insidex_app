@@ -2708,4 +2708,17 @@ class AppLocalizationsHi extends AppLocalizations {
   String statsSessionStatus(int hasCount, int noCount) {
     return 'सत्र है: $hasCount | सत्र नहीं: $noCount';
   }
+
+  @override
+  String get upNext => 'अगला';
+
+  @override
+  String get autoPlayOff => 'ऑटो-प्ले बंद';
+
+  @override
+  String get autoPlayNextSession => 'अगला सत्र स्वतः चलाएं';
+
+  @override
+  String get autoPlayNextSessionSubtitle =>
+      'वर्तमान सत्र समाप्त होने पर अगला सत्र स्वतः चलाएं';
 }

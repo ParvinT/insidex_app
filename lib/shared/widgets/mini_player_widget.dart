@@ -13,6 +13,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'auto_marquee_text.dart';
 import '../../app.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/auto_play_provider.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/download/download_service.dart';
@@ -48,7 +49,6 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   // Drag state
   double _dragOffset = 0.0;
   bool _isDragging = false;
-  bool _isTransitioning = false;
 
   //  Smooth position animation
   late AnimationController _positionController;
@@ -125,18 +125,26 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       if (!_miniPlayerProvider!.isVisible) return;
 
       if (state.processingState == ProcessingState.completed) {
-        if (_miniPlayerProvider!.hasNext && !_isTransitioning) {
-          debugPrint('🎵 [MiniPlayer] Session completed - auto-playing next');
-          _playNextInMiniPlayer();
-        } else if (!_miniPlayerProvider!.hasNext && !_isTransitioning) {
+        if (_miniPlayerProvider!.hasNext &&
+            !_miniPlayerProvider!.isAutoPlayTransitioning) {
+          final autoPlay =
+              InsidexApp.navigatorKey.currentContext?.read<AutoPlayProvider>();
+          if (autoPlay?.isEnabled ?? true) {
+            debugPrint('🎵 [MiniPlayer] Session completed - auto-playing next');
+            _playNextInMiniPlayer();
+          } else {
+            debugPrint('⏹️ [MiniPlayer] Auto-play disabled - stopping');
+          }
+        } else if (!_miniPlayerProvider!.hasNext &&
+            !_miniPlayerProvider!.isAutoPlayTransitioning) {
           debugPrint(
               '🎵 [MiniPlayer] Session completed - no next, stopping & dismissing');
-          _isTransitioning = true;
+          _miniPlayerProvider!.setAutoPlayTransitioning(true);
           _audioService.stop().then((_) {
             if (mounted && _miniPlayerProvider != null) {
               _miniPlayerProvider!.dismiss();
             }
-            _isTransitioning = false;
+            _miniPlayerProvider!.setAutoPlayTransitioning(false);
           });
         }
       }
@@ -697,7 +705,10 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     navigatorState.push(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) {
-          return AudioPlayerScreen(sessionData: session);
+          return AudioPlayerScreen(
+            sessionData: session,
+            playContext: _miniPlayerProvider?.playContext,
+          );
         },
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           // Slide up from bottom
@@ -730,15 +741,16 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   // =================== AUTO-PLAY ===================
 
   Future<void> _playNextInMiniPlayer() async {
-    if (_miniPlayerProvider == null || _isTransitioning) return;
+    if (_miniPlayerProvider == null ||
+        _miniPlayerProvider!.isAutoPlayTransitioning) return;
 
-    _isTransitioning = true;
+    _miniPlayerProvider!.setAutoPlayTransitioning(true);
 
     try {
       final nextSession = _miniPlayerProvider!.playNext();
       if (nextSession == null) {
         debugPrint('⏹️ [MiniPlayer] No next session - queue ended');
-        _isTransitioning = false;
+        _miniPlayerProvider!.setAutoPlayTransitioning(false);
         return;
       }
 
@@ -759,7 +771,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     } catch (e) {
       debugPrint('❌ [MiniPlayer] Auto-play error: $e');
     } finally {
-      _isTransitioning = false;
+      _miniPlayerProvider!.setAutoPlayTransitioning(false);
     }
   }
 
@@ -789,7 +801,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     if (audioUrl.isEmpty) {
       debugPrint('❌ [MiniPlayer] No audio URL for next session, skipping');
       if (_miniPlayerProvider!.hasNext) {
-        _isTransitioning = false;
+        _miniPlayerProvider!.setAutoPlayTransitioning(false);
         _playNextInMiniPlayer();
         return;
       }
@@ -811,6 +823,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     await _audioService.stop();
     await Future.delayed(const Duration(milliseconds: 50));
     await _audioService.initialize();
+    _setupStreamListeners();
 
     final resolved = await _audioService.playFromUrl(
       audioUrl,
@@ -856,7 +869,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     if (decryptedPath == null) {
       debugPrint('❌ [MiniPlayer] Could not decrypt, skipping');
       if (_miniPlayerProvider!.hasNext) {
-        _isTransitioning = false;
+        _miniPlayerProvider!.setAutoPlayTransitioning(false);
         _playNextInMiniPlayer();
         return;
       }
@@ -872,6 +885,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     await _audioService.stop();
     await Future.delayed(const Duration(milliseconds: 50));
     await _audioService.initialize();
+    _setupStreamListeners();
 
     final durationSeconds = nextSession['_offlineDurationSeconds'] as int? ?? 0;
 

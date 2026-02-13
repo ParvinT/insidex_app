@@ -1,5 +1,6 @@
 // lib/features/search/search_screen.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -39,6 +40,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   List<String> _recentSearches = [];
   bool _isLoadingHistory = true;
+  Timer? _debounceTimer;
 
   bool _isSearching = false;
   final String _selectedGenderFilter = 'all';
@@ -65,6 +67,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     _tabController.dispose();
     _focusNode.dispose();
@@ -286,7 +289,15 @@ class _SearchScreenState extends State<SearchScreen>
                 contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) {
-                _performSearch(value);
+                _debounceTimer?.cancel();
+                if (value.trim().isEmpty) {
+                  _performSearch('');
+                  return;
+                }
+                _debounceTimer = Timer(
+                  const Duration(milliseconds: 300),
+                  () => _performSearch(value),
+                );
               },
             ),
           ),

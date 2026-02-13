@@ -2715,4 +2715,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String statsSessionStatus(int hasCount, int noCount) {
     return 'Session Var: $hasCount | Session Yok: $noCount';
   }
+
+  @override
+  String get upNext => 'SIRADAKI';
+
+  @override
+  String get autoPlayOff => 'OTO-OYNATMA KAPALI';
+
+  @override
+  String get autoPlayNextSession => 'Sıradakini otomatik oynat';
+
+  @override
+  String get autoPlayNextSessionSubtitle =>
+      'Mevcut oturum bittiğinde sıradakini otomatik olarak çal';
 }

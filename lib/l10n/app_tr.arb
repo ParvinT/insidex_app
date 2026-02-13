@@ -965,6 +965,10 @@
   "sessionNotAssigned": "⚠️ Session atanmamış",
   "hasSession": "✅ Session Var",
   "noSession": "⚠️ Session Yok",
-  "statsSessionStatus": "Session Var: {hasCount} | Session Yok: {noCount}"
+  "statsSessionStatus": "Session Var: {hasCount} | Session Yok: {noCount}",
+  "upNext": "SIRADAKI",
+  "autoPlayOff": "OTO-OYNATMA KAPALI",
+  "autoPlayNextSession": "Sıradakini otomatik oynat",
+  "autoPlayNextSessionSubtitle": "Mevcut oturum bittiğinde sıradakini otomatik olarak çal"
   
 }

@@ -2723,4 +2723,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String statsSessionStatus(int hasCount, int noCount) {
     return 'С сессией: $hasCount | Без сессии: $noCount';
   }
+
+  @override
+  String get upNext => 'ДАЛЕЕ';
+
+  @override
+  String get autoPlayOff => 'АВТОВОСПР. ВЫКЛ.';
+
+  @override
+  String get autoPlayNextSession => 'Автовоспроизведение';
+
+  @override
+  String get autoPlayNextSessionSubtitle =>
+      'Автоматически воспроизводить следующий сеанс';
 }

@@ -971,6 +971,10 @@
   "sessionNotAssigned": "⚠️ Сессия не назначена",
   "hasSession": "✅ Сессия есть",
   "noSession": "⚠️ Сессии нет",
-  "statsSessionStatus": "С сессией: {hasCount} | Без сессии: {noCount}"
+  "statsSessionStatus": "С сессией: {hasCount} | Без сессии: {noCount}",
+  "upNext": "ДАЛЕЕ",
+  "autoPlayOff": "АВТОВОСПР. ВЫКЛ.",
+  "autoPlayNextSession": "Автовоспроизведение",
+  "autoPlayNextSessionSubtitle": "Автоматически воспроизводить следующий сеанс"
   
 }

@@ -5183,6 +5183,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Has Session: {hasCount} | No Session: {noCount}'**
   String statsSessionStatus(int hasCount, int noCount);
+
+  /// No description provided for @upNext.
+  ///
+  /// In en, this message translates to:
+  /// **'UP NEXT'**
+  String get upNext;
+
+  /// No description provided for @autoPlayOff.
+  ///
+  /// In en, this message translates to:
+  /// **'AUTO-PLAY OFF'**
+  String get autoPlayOff;
+
+  /// No description provided for @autoPlayNextSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-play next session'**
+  String get autoPlayNextSession;
+
+  /// No description provided for @autoPlayNextSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically play the next session when current one ends'**
+  String get autoPlayNextSessionSubtitle;
 }
 
 class _AppLocalizationsDelegate

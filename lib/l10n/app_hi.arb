@@ -920,5 +920,9 @@
   "sessionNotAssigned": "⚠️ सत्र निर्धारित नहीं",
   "hasSession": "✅ सत्र है",
   "noSession": "⚠️ सत्र नहीं",
-  "statsSessionStatus": "सत्र है: {hasCount} | सत्र नहीं: {noCount}"
+  "statsSessionStatus": "सत्र है: {hasCount} | सत्र नहीं: {noCount}",
+  "upNext": "अगला",
+  "autoPlayOff": "ऑटो-प्ले बंद",
+  "autoPlayNextSession": "अगला सत्र स्वतः चलाएं",
+  "autoPlayNextSessionSubtitle": "वर्तमान सत्र समाप्त होने पर अगला सत्र स्वतः चलाएं"
 }
