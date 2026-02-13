@@ -49,6 +49,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   // Drag state
   double _dragOffset = 0.0;
   bool _isDragging = false;
+  bool _lastKnownVisibility = false;
 
   //  Smooth position animation
   late AnimationController _positionController;
@@ -88,7 +89,42 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
     if (_miniPlayerProvider == null) {
       _miniPlayerProvider = context.read<MiniPlayerProvider>();
+      _miniPlayerProvider!.addListener(_onProviderChanged);
       _setupStreamListeners();
+    }
+  }
+
+  void _onProviderChanged() {
+    final isVisible = _miniPlayerProvider?.isVisible ?? false;
+    if (isVisible && !_lastKnownVisibility) {
+      debugPrint('🔄 [MiniPlayer] Became visible - re-subscribing streams');
+      _setupStreamListeners();
+      // Check for any already-completed state we might have missed
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _checkForPendingCompletion();
+      });
+    }
+    _lastKnownVisibility = isVisible;
+  }
+
+  Future<void> _checkForPendingCompletion() async {
+    try {
+      final state = await _audioService.playerState.first;
+      if (state.processingState == ProcessingState.completed &&
+          _miniPlayerProvider != null &&
+          _miniPlayerProvider!.isVisible &&
+          _miniPlayerProvider!.hasNext &&
+          !_miniPlayerProvider!.isAutoPlayTransitioning) {
+        final autoPlay =
+            InsidexApp.navigatorKey.currentContext?.read<AutoPlayProvider>();
+        if (autoPlay?.isEnabled ?? true) {
+          debugPrint(
+              '🎵 [MiniPlayer] Found pending completion - auto-playing next');
+          _playNextInMiniPlayer();
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ [MiniPlayer] Pending completion check failed: $e');
     }
   }
 
@@ -153,6 +189,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
   @override
   void dispose() {
+    _miniPlayerProvider?.removeListener(_onProviderChanged);
     _playingSub?.cancel();
     _positionSub?.cancel();
     _durationSub?.cancel();

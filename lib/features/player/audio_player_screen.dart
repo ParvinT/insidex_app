@@ -126,7 +126,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
       // Set play context if provided
       if (widget.playContext != null) {
-        _miniPlayerProvider!.setPlayContext(widget.playContext);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _miniPlayerProvider?.setPlayContext(widget.playContext);
+        });
         debugPrint('🎯 [AudioPlayer] PlayContext set: ${widget.playContext}');
       }
     }
@@ -450,7 +452,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
     _playerStateSub = _audioService.playerState.listen((state) {
       if (!mounted) return;
+      debugPrint(
+          '🔔 [AudioPlayer] PlayerState: processing=${state.processingState}, playing=${state.playing}');
       if (state.processingState == ProcessingState.completed) {
+        debugPrint('✅ [AudioPlayer] COMPLETED detected!');
+        debugPrint('   isLooping: $_isLooping');
+        debugPrint('   hasNext: ${_miniPlayerProvider?.hasNext}');
+        debugPrint(
+            '   isTransitioning: ${_miniPlayerProvider?.isAutoPlayTransitioning}');
+        debugPrint(
+            '   autoPlayEnabled: ${context.read<AutoPlayProvider>().isEnabled}');
         if (_isLooping) {
           _audioService.seek(Duration.zero);
           _audioService.play();
@@ -790,6 +801,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     // Load URLs, title, and image for new session
     await _loadLanguageAndUrls();
 
+    // Sync localized data back to provider
+    _miniPlayerProvider!.updateSession(_session);
+
     // Check favorite/playlist status for new session
     _checkFavoriteStatus();
     _checkPlaylistStatus();
@@ -850,7 +864,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
         debugPrint('🔙 [AudioPlayer] PopScope triggered');
 
-        // ✅ Show mini player FIRST (non-blocking)
+        // Clear transitioning flag so mini player can handle completions
+        _miniPlayerProvider?.setAutoPlayTransitioning(false);
+
+        // Show mini player with synced session data
         if (_accessGranted && _miniPlayerProvider != null) {
           debugPrint(
               '🎵 [AudioPlayer] Showing mini player with session: ${_session['title']}');
@@ -867,7 +884,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           debugPrint('❌ Mini player provider is null');
         }
 
-        // ✅ End tracking in background (non-blocking)
+        // End tracking in background (non-blocking)
         if (_isTracking) {
           ListeningTrackerService.endSession().then((_) {
             debugPrint('Session tracking ended on back press');

@@ -172,6 +172,8 @@ class _SearchScreenState extends State<SearchScreen>
       _quizSearchService.searchAll(query),
     ]);
 
+    if (_searchController.text != query) return;
+
     // 🆕 Apply gender filter to sessions
     final searchResults = results[0];
     final sessions = searchResults['sessions'] as List<Map<String, dynamic>>;
