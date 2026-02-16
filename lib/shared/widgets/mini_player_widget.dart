@@ -19,6 +19,7 @@ import '../../services/language_helper_service.dart';
 import '../../services/download/download_service.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../../services/session_localization_service.dart';
+import '../../services/audio/audio_handler.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../features/player/audio_player_screen.dart';
@@ -129,6 +130,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
   }
 
   void _setupStreamListeners() {
+    // Bind notification skip controls to mini player actions
+    audioHandler.onSkipToNext = () => _playNextInMiniPlayer();
+    audioHandler.onSkipToPrevious = () => _playPreviousInMiniPlayer();
     // Cancel existing subscriptions
     _playingSub?.cancel();
     _positionSub?.cancel();
@@ -261,16 +265,10 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     bool isTablet,
   ) {
     final colors = context.colors;
-    // Calculate height based on expand state
-    final double collapsedHeight = baseHeight + 20.h;
-    final double expandedHeight = baseHeight + 48.h + 20.h;
-    final double currentHeight =
-        miniPlayer.isExpanded ? expandedHeight : collapsedHeight;
+    final double fixedHeight = baseHeight + 20.h;
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeInOut,
-      height: currentHeight, // Animated height
+    return Container(
+      height: fixedHeight, // Animated height
       margin: EdgeInsets.only(
         left: isTablet ? 16.w : 8.w,
         right: isTablet ? 16.w : 8.w,
@@ -323,56 +321,37 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
                         ),
                       ),
 
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 4.w),
+
+                      // Previous track button
+                      _buildMiniTrackButton(
+                        icon: Icons.skip_previous_rounded,
+                        enabled: miniPlayer.hasPrevious,
+                        onTap: () => _playPreviousInMiniPlayer(),
+                      ),
+
+                      SizedBox(width: 4.w),
 
                       // Play/Pause button
                       _buildPlayPauseButton(miniPlayer),
 
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 4.w),
 
-                      // Close button
-                      _buildCloseButton(miniPlayer),
+                      // Next track button
+                      _buildMiniTrackButton(
+                        icon: Icons.skip_next_rounded,
+                        enabled: miniPlayer.hasNext,
+                        onTap: () => _playNextInMiniPlayer(),
+                      ),
 
                       SizedBox(width: 4.w),
 
-                      // Expand/Collapse button
-                      _buildExpandButton(miniPlayer),
+                      // Close button
+                      _buildCloseButton(miniPlayer),
                     ],
                   ),
                 ),
               ),
-
-              // Expanded controls (skip buttons) - shown when expanded
-              if (miniPlayer.isExpanded)
-                AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: _isDragging && _dragOffset > 0
-                      ? (1.0 - (_dragOffset / 200.0)).clamp(0.0, 1.0)
-                      : 1.0,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: 12.w,
-                      right: 12.w,
-                      bottom: 8.h,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Skip backward button
-                        _buildSkipButton(
-                          icon: Icons.replay_10,
-                          onTap: () => _skipBackward(),
-                        ),
-                        SizedBox(width: 24.w),
-                        // Skip forward button
-                        _buildSkipButton(
-                          icon: Icons.forward_10,
-                          onTap: () => _skipForward(),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
 
               // Progress bar
               _buildProgressBar(miniPlayer),
@@ -480,24 +459,33 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     );
   }
 
-  /// Skip button (forward/backward)
-  Widget _buildSkipButton({
+  /// Previous/Next track button for mini player
+  Widget _buildMiniTrackButton({
     required IconData icon,
+    required bool enabled,
     required VoidCallback onTap,
   }) {
+    final isTablet = context.isTablet;
+    final size = isTablet ? 36.w : 32.w;
+    final iconSize = isTablet ? 20.sp : 18.sp;
+
     return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32.w,
-        height: 32.w,
-        decoration: BoxDecoration(
-          color: context.colors.greyMedium,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          size: 18.sp,
-          color: context.colors.textPrimary,
+      onTap: enabled ? onTap : null,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: enabled ? 1.0 : 0.3,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: context.colors.greyLight,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            size: iconSize,
+            color: context.colors.textPrimary,
+          ),
         ),
       ),
     );
@@ -520,30 +508,6 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
           miniPlayer.isPlaying ? Icons.pause : Icons.play_arrow,
           color: context.colors.textOnPrimary,
           size: 20.sp,
-        ),
-      ),
-    );
-  }
-
-  /// Expand button (shows skip controls)
-  Widget _buildExpandButton(MiniPlayerProvider miniPlayer) {
-    return GestureDetector(
-      onTap: () => _toggleExpanded(miniPlayer),
-      child: AnimatedRotation(
-        turns: miniPlayer.isExpanded ? 0.5 : 0.0,
-        duration: const Duration(milliseconds: 200),
-        child: Container(
-          width: 32.w,
-          height: 32.w,
-          decoration: BoxDecoration(
-            color: context.colors.greyLight,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.keyboard_arrow_up,
-            size: 18.sp,
-            color: context.colors.textPrimary,
-          ),
         ),
       ),
     );
@@ -707,10 +671,6 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     }
   }
 
-  void _toggleExpanded(MiniPlayerProvider miniPlayer) {
-    miniPlayer.toggleExpanded();
-  }
-
   void _closeMiniPlayer(MiniPlayerProvider miniPlayer) async {
     // Stop audio and close notification
     await _audioService.stop();
@@ -767,14 +727,6 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     );
   }
 
-  void _skipBackward() async {
-    final currentPosition = await _audioService.position.first;
-    final newPosition = currentPosition - const Duration(seconds: 10);
-    await _audioService.seek(
-      newPosition.isNegative ? Duration.zero : newPosition,
-    );
-  }
-
   // =================== AUTO-PLAY ===================
 
   Future<void> _playNextInMiniPlayer() async {
@@ -810,6 +762,147 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     } finally {
       _miniPlayerProvider!.setAutoPlayTransitioning(false);
     }
+  }
+
+  Future<void> _playPreviousInMiniPlayer() async {
+    if (_miniPlayerProvider == null ||
+        _miniPlayerProvider!.isAutoPlayTransitioning) return;
+
+    _miniPlayerProvider!.setAutoPlayTransitioning(true);
+
+    try {
+      final prevSession = _miniPlayerProvider!.playPrevious();
+      if (prevSession == null) {
+        debugPrint('⏹️ [MiniPlayer] No previous session - at start');
+        return;
+      }
+
+      debugPrint(
+          '⏮️ [MiniPlayer] Switching to previous: ${prevSession['title']}');
+
+      final isOffline = prevSession['_isOffline'] == true;
+
+      if (isOffline) {
+        await _playPrevOffline(prevSession);
+      } else {
+        await _playPrevOnline(prevSession);
+      }
+
+      if (!isOffline) {
+        _addToRecentSessions(prevSession);
+      }
+    } catch (e) {
+      debugPrint('❌ [MiniPlayer] Play previous error: $e');
+    } finally {
+      _miniPlayerProvider!.setAutoPlayTransitioning(false);
+    }
+  }
+
+  Future<void> _playPrevOnline(Map<String, dynamic> prevSession) async {
+    final language = await LanguageHelperService.getCurrentLanguage();
+
+    final localizedContent = SessionLocalizationService.getLocalizedContent(
+      prevSession,
+      language,
+    );
+
+    final audioUrl = LanguageHelperService.getAudioUrl(
+      prevSession['subliminal']?['audioUrls'],
+      language,
+    );
+
+    final imageUrl = LanguageHelperService.getImageUrl(
+      prevSession['backgroundImages'],
+      language,
+    );
+
+    final durationSeconds = LanguageHelperService.getDuration(
+      prevSession['subliminal']?['durations'],
+      language,
+    );
+
+    if (audioUrl.isEmpty) {
+      debugPrint('❌ [MiniPlayer] No audio URL for previous session');
+      if (_miniPlayerProvider!.hasPrevious) {
+        _miniPlayerProvider!.setAutoPlayTransitioning(false);
+        _playPreviousInMiniPlayer();
+        return;
+      }
+      return;
+    }
+
+    final displayTitle = localizedContent.title.isNotEmpty
+        ? localizedContent.title
+        : prevSession['title'] ?? 'InsideX';
+
+    final updatedSession = Map<String, dynamic>.from(prevSession);
+    updatedSession['_localizedTitle'] = displayTitle;
+    updatedSession['_displayTitle'] = displayTitle;
+    updatedSession['_backgroundImageUrl'] = imageUrl;
+    updatedSession['_currentLanguage'] = language;
+
+    _miniPlayerProvider!.playSession(updatedSession);
+
+    await _audioService.stop();
+    await Future.delayed(const Duration(milliseconds: 50));
+    await _audioService.initialize();
+    _setupStreamListeners();
+
+    await _audioService.playFromUrl(
+      audioUrl,
+      title: displayTitle,
+      artist: 'InsideX',
+      artworkUrl: imageUrl,
+      sessionId: prevSession['id'],
+      duration: durationSeconds > 0 ? Duration(seconds: durationSeconds) : null,
+    );
+  }
+
+  Future<void> _playPrevOffline(Map<String, dynamic> prevSession) async {
+    final sessionId = prevSession['id'] as String?;
+    if (sessionId == null) return;
+
+    final downloadService = DownloadService();
+    final language = prevSession['_downloadedLanguage'] as String? ?? 'en';
+
+    final preloader = DecryptionPreloader();
+    String? decryptedPath = preloader.getCachedPath(sessionId);
+
+    if (decryptedPath == null) {
+      decryptedPath = await downloadService.getDecryptedAudioPath(
+        sessionId,
+        language,
+      );
+    }
+
+    if (decryptedPath == null) {
+      debugPrint('❌ [MiniPlayer] Cannot decrypt previous offline session');
+      return;
+    }
+
+    final displayTitle = prevSession['_displayTitle'] ??
+        prevSession['_localizedTitle'] ??
+        prevSession['title'] ??
+        'InsideX';
+
+    final updatedSession = Map<String, dynamic>.from(prevSession);
+    updatedSession['_displayTitle'] = displayTitle;
+    _miniPlayerProvider!.playSession(updatedSession);
+
+    await _audioService.stop();
+    await Future.delayed(const Duration(milliseconds: 50));
+    await _audioService.initialize();
+    _setupStreamListeners();
+
+    final localImagePath = prevSession['_localImagePath'] as String?;
+
+    await _audioService.playFromUrl(
+      'file://$decryptedPath',
+      title: displayTitle,
+      artist: 'InsideX',
+      sessionId: sessionId,
+      localArtworkPath: localImagePath,
+    );
   }
 
   Future<void> _playNextOnline(Map<String, dynamic> nextSession) async {
@@ -957,18 +1050,6 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
       } catch (e) {
         debugPrint('❌ [MiniPlayer] Error adding to recent: $e');
       }
-    }
-  }
-
-  void _skipForward() async {
-    final currentPosition = await _audioService.position.first;
-    final duration = await _audioService.duration.first;
-    final newPosition = currentPosition + const Duration(seconds: 10);
-
-    if (duration != null && newPosition < duration) {
-      await _audioService.seek(newPosition);
-    } else if (duration != null) {
-      await _audioService.seek(duration);
     }
   }
 

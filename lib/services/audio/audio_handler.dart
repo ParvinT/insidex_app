@@ -36,6 +36,10 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
   // Skip duration for forward/rewind
   static const Duration _skipDuration = Duration(seconds: 10);
 
+  // Callbacks for notification skip controls
+  VoidCallback? onSkipToNext;
+  VoidCallback? onSkipToPrevious;
+
   // =================== CONSTRUCTOR ===================
 
   InsideXAudioHandler() {
@@ -87,10 +91,10 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
         return PlaybackState(
           // Available controls shown on lock screen / notification
           controls: [
-            MediaControl.rewind, // -10 seconds
+            MediaControl.skipToPrevious,
             playing ? MediaControl.pause : MediaControl.play,
             MediaControl.stop,
-            MediaControl.fastForward,
+            MediaControl.skipToNext,
           ],
           // Which system actions are enabled
           systemActions: const {
@@ -100,8 +104,8 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
             MediaAction.play,
             MediaAction.pause,
             MediaAction.stop,
-            MediaAction.fastForward,
-            MediaAction.rewind,
+            MediaAction.skipToNext,
+            MediaAction.skipToPrevious,
           },
           // Android notification compact view buttons (indices of controls array)
           androidCompactActionIndices: const [0, 1, 3],
@@ -287,6 +291,22 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     await _player.seek(targetPosition);
     debugPrint(
         '⏮️ [InsideXAudioHandler] Rewind 10s → ${targetPosition.inSeconds}s');
+  }
+
+  @override
+  Future<void> skipToNext() async {
+    debugPrint('⏭️ [InsideXAudioHandler] Skip to next (notification)');
+    if (onSkipToNext != null) {
+      onSkipToNext!();
+    }
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    debugPrint('⏮️ [InsideXAudioHandler] Skip to previous (notification)');
+    if (onSkipToPrevious != null) {
+      onSkipToPrevious!();
+    }
   }
 
   @override

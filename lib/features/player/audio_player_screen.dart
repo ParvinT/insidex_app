@@ -416,6 +416,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   }
 
   Future<void> _setupStreamListeners() async {
+    // Bind notification skip controls to full player actions
+    audioHandler.onSkipToNext = () => _playNextSession();
+    audioHandler.onSkipToPrevious = () => _playPreviousSession();
     // Cancel existing subscriptions first
     await _playingSub?.cancel();
     await _positionSub?.cancel();
@@ -845,6 +848,58 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     }
   }
 
+  Future<void> _playPreviousSession() async {
+    debugPrint('🔵 [PREV-DEBUG] _playPreviousSession CALLED');
+
+    if (_miniPlayerProvider == null ||
+        _miniPlayerProvider!.isAutoPlayTransitioning) {
+      debugPrint('🔴 [PREV-DEBUG] BLOCKED - transitioning or null provider');
+      return;
+    }
+
+    _miniPlayerProvider!.setAutoPlayTransitioning(true);
+
+    try {
+      final prevSession = _miniPlayerProvider!.playPrevious();
+      if (prevSession == null) {
+        debugPrint('⏹️ [PREV-DEBUG] No previous session - at start');
+        return;
+      }
+
+      debugPrint(
+          '⏮️ [AudioPlayer] Switching to previous: ${prevSession['title']}');
+
+      setState(() {
+        _session = Map<String, dynamic>.from(prevSession);
+        _currentPosition = Duration.zero;
+        _totalDuration = Duration.zero;
+        _isPlaying = false;
+        _hasAddedToRecent = false;
+        _isPlayingTrack = false;
+        _audioUrl = null;
+        _backgroundImageUrl = null;
+        _isFavorite = false;
+        _isInPlaylist = false;
+      });
+
+      if (_isTracking) {
+        await ListeningTrackerService.endSession();
+        _isTracking = false;
+      }
+
+      await _loadLanguageAndUrls();
+      _miniPlayerProvider!.updateSession(_session);
+      _checkFavoriteStatus();
+      _checkPlaylistStatus();
+      _addToRecentSessions();
+      await _initializeAudio();
+    } catch (e) {
+      debugPrint('❌ [AudioPlayer] Play previous session error: $e');
+    } finally {
+      _miniPlayerProvider!.setAutoPlayTransitioning(false);
+    }
+  }
+
   // =================== LIFECYCLE OBSERVER ===================
 
   @override
@@ -909,6 +964,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           _miniPlayerProvider!.show();
           debugPrint(
               '✅ [AudioPlayer] Mini player visible: ${_miniPlayerProvider!.isVisible}');
+          // Force re-bind notification callbacks to mini player
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _miniPlayerProvider?.triggerRefresh();
+          });
         } else if (!_accessGranted) {
           debugPrint(
               '🚫 [AudioPlayer] Access not granted - skipping mini player');
@@ -994,15 +1053,18 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
                             SizedBox(height: 30.h),
                             PlayerPlayControls(
                               isPlaying: _isPlaying,
+                              hasPrevious:
+                                  _miniPlayerProvider?.hasPrevious ?? false,
+                              hasNext: _miniPlayerProvider?.hasNext ?? false,
                               onPlayPause: _togglePlayPause,
                               onReplay10: _replay10,
                               onForward10: _forward10,
+                              onPrevious: () => _playPreviousSession(),
+                              onNext: () => _playNextSession(),
                             ),
                             SizedBox(height: 16.h),
                             UpNextCard(
                               currentLanguage: _currentLanguage,
-                              onTap: () => _playNextSession(),
-                              onSkipNext: () => _playNextSession(),
                             ),
                             SizedBox(height: 16.h),
                             PlayerBottomActions(

@@ -20,14 +20,10 @@ import '../../../services/language_helper_service.dart';
 /// Hidden when no next session exists in the queue.
 class UpNextCard extends StatelessWidget {
   final String currentLanguage;
-  final VoidCallback? onTap;
-  final VoidCallback? onSkipNext;
 
   const UpNextCard({
     super.key,
     required this.currentLanguage,
-    this.onTap,
-    this.onSkipNext,
   });
 
   @override
@@ -56,38 +52,32 @@ class UpNextCard extends StatelessWidget {
         horizontal: isTablet ? 50.w : 30.w,
         vertical: 8.h,
       ),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: EdgeInsets.all(isTablet ? 14.w : 12.w),
-          decoration: BoxDecoration(
-            color: colors.backgroundElevated.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(isTablet ? 16.r : 14.r),
-            border: Border.all(
-              color: colors.textPrimary.withValues(alpha: 0.08),
-              width: 1,
-            ),
+      child: Container(
+        padding: EdgeInsets.all(isTablet ? 14.w : 12.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundElevated.withValues(alpha: 0.6),
+          borderRadius: BorderRadius.circular(isTablet ? 16.r : 14.r),
+          border: Border.all(
+            color: colors.textPrimary.withValues(alpha: 0.08),
+            width: 1,
           ),
-          child: Row(
-            children: [
-              // Thumbnail
-              _buildThumbnail(context, nextSession, isTablet),
-              SizedBox(width: isTablet ? 14.w : 10.w),
+        ),
+        child: Row(
+          children: [
+            // Thumbnail
+            _buildThumbnail(context, nextSession, isTablet),
+            SizedBox(width: isTablet ? 14.w : 10.w),
 
-              // Session info
-              Expanded(
-                child: _buildSessionInfo(
-                  context,
-                  nextSession,
-                  miniPlayer,
-                  isTablet,
-                ),
+            // Session info
+            Expanded(
+              child: _buildSessionInfo(
+                context,
+                nextSession,
+                miniPlayer,
+                isTablet,
               ),
-
-              // Skip next button
-              _buildSkipNextButton(context, isTablet),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -232,31 +222,6 @@ class UpNextCard extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-
-  // =================== SKIP NEXT BUTTON ===================
-
-  Widget _buildSkipNextButton(BuildContext context, bool isTablet) {
-    final colors = context.colors;
-    final buttonSize = isTablet ? 36.w : 32.w;
-    final iconSize = isTablet ? 18.sp : 16.sp;
-
-    return GestureDetector(
-      onTap: onSkipNext,
-      child: Container(
-        width: buttonSize,
-        height: buttonSize,
-        decoration: BoxDecoration(
-          color: colors.textPrimary.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          Icons.skip_next_rounded,
-          color: colors.textPrimary,
-          size: iconSize,
-        ),
-      ),
     );
   }
 

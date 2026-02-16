@@ -288,30 +288,60 @@ class PlayerProgressBar extends StatelessWidget {
   }
 }
 
-/// Play/Pause controls with skip buttons
+/// Play/Pause controls with skip and previous/next buttons
 class PlayerPlayControls extends StatelessWidget {
   final bool isPlaying;
+  final bool hasPrevious;
+  final bool hasNext;
   final VoidCallback onPlayPause;
   final VoidCallback onReplay10;
   final VoidCallback onForward10;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
 
   const PlayerPlayControls({
     super.key,
     required this.isPlaying,
+    this.hasPrevious = false,
+    this.hasNext = false,
     required this.onPlayPause,
     required this.onReplay10,
     required this.onForward10,
+    this.onPrevious,
+    this.onNext,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+
+    final double skipTrackSize = isTablet ? 42.w : 36.w;
+    final double skipTrackIconSize = isTablet ? 24.sp : 20.sp;
+    final double skipTimeSize = isTablet ? 50.w : 48.w;
+    final double skipTimeIconSize = isTablet ? 28.sp : 26.sp;
+    final double playPauseSize = isTablet ? 74.w : 70.w;
+    final double playPauseIconSize = isTablet ? 38.sp : 35.sp;
+    final double innerSpacing = isTablet ? 18.w : 14.w;
+    final double outerSpacing = isTablet ? 14.w : 10.w;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Skip backward
+        // Previous track
+        _buildTrackButton(
+          icon: Icons.skip_previous_rounded,
+          enabled: hasPrevious,
+          onTap: onPrevious,
+          size: skipTrackSize,
+          iconSize: skipTrackIconSize,
+        ),
+
+        SizedBox(width: outerSpacing),
+
+        // Rewind 10s
         Container(
-          width: 48.w,
-          height: 48.w,
+          width: skipTimeSize,
+          height: skipTimeSize,
           decoration: BoxDecoration(
             color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
             shape: BoxShape.circle,
@@ -321,21 +351,21 @@ class PlayerPlayControls extends StatelessWidget {
               Icons.replay_10,
               color: AppColors.darkTextPrimary,
             ),
-            iconSize: 26.sp,
+            iconSize: skipTimeIconSize,
             padding: EdgeInsets.zero,
             onPressed: onReplay10,
           ),
         ),
 
-        SizedBox(width: 20.w),
+        SizedBox(width: innerSpacing),
 
         // Play/Pause
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onPlayPause,
           child: Container(
-            width: 70.w,
-            height: 70.w,
+            width: playPauseSize,
+            height: playPauseSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.darkTextPrimary.withValues(alpha: 0.5),
@@ -350,17 +380,17 @@ class PlayerPlayControls extends StatelessWidget {
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
               color: AppColors.darkTextOnLight,
-              size: 35.sp,
+              size: playPauseIconSize,
             ),
           ),
         ),
 
-        SizedBox(width: 20.w),
+        SizedBox(width: innerSpacing),
 
-        // Skip forward
+        // Forward 10s
         Container(
-          width: 48.w,
-          height: 48.w,
+          width: skipTimeSize,
+          height: skipTimeSize,
           decoration: BoxDecoration(
             color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
             shape: BoxShape.circle,
@@ -370,12 +400,52 @@ class PlayerPlayControls extends StatelessWidget {
               Icons.forward_10,
               color: AppColors.darkTextPrimary,
             ),
-            iconSize: 26.sp,
+            iconSize: skipTimeIconSize,
             padding: EdgeInsets.zero,
             onPressed: onForward10,
           ),
         ),
+
+        SizedBox(width: outerSpacing),
+
+        // Next track
+        _buildTrackButton(
+          icon: Icons.skip_next_rounded,
+          enabled: hasNext,
+          onTap: onNext,
+          size: skipTrackSize,
+          iconSize: skipTrackIconSize,
+        ),
       ],
+    );
+  }
+
+  Widget _buildTrackButton({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback? onTap,
+    required double size,
+    required double iconSize,
+  }) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: enabled ? 1.0 : 0.3,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: AppColors.darkBackgroundElevated.withValues(alpha: 0.3),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.darkTextPrimary,
+            size: iconSize,
+          ),
+        ),
+      ),
     );
   }
 }

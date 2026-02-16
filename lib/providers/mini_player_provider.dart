@@ -225,6 +225,11 @@ class MiniPlayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Force refresh to re-trigger listeners (e.g. rebind notification callbacks)
+  void triggerRefresh() {
+    notifyListeners();
+  }
+
   /// Hide mini player
   void hide() {
     _isVisible = false;
