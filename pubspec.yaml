@@ -1,7 +1,7 @@
 name: insidex_app
 description: "InsideX - Sound Healing & HypnoTrack"
 publish_to: "none"
-version: 1.0.0+13
+version: 1.0.0+14
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -14,7 +14,7 @@ dependencies:
 
   # UI & Responsive
   flutter_screenutil: ^5.9.0
-  responsive_framework: ^1.1.1
+  responsive_framework: ^1.1.1w
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.9
   auto_size_text: ^3.0.0

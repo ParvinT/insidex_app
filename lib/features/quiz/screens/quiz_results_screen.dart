@@ -8,13 +8,13 @@ import 'package:lottie/lottie.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
+import '../../../core/routes/player_route.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/disease/disease_cause_service.dart';
 import '../../../services/language_helper_service.dart';
 import '../../../services/session_localization_service.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../player/audio_player_screen.dart';
 
 class QuizResultsScreen extends StatefulWidget {
   final List<DiseaseModel> selectedDiseases;
@@ -645,11 +645,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       if (!mounted) return;
 
       // Navigate to audio player
-      await navigator.push(
-        MaterialPageRoute(
-          builder: (_) => AudioPlayerScreen(sessionData: completeSessionData),
-        ),
-      );
+      await navigator.push(PlayerRoute(sessionData: completeSessionData));
     } catch (e) {
       debugPrint('❌ [QuizResults] Error: $e');
 

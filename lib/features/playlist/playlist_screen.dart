@@ -12,7 +12,7 @@ import 'dart:async';
 import '../../models/play_context.dart';
 import '../../providers/locale_provider.dart';
 import '../../core/themes/app_theme_extension.dart';
-import '../player/audio_player_screen.dart';
+import '../../core/routes/player_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../services/session_filter_service.dart';
@@ -779,15 +779,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       onRemove: onRemove,
       onAddToPlaylist: onAddToPlaylist,
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => AudioPlayerScreen(
-              sessionData: session,
-              playContext: playContext,
-            ),
-          ),
-        );
+        Navigator.push(context,
+            PlayerRoute(sessionData: session, playContext: playContext));
       },
     );
   }
@@ -813,9 +806,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         onRemove: () => _removeFromPlaylist(session['id']),
         onTap: () {
           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AudioPlayerScreen(
+              context,
+              PlayerRoute(
                 sessionData: session,
                 playContext: PlayContext(
                   type: PlayContextType.playlist,
@@ -823,9 +815,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
                   sessionList: _myPlaylistSessions,
                   currentIndex: index,
                 ),
-              ),
-            ),
-          );
+              ));
         },
       ),
     );

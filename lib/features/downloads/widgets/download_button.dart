@@ -65,6 +65,19 @@ class _DownloadButtonState extends State<DownloadButton>
     super.dispose();
   }
 
+  @override
+  void didUpdateWidget(covariant DownloadButton oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Session changed - recheck download status
+    if (oldWidget.session['id'] != widget.session['id']) {
+      _progressSubscription?.cancel();
+      _progressSubscription = null;
+      setState(() => _isChecking = true);
+      _checkDownloadStatus();
+    }
+  }
+
   Future<void> _checkDownloadStatus() async {
     final sessionId = widget.session['id'] as String?;
     if (sessionId == null) {
@@ -75,6 +88,23 @@ class _DownloadButtonState extends State<DownloadButton>
     final provider = context.read<DownloadProvider>();
     final language = context.read<LocaleProvider>().locale.languageCode;
 
+    // Check if currently downloading (active or queued)
+    final isInProgress = provider.isDownloading(sessionId, language) ||
+        provider.isPending(sessionId, language);
+
+    if (isInProgress) {
+      // Already downloading - attach listener
+      if (mounted) {
+        setState(() {
+          _isDownloaded = false;
+          _isChecking = false;
+        });
+        _listenForCompletion(provider, language);
+      }
+      return;
+    }
+
+    // Check if already downloaded
     final isDownloaded = await provider.isDownloaded(sessionId, language);
 
     if (mounted) {

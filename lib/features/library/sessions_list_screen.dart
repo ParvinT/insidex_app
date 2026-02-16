@@ -8,8 +8,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import '../../models/play_context.dart';
 import '../../core/themes/app_theme_extension.dart';
+import '../../core/routes/player_route.dart';
 import '../../shared/widgets/session_card.dart';
-import '../player/audio_player_screen.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
@@ -622,14 +622,9 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
         );
 
         Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => AudioPlayerScreen(
-              sessionData: completeSessionData,
-              playContext: playContext,
-            ),
-          ),
-        );
+            context,
+            PlayerRoute(
+                sessionData: completeSessionData, playContext: playContext));
       },
     );
   }

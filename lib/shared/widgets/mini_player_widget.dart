@@ -22,7 +22,7 @@ import '../../services/session_localization_service.dart';
 import '../../services/audio/audio_handler.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/themes/app_theme_extension.dart';
-import '../../features/player/audio_player_screen.dart';
+import '../../core/routes/player_route.dart';
 
 /// Mini Player Widget - Spotify/YouTube style
 /// Shows at bottom of screen when a session is playing
@@ -700,30 +700,7 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
     // Simple push with animation
     navigatorState.push(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return AudioPlayerScreen(
-            sessionData: session,
-            playContext: _miniPlayerProvider?.playContext,
-          );
-        },
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          // Slide up from bottom
-          const begin = Offset(0.0, 1.0);
-          const end = Offset.zero;
-          const curve = Curves.easeOutCubic;
-
-          var tween = Tween(begin: begin, end: end).chain(
-            CurveTween(curve: curve),
-          );
-
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 400),
-      ),
+      PlayerRoute(sessionData: session),
     );
   }
 

@@ -6,6 +6,7 @@ class DownloadedSession {
   final String id;
   final String sessionId;
   final String language;
+  final String userId;
   final String encryptedAudioPath;
   final String imagePath;
   final String title;
@@ -45,6 +46,7 @@ class DownloadedSession {
     this.description,
     this.introTitle,
     this.introContent,
+    this.userId = '',
   });
 
   /// Create from SQLite row
@@ -53,6 +55,7 @@ class DownloadedSession {
       id: map['id'] as String,
       sessionId: map['session_id'] as String,
       language: map['language'] as String,
+      userId: map['user_id'] as String? ?? '',
       encryptedAudioPath: map['encrypted_audio_path'] as String,
       imagePath: map['image_path'] as String,
       title: map['title'] as String,
@@ -80,6 +83,7 @@ class DownloadedSession {
       'id': id,
       'session_id': sessionId,
       'language': language,
+      'user_id': userId,
       'encrypted_audio_path': encryptedAudioPath,
       'image_path': imagePath,
       'title': title,
@@ -103,6 +107,7 @@ class DownloadedSession {
   factory DownloadedSession.fromSessionData({
     required Map<String, dynamic> sessionData,
     required String language,
+    required String userId,
     required String encryptedAudioPath,
     required String imagePath,
     required int fileSizeBytes,
@@ -117,6 +122,7 @@ class DownloadedSession {
       id: '${sessionId}_$language',
       sessionId: sessionId,
       language: language,
+      userId: userId,
       encryptedAudioPath: encryptedAudioPath,
       imagePath: imagePath,
       title: title,
@@ -139,6 +145,7 @@ class DownloadedSession {
     String? id,
     String? sessionId,
     String? language,
+    String? userId,
     String? encryptedAudioPath,
     String? imagePath,
     String? title,
@@ -160,6 +167,7 @@ class DownloadedSession {
       id: id ?? this.id,
       sessionId: sessionId ?? this.sessionId,
       language: language ?? this.language,
+      userId: userId ?? this.userId,
       encryptedAudioPath: encryptedAudioPath ?? this.encryptedAudioPath,
       imagePath: imagePath ?? this.imagePath,
       title: title ?? this.title,

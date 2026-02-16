@@ -43,8 +43,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         PlayerAudioMixin,
         PlayerSessionMixin,
         PlayerQueueHelpersMixin
-    implements
-        PlayerStateAccessor {
+    implements PlayerStateAccessor {
   // =================== STATE VARIABLES ===================
 
   late final AnimationController _eqController = AnimationController(
@@ -318,24 +317,21 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           });
         }
       },
-      child: Container(
-        color: Colors.black,
-        child: AnimatedContainer(
-          duration: _isDismissDragging
-              ? Duration.zero
-              : const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-          transform: Matrix4.translationValues(0, _dismissDragOffset, 0),
-          child: Scaffold(
-            backgroundColor: colors.background,
-            body: Stack(
-              children: [
-                _buildBlurBackground(colors),
-                _buildDarkOverlay(),
-                _buildMainContent(colors),
-                if (_isDecrypting) _buildDecryptingOverlay(colors),
-              ],
-            ),
+      child: AnimatedContainer(
+        duration: _isDismissDragging
+            ? Duration.zero
+            : const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        transform: Matrix4.translationValues(0, _dismissDragOffset, 0),
+        child: Scaffold(
+          backgroundColor: colors.background,
+          body: Stack(
+            children: [
+              _buildBlurBackground(colors),
+              _buildDarkOverlay(),
+              _buildMainContent(colors),
+              if (_isDecrypting) _buildDecryptingOverlay(colors),
+            ],
           ),
         ),
       ),
@@ -371,8 +367,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final Widget inner = _buildPlayerBody();
-                final bool isSmallPhone = constraints.maxWidth <= 400 ||
-                    constraints.maxHeight <= 700;
+                final bool isSmallPhone =
+                    constraints.maxWidth <= 400 || constraints.maxHeight <= 700;
                 return _buildDismissableScrollView(
                   constraints: constraints,
                   isSmallPhone: isSmallPhone,
@@ -504,8 +500,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: constraints.maxHeight),
           child: Align(
-            alignment:
-                isSmallPhone ? Alignment.topCenter : Alignment.center,
+            alignment: isSmallPhone ? Alignment.topCenter : Alignment.center,
             child: child,
           ),
         ),

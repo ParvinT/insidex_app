@@ -8,12 +8,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import '../../core/themes/app_theme_extension.dart';
 import 'sessions_list_screen.dart';
-import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/themes/app_theme_extension.dart';
+import '../../core/routes/player_route.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
@@ -774,15 +774,8 @@ class _CategoriesScreenState extends State<CategoriesScreen>
           currentIndex: index,
         );
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AudioPlayerScreen(
-              sessionData: session,
-              playContext: playContext,
-            ),
-          ),
-        );
+        Navigator.push(context,
+            PlayerRoute(sessionData: session, playContext: playContext));
       },
     );
   }

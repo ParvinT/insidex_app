@@ -13,6 +13,7 @@ import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../providers/auto_play_provider.dart';
+import '../../providers/download_provider.dart';
 import 'widgets/language_selector.dart';
 import 'widgets/theme_selector.dart';
 import '../../l10n/app_localizations.dart';
@@ -446,6 +447,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           debugPrint('✅ [Settings] Mini player dismissed');
         } catch (e) {
           debugPrint('⚠️ [Settings] Mini player dismiss error: $e');
+        }
+
+        try {
+          final downloadProvider = context.read<DownloadProvider>();
+          await downloadProvider.clearUserData();
+          debugPrint('✅ [Settings] Download provider cleared');
+        } catch (e) {
+          debugPrint('⚠️ [Settings] Download provider clear error: $e');
         }
 
         await AuthPersistenceService.fullLogout();

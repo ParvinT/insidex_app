@@ -8,9 +8,9 @@ import 'package:lottie/lottie.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/constants/app_icons.dart';
+import '../../core/routes/player_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/sessions_list_screen.dart';
-import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../services/session_filter_service.dart';
 import '../quiz/screens/quiz_results_screen.dart';
@@ -651,11 +651,7 @@ class _SearchScreenState extends State<SearchScreen>
         if (!mounted) return;
 
         // Navigate to audio player
-        navigator.push(
-          MaterialPageRoute(
-            builder: (_) => AudioPlayerScreen(sessionData: session),
-          ),
-        );
+        navigator.push(PlayerRoute(sessionData: session));
       },
     );
   }

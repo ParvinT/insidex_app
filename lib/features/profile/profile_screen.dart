@@ -18,6 +18,7 @@ import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/download_provider.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
 import '../../providers/subscription_provider.dart';
 import '../subscription/paywall_screen.dart';
@@ -198,6 +199,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         debugPrint('✅ [Profile] Mini player dismissed');
       } catch (e) {
         debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
+      }
+      try {
+        final downloadProvider = context.read<DownloadProvider>();
+        await downloadProvider.clearUserData();
+        debugPrint('✅ [Settings] Download provider cleared');
+      } catch (e) {
+        debugPrint('⚠️ [Settings] Download provider clear error: $e');
       }
       await AuthPersistenceService.fullLogout();
       if (mounted) {

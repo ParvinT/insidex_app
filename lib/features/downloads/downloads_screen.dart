@@ -9,6 +9,7 @@ import 'dart:io';
 
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/routes/player_route.dart';
 import '../../models/downloaded_session.dart';
 import '../../models/play_context.dart';
 import '../../providers/download_provider.dart';
@@ -16,7 +17,6 @@ import '../../providers/mini_player_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
-import '../player/audio_player_screen.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/audio/audio_player_service.dart';
@@ -587,14 +587,11 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     );
 
     Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AudioPlayerScreen(
+        context,
+        PlayerRoute(
           sessionData: download.toPlayerSessionData(),
           playContext: playContext,
-        ),
-      ),
-    );
+        ));
   }
 
   Future<void> _showDeleteDialog(

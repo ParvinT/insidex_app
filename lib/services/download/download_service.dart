@@ -79,6 +79,7 @@ class DownloadService {
 
   /// Get download directory path
   String? get downloadPath => _downloadDir?.path;
+  String? get currentUserId => _currentUserId;
 
   // =================== INITIALIZATION ===================
 
@@ -104,6 +105,9 @@ class DownloadService {
       // Setup download directory
       await _setupDownloadDirectory();
 
+      _database.setCurrentUser(userId);
+      await _database.claimOrphanedDownloads(userId);
+
       // Mark as initialized
       _isInitialized = true;
 
@@ -111,10 +115,12 @@ class DownloadService {
       await DownloadHelpers.autoCleanup(
         downloadDir: _downloadDir,
         getValidKeys: () async {
-          final downloads = await getAllDownloads();
+          final downloads = await _database.getAllDownloadsAllUsers();
           return downloads.map((d) => '${d.sessionId}_${d.language}').toList();
         },
       );
+
+      await _validateDownloadIntegrity();
 
       // Notify listeners of current downloads
       await _notifyDownloadsChanged();
@@ -125,6 +131,39 @@ class DownloadService {
     } catch (e) {
       debugPrint('❌ [DownloadService] Initialization error: $e');
       rethrow;
+    }
+  }
+
+  /// Validate download records have matching files on disk.
+  /// Runs once during initialization - not on every query.
+  Future<void> _validateDownloadIntegrity() async {
+    try {
+      final downloads = await _database.getAllDownloads();
+      int removedCount = 0;
+
+      for (final download in downloads) {
+        final file = File(download.encryptedAudioPath);
+        if (!await file.exists()) {
+          debugPrint(
+              '🧹 [DownloadService] Orphaned record: ${download.id} (file missing)');
+          await _database.deleteDownload(download.id);
+
+          final key = '${download.sessionId}_${download.language}';
+          final sessionDir = Directory(path.join(_downloadDir!.path, key));
+          if (await sessionDir.exists()) {
+            await sessionDir.delete(recursive: true);
+          }
+
+          removedCount++;
+        }
+      }
+
+      if (removedCount > 0) {
+        debugPrint(
+            '✅ [DownloadService] Removed $removedCount orphaned records');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [DownloadService] Integrity validation error: $e');
     }
   }
 
@@ -147,6 +186,8 @@ class DownloadService {
 
       // Setup download directory (no network needed)
       await _setupDownloadDirectory();
+
+      _database.setCurrentUser(cachedUserId);
 
       // Mark as initialized
       _isInitialized = true;
@@ -369,6 +410,7 @@ class DownloadService {
       final download = DownloadedSession.fromSessionData(
         sessionData: sessionData,
         language: language,
+        userId: _currentUserId ?? '',
         encryptedAudioPath: audioPath,
         imagePath: imagePath,
         fileSizeBytes: fileSize,
@@ -684,18 +726,23 @@ class DownloadService {
   /// Delete all downloads
   Future<int> deleteAllDownloads() async {
     try {
-      // Delete from database
+      // Get current user's downloads BEFORE deleting from DB
+      final userDownloads = await getAllDownloads();
+
+      // Delete from database (scoped to current user)
       final count = await _database.deleteAllDownloads();
 
-      // Delete all files
-      if (_downloadDir != null && await _downloadDir!.exists()) {
-        await _downloadDir!.delete(recursive: true);
-        await _downloadDir!.create(recursive: true);
+      // Only delete THIS user's files, not everyone's
+      for (final download in userDownloads) {
+        final key = '${download.sessionId}_${download.language}';
+        final sessionDir = Directory(path.join(_downloadDir!.path, key));
+        if (await sessionDir.exists()) {
+          await sessionDir.delete(recursive: true);
+          debugPrint('🗑️ [DownloadService] Deleted files: $key');
+        }
       }
 
-      // Notify listeners
       await _notifyDownloadsChanged();
-
       debugPrint('🗑️ [DownloadService] Deleted all downloads: $count');
       return count;
     } catch (e) {
@@ -801,6 +848,7 @@ class DownloadService {
   /// Clear user data (on logout)
   Future<void> clearUserData() async {
     _encryption.clear();
+    _database.clearCurrentUser();
     _currentUserId = null;
     _isInitialized = false;
     debugPrint('📥 [DownloadService] User data cleared');
