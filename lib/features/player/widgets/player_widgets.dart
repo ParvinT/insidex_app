@@ -208,7 +208,8 @@ class IntroductionButton extends StatelessWidget {
 }
 
 /// Progress bar with time labels
-class PlayerProgressBar extends StatelessWidget {
+/// Uses local state during drag to prevent jitter from position stream
+class PlayerProgressBar extends StatefulWidget {
   final Duration position;
   final Duration duration;
   final Function(Duration) onSeek;
@@ -220,6 +221,14 @@ class PlayerProgressBar extends StatelessWidget {
     required this.onSeek,
   });
 
+  @override
+  State<PlayerProgressBar> createState() => _PlayerProgressBarState();
+}
+
+class _PlayerProgressBarState extends State<PlayerProgressBar> {
+  bool _isDragging = false;
+  double _dragValue = 0.0;
+
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
@@ -229,12 +238,22 @@ class PlayerProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final total =
-        duration.inMilliseconds > 0 ? duration : const Duration(minutes: 10);
+    final total = widget.duration.inMilliseconds > 0
+        ? widget.duration
+        : const Duration(minutes: 10);
 
-    final value = total.inMilliseconds == 0
-        ? 0.0
-        : (position.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0);
+    // During drag, use local value; otherwise use stream value
+    final double value = _isDragging
+        ? _dragValue
+        : (total.inMilliseconds == 0
+            ? 0.0
+            : (widget.position.inMilliseconds / total.inMilliseconds)
+                .clamp(0.0, 1.0));
+
+    // Display position based on current state
+    final displayPosition = _isDragging
+        ? Duration(milliseconds: (total.inMilliseconds * _dragValue).round())
+        : widget.position;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 30.w),
@@ -252,9 +271,23 @@ class PlayerProgressBar extends StatelessWidget {
             ),
             child: Slider(
               value: value,
+              onChangeStart: (v) {
+                setState(() {
+                  _isDragging = true;
+                  _dragValue = v;
+                });
+              },
               onChanged: (v) {
+                setState(() {
+                  _dragValue = v;
+                });
+              },
+              onChangeEnd: (v) {
                 final newMs = (total.inMilliseconds * v).round();
-                onSeek(Duration(milliseconds: newMs));
+                widget.onSeek(Duration(milliseconds: newMs));
+                setState(() {
+                  _isDragging = false;
+                });
               },
             ),
           ),
@@ -264,15 +297,15 @@ class PlayerProgressBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _formatDuration(position),
+                  _formatDuration(displayPosition),
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
                     color: colors.textSecondary,
                   ),
                 ),
                 Text(
-                  duration.inMilliseconds > 0
-                      ? _formatDuration(duration)
+                  widget.duration.inMilliseconds > 0
+                      ? _formatDuration(widget.duration)
                       : '--:--',
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,

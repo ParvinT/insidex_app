@@ -85,6 +85,11 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   StreamSubscription<int?>? _sleepTimerSub;
   bool get _isOfflineSession => _session['_isOffline'] == true;
 
+  // Swipe-to-dismiss state
+  double _dismissDragOffset = 0.0;
+  bool _isDismissDragging = false;
+  final ScrollController _dismissScrollController = ScrollController();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -511,8 +516,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     debugPrint('🟡 [INIT-DEBUG] Starting _initializeAudio...');
 
     try {
-      await _audioService.stop();
-      debugPrint('🟡 [INIT-DEBUG] audioService.stop() done');
+      // Pause instead of stop to keep audio session alive
+      await _audioService.pause();
+      await _audioService.seek(Duration.zero);
+      debugPrint('🟡 [INIT-DEBUG] audioService paused + seeked to zero');
       await Future.delayed(const Duration(milliseconds: 50));
       await _audioService.initialize();
       debugPrint('🟡 [INIT-DEBUG] audioService.initialize() done');
@@ -803,30 +810,34 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       debugPrint(
           '🔵 [NEXT-DEBUG] Got next session: ${nextSession['id']} - ${nextSession['title']}');
 
-      setState(() {
-        _session = Map<String, dynamic>.from(nextSession);
-        _currentPosition = Duration.zero;
-        _totalDuration = Duration.zero;
-        _isPlaying = false;
-        _hasAddedToRecent = false;
-        _isPlayingTrack = false;
-        _audioUrl = null;
-        _backgroundImageUrl = null;
-        _isFavorite = false;
-        _isInPlaylist = false;
-      });
-      debugPrint('🔵 [NEXT-DEBUG] setState done - state reset');
-
+      // End tracking for current session before switching
       if (_isTracking) {
         await ListeningTrackerService.endSession();
         _isTracking = false;
         debugPrint('🔵 [NEXT-DEBUG] Tracking ended');
       }
 
-      debugPrint('🔵 [NEXT-DEBUG] Calling _loadLanguageAndUrls...');
+      // Prepare new session data with basic info BEFORE setState
+      final newSession = Map<String, dynamic>.from(nextSession);
+
+      // Pre-load language and URLs into the new session map
+      _session = newSession;
       await _loadLanguageAndUrls();
       debugPrint(
           '🔵 [NEXT-DEBUG] _loadLanguageAndUrls done. audioUrl: $_audioUrl');
+
+      // Now update UI in a single setState with all info ready
+      setState(() {
+        _currentPosition = Duration.zero;
+        _totalDuration = Duration.zero;
+        _isPlaying = false;
+        _hasAddedToRecent = false;
+        _isPlayingTrack = false;
+        _isFavorite = false;
+        _isInPlaylist = false;
+      });
+      debugPrint(
+          '🔵 [NEXT-DEBUG] setState done - state reset with title ready');
 
       _miniPlayerProvider!.updateSession(_session);
       debugPrint('🔵 [NEXT-DEBUG] Provider session updated');
@@ -869,25 +880,30 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
       debugPrint(
           '⏮️ [AudioPlayer] Switching to previous: ${prevSession['title']}');
 
-      setState(() {
-        _session = Map<String, dynamic>.from(prevSession);
-        _currentPosition = Duration.zero;
-        _totalDuration = Duration.zero;
-        _isPlaying = false;
-        _hasAddedToRecent = false;
-        _isPlayingTrack = false;
-        _audioUrl = null;
-        _backgroundImageUrl = null;
-        _isFavorite = false;
-        _isInPlaylist = false;
-      });
-
+      // End tracking for current session before switching
       if (_isTracking) {
         await ListeningTrackerService.endSession();
         _isTracking = false;
       }
 
+      // Prepare new session data with basic info BEFORE setState
+      final newSession = Map<String, dynamic>.from(prevSession);
+
+      // Pre-load language and URLs into the new session map
+      _session = newSession;
       await _loadLanguageAndUrls();
+
+      // Now update UI in a single setState with all info ready
+      setState(() {
+        _currentPosition = Duration.zero;
+        _totalDuration = Duration.zero;
+        _isPlaying = false;
+        _hasAddedToRecent = false;
+        _isPlayingTrack = false;
+        _isFavorite = false;
+        _isInPlaylist = false;
+      });
+
       _miniPlayerProvider!.updateSession(_session);
       _checkFavoriteStatus();
       _checkPlaylistStatus();
@@ -938,6 +954,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
     _playerStateSub?.cancel();
     _eqController.dispose();
     _sleepTimerSub?.cancel();
+    _dismissScrollController.dispose();
     super.dispose();
   }
 
@@ -982,166 +999,233 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           });
         }
       },
-      child: Scaffold(
-        backgroundColor: colors.background,
-        body: Stack(
-          children: [
-            // 1. BLUR BACKGROUND IMAGE (Network or Local)
-            _buildBlurBackground(colors),
+      child: Container(
+        color: Colors.black,
+        child: AnimatedContainer(
+          duration: _isDismissDragging
+              ? Duration.zero
+              : const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+          transform: Matrix4.translationValues(0, _dismissDragOffset, 0),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            body: Stack(
+              children: [
+                // 1. BLUR BACKGROUND IMAGE (Network or Local)
+                _buildBlurBackground(colors),
 
-            // 2. DARK OVERLAY FOR READABILITY
-            Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(
-                  alpha: (_backgroundImageUrl != null &&
-                              _backgroundImageUrl!.isNotEmpty) ||
-                          (_session['_localImagePath'] != null &&
-                              (_session['_localImagePath'] as String)
-                                  .isNotEmpty)
-                      ? 0.35
-                      : 0.0,
-                ),
-              ),
-            ),
-
-            // 3. MAIN CONTENT
-            SafeArea(
-              child: Column(
-                children: [
-                  PlayerHeader(
-                    onBack: () => Navigator.pop(context),
-                    onInfo: () {
-                      SessionInfoModal.show(
-                        context: context,
-                        session: _session,
-                      );
-                    },
-                  ),
-                  Expanded(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final Widget inner = Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            PlayerAlbumArt(
-                              imageUrl: _backgroundImageUrl,
-                              localImagePath: _session['_localImagePath'],
-                              equalizerController: _eqController,
-                              isPlaying: _isPlaying,
-                            ),
-                            SizedBox(height: 40.h),
-                            PlayerSessionInfo(
-                              title: _session['_displayTitle'] ??
-                                  _session['_localizedTitle'] ??
-                                  _session['title'] ??
-                                  AppLocalizations.of(
-                                    context,
-                                  ).untitledSession,
-                              subtitle: AppLocalizations.of(
-                                context,
-                              ).subliminalSession,
-                            ),
-                            SizedBox(height: 30.h),
-                            IntroductionButton(onTap: _showIntroductionModal),
-                            SizedBox(height: 30.h),
-                            PlayerProgressBar(
-                              position: _currentPosition,
-                              duration: _totalDuration,
-                              onSeek: (duration) =>
-                                  _audioService.seek(duration),
-                            ),
-                            SizedBox(height: 30.h),
-                            PlayerPlayControls(
-                              isPlaying: _isPlaying,
-                              hasPrevious:
-                                  _miniPlayerProvider?.hasPrevious ?? false,
-                              hasNext: _miniPlayerProvider?.hasNext ?? false,
-                              onPlayPause: _togglePlayPause,
-                              onReplay10: _replay10,
-                              onForward10: _forward10,
-                              onPrevious: () => _playPreviousSession(),
-                              onNext: () => _playNextSession(),
-                            ),
-                            SizedBox(height: 16.h),
-                            UpNextCard(
-                              currentLanguage: _currentLanguage,
-                            ),
-                            SizedBox(height: 16.h),
-                            PlayerBottomActions(
-                              isLooping: _isLooping,
-                              isFavorite: _isFavorite,
-                              isInPlaylist: _isInPlaylist,
-                              isOffline: _isOfflineSession,
-                              isTimerActive: _sleepTimerMinutes != null,
-                              onLoop: _toggleLoop,
-                              onFavorite: _toggleFavorite,
-                              onPlaylist: _togglePlaylist,
-                              onTimer: _showSleepTimerModal,
-                              downloadButton: _isOfflineSession
-                                  ? null
-                                  : DownloadButton(
-                                      session: _session,
-                                      size: 24.sp,
-                                      showBackground: false,
-                                    ),
-                            ),
-                          ],
-                        );
-                        final bool isSmallPhone = constraints.maxWidth <= 400 ||
-                            constraints.maxHeight <= 700;
-                        return SingleChildScrollView(
-                          padding: EdgeInsets.only(
-                            bottom: MediaQuery.of(context).padding.bottom + 12,
-                          ),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: constraints.maxHeight,
-                            ),
-                            child: Align(
-                              alignment: isSmallPhone
-                                  ? Alignment.topCenter
-                                  : Alignment.center,
-                              child: inner,
-                            ),
-                          ),
-                        );
-                      },
+                // 2. DARK OVERLAY FOR READABILITY
+                Positioned.fill(
+                  child: Container(
+                    color: Colors.black.withValues(
+                      alpha: (_backgroundImageUrl != null &&
+                                  _backgroundImageUrl!.isNotEmpty) ||
+                              (_session['_localImagePath'] != null &&
+                                  (_session['_localImagePath'] as String)
+                                      .isNotEmpty)
+                          ? 0.35
+                          : 0.0,
                     ),
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // 4. DECRYPTING OVERLAY
-            if (_isDecrypting)
-              Container(
-                color: colors.textPrimary.withValues(alpha: 0.85),
-                child: Center(
+                // 3. MAIN CONTENT
+                SafeArea(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: 48.w,
-                        height: 48.w,
-                        child: CircularProgressIndicator(
-                          color: colors.textOnPrimary,
-                          strokeWidth: 3,
-                        ),
+                      PlayerHeader(
+                        onBack: () => Navigator.pop(context),
+                        onInfo: () {
+                          SessionInfoModal.show(
+                            context: context,
+                            session: _session,
+                          );
+                        },
                       ),
-                      SizedBox(height: 20.h),
-                      Text(
-                        AppLocalizations.of(context).preparing,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w500,
-                          color: colors.textOnPrimary,
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final Widget inner = Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                PlayerAlbumArt(
+                                  imageUrl: _backgroundImageUrl,
+                                  localImagePath: _session['_localImagePath'],
+                                  equalizerController: _eqController,
+                                  isPlaying: _isPlaying,
+                                  hasPrevious:
+                                      _miniPlayerProvider?.hasPrevious ?? false,
+                                  hasNext:
+                                      _miniPlayerProvider?.hasNext ?? false,
+                                  onSwipePrevious: () => _playPreviousSession(),
+                                  onSwipeNext: () => _playNextSession(),
+                                  nextImageUrl: _getNextSessionImageUrl(),
+                                  nextLocalImagePath:
+                                      _getNextSessionLocalImagePath(),
+                                  previousImageUrl:
+                                      _getPreviousSessionImageUrl(),
+                                  previousLocalImagePath:
+                                      _getPreviousSessionLocalImagePath(),
+                                ),
+                                SizedBox(height: 40.h),
+                                PlayerSessionInfo(
+                                  title: _session['_displayTitle'] ??
+                                      _session['_localizedTitle'] ??
+                                      _session['title'] ??
+                                      AppLocalizations.of(
+                                        context,
+                                      ).untitledSession,
+                                  subtitle: AppLocalizations.of(
+                                    context,
+                                  ).subliminalSession,
+                                ),
+                                SizedBox(height: 30.h),
+                                IntroductionButton(
+                                    onTap: _showIntroductionModal),
+                                SizedBox(height: 30.h),
+                                PlayerProgressBar(
+                                  position: _currentPosition,
+                                  duration: _totalDuration,
+                                  onSeek: (duration) =>
+                                      _audioService.seek(duration),
+                                ),
+                                SizedBox(height: 30.h),
+                                PlayerPlayControls(
+                                  isPlaying: _isPlaying,
+                                  hasPrevious:
+                                      _miniPlayerProvider?.hasPrevious ?? false,
+                                  hasNext:
+                                      _miniPlayerProvider?.hasNext ?? false,
+                                  onPlayPause: _togglePlayPause,
+                                  onReplay10: _replay10,
+                                  onForward10: _forward10,
+                                  onPrevious: () => _playPreviousSession(),
+                                  onNext: () => _playNextSession(),
+                                ),
+                                SizedBox(height: 16.h),
+                                UpNextCard(
+                                  currentLanguage: _currentLanguage,
+                                ),
+                                SizedBox(height: 16.h),
+                                PlayerBottomActions(
+                                  isLooping: _isLooping,
+                                  isFavorite: _isFavorite,
+                                  isInPlaylist: _isInPlaylist,
+                                  isOffline: _isOfflineSession,
+                                  isTimerActive: _sleepTimerMinutes != null,
+                                  onLoop: _toggleLoop,
+                                  onFavorite: _toggleFavorite,
+                                  onPlaylist: _togglePlaylist,
+                                  onTimer: _showSleepTimerModal,
+                                  downloadButton: _isOfflineSession
+                                      ? null
+                                      : DownloadButton(
+                                          session: _session,
+                                          size: 24.sp,
+                                          showBackground: false,
+                                        ),
+                                ),
+                              ],
+                            );
+                            final bool isSmallPhone =
+                                constraints.maxWidth <= 400 ||
+                                    constraints.maxHeight <= 700;
+                            return Listener(
+                              onPointerMove: (event) {
+                                if (!_dismissScrollController.hasClients) {
+                                  return;
+                                }
+                                final isAtTop =
+                                    _dismissScrollController.offset <= 0;
+                                final isGoingDown = event.delta.dy > 0;
+
+                                if ((isAtTop && isGoingDown) ||
+                                    _isDismissDragging) {
+                                  setState(() {
+                                    _dismissDragOffset =
+                                        (_dismissDragOffset + event.delta.dy)
+                                            .clamp(0.0, 500.0);
+                                    _isDismissDragging = _dismissDragOffset > 0;
+                                  });
+                                }
+                              },
+                              onPointerUp: (_) {
+                                if (!_isDismissDragging) return;
+
+                                final threshold =
+                                    MediaQuery.of(context).size.height * 0.15;
+
+                                if (_dismissDragOffset > threshold) {
+                                  Navigator.of(context).pop();
+                                } else {
+                                  setState(() {
+                                    _dismissDragOffset = 0.0;
+                                    _isDismissDragging = false;
+                                  });
+                                }
+                              },
+                              child: SingleChildScrollView(
+                                controller: _dismissScrollController,
+                                physics: _isDismissDragging
+                                    ? const NeverScrollableScrollPhysics()
+                                    : null,
+                                padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).padding.bottom +
+                                          12,
+                                ),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: constraints.maxHeight,
+                                  ),
+                                  child: Align(
+                                    alignment: isSmallPhone
+                                        ? Alignment.topCenter
+                                        : Alignment.center,
+                                    child: inner,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-          ],
+
+                // 4. DECRYPTING OVERLAY
+                if (_isDecrypting)
+                  Container(
+                    color: colors.textPrimary.withValues(alpha: 0.85),
+                    child: Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 48.w,
+                            height: 48.w,
+                            child: CircularProgressIndicator(
+                              color: colors.textOnPrimary,
+                              strokeWidth: 3,
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                          Text(
+                            AppLocalizations.of(context).preparing,
+                            style: GoogleFonts.inter(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w500,
+                              color: colors.textOnPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -1338,6 +1422,48 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         });
       }
     });
+  }
+
+  // =================== QUEUE IMAGE HELPERS ===================
+
+  String? _getNextSessionImageUrl() {
+    final next = _miniPlayerProvider?.nextSession;
+    if (next == null) return null;
+    if (next['_isOffline'] == true) return null;
+
+    final bgImages = next['backgroundImages'];
+    if (bgImages is Map) {
+      return bgImages[_currentLanguage] ??
+          bgImages['en'] ??
+          (bgImages.isNotEmpty ? bgImages.values.first : null);
+    }
+    return null;
+  }
+
+  String? _getNextSessionLocalImagePath() {
+    final next = _miniPlayerProvider?.nextSession;
+    if (next == null) return null;
+    return next['_localImagePath'] as String?;
+  }
+
+  String? _getPreviousSessionImageUrl() {
+    final prev = _miniPlayerProvider?.playContext?.previousSession;
+    if (prev == null) return null;
+    if (prev['_isOffline'] == true) return null;
+
+    final bgImages = prev['backgroundImages'];
+    if (bgImages is Map) {
+      return bgImages[_currentLanguage] ??
+          bgImages['en'] ??
+          (bgImages.isNotEmpty ? bgImages.values.first : null);
+    }
+    return null;
+  }
+
+  String? _getPreviousSessionLocalImagePath() {
+    final prev = _miniPlayerProvider?.playContext?.previousSession;
+    if (prev == null) return null;
+    return prev['_localImagePath'] as String?;
   }
 
   void _showIntroductionModal() {

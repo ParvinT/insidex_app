@@ -8,13 +8,25 @@ import 'package:shimmer/shimmer.dart';
 import '../../../services/cache_manager_service.dart';
 import '../../../core/themes/app_theme_extension.dart';
 
-/// YouTube Music style album art with integrated equalizer
-/// Responsive design that adapts to screen size
+/// YouTube Music style album art with integrated equalizer and swipe navigation.
+/// Supports swiping left/right to navigate between sessions in the queue.
 class PlayerAlbumArt extends StatefulWidget {
   final String? imageUrl;
   final String? localImagePath;
   final AnimationController equalizerController;
   final bool isPlaying;
+
+  // Swipe navigation
+  final bool hasPrevious;
+  final bool hasNext;
+  final VoidCallback? onSwipePrevious;
+  final VoidCallback? onSwipeNext;
+
+  // Next/Previous session images for peek effect
+  final String? nextImageUrl;
+  final String? nextLocalImagePath;
+  final String? previousImageUrl;
+  final String? previousLocalImagePath;
 
   const PlayerAlbumArt({
     super.key,
@@ -22,6 +34,14 @@ class PlayerAlbumArt extends StatefulWidget {
     this.localImagePath,
     required this.equalizerController,
     required this.isPlaying,
+    this.hasPrevious = false,
+    this.hasNext = false,
+    this.onSwipePrevious,
+    this.onSwipeNext,
+    this.nextImageUrl,
+    this.nextLocalImagePath,
+    this.previousImageUrl,
+    this.previousLocalImagePath,
   });
 
   @override
@@ -31,93 +51,187 @@ class PlayerAlbumArt extends StatefulWidget {
 class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     with SingleTickerProviderStateMixin {
   late AnimationController _continuousController;
+  late PageController _pageController;
+
+  bool _isSwiping = false;
+
+  // Current page starts at the "current" session index
+  int get _currentPageIndex => widget.hasPrevious ? 1 : 0;
 
   @override
   void initState() {
     super.initState();
-    // ✅ Dedicated controller for seamless infinite animation
     _continuousController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10), // 1 hour (very long)
+      duration: const Duration(seconds: 10),
     )..repeat();
+
+    _pageController = PageController(initialPage: _currentPageIndex);
+  }
+
+  @override
+  void didUpdateWidget(covariant PlayerAlbumArt oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // When session changes (after swipe completes), reset PageController
+    final oldId = oldWidget.imageUrl ?? oldWidget.localImagePath;
+    final newId = widget.imageUrl ?? widget.localImagePath;
+
+    if (oldId != newId && !_isSwiping) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(_currentPageIndex);
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _continuousController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    // Responsive size calculation
     final double imageSize = _calculateImageSize(size);
-    final double borderRadius = imageSize * 0.08; // 8% of image size
+    final double imageHeight = imageSize * 9 / 16;
+    final double borderRadius = imageSize * 0.08;
 
-    return Container(
+    return SizedBox(
       width: imageSize,
-      height: imageSize * 9 / 16,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-            spreadRadius: 2,
-          ),
-        ],
+      height: imageHeight,
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: _totalPages,
+        physics: _totalPages > 1
+            ? const BouncingScrollPhysics()
+            : const NeverScrollableScrollPhysics(),
+        onPageChanged: _onPageChanged,
+        itemBuilder: (context, index) {
+          final pageType = _getPageType(index);
+          return _buildPage(pageType, imageSize, imageHeight, borderRadius);
+        },
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius),
-        child: Stack(
-          children: [
-            // 1. Background Image
-            _buildBackgroundImage(),
+    );
+  }
 
-            // 2. Dark Overlay (for equalizer visibility)
-            _buildDarkOverlay(),
+  // =================== PAGE MANAGEMENT ===================
 
-            // 3. Equalizer (centered)
-            Center(
-              child: widget.isPlaying
-                  ? AnimatedBuilder(
-                      animation: _continuousController,
-                      builder: (context, _) => _buildAnimatedEqualizer(),
-                    )
-                  : _buildStaticEqualizer(),
-            ),
-          ],
+  int get _totalPages {
+    int count = 1; // current
+    if (widget.hasPrevious) count++;
+    if (widget.hasNext) count++;
+    return count;
+  }
+
+  _PageType _getPageType(int index) {
+    if (widget.hasPrevious) {
+      if (index == 0) return _PageType.previous;
+      if (index == 1) return _PageType.current;
+      return _PageType.next;
+    } else {
+      if (index == 0) return _PageType.current;
+      return _PageType.next;
+    }
+  }
+
+  void _onPageChanged(int index) {
+    final pageType = _getPageType(index);
+
+    if (pageType == _PageType.previous) {
+      _isSwiping = true;
+      widget.onSwipePrevious?.call();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _isSwiping = false;
+      });
+    } else if (pageType == _PageType.next) {
+      _isSwiping = true;
+      widget.onSwipeNext?.call();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _isSwiping = false;
+      });
+    }
+  }
+
+  // =================== PAGE CONTENT ===================
+
+  Widget _buildPage(
+    _PageType type,
+    double imageSize,
+    double imageHeight,
+    double borderRadius,
+  ) {
+    String? imageUrl;
+    String? localPath;
+
+    switch (type) {
+      case _PageType.previous:
+        imageUrl = widget.previousImageUrl;
+        localPath = widget.previousLocalImagePath;
+        break;
+      case _PageType.current:
+        imageUrl = widget.imageUrl;
+        localPath = widget.localImagePath;
+        break;
+      case _PageType.next:
+        imageUrl = widget.nextImageUrl;
+        localPath = widget.nextLocalImagePath;
+        break;
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      child: Container(
+        width: imageSize,
+        height: imageHeight,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(borderRadius),
+          boxShadow: type == _PageType.current
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                    spreadRadius: 2,
+                  ),
+                ]
+              : null,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(borderRadius),
+          child: Stack(
+            children: [
+              // Background Image
+              _buildImage(imageUrl, localPath),
+
+              // Dark Overlay
+              _buildDarkOverlay(),
+
+              // Equalizer (only on current page)
+              if (type == _PageType.current)
+                Center(
+                  child: widget.isPlaying
+                      ? AnimatedBuilder(
+                          animation: _continuousController,
+                          builder: (context, _) => _buildAnimatedEqualizer(),
+                        )
+                      : _buildStaticEqualizer(),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  /// Calculate responsive image size
-  double _calculateImageSize(Size screenSize) {
-    final width = screenSize.width;
-    final height = screenSize.height;
+  // =================== IMAGE BUILDERS ===================
 
-    // Tablet/Desktop
-    if (width >= 600) {
-      return width * 0.5; // 50% of screen width
-    }
-
-    // Small phones
-    if (height <= 700) {
-      return width * 0.70; // 70% of screen width
-    }
-
-    // Normal phones
-    return width * 0.75; // 75% of screen width
-  }
-
-  /// Background image with cache
-  Widget _buildBackgroundImage() {
-    if (widget.localImagePath != null && widget.localImagePath!.isNotEmpty) {
-      final file = File(widget.localImagePath!);
+  Widget _buildImage(String? imageUrl, String? localPath) {
+    if (localPath != null && localPath.isNotEmpty) {
+      final file = File(localPath);
       return Positioned.fill(
         child: FutureBuilder<bool>(
           future: file.exists(),
@@ -129,24 +243,23 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
                 errorBuilder: (_, __, ___) => _buildPlaceholder(),
               );
             }
-            // Local file yoksa network'e fallback
-            return _buildNetworkImage();
+            return _buildNetworkOrPlaceholder(imageUrl);
           },
         ),
       );
     }
 
-    return _buildNetworkImage();
+    return _buildNetworkOrPlaceholder(imageUrl);
   }
 
-  Widget _buildNetworkImage() {
-    if (widget.imageUrl == null || widget.imageUrl!.isEmpty) {
+  Widget _buildNetworkOrPlaceholder(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
       return _buildPlaceholder();
     }
 
     return Positioned.fill(
       child: CachedNetworkImage(
-        imageUrl: widget.imageUrl!,
+        imageUrl: imageUrl,
         cacheManager: AppCacheManager.instance,
         fit: BoxFit.cover,
         placeholder: (context, url) => _buildPlaceholder(),
@@ -155,7 +268,25 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Placeholder for loading/error states
+  // =================== SIZING ===================
+
+  double _calculateImageSize(Size screenSize) {
+    final width = screenSize.width;
+    final height = screenSize.height;
+
+    if (width >= 600) {
+      return width * 0.5;
+    }
+
+    if (height <= 700) {
+      return width * 0.70;
+    }
+
+    return width * 0.75;
+  }
+
+  // =================== DECORATIONS ===================
+
   Widget _buildPlaceholder() {
     final colors = context.colors;
     return Shimmer.fromColors(
@@ -167,7 +298,6 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Dark overlay for equalizer contrast
   Widget _buildDarkOverlay() {
     return Positioned.fill(
       child: Container(
@@ -176,8 +306,8 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
             center: Alignment.center,
             radius: 0.8,
             colors: [
-              Colors.black.withValues(alpha: 0.3), // Center lighter
-              Colors.black.withValues(alpha: 0.6), // Edges darker
+              Colors.black.withValues(alpha: 0.3),
+              Colors.black.withValues(alpha: 0.6),
             ],
           ),
         ),
@@ -185,7 +315,8 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Static equalizer (when paused)
+  // =================== EQUALIZER ===================
+
   Widget _buildStaticEqualizer() {
     return SizedBox(
       width: 80.w,
@@ -196,25 +327,18 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Animated equalizer (when playing)
   Widget _buildAnimatedEqualizer() {
-    // ✅ Use dedicated continuous controller
-    final t =
-        _continuousController.value * 5000; // Scale up for visible movement
+    final t = _continuousController.value * 5000;
 
     final bars = List.generate(5, (i) {
-      // Each bar has different speed
       final speed = 2.5 + i * 0.5;
       final phase = t * speed + i * 1.2;
 
-      // Combine two sine waves
       final height1 = (1 + math.sin(phase)) / 2;
       final height2 = (1 + math.sin(phase * 1.7 + 1.5)) / 2;
 
-      // Mix them together
       final combined = (height1 + height2) / 2;
 
-      // Calculate bar height (20..60 range)
       return 20 + 40 * combined;
     });
 
@@ -228,7 +352,10 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   }
 }
 
-/// Custom painter for equalizer bars
+// =================== ENUMS & PAINTERS ===================
+
+enum _PageType { previous, current, next }
+
 class _EqualizerPainter extends CustomPainter {
   final List<double> barHeights;
 
@@ -248,7 +375,6 @@ class _EqualizerPainter extends CustomPainter {
       final barHeight = barHeights[i];
       final y1 = centerY - barHeight / 2;
 
-      // Gradient paint
       final gradientPaint = Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
@@ -260,7 +386,6 @@ class _EqualizerPainter extends CustomPainter {
         ).createShader(Rect.fromLTWH(startX, y1, barWidth, barHeight))
         ..style = PaintingStyle.fill;
 
-      // Yuvarlatılmış köşeler
       final rect = RRect.fromRectAndRadius(
         Rect.fromLTWH(startX, y1, barWidth, barHeight),
         const Radius.circular(2.0),
@@ -275,71 +400,3 @@ class _EqualizerPainter extends CustomPainter {
   @override
   bool shouldRepaint(_EqualizerPainter oldDelegate) => true;
 }
-
-// Another good version for equalizer.
-/*class _EqualizerPainter extends CustomPainter {
-  final List<double> barHeights;
-
-  _EqualizerPainter(this.barHeights);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final barWidth = 3.5;
-    final spacing = 8.0;
-    final centerY = size.height / 2;
-    
-    final totalWidth = (barHeights.length * barWidth) + 
-                       ((barHeights.length - 1) * spacing);
-    var startX = (size.width - totalWidth) / 2;
-
-    for (int i = 0; i < barHeights.length; i++) {
-      final barHeight = barHeights[i];
-      final y1 = centerY - barHeight / 2;
-
-      // 1. Outer glow (çok hafif)
-      final glowPaint = Paint()
-        ..color = Colors.white.withValues(alpha:0.1)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-
-      final glowRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(startX - 1, y1 - 1, barWidth + 2, barHeight + 2),
-        const Radius.circular(2.0),
-      );
-      canvas.drawRRect(glowRect, glowPaint);
-
-      // 2. Main bar with frosted glass effect
-      final glassPaint = Paint()
-        ..color = Colors.white.withValues(alpha:0.25)
-        ..style = PaintingStyle.fill;
-
-      final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(startX, y1, barWidth, barHeight),
-        const Radius.circular(2.0),
-      );
-      canvas.drawRRect(rect, glassPaint);
-
-      // 3. Inner highlight (cam parlama efekti)
-      final highlightPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.white.withValues(alpha:0.4),
-            Colors.white.withValues(alpha:0.0),
-          ],
-        ).createShader(Rect.fromLTWH(startX, y1, barWidth * 0.5, barHeight))
-        ..style = PaintingStyle.fill;
-
-      final highlightRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(startX, y1, barWidth * 0.4, barHeight),
-        const Radius.circular(2.0),
-      );
-      canvas.drawRRect(highlightRect, highlightPaint);
-
-      startX += barWidth + spacing;
-    }
-  }
-
-  @override
-  bool shouldRepaint(_EqualizerPainter oldDelegate) => true;
-}*/

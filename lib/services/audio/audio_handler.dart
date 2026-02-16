@@ -370,12 +370,25 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     await _ensureInitialized();
     final int token = ++_loadToken;
 
-    // Stop any current playback
-    await _player.stop();
+    // Pause current playback without releasing audio session
+    // Using pause + seek instead of stop to prevent:
+    // 1. Other apps stealing audio focus during transition
+    // 2. Lock screen artwork disappearing momentarily
+    await _player.pause();
     await _player.seek(Duration.zero);
 
-    debugPrint(
-        '🔄 [InsideXAudioHandler] Stopped previous audio, loading new: $title');
+    // Update media item immediately with new session info
+    // so lock screen shows new title/artwork during loading
+    _updateMediaItem(
+      title: title,
+      artist: artist,
+      artworkUrl: artworkUrl,
+      localArtworkPath: localArtworkPath,
+      sessionId: sessionId,
+      duration: duration,
+    );
+
+    debugPrint('🔄 [InsideXAudioHandler] Preparing transition to: $title');
 
     Duration? resolvedDuration;
 
@@ -424,15 +437,10 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
 
         if (token != _loadToken) return resolvedDuration;
 
-        // Update media item for lock screen / notification
-        _updateMediaItem(
-          title: title,
-          artist: artist,
-          artworkUrl: artworkUrl,
-          localArtworkPath: localArtworkPath,
-          sessionId: sessionId,
-          duration: resolvedDuration ?? duration,
-        );
+        // Update duration now that we know the resolved value
+        if (resolvedDuration != null) {
+          updateDuration(resolvedDuration);
+        }
 
         // Start playback
         _player.play();

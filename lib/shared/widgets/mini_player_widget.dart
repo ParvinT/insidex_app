@@ -843,9 +843,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
     _miniPlayerProvider!.playSession(updatedSession);
 
-    await _audioService.stop();
+    await _audioService.pause();
+    await _audioService.seek(Duration.zero);
     await Future.delayed(const Duration(milliseconds: 50));
-    await _audioService.initialize();
     _setupStreamListeners();
 
     await _audioService.playFromUrl(
@@ -889,9 +889,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     updatedSession['_displayTitle'] = displayTitle;
     _miniPlayerProvider!.playSession(updatedSession);
 
-    await _audioService.stop();
+    await _audioService.pause();
+    await _audioService.seek(Duration.zero);
     await Future.delayed(const Duration(milliseconds: 50));
-    await _audioService.initialize();
     _setupStreamListeners();
 
     final localImagePath = prevSession['_localImagePath'] as String?;
@@ -950,9 +950,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
     _miniPlayerProvider!.playSession(updatedSession);
 
-    await _audioService.stop();
+    await _audioService.pause();
+    await _audioService.seek(Duration.zero);
     await Future.delayed(const Duration(milliseconds: 50));
-    await _audioService.initialize();
     _setupStreamListeners();
 
     final resolved = await _audioService.playFromUrl(
@@ -1012,9 +1012,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
     _miniPlayerProvider!.playSession(updatedSession);
 
     // Play
-    await _audioService.stop();
+    await _audioService.pause();
+    await _audioService.seek(Duration.zero);
     await Future.delayed(const Duration(milliseconds: 50));
-    await _audioService.initialize();
     _setupStreamListeners();
 
     final durationSeconds = nextSession['_offlineDurationSeconds'] as int? ?? 0;
