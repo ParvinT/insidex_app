@@ -14,7 +14,7 @@ dependencies:
 
   # UI & Responsive
   flutter_screenutil: ^5.9.0
-  responsive_framework: ^1.1.1w
+  responsive_framework: ^1.1.1
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.9
   auto_size_text: ^3.0.0
