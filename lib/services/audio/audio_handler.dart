@@ -415,7 +415,7 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
         );
 
         // Start playback
-        await _player.play();
+        _player.play();
 
         debugPrint('🎵 [InsideXAudioHandler] Now playing: $title');
         return resolvedDuration;

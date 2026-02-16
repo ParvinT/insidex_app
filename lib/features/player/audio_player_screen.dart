@@ -456,7 +456,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           '🔔 [AudioPlayer] PlayerState: processing=${state.processingState}, playing=${state.playing}');
       if (state.processingState == ProcessingState.completed) {
         debugPrint('✅ [AudioPlayer] COMPLETED detected!');
-        debugPrint('   isLooping: $_isLooping');
+        debugPrint('✅ [STREAM-DEBUG] hasNext: ${_miniPlayerProvider?.hasNext}');
+        debugPrint(
+            '✅ [STREAM-DEBUG] isAutoPlayTransitioning: ${_miniPlayerProvider?.isAutoPlayTransitioning}');
+        debugPrint('✅ [STREAM-DEBUG] _isLooping: $_isLooping');
         debugPrint('   hasNext: ${_miniPlayerProvider?.hasNext}');
         debugPrint(
             '   isTransitioning: ${_miniPlayerProvider?.isAutoPlayTransitioning}');
@@ -497,25 +500,29 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
 
   Future<void> _initializeAudio() async {
     if (_isLoadingAudio) {
-      debugPrint('⏳ [AudioPlayer] Already loading audio, skipping...');
+      debugPrint('⏳ [INIT-DEBUG] Already loading audio, SKIPPING');
       return;
     }
 
     _isLoadingAudio = true;
-    debugPrint('🎵 [AudioPlayer] Initializing audio...');
+    debugPrint('🟡 [INIT-DEBUG] Starting _initializeAudio...');
 
     try {
       await _audioService.stop();
+      debugPrint('🟡 [INIT-DEBUG] audioService.stop() done');
       await Future.delayed(const Duration(milliseconds: 50));
       await _audioService.initialize();
-      debugPrint('✅ [AudioPlayer] Audio service initialized');
+      debugPrint('🟡 [INIT-DEBUG] audioService.initialize() done');
     } catch (e) {
-      debugPrint('❌ [AudioPlayer] Initialize audio error: $e');
+      debugPrint('❌ [INIT-DEBUG] Initialize error: $e');
     } finally {
       _isLoadingAudio = false;
+      debugPrint('🟡 [INIT-DEBUG] _isLoadingAudio set to FALSE');
     }
     await _setupStreamListeners();
+    debugPrint('🟡 [INIT-DEBUG] Stream listeners setup done');
     await _playCurrentTrack();
+    debugPrint('🟡 [INIT-DEBUG] _playCurrentTrack() returned');
   }
 
   Future<void> _togglePlayPause() async {
@@ -764,53 +771,78 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
   // =================== AUTO-PLAY ===================
 
   Future<void> _playNextSession() async {
+    debugPrint('🔵 [NEXT-DEBUG] _playNextSession CALLED');
+    debugPrint(
+        '🔵 [NEXT-DEBUG] _miniPlayerProvider == null: ${_miniPlayerProvider == null}');
+    debugPrint(
+        '🔵 [NEXT-DEBUG] isAutoPlayTransitioning: ${_miniPlayerProvider?.isAutoPlayTransitioning}');
+    debugPrint('🔵 [NEXT-DEBUG] hasNext: ${_miniPlayerProvider?.hasNext}');
+    debugPrint('🔵 [NEXT-DEBUG] _isPlayingTrack: $_isPlayingTrack');
+    debugPrint('🔵 [NEXT-DEBUG] _isLoadingAudio: $_isLoadingAudio');
+    debugPrint('🔵 [NEXT-DEBUG] mounted: $mounted');
+
     if (_miniPlayerProvider == null ||
-        _miniPlayerProvider!.isAutoPlayTransitioning) return;
-
-    _miniPlayerProvider!.setAutoPlayTransitioning(true);
-
-    final nextSession = _miniPlayerProvider!.playNext();
-    if (nextSession == null) {
-      debugPrint('⏹️ [AudioPlayer] No next session - queue ended');
-      _miniPlayerProvider!.setAutoPlayTransitioning(false);
+        _miniPlayerProvider!.isAutoPlayTransitioning) {
+      debugPrint('🔴 [NEXT-DEBUG] BLOCKED! Returning early.');
       return;
     }
 
-    debugPrint('⏭️ [AudioPlayer] Switching to: ${nextSession['title']}');
+    _miniPlayerProvider!.setAutoPlayTransitioning(true);
+    debugPrint('🔵 [NEXT-DEBUG] Transitioning set to TRUE');
 
-    // Reset state for new session
-    setState(() {
-      _session = Map<String, dynamic>.from(nextSession);
-      _currentPosition = Duration.zero;
-      _totalDuration = Duration.zero;
-      _isPlaying = false;
-      _hasAddedToRecent = false;
-      _isPlayingTrack = false;
-      _audioUrl = null;
-      _backgroundImageUrl = null;
-      _isFavorite = false;
-      _isInPlaylist = false;
-    });
+    try {
+      final nextSession = _miniPlayerProvider!.playNext();
+      if (nextSession == null) {
+        debugPrint('🔴 [NEXT-DEBUG] playNext() returned NULL - queue ended');
+        return;
+      }
 
-    // End current tracking session
-    if (_isTracking) {
-      await ListeningTrackerService.endSession();
-      _isTracking = false;
+      debugPrint(
+          '🔵 [NEXT-DEBUG] Got next session: ${nextSession['id']} - ${nextSession['title']}');
+
+      setState(() {
+        _session = Map<String, dynamic>.from(nextSession);
+        _currentPosition = Duration.zero;
+        _totalDuration = Duration.zero;
+        _isPlaying = false;
+        _hasAddedToRecent = false;
+        _isPlayingTrack = false;
+        _audioUrl = null;
+        _backgroundImageUrl = null;
+        _isFavorite = false;
+        _isInPlaylist = false;
+      });
+      debugPrint('🔵 [NEXT-DEBUG] setState done - state reset');
+
+      if (_isTracking) {
+        await ListeningTrackerService.endSession();
+        _isTracking = false;
+        debugPrint('🔵 [NEXT-DEBUG] Tracking ended');
+      }
+
+      debugPrint('🔵 [NEXT-DEBUG] Calling _loadLanguageAndUrls...');
+      await _loadLanguageAndUrls();
+      debugPrint(
+          '🔵 [NEXT-DEBUG] _loadLanguageAndUrls done. audioUrl: $_audioUrl');
+
+      _miniPlayerProvider!.updateSession(_session);
+      debugPrint('🔵 [NEXT-DEBUG] Provider session updated');
+
+      _checkFavoriteStatus();
+      _checkPlaylistStatus();
+      _addToRecentSessions();
+      debugPrint('🔵 [NEXT-DEBUG] Favorite/Playlist/Recent checks dispatched');
+
+      debugPrint('🔵 [NEXT-DEBUG] Calling _initializeAudio...');
+      await _initializeAudio();
+      debugPrint('🔵 [NEXT-DEBUG] _initializeAudio COMPLETED');
+    } catch (e, st) {
+      debugPrint('❌ [NEXT-DEBUG] EXCEPTION: $e');
+      debugPrint('❌ [NEXT-DEBUG] STACKTRACE: $st');
+    } finally {
+      _miniPlayerProvider!.setAutoPlayTransitioning(false);
+      debugPrint('🔵 [NEXT-DEBUG] Transitioning set to FALSE (finally)');
     }
-
-    // Load URLs, title, and image for new session
-    await _loadLanguageAndUrls();
-
-    // Sync localized data back to provider
-    _miniPlayerProvider!.updateSession(_session);
-
-    // Check favorite/playlist status for new session
-    _checkFavoriteStatus();
-    _checkPlaylistStatus();
-    _addToRecentSessions();
-
-    await _initializeAudio();
-    _miniPlayerProvider!.setAutoPlayTransitioning(false);
   }
 
   // =================== LIFECYCLE OBSERVER ===================
