@@ -10,7 +10,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'player_state_mixin.dart';
 import 'player_audio_mixin.dart';
 import 'player_session_mixin.dart';
-import 'player_queue_helpers.dart';
 import 'widgets/player_modals.dart';
 import 'widgets/session_info_modal.dart';
 import 'widgets/player_widgets.dart';
@@ -41,8 +40,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
         TickerProviderStateMixin,
         WidgetsBindingObserver,
         PlayerAudioMixin,
-        PlayerSessionMixin,
-        PlayerQueueHelpersMixin
+        PlayerSessionMixin
     implements PlayerStateAccessor {
   // =================== STATE VARIABLES ===================
 
@@ -395,10 +393,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen>
           hasNext: _miniPlayerProvider?.hasNext ?? false,
           onSwipePrevious: () => playPreviousSession(),
           onSwipeNext: () => playNextSession(),
-          nextImageUrl: getNextSessionImageUrl(),
-          nextLocalImagePath: getNextSessionLocalImagePath(),
-          previousImageUrl: getPreviousSessionImageUrl(),
-          previousLocalImagePath: getPreviousSessionLocalImagePath(),
+          isTransitioning:
+              _miniPlayerProvider?.isAutoPlayTransitioning ?? false,
         ),
         SizedBox(height: 40.h),
         PlayerSessionInfo(

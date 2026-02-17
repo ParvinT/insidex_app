@@ -22,11 +22,8 @@ class PlayerAlbumArt extends StatefulWidget {
   final VoidCallback? onSwipePrevious;
   final VoidCallback? onSwipeNext;
 
-  // Next/Previous session images for peek effect
-  final String? nextImageUrl;
-  final String? nextLocalImagePath;
-  final String? previousImageUrl;
-  final String? previousLocalImagePath;
+  // Transition lock - parent tells us when a session change is in progress
+  final bool isTransitioning;
 
   const PlayerAlbumArt({
     super.key,
@@ -38,10 +35,7 @@ class PlayerAlbumArt extends StatefulWidget {
     this.hasNext = false,
     this.onSwipePrevious,
     this.onSwipeNext,
-    this.nextImageUrl,
-    this.nextLocalImagePath,
-    this.previousImageUrl,
-    this.previousLocalImagePath,
+    this.isTransitioning = false,
   });
 
   @override
@@ -51,13 +45,20 @@ class PlayerAlbumArt extends StatefulWidget {
 class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     with SingleTickerProviderStateMixin {
   late AnimationController _continuousController;
-  late PageController _pageController;
 
-  bool _isSwiping = false;
-  bool _isTransitionLocked = false;
+  // Horizontal drag tracking for swipe gesture
+  double _dragOffset = 0.0;
+  bool _swipeTriggered = false;
 
-  // Current page starts at the "current" session index
-  int get _currentPageIndex => widget.hasPrevious ? 1 : 0;
+  // Swipe thresholds
+  static const double _swipeThreshold = 80.0;
+  static const double _velocityThreshold = 300.0;
+  static const double _maxDragOffset = 120.0;
+
+  // Unique key for AnimatedSwitcher based on current image
+  Key get _imageKey => ValueKey(
+        widget.imageUrl ?? widget.localImagePath ?? 'placeholder',
+      );
 
   @override
   void initState() {
@@ -66,31 +67,11 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
       vsync: this,
       duration: const Duration(seconds: 10),
     )..repeat();
-
-    _pageController = PageController(initialPage: _currentPageIndex);
-  }
-
-  @override
-  void didUpdateWidget(covariant PlayerAlbumArt oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    // When session changes (after swipe completes), reset PageController
-    final oldId = oldWidget.imageUrl ?? oldWidget.localImagePath;
-    final newId = widget.imageUrl ?? widget.localImagePath;
-
-    if (oldId != newId && !_isSwiping) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _pageController.hasClients) {
-          _pageController.jumpToPage(_currentPageIndex);
-        }
-      });
-    }
   }
 
   @override
   void dispose() {
     _continuousController.dispose();
-    _pageController.dispose();
     super.dispose();
   }
 
@@ -101,140 +82,151 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     final double imageHeight = imageSize * 9 / 16;
     final double borderRadius = imageSize * 0.08;
 
+    final bool canSwipe =
+        !widget.isTransitioning && (widget.hasPrevious || widget.hasNext);
+
     return SizedBox(
       width: imageSize,
       height: imageHeight,
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: _totalPages,
-        physics: _totalPages > 1 && !_isTransitionLocked
-            ? const BouncingScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
-        onPageChanged: _onPageChanged,
-        itemBuilder: (context, index) {
-          final pageType = _getPageType(index);
-          return _buildPage(pageType, imageSize, imageHeight, borderRadius);
-        },
+      child: GestureDetector(
+        onHorizontalDragStart: canSwipe ? _onDragStart : null,
+        onHorizontalDragUpdate: canSwipe ? _onDragUpdate : null,
+        onHorizontalDragEnd: canSwipe ? _onDragEnd : null,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: Transform.translate(
+            key: _imageKey,
+            offset: Offset(_dragOffset, 0),
+            child: Opacity(
+              opacity: (1.0 - (_dragOffset.abs() / _maxDragOffset) * 0.3)
+                  .clamp(0.5, 1.0),
+              child: _buildAlbumArt(imageSize, imageHeight, borderRadius),
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  // =================== PAGE MANAGEMENT ===================
+  // =================== SWIPE GESTURE HANDLING ===================
 
-  int get _totalPages {
-    int count = 1; // current
-    if (widget.hasPrevious) count++;
-    if (widget.hasNext) count++;
-    return count;
+  void _onDragStart(DragStartDetails details) {
+    _swipeTriggered = false;
   }
 
-  _PageType _getPageType(int index) {
-    if (widget.hasPrevious) {
-      if (index == 0) return _PageType.previous;
-      if (index == 1) return _PageType.current;
-      return _PageType.next;
-    } else {
-      if (index == 0) return _PageType.current;
-      return _PageType.next;
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (_swipeTriggered) return;
+
+    double newOffset = _dragOffset + details.delta.dx;
+
+    // Constrain drag: only allow directions that have sessions
+    if (newOffset > 0 && !widget.hasPrevious) {
+      newOffset = newOffset * 0.2; // Rubber band effect
     }
-  }
-
-  void _onPageChanged(int index) {
-    final pageType = _getPageType(index);
-
-    if (pageType == _PageType.previous && !_isTransitionLocked) {
-      _isSwiping = true;
-      _isTransitionLocked = true;
-      widget.onSwipePrevious?.call();
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) {
-          setState(() {
-            _isSwiping = false;
-            _isTransitionLocked = false;
-          });
-        }
-      });
-    } else if (pageType == _PageType.next && !_isTransitionLocked) {
-      _isSwiping = true;
-      _isTransitionLocked = true;
-      widget.onSwipeNext?.call();
-      Future.delayed(const Duration(milliseconds: 1000), () {
-        if (mounted) {
-          setState(() {
-            _isSwiping = false;
-            _isTransitionLocked = false;
-          });
-        }
-      });
+    if (newOffset < 0 && !widget.hasNext) {
+      newOffset = newOffset * 0.2; // Rubber band effect
     }
+
+    setState(() {
+      _dragOffset = newOffset.clamp(-_maxDragOffset, _maxDragOffset);
+    });
   }
 
-  // =================== PAGE CONTENT ===================
+  void _onDragEnd(DragEndDetails details) {
+    if (_swipeTriggered) return;
 
-  Widget _buildPage(
-    _PageType type,
+    final velocity = details.primaryVelocity ?? 0;
+    final absOffset = _dragOffset.abs();
+
+    bool shouldNavigate = false;
+    bool goNext = false;
+
+    // Check velocity-based flick
+    if (velocity.abs() > _velocityThreshold) {
+      if (velocity < 0 && widget.hasNext) {
+        shouldNavigate = true;
+        goNext = true;
+      } else if (velocity > 0 && widget.hasPrevious) {
+        shouldNavigate = true;
+        goNext = false;
+      }
+    }
+    // Check distance-based swipe
+    else if (absOffset > _swipeThreshold) {
+      if (_dragOffset < 0 && widget.hasNext) {
+        shouldNavigate = true;
+        goNext = true;
+      } else if (_dragOffset > 0 && widget.hasPrevious) {
+        shouldNavigate = true;
+        goNext = false;
+      }
+    }
+
+    if (shouldNavigate) {
+      _swipeTriggered = true;
+
+      if (goNext) {
+        widget.onSwipeNext?.call();
+      } else {
+        widget.onSwipePrevious?.call();
+      }
+    }
+
+    // Animate drag offset back to zero
+    setState(() {
+      _dragOffset = 0.0;
+    });
+  }
+
+  // =================== ALBUM ART CONTENT ===================
+
+  Widget _buildAlbumArt(
     double imageSize,
     double imageHeight,
     double borderRadius,
   ) {
-    String? imageUrl;
-    String? localPath;
-
-    switch (type) {
-      case _PageType.previous:
-        imageUrl = widget.previousImageUrl;
-        localPath = widget.previousLocalImagePath;
-        break;
-      case _PageType.current:
-        imageUrl = widget.imageUrl;
-        localPath = widget.localImagePath;
-        break;
-      case _PageType.next:
-        imageUrl = widget.nextImageUrl;
-        localPath = widget.nextLocalImagePath;
-        break;
-    }
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 4.w),
-      child: Container(
-        width: imageSize,
-        height: imageHeight,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(borderRadius),
-          boxShadow: type == _PageType.current
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 24,
-                    offset: const Offset(0, 8),
-                    spreadRadius: 2,
-                  ),
-                ]
-              : null,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(borderRadius),
-          child: Stack(
-            children: [
-              // Background Image
-              _buildImage(imageUrl, localPath),
-
-              // Dark Overlay
-              _buildDarkOverlay(),
-
-              // Equalizer (only on current page)
-              if (type == _PageType.current)
-                Center(
-                  child: widget.isPlaying
-                      ? AnimatedBuilder(
-                          animation: _continuousController,
-                          builder: (context, _) => _buildAnimatedEqualizer(),
-                        )
-                      : _buildStaticEqualizer(),
-                ),
-            ],
+    return Container(
+      width: imageSize,
+      height: imageHeight,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+            spreadRadius: 2,
           ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Stack(
+          children: [
+            // Background Image
+            _buildImage(widget.imageUrl, widget.localImagePath),
+
+            // Dark Overlay
+            _buildDarkOverlay(),
+
+            // Equalizer
+            Center(
+              child: widget.isPlaying
+                  ? AnimatedBuilder(
+                      animation: _continuousController,
+                      builder: (context, _) => _buildAnimatedEqualizer(),
+                    )
+                  : _buildStaticEqualizer(),
+            ),
+          ],
         ),
       ),
     );
@@ -365,9 +357,7 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   }
 }
 
-// =================== ENUMS & PAINTERS ===================
-
-enum _PageType { previous, current, next }
+// =================== PAINTERS ===================
 
 class _EqualizerPainter extends CustomPainter {
   final List<double> barHeights;
