@@ -708,7 +708,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
   Future<void> _playNextInMiniPlayer() async {
     if (_miniPlayerProvider == null ||
-        _miniPlayerProvider!.isAutoPlayTransitioning) return;
+        _miniPlayerProvider!.isAutoPlayTransitioning) {
+      return;
+    }
 
     _miniPlayerProvider!.setAutoPlayTransitioning(true);
 
@@ -743,7 +745,9 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
   Future<void> _playPreviousInMiniPlayer() async {
     if (_miniPlayerProvider == null ||
-        _miniPlayerProvider!.isAutoPlayTransitioning) return;
+        _miniPlayerProvider!.isAutoPlayTransitioning) {
+      return;
+    }
 
     _miniPlayerProvider!.setAutoPlayTransitioning(true);
 
@@ -844,13 +848,10 @@ class _MiniPlayerWidgetState extends State<MiniPlayerWidget>
 
     final preloader = DecryptionPreloader();
     String? decryptedPath = preloader.getCachedPath(sessionId);
-
-    if (decryptedPath == null) {
-      decryptedPath = await downloadService.getDecryptedAudioPath(
-        sessionId,
-        language,
-      );
-    }
+    decryptedPath ??= await downloadService.getDecryptedAudioPath(
+      sessionId,
+      language,
+    );
 
     if (decryptedPath == null) {
       debugPrint('❌ [MiniPlayer] Cannot decrypt previous offline session');

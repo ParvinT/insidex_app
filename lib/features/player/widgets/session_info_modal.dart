@@ -40,6 +40,8 @@ class SessionInfoModal {
     );
     localizedSession['_displayDescription'] = philosophyText;
 
+    if (!context.mounted) return;
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,

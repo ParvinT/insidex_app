@@ -525,19 +525,22 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   }
 
   Future<void> _playDownload(DownloadedSession download, int index) async {
-    // ✅ CHECK SUBSCRIPTION - Can user play offline content?
+    // ✅ Capture ALL context dependencies upfront
     final subscriptionProvider = context.read<SubscriptionProvider>();
+    final miniPlayer = context.read<MiniPlayerProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
 
     if (!subscriptionProvider.canDownload) {
-      // User is Lite or Free - check internet status
       final connectivityResult = await Connectivity().checkConnectivity();
       final hasInternet = connectivityResult.any(
         (result) => result != ConnectivityResult.none,
       );
 
+      if (!mounted) return;
+
       if (hasInternet) {
-        // Online - show upgrade prompt with upgrade option
-        final l10n = AppLocalizations.of(context);
         final purchased = await showUpgradeBottomSheet(
           context,
           feature: 'offline_playback',
@@ -545,53 +548,42 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           subtitle: l10n.offlinePlaybackSubtitle,
         );
 
-        // If not purchased, don't play
         if (purchased != true) return;
-
-        // Re-check after potential purchase
         if (!subscriptionProvider.canDownload) return;
       } else {
-        // Offline - show info-only modal (no upgrade button)
         await showOfflineUpgradeInfo(context);
         return;
       }
     }
 
-    // ✅ User has Standard - proceed with playback
-    // Stop current audio and dismiss mini player BEFORE navigating
     final audioService = AudioPlayerService();
     await audioService.stop();
 
-    // Dismiss mini player to prevent state conflicts
-    if (mounted) {
-      final miniPlayer = context.read<MiniPlayerProvider>();
-      miniPlayer.dismiss();
-    }
+    if (!mounted) return;
+    miniPlayer.dismiss();
 
-    // Small delay to ensure cleanup completes
     await Future.delayed(const Duration(milliseconds: 100));
 
     _preloader.prioritize(download.sessionId);
 
     if (!mounted) return;
 
-    final downloadProvider = context.read<DownloadProvider>();
     final sessionList =
         downloadProvider.downloads.map((d) => d.toPlayerSessionData()).toList();
 
     final playContext = PlayContext(
       type: PlayContextType.playlist,
-      sourceTitle: AppLocalizations.of(context).downloads,
+      sourceTitle: l10n.downloads,
       sessionList: sessionList,
       currentIndex: index,
     );
 
-    Navigator.push(
-        context,
-        PlayerRoute(
-          sessionData: download.toPlayerSessionData(),
-          playContext: playContext,
-        ));
+    navigator.push(
+      PlayerRoute(
+        sessionData: download.toPlayerSessionData(),
+        playContext: playContext,
+      ),
+    );
   }
 
   Future<void> _showDeleteDialog(

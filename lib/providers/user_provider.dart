@@ -158,6 +158,7 @@ class UserProvider extends ChangeNotifier {
     _isShowingLogoutDialog = false;
 
     MiniPlayerProvider? miniPlayerProvider;
+    DownloadProvider? downloadProvider;
     final navigatorState = InsidexApp.navigatorKey.currentState;
     if (navigatorState != null) {
       try {
@@ -167,6 +168,14 @@ class UserProvider extends ChangeNotifier {
         );
       } catch (e) {
         debugPrint('⚠️ Could not get MiniPlayerProvider: $e');
+      }
+      try {
+        downloadProvider = Provider.of<DownloadProvider>(
+          navigatorState.context,
+          listen: false,
+        );
+      } catch (e) {
+        debugPrint('⚠️ Could not get DownloadProvider: $e');
       }
     }
 
@@ -187,12 +196,7 @@ class UserProvider extends ChangeNotifier {
     }
 
     try {
-      final navContext = InsidexApp.navigatorKey.currentContext;
-      if (navContext != null) {
-        final downloadProvider = Provider.of<DownloadProvider>(
-          navContext,
-          listen: false,
-        );
+      if (downloadProvider != null) {
         await downloadProvider.clearUserData();
         debugPrint('✅ [UserProvider] Download provider cleared');
       }

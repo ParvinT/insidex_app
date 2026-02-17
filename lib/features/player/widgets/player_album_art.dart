@@ -54,6 +54,7 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   late PageController _pageController;
 
   bool _isSwiping = false;
+  bool _isTransitionLocked = false;
 
   // Current page starts at the "current" session index
   int get _currentPageIndex => widget.hasPrevious ? 1 : 0;
@@ -106,7 +107,7 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
       child: PageView.builder(
         controller: _pageController,
         itemCount: _totalPages,
-        physics: _totalPages > 1
+        physics: _totalPages > 1 && !_isTransitionLocked
             ? const BouncingScrollPhysics()
             : const NeverScrollableScrollPhysics(),
         onPageChanged: _onPageChanged,
@@ -141,17 +142,29 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   void _onPageChanged(int index) {
     final pageType = _getPageType(index);
 
-    if (pageType == _PageType.previous) {
+    if (pageType == _PageType.previous && !_isTransitionLocked) {
       _isSwiping = true;
+      _isTransitionLocked = true;
       widget.onSwipePrevious?.call();
-      Future.delayed(const Duration(milliseconds: 300), () {
-        _isSwiping = false;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          setState(() {
+            _isSwiping = false;
+            _isTransitionLocked = false;
+          });
+        }
       });
-    } else if (pageType == _PageType.next) {
+    } else if (pageType == _PageType.next && !_isTransitionLocked) {
       _isSwiping = true;
+      _isTransitionLocked = true;
       widget.onSwipeNext?.call();
-      Future.delayed(const Duration(milliseconds: 300), () {
-        _isSwiping = false;
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          setState(() {
+            _isSwiping = false;
+            _isTransitionLocked = false;
+          });
+        }
       });
     }
   }

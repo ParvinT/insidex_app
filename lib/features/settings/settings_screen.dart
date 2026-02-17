@@ -382,6 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleSignOut() async {
     final miniPlayerProvider = context.read<MiniPlayerProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
     // Show confirmation dialog
     final shouldSignOut = await showDialog<bool>(
       context: context,
@@ -450,7 +451,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         }
 
         try {
-          final downloadProvider = context.read<DownloadProvider>();
           await downloadProvider.clearUserData();
           debugPrint('✅ [Settings] Download provider cleared');
         } catch (e) {

@@ -105,6 +105,14 @@ class DecryptionPreloader {
     final cachedPath = _decryptedCache[cacheKey];
 
     if (cachedPath != null) {
+      // Validate file still exists on disk
+      final file = File(cachedPath);
+      if (!file.existsSync()) {
+        _decryptedCache.remove(cacheKey);
+        debugPrint('🗑️ [Preloader] Stale cache removed: $cacheKey');
+        return null;
+      }
+
       // Move to end (LRU update)
       _decryptedCache.remove(cacheKey);
       _decryptedCache[cacheKey] = cachedPath;

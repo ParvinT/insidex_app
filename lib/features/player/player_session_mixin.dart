@@ -20,6 +20,16 @@ mixin PlayerSessionMixin<T extends StatefulWidget> on State<T>
   Future<void> Function()? onInitializeAudio;
   Future<void> Function()? onSetupStreamListeners;
 
+  // Cooldown to prevent rapid swipe/tap transitions
+  DateTime? _lastTransitionTime;
+  static const Duration _transitionCooldown = Duration(milliseconds: 1000);
+
+  bool get _isInCooldown {
+    if (_lastTransitionTime == null) return false;
+    return DateTime.now().difference(_lastTransitionTime!) <
+        _transitionCooldown;
+  }
+
   Future<void> checkAccessAndInitialize() async {
     final miniPlayerProvider = context.read<MiniPlayerProvider>();
     final subscriptionProvider = context.read<SubscriptionProvider>();
@@ -145,8 +155,7 @@ mixin PlayerSessionMixin<T extends StatefulWidget> on State<T>
 
       session['_localizedTitle'] = title;
       session['_displayTitle'] = title;
-      session['_localizedIntroContent'] =
-          localizedContent.introduction.content;
+      session['_localizedIntroContent'] = localizedContent.introduction.content;
     });
   }
 
@@ -158,8 +167,7 @@ mixin PlayerSessionMixin<T extends StatefulWidget> on State<T>
       return;
     }
 
-    final isSameSession =
-        miniPlayer.currentSession?['id'] == session['id'];
+    final isSameSession = miniPlayer.currentSession?['id'] == session['id'];
 
     if (!isSameSession) {
       debugPrint('🆕 Different session, starting fresh');
@@ -194,10 +202,13 @@ mixin PlayerSessionMixin<T extends StatefulWidget> on State<T>
     debugPrint('🔵 [NEXT-DEBUG] playNextSession CALLED');
 
     if (miniPlayerProvider == null ||
-        miniPlayerProvider!.isAutoPlayTransitioning) {
+        miniPlayerProvider!.isAutoPlayTransitioning ||
+        _isInCooldown) {
       debugPrint('🔴 [NEXT-DEBUG] BLOCKED! Returning early.');
       return;
     }
+
+    _lastTransitionTime = DateTime.now();
 
     miniPlayerProvider!.setAutoPlayTransitioning(true);
 
@@ -260,10 +271,14 @@ mixin PlayerSessionMixin<T extends StatefulWidget> on State<T>
     debugPrint('🔵 [PREV-DEBUG] playPreviousSession CALLED');
 
     if (miniPlayerProvider == null ||
-        miniPlayerProvider!.isAutoPlayTransitioning) {
-      debugPrint('🔴 [PREV-DEBUG] BLOCKED - transitioning or null provider');
+        miniPlayerProvider!.isAutoPlayTransitioning ||
+        _isInCooldown) {
+      debugPrint(
+          '🔴 [PREV-DEBUG] BLOCKED - transitioning, cooldown, or null provider');
       return;
     }
+
+    _lastTransitionTime = DateTime.now();
 
     miniPlayerProvider!.setAutoPlayTransitioning(true);
 

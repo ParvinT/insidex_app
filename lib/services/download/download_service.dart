@@ -612,6 +612,11 @@ class DownloadService {
   Future<String?> getDecryptedAudioPath(
       String sessionId, String language) async {
     try {
+      // Defensive: ensure encryption is ready after account switch
+      if (!_encryption.isInitialized && _currentUserId != null) {
+        debugPrint('🔐 [DownloadService] Lazy re-init encryption');
+        _encryption.initialize(_currentUserId!);
+      }
       final download = await getDownload(sessionId, language);
       if (download == null) {
         debugPrint(

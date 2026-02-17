@@ -153,6 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleSignOut() async {
     final miniPlayerProvider = context.read<MiniPlayerProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -201,7 +202,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
       }
       try {
-        final downloadProvider = context.read<DownloadProvider>();
         await downloadProvider.clearUserData();
         debugPrint('✅ [Settings] Download provider cleared');
       } catch (e) {
