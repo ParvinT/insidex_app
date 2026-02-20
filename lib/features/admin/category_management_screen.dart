@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lottie/lottie.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../core/responsive/breakpoints.dart';
-import '../../core/constants/app_icons.dart';
 import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
 import '../../services/category/category_localization_service.dart';
 import '../../services/category/category_filter_service.dart';
 import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../../shared/widgets/category_icon.dart';
 import 'add_category_screen.dart';
 import 'category_images_screen.dart';
 import 'widgets/admin_search_bar.dart';
@@ -326,14 +325,11 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(12.w),
-                  child: Lottie.asset(
-                    AppIcons.getAnimationPath(
-                      AppIcons.getIconByName(category.iconName)?['path'] ??
-                          'meditation.json',
-                    ),
-                    fit: BoxFit.contain,
-                    repeat: true,
+                  padding: EdgeInsets.all(10.w),
+                  child: CategoryIcon(
+                    name: category.iconName,
+                    size: isTablet ? 40.w : 30.w,
+                    forceBrightness: Brightness.dark,
                   ),
                 ),
               ),

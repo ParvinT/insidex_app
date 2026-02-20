@@ -4,18 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
 import '../../services/category/category_localization_service.dart';
 import 'widgets/multi_language_content_section.dart';
-import '../../core/constants/app_icons.dart';
 
 class AddSessionScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionToEdit;
@@ -669,18 +668,9 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                                   snapshot.data ?? category.getName('en');
                               return Row(
                                 children: [
-                                  SizedBox(
-                                    width: 32.w,
-                                    height: 32.w,
-                                    child: Lottie.asset(
-                                      AppIcons.getAnimationPath(
-                                        AppIcons.getIconByName(
-                                                category.iconName)?['path'] ??
-                                            'meditation.json',
-                                      ),
-                                      fit: BoxFit.contain,
-                                      repeat: true,
-                                    ),
+                                  CategoryIcon(
+                                    name: category.iconName,
+                                    size: 32.w,
                                   ),
                                   SizedBox(width: 12.w),
                                   Expanded(child: Text(name)),

@@ -5,15 +5,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:lottie/lottie.dart';
 import '../../models/play_context.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/player_route.dart';
 import '../../shared/widgets/session_card.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
-import '../../core/constants/app_icons.dart';
 import '../../shared/widgets/auto_marquee_text.dart';
 
 class SessionsListScreen extends StatefulWidget {
@@ -369,24 +368,10 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                             : Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  // Icon animation
                                   if (widget.categoryIconName != null)
-                                    SizedBox(
-                                      width: 32.w,
-                                      height: 32.w,
-                                      child: Transform.scale(
-                                        scale: 1.2,
-                                        child: Lottie.asset(
-                                          AppIcons.getAnimationPath(
-                                            AppIcons.getIconByName(widget
-                                                        .categoryIconName!)?[
-                                                    'path'] ??
-                                                'meditation.json',
-                                          ),
-                                          fit: BoxFit.contain,
-                                          repeat: true,
-                                        ),
-                                      ),
+                                    CategoryIcon(
+                                      name: widget.categoryIconName!,
+                                      size: 32.w,
                                     ),
                                   SizedBox(width: 6.w),
                                   Flexible(
@@ -455,55 +440,62 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
     }
 
     // Sessions list with pagination
-    return ListView.builder(
-      padding: EdgeInsets.all(20.w),
-      itemCount: _allSessions.length + (_hasMoreAllSessions ? 1 : 0),
-      itemBuilder: (context, index) {
-        // See More button at the end
-        if (index == _allSessions.length) {
-          if (_isLoadingAllSessions) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: CircularProgressIndicator(color: colors.textPrimary),
-              ),
-            );
-          } else {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: _loadMoreAllSessions,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.textPrimary,
-                    foregroundColor: colors.background,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeIn,
+      switchOutCurve: Curves.easeOut,
+      child: ListView.builder(
+        key: ValueKey(
+            'allSessions_${_selectedGenderFilter}_${_allSessions.length}'),
+        padding: EdgeInsets.all(20.w),
+        itemCount: _allSessions.length + (_hasMoreAllSessions ? 1 : 0),
+        itemBuilder: (context, index) {
+          // See More button at the end
+          if (index == _allSessions.length) {
+            if (_isLoadingAllSessions) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: Center(
+                  child: CircularProgressIndicator(color: colors.textPrimary),
+                ),
+              );
+            } else {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: _loadMoreAllSessions,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.textPrimary,
+                      foregroundColor: colors.background,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 32.w, vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).seeMore,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      AppLocalizations.of(context).seeMore,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
+              );
+            }
           }
-        }
 
-        // Session item
-        final session = _allSessions[index];
-        return _buildSessionCard(
-          sessionId: session['id'],
-          sessionData: session,
-          index: index,
-        );
-      },
+          // Session item
+          final session = _allSessions[index];
+          return _buildSessionCard(
+            sessionId: session['id'],
+            sessionData: session,
+            index: index,
+          );
+        },
+      ),
     );
   }
 
@@ -547,55 +539,63 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
     }
 
     // Sessions list with pagination
-    return ListView.builder(
-      padding: EdgeInsets.all(20.w),
-      itemCount: _categorySessions.length + (_hasMoreCategorySessions ? 1 : 0),
-      itemBuilder: (context, index) {
-        // See More button at the end
-        if (index == _categorySessions.length) {
-          if (_isLoadingCategorySessions) {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: CircularProgressIndicator(color: colors.textPrimary),
-              ),
-            );
-          } else {
-            return Padding(
-              padding: EdgeInsets.symmetric(vertical: 20.h),
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: _loadMoreCategorySessions,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: colors.textPrimary,
-                    foregroundColor: colors.background,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 32.w, vertical: 12.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      switchInCurve: Curves.easeIn,
+      switchOutCurve: Curves.easeOut,
+      child: ListView.builder(
+        key: ValueKey(
+            'catSessions_${_selectedGenderFilter}_${_categorySessions.length}'),
+        padding: EdgeInsets.all(20.w),
+        itemCount:
+            _categorySessions.length + (_hasMoreCategorySessions ? 1 : 0),
+        itemBuilder: (context, index) {
+          // See More button at the end
+          if (index == _categorySessions.length) {
+            if (_isLoadingCategorySessions) {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: Center(
+                  child: CircularProgressIndicator(color: colors.textPrimary),
+                ),
+              );
+            } else {
+              return Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: Center(
+                  child: ElevatedButton(
+                    onPressed: _loadMoreCategorySessions,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: colors.textPrimary,
+                      foregroundColor: colors.background,
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 32.w, vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context).seeMore,
-                    style: GoogleFonts.inter(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
+                    child: Text(
+                      AppLocalizations.of(context).seeMore,
+                      style: GoogleFonts.inter(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            );
+              );
+            }
           }
-        }
 
-        // Session item
-        final session = _categorySessions[index];
-        return _buildSessionCard(
-          sessionId: session['id'],
-          sessionData: session,
-          index: index,
-        );
-      },
+          // Session item
+          final session = _categorySessions[index];
+          return _buildSessionCard(
+            sessionId: session['id'],
+            sessionData: session,
+            index: index,
+          );
+        },
+      ),
     );
   }
 
@@ -680,7 +680,8 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
           }
         }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: isSelected ? colors.textPrimary : colors.greyLight,

@@ -33,24 +33,21 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
-  String _selectedAvatar = 'turtle';
+  late String _selectedAvatar;
 
   @override
   void initState() {
     super.initState();
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
+      _selectedAvatar = 'turtle';
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/auth/login');
       });
     } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final userProvider = context.read<UserProvider>();
-        setState(() {
-          _nameController.text = userProvider.userName;
-          _selectedAvatar = userProvider.avatarEmoji;
-        });
-      });
+      final userProvider = context.read<UserProvider>();
+      _nameController.text = userProvider.userName;
+      _selectedAvatar = userProvider.avatarEmoji;
     }
   }
 

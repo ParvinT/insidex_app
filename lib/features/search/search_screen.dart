@@ -4,14 +4,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
-import '../../core/constants/app_icons.dart';
 import '../../core/routes/player_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/sessions_list_screen.dart';
 import '../../shared/widgets/session_card.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../services/session_filter_service.dart';
 import '../quiz/screens/quiz_results_screen.dart';
 import 'search_service.dart';
@@ -562,19 +561,9 @@ class _SearchScreenState extends State<SearchScreen>
             ),
             child: Row(
               children: [
-                // Icon with colored background
-                Container(
-                  width: isTablet ? 56.w : 48.w,
-                  height: isTablet ? 56.w : 48.w,
-                  padding: EdgeInsets.all(8.w),
-                  child: Lottie.asset(
-                    AppIcons.getAnimationPath(
-                      AppIcons.getIconByName(category['iconName'])?['path'] ??
-                          'meditation.json',
-                    ),
-                    fit: BoxFit.contain,
-                    repeat: true,
-                  ),
+                CategoryIcon(
+                  name: category['iconName'] ?? 'meditation',
+                  size: isTablet ? 56.w : 48.w,
                 ),
 
                 SizedBox(width: isTablet ? 18.w : 16.w),

@@ -96,11 +96,11 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/icons/categories/
     - assets/legal/en/
     - assets/legal/ru/
     - assets/legal/tr/
     - assets/legal/hi/
-    - assets/animations/categories/
     - assets/animations/ui/
     - assets/animations/avatars/
     - assets/content/en/

@@ -5,16 +5,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:lottie/lottie.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'sessions_list_screen.dart';
 import '../../shared/widgets/session_card.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../core/responsive/context_ext.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/routes/player_route.dart';
-import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/session_filter_service.dart';
 import '../../models/category_model.dart';
@@ -49,6 +48,12 @@ class _CategoriesScreenState extends State<CategoriesScreen>
   bool _isLoadingSessions = false;
   int _recursiveCallCount = 0;
   String _selectedGenderFilter = 'all';
+  // Cache for session counts per category (avoids repeated Firestore streams)
+  Map<String, int> _sessionCountCache = {};
+  bool _isSessionCountsLoaded = false;
+
+  // Cache for localized names (avoids repeated FutureBuilder calls)
+  Map<String, String> _localizedNameCache = {};
 
   @override
   void initState() {
@@ -92,7 +97,6 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     setState(() => _isLoadingCategories = true);
 
     try {
-      // Get categories filtered by user's language
       final categories = await _categoryService.getCategoriesByLanguage();
       final userLanguage = await LanguageHelperService.getCurrentLanguage();
       categories.sort((a, b) {
@@ -109,19 +113,58 @@ class _CategoriesScreenState extends State<CategoriesScreen>
         }
       }
 
-      setState(() {
-        _categories = categories;
-        _categoryImages = images;
-        _isLoadingCategories = false;
-      });
+      // Pre-cache localized names
+      final Map<String, String> nameCache = {};
+      for (final category in categories) {
+        nameCache[category.id] =
+            await CategoryLocalizationService.getLocalizedNameAuto(category);
+      }
 
-      debugPrint('✅ Loaded ${categories.length} categories for user language');
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _categoryImages = images;
+          _localizedNameCache = nameCache;
+          _isLoadingCategories = false;
+        });
+      }
+
+      // Load session counts in background
+      _loadSessionCounts(categories);
     } catch (e) {
       debugPrint('❌ Error loading categories: $e');
-      setState(() {
-        _categories = [];
-        _isLoadingCategories = false;
-      });
+      if (mounted) {
+        setState(() => _isLoadingCategories = false);
+      }
+    }
+  }
+
+  Future<void> _loadSessionCounts(List<CategoryModel> categories) async {
+    try {
+      final Map<String, int> counts = {};
+
+      for (final category in categories) {
+        final snapshot = await _firestore
+            .collection('sessions')
+            .where('categoryId', isEqualTo: category.id)
+            .get();
+
+        // Apply language filter
+        final filtered =
+            await SessionFilterService.filterSessionsByLanguage(snapshot.docs);
+        counts[category.id] = filtered.length;
+      }
+
+      if (mounted) {
+        setState(() {
+          _sessionCountCache = counts;
+          _isSessionCountsLoaded = true;
+        });
+      }
+
+      debugPrint('✅ Session counts cached for ${counts.length} categories');
+    } catch (e) {
+      debugPrint('❌ Error loading session counts: $e');
     }
   }
 
@@ -427,20 +470,26 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
         // Categories Grid
         Expanded(
-          child: GridView.builder(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount:
-                  context.isDesktop ? 4 : (context.isTablet ? 3 : 2),
-              crossAxisSpacing: 16.w,
-              mainAxisSpacing: 16.h,
-              childAspectRatio: 1.0,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child: GridView.builder(
+              key: ValueKey('grid_$_selectedGenderFilter'),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount:
+                    context.isDesktop ? 4 : (context.isTablet ? 3 : 2),
+                crossAxisSpacing: 16.w,
+                mainAxisSpacing: 16.h,
+                childAspectRatio: 1.0,
+              ),
+              itemCount: filteredCategories.length,
+              itemBuilder: (context, index) {
+                final category = filteredCategories[index];
+                return _buildCategoryCard(category);
+              },
             ),
-            itemCount: filteredCategories.length,
-            itemBuilder: (context, index) {
-              final category = filteredCategories[index];
-              return _buildCategoryCard(category);
-            },
           ),
         ),
       ],
@@ -449,204 +498,149 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
   Widget _buildCategoryCard(CategoryModel category) {
     final colors = context.colors;
-    // Parse color
     Color cardColor = colors.textPrimary;
 
-    return FutureBuilder<String>(
-        future: CategoryLocalizationService.getLocalizedNameAuto(category),
-        builder: (context, snapshot) {
-          final localizedName = snapshot.data ?? category.getName('en');
+    // Use cached localized name instead of FutureBuilder
+    final localizedName =
+        _localizedNameCache[category.id] ?? category.getName('en');
 
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SessionsListScreen(
-                    categoryTitle: localizedName,
-                    categoryIconName: category.iconName,
-                    categoryId: category.id,
+    // Use cached session count instead of StreamBuilder
+    final sessionCount = _sessionCountCache[category.id] ?? 0;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SessionsListScreen(
+              categoryTitle: localizedName,
+              categoryIconName: category.iconName,
+              categoryId: category.id,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              cardColor.withValues(alpha: 0.8),
+              cardColor.withValues(alpha: 0.4),
+            ],
+          ),
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        child: Stack(
+          children: [
+            if (category.backgroundImages.isNotEmpty)
+              Positioned.fill(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(24.r),
+                  child: CachedNetworkImage(
+                    imageUrl: _categoryImages[category.id] ?? '',
+                    cacheManager: AppCacheManager.instance,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cardColor, cardColor.withValues(alpha: 0.7)],
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [cardColor, cardColor.withValues(alpha: 0.7)],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              );
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    cardColor.withValues(alpha: 0.8),
-                    cardColor.withValues(alpha: 0.4),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(24.r),
               ),
-              child: Stack(
-                children: [
-                  if (category.backgroundImages.isNotEmpty)
-                    Positioned.fill(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(24.r),
-                        child: CachedNetworkImage(
-                          imageUrl: _categoryImages[category.id] ?? '',
-                          cacheManager: AppCacheManager.instance,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  cardColor,
-                                  cardColor.withValues(alpha: 0.7)
-                                ],
-                              ),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  cardColor,
-                                  cardColor.withValues(alpha: 0.7)
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
 
-                  // Dark overlay for readability
-                  if (category.backgroundImages.isNotEmpty)
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24.r),
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.black.withValues(alpha: 0.4),
-                              Colors.black.withValues(alpha: 0.6),
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  // Content
-                  Padding(
-                    padding: EdgeInsets.all(14.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Icon - Flexible, kalan alanı kullanır
-                        Flexible(
-                          flex: 1,
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: SizedBox(
-                              width: 50.w,
-                              height: 50.w,
-                              child: Lottie.asset(
-                                AppIcons.getAnimationPath(
-                                  AppIcons.getIconByName(
-                                          category.iconName)?['path'] ??
-                                      'meditation.json',
-                                ),
-                                fit: BoxFit.contain,
-                                repeat: true,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // Title
-                        AutoSizeText(
-                          localizedName,
-                          maxLines: 2,
-                          minFontSize: 11,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
-
-                        SizedBox(height: 2.h),
-
-                        // Session Count
-                        StreamBuilder<QuerySnapshot>(
-                          stream: _firestore
-                              .collection('sessions')
-                              .where('categoryId', isEqualTo: category.id)
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Row(
-                                children: [
-                                  Icon(
-                                    Icons.play_circle_filled,
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                    size: 16.sp,
-                                  ),
-                                  SizedBox(width: 4.w),
-                                  Text(
-                                    '...  ${AppLocalizations.of(context).sessions}',
-                                    style: GoogleFonts.inter(
-                                      fontSize: 12.sp,
-                                      color:
-                                          Colors.white.withValues(alpha: 0.8),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            }
-
-                            final allDocs = snapshot.data?.docs ?? [];
-
-                            // ✅ LANGUAGE FILTER
-                            return FutureBuilder<List<Map<String, dynamic>>>(
-                              future:
-                                  SessionFilterService.filterSessionsByLanguage(
-                                      allDocs),
-                              builder: (context, filteredSnapshot) {
-                                final count =
-                                    filteredSnapshot.data?.length ?? 0;
-
-                                return Row(
-                                  children: [
-                                    Icon(
-                                      Icons.play_circle_filled,
-                                      color:
-                                          Colors.white.withValues(alpha: 0.8),
-                                      size: 16.sp,
-                                    ),
-                                    SizedBox(width: 4.w),
-                                    Text(
-                                      '$count  ${AppLocalizations.of(context).sessions}',
-                                      style: GoogleFonts.inter(
-                                        fontSize: 12.sp,
-                                        color:
-                                            Colors.white.withValues(alpha: 0.8),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
+            // Dark overlay for readability
+            if (category.backgroundImages.isNotEmpty)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24.r),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withValues(alpha: 0.4),
+                        Colors.black.withValues(alpha: 0.6),
                       ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
                     ),
+                  ),
+                ),
+              ),
+
+            // Content
+            Padding(
+              padding: EdgeInsets.all(14.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Icon
+                  Flexible(
+                    flex: 1,
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: CategoryIcon(
+                        name: category.iconName,
+                        size: context.isDesktop
+                            ? 48.w
+                            : (context.isTablet ? 44.w : 36.w),
+                        forceBrightness: Brightness.dark,
+                      ),
+                    ),
+                  ),
+
+                  // Title
+                  AutoSizeText(
+                    localizedName,
+                    maxLines: 2,
+                    minFontSize: 11,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  SizedBox(height: 2.h),
+
+                  // Session Count (cached — no more StreamBuilder!)
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.play_circle_filled,
+                        color: Colors.white.withValues(alpha: 0.8),
+                        size: 16.sp,
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        _isSessionCountsLoaded
+                            ? '$sessionCount  ${AppLocalizations.of(context).sessions}'
+                            : '...  ${AppLocalizations.of(context).sessions}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12.sp,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
-          );
-        });
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildAllSessionsTab() {
@@ -700,57 +694,64 @@ class _CategoriesScreenState extends State<CategoriesScreen>
 
         // Sessions list
         Expanded(
-          child: ListView.builder(
-            padding: EdgeInsets.all(20.w),
-            itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
-            itemBuilder: (context, index) {
-              // See more button at the end
-              if (index == _allSessions.length) {
-                if (_isLoadingSessions) {
-                  // Loading indicator
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.h),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: colors.textPrimary,
-                      ),
-                    ),
-                  );
-                } else {
-                  // See More button
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20.h),
-                    child: Center(
-                      child: ElevatedButton(
-                        onPressed: _loadMoreSessions,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: colors.textPrimary,
-                          foregroundColor: colors.background,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32.w,
-                            vertical: 12.h,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                        ),
-                        child: Text(
-                          AppLocalizations.of(context).seeMore,
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeIn,
+            switchOutCurve: Curves.easeOut,
+            child: ListView.builder(
+              key: ValueKey(
+                  'allSessions_${_selectedGenderFilter}_${_allSessions.length}'),
+              padding: EdgeInsets.all(20.w),
+              itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
+              itemBuilder: (context, index) {
+                // See more button at the end
+                if (index == _allSessions.length) {
+                  if (_isLoadingSessions) {
+                    // Loading indicator
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: colors.textPrimary,
                         ),
                       ),
-                    ),
-                  );
+                    );
+                  } else {
+                    // See More button
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20.h),
+                      child: Center(
+                        child: ElevatedButton(
+                          onPressed: _loadMoreSessions,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: colors.textPrimary,
+                            foregroundColor: colors.background,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 32.w,
+                              vertical: 12.h,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                          ),
+                          child: Text(
+                            AppLocalizations.of(context).seeMore,
+                            style: GoogleFonts.inter(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }
                 }
-              }
 
-              // Session item
-              final session = _allSessions[index];
-              return _buildSessionItem(context, session, index);
-            },
+                // Session item
+                final session = _allSessions[index];
+                return _buildSessionItem(context, session, index);
+              },
+            ),
           ),
         ),
       ],
@@ -826,7 +827,10 @@ class _CategoriesScreenState extends State<CategoriesScreen>
       onTap: () {
         if (_selectedGenderFilter != value) {
           setState(() => _selectedGenderFilter = value);
-          _loadInitialSessions();
+          // Only reload sessions for "All Sessions" tab, not categories tab
+          if (_tabController.index == 1) {
+            _loadInitialSessions();
+          }
         }
       },
       child: Container(
