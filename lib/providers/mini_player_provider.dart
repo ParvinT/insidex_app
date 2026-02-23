@@ -390,7 +390,9 @@ class MiniPlayerProvider extends ChangeNotifier {
             backgroundImages['tr'] ??
             backgroundImages['ru'] ??
             backgroundImages['hi'] ??
-            backgroundImages.values.first;
+            (backgroundImages.values.isNotEmpty
+                ? backgroundImages.values.first
+                : null);
       }
     } else {
       // Fallback to old structure
@@ -413,7 +415,9 @@ class MiniPlayerProvider extends ChangeNotifier {
       final userLanguage = await LanguageHelperService.getCurrentLanguage();
       final imageUrl = backgroundImages[userLanguage] ??
           backgroundImages['en'] ??
-          backgroundImages.values.first;
+          (backgroundImages.values.isNotEmpty
+              ? backgroundImages.values.first
+              : null);
 
       if (_cachedImageUrl != imageUrl) {
         _cachedImageUrl = imageUrl;

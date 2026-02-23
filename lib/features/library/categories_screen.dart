@@ -709,8 +709,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
             switchInCurve: Curves.easeIn,
             switchOutCurve: Curves.easeOut,
             child: ListView.builder(
-              key: ValueKey(
-                  'allSessions_${_selectedGenderFilter}_${_allSessions.length}'),
+              key: ValueKey('allSessions_$_selectedGenderFilter'),
               padding: EdgeInsets.all(20.w),
               itemCount: _allSessions.length + (_hasMoreSessions ? 1 : 0),
               itemBuilder: (context, index) {

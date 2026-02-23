@@ -389,19 +389,21 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
                               )
                             : Row(
                                 mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   if (widget.categoryIconName != null)
                                     CategoryIcon(
                                       name: widget.categoryIconName!,
-                                      size: 32.w,
+                                      size: (24.sp).clamp(20.0, 28.0),
                                     ),
-                                  SizedBox(width: 6.w),
+                                  if (widget.categoryIconName != null)
+                                    SizedBox(width: 6.w),
                                   Flexible(
                                     child: AutoMarqueeText(
                                       text: rightTitleText,
                                       style: GoogleFonts.inter(
-                                        fontSize: (16.sp).clamp(14.0, 18.0),
-                                        fontWeight: FontWeight.w700,
+                                        fontSize: (15.sp).clamp(14.0, 20.0),
+                                        fontWeight: FontWeight.w600,
                                         color: colors.textPrimary,
                                       ),
                                     ),
@@ -467,8 +469,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
       switchInCurve: Curves.easeIn,
       switchOutCurve: Curves.easeOut,
       child: ListView.builder(
-        key: ValueKey(
-            'allSessions_${_selectedGenderFilter}_${_allSessions.length}'),
+        key: ValueKey('allSessions_$_selectedGenderFilter'),
         padding: EdgeInsets.all(20.w),
         itemCount: _allSessions.length + (_hasMoreAllSessions ? 1 : 0),
         itemBuilder: (context, index) {
@@ -566,8 +567,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
       switchInCurve: Curves.easeIn,
       switchOutCurve: Curves.easeOut,
       child: ListView.builder(
-        key: ValueKey(
-            'catSessions_${_selectedGenderFilter}_${_categorySessions.length}'),
+        key: ValueKey('catSessions_$_selectedGenderFilter'),
         padding: EdgeInsets.all(20.w),
         itemCount:
             _categorySessions.length + (_hasMoreCategorySessions ? 1 : 0),
