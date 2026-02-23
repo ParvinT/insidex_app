@@ -200,10 +200,19 @@ class _CategoriesScreenState extends State<CategoriesScreen>
     try {
       debugPrint('📥 [Pagination] Loading sessions...');
 
-      Query query = _firestore
-          .collection('sessions')
-          .orderBy('createdAt', descending: true)
-          .limit(20);
+      Query query;
+      if (_selectedGenderFilter == 'all') {
+        query = _firestore
+            .collection('sessions')
+            .orderBy('createdAt', descending: true)
+            .limit(20);
+      } else {
+        query = _firestore
+            .collection('sessions')
+            .where('gender', whereIn: [_selectedGenderFilter, 'both'])
+            .orderBy('createdAt', descending: true)
+            .limit(20);
+      }
 
       if (_lastDocument != null) {
         query = query.startAfter([_lastDocument!['createdAt']]);
@@ -516,6 +525,7 @@ class _CategoriesScreenState extends State<CategoriesScreen>
               categoryTitle: localizedName,
               categoryIconName: category.iconName,
               categoryId: category.id,
+              initialGenderFilter: _selectedGenderFilter,
             ),
           ),
         );

@@ -20,6 +20,7 @@ class SessionsListScreen extends StatefulWidget {
   final String? categoryIconName;
   final String? categoryId;
   final bool isShowingAllSessions;
+  final String initialGenderFilter;
 
   const SessionsListScreen({
     super.key,
@@ -27,6 +28,7 @@ class SessionsListScreen extends StatefulWidget {
     this.categoryIconName,
     this.categoryId,
     this.isShowingAllSessions = false,
+    this.initialGenderFilter = 'all',
   });
 
   @override
@@ -54,6 +56,7 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
   @override
   void initState() {
     super.initState();
+    _selectedGenderFilter = widget.initialGenderFilter;
     if (widget.isShowingAllSessions) {
       _loadInitialAllSessions();
     } else {
@@ -120,10 +123,19 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
     try {
       debugPrint('📥 [All Sessions Pagination] Loading sessions...');
 
-      Query query = FirebaseFirestore.instance
-          .collection('sessions')
-          .orderBy('createdAt', descending: true)
-          .limit(20);
+      Query query;
+      if (_selectedGenderFilter == 'all') {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .orderBy('createdAt', descending: true)
+            .limit(20);
+      } else {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .where('gender', whereIn: [_selectedGenderFilter, 'both'])
+            .orderBy('createdAt', descending: true)
+            .limit(20);
+      }
 
       if (_lastAllDocument != null) {
         query = query.startAfter([_lastAllDocument!['createdAt']]);
@@ -214,11 +226,21 @@ class _SessionsListScreenState extends State<SessionsListScreen> {
       debugPrint(
           '📥 [Category Pagination] Loading sessions for ${widget.categoryId}...');
 
-      Query query = FirebaseFirestore.instance
-          .collection('sessions')
-          .where('categoryId', isEqualTo: widget.categoryId)
-          .orderBy('createdAt', descending: true)
-          .limit(20);
+      Query query;
+      if (_selectedGenderFilter == 'all') {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .where('categoryId', isEqualTo: widget.categoryId)
+            .orderBy('createdAt', descending: true)
+            .limit(20);
+      } else {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .where('categoryId', isEqualTo: widget.categoryId)
+            .where('gender', whereIn: [_selectedGenderFilter, 'both'])
+            .orderBy('createdAt', descending: true)
+            .limit(20);
+      }
 
       if (_lastCategoryDocument != null) {
         query = query.startAfter([_lastCategoryDocument!['createdAt']]);

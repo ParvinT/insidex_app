@@ -5,8 +5,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/themes/app_theme_extension.dart';
-import '../../services/session_localization_service.dart';
-import '../../services/language_helper_service.dart';
 import '../../l10n/app_localizations.dart';
 import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
@@ -34,25 +32,42 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
   final AdminSearchService _adminSearchService = AdminSearchService();
   String _selectedGenderFilter = 'all';
 
+  // Pagination
+  List<Map<String, dynamic>> _sessions = [];
+  DocumentSnapshot? _lastDocument;
+  bool _hasMore = true;
+  bool _isLoading = false;
+  bool _isInitialLoad = true;
+  final ScrollController _scrollController = ScrollController();
+  static const int _pageSize = 30;
+
   @override
   void initState() {
     super.initState();
     _loadCategories();
+    _loadSessions();
+    _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreSessions();
+    }
   }
 
   Future<void> _loadCategories() async {
     try {
-      // Admin panel - get ALL categories (not filtered by language)
       final categories =
           await _categoryService.getAllCategories(forceRefresh: true);
 
-      // Sort by English name for consistency in admin panel
       categories.sort((a, b) {
         final nameA = a.getName('en').toLowerCase();
         final nameB = b.getName('en').toLowerCase();
@@ -72,6 +87,101 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     }
   }
 
+  Future<void> _loadSessions() async {
+    setState(() {
+      _sessions = [];
+      _lastDocument = null;
+      _hasMore = true;
+      _isInitialLoad = true;
+    });
+    await _loadMoreSessions();
+  }
+
+  Future<void> _loadMoreSessions() async {
+    if (_isLoading || !_hasMore) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      Query query;
+
+      if (_searchQuery.isNotEmpty) {
+        // Search mode: fetch matching sessions
+        final results = await _adminSearchService.searchSessions(_searchQuery);
+        setState(() {
+          _sessions = results;
+          _hasMore = false;
+          _isLoading = false;
+          _isInitialLoad = false;
+        });
+        return;
+      }
+
+      // Normal mode: paginated query with gender filter
+      if (_selectedCategoryId != null && _selectedGenderFilter != 'all') {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .where('categoryId', isEqualTo: _selectedCategoryId)
+            .where('gender', isEqualTo: _selectedGenderFilter)
+            .orderBy('sessionNumber')
+            .limit(_pageSize);
+      } else if (_selectedCategoryId != null) {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .where('categoryId', isEqualTo: _selectedCategoryId)
+            .orderBy('sessionNumber')
+            .limit(_pageSize);
+      } else if (_selectedGenderFilter != 'all') {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .where('gender', isEqualTo: _selectedGenderFilter)
+            .orderBy('sessionNumber')
+            .limit(_pageSize);
+      } else {
+        query = FirebaseFirestore.instance
+            .collection('sessions')
+            .orderBy('sessionNumber')
+            .limit(_pageSize);
+      }
+
+      if (_lastDocument != null) {
+        query = query.startAfterDocument(_lastDocument!);
+      }
+
+      final snapshot = await query.get();
+
+      if (snapshot.docs.isEmpty) {
+        setState(() {
+          _hasMore = false;
+          _isLoading = false;
+          _isInitialLoad = false;
+        });
+        return;
+      }
+
+      final newSessions = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {'id': doc.id, ...data};
+      }).toList();
+
+      final filtered = newSessions;
+
+      setState(() {
+        _sessions.addAll(filtered);
+        _lastDocument = snapshot.docs.last;
+        _hasMore = snapshot.docs.length == _pageSize;
+        _isLoading = false;
+        _isInitialLoad = false;
+      });
+    } catch (e) {
+      debugPrint('❌ Error loading sessions: $e');
+      setState(() {
+        _isLoading = false;
+        _isInitialLoad = false;
+      });
+    }
+  }
+
   Future<void> _deleteSession(String sessionId) async {
     final confirmed = await showDialog<bool>(
       context: context,
@@ -85,8 +195,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(AppLocalizations.of(context).delete),
+            child: Text(
+              AppLocalizations.of(context).delete,
+              style: const TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),
@@ -94,58 +206,33 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
 
     if (confirmed == true) {
       try {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(AppLocalizations.of(context).deletingSessionAndFiles),
-                ],
-              ),
-              duration: const Duration(seconds: 30),
-            ),
-          );
-        }
-
+        // Delete storage files
+        await StorageService.deleteSessionFiles(sessionId);
+        // Delete Firestore document
         await FirebaseFirestore.instance
             .collection('sessions')
             .doc(sessionId)
             .delete();
-        debugPrint('✅ Session deleted from Firestore: $sessionId');
 
-        await StorageService.deleteSessionFiles(sessionId);
-        debugPrint('✅ Session files deleted from Storage: $sessionId');
+        setState(() {
+          _sessions.removeWhere((s) => s['id'] == sessionId);
+        });
 
         if (mounted) {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
                   Text(AppLocalizations.of(context).sessionDeletedSuccessfully),
               backgroundColor: Colors.green,
-              duration: const Duration(seconds: 3),
             ),
           );
         }
       } catch (e) {
-        debugPrint('❌ Error deleting session: $e');
         if (mounted) {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                  '${AppLocalizations.of(context).errorDeletingSession}: $e'),
+              content: Text('Error: $e'),
               backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
             ),
           );
         }
@@ -153,7 +240,33 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     }
   }
 
-  // 🆕 Helper: Get category name from ID
+  String _getDisplayTitleSync(Map<String, dynamic> session) {
+    final sessionNum = session['sessionNumber']?.toString() ?? '';
+
+    // Get current device locale
+    final locale = WidgetsBinding.instance.platformDispatcher.locale;
+    final currentLang = locale.languageCode;
+
+    // Try to get title from content
+    if (session['content'] is Map) {
+      final content = session['content'] as Map<String, dynamic>;
+      // Try current language first, then fallback order
+      final langOrder = [currentLang, 'en', 'ru', 'tr', 'hi'];
+      for (final lang in langOrder) {
+        if (content[lang] is Map) {
+          final title = (content[lang] as Map)['title']?.toString() ?? '';
+          if (title.isNotEmpty) {
+            return sessionNum.isNotEmpty ? '#$sessionNum $title' : title;
+          }
+        }
+      }
+    }
+
+    // Fallback to old structure
+    final oldTitle = session['title']?.toString() ?? 'Untitled';
+    return sessionNum.isNotEmpty ? '#$sessionNum $oldTitle' : oldTitle;
+  }
+
   String _getCategoryName(String? categoryId) {
     final l10n = AppLocalizations.of(context);
 
@@ -165,9 +278,79 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
       final category = _categories.firstWhere((cat) => cat.id == categoryId);
       return category.getName('en');
     } catch (e) {
-      debugPrint('⚠️ Category not found: $categoryId');
       return l10n.uncategorized;
     }
+  }
+
+  Widget _buildLanguageBadges(
+      Map<String, dynamic> session, AppThemeExtension colors) {
+    final audioUrls = session['subliminal']?['audioUrls'] as Map?;
+    final imageUrls = session['backgroundImages'] as Map?;
+
+    final hasAudio = <String>[];
+    final hasImage = <String>[];
+
+    for (final lang in ['en', 'tr', 'ru', 'hi']) {
+      if (audioUrls?[lang] != null && audioUrls![lang].toString().isNotEmpty) {
+        hasAudio.add(lang);
+      }
+      if (imageUrls?[lang] != null && imageUrls![lang].toString().isNotEmpty) {
+        hasImage.add(lang);
+      }
+    }
+
+    return Row(
+      children: [
+        if (hasAudio.isNotEmpty) ...[
+          Icon(Icons.audiotrack, size: 14.sp, color: Colors.green),
+          SizedBox(width: 4.w),
+          Text(
+            hasAudio.join(', ').toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              color: Colors.green,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(width: 12.w),
+        ],
+        if (hasImage.isNotEmpty) ...[
+          Icon(Icons.image, size: 14.sp, color: Colors.blue),
+          SizedBox(width: 4.w),
+          Text(
+            hasImage.join(', ').toUpperCase(),
+            style: GoogleFonts.inter(
+              fontSize: 10.sp,
+              color: Colors.blue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildGenderChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedGenderFilter == value;
+    return Padding(
+      padding: EdgeInsets.only(right: 8.w),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (selected) {
+          setState(() {
+            _selectedGenderFilter = selected ? value : 'all';
+          });
+          _loadSessions();
+        },
+        backgroundColor: colors.greyLight,
+        selectedColor: colors.textPrimary,
+        labelStyle: TextStyle(
+          color: isSelected ? colors.textOnPrimary : colors.textPrimary,
+        ),
+      ),
+    );
   }
 
   @override
@@ -195,8 +378,8 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                 MaterialPageRoute(
                     builder: (context) => const AddSessionScreen()),
               );
-              // Refresh categories after returning
               _loadCategories();
+              _loadSessions();
             },
           ),
         ],
@@ -210,13 +393,16 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
               controller: _searchController,
               onSearchChanged: (query) {
                 setState(() => _searchQuery = query);
+                _loadSessions();
               },
               onClear: () {
                 setState(() => _searchQuery = '');
+                _loadSessions();
               },
             ),
           ),
-          // Category Filter - Horizontal Scroll
+
+          // Category Filter
           Container(
             height: 50.h,
             padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -225,7 +411,6 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
               itemCount: _categories.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  // "All" option
                   return Padding(
                     padding: EdgeInsets.only(right: 12.w),
                     child: ChoiceChip(
@@ -233,6 +418,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       selected: _selectedCategoryId == null,
                       onSelected: (selected) {
                         setState(() => _selectedCategoryId = null);
+                        _loadSessions();
                       },
                       backgroundColor: colors.greyLight,
                       selectedColor: colors.textPrimary,
@@ -255,9 +441,9 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                     selected: isSelected,
                     onSelected: (selected) {
                       setState(() {
-                        // Toggle: if already selected, deselect (null), else select
                         _selectedCategoryId = isSelected ? null : category.id;
                       });
+                      _loadSessions();
                     },
                     backgroundColor: colors.greyLight,
                     selectedColor: colors.textPrimary,
@@ -272,7 +458,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
             ),
           ),
 
-          // Gender Filter Row - Horizontal Scroll
+          // Gender Filter
           Container(
             height: 44.h,
             padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -283,13 +469,10 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                 children: [
                   _buildGenderChip(
                       'all', '⚥ ${AppLocalizations.of(context).all}', colors),
-                  SizedBox(width: 8.w),
                   _buildGenderChip(
                       'male', '♂ ${AppLocalizations.of(context).male}', colors),
-                  SizedBox(width: 8.w),
                   _buildGenderChip('female',
                       '♀ ${AppLocalizations.of(context).female}', colors),
-                  SizedBox(width: 8.w),
                   _buildGenderChip('both',
                       '⚥ ${AppLocalizations.of(context).genderBoth}', colors),
                 ],
@@ -297,361 +480,189 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
             ),
           ),
 
+          // Session count
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+            child: Row(
+              children: [
+                Text(
+                  '${_sessions.length} sessions loaded',
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: colors.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                if (_isLoading && !_isInitialLoad)
+                  SizedBox(
+                    width: 16.w,
+                    height: 16.w,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: colors.textPrimary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+
           // Sessions List
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _selectedCategoryId == null
-                  ? FirebaseFirestore.instance
-                      .collection('sessions')
-                      .orderBy('createdAt', descending: true)
-                      .snapshots()
-                  : FirebaseFirestore.instance
-                      .collection('sessions')
-                      .where('categoryId', isEqualTo: _selectedCategoryId)
-                      .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                      child:
-                          CircularProgressIndicator(color: colors.textPrimary));
-                }
-
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.error_outline,
-                            size: 64.sp, color: Colors.red),
-                        SizedBox(height: 16.h),
-                        Text(
-                          'Error: ${snapshot.error}',
-                          style: GoogleFonts.inter(
-                            fontSize: 14.sp,
-                            color: Colors.red,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                if (!snapshot.hasData) {
-                  return Center(
-                      child:
-                          CircularProgressIndicator(color: colors.textPrimary));
-                }
-
-                var sessions = snapshot.data!.docs;
-
-                // Apply search filter
-                if (_searchQuery.isNotEmpty) {
-                  sessions = _adminSearchService.filterSessionsLocally(
-                    sessions,
-                    _searchQuery,
-                  );
-                }
-
-                // Apply gender filter
-                if (_selectedGenderFilter != 'all') {
-                  sessions = sessions.where((doc) {
-                    final data = doc.data() as Map<String, dynamic>;
-                    final sessionGender = data['gender'] as String? ?? 'both';
-
-                    if (_selectedGenderFilter == 'both') {
-                      return sessionGender == 'both';
-                    }
-                    // Show sessions that match the filter OR are for 'both' genders
-                    return sessionGender == _selectedGenderFilter ||
-                        sessionGender == 'both';
-                  }).toList();
-                }
-
-                // ✅ Client-side sorting when filtering by category
-                if (_selectedCategoryId != null && sessions.isNotEmpty) {
-                  sessions = sessions.toList()
-                    ..sort((a, b) {
-                      final aData = a.data() as Map<String, dynamic>;
-                      final bData = b.data() as Map<String, dynamic>;
-
-                      final aTime = aData['createdAt'] as Timestamp?;
-                      final bTime = bData['createdAt'] as Timestamp?;
-
-                      if (aTime == null) return 1;
-                      if (bTime == null) return -1;
-
-                      return bTime.compareTo(aTime); // descending
-                    });
-                }
-
-                if (sessions.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _searchQuery.isNotEmpty
-                              ? Icons.search_off_rounded
-                              : Icons.library_music,
-                          size: 64.sp,
-                          color: colors.textSecondary,
-                        ),
-                        SizedBox(height: 16.h),
-                        Text(
-                          _searchQuery.isNotEmpty
-                              ? AppLocalizations.of(context).noResultsFound
-                              : AppLocalizations.of(context).noSessionsFound,
-                          style: GoogleFonts.inter(
-                            fontSize: 16.sp,
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                        if (_searchQuery.isNotEmpty) ...[
-                          SizedBox(height: 8.h),
-                          Text(
-                            AppLocalizations.of(context).tryDifferentKeywords,
-                            style: GoogleFonts.inter(
-                              fontSize: 14.sp,
+            child: _isInitialLoad
+                ? Center(
+                    child: CircularProgressIndicator(color: colors.textPrimary))
+                : _sessions.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _searchQuery.isNotEmpty
+                                  ? Icons.search_off_rounded
+                                  : Icons.library_music,
+                              size: 64.sp,
                               color: colors.textSecondary,
                             ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  );
-                }
+                            SizedBox(height: 16.h),
+                            Text(
+                              _searchQuery.isNotEmpty
+                                  ? AppLocalizations.of(context).noResultsFound
+                                  : AppLocalizations.of(context)
+                                      .noSessionsFound,
+                              style: GoogleFonts.inter(
+                                fontSize: 16.sp,
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadSessions,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          padding: EdgeInsets.all(20.w),
+                          itemCount: _sessions.length + (_hasMore ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            // Loading indicator at bottom
+                            if (index == _sessions.length) {
+                              return Padding(
+                                padding: EdgeInsets.all(16.w),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                              );
+                            }
 
-                return ListView.builder(
-                  padding: EdgeInsets.all(20.w),
-                  itemCount: sessions.length,
-                  itemBuilder: (context, index) {
-                    final sessionDoc = sessions[index];
-                    final session = sessionDoc.data() as Map<String, dynamic>;
-                    final docId = sessionDoc.id;
-                    session['id'] = docId;
+                            final session = _sessions[index];
+                            final docId = session['id'] as String;
+                            final displayTitle = _getDisplayTitleSync(session);
+                            final gender =
+                                session['gender'] as String? ?? 'both';
 
-                    return FutureBuilder<String>(
-                      future: _getDisplayTitle(session),
-                      builder: (context, titleSnapshot) {
-                        final displayTitle = titleSnapshot.data ??
-                            AppLocalizations.of(context).loading;
-
-                        return Card(
-                          margin: EdgeInsets.only(bottom: 16.h),
-                          color: colors.backgroundPure,
-                          child: Padding(
-                            padding: EdgeInsets.all(16.w),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
+                            return Card(
+                              margin: EdgeInsets.only(bottom: 12.h),
+                              color: colors.backgroundCard,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.r),
+                                side: BorderSide(
+                                    color: colors.border, width: 0.5),
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(16.w),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Session Number Badge
-                                    if (session['sessionNumber'] != null)
-                                      Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 12.w,
-                                          vertical: 6.h,
+                                    Row(
+                                      children: [
+                                        // Gender icon
+                                        Text(
+                                          gender == 'male'
+                                              ? '♂'
+                                              : gender == 'female'
+                                                  ? '♀'
+                                                  : '⚥',
+                                          style: TextStyle(fontSize: 18.sp),
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: colors.textPrimary
-                                              .withValues(alpha: 0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          border: Border.all(
-                                            color: colors.textPrimary
-                                                .withValues(alpha: 0.3),
-                                            width: 1,
+                                        SizedBox(width: 8.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                displayTitle,
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: colors.textPrimary,
+                                                ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              SizedBox(height: 4.h),
+                                              Text(
+                                                _getCategoryName(
+                                                    session['categoryId']),
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 12.sp,
+                                                  color: colors.textSecondary,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        child: Text(
-                                          '№${session['sessionNumber']}',
-                                          style: GoogleFonts.inter(
-                                            fontSize: 16.sp,
-                                            fontWeight: FontWeight.w700,
-                                            color: colors.textPrimary,
-                                          ),
-                                        ),
-                                      )
-                                    else
-                                      Container(
-                                        padding: EdgeInsets.all(8.w),
-                                        decoration: BoxDecoration(
-                                          color: colors.textSecondary
-                                              .withValues(alpha: 0.1),
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                        ),
-                                        child: Icon(
-                                          Icons.music_note,
-                                          size: 24.sp,
-                                          color: colors.textSecondary,
-                                        ),
-                                      ),
-                                    SizedBox(width: 12.w),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          // Title
-                                          Text(
-                                            displayTitle,
-                                            style: GoogleFonts.inter(
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w600,
-                                              color: colors.textPrimary,
+                                        PopupMenuButton(
+                                          itemBuilder: (context) => [
+                                            PopupMenuItem(
+                                              value: 'edit',
+                                              child: Text(
+                                                  AppLocalizations.of(context)
+                                                      .edit),
                                             ),
-                                          ),
-                                          SizedBox(height: 4.h),
-                                          // Category Name
-                                          Text(
-                                            _getCategoryName(
-                                                session['categoryId']),
-                                            style: GoogleFonts.inter(
-                                              fontSize: 12.sp,
-                                              color: colors.textSecondary,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuButton(
-                                      itemBuilder: (context) => [
-                                        PopupMenuItem(
-                                          value: 'edit',
-                                          child: Text(
-                                              AppLocalizations.of(context)
-                                                  .edit),
-                                        ),
-                                        PopupMenuItem(
-                                          value: 'delete',
-                                          child: Text(
-                                            AppLocalizations.of(context).delete,
-                                            style: const TextStyle(
-                                                color: Colors.red),
-                                          ),
-                                        ),
-                                      ],
-                                      onSelected: (value) async {
-                                        if (value == 'edit') {
-                                          // ✅ Navigate to edit screen
-                                          await Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  AddSessionScreen(
-                                                sessionToEdit: {
-                                                  ...session,
-                                                  'id': docId,
-                                                },
+                                            PopupMenuItem(
+                                              value: 'delete',
+                                              child: Text(
+                                                AppLocalizations.of(context)
+                                                    .delete,
+                                                style: const TextStyle(
+                                                    color: Colors.red),
                                               ),
                                             ),
-                                          );
-                                          // Refresh categories after returning
-                                          _loadCategories();
-                                        } else if (value == 'delete') {
-                                          _deleteSession(docId);
-                                        }
-                                      },
+                                          ],
+                                          onSelected: (value) async {
+                                            if (value == 'edit') {
+                                              await Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      AddSessionScreen(
+                                                    sessionToEdit: session,
+                                                  ),
+                                                ),
+                                              );
+                                              _loadCategories();
+                                              _loadSessions();
+                                            } else if (value == 'delete') {
+                                              _deleteSession(docId);
+                                            }
+                                          },
+                                        ),
+                                      ],
                                     ),
+                                    SizedBox(height: 12.h),
+                                    _buildLanguageBadges(session, colors),
                                   ],
                                 ),
-
-                                SizedBox(height: 12.h),
-                                // Language badges
-                                _buildLanguageBadges(session, colors),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                );
-              },
-            ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
           ),
         ],
-      ),
-    );
-  }
-
-  // Get display title with session number
-  Future<String> _getDisplayTitle(Map<String, dynamic> session) async {
-    final currentLanguage = await LanguageHelperService.getCurrentLanguage();
-    final localizedContent = SessionLocalizationService.getLocalizedContent(
-        session, currentLanguage);
-
-    final sessionNumber = session['sessionNumber'];
-    if (sessionNumber != null) {
-      return '№$sessionNumber — ${localizedContent.title}';
-    }
-
-    return localizedContent.title;
-  }
-
-  // Build language availability badges
-  Widget _buildLanguageBadges(
-      Map<String, dynamic> session, AppThemeExtension colors) {
-    final availableLanguages =
-        SessionLocalizationService.getAvailableLanguages(session);
-
-    if (availableLanguages.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Wrap(
-      spacing: 8.w,
-      runSpacing: 8.h,
-      children: availableLanguages.map((lang) {
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
-          decoration: BoxDecoration(
-            color: colors.textPrimary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6.r),
-            border: Border.all(
-              color: colors.textPrimary.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Text(
-            lang.toUpperCase(),
-            style: GoogleFonts.inter(
-              fontSize: 10.sp,
-              fontWeight: FontWeight.w600,
-              color: colors.textPrimary,
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildGenderChip(
-      String value, String label, AppThemeExtension colors) {
-    final isSelected = _selectedGenderFilter == value;
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedGenderFilter = value);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? colors.textPrimary : colors.greyLight,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: isSelected ? colors.textPrimary : colors.border,
-          ),
-        ),
-        child: Text(
-          label,
-          style: GoogleFonts.inter(
-            fontSize: 12.sp,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? colors.textOnPrimary : colors.textPrimary,
-          ),
-        ),
       ),
     );
   }
