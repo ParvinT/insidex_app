@@ -5237,6 +5237,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{filtered} / {total} sessions'**
   String filteredSessions(int filtered, int total);
+
+  /// No description provided for @adminPushNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Push Notifications'**
+  String get adminPushNotifications;
+
+  /// No description provided for @adminPushSendNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Send New'**
+  String get adminPushSendNew;
+
+  /// No description provided for @adminPushDirect.
+  ///
+  /// In en, this message translates to:
+  /// **'Direct'**
+  String get adminPushDirect;
+
+  /// No description provided for @adminPushHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get adminPushHistory;
+
+  /// No description provided for @adminPushTargetAudience.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Audience'**
+  String get adminPushTargetAudience;
+
+  /// No description provided for @adminPushAllUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'All Users'**
+  String get adminPushAllUsers;
+
+  /// No description provided for @adminPushByLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'By Language'**
+  String get adminPushByLanguage;
+
+  /// No description provided for @adminPushByTier.
+  ///
+  /// In en, this message translates to:
+  /// **'By Tier'**
+  String get adminPushByTier;
+
+  /// No description provided for @adminPushByPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'By Platform'**
+  String get adminPushByPlatform;
+
+  /// No description provided for @adminPushCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get adminPushCustom;
+
+  /// No description provided for @adminPushNotificationContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification Content'**
+  String get adminPushNotificationContent;
+
+  /// No description provided for @adminPushEnglishRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'English (Required)'**
+  String get adminPushEnglishRequired;
+
+  /// No description provided for @adminPushTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'English title is required'**
+  String get adminPushTitleRequired;
+
+  /// No description provided for @adminPushBodyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'English body is required'**
+  String get adminPushBodyRequired;
+
+  /// No description provided for @adminPushBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Body'**
+  String get adminPushBody;
+
+  /// No description provided for @adminPushPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get adminPushPreview;
+
+  /// No description provided for @adminPushSendNotification.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification'**
+  String get adminPushSendNotification;
+
+  /// No description provided for @adminPushSendConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Notification?'**
+  String get adminPushSendConfirm;
+
+  /// No description provided for @adminPushSendWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'This will send a push notification to all targeted users immediately.'**
+  String get adminPushSendWarning;
+
+  /// No description provided for @adminPushSentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification sent successfully!'**
+  String get adminPushSentSuccess;
+
+  /// No description provided for @adminPushSelectLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one language'**
+  String get adminPushSelectLanguage;
+
+  /// No description provided for @adminPushSelectTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one tier'**
+  String get adminPushSelectTier;
+
+  /// No description provided for @adminPushSelectPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select at least one platform'**
+  String get adminPushSelectPlatform;
+
+  /// No description provided for @adminPushFindUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Find User'**
+  String get adminPushFindUser;
+
+  /// No description provided for @adminPushEmailOrUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Email or UID'**
+  String get adminPushEmailOrUid;
+
+  /// No description provided for @adminPushSendToUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to User'**
+  String get adminPushSendToUser;
+
+  /// No description provided for @adminPushSending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get adminPushSending;
+
+  /// No description provided for @adminPushNoToken.
+  ///
+  /// In en, this message translates to:
+  /// **'This user has no active device. Notification cannot be delivered.'**
+  String get adminPushNoToken;
+
+  /// No description provided for @adminPushNoHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications sent yet'**
+  String get adminPushNoHistory;
+
+  /// No description provided for @adminPushTitleBodyRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title and body are required'**
+  String get adminPushTitleBodyRequired;
+
+  /// No description provided for @adminPushSubscriptionTier.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Tier'**
+  String get adminPushSubscriptionTier;
+
+  /// No description provided for @adminPushPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get adminPushPlatform;
+
+  /// No description provided for @adminPushLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get adminPushLanguages;
 }
 
 class _AppLocalizationsDelegate

@@ -992,6 +992,40 @@
       "filtered": {"type": "int"},
       "total": {"type": "int"}
     }
-  }
+  },
+
+  "adminPushNotifications": "Push-уведомления",
+  "adminPushSendNew": "Новое",
+  "adminPushDirect": "Прямое",
+  "adminPushHistory": "История",
+  "adminPushTargetAudience": "Целевая аудитория",
+  "adminPushAllUsers": "Все пользователи",
+  "adminPushByLanguage": "По языку",
+  "adminPushByTier": "По уровню",
+  "adminPushByPlatform": "По платформе",
+  "adminPushCustom": "Настраиваемый",
+  "adminPushNotificationContent": "Содержание уведомления",
+  "adminPushEnglishRequired": "Английский (Обязательно)",
+  "adminPushTitleRequired": "Английский заголовок обязателен",
+  "adminPushBodyRequired": "Английский текст обязателен",
+  "adminPushBody": "Содержание",
+  "adminPushPreview": "Предпросмотр",
+  "adminPushSendNotification": "Отправить уведомление",
+  "adminPushSendConfirm": "Отправить уведомление?",
+  "adminPushSendWarning": "Это немедленно отправит push-уведомление всем целевым пользователям.",
+  "adminPushSentSuccess": "Уведомление успешно отправлено!",
+  "adminPushSelectLanguage": "Пожалуйста, выберите хотя бы один язык",
+  "adminPushSelectTier": "Пожалуйста, выберите хотя бы один уровень",
+  "adminPushSelectPlatform": "Пожалуйста, выберите хотя бы одну платформу",
+  "adminPushFindUser": "Найти пользователя",
+  "adminPushEmailOrUid": "Email или UID",
+  "adminPushSendToUser": "Отправить пользователю",
+  "adminPushSending": "Отправка...",
+  "adminPushNoToken": "У этого пользователя нет активного устройства. Уведомление не может быть доставлено.",
+  "adminPushNoHistory": "Уведомления ещё не отправлялись",
+  "adminPushTitleBodyRequired": "Заголовок и текст обязательны",
+  "adminPushSubscriptionTier": "Уровень подписки",
+  "adminPushPlatform": "Платформа",
+  "adminPushLanguages": "Языки"
   
 }

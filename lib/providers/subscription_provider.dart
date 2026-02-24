@@ -36,6 +36,7 @@ import '../models/subscription_model.dart';
 import '../models/subscription_package.dart';
 import '../core/constants/subscription_constants.dart';
 import '../services/subscription/subscription_service.dart';
+import '../services/notifications/topic_management_service.dart';
 
 /// Provider for managing subscription state across the app
 ///
@@ -708,6 +709,12 @@ class SubscriptionProvider extends ChangeNotifier with WidgetsBindingObserver {
               '🔔 [SubscriptionProvider] Real-time update: ${newSubscription.tier}');
 
           _subscription = newSubscription;
+          // Update FCM tier topic
+          try {
+            TopicManagementService().updateTierTopic(newSubscription.tier.name);
+          } catch (e) {
+            debugPrint('⚠️ FCM tier topic update error: $e');
+          }
           notifyListeners();
         }
       },

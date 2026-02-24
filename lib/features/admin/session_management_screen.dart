@@ -383,8 +383,9 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
           return images == null || images is! Map || images.isEmpty;
         case 'no_intro':
           final content = session['content'];
-          if (content == null || content is! Map || content.isEmpty)
+          if (content == null || content is! Map || content.isEmpty) {
             return true;
+          }
           // Check if ANY language has intro content
           for (final langContent in content.values) {
             if (langContent is Map) {

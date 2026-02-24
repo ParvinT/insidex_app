@@ -2747,4 +2747,105 @@ class AppLocalizationsTr extends AppLocalizations {
   String filteredSessions(int filtered, int total) {
     return '$filtered / $total seans';
   }
+
+  @override
+  String get adminPushNotifications => 'Push Bildirimleri';
+
+  @override
+  String get adminPushSendNew => 'Yeni Gönder';
+
+  @override
+  String get adminPushDirect => 'Direkt';
+
+  @override
+  String get adminPushHistory => 'Geçmiş';
+
+  @override
+  String get adminPushTargetAudience => 'Hedef Kitle';
+
+  @override
+  String get adminPushAllUsers => 'Tüm Kullanıcılar';
+
+  @override
+  String get adminPushByLanguage => 'Dile Göre';
+
+  @override
+  String get adminPushByTier => 'Seviyeye Göre';
+
+  @override
+  String get adminPushByPlatform => 'Platforma Göre';
+
+  @override
+  String get adminPushCustom => 'Özel';
+
+  @override
+  String get adminPushNotificationContent => 'Bildirim İçeriği';
+
+  @override
+  String get adminPushEnglishRequired => 'İngilizce (Zorunlu)';
+
+  @override
+  String get adminPushTitleRequired => 'İngilizce başlık zorunludur';
+
+  @override
+  String get adminPushBodyRequired => 'İngilizce içerik zorunludur';
+
+  @override
+  String get adminPushBody => 'İçerik';
+
+  @override
+  String get adminPushPreview => 'Önizleme';
+
+  @override
+  String get adminPushSendNotification => 'Bildirim Gönder';
+
+  @override
+  String get adminPushSendConfirm => 'Bildirim Gönderilsin mi?';
+
+  @override
+  String get adminPushSendWarning =>
+      'Bu bildirim hedef kullanıcılara anında gönderilecektir.';
+
+  @override
+  String get adminPushSentSuccess => 'Bildirim başarıyla gönderildi!';
+
+  @override
+  String get adminPushSelectLanguage => 'Lütfen en az bir dil seçin';
+
+  @override
+  String get adminPushSelectTier => 'Lütfen en az bir seviye seçin';
+
+  @override
+  String get adminPushSelectPlatform => 'Lütfen en az bir platform seçin';
+
+  @override
+  String get adminPushFindUser => 'Kullanıcı Bul';
+
+  @override
+  String get adminPushEmailOrUid => 'Email veya UID';
+
+  @override
+  String get adminPushSendToUser => 'Kullanıcıya Gönder';
+
+  @override
+  String get adminPushSending => 'Gönderiliyor...';
+
+  @override
+  String get adminPushNoToken =>
+      'Bu kullanıcının aktif cihazı yok. Bildirim iletilemez.';
+
+  @override
+  String get adminPushNoHistory => 'Henüz bildirim gönderilmedi';
+
+  @override
+  String get adminPushTitleBodyRequired => 'Başlık ve içerik zorunludur';
+
+  @override
+  String get adminPushSubscriptionTier => 'Abonelik Seviyesi';
+
+  @override
+  String get adminPushPlatform => 'Platform';
+
+  @override
+  String get adminPushLanguages => 'Diller';
 }

@@ -8,6 +8,7 @@ import 'dart:ui' as ui;
 
 import '../services/notifications/daily_reminder_service.dart';
 import '../services/notifications/notification_sync_service.dart';
+import '../services/notifications/topic_management_service.dart';
 import '../services/language_helper_service.dart';
 
 class LocaleProvider extends ChangeNotifier {
@@ -85,6 +86,12 @@ class LocaleProvider extends ChangeNotifier {
     }
 
     LanguageHelperService.clearCache();
+    // Update FCM language topic
+    try {
+      await TopicManagementService().updateLanguageTopic(locale.languageCode);
+    } catch (e) {
+      debugPrint('⚠️ FCM language topic update error: $e');
+    }
 
     await Future.delayed(const Duration(seconds: 1));
 

@@ -348,6 +348,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                       colors: colors,
                     ),
                     _buildCompactMenuItem(
+                      icon: Icons.notifications_active,
+                      title:
+                          AppLocalizations.of(context).adminPushNotifications,
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushNamed(
+                            context, '/admin/push-notifications');
+                      },
+                      isCompact: isSmallScreen,
+                      colors: colors,
+                    ),
+                    _buildCompactMenuItem(
                       icon: Icons.settings,
                       title: AppLocalizations.of(context).settings,
                       onTap: () {

@@ -2755,4 +2755,107 @@ class AppLocalizationsRu extends AppLocalizations {
   String filteredSessions(int filtered, int total) {
     return '$filtered / $total сессий';
   }
+
+  @override
+  String get adminPushNotifications => 'Push-уведомления';
+
+  @override
+  String get adminPushSendNew => 'Новое';
+
+  @override
+  String get adminPushDirect => 'Прямое';
+
+  @override
+  String get adminPushHistory => 'История';
+
+  @override
+  String get adminPushTargetAudience => 'Целевая аудитория';
+
+  @override
+  String get adminPushAllUsers => 'Все пользователи';
+
+  @override
+  String get adminPushByLanguage => 'По языку';
+
+  @override
+  String get adminPushByTier => 'По уровню';
+
+  @override
+  String get adminPushByPlatform => 'По платформе';
+
+  @override
+  String get adminPushCustom => 'Настраиваемый';
+
+  @override
+  String get adminPushNotificationContent => 'Содержание уведомления';
+
+  @override
+  String get adminPushEnglishRequired => 'Английский (Обязательно)';
+
+  @override
+  String get adminPushTitleRequired => 'Английский заголовок обязателен';
+
+  @override
+  String get adminPushBodyRequired => 'Английский текст обязателен';
+
+  @override
+  String get adminPushBody => 'Содержание';
+
+  @override
+  String get adminPushPreview => 'Предпросмотр';
+
+  @override
+  String get adminPushSendNotification => 'Отправить уведомление';
+
+  @override
+  String get adminPushSendConfirm => 'Отправить уведомление?';
+
+  @override
+  String get adminPushSendWarning =>
+      'Это немедленно отправит push-уведомление всем целевым пользователям.';
+
+  @override
+  String get adminPushSentSuccess => 'Уведомление успешно отправлено!';
+
+  @override
+  String get adminPushSelectLanguage =>
+      'Пожалуйста, выберите хотя бы один язык';
+
+  @override
+  String get adminPushSelectTier => 'Пожалуйста, выберите хотя бы один уровень';
+
+  @override
+  String get adminPushSelectPlatform =>
+      'Пожалуйста, выберите хотя бы одну платформу';
+
+  @override
+  String get adminPushFindUser => 'Найти пользователя';
+
+  @override
+  String get adminPushEmailOrUid => 'Email или UID';
+
+  @override
+  String get adminPushSendToUser => 'Отправить пользователю';
+
+  @override
+  String get adminPushSending => 'Отправка...';
+
+  @override
+  String get adminPushNoToken =>
+      'У этого пользователя нет активного устройства. Уведомление не может быть доставлено.';
+
+  @override
+  String get adminPushNoHistory => 'Уведомления ещё не отправлялись';
+
+  @override
+  String get adminPushTitleBodyRequired => 'Заголовок и текст обязательны';
+
+  @override
+  String get adminPushSubscriptionTier => 'Уровень подписки';
+
+  @override
+  String get adminPushPlatform => 'Платформа';
+
+  @override
+  String get adminPushLanguages => 'Языки';
 }

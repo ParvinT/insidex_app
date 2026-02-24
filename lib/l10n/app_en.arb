@@ -1123,7 +1123,41 @@
       "filtered": {"type": "int"},
       "total": {"type": "int"}
     }
-  }
+  },
+
+  "adminPushNotifications": "Push Notifications",
+  "adminPushSendNew": "Send New",
+  "adminPushDirect": "Direct",
+  "adminPushHistory": "History",
+  "adminPushTargetAudience": "Target Audience",
+  "adminPushAllUsers": "All Users",
+  "adminPushByLanguage": "By Language",
+  "adminPushByTier": "By Tier",
+  "adminPushByPlatform": "By Platform",
+  "adminPushCustom": "Custom",
+  "adminPushNotificationContent": "Notification Content",
+  "adminPushEnglishRequired": "English (Required)",
+  "adminPushTitleRequired": "English title is required",
+  "adminPushBodyRequired": "English body is required",
+  "adminPushBody": "Body",
+  "adminPushPreview": "Preview",
+  "adminPushSendNotification": "Send Notification",
+  "adminPushSendConfirm": "Send Notification?",
+  "adminPushSendWarning": "This will send a push notification to all targeted users immediately.",
+  "adminPushSentSuccess": "Notification sent successfully!",
+  "adminPushSelectLanguage": "Please select at least one language",
+  "adminPushSelectTier": "Please select at least one tier",
+  "adminPushSelectPlatform": "Please select at least one platform",
+  "adminPushFindUser": "Find User",
+  "adminPushEmailOrUid": "Email or UID",
+  "adminPushSendToUser": "Send to User",
+  "adminPushSending": "Sending...",
+  "adminPushNoToken": "This user has no active device. Notification cannot be delivered.",
+  "adminPushNoHistory": "No notifications sent yet",
+  "adminPushTitleBodyRequired": "Title and body are required",
+  "adminPushSubscriptionTier": "Subscription Tier",
+  "adminPushPlatform": "Platform",
+  "adminPushLanguages": "Languages"
 
 }
 

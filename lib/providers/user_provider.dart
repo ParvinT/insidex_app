@@ -6,11 +6,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
 import '../app.dart';
-import '../services/device_session_service.dart';
 import '../shared/widgets/device_logout_dialog.dart';
+import '../services/device_session_service.dart';
 import '../services/auth_persistence_service.dart';
 import '../services/audio/audio_player_service.dart';
 import '../services/download/decryption_preloader.dart';
+import '../services/notifications/topic_management_service.dart';
 import 'mini_player_provider.dart';
 import 'subscription_provider.dart';
 import 'download_provider.dart';
@@ -210,6 +211,14 @@ class UserProvider extends ChangeNotifier {
       await DeviceSessionService().clearActiveDevice(_firebaseUser!.uid);
     } else if (forcedByOtherDevice) {
       debugPrint('⏭️ Skipping clearActiveDevice (forced by other device)');
+    }
+
+    // Unsubscribe from all FCM topics
+    try {
+      await TopicManagementService().unsubscribeAllTopics();
+      debugPrint('✅ FCM topics unsubscribed');
+    } catch (e) {
+      debugPrint('⚠️ FCM topic unsubscribe error: $e');
     }
 
     // Sign out

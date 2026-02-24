@@ -986,6 +986,40 @@
       "filtered": {"type": "int"},
       "total": {"type": "int"}
     }
-  }
+  },
+
+  "adminPushNotifications": "Push Bildirimleri",
+  "adminPushSendNew": "Yeni Gönder",
+  "adminPushDirect": "Direkt",
+  "adminPushHistory": "Geçmiş",
+  "adminPushTargetAudience": "Hedef Kitle",
+  "adminPushAllUsers": "Tüm Kullanıcılar",
+  "adminPushByLanguage": "Dile Göre",
+  "adminPushByTier": "Seviyeye Göre",
+  "adminPushByPlatform": "Platforma Göre",
+  "adminPushCustom": "Özel",
+  "adminPushNotificationContent": "Bildirim İçeriği",
+  "adminPushEnglishRequired": "İngilizce (Zorunlu)",
+  "adminPushTitleRequired": "İngilizce başlık zorunludur",
+  "adminPushBodyRequired": "İngilizce içerik zorunludur",
+  "adminPushBody": "İçerik",
+  "adminPushPreview": "Önizleme",
+  "adminPushSendNotification": "Bildirim Gönder",
+  "adminPushSendConfirm": "Bildirim Gönderilsin mi?",
+  "adminPushSendWarning": "Bu bildirim hedef kullanıcılara anında gönderilecektir.",
+  "adminPushSentSuccess": "Bildirim başarıyla gönderildi!",
+  "adminPushSelectLanguage": "Lütfen en az bir dil seçin",
+  "adminPushSelectTier": "Lütfen en az bir seviye seçin",
+  "adminPushSelectPlatform": "Lütfen en az bir platform seçin",
+  "adminPushFindUser": "Kullanıcı Bul",
+  "adminPushEmailOrUid": "Email veya UID",
+  "adminPushSendToUser": "Kullanıcıya Gönder",
+  "adminPushSending": "Gönderiliyor...",
+  "adminPushNoToken": "Bu kullanıcının aktif cihazı yok. Bildirim iletilemez.",
+  "adminPushNoHistory": "Henüz bildirim gönderilmedi",
+  "adminPushTitleBodyRequired": "Başlık ve içerik zorunludur",
+  "adminPushSubscriptionTier": "Abonelik Seviyesi",
+  "adminPushPlatform": "Platform",
+  "adminPushLanguages": "Diller"
   
 }

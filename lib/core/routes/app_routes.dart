@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 
-// --- Feature imports (relative, alias'sız) ---
+// --- Feature imports ---
 import '../../features/splash/splash_screen.dart';
 import '../../features/onboarding/goals_screen.dart';
 import '../../features/settings/settings_screen.dart';
@@ -17,6 +17,7 @@ import '../../features/admin/home_cards_management_screen.dart';
 import '../../features/admin/admin_settings_screen.dart';
 import '../../features/admin/grant_subscription_screen.dart';
 import '../../features/admin/add_category_screen.dart';
+import '../../features/admin/notifications/push_notification_screen.dart';
 import '../../features/auth/forgot_password_screen.dart';
 import '../../features/profile/change_password_screen.dart';
 import '../../features/legal/legal_document_screen.dart';
@@ -51,6 +52,7 @@ class AppRoutes {
   static const String adminDashboard = '/admin/dashboard';
   static const String homeCardsManagement = '/admin/home-cards';
   static const String addCategory = '/admin/add-category';
+  static const String pushNotifications = '/admin/push-notifications';
 
   static const String privacyPolicy = '/legal/privacy-policy';
   static const String termsOfService = '/legal/terms-of-service';
@@ -84,6 +86,7 @@ class AppRoutes {
         '/admin/users': (_) => const UserManagementScreen(),
         '/admin/settings': (_) => const AdminSettingsScreen(),
         '/admin/grant-subscription': (_) => const GrantSubscriptionScreen(),
+        '/admin/push-notifications': (_) => const PushNotificationScreen(),
 
         // legal pages - Markdown-based
         privacyPolicy: (context) => LegalDocumentScreen(

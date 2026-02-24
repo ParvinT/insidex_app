@@ -2740,4 +2740,105 @@ class AppLocalizationsHi extends AppLocalizations {
   String filteredSessions(int filtered, int total) {
     return '$filtered / $total सत्र';
   }
+
+  @override
+  String get adminPushNotifications => 'पुश सूचनाएं';
+
+  @override
+  String get adminPushSendNew => 'नया भेजें';
+
+  @override
+  String get adminPushDirect => 'प्रत्यक्ष';
+
+  @override
+  String get adminPushHistory => 'इतिहास';
+
+  @override
+  String get adminPushTargetAudience => 'लक्षित दर्शक';
+
+  @override
+  String get adminPushAllUsers => 'सभी उपयोगकर्ता';
+
+  @override
+  String get adminPushByLanguage => 'भाषा के अनुसार';
+
+  @override
+  String get adminPushByTier => 'स्तर के अनुसार';
+
+  @override
+  String get adminPushByPlatform => 'प्लेटफ़ॉर्म के अनुसार';
+
+  @override
+  String get adminPushCustom => 'कस्टम';
+
+  @override
+  String get adminPushNotificationContent => 'सूचना सामग्री';
+
+  @override
+  String get adminPushEnglishRequired => 'अंग्रेज़ी (आवश्यक)';
+
+  @override
+  String get adminPushTitleRequired => 'अंग्रेज़ी शीर्षक आवश्यक है';
+
+  @override
+  String get adminPushBodyRequired => 'अंग्रेज़ी विवरण आवश्यक है';
+
+  @override
+  String get adminPushBody => 'विवरण';
+
+  @override
+  String get adminPushPreview => 'पूर्वावलोकन';
+
+  @override
+  String get adminPushSendNotification => 'सूचना भेजें';
+
+  @override
+  String get adminPushSendConfirm => 'सूचना भेजें?';
+
+  @override
+  String get adminPushSendWarning =>
+      'यह तुरंत सभी लक्षित उपयोगकर्ताओं को पुश सूचना भेजेगा।';
+
+  @override
+  String get adminPushSentSuccess => 'सूचना सफलतापूर्वक भेजी गई!';
+
+  @override
+  String get adminPushSelectLanguage => 'कृपया कम से कम एक भाषा चुनें';
+
+  @override
+  String get adminPushSelectTier => 'कृपया कम से कम एक स्तर चुनें';
+
+  @override
+  String get adminPushSelectPlatform => 'कृपया कम से कम एक प्लेटफ़ॉर्म चुनें';
+
+  @override
+  String get adminPushFindUser => 'उपयोगकर्ता खोजें';
+
+  @override
+  String get adminPushEmailOrUid => 'ईमेल या UID';
+
+  @override
+  String get adminPushSendToUser => 'उपयोगकर्ता को भेजें';
+
+  @override
+  String get adminPushSending => 'भेजा जा रहा है...';
+
+  @override
+  String get adminPushNoToken =>
+      'इस उपयोगकर्ता का कोई सक्रिय डिवाइस नहीं है। सूचना वितरित नहीं की जा सकती।';
+
+  @override
+  String get adminPushNoHistory => 'अभी तक कोई सूचना नहीं भेजी गई';
+
+  @override
+  String get adminPushTitleBodyRequired => 'शीर्षक और विवरण आवश्यक हैं';
+
+  @override
+  String get adminPushSubscriptionTier => 'सदस्यता स्तर';
+
+  @override
+  String get adminPushPlatform => 'प्लेटफ़ॉर्म';
+
+  @override
+  String get adminPushLanguages => 'भाषाएँ';
 }

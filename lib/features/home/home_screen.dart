@@ -11,17 +11,20 @@ import 'widgets/greeting_section.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/responsive_scaffold.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/routes/app_routes.dart';
 import '../../features/library/categories_screen.dart';
 import '../../features/playlist/playlist_screen.dart';
 import '../../shared/widgets/menu_overlay.dart';
-import '../../core/routes/app_routes.dart';
 import '../../services/notifications/notification_service.dart';
 import '../../services/home_card_service.dart';
-import '../quiz/widgets/expandable_quiz_section.dart';
-import '../../l10n/app_localizations.dart';
-import '../search/search_screen.dart';
+import '../../services/notifications/topic_management_service.dart';
+import '../../providers/locale_provider.dart';
+import '../../providers/subscription_provider.dart';
 import '../../providers/download_provider.dart';
 import '../search/widgets/search_bar_widget.dart';
+import '../search/search_screen.dart';
+import '../quiz/widgets/expandable_quiz_section.dart';
+import '../../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -48,6 +51,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     // Check notification permission after screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       NotificationService.checkAndShowPermissionDialog(context);
+    });
+
+    // Ensure FCM topics are subscribed (handles auto-login & app updates)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureTopicSubscription();
     });
   }
 
@@ -84,6 +92,29 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     Future.microtask(() {
       HomeCardService.smartPrefetch();
     });
+  }
+
+  Future<void> _ensureTopicSubscription() async {
+    final locale = context.read<LocaleProvider>().locale.languageCode;
+    final subProvider = context.read<SubscriptionProvider>();
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final topicManager = TopicManagementService();
+      final isInitialized = await topicManager.isInitialized();
+      if (isInitialized) return; // Already subscribed, skip
+
+      await subProvider.waitForInitialization();
+
+      await topicManager.subscribeUserTopics(
+        language: locale,
+        tier: subProvider.tier.name,
+      );
+      debugPrint('✅ FCM topics subscribed (auto-login/app update)');
+    } catch (e) {
+      debugPrint('⚠️ FCM topic auto-subscription error: $e');
+    }
   }
 
   @override

@@ -6,16 +6,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../providers/locale_provider.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/utils/firebase_error_handler.dart';
 import '../../providers/user_provider.dart';
 import '../../services/firebase_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/notifications/topic_management_service.dart';
+import '../../services/device_session_service.dart';
 import '../../services/analytics_service.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../l10n/app_localizations.dart';
-import '../../services/device_session_service.dart';
 
 class OTPVerificationScreen extends StatefulWidget {
   final String email;
@@ -109,6 +111,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
     setState(() => _busy = true);
 
     final userProvider = context.read<UserProvider>();
+    final locale = context.read<LocaleProvider>().locale.languageCode;
 
     try {
       // Use Firebase service to verify OTP and create account
@@ -155,6 +158,17 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
         debugPrint('✅ New user login state cached for device');
       } catch (e) {
         debugPrint('⚠️ Could not cache login state: $e');
+      }
+
+      // Subscribe to FCM topics for push notifications
+      try {
+        await TopicManagementService().subscribeUserTopics(
+          language: locale,
+          tier: 'free',
+        );
+        debugPrint('✅ FCM topics subscribed for new user');
+      } catch (e) {
+        debugPrint('⚠️ FCM topic subscription error: $e');
       }
 
       final prefs = await SharedPreferences.getInstance();

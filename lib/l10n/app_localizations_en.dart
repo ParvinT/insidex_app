@@ -2737,4 +2737,105 @@ class AppLocalizationsEn extends AppLocalizations {
   String filteredSessions(int filtered, int total) {
     return '$filtered / $total sessions';
   }
+
+  @override
+  String get adminPushNotifications => 'Push Notifications';
+
+  @override
+  String get adminPushSendNew => 'Send New';
+
+  @override
+  String get adminPushDirect => 'Direct';
+
+  @override
+  String get adminPushHistory => 'History';
+
+  @override
+  String get adminPushTargetAudience => 'Target Audience';
+
+  @override
+  String get adminPushAllUsers => 'All Users';
+
+  @override
+  String get adminPushByLanguage => 'By Language';
+
+  @override
+  String get adminPushByTier => 'By Tier';
+
+  @override
+  String get adminPushByPlatform => 'By Platform';
+
+  @override
+  String get adminPushCustom => 'Custom';
+
+  @override
+  String get adminPushNotificationContent => 'Notification Content';
+
+  @override
+  String get adminPushEnglishRequired => 'English (Required)';
+
+  @override
+  String get adminPushTitleRequired => 'English title is required';
+
+  @override
+  String get adminPushBodyRequired => 'English body is required';
+
+  @override
+  String get adminPushBody => 'Body';
+
+  @override
+  String get adminPushPreview => 'Preview';
+
+  @override
+  String get adminPushSendNotification => 'Send Notification';
+
+  @override
+  String get adminPushSendConfirm => 'Send Notification?';
+
+  @override
+  String get adminPushSendWarning =>
+      'This will send a push notification to all targeted users immediately.';
+
+  @override
+  String get adminPushSentSuccess => 'Notification sent successfully!';
+
+  @override
+  String get adminPushSelectLanguage => 'Please select at least one language';
+
+  @override
+  String get adminPushSelectTier => 'Please select at least one tier';
+
+  @override
+  String get adminPushSelectPlatform => 'Please select at least one platform';
+
+  @override
+  String get adminPushFindUser => 'Find User';
+
+  @override
+  String get adminPushEmailOrUid => 'Email or UID';
+
+  @override
+  String get adminPushSendToUser => 'Send to User';
+
+  @override
+  String get adminPushSending => 'Sending...';
+
+  @override
+  String get adminPushNoToken =>
+      'This user has no active device. Notification cannot be delivered.';
+
+  @override
+  String get adminPushNoHistory => 'No notifications sent yet';
+
+  @override
+  String get adminPushTitleBodyRequired => 'Title and body are required';
+
+  @override
+  String get adminPushSubscriptionTier => 'Subscription Tier';
+
+  @override
+  String get adminPushPlatform => 'Platform';
+
+  @override
+  String get adminPushLanguages => 'Languages';
 }

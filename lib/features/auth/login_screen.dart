@@ -11,11 +11,14 @@ import '../../core/utils/firebase_error_handler.dart';
 import '../../shared/widgets/custom_text_field.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../services/firebase_service.dart';
-import '../../providers/user_provider.dart';
-import '../../core/responsive/auth_scaffold.dart';
+import '../../services/notifications/topic_management_service.dart';
 import '../../services/auth_persistence_service.dart';
-import '../../l10n/app_localizations.dart';
 import '../../services/device_session_service.dart';
+import '../../providers/user_provider.dart';
+import '../../providers/subscription_provider.dart';
+import '../../providers/locale_provider.dart';
+import '../../core/responsive/auth_scaffold.dart';
+import '../../l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -51,6 +54,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
+    final locale = context.read<LocaleProvider>().locale.languageCode;
+    final subProvider = context.read<SubscriptionProvider>();
+    final userProvider = context.read<UserProvider>();
 
     final result = await FirebaseService.signIn(
       email: email,
@@ -64,11 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['success']) {
       final user = result['user'];
       if (user != null) {
-        final userProvider = context.read<UserProvider>();
         debugPrint('SAVING AUTH SESSION for: ${user.email}');
         await AuthPersistenceService.saveAuthSession(user, password: password);
 
-        // Test için SharedPreferences'ı kontrol et
         final prefs = await SharedPreferences.getInstance();
         debugPrint('After save - Email: ${prefs.getString('user_email')}');
         debugPrint(
@@ -81,10 +85,21 @@ class _LoginScreenState extends State<LoginScreen> {
         await Future.delayed(const Duration(milliseconds: 500));
 
         await userProvider.loadUserData(user.uid);
-        // Save has_logged_in flag for offline mode
         await prefs.setBool('has_logged_in', true);
         await prefs.setString('cached_user_id', user.uid);
         debugPrint('✅ [Login] has_logged_in flag and user ID saved');
+
+        // Subscribe to FCM topics for push notifications
+        try {
+          await subProvider.waitForInitialization();
+          await TopicManagementService().subscribeUserTopics(
+            language: locale,
+            tier: subProvider.tier.name,
+          );
+          debugPrint('✅ FCM topics subscribed');
+        } catch (e) {
+          debugPrint('⚠️ FCM topic subscription error: $e');
+        }
       }
 
       if (!mounted) return;
