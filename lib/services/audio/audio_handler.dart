@@ -36,6 +36,10 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
   // Skip duration for forward/rewind
   static const Duration _skipDuration = Duration(seconds: 10);
 
+  // Callbacks for notification skip controls
+  VoidCallback? onSkipToNext;
+  VoidCallback? onSkipToPrevious;
+
   // =================== CONSTRUCTOR ===================
 
   InsideXAudioHandler() {
@@ -87,10 +91,10 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
         return PlaybackState(
           // Available controls shown on lock screen / notification
           controls: [
-            MediaControl.rewind, // -10 seconds
+            MediaControl.skipToPrevious,
             playing ? MediaControl.pause : MediaControl.play,
             MediaControl.stop,
-            MediaControl.fastForward,
+            MediaControl.skipToNext,
           ],
           // Which system actions are enabled
           systemActions: const {
@@ -100,8 +104,8 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
             MediaAction.play,
             MediaAction.pause,
             MediaAction.stop,
-            MediaAction.fastForward,
-            MediaAction.rewind,
+            MediaAction.skipToNext,
+            MediaAction.skipToPrevious,
           },
           // Android notification compact view buttons (indices of controls array)
           androidCompactActionIndices: const [0, 1, 3],
@@ -290,6 +294,22 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
   }
 
   @override
+  Future<void> skipToNext() async {
+    debugPrint('⏭️ [InsideXAudioHandler] Skip to next (notification)');
+    if (onSkipToNext != null) {
+      onSkipToNext!();
+    }
+  }
+
+  @override
+  Future<void> skipToPrevious() async {
+    debugPrint('⏮️ [InsideXAudioHandler] Skip to previous (notification)');
+    if (onSkipToPrevious != null) {
+      onSkipToPrevious!();
+    }
+  }
+
+  @override
   Future<void> setSpeed(double speed) async {
     await _player.setSpeed(speed);
     debugPrint('🏃 [InsideXAudioHandler] Speed set to ${speed}x');
@@ -350,12 +370,25 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
     await _ensureInitialized();
     final int token = ++_loadToken;
 
-    // Stop any current playback
-    await _player.stop();
+    // Pause current playback without releasing audio session
+    // Using pause + seek instead of stop to prevent:
+    // 1. Other apps stealing audio focus during transition
+    // 2. Lock screen artwork disappearing momentarily
+    await _player.pause();
     await _player.seek(Duration.zero);
 
-    debugPrint(
-        '🔄 [InsideXAudioHandler] Stopped previous audio, loading new: $title');
+    // Update media item immediately with new session info
+    // so lock screen shows new title/artwork during loading
+    _updateMediaItem(
+      title: title,
+      artist: artist,
+      artworkUrl: artworkUrl,
+      localArtworkPath: localArtworkPath,
+      sessionId: sessionId,
+      duration: duration,
+    );
+
+    debugPrint('🔄 [InsideXAudioHandler] Preparing transition to: $title');
 
     Duration? resolvedDuration;
 
@@ -404,18 +437,13 @@ class InsideXAudioHandler extends BaseAudioHandler with SeekHandler {
 
         if (token != _loadToken) return resolvedDuration;
 
-        // Update media item for lock screen / notification
-        _updateMediaItem(
-          title: title,
-          artist: artist,
-          artworkUrl: artworkUrl,
-          localArtworkPath: localArtworkPath,
-          sessionId: sessionId,
-          duration: resolvedDuration ?? duration,
-        );
+        // Update duration now that we know the resolved value
+        if (resolvedDuration != null) {
+          updateDuration(resolvedDuration);
+        }
 
         // Start playback
-        await _player.play();
+        _player.play();
 
         debugPrint('🎵 [InsideXAudioHandler] Now playing: $title');
         return resolvedDuration;

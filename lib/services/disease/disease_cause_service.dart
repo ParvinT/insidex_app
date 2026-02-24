@@ -145,7 +145,9 @@ class DiseaseCauseService {
       final recommendations = <String, String>{};
 
       causes.forEach((diseaseId, cause) {
-        recommendations[diseaseId] = cause.recommendedSessionId;
+        if (cause.recommendedSessionId != null) {
+          recommendations[diseaseId] = cause.recommendedSessionId!;
+        }
       });
 
       return recommendations;

@@ -14,6 +14,7 @@ import 'providers/mini_player_provider.dart';
 import 'providers/locale_provider.dart';
 import 'providers/download_provider.dart';
 import 'providers/subscription_provider.dart';
+import 'providers/auto_play_provider.dart';
 import 'services/audio/audio_handler.dart';
 import 'services/audio/audio_cache_service.dart';
 import 'app.dart';
@@ -52,6 +53,7 @@ void main() async {
     webProvider:
         ReCaptchaV3Provider('6Lc9aFssAAAAAEojp9FJJkOnIr7dEqSV4wK4nmdn'),
   );
+
   debugPrint('✅ Firebase App Check initialized');
 
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
@@ -125,6 +127,7 @@ void main() async {
         providers: [
           ChangeNotifierProvider(create: (_) => DownloadProvider()),
           ChangeNotifierProvider(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider(create: (_) => AutoPlayProvider()),
           ChangeNotifierProvider(
               create: (_) => UserProvider()..initAuthListener()),
           ChangeNotifierProvider(

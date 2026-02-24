@@ -1,7 +1,7 @@
 name: insidex_app
-description: "InsideX - Sound Healing & Subliminal App"
+description: "InsideX - Sound Healing & HypnoTrack"
 publish_to: "none"
-version: 1.0.0+7
+version: 1.0.0+19
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -18,6 +18,7 @@ dependencies:
   google_fonts: ^6.2.1
   flutter_svg: ^2.0.9
   auto_size_text: ^3.0.0
+  smooth_page_indicator: ^2.0.1
   lottie: ^3.1.0
 
   firebase_analytics: ^11.0.1
@@ -95,11 +96,11 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/icons/categories/
     - assets/legal/en/
     - assets/legal/ru/
     - assets/legal/tr/
     - assets/legal/hi/
-    - assets/animations/categories/
     - assets/animations/ui/
     - assets/animations/avatars/
     - assets/content/en/

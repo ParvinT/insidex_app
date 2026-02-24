@@ -1,6 +1,6 @@
 # Kullanım Koşulları
 
-**Yürürlük Tarihi:** 11 Eylül 2025
+**Yürürlük Tarihi:** 6 Şubat 2026
 
 **ALZHAMI LTD**  
 Şirket Numarası: 16545604  
@@ -81,7 +81,7 @@ iOS için: Apple ID üzerinden yönetilir.
 
 **HİZMETLER GARANTİSİZ "OLDUĞU GİBİ" SAĞLANIR.**
 
-Uygulamanın bilinçaltı sesi yalnızca kişisel gelişim içindir. Şunları YAPMAZ:
+Uygulamanın Hipnotrek sesi yalnızca kişisel gelişim içindir. Şunları YAPMAZ:
 
 - Herhangi bir durumu teşhis etmek, tedavi etmek veya iyileştirmek
 - Tıbbi veya psikolojik tavsiyenin yerini almak

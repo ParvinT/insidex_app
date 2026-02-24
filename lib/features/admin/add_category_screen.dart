@@ -3,11 +3,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../core/responsive/breakpoints.dart';
 import '../../models/category_model.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../services/category/category_service.dart';
 import '../../core/constants/app_icons.dart';
 import '../../l10n/app_localizations.dart';
@@ -183,14 +183,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               ),
               child: Center(
                 child: Padding(
-                  padding: EdgeInsets.all(18.w),
-                  child: Lottie.asset(
-                    AppIcons.getAnimationPath(
-                      AppIcons.getIconByName(_selectedIcon)?['path'] ??
-                          'meditation.json',
-                    ),
-                    fit: BoxFit.contain,
-                    repeat: true,
+                  padding: EdgeInsets.all(12.w),
+                  child: CategoryIcon(
+                    name: _selectedIcon,
+                    size: isTablet ? 56.w : 46.w,
                   ),
                 ),
               ),
@@ -471,10 +467,10 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
               child: GridView.builder(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 20.h,
-                  crossAxisSpacing: 20.w,
-                  childAspectRatio: 0.9,
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 16.h,
+                  crossAxisSpacing: 16.w,
+                  childAspectRatio: 0.85,
                 ),
                 itemCount: AppIcons.categoryIcons.length,
                 itemBuilder: (context, index) {
@@ -489,44 +485,38 @@ class _AddCategoryScreenState extends State<AddCategoryScreen> {
                     child: Column(
                       children: [
                         Container(
-                          width: 100.w,
-                          height: 100.w,
+                          width: 80.w,
+                          height: 80.w,
                           decoration: BoxDecoration(
-                            gradient: isSelected
-                                ? LinearGradient(
-                                    colors: [
-                                      colors.textPrimary,
-                                      colors.textPrimary.withValues(alpha: 0.7),
-                                    ],
-                                  )
-                                : LinearGradient(
-                                    colors: [
-                                      colors.greyLight,
-                                      colors.greyMedium,
-                                    ],
-                                  ),
+                            color: isSelected
+                                ? colors.textPrimary
+                                : colors.greyLight,
                             borderRadius: BorderRadius.circular(16.r),
                             border: isSelected
                                 ? Border.all(
                                     color: colors.textPrimary,
                                     width: 3,
                                   )
-                                : null,
+                                : Border.all(
+                                    color: colors.border,
+                                    width: 1,
+                                  ),
                           ),
                           child: Padding(
-                            padding: EdgeInsets.all(20.w),
-                            child: Lottie.asset(
-                              AppIcons.getAnimationPath(icon['path']!),
-                              fit: BoxFit.contain,
-                              repeat: true,
+                            padding: EdgeInsets.all(14.w),
+                            child: CategoryIcon(
+                              name: icon['name']!,
+                              size: 52.w,
+                              forceBrightness:
+                                  isSelected ? Brightness.dark : null,
                             ),
                           ),
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 6.h),
                         Text(
                           icon['label']!,
                           style: GoogleFonts.inter(
-                            fontSize: 12.sp,
+                            fontSize: 10.sp,
                             fontWeight:
                                 isSelected ? FontWeight.w600 : FontWeight.w400,
                             color: isSelected

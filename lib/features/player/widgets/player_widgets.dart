@@ -4,10 +4,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:marquee/marquee.dart';
 import '../../../l10n/app_localizations.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../../shared/widgets/auto_marquee_text.dart';
 
 /// Header with back button, title, and info button
 class PlayerHeader extends StatelessWidget {
@@ -112,36 +112,43 @@ class PlayerSessionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 40.w),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: ScrollingText(
-              text: title,
-              style: GoogleFonts.inter(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.w700,
-                color: colors.textPrimary,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isTablet = MediaQuery.of(context).size.width >= 600;
+        final horizontalPadding = isTablet ? 60.w : 40.w;
+        final subtitleWidth = isTablet ? 220.w : 180.w;
+        final titleFontSize = isTablet ? 24.sp : 20.sp;
+        final subtitleFontSize = isTablet ? 16.sp : 14.sp;
+
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Column(
+            children: [
+              AutoMarqueeText(
+                text: title,
+                style: GoogleFonts.inter(
+                  fontSize: titleFontSize,
+                  fontWeight: FontWeight.w700,
+                  color: colors.textPrimary,
+                ),
+                alignment: Alignment.center,
               ),
-              maxWidth: MediaQuery.of(context).size.width - 40.w,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          SizedBox(
-            width: 150.w,
-            child: ScrollingText(
-              text: subtitle,
-              style: GoogleFonts.inter(
-                fontSize: 14.sp,
-                color: colors.textSecondary,
+              SizedBox(height: 8.h),
+              SizedBox(
+                width: subtitleWidth,
+                child: AutoMarqueeText(
+                  text: subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: subtitleFontSize,
+                    color: colors.textSecondary,
+                  ),
+                  alignment: Alignment.center,
+                ),
               ),
-              maxWidth: 150.w,
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -201,7 +208,8 @@ class IntroductionButton extends StatelessWidget {
 }
 
 /// Progress bar with time labels
-class PlayerProgressBar extends StatelessWidget {
+/// Uses local state during drag to prevent jitter from position stream
+class PlayerProgressBar extends StatefulWidget {
   final Duration position;
   final Duration duration;
   final Function(Duration) onSeek;
@@ -213,6 +221,14 @@ class PlayerProgressBar extends StatelessWidget {
     required this.onSeek,
   });
 
+  @override
+  State<PlayerProgressBar> createState() => _PlayerProgressBarState();
+}
+
+class _PlayerProgressBarState extends State<PlayerProgressBar> {
+  bool _isDragging = false;
+  double _dragValue = 0.0;
+
   String _formatDuration(Duration d) {
     final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
@@ -222,12 +238,22 @@ class PlayerProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final total =
-        duration.inMilliseconds > 0 ? duration : const Duration(minutes: 10);
+    final total = widget.duration.inMilliseconds > 0
+        ? widget.duration
+        : const Duration(minutes: 10);
 
-    final value = total.inMilliseconds == 0
-        ? 0.0
-        : (position.inMilliseconds / total.inMilliseconds).clamp(0.0, 1.0);
+    // During drag, use local value; otherwise use stream value
+    final double value = _isDragging
+        ? _dragValue
+        : (total.inMilliseconds == 0
+            ? 0.0
+            : (widget.position.inMilliseconds / total.inMilliseconds)
+                .clamp(0.0, 1.0));
+
+    // Display position based on current state
+    final displayPosition = _isDragging
+        ? Duration(milliseconds: (total.inMilliseconds * _dragValue).round())
+        : widget.position;
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 30.w),
@@ -245,9 +271,23 @@ class PlayerProgressBar extends StatelessWidget {
             ),
             child: Slider(
               value: value,
+              onChangeStart: (v) {
+                setState(() {
+                  _isDragging = true;
+                  _dragValue = v;
+                });
+              },
               onChanged: (v) {
+                setState(() {
+                  _dragValue = v;
+                });
+              },
+              onChangeEnd: (v) {
                 final newMs = (total.inMilliseconds * v).round();
-                onSeek(Duration(milliseconds: newMs));
+                widget.onSeek(Duration(milliseconds: newMs));
+                setState(() {
+                  _isDragging = false;
+                });
               },
             ),
           ),
@@ -257,15 +297,15 @@ class PlayerProgressBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  _formatDuration(position),
+                  _formatDuration(displayPosition),
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
                     color: colors.textSecondary,
                   ),
                 ),
                 Text(
-                  duration.inMilliseconds > 0
-                      ? _formatDuration(duration)
+                  widget.duration.inMilliseconds > 0
+                      ? _formatDuration(widget.duration)
                       : '--:--',
                   style: GoogleFonts.inter(
                     fontSize: 11.sp,
@@ -281,30 +321,60 @@ class PlayerProgressBar extends StatelessWidget {
   }
 }
 
-/// Play/Pause controls with skip buttons
+/// Play/Pause controls with skip and previous/next buttons
 class PlayerPlayControls extends StatelessWidget {
   final bool isPlaying;
+  final bool hasPrevious;
+  final bool hasNext;
   final VoidCallback onPlayPause;
   final VoidCallback onReplay10;
   final VoidCallback onForward10;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
 
   const PlayerPlayControls({
     super.key,
     required this.isPlaying,
+    this.hasPrevious = false,
+    this.hasNext = false,
     required this.onPlayPause,
     required this.onReplay10,
     required this.onForward10,
+    this.onPrevious,
+    this.onNext,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width >= 600;
+
+    final double skipTrackSize = isTablet ? 42.w : 36.w;
+    final double skipTrackIconSize = isTablet ? 24.sp : 20.sp;
+    final double skipTimeSize = isTablet ? 50.w : 48.w;
+    final double skipTimeIconSize = isTablet ? 28.sp : 26.sp;
+    final double playPauseSize = isTablet ? 74.w : 70.w;
+    final double playPauseIconSize = isTablet ? 38.sp : 35.sp;
+    final double innerSpacing = isTablet ? 18.w : 14.w;
+    final double outerSpacing = isTablet ? 14.w : 10.w;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Skip backward
+        // Previous track
+        _buildTrackButton(
+          icon: Icons.skip_previous_rounded,
+          enabled: hasPrevious,
+          onTap: onPrevious,
+          size: skipTrackSize,
+          iconSize: skipTrackIconSize,
+        ),
+
+        SizedBox(width: outerSpacing),
+
+        // Rewind 10s
         Container(
-          width: 48.w,
-          height: 48.w,
+          width: skipTimeSize,
+          height: skipTimeSize,
           decoration: BoxDecoration(
             color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
             shape: BoxShape.circle,
@@ -314,21 +384,21 @@ class PlayerPlayControls extends StatelessWidget {
               Icons.replay_10,
               color: AppColors.darkTextPrimary,
             ),
-            iconSize: 26.sp,
+            iconSize: skipTimeIconSize,
             padding: EdgeInsets.zero,
             onPressed: onReplay10,
           ),
         ),
 
-        SizedBox(width: 20.w),
+        SizedBox(width: innerSpacing),
 
         // Play/Pause
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onPlayPause,
           child: Container(
-            width: 70.w,
-            height: 70.w,
+            width: playPauseSize,
+            height: playPauseSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: AppColors.darkTextPrimary.withValues(alpha: 0.5),
@@ -343,17 +413,17 @@ class PlayerPlayControls extends StatelessWidget {
             child: Icon(
               isPlaying ? Icons.pause : Icons.play_arrow,
               color: AppColors.darkTextOnLight,
-              size: 35.sp,
+              size: playPauseIconSize,
             ),
           ),
         ),
 
-        SizedBox(width: 20.w),
+        SizedBox(width: innerSpacing),
 
-        // Skip forward
+        // Forward 10s
         Container(
-          width: 48.w,
-          height: 48.w,
+          width: skipTimeSize,
+          height: skipTimeSize,
           decoration: BoxDecoration(
             color: AppColors.darkBackgroundElevated.withValues(alpha: 0.5),
             shape: BoxShape.circle,
@@ -363,12 +433,52 @@ class PlayerPlayControls extends StatelessWidget {
               Icons.forward_10,
               color: AppColors.darkTextPrimary,
             ),
-            iconSize: 26.sp,
+            iconSize: skipTimeIconSize,
             padding: EdgeInsets.zero,
             onPressed: onForward10,
           ),
         ),
+
+        SizedBox(width: outerSpacing),
+
+        // Next track
+        _buildTrackButton(
+          icon: Icons.skip_next_rounded,
+          enabled: hasNext,
+          onTap: onNext,
+          size: skipTrackSize,
+          iconSize: skipTrackIconSize,
+        ),
       ],
+    );
+  }
+
+  Widget _buildTrackButton({
+    required IconData icon,
+    required bool enabled,
+    required VoidCallback? onTap,
+    required double size,
+    required double iconSize,
+  }) {
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 200),
+        opacity: enabled ? 1.0 : 0.3,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: AppColors.darkBackgroundElevated.withValues(alpha: 0.3),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.darkTextPrimary,
+            size: iconSize,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -455,60 +565,6 @@ class PlayerBottomActions extends StatelessWidget {
 
           if (downloadButton != null) downloadButton!,
         ],
-      ),
-    );
-  }
-}
-
-/// Scrolling text widget for long titles
-class ScrollingText extends StatelessWidget {
-  final String text;
-  final TextStyle style;
-  final double maxWidth;
-
-  const ScrollingText({
-    super.key,
-    required this.text,
-    required this.style,
-    required this.maxWidth,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout(maxWidth: maxWidth);
-
-    final needsScrolling = textPainter.didExceedMaxLines;
-
-    if (!needsScrolling) {
-      return Text(
-        text,
-        style: style,
-        maxLines: 1,
-        overflow: TextOverflow.visible,
-        textAlign: TextAlign.center,
-      );
-    }
-
-    return SizedBox(
-      width: maxWidth,
-      height: style.fontSize! * 1.5,
-      child: Marquee(
-        text: text,
-        style: style,
-        scrollAxis: Axis.horizontal,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        blankSpace: 40.w,
-        velocity: 30.0,
-        pauseAfterRound: const Duration(seconds: 2),
-        startPadding: 10.w,
-        accelerationDuration: const Duration(milliseconds: 500),
-        accelerationCurve: Curves.easeInOut,
-        decelerationDuration: const Duration(milliseconds: 500),
-        decelerationCurve: Curves.easeInOut,
       ),
     );
   }

@@ -9,13 +9,14 @@ import 'dart:io';
 
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
+import '../../core/routes/player_route.dart';
 import '../../models/downloaded_session.dart';
+import '../../models/play_context.dart';
 import '../../providers/download_provider.dart';
 import '../../providers/mini_player_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
-import '../player/audio_player_screen.dart';
 import '../../services/download/decryption_preloader.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/audio/audio_player_service.dart';
@@ -273,6 +274,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           provider,
           isTablet,
           index == downloads.length - 1,
+          index,
         );
       },
     );
@@ -283,6 +285,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     DownloadProvider provider,
     bool isTablet,
     bool isLast,
+    int index,
   ) {
     final colors = context.colors;
     final double imageSize = isTablet ? 80.w : 70.w;
@@ -295,7 +298,7 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: () => _playDownload(download),
+          onTap: () => _playDownload(download, index),
           borderRadius: BorderRadius.circular(borderRadius),
           child: Container(
             padding: EdgeInsets.all(12.w),
@@ -521,20 +524,23 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
     }
   }
 
-  Future<void> _playDownload(DownloadedSession download) async {
-    // ✅ CHECK SUBSCRIPTION - Can user play offline content?
+  Future<void> _playDownload(DownloadedSession download, int index) async {
+    // ✅ Capture ALL context dependencies upfront
     final subscriptionProvider = context.read<SubscriptionProvider>();
+    final miniPlayer = context.read<MiniPlayerProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
+    final l10n = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
 
     if (!subscriptionProvider.canDownload) {
-      // User is Lite or Free - check internet status
       final connectivityResult = await Connectivity().checkConnectivity();
       final hasInternet = connectivityResult.any(
         (result) => result != ConnectivityResult.none,
       );
 
+      if (!mounted) return;
+
       if (hasInternet) {
-        // Online - show upgrade prompt with upgrade option
-        final l10n = AppLocalizations.of(context);
         final purchased = await showUpgradeBottomSheet(
           context,
           feature: 'offline_playback',
@@ -542,41 +548,40 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           subtitle: l10n.offlinePlaybackSubtitle,
         );
 
-        // If not purchased, don't play
         if (purchased != true) return;
-
-        // Re-check after potential purchase
         if (!subscriptionProvider.canDownload) return;
       } else {
-        // Offline - show info-only modal (no upgrade button)
         await showOfflineUpgradeInfo(context);
         return;
       }
     }
 
-    // ✅ User has Standard - proceed with playback
-    // Stop current audio and dismiss mini player BEFORE navigating
     final audioService = AudioPlayerService();
     await audioService.stop();
 
-    // Dismiss mini player to prevent state conflicts
-    if (mounted) {
-      final miniPlayer = context.read<MiniPlayerProvider>();
-      miniPlayer.dismiss();
-    }
+    if (!mounted) return;
+    miniPlayer.dismiss();
 
-    // Small delay to ensure cleanup completes
     await Future.delayed(const Duration(milliseconds: 100));
 
     _preloader.prioritize(download.sessionId);
 
     if (!mounted) return;
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            AudioPlayerScreen(sessionData: download.toPlayerSessionData()),
+    final sessionList =
+        downloadProvider.downloads.map((d) => d.toPlayerSessionData()).toList();
+
+    final playContext = PlayContext(
+      type: PlayContextType.playlist,
+      sourceTitle: l10n.downloads,
+      sessionList: sessionList,
+      currentIndex: index,
+    );
+
+    navigator.push(
+      PlayerRoute(
+        sessionData: download.toPlayerSessionData(),
+        playContext: playContext,
       ),
     );
   }

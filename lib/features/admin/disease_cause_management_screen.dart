@@ -33,6 +33,15 @@ class _DiseaseCauseManagementScreenState
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
+  String _sessionFilter = 'all';
+  String _genderFilter = 'all';
+
+  int get _totalCount => _causes.length;
+  int get _hasSessionCount =>
+      _causes.where((c) => c.hasRecommendedSession).length;
+  int get _noSessionCount =>
+      _causes.where((c) => !c.hasRecommendedSession).length;
+
   @override
   void initState() {
     super.initState();
@@ -79,6 +88,21 @@ class _DiseaseCauseManagementScreenState
 
   List<DiseaseCauseModel> get _filteredCauses {
     var causes = _causes;
+
+    // Apply session filter
+    if (_sessionFilter == 'hasSession') {
+      causes = causes.where((c) => c.hasRecommendedSession).toList();
+    } else if (_sessionFilter == 'noSession') {
+      causes = causes.where((c) => !c.hasRecommendedSession).toList();
+    }
+
+    // Apply gender filter
+    if (_genderFilter != 'all') {
+      causes = causes.where((cause) {
+        final disease = _diseasesById[cause.diseaseId];
+        return disease?.gender == _genderFilter;
+      }).toList();
+    }
 
     // Apply search filter
     if (_searchQuery.isNotEmpty) {
@@ -229,6 +253,9 @@ class _DiseaseCauseManagementScreenState
                     },
                   ),
                 ),
+                SizedBox(height: 12.h),
+                _buildFilterChips(colors),
+                SizedBox(height: 12.h),
 
                 // Cause List
                 Expanded(
@@ -314,14 +341,24 @@ class _DiseaseCauseManagementScreenState
                         ),
                       ),
                       SizedBox(height: 4.h),
-                      Text(
-                        '${AppLocalizations.of(context).recommendsSession} №${cause.sessionNumber}',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: Colors.green[700],
-                          fontWeight: FontWeight.w600,
+                      if (cause.hasRecommendedSession)
+                        Text(
+                          '${AppLocalizations.of(context).recommendsSession} №${cause.sessionNumber}',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        )
+                      else
+                        Text(
+                          AppLocalizations.of(context).sessionNotAssigned,
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: Colors.orange[700],
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -362,6 +399,144 @@ class _DiseaseCauseManagementScreenState
                 overflow: TextOverflow.ellipsis,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChips(AppThemeExtension colors) {
+    final l10n = AppLocalizations.of(context);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Session Filter Row
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildFilterChip(
+                  label: l10n.all,
+                  isSelected: _sessionFilter == 'all',
+                  onTap: () => setState(() => _sessionFilter = 'all'),
+                  colors: colors,
+                ),
+                SizedBox(width: 8.w),
+                _buildFilterChip(
+                  label: l10n.hasSession,
+                  isSelected: _sessionFilter == 'hasSession',
+                  onTap: () => setState(() => _sessionFilter = 'hasSession'),
+                  colors: colors,
+                  count: _hasSessionCount,
+                ),
+                SizedBox(width: 8.w),
+                _buildFilterChip(
+                  label: l10n.noSession,
+                  isSelected: _sessionFilter == 'noSession',
+                  onTap: () => setState(() => _sessionFilter = 'noSession'),
+                  colors: colors,
+                  count: _noSessionCount,
+                  isWarning: true,
+                ),
+                SizedBox(width: 16.w),
+                Container(width: 1, height: 24.h, color: colors.border),
+                SizedBox(width: 16.w),
+                _buildFilterChip(
+                  label: '♂',
+                  isSelected: _genderFilter == 'male',
+                  onTap: () => setState(() =>
+                      _genderFilter = _genderFilter == 'male' ? 'all' : 'male'),
+                  colors: colors,
+                  genderColor: Colors.blue,
+                ),
+                SizedBox(width: 8.w),
+                _buildFilterChip(
+                  label: '♀',
+                  isSelected: _genderFilter == 'female',
+                  onTap: () => setState(() => _genderFilter =
+                      _genderFilter == 'female' ? 'all' : 'female'),
+                  colors: colors,
+                  genderColor: Colors.pink,
+                ),
+              ],
+            ),
+          ),
+
+          SizedBox(height: 8.h),
+
+          // Stats Row
+          Text(
+            '${l10n.total}: $_totalCount | ${l10n.statsSessionStatus(_hasSessionCount, _noSessionCount)}',
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              color: colors.textSecondary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+    required AppThemeExtension colors,
+    int? count,
+    bool isWarning = false,
+    Color? genderColor,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (genderColor ??
+                  (isWarning ? Colors.orange : colors.textPrimary))
+              : colors.backgroundElevated,
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isSelected
+                ? (genderColor ??
+                    (isWarning ? Colors.orange : colors.textPrimary))
+                : colors.border,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 13.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : colors.textPrimary,
+              ),
+            ),
+            if (count != null) ...[
+              SizedBox(width: 6.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.white.withValues(alpha: 0.3)
+                      : colors.greyLight,
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                child: Text(
+                  '$count',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? Colors.white : colors.textSecondary,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

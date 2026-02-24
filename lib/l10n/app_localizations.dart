@@ -111,7 +111,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTagline.
   ///
   /// In en, this message translates to:
-  /// **'Sound Healing & Subliminal'**
+  /// **'Sound Healing & HypnoTrack'**
   String get appTagline;
 
   /// No description provided for @settings.
@@ -291,7 +291,7 @@ abstract class AppLocalizations {
   /// No description provided for @allSubliminals.
   ///
   /// In en, this message translates to:
-  /// **'All Subliminals'**
+  /// **'All HypnoTracks'**
   String get allSubliminals;
 
   /// No description provided for @yourPlaylist.
@@ -735,7 +735,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminals.
   ///
   /// In en, this message translates to:
-  /// **'subliminals'**
+  /// **'HypnoTracks'**
   String get subliminals;
 
   /// No description provided for @personalInformation.
@@ -1629,7 +1629,7 @@ abstract class AppLocalizations {
   /// No description provided for @createYourPersonalProfile.
   ///
   /// In en, this message translates to:
-  /// **'Create your personal profile\nto get custom subliminal sessions'**
+  /// **'Create your personal profile\nto get custom HypnoTrack sessions'**
   String get createYourPersonalProfile;
 
   /// No description provided for @emailPassword.
@@ -2163,7 +2163,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminalSession.
   ///
   /// In en, this message translates to:
-  /// **'Subliminal Session'**
+  /// **'HypnoTrack Session'**
   String get subliminalSession;
 
   /// No description provided for @noIntroductionAvailable.
@@ -2193,7 +2193,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminal.
   ///
   /// In en, this message translates to:
-  /// **'Subliminal'**
+  /// **'HypnoTrack'**
   String get subliminal;
 
   /// No description provided for @sessionDetails.
@@ -3171,7 +3171,7 @@ abstract class AppLocalizations {
   /// No description provided for @subliminalAudio.
   ///
   /// In en, this message translates to:
-  /// **'Subliminal Audio'**
+  /// **'HypnoTrack Audio'**
   String get subliminalAudio;
 
   /// No description provided for @backgroundImages.
@@ -3849,13 +3849,13 @@ abstract class AppLocalizations {
   /// No description provided for @browseAllSubliminals.
   ///
   /// In en, this message translates to:
-  /// **'Browse all available subliminal sessions'**
+  /// **'Browse all available HypnoTrack sessions'**
   String get browseAllSubliminals;
 
   /// No description provided for @yourPersonalizedCollection.
   ///
   /// In en, this message translates to:
-  /// **'Your personalized subliminal collection'**
+  /// **'Your personalized HypnoTrack collection'**
   String get yourPersonalizedCollection;
 
   /// No description provided for @deletingSessionAndFiles.
@@ -5147,6 +5147,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get adminPremiumReasonOther;
+
+  /// No description provided for @ourApproach.
+  ///
+  /// In en, this message translates to:
+  /// **'Our Approach'**
+  String get ourApproach;
+
+  /// No description provided for @currentSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Session'**
+  String get currentSession;
+
+  /// No description provided for @sessionNotAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Session not assigned'**
+  String get sessionNotAssigned;
+
+  /// No description provided for @hasSession.
+  ///
+  /// In en, this message translates to:
+  /// **'✅ Has Session'**
+  String get hasSession;
+
+  /// No description provided for @noSession.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ No Session'**
+  String get noSession;
+
+  /// No description provided for @statsSessionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Has Session: {hasCount} | No Session: {noCount}'**
+  String statsSessionStatus(int hasCount, int noCount);
+
+  /// No description provided for @upNext.
+  ///
+  /// In en, this message translates to:
+  /// **'UP NEXT'**
+  String get upNext;
+
+  /// No description provided for @autoPlayOff.
+  ///
+  /// In en, this message translates to:
+  /// **'AUTO-PLAY OFF'**
+  String get autoPlayOff;
+
+  /// No description provided for @autoPlayNextSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-play next session'**
+  String get autoPlayNextSession;
+
+  /// No description provided for @autoPlayNextSessionSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatically play the next session when current one ends'**
+  String get autoPlayNextSessionSubtitle;
+
+  /// No description provided for @noAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'No Audio'**
+  String get noAudio;
+
+  /// No description provided for @noImage.
+  ///
+  /// In en, this message translates to:
+  /// **'No Image'**
+  String get noImage;
+
+  /// No description provided for @noIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'No Intro'**
+  String get noIntro;
+
+  /// No description provided for @sessionsLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sessions loaded'**
+  String sessionsLoaded(int count);
+
+  /// No description provided for @filteredSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'{filtered} / {total} sessions'**
+  String filteredSessions(int filtered, int total);
 }
 
 class _AppLocalizationsDelegate

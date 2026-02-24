@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Categories are filtered by gender (male/female/both)
 class QuizCategoryModel {
   final String id;
-  final String iconName;
   final String gender; // 'male', 'female', or 'both'
   final Map<String, String> names; // {en, tr, ru, hi}
   final DateTime? createdAt;
@@ -14,7 +13,6 @@ class QuizCategoryModel {
 
   QuizCategoryModel({
     required this.id,
-    required this.iconName,
     required this.gender,
     this.names = const {},
     this.createdAt,
@@ -44,7 +42,6 @@ class QuizCategoryModel {
   factory QuizCategoryModel.fromMap(String id, Map<String, dynamic> map) {
     return QuizCategoryModel(
       id: id,
-      iconName: map['iconName'] ?? 'category',
       gender: map['gender'] ?? 'both',
       names: map['names'] is Map ? Map<String, String>.from(map['names']) : {},
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
@@ -55,7 +52,6 @@ class QuizCategoryModel {
   /// To Firestore document
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
-      'iconName': iconName,
       'gender': gender,
       'names': names,
     };
@@ -73,7 +69,6 @@ class QuizCategoryModel {
   /// Create a copy with updated fields
   QuizCategoryModel copyWith({
     String? id,
-    String? iconName,
     String? gender,
     Map<String, String>? names,
     DateTime? createdAt,
@@ -81,7 +76,6 @@ class QuizCategoryModel {
   }) {
     return QuizCategoryModel(
       id: id ?? this.id,
-      iconName: iconName ?? this.iconName,
       gender: gender ?? this.gender,
       names: names ?? this.names,
       createdAt: createdAt ?? this.createdAt,
@@ -91,7 +85,7 @@ class QuizCategoryModel {
 
   @override
   String toString() {
-    return 'QuizCategoryModel(id: $id, iconName: $iconName, gender: $gender)';
+    return 'QuizCategoryModel(id: $id, gender: $gender)';
   }
 
   @override

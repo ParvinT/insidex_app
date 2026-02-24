@@ -7,7 +7,7 @@
 
 ## Tıbbi Tedavi Değildir
 
-**ÖNEMLİ:** InsideX bilinçaltı parçaları tıbbi tedavi değildir ve herhangi bir tıbbi tavsiye veya terapinin yerini almak amacıyla tasarlanmamıştır. Sonuçlar farklı bireyler için değişiklik gösterebilir ve algılanan etkilerin zaman dilimleri garanti edilmez.
+**ÖNEMLİ:** InsideX Hipnotrek ses programları tıbbi tedavi değildir ve herhangi bir tıbbi tavsiye veya terapinin yerini almak amacıyla tasarlanmamıştır. Sonuçlar kişiden kişiye değişebilir ve algılanan etkiler için zaman çerçeveleri garanti edilmez.
 
 ## Garanti Bulunmamaktadır
 
@@ -15,7 +15,7 @@ Tüm içerik "olduğu gibi" ve herhangi bir garanti olmaksızın sağlanır. Ins
 
 ## Önemli Güvenlik Notu
 
-**KRİTİK UYARI:** Bazı bilinçaltı seansları derin bir rahatlama veya meditatif durum yaratabilir. Bunlar şu durumlarda KULLANILMAMALIDIR:
+**KRİTİK UYARI:** Bazı Hipnotrek seansları derin bir rahatlama veya meditasyon durumuna yol açabilir. Bunlar şu durumlarda KULLANILMAMALIDIR:
 
 - Ağır makine kullanırken
 - Araba kullanırken (özel olarak tasarlanmış araba kullanma seanslarımız hariç)
@@ -46,4 +46,4 @@ Bu uygulama yalnızca 18 yaş ve üzeri kullanıcılar için tasarlanmıştır.
 **Anlaşma:**  
 InsideX'i kullanarak, bu sorumluluk reddini okuduğunuzu ve anladığınızı kabul etmiş olursunuz.
 
-**Son Güncelleme:** Eylül 2025
+**Son Güncelleme:** Şubat 2026

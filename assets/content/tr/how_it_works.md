@@ -10,8 +10,8 @@ Fiziksel veya duygusal olarak sizi etkileyen durumları seçiyorsunuz. Her seçi
 **2. Kök Neden Analizi**
 Sistemimiz, seçtiğiniz her durumun arkasındaki bilinçaltı kalıpları ve duygusal kökleri ortaya çıkarıyor. Çoğu fiziksel rahatsızlık, fark edilmeyen duygusal bloklardan kaynaklanır.
 
-**3. Kişisel Subliminal Programınız**
-Size özel hazırlanmış subliminal ses programları öneriliyor. Bu programlar, tam olarak sizin bilinçaltı kalıplarınızı hedef alacak şekilde eşleştiriliyor.
+**3. Kişisel Hipnotrek Programınız**
+Size özel hazırlanmış Hipnotrek ses programları önerilir. Bu programlar bilinçaltı kalıplarınızı tam olarak hedefleyecek şekilde eşleştirilmiştir.
 
 ## NEDEN BU KADAR ETKİLİ?
 

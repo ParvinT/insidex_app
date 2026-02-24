@@ -20,9 +20,7 @@ class SessionLocalizationService {
         debugPrint('⚠️ Session ${session['id']}: Using old structure');
         return SessionContentModel(
           title: session['title'] ?? 'Untitled',
-          description: session['description'] ?? '',
           introduction: IntroductionContent(
-            title: session['introduction']?['title'] ?? '',
             content: session['introduction']?['content'] ?? '',
           ),
         );
@@ -36,8 +34,7 @@ class SessionLocalizationService {
       // Return safe fallback
       return SessionContentModel(
         title: 'Untitled Session',
-        description: '',
-        introduction: IntroductionContent(title: '', content: ''),
+        introduction: IntroductionContent(content: ''),
       );
     }
   }
@@ -121,8 +118,6 @@ class SessionLocalizationService {
     // Add localized fields to session data
     completeData['_displayTitle'] = displayTitle;
     completeData['_localizedTitle'] = baseTitle;
-    completeData['_localizedDescription'] = localizedContent.description;
-    completeData['_localizedIntroTitle'] = localizedContent.introduction.title;
     completeData['_localizedIntroContent'] =
         localizedContent.introduction.content;
 

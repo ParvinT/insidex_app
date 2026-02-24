@@ -1,16 +1,16 @@
 // lib/features/search/search_screen.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:lottie/lottie.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/responsive/context_ext.dart';
-import '../../core/constants/app_icons.dart';
+import '../../core/routes/player_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../library/sessions_list_screen.dart';
-import '../player/audio_player_screen.dart';
 import '../../shared/widgets/session_card.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../services/session_filter_service.dart';
 import '../quiz/screens/quiz_results_screen.dart';
 import 'search_service.dart';
@@ -39,6 +39,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   List<String> _recentSearches = [];
   bool _isLoadingHistory = true;
+  Timer? _debounceTimer;
 
   bool _isSearching = false;
   final String _selectedGenderFilter = 'all';
@@ -65,6 +66,7 @@ class _SearchScreenState extends State<SearchScreen>
 
   @override
   void dispose() {
+    _debounceTimer?.cancel();
     _searchController.dispose();
     _tabController.dispose();
     _focusNode.dispose();
@@ -168,6 +170,8 @@ class _SearchScreenState extends State<SearchScreen>
       _searchService.search(query),
       _quizSearchService.searchAll(query),
     ]);
+
+    if (_searchController.text != query) return;
 
     // 🆕 Apply gender filter to sessions
     final searchResults = results[0];
@@ -286,7 +290,15 @@ class _SearchScreenState extends State<SearchScreen>
                 contentPadding: EdgeInsets.zero,
               ),
               onChanged: (value) {
-                _performSearch(value);
+                _debounceTimer?.cancel();
+                if (value.trim().isEmpty) {
+                  _performSearch('');
+                  return;
+                }
+                _debounceTimer = Timer(
+                  const Duration(milliseconds: 300),
+                  () => _performSearch(value),
+                );
               },
             ),
           ),
@@ -549,19 +561,9 @@ class _SearchScreenState extends State<SearchScreen>
             ),
             child: Row(
               children: [
-                // Icon with colored background
-                Container(
-                  width: isTablet ? 56.w : 48.w,
-                  height: isTablet ? 56.w : 48.w,
-                  padding: EdgeInsets.all(8.w),
-                  child: Lottie.asset(
-                    AppIcons.getAnimationPath(
-                      AppIcons.getIconByName(category['iconName'])?['path'] ??
-                          'meditation.json',
-                    ),
-                    fit: BoxFit.contain,
-                    repeat: true,
-                  ),
+                CategoryIcon(
+                  name: category['iconName'] ?? 'meditation',
+                  size: isTablet ? 56.w : 48.w,
                 ),
 
                 SizedBox(width: isTablet ? 18.w : 16.w),
@@ -638,11 +640,7 @@ class _SearchScreenState extends State<SearchScreen>
         if (!mounted) return;
 
         // Navigate to audio player
-        navigator.push(
-          MaterialPageRoute(
-            builder: (_) => AudioPlayerScreen(sessionData: session),
-          ),
-        );
+        navigator.push(PlayerRoute(sessionData: session));
       },
     );
   }

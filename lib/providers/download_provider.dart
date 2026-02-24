@@ -45,9 +45,19 @@ class DownloadProvider extends ChangeNotifier {
   bool get isOnline => _connectivityStatus == ConnectivityStatus.online;
   bool get isOffline => _connectivityStatus == ConnectivityStatus.offline;
 
+  /// Check if a download is pending or in progress
+  bool isPending(String sessionId, String language) {
+    return _downloadService.isPending(sessionId, language);
+  }
+
   /// Initialize the provider
   Future<void> initialize(String userId) async {
-    if (_isInitialized) return;
+    if (_isInitialized && _downloadService.currentUserId == userId) return;
+
+    // Different user logging in - reset first
+    if (_isInitialized) {
+      await clearUserData();
+    }
 
     debugPrint('📥 [DownloadProvider] Initializing...');
 

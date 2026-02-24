@@ -12,7 +12,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appName => 'InsideX';
 
   @override
-  String get appTagline => 'Звуковое Исцеление и Сублиминалы';
+  String get appTagline => 'Звуковое Исцеление & Гипнотрек';
 
   @override
   String get settings => 'Настройки';
@@ -102,7 +102,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profile => 'Профиль';
 
   @override
-  String get allSubliminals => 'Все сублиминалы';
+  String get allSubliminals => 'Все Гипнотреки';
 
   @override
   String get yourPlaylist => 'Ваш плейлист';
@@ -330,7 +330,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journey => 'Путь';
 
   @override
-  String get subliminals => 'сублиминалов';
+  String get subliminals => 'Гипнотреки';
 
   @override
   String get personalInformation => 'Личная информация';
@@ -791,7 +791,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get createYourPersonalProfile =>
-      'Создайте свой личный профиль\nчтобы получить персональные сублиминальные сессии';
+      'Создайте свой личный профиль,\nчтобы получить персональные Гипнотрек сессии';
 
   @override
   String get emailPassword => 'Email + Пароль';
@@ -1075,7 +1075,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get introduction => 'Введение';
 
   @override
-  String get subliminalSession => 'Сублиминальная сессия';
+  String get subliminalSession => 'Гипнотрек Сессия';
 
   @override
   String get noIntroductionAvailable => 'Введение недоступно';
@@ -1090,7 +1090,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get failedToPlayAudio => 'Не удалось воспроизвести аудио';
 
   @override
-  String get subliminal => 'Сублиминал';
+  String get subliminal => 'Гипнотрек';
 
   @override
   String get sessionDetails => 'Детали сессии';
@@ -1622,7 +1622,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get audioFiles => 'Аудиофайлы';
 
   @override
-  String get subliminalAudio => 'Сублиминальный аудио';
+  String get subliminalAudio => 'Гипнотрек Аудио';
 
   @override
   String get backgroundImages => 'Фоновые изображения';
@@ -1990,16 +1990,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get unknownDisease => 'Неизвестное заболевание';
 
   @override
-  String get browseAllSubliminals => 'सभी उपलब्ध अवचेतन सत्रों को ब्राउज़ करें';
+  String get browseAllSubliminals =>
+      'Просмотреть все доступные Гипнотрек сессии';
 
   @override
-  String get yourPersonalizedCollection => 'आपका व्यक्तिगत अवचेतन संग्रह';
+  String get yourPersonalizedCollection =>
+      'Ваша персонализированная коллекция Гипнотреков';
 
   @override
-  String get deletingSessionAndFiles => 'सत्र और फ़ाइलें हटाई जा रही हैं...';
+  String get deletingSessionAndFiles => 'Удаление сеанса и файлов...';
 
   @override
-  String get errorDeletingSession => 'सत्र हटाते समय त्रुटि';
+  String get errorDeletingSession => 'Ошибка при удалении сеанса';
 
   @override
   String get recommendedForYou => 'Рекомендуется для вас';
@@ -2214,7 +2216,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectCategoryOptional => 'Выберите категорию (необязательно)';
 
   @override
-  String get noCategory => 'Без категории';
+  String get noCategory => 'Нет категории';
 
   @override
   String get addYourFirstQuizCategory => 'Добавьте свою первую категорию теста';
@@ -2701,4 +2703,56 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get adminPremiumReasonOther => 'Другое';
+
+  @override
+  String get ourApproach => 'Наш подход';
+
+  @override
+  String get currentSession => 'Текущая сессия';
+
+  @override
+  String get sessionNotAssigned => '⚠️ Сессия не назначена';
+
+  @override
+  String get hasSession => '✅ Сессия есть';
+
+  @override
+  String get noSession => '⚠️ Сессии нет';
+
+  @override
+  String statsSessionStatus(int hasCount, int noCount) {
+    return 'С сессией: $hasCount | Без сессии: $noCount';
+  }
+
+  @override
+  String get upNext => 'ДАЛЕЕ';
+
+  @override
+  String get autoPlayOff => 'АВТОВОСПР. ВЫКЛ.';
+
+  @override
+  String get autoPlayNextSession => 'Автовоспроизведение';
+
+  @override
+  String get autoPlayNextSessionSubtitle =>
+      'Автоматически воспроизводить следующий сеанс';
+
+  @override
+  String get noAudio => 'Нет аудио';
+
+  @override
+  String get noImage => 'Нет изображения';
+
+  @override
+  String get noIntro => 'Нет вступления';
+
+  @override
+  String sessionsLoaded(int count) {
+    return '$count сессий загружено';
+  }
+
+  @override
+  String filteredSessions(int filtered, int total) {
+    return '$filtered / $total сессий';
+  }
 }

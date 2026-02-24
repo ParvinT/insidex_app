@@ -18,6 +18,7 @@ import 'progress_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/download_provider.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
 import '../../providers/subscription_provider.dart';
 import '../subscription/paywall_screen.dart';
@@ -32,24 +33,21 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
-  String _selectedAvatar = 'turtle';
+  late String _selectedAvatar;
 
   @override
   void initState() {
     super.initState();
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
+      _selectedAvatar = 'turtle';
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/auth/login');
       });
     } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final userProvider = context.read<UserProvider>();
-        setState(() {
-          _nameController.text = userProvider.userName;
-          _selectedAvatar = userProvider.avatarEmoji;
-        });
-      });
+      final userProvider = context.read<UserProvider>();
+      _nameController.text = userProvider.userName;
+      _selectedAvatar = userProvider.avatarEmoji;
     }
   }
 
@@ -152,6 +150,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _handleSignOut() async {
     final miniPlayerProvider = context.read<MiniPlayerProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -198,6 +197,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         debugPrint('✅ [Profile] Mini player dismissed');
       } catch (e) {
         debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
+      }
+      try {
+        await downloadProvider.clearUserData();
+        debugPrint('✅ [Settings] Download provider cleared');
+      } catch (e) {
+        debugPrint('⚠️ [Settings] Download provider clear error: $e');
       }
       await AuthPersistenceService.fullLogout();
       if (mounted) {

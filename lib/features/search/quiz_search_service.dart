@@ -153,8 +153,7 @@ class QuizSearchService {
 
         // 🆕 Check if disease has a recommended session
         final cause = causeMap[disease.id];
-        final hasSession =
-            cause != null && cause.recommendedSessionId.isNotEmpty;
+        final hasSession = cause != null && cause.hasRecommendedSession;
 
         return DiseaseSearchResult(
           disease: disease,

@@ -4,18 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:lottie/lottie.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
 import '../../services/storage_service.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/category_icon.dart';
 import '../../models/category_model.dart';
 import '../../services/category/category_service.dart';
 import '../../services/category/category_localization_service.dart';
 import 'widgets/multi_language_content_section.dart';
-import '../../core/constants/app_icons.dart';
 
 class AddSessionScreen extends StatefulWidget {
   final Map<String, dynamic>? sessionToEdit;
@@ -67,8 +66,6 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       for (final lang in AppLanguages.supportedLanguages)
         lang: {
           'title': TextEditingController(),
-          'description': TextEditingController(),
-          'introTitle': TextEditingController(),
           'introContent': TextEditingController(),
         }
     };
@@ -177,19 +174,14 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     if (contentMap != null && contentMap.isNotEmpty) {
       // NEW STRUCTURE: Multi-language content
       for (final lang in AppLanguages.supportedLanguages) {
-        // 🆕
         final langContent = contentMap[lang] as Map<String, dynamic>?;
 
         if (langContent != null) {
           _contentControllers[lang]!['title']!.text =
               langContent['title'] ?? '';
-          _contentControllers[lang]!['description']!.text =
-              langContent['description'] ?? '';
 
           final intro = langContent['introduction'] as Map<String, dynamic>?;
           if (intro != null) {
-            _contentControllers[lang]!['introTitle']!.text =
-                intro['title'] ?? '';
             _contentControllers[lang]!['introContent']!.text =
                 intro['content'] ?? '';
           }
@@ -197,14 +189,10 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
       }
     } else {
       // OLD STRUCTURE: Single language (backward compatibility)
-      // Load as English content
       _contentControllers['en']!['title']!.text = session['title'] ?? '';
-      _contentControllers['en']!['description']!.text =
-          session['description'] ?? '';
 
       final intro = session['introduction'] as Map<String, dynamic>?;
       if (intro != null) {
-        _contentControllers['en']!['introTitle']!.text = intro['title'] ?? '';
         _contentControllers['en']!['introContent']!.text =
             intro['content'] ?? '';
       }
@@ -480,10 +468,7 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
         for (final lang in AppLanguages.supportedLanguages)
           lang: {
             'title': _contentControllers[lang]!['title']!.text.trim(),
-            'description':
-                _contentControllers[lang]!['description']!.text.trim(),
             'introduction': {
-              'title': _contentControllers[lang]!['introTitle']!.text.trim(),
               'content':
                   _contentControllers[lang]!['introContent']!.text.trim(),
             },
@@ -596,290 +581,308 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
           ),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Loading indicator
-                  if (_isLoading) _buildUploadProgress(colors),
+          // 🔒 Fixed loading indicator (always visible at top)
+          if (_isLoading)
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 12.w, 20.w, 0),
+              child: _buildUploadProgress(colors),
+            ),
 
-                  // Session Number
-                  _buildSectionTitle(
-                      AppLocalizations.of(context).sessionNumber, colors),
-                  SizedBox(height: 12.h),
-                  TextField(
-                    controller: _sessionNumberController,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    decoration: InputDecoration(
-                      labelText:
-                          AppLocalizations.of(context).sessionNumberLabel,
-                      hintText: AppLocalizations.of(context).sessionNumberHint,
-                      helperText:
-                          AppLocalizations.of(context).sessionNumberHelper,
-                      errorText: null,
-                      prefixIcon:
-                          Icon(Icons.numbers, color: colors.textPrimary),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide:
-                            BorderSide(color: colors.textPrimary, width: 2),
-                      ),
-                    ),
-                    style: GoogleFonts.inter(fontSize: 16.sp),
-                  ),
-
-                  SizedBox(height: 24.h),
-
-                  // Category Dropdown
-                  _buildSectionTitle(
-                      AppLocalizations.of(context).category, colors),
-                  SizedBox(height: 12.h),
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedCategoryId,
-                    isExpanded: true,
-                    decoration: InputDecoration(
-                      labelText: AppLocalizations.of(context).category,
-                      prefixIcon:
-                          Icon(Icons.category, color: colors.textPrimary),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
-                        borderSide: BorderSide(
-                          color: colors.textPrimary,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    hint:
-                        Text(AppLocalizations.of(context).pleaseSelectCategory),
-                    items: _categories.map((category) {
-                      return DropdownMenuItem<String>(
-                        value: category.id,
-                        child: FutureBuilder<String>(
-                          future:
-                              CategoryLocalizationService.getLocalizedNameAuto(
-                                  category),
-                          builder: (context, snapshot) {
-                            final name =
-                                snapshot.data ?? category.getName('en');
-                            return Row(
-                              children: [
-                                SizedBox(
-                                  width: 32.w,
-                                  height: 32.w,
-                                  child: Lottie.asset(
-                                    AppIcons.getAnimationPath(
-                                      AppIcons.getIconByName(
-                                              category.iconName)?['path'] ??
-                                          'meditation.json',
-                                    ),
-                                    fit: BoxFit.contain,
-                                    repeat: true,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Expanded(child: Text(name)),
-                              ],
-                            );
-                          },
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategoryId = value;
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return AppLocalizations.of(context)
-                            .pleaseSelectCategory;
-                      }
-                      return null;
-                    },
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: _isDemo ? Colors.green.shade50 : colors.greyLight,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: _isDemo ? Colors.green.shade300 : colors.border,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _isDemo ? Icons.lock_open : Icons.lock,
-                          color: _isDemo ? Colors.green : colors.textSecondary,
-                          size: 24.sp,
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppLocalizations.of(context).demoSession,
-                                style: GoogleFonts.inter(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: colors.textPrimary,
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                _isDemo
-                                    ? AppLocalizations.of(context)
-                                        .freeUsersCanPlay
-                                    : AppLocalizations.of(context)
-                                        .onlyPremiumCanPlay,
-                                style: GoogleFonts.inter(
-                                  fontSize: 12.sp,
-                                  color: colors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Switch(
-                          value: _isDemo,
-                          onChanged: (value) {
-                            setState(() {
-                              _isDemo = value;
-                            });
-                          },
-                          activeThumbColor: Colors.green,
-                        ),
+          // 📜 Scrollable content
+          Expanded(
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Session Number
+                    _buildSectionTitle(
+                        AppLocalizations.of(context).sessionNumber, colors),
+                    SizedBox(height: 12.h),
+                    TextField(
+                      controller: _sessionNumberController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
                       ],
-                    ),
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  // Gender Selection
-                  _buildSectionTitle(
-                      '👤 ${AppLocalizations.of(context).targetGender}',
-                      colors),
-                  SizedBox(height: 12.h),
-                  _buildGenderSelector(colors),
-
-                  SizedBox(height: 24.h),
-
-                  // Multi-Language Content Section (Widget)
-                  MultiLanguageContentSection(
-                    contentControllers: _contentControllers,
-                    selectedLanguage: _selectedLanguage,
-                    onLanguageChanged: (lang) =>
-                        setState(() => _selectedLanguage = lang),
-                    existingAudioUrls: widget.sessionToEdit?['subliminal']
-                        ?['audioUrls'],
-                    uploadedAudios: _subliminalAudios,
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  // Audio Upload Section
-                  _buildSectionTitle(
-                      '🎵 ${AppLocalizations.of(context).audioFiles}', colors),
-                  SizedBox(height: 12.h),
-                  _buildLanguageTabs(colors),
-                  SizedBox(height: 16.h),
-                  _buildFileUploadCard(
-                    title:
-                        '${AppLocalizations.of(context).subliminalAudio} ($_selectedLanguage)',
-                    subtitle: _subliminalAudios[_selectedLanguage] != null
-                        ? _subliminalAudios[_selectedLanguage]!.name
-                        : AppLocalizations.of(context).noAudioSelected,
-                    icon: Icons.audiotrack,
-                    onTap: () =>
-                        _pickSubliminalAudioForLanguage(_selectedLanguage),
-                    hasFile: _subliminalAudios[_selectedLanguage] != null,
-                    colors: colors,
-                    languageCode: _selectedLanguage,
-                  ),
-
-                  SizedBox(height: 32.h),
-
-                  // Image Upload Section
-                  _buildSectionTitle(
-                      '🖼️ ${AppLocalizations.of(context).backgroundImages}',
-                      colors),
-                  SizedBox(height: 12.h),
-                  _buildFileUploadCard(
-                    title:
-                        '${AppLocalizations.of(context).backgroundImage} ($_selectedLanguage)',
-                    subtitle: _backgroundImages[_selectedLanguage] != null
-                        ? _backgroundImages[_selectedLanguage]!.name
-                        : AppLocalizations.of(context).noImageSelected,
-                    icon: Icons.image,
-                    onTap: () =>
-                        _pickBackgroundImageForLanguage(_selectedLanguage),
-                    hasFile: _backgroundImages[_selectedLanguage] != null,
-                    colors: colors,
-                    languageCode: _selectedLanguage,
-                  ),
-
-                  SizedBox(height: 40.h),
-
-                  // Save Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56.h,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _saveSession,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colors.textPrimary,
-                        foregroundColor: colors.textOnPrimary,
-                        shape: RoundedRectangleBorder(
+                      decoration: InputDecoration(
+                        labelText:
+                            AppLocalizations.of(context).sessionNumberLabel,
+                        hintText:
+                            AppLocalizations.of(context).sessionNumberHint,
+                        helperText:
+                            AppLocalizations.of(context).sessionNumberHelper,
+                        errorText: null,
+                        prefixIcon:
+                            Icon(Icons.numbers, color: colors.textPrimary),
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide:
+                              BorderSide(color: colors.textPrimary, width: 2),
+                        ),
                       ),
-                      child: Text(
-                        widget.sessionToEdit != null
-                            ? AppLocalizations.of(context).updateSession
-                            : AppLocalizations.of(context).createSession,
-                        style: GoogleFonts.inter(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          color: colors.textOnPrimary,
+                      style: GoogleFonts.inter(fontSize: 16.sp),
+                    ),
+
+                    SizedBox(height: 24.h),
+
+                    // Category Dropdown
+                    _buildSectionTitle(
+                        AppLocalizations.of(context).category, colors),
+                    SizedBox(height: 12.h),
+                    DropdownButtonFormField<String>(
+                      initialValue: _selectedCategoryId,
+                      isExpanded: true,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context).category,
+                        prefixIcon:
+                            Icon(Icons.category, color: colors.textPrimary),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12.r),
+                          borderSide: BorderSide(
+                            color: colors.textPrimary,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      hint: Text(
+                          AppLocalizations.of(context).pleaseSelectCategory),
+                      items: _categories.map((category) {
+                        return DropdownMenuItem<String>(
+                          value: category.id,
+                          child: FutureBuilder<String>(
+                            future: CategoryLocalizationService
+                                .getLocalizedNameAuto(category),
+                            builder: (context, snapshot) {
+                              final name =
+                                  snapshot.data ?? category.getName('en');
+                              final l10n = AppLocalizations.of(context);
+                              final genderLabel = category.gender == 'male'
+                                  ? l10n.male
+                                  : category.gender == 'female'
+                                      ? l10n.female
+                                      : l10n.genderBoth;
+                              return Row(
+                                children: [
+                                  CategoryIcon(
+                                    name: category.iconName,
+                                    size: 32.w,
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Flexible(child: Text(name)),
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          genderLabel,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: category.gender == 'male'
+                                                ? Colors.blue
+                                                : category.gender == 'female'
+                                                    ? Colors.pink
+                                                    : Colors.purple,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedCategoryId = value;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return AppLocalizations.of(context)
+                              .pleaseSelectCategory;
+                        }
+                        return null;
+                      },
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    Container(
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color:
+                            _isDemo ? Colors.green.shade50 : colors.greyLight,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color:
+                              _isDemo ? Colors.green.shade300 : colors.border,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            _isDemo ? Icons.lock_open : Icons.lock,
+                            color:
+                                _isDemo ? Colors.green : colors.textSecondary,
+                            size: 24.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context).demoSession,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: colors.textPrimary,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  _isDemo
+                                      ? AppLocalizations.of(context)
+                                          .freeUsersCanPlay
+                                      : AppLocalizations.of(context)
+                                          .onlyPremiumCanPlay,
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.sp,
+                                    color: colors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Switch(
+                            value: _isDemo,
+                            onChanged: (value) {
+                              setState(() {
+                                _isDemo = value;
+                              });
+                            },
+                            activeThumbColor: Colors.green,
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    // Gender Selection
+                    _buildSectionTitle(
+                        '👤 ${AppLocalizations.of(context).targetGender}',
+                        colors),
+                    SizedBox(height: 12.h),
+                    _buildGenderSelector(colors),
+
+                    SizedBox(height: 24.h),
+
+                    // Multi-Language Content Section (Widget)
+                    MultiLanguageContentSection(
+                      contentControllers: _contentControllers,
+                      selectedLanguage: _selectedLanguage,
+                      onLanguageChanged: (lang) =>
+                          setState(() => _selectedLanguage = lang),
+                      existingAudioUrls: widget.sessionToEdit?['subliminal']
+                          ?['audioUrls'],
+                      uploadedAudios: _subliminalAudios,
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    // Audio Upload Section
+                    _buildSectionTitle(
+                        '🎵 ${AppLocalizations.of(context).audioFiles}',
+                        colors),
+                    SizedBox(height: 12.h),
+                    _buildLanguageTabs(colors),
+                    SizedBox(height: 16.h),
+                    _buildFileUploadCard(
+                      title:
+                          '${AppLocalizations.of(context).subliminalAudio} ($_selectedLanguage)',
+                      subtitle: _subliminalAudios[_selectedLanguage] != null
+                          ? _subliminalAudios[_selectedLanguage]!.name
+                          : AppLocalizations.of(context).noAudioSelected,
+                      icon: Icons.audiotrack,
+                      onTap: () =>
+                          _pickSubliminalAudioForLanguage(_selectedLanguage),
+                      hasFile: _subliminalAudios[_selectedLanguage] != null,
+                      colors: colors,
+                      languageCode: _selectedLanguage,
+                      fileType: 'audio',
+                    ),
+
+                    SizedBox(height: 32.h),
+
+                    // Image Upload Section
+                    _buildSectionTitle(
+                        '🖼️ ${AppLocalizations.of(context).backgroundImages}',
+                        colors),
+                    SizedBox(height: 12.h),
+                    _buildFileUploadCard(
+                      title:
+                          '${AppLocalizations.of(context).backgroundImage} ($_selectedLanguage)',
+                      subtitle: _backgroundImages[_selectedLanguage] != null
+                          ? _backgroundImages[_selectedLanguage]!.name
+                          : AppLocalizations.of(context).noImageSelected,
+                      icon: Icons.image,
+                      onTap: () =>
+                          _pickBackgroundImageForLanguage(_selectedLanguage),
+                      hasFile: _backgroundImages[_selectedLanguage] != null,
+                      colors: colors,
+                      languageCode: _selectedLanguage,
+                      fileType: 'image',
+                    ),
+
+                    SizedBox(height: 40.h),
+
+                    // Save Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 56.h,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveSession,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: colors.textPrimary,
+                          foregroundColor: colors.textOnPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                        ),
+                        child: Text(
+                          widget.sessionToEdit != null
+                              ? AppLocalizations.of(context).updateSession
+                              : AppLocalizations.of(context).createSession,
+                          style: GoogleFonts.inter(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: colors.textOnPrimary,
+                          ),
                         ),
                       ),
                     ),
-                  ),
 
-                  SizedBox(height: 40.h),
-                ],
-              ),
-            ),
-          ),
-
-          // Loading overlay
-          if (_isLoading)
-            Container(
-              color: Colors.black54,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: colors.textPrimary,
+                    SizedBox(height: 40.h),
+                  ],
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -997,32 +1000,42 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
     required bool hasFile,
     required AppThemeExtension colors,
     String? languageCode,
+    required String fileType,
   }) {
     String displaySubtitle = subtitle;
     bool hasExistingFile = false;
 
     if (languageCode != null && widget.sessionToEdit != null && !hasFile) {
       // Check for existing audio URL
-      if (title.contains('Audio')) {
+      if (fileType == 'audio') {
         final existingUrl =
             widget.sessionToEdit!['subliminal']?['audioUrls']?[languageCode];
         if (existingUrl != null) {
           hasExistingFile = true;
-          // Extract filename from URL
-          final uri = Uri.parse(existingUrl.toString());
-          final filename = uri.pathSegments.last.split('?').first;
+          // Extract filename from URL (decode Firebase Storage URL)
+          final decodedUrl = Uri.decodeFull(existingUrl.toString());
+          final fullFilename = decodedUrl.split('/').last.split('?').first;
+          // Remove timestamp prefix if exists (e.g., "1707654321_relaxation.mp3" → "relaxation.mp3")
+          final filename = fullFilename.contains('_')
+              ? fullFilename.substring(fullFilename.indexOf('_') + 1)
+              : fullFilename;
           displaySubtitle =
               '✅ ${AppLocalizations.of(context).existing}: $filename';
         }
       }
       // Check for existing image URL
-      else if (title.contains('Image')) {
+      else if (fileType == 'image') {
         final existingUrl =
             widget.sessionToEdit!['backgroundImages']?[languageCode];
         if (existingUrl != null) {
           hasExistingFile = true;
-          final uri = Uri.parse(existingUrl.toString());
-          final filename = uri.pathSegments.last.split('?').first;
+          // Extract filename from URL (decode Firebase Storage URL)
+          final decodedUrl = Uri.decodeFull(existingUrl.toString());
+          final fullFilename = decodedUrl.split('/').last.split('?').first;
+          // Remove timestamp prefix if exists (e.g., "1707654321_background.jpg" → "background.jpg")
+          final filename = fullFilename.contains('_')
+              ? fullFilename.substring(fullFilename.indexOf('_') + 1)
+              : fullFilename;
           displaySubtitle =
               '✅ ${AppLocalizations.of(context).existing}: $filename';
         }

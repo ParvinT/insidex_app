@@ -8,13 +8,22 @@ import 'package:shimmer/shimmer.dart';
 import '../../../services/cache_manager_service.dart';
 import '../../../core/themes/app_theme_extension.dart';
 
-/// YouTube Music style album art with integrated equalizer
-/// Responsive design that adapts to screen size
+/// YouTube Music style album art with integrated equalizer and swipe navigation.
+/// Supports swiping left/right to navigate between sessions in the queue.
 class PlayerAlbumArt extends StatefulWidget {
   final String? imageUrl;
   final String? localImagePath;
   final AnimationController equalizerController;
   final bool isPlaying;
+
+  // Swipe navigation
+  final bool hasPrevious;
+  final bool hasNext;
+  final VoidCallback? onSwipePrevious;
+  final VoidCallback? onSwipeNext;
+
+  // Transition lock - parent tells us when a session change is in progress
+  final bool isTransitioning;
 
   const PlayerAlbumArt({
     super.key,
@@ -22,6 +31,11 @@ class PlayerAlbumArt extends StatefulWidget {
     this.localImagePath,
     required this.equalizerController,
     required this.isPlaying,
+    this.hasPrevious = false,
+    this.hasNext = false,
+    this.onSwipePrevious,
+    this.onSwipeNext,
+    this.isTransitioning = false,
   });
 
   @override
@@ -32,13 +46,26 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     with SingleTickerProviderStateMixin {
   late AnimationController _continuousController;
 
+  // Horizontal drag tracking for swipe gesture
+  double _dragOffset = 0.0;
+  bool _swipeTriggered = false;
+
+  // Swipe thresholds
+  static const double _swipeThreshold = 80.0;
+  static const double _velocityThreshold = 300.0;
+  static const double _maxDragOffset = 120.0;
+
+  // Unique key for AnimatedSwitcher based on current image
+  Key get _imageKey => ValueKey(
+        widget.imageUrl ?? widget.localImagePath ?? 'placeholder',
+      );
+
   @override
   void initState() {
     super.initState();
-    // ✅ Dedicated controller for seamless infinite animation
     _continuousController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 10), // 1 hour (very long)
+      duration: const Duration(seconds: 10),
     )..repeat();
   }
 
@@ -51,14 +78,124 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-
-    // Responsive size calculation
     final double imageSize = _calculateImageSize(size);
-    final double borderRadius = imageSize * 0.08; // 8% of image size
+    final double imageHeight = imageSize * 9 / 16;
+    final double borderRadius = imageSize * 0.08;
 
+    final bool canSwipe =
+        !widget.isTransitioning && (widget.hasPrevious || widget.hasNext);
+
+    return SizedBox(
+      width: imageSize,
+      height: imageHeight,
+      child: GestureDetector(
+        onHorizontalDragStart: canSwipe ? _onDragStart : null,
+        onHorizontalDragUpdate: canSwipe ? _onDragUpdate : null,
+        onHorizontalDragEnd: canSwipe ? _onDragEnd : null,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 350),
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: child,
+            );
+          },
+          child: Transform.translate(
+            key: _imageKey,
+            offset: Offset(_dragOffset, 0),
+            child: Opacity(
+              opacity: (1.0 - (_dragOffset.abs() / _maxDragOffset) * 0.3)
+                  .clamp(0.5, 1.0),
+              child: _buildAlbumArt(imageSize, imageHeight, borderRadius),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // =================== SWIPE GESTURE HANDLING ===================
+
+  void _onDragStart(DragStartDetails details) {
+    _swipeTriggered = false;
+  }
+
+  void _onDragUpdate(DragUpdateDetails details) {
+    if (_swipeTriggered) return;
+
+    double newOffset = _dragOffset + details.delta.dx;
+
+    // Constrain drag: only allow directions that have sessions
+    if (newOffset > 0 && !widget.hasPrevious) {
+      newOffset = newOffset * 0.2; // Rubber band effect
+    }
+    if (newOffset < 0 && !widget.hasNext) {
+      newOffset = newOffset * 0.2; // Rubber band effect
+    }
+
+    setState(() {
+      _dragOffset = newOffset.clamp(-_maxDragOffset, _maxDragOffset);
+    });
+  }
+
+  void _onDragEnd(DragEndDetails details) {
+    if (_swipeTriggered) return;
+
+    final velocity = details.primaryVelocity ?? 0;
+    final absOffset = _dragOffset.abs();
+
+    bool shouldNavigate = false;
+    bool goNext = false;
+
+    // Check velocity-based flick
+    if (velocity.abs() > _velocityThreshold) {
+      if (velocity < 0 && widget.hasNext) {
+        shouldNavigate = true;
+        goNext = true;
+      } else if (velocity > 0 && widget.hasPrevious) {
+        shouldNavigate = true;
+        goNext = false;
+      }
+    }
+    // Check distance-based swipe
+    else if (absOffset > _swipeThreshold) {
+      if (_dragOffset < 0 && widget.hasNext) {
+        shouldNavigate = true;
+        goNext = true;
+      } else if (_dragOffset > 0 && widget.hasPrevious) {
+        shouldNavigate = true;
+        goNext = false;
+      }
+    }
+
+    if (shouldNavigate) {
+      _swipeTriggered = true;
+
+      if (goNext) {
+        widget.onSwipeNext?.call();
+      } else {
+        widget.onSwipePrevious?.call();
+      }
+    }
+
+    // Animate drag offset back to zero
+    setState(() {
+      _dragOffset = 0.0;
+    });
+  }
+
+  // =================== ALBUM ART CONTENT ===================
+
+  Widget _buildAlbumArt(
+    double imageSize,
+    double imageHeight,
+    double borderRadius,
+  ) {
     return Container(
       width: imageSize,
-      height: imageSize * 9 / 16,
+      height: imageHeight,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: [
@@ -74,13 +211,13 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
         borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
-            // 1. Background Image
-            _buildBackgroundImage(),
+            // Background Image
+            _buildImage(widget.imageUrl, widget.localImagePath),
 
-            // 2. Dark Overlay (for equalizer visibility)
+            // Dark Overlay
             _buildDarkOverlay(),
 
-            // 3. Equalizer (centered)
+            // Equalizer
             Center(
               child: widget.isPlaying
                   ? AnimatedBuilder(
@@ -95,29 +232,11 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Calculate responsive image size
-  double _calculateImageSize(Size screenSize) {
-    final width = screenSize.width;
-    final height = screenSize.height;
+  // =================== IMAGE BUILDERS ===================
 
-    // Tablet/Desktop
-    if (width >= 600) {
-      return width * 0.5; // 50% of screen width
-    }
-
-    // Small phones
-    if (height <= 700) {
-      return width * 0.70; // 70% of screen width
-    }
-
-    // Normal phones
-    return width * 0.75; // 75% of screen width
-  }
-
-  /// Background image with cache
-  Widget _buildBackgroundImage() {
-    if (widget.localImagePath != null && widget.localImagePath!.isNotEmpty) {
-      final file = File(widget.localImagePath!);
+  Widget _buildImage(String? imageUrl, String? localPath) {
+    if (localPath != null && localPath.isNotEmpty) {
+      final file = File(localPath);
       return Positioned.fill(
         child: FutureBuilder<bool>(
           future: file.exists(),
@@ -129,24 +248,23 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
                 errorBuilder: (_, __, ___) => _buildPlaceholder(),
               );
             }
-            // Local file yoksa network'e fallback
-            return _buildNetworkImage();
+            return _buildNetworkOrPlaceholder(imageUrl);
           },
         ),
       );
     }
 
-    return _buildNetworkImage();
+    return _buildNetworkOrPlaceholder(imageUrl);
   }
 
-  Widget _buildNetworkImage() {
-    if (widget.imageUrl == null || widget.imageUrl!.isEmpty) {
+  Widget _buildNetworkOrPlaceholder(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
       return _buildPlaceholder();
     }
 
     return Positioned.fill(
       child: CachedNetworkImage(
-        imageUrl: widget.imageUrl!,
+        imageUrl: imageUrl,
         cacheManager: AppCacheManager.instance,
         fit: BoxFit.cover,
         placeholder: (context, url) => _buildPlaceholder(),
@@ -155,7 +273,25 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Placeholder for loading/error states
+  // =================== SIZING ===================
+
+  double _calculateImageSize(Size screenSize) {
+    final width = screenSize.width;
+    final height = screenSize.height;
+
+    if (width >= 600) {
+      return width * 0.5;
+    }
+
+    if (height <= 700) {
+      return width * 0.70;
+    }
+
+    return width * 0.75;
+  }
+
+  // =================== DECORATIONS ===================
+
   Widget _buildPlaceholder() {
     final colors = context.colors;
     return Shimmer.fromColors(
@@ -167,7 +303,6 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Dark overlay for equalizer contrast
   Widget _buildDarkOverlay() {
     return Positioned.fill(
       child: Container(
@@ -176,8 +311,8 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
             center: Alignment.center,
             radius: 0.8,
             colors: [
-              Colors.black.withValues(alpha: 0.3), // Center lighter
-              Colors.black.withValues(alpha: 0.6), // Edges darker
+              Colors.black.withValues(alpha: 0.3),
+              Colors.black.withValues(alpha: 0.6),
             ],
           ),
         ),
@@ -185,7 +320,8 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Static equalizer (when paused)
+  // =================== EQUALIZER ===================
+
   Widget _buildStaticEqualizer() {
     return SizedBox(
       width: 80.w,
@@ -196,25 +332,18 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
     );
   }
 
-  /// Animated equalizer (when playing)
   Widget _buildAnimatedEqualizer() {
-    // ✅ Use dedicated continuous controller
-    final t =
-        _continuousController.value * 5000; // Scale up for visible movement
+    final t = _continuousController.value * 5000;
 
     final bars = List.generate(5, (i) {
-      // Each bar has different speed
       final speed = 2.5 + i * 0.5;
       final phase = t * speed + i * 1.2;
 
-      // Combine two sine waves
       final height1 = (1 + math.sin(phase)) / 2;
       final height2 = (1 + math.sin(phase * 1.7 + 1.5)) / 2;
 
-      // Mix them together
       final combined = (height1 + height2) / 2;
 
-      // Calculate bar height (20..60 range)
       return 20 + 40 * combined;
     });
 
@@ -228,7 +357,8 @@ class _PlayerAlbumArtState extends State<PlayerAlbumArt>
   }
 }
 
-/// Custom painter for equalizer bars
+// =================== PAINTERS ===================
+
 class _EqualizerPainter extends CustomPainter {
   final List<double> barHeights;
 
@@ -248,7 +378,6 @@ class _EqualizerPainter extends CustomPainter {
       final barHeight = barHeights[i];
       final y1 = centerY - barHeight / 2;
 
-      // Gradient paint
       final gradientPaint = Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
@@ -260,7 +389,6 @@ class _EqualizerPainter extends CustomPainter {
         ).createShader(Rect.fromLTWH(startX, y1, barWidth, barHeight))
         ..style = PaintingStyle.fill;
 
-      // Yuvarlatılmış köşeler
       final rect = RRect.fromRectAndRadius(
         Rect.fromLTWH(startX, y1, barWidth, barHeight),
         const Radius.circular(2.0),
@@ -275,71 +403,3 @@ class _EqualizerPainter extends CustomPainter {
   @override
   bool shouldRepaint(_EqualizerPainter oldDelegate) => true;
 }
-
-// Another good version for equalizer.
-/*class _EqualizerPainter extends CustomPainter {
-  final List<double> barHeights;
-
-  _EqualizerPainter(this.barHeights);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final barWidth = 3.5;
-    final spacing = 8.0;
-    final centerY = size.height / 2;
-    
-    final totalWidth = (barHeights.length * barWidth) + 
-                       ((barHeights.length - 1) * spacing);
-    var startX = (size.width - totalWidth) / 2;
-
-    for (int i = 0; i < barHeights.length; i++) {
-      final barHeight = barHeights[i];
-      final y1 = centerY - barHeight / 2;
-
-      // 1. Outer glow (çok hafif)
-      final glowPaint = Paint()
-        ..color = Colors.white.withValues(alpha:0.1)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
-
-      final glowRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(startX - 1, y1 - 1, barWidth + 2, barHeight + 2),
-        const Radius.circular(2.0),
-      );
-      canvas.drawRRect(glowRect, glowPaint);
-
-      // 2. Main bar with frosted glass effect
-      final glassPaint = Paint()
-        ..color = Colors.white.withValues(alpha:0.25)
-        ..style = PaintingStyle.fill;
-
-      final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(startX, y1, barWidth, barHeight),
-        const Radius.circular(2.0),
-      );
-      canvas.drawRRect(rect, glassPaint);
-
-      // 3. Inner highlight (cam parlama efekti)
-      final highlightPaint = Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Colors.white.withValues(alpha:0.4),
-            Colors.white.withValues(alpha:0.0),
-          ],
-        ).createShader(Rect.fromLTWH(startX, y1, barWidth * 0.5, barHeight))
-        ..style = PaintingStyle.fill;
-
-      final highlightRect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(startX, y1, barWidth * 0.4, barHeight),
-        const Radius.circular(2.0),
-      );
-      canvas.drawRRect(highlightRect, highlightPaint);
-
-      startX += barWidth + spacing;
-    }
-  }
-
-  @override
-  bool shouldRepaint(_EqualizerPainter oldDelegate) => true;
-}*/

@@ -13,6 +13,7 @@ import '../services/audio/audio_player_service.dart';
 import '../services/download/decryption_preloader.dart';
 import 'mini_player_provider.dart';
 import 'subscription_provider.dart';
+import 'download_provider.dart';
 
 class UserProvider extends ChangeNotifier {
   User? _firebaseUser;
@@ -157,6 +158,7 @@ class UserProvider extends ChangeNotifier {
     _isShowingLogoutDialog = false;
 
     MiniPlayerProvider? miniPlayerProvider;
+    DownloadProvider? downloadProvider;
     final navigatorState = InsidexApp.navigatorKey.currentState;
     if (navigatorState != null) {
       try {
@@ -166,6 +168,14 @@ class UserProvider extends ChangeNotifier {
         );
       } catch (e) {
         debugPrint('⚠️ Could not get MiniPlayerProvider: $e');
+      }
+      try {
+        downloadProvider = Provider.of<DownloadProvider>(
+          navigatorState.context,
+          listen: false,
+        );
+      } catch (e) {
+        debugPrint('⚠️ Could not get DownloadProvider: $e');
       }
     }
 
@@ -183,6 +193,15 @@ class UserProvider extends ChangeNotifier {
       debugPrint('✅ [UserProvider] Preloader cache cleared');
     } catch (e) {
       debugPrint('⚠️ [UserProvider] Preloader clear error: $e');
+    }
+
+    try {
+      if (downloadProvider != null) {
+        await downloadProvider.clearUserData();
+        debugPrint('✅ [UserProvider] Download provider cleared');
+      }
+    } catch (e) {
+      debugPrint('⚠️ [UserProvider] Download provider clear error: $e');
     }
 
     // Clear device session

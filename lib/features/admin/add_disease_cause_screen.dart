@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/themes/app_theme_extension.dart';
 import '../../core/constants/app_languages.dart';
+import '../../core/responsive/context_ext.dart';
 import '../../models/disease_cause_model.dart';
 import '../../models/disease_model.dart';
 import '../../services/disease/disease_cause_service.dart';
@@ -13,6 +14,7 @@ import '../../services/disease/disease_service.dart';
 import '../../services/language_helper_service.dart';
 import '../../services/session_localization_service.dart';
 import '../../l10n/app_localizations.dart';
+import 'widgets/searchable_picker_sheet.dart';
 
 class AddDiseaseCauseScreen extends StatefulWidget {
   final DiseaseCauseModel? causeToEdit;
@@ -45,6 +47,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
   // Disease dropdown
   List<DiseaseModel> _diseases = [];
   String? _selectedDiseaseId;
+  String _adminLanguage = 'en';
 
   bool _isLoading = false;
   bool _isLoadingData = true;
@@ -80,6 +83,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
           await FirebaseFirestore.instance.collection('sessions').get();
 
       final adminLanguage = await LanguageHelperService.getCurrentLanguage();
+      _adminLanguage = adminLanguage;
 
       final sessions = sessionsSnapshot.docs.map((doc) {
         final data = doc.data();
@@ -96,11 +100,13 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
             : (data['title'] ?? 'Untitled');
 
         final sessionNumber = data['sessionNumber'];
+        final gender = data['gender'] as String?;
 
         return {
           'id': doc.id,
           'title': title,
           'sessionNumber': sessionNumber,
+          'gender': gender,
           // Store display title for dropdown
           'displayTitle':
               sessionNumber != null ? '№$sessionNumber • $title' : title,
@@ -174,6 +180,124 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
     super.dispose();
   }
 
+  // =================== PICKER METHODS ===================
+
+  String? _getSelectedDiseaseName() {
+    if (_selectedDiseaseId == null) return null;
+    final disease = _diseases.firstWhere(
+      (d) => d.id == _selectedDiseaseId,
+      orElse: () => DiseaseModel(
+        id: '',
+        gender: 'male',
+        translations: {'en': 'Unknown'},
+      ),
+    );
+    return disease.getLocalizedName(_adminLanguage);
+  }
+
+  String? _getSelectedDiseaseGender() {
+    if (_selectedDiseaseId == null) return null;
+    final disease = _diseases.firstWhere(
+      (d) => d.id == _selectedDiseaseId,
+      orElse: () => DiseaseModel(
+        id: '',
+        gender: 'male',
+        translations: {},
+      ),
+    );
+    return disease.gender;
+  }
+
+  String? _getSelectedSessionName() {
+    if (_selectedSessionId == null) return null;
+    final session = _sessions.firstWhere(
+      (s) => s['id'] == _selectedSessionId,
+      orElse: () => {'displayTitle': 'Unknown'},
+    );
+    return session['displayTitle'] as String?;
+  }
+
+  Future<void> _showDiseasePicker() async {
+    final l10n = AppLocalizations.of(context);
+
+    final items = _diseases.map((disease) {
+      return PickerItem<String>(
+        value: disease.id,
+        title: disease.getLocalizedName(_adminLanguage),
+        gender: disease.gender,
+      );
+    }).toList();
+
+    // Sort alphabetically
+    items
+        .sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
+
+    final result = await showSearchablePickerSheet<String>(
+      context: context,
+      title: l10n.selectADisease,
+      items: items,
+      selectedValue: _selectedDiseaseId,
+      searchHint: l10n.search,
+      genderFilter: GenderFilterConfig(
+        enabled: true,
+        allLabel: l10n.all,
+        maleLabel: l10n.male,
+        femaleLabel: l10n.female,
+      ),
+    );
+
+    if (result != null) {
+      setState(() => _selectedDiseaseId = result);
+    }
+  }
+
+  Future<void> _showSessionPicker() async {
+    final l10n = AppLocalizations.of(context);
+
+    final items = _sessions.map((session) {
+      final sessionNumber = session['sessionNumber'] as int?;
+      final title = session['title'] as String? ?? 'Untitled';
+      final gender = session['gender'] as String?;
+
+      return PickerItem<String>(
+        value: session['id'] as String,
+        title: sessionNumber != null ? '№$sessionNumber • $title' : title,
+        subtitle: gender != null
+            ? (gender == 'male' ? l10n.male : l10n.female)
+            : null,
+        gender: gender,
+      );
+    }).toList();
+
+    final result = await showSearchablePickerSheet<String>(
+      context: context,
+      title: l10n.selectASession,
+      items: items,
+      selectedValue: _selectedSessionId,
+      searchHint: l10n.searchSessions,
+      genderFilter: GenderFilterConfig(
+        enabled: true,
+        allLabel: l10n.all,
+        maleLabel: l10n.male,
+        femaleLabel: l10n.female,
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _selectedSessionId = result;
+        // Find and store session number
+        final selectedSession = _sessions.firstWhere(
+          (s) => s['id'] == result,
+          orElse: () => {},
+        );
+        _selectedSessionNumber = selectedSession['sessionNumber'] as int?;
+      });
+    }
+  }
+
+  // =================== SAVE METHOD ===================
+
   Future<void> _saveDiseaseCause() async {
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -189,16 +313,6 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context).pleaseSelectDisease),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    if (_selectedSessionId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context).pleaseSelectSession),
           backgroundColor: Colors.orange,
         ),
       );
@@ -226,7 +340,7 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
         id: widget.causeToEdit?.id ?? '',
         diseaseId: _selectedDiseaseId!,
         content: content,
-        recommendedSessionId: _selectedSessionId!,
+        recommendedSessionId: _selectedSessionId,
         sessionNumber: _selectedSessionNumber,
         createdAt: widget.causeToEdit?.createdAt ?? DateTime.now(),
       );
@@ -280,6 +394,8 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
       }
     }
   }
+
+  // =================== BUILD METHODS ===================
 
   @override
   Widget build(BuildContext context) {
@@ -389,109 +505,148 @@ class _AddDiseaseCauseScreenState extends State<AddDiseaseCauseScreen>
   }
 
   Widget _buildDiseaseDropdown(AppThemeExtension colors) {
-    return DropdownButtonFormField<String>(
-      initialValue: _selectedDiseaseId,
-      decoration: InputDecoration(
-        labelText: AppLocalizations.of(context).disease,
-        hintText: AppLocalizations.of(context).selectADisease,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        prefixIcon: const Icon(Icons.medical_services),
-      ),
-      isExpanded: true,
-      items: _diseases.map((disease) {
-        return DropdownMenuItem<String>(
-          value: disease.id,
-          child: Row(
-            children: [
-              // Gender badge
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                decoration: BoxDecoration(
-                  color: disease.gender == 'male'
-                      ? Colors.blue.withValues(alpha: 0.2)
-                      : Colors.pink.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                child: Text(
-                  disease.gender == 'male' ? 'M' : 'F',
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: disease.gender == 'male'
-                        ? Colors.blue[700]
-                        : Colors.pink[700],
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  disease.getLocalizedName('en'),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() => _selectedDiseaseId = value);
-      },
-      validator: (value) {
-        if (value == null) {
-          return AppLocalizations.of(context).pleaseSelectDisease;
-        }
-        return null;
-      },
+    return _buildPickerField(
+      colors: colors,
+      label: AppLocalizations.of(context).disease,
+      hint: AppLocalizations.of(context).selectADisease,
+      icon: Icons.medical_services,
+      value: _getSelectedDiseaseName(),
+      selectedGender: _getSelectedDiseaseGender(),
+      onTap: _showDiseasePicker,
+      isRequired: true,
+      isEmpty: _selectedDiseaseId == null,
     );
   }
 
   Widget _buildSessionDropdown(AppThemeExtension colors) {
-    return DropdownButtonFormField<String>(
-      initialValue: _selectedSessionId,
-      decoration: InputDecoration(
-        labelText: AppLocalizations.of(context).recommendedSession,
-        hintText: AppLocalizations.of(context).selectASession,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        prefixIcon: Icon(Icons.music_note, color: colors.textPrimary),
-      ),
-      isExpanded: true,
-      items: _sessions.map((session) {
-        // Use pre-formatted display title
-        final displayTitle =
-            session['displayTitle'] ?? session['title'] ?? 'Untitled';
+    return _buildPickerField(
+      colors: colors,
+      label: AppLocalizations.of(context).recommendedSession,
+      hint: AppLocalizations.of(context).selectASession,
+      icon: Icons.music_note,
+      value: _getSelectedSessionName(),
+      onTap: _showSessionPicker,
+      isRequired: false,
+      isEmpty: _selectedSessionId == null,
+    );
+  }
 
-        return DropdownMenuItem<String>(
-          value: session['id'],
-          child: Text(
-            displayTitle,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
+  Widget _buildPickerField({
+    required AppThemeExtension colors,
+    required String label,
+    required String hint,
+    required IconData icon,
+    required VoidCallback onTap,
+    String? value,
+    String? selectedGender,
+    bool isRequired = false,
+    bool isEmpty = true,
+  }) {
+    final isTablet = context.isTablet;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label
+        Row(
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: isTablet ? 15.sp : 14.sp,
+                fontWeight: FontWeight.w500,
+                color: colors.textPrimary,
+              ),
+            ),
+            if (isRequired)
+              Text(
+                ' *',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: isTablet ? 15.sp : 14.sp,
+                ),
+              ),
+          ],
+        ),
+        SizedBox(height: 8.h),
+
+        // Picker field
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: isTablet ? 16.h : 14.h,
+            ),
+            decoration: BoxDecoration(
+              color: colors.backgroundElevated,
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: isEmpty
+                    ? colors.border.withValues(alpha: 0.5)
+                    : colors.textPrimary.withValues(alpha: 0.3),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                // Icon
+                Icon(
+                  icon,
+                  color: isEmpty ? colors.textSecondary : colors.textPrimary,
+                  size: isTablet ? 24.sp : 22.sp,
+                ),
+                SizedBox(width: 12.w),
+
+                // Gender badge (if applicable)
+                if (selectedGender != null) ...[
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selectedGender == 'male'
+                          ? Colors.blue.withValues(alpha: 0.15)
+                          : Colors.pink.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Icon(
+                      selectedGender == 'male' ? Icons.male : Icons.female,
+                      size: isTablet ? 16.sp : 14.sp,
+                      color:
+                          selectedGender == 'male' ? Colors.blue : Colors.pink,
+                    ),
+                  ),
+                  SizedBox(width: 8.w),
+                ],
+
+                // Value or hint
+                Expanded(
+                  child: Text(
+                    value ?? hint,
+                    style: GoogleFonts.inter(
+                      fontSize: isTablet ? 16.sp : 15.sp,
+                      color:
+                          isEmpty ? colors.textSecondary : colors.textPrimary,
+                      fontWeight: isEmpty ? FontWeight.w400 : FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+
+                // Arrow icon
+                Icon(
+                  Icons.keyboard_arrow_down_rounded,
+                  color: colors.textSecondary,
+                  size: isTablet ? 26.sp : 24.sp,
+                ),
+              ],
+            ),
           ),
-        );
-      }).toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedSessionId = value;
-          // Find and store session number
-          final selectedSession = _sessions.firstWhere(
-            (s) => s['id'] == value,
-            orElse: () => {},
-          );
-          _selectedSessionNumber = selectedSession['sessionNumber'];
-        });
-      },
-      validator: (value) {
-        if (value == null) {
-          return AppLocalizations.of(context).pleaseSelectSession;
-        }
-        return null;
-      },
+        ),
+      ],
     );
   }
 

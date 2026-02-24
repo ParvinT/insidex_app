@@ -12,6 +12,8 @@ import '../notifications/notification_settings_screen.dart';
 import '../../services/auth_persistence_service.dart';
 import '../../services/audio/audio_player_service.dart';
 import '../../providers/mini_player_provider.dart';
+import '../../providers/auto_play_provider.dart';
+import '../../providers/download_provider.dart';
 import 'widgets/language_selector.dart';
 import 'widgets/theme_selector.dart';
 import '../../l10n/app_localizations.dart';
@@ -107,6 +109,71 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     },
                   ),
                 ]),
+
+                SizedBox(height: 16.h),
+
+                // Auto-play toggle
+                Consumer<AutoPlayProvider>(
+                  builder: (context, autoPlay, _) {
+                    if (!autoPlay.isInitialized) return const SizedBox.shrink();
+                    return _buildSettingsCard([
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 20.w,
+                          vertical: 12.h,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40.w,
+                              height: 40.w,
+                              decoration: BoxDecoration(
+                                color: colors.greyLight,
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Icon(
+                                Icons.skip_next_rounded,
+                                color: colors.textPrimary,
+                              ),
+                            ),
+                            SizedBox(width: 16.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    AppLocalizations.of(context)
+                                        .autoPlayNextSession,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: colors.textPrimary,
+                                    ),
+                                  ),
+                                  SizedBox(height: 2.h),
+                                  Text(
+                                    AppLocalizations.of(context)
+                                        .autoPlayNextSessionSubtitle,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 13.sp,
+                                      color: colors.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Switch.adaptive(
+                              value: autoPlay.isEnabled,
+                              onChanged: (value) => autoPlay.setEnabled(value),
+                              activeTrackColor: colors.textPrimary,
+                              activeThumbColor: colors.textOnPrimary,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]);
+                  },
+                ),
 
                 SizedBox(height: 32.h),
 
@@ -315,6 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleSignOut() async {
     final miniPlayerProvider = context.read<MiniPlayerProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
     // Show confirmation dialog
     final shouldSignOut = await showDialog<bool>(
       context: context,
@@ -380,6 +448,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
           debugPrint('✅ [Settings] Mini player dismissed');
         } catch (e) {
           debugPrint('⚠️ [Settings] Mini player dismiss error: $e');
+        }
+
+        try {
+          await downloadProvider.clearUserData();
+          debugPrint('✅ [Settings] Download provider cleared');
+        } catch (e) {
+          debugPrint('⚠️ [Settings] Download provider clear error: $e');
         }
 
         await AuthPersistenceService.fullLogout();

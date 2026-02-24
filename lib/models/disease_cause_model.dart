@@ -2,17 +2,17 @@
 
 class DiseaseCauseModel {
   final String id;
-  final String diseaseId; 
-  final Map<String, String> content; 
-  final String recommendedSessionId; 
-  final int? sessionNumber; 
+  final String diseaseId;
+  final Map<String, String> content;
+  final String? recommendedSessionId;
+  final int? sessionNumber;
   final DateTime? createdAt;
 
   DiseaseCauseModel({
     required this.id,
     required this.diseaseId,
     required this.content,
-    required this.recommendedSessionId,
+    this.recommendedSessionId,
     this.sessionNumber,
     this.createdAt,
   });
@@ -20,11 +20,13 @@ class DiseaseCauseModel {
   /// Create from Firestore document
   factory DiseaseCauseModel.fromMap(
       Map<String, dynamic> map, String documentId) {
+    final sessionId = map['recommendedSessionId'] as String?;
     return DiseaseCauseModel(
       id: documentId,
       diseaseId: map['diseaseId'] ?? '',
       content: Map<String, String>.from(map['content'] ?? {}),
-      recommendedSessionId: map['recommendedSessionId'] ?? '',
+      recommendedSessionId:
+          (sessionId != null && sessionId.isNotEmpty) ? sessionId : null,
       sessionNumber: map['sessionNumber'],
       createdAt: map['createdAt']?.toDate(),
     );
@@ -35,8 +37,9 @@ class DiseaseCauseModel {
     return {
       'diseaseId': diseaseId,
       'content': content,
-      'recommendedSessionId': recommendedSessionId,
-      'sessionNumber': sessionNumber,
+      if (recommendedSessionId != null && recommendedSessionId!.isNotEmpty)
+        'recommendedSessionId': recommendedSessionId,
+      if (sessionNumber != null) 'sessionNumber': sessionNumber,
       'createdAt': createdAt,
     };
   }
@@ -45,6 +48,10 @@ class DiseaseCauseModel {
   String getLocalizedContent(String locale) {
     return content[locale] ?? content['en'] ?? 'No content available';
   }
+
+  /// Check if has recommended session
+  bool get hasRecommendedSession =>
+      recommendedSessionId != null && recommendedSessionId!.isNotEmpty;
 
   /// Copy with
   DiseaseCauseModel copyWith({

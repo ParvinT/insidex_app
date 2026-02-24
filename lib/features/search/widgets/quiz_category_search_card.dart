@@ -47,23 +47,6 @@ class QuizCategorySearchCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Icon
-            Container(
-              width: isTablet ? 52.w : 44.w,
-              height: isTablet ? 52.w : 44.w,
-              decoration: BoxDecoration(
-                color: _getGenderColor(category.gender).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Icon(
-                _getIconData(category.iconName),
-                color: _getGenderColor(category.gender),
-                size: isTablet ? 26.sp : 22.sp,
-              ),
-            ),
-
-            SizedBox(width: 14.w),
-
             // Content
             Expanded(
               child: Column(
@@ -222,40 +205,5 @@ class QuizCategorySearchCard extends StatelessWidget {
       default:
         return Icons.people;
     }
-  }
-
-  IconData _getIconData(String iconName) {
-    const iconMap = {
-      'face': Icons.face,
-      'person': Icons.person,
-      'no_drinks': Icons.no_drinks,
-      'child_care': Icons.child_care,
-      'psychology': Icons.psychology,
-      'psychology_alt': Icons.psychology_alt,
-      'restaurant': Icons.restaurant,
-      'favorite': Icons.favorite,
-      'accessibility_new': Icons.accessibility_new,
-      'air': Icons.air,
-      'visibility': Icons.visibility,
-      'mood': Icons.mood,
-      'water_drop': Icons.water_drop,
-      'medical_services': Icons.medical_services,
-      'health_and_safety': Icons.health_and_safety,
-      'fitness_center': Icons.fitness_center,
-      'category': Icons.category,
-      'healing': Icons.healing,
-      'local_hospital': Icons.local_hospital,
-      'monitor_heart': Icons.monitor_heart,
-      'medication': Icons.medication,
-      'vaccines': Icons.vaccines,
-      'bloodtype': Icons.bloodtype,
-      'sick': Icons.sick,
-      'elderly': Icons.elderly,
-      'pregnant_woman': Icons.pregnant_woman,
-      'male': Icons.male,
-      'female': Icons.female,
-    };
-
-    return iconMap[iconName] ?? Icons.category;
   }
 }

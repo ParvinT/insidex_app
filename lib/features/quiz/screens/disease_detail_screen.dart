@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
+import '../../../core/routes/player_route.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/language_helper_service.dart';
@@ -13,7 +14,6 @@ import '../services/quiz_service.dart';
 import '../../../services/session_localization_service.dart';
 import '../widgets/disease_cause_card.dart';
 import '../widgets/session_recommendation_card.dart';
-import '../../player/audio_player_screen.dart';
 import '../../../l10n/app_localizations.dart';
 
 class DiseaseDetailScreen extends StatefulWidget {
@@ -96,14 +96,7 @@ class _DiseaseDetailScreenState extends State<DiseaseDetailScreen> {
     if (_sessionData == null) return;
 
     // For now, just navigate to player
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AudioPlayerScreen(
-          sessionData: _sessionData!,
-        ),
-      ),
-    );
+    Navigator.push(context, PlayerRoute(sessionData: _sessionData!));
   }
 
   @override

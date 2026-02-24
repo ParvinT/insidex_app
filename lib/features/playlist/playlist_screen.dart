@@ -9,9 +9,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
+import '../../models/play_context.dart';
 import '../../providers/locale_provider.dart';
 import '../../core/themes/app_theme_extension.dart';
-import '../player/audio_player_screen.dart';
+import '../../core/routes/player_route.dart';
 import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/session_card.dart';
 import '../../services/session_filter_service.dart';
@@ -616,6 +617,12 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           isFavorite: isFavorite,
           onRemove: () => _removeFromPlaylist(session['id']),
           onToggleFavorite: () => _toggleFavorite(session['id'], isFavorite),
+          playContext: PlayContext(
+            type: PlayContextType.playlist,
+            sourceTitle: 'My Playlist',
+            sessionList: _myPlaylistSessions,
+            currentIndex: index,
+          ),
         );
       },
     );
@@ -642,6 +649,12 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           isFavorite: true,
           showRemoveButton: false,
           onToggleFavorite: () => _toggleFavorite(session['id'], true),
+          playContext: PlayContext(
+            type: PlayContextType.playlist,
+            sourceTitle: AppLocalizations.of(context).favorites,
+            sessionList: _favoriteSessions,
+            currentIndex: index,
+          ),
         );
       },
     );
@@ -675,6 +688,12 @@ class _PlaylistScreenState extends State<PlaylistScreen>
           showAddToPlaylist: !isInPlaylist,
           onToggleFavorite: () => _toggleFavorite(session['id'], isFavorite),
           onAddToPlaylist: () => _addToPlaylist(session['id']),
+          playContext: PlayContext(
+            type: PlayContextType.playlist,
+            sourceTitle: AppLocalizations.of(context).recent,
+            sessionList: _recentSessions,
+            currentIndex: index,
+          ),
         );
       },
     );
@@ -746,6 +765,7 @@ class _PlaylistScreenState extends State<PlaylistScreen>
     VoidCallback? onRemove,
     VoidCallback? onToggleFavorite,
     VoidCallback? onAddToPlaylist,
+    PlayContext? playContext,
   }) {
     return SessionCard(
       session: session,
@@ -759,12 +779,8 @@ class _PlaylistScreenState extends State<PlaylistScreen>
       onRemove: onRemove,
       onAddToPlaylist: onAddToPlaylist,
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => AudioPlayerScreen(sessionData: session),
-          ),
-        );
+        Navigator.push(context,
+            PlayerRoute(sessionData: session, playContext: playContext));
       },
     );
   }
@@ -790,11 +806,16 @@ class _PlaylistScreenState extends State<PlaylistScreen>
         onRemove: () => _removeFromPlaylist(session['id']),
         onTap: () {
           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AudioPlayerScreen(sessionData: session),
-            ),
-          );
+              context,
+              PlayerRoute(
+                sessionData: session,
+                playContext: PlayContext(
+                  type: PlayContextType.playlist,
+                  sourceTitle: 'My Playlist',
+                  sessionList: _myPlaylistSessions,
+                  currentIndex: index,
+                ),
+              ));
         },
       ),
     );

@@ -7,7 +7,7 @@
 
 ## Not Medical Treatment
 
-**IMPORTANT:** InsideX subliminal tracks are not medical treatments and are not intended to replace any medical advice or therapy. Results may vary for different individuals, and timeframes for perceived effects are not guaranteed.
+**IMPORTANT:** InsideX HypnoTrack audio programs are not medical treatments and are not intended to replace any medical advice or therapy. Results may vary for different individuals, and timeframes for perceived effects are not guaranteed.
 
 ## No Warranties
 
@@ -15,7 +15,7 @@ All content is provided "as is" and without warranties of any kind. InsideX and 
 
 ## Important Safety Note
 
-**CRITICAL WARNING:** Some subliminal sessions may induce a deeply relaxed or meditative state. These should NOT be used while:
+**CRITICAL WARNING:** Some HypnoTrack sessions may induce a deeply relaxed or meditative state. These should NOT be used while:
 
 - Operating heavy machinery
 - Driving (except our specially designed driving sessions)
@@ -46,4 +46,4 @@ This app is intended for users 18 years and older only.
 **Agreement:**  
 By using InsideX, you acknowledge that you have read and understood this disclaimer.
 
-**Last Updated:** September 2025
+**Last Updated:** February 2026

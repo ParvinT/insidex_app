@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/responsive/context_ext.dart';
 import '../../../models/disease_model.dart';
@@ -217,48 +217,24 @@ class QuizDiseaseGrid extends StatelessWidget {
     if (_totalPages <= 1) return const SizedBox.shrink();
     final colors = context.colors;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(_totalPages, (index) {
-          // Show first 2, last 2, and current page context
-          if (_totalPages > 7) {
-            if (index > 1 && index < _totalPages - 2) {
-              if (index < currentPage - 1 || index > currentPage + 1) {
-                // Show ellipsis
-                if (index == 2 || index == _totalPages - 3) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 2.w),
-                    child: Text(
-                      '...',
-                      style: GoogleFonts.inter(
-                        fontSize: 12.sp,
-                        color: colors.textSecondary,
-                      ),
-                    ),
-                  );
-                }
-                return const SizedBox.shrink();
-              }
-            }
-          }
+    final double dotSize = isTablet ? 8.0 : 7.0;
+    final double spacing = isTablet ? 8.0 : 6.0;
 
-          return GestureDetector(
-            onTap: () => _goToPage(index),
-            child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 4.w),
-              width: isTablet ? 10.w : 8.w,
-              height: isTablet ? 10.w : 8.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: currentPage == index
-                    ? colors.textPrimary
-                    : colors.border.withValues(alpha: 0.5),
-              ),
-            ),
-          );
-        }),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 6.h),
+      child: SmoothPageIndicator(
+        controller: pageController,
+        count: _totalPages,
+        onDotClicked: (index) => _goToPage(index),
+        effect: ScrollingDotsEffect(
+          dotHeight: dotSize,
+          dotWidth: dotSize,
+          activeDotColor: colors.textPrimary,
+          dotColor: colors.border.withValues(alpha: 0.4),
+          spacing: spacing,
+          maxVisibleDots: 7,
+          activeDotScale: 1.4,
+        ),
       ),
     );
   }

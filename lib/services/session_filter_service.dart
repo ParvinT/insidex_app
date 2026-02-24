@@ -2,7 +2,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'language_helper_service.dart';
 
 class SessionFilterService {
   /// Filter sessions by user's current language
@@ -10,8 +9,6 @@ class SessionFilterService {
   static Future<List<Map<String, dynamic>>> filterSessionsByLanguage(
     List<QueryDocumentSnapshot> docs,
   ) async {
-    final userLanguage = await LanguageHelperService.getCurrentLanguage();
-
     final filteredSessions = <Map<String, dynamic>>[];
 
     for (final doc in docs) {
@@ -20,9 +17,7 @@ class SessionFilterService {
       // Check if session has audio for user's language
       final audioUrls = data['subliminal']?['audioUrls'];
 
-      if (audioUrls is Map &&
-          (audioUrls.containsKey(userLanguage) ||
-              audioUrls.containsKey('en'))) {
+      if (audioUrls is Map && audioUrls.isNotEmpty) {
         // Has audio for this language
         filteredSessions.add({
           'id': doc.id,
@@ -38,12 +33,10 @@ class SessionFilterService {
   /// Check if a single session has audio for user's language
   static Future<bool> hasAudioForUserLanguage(
       Map<String, dynamic> session) async {
-    final userLanguage = await LanguageHelperService.getCurrentLanguage();
-
     final audioUrls = session['subliminal']?['audioUrls'];
 
     if (audioUrls is Map) {
-      return audioUrls.containsKey(userLanguage) || audioUrls.containsKey('en');
+      return audioUrls.isNotEmpty;
     }
 
     return false;
@@ -53,17 +46,13 @@ class SessionFilterService {
   static Future<List<Map<String, dynamic>>> filterFetchedSessions(
     List<Map<String, dynamic>> sessions,
   ) async {
-    final userLanguage = await LanguageHelperService.getCurrentLanguage();
-
     final filteredSessions = <Map<String, dynamic>>[];
 
     for (final session in sessions) {
       // Check if session has audio for user's language
       final audioUrls = session['subliminal']?['audioUrls'];
 
-      if (audioUrls is Map &&
-          (audioUrls.containsKey(userLanguage) ||
-              audioUrls.containsKey('en'))) {
+      if (audioUrls is Map && audioUrls.isNotEmpty) {
         // Has audio for user's language OR English fallback
         filteredSessions.add(session);
       }
@@ -126,8 +115,6 @@ class SessionFilterService {
     List<QueryDocumentSnapshot> docs,
     String genderFilter,
   ) async {
-    final userLanguage = await LanguageHelperService.getCurrentLanguage();
-
     final filteredSessions = <Map<String, dynamic>>[];
 
     for (final doc in docs) {
@@ -135,10 +122,8 @@ class SessionFilterService {
 
       // 1. Check language (with English fallback)
       final audioUrls = data['subliminal']?['audioUrls'];
-      if (audioUrls is! Map ||
-          (!audioUrls.containsKey(userLanguage) &&
-              !audioUrls.containsKey('en'))) {
-        continue; // Skip - no audio for user's language and no English fallback
+      if (audioUrls is! Map || audioUrls.isEmpty) {
+        continue;
       }
 
       // 2. Check gender

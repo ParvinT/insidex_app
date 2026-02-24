@@ -4,7 +4,7 @@
 
 ## Yeni Nesil Sağlıklı Yaşam
 
-InsideX, bilinçaltı programlama, nörobilim ve ses terapisini birleştirerek günlük hayatta dengeyi, özgüveni ve canlılığı yeniden kazanmanıza yardımcı olan yeni nesil bir sağlıklı yaşam uygulamasıdır.
+InsideX, günlük yaşamda dengeyi, özgüveni ve canlılığı yeniden kazanmanıza yardımcı olmak için Hipnotrek programlama, sinirbilim ve ses terapisini birleştiren yeni nesil bir sağlık uygulamasıdır.
 
 ## Neler Sunuyoruz
 
@@ -16,7 +16,7 @@ InsideX sadece iyileşme ile ilgili değil — daha derin bir seviyede kendinizl
 
 ## Seans Türleri
 
-Çeşitli bilinçaltı türleri sağlıyoruz:
+Çeşitli Hipnotrek türleri sunuyoruz:
 
 - Derin dinlenme ve duygusal sıfırlama için rahatlatıcı parçalar
 - Egzersiz, araba kullanma ve yüksek odaklanma gerektiren görevler için aktif parçalar
@@ -42,4 +42,4 @@ Bu uygulama, Lottie Simple License kapsamında [LottieFiles](https://lottiefiles
 
 **İstanbul'da ❤️ ile yapıldı**
 
-© 2025 InsideX. Tüm hakları saklıdır.
+© 2026 InsideX. Tüm hakları saklıdır.

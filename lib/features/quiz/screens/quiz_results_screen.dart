@@ -8,13 +8,13 @@ import 'package:lottie/lottie.dart';
 import '../../../core/themes/app_theme_extension.dart';
 import '../../../core/constants/app_icons.dart';
 import '../../../core/responsive/context_ext.dart';
+import '../../../core/routes/player_route.dart';
 import '../../../models/disease_model.dart';
 import '../../../models/disease_cause_model.dart';
 import '../../../services/disease/disease_cause_service.dart';
 import '../../../services/language_helper_service.dart';
 import '../../../services/session_localization_service.dart';
 import '../../../l10n/app_localizations.dart';
-import '../../player/audio_player_screen.dart';
 
 class QuizResultsScreen extends StatefulWidget {
   final List<DiseaseModel> selectedDiseases;
@@ -395,127 +395,130 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
                   ],
                 ),
 
-                SizedBox(height: 16.h),
+                if (cause.hasRecommendedSession) ...[
+                  SizedBox(height: 16.h),
 
-                // Recommended session
-                GestureDetector(
-                  onTap: () => _navigateToSession(cause.recommendedSessionId),
-                  child: Container(
+                  // Recommended session
+                  GestureDetector(
+                    onTap: () =>
+                        _navigateToSession(cause.recommendedSessionId!),
+                    child: Container(
+                      padding: EdgeInsets.all(
+                          (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
+                      decoration: BoxDecoration(
+                        color: colors.textPrimary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return Row(
+                            children: [
+                              Icon(
+                                Icons.play_circle_filled,
+                                color: colors.textPrimary,
+                                size: isTablet ? 24.sp : 22.sp,
+                              ),
+                              SizedBox(width: 12.w),
+                              Expanded(
+                                child: FutureBuilder<String>(
+                                  future: _getSessionTitle(
+                                      cause.recommendedSessionId!,
+                                      currentLanguage),
+                                  builder: (context, snapshot) {
+                                    final sessionTitle = snapshot.data ??
+                                        '${AppLocalizations.of(context).session} №${cause.sessionNumber}';
+
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          AppLocalizations.of(context)
+                                              .recommendedSession,
+                                          style: GoogleFonts.inter(
+                                            fontSize: (isTablet ? 11.sp : 10.sp)
+                                                .clamp(9.0, 12.0),
+                                            fontWeight: FontWeight.w500,
+                                            color: colors.textSecondary,
+                                          ),
+                                        ),
+                                        SizedBox(height: 2.h),
+                                        Text(
+                                          sessionTitle,
+                                          style: GoogleFonts.inter(
+                                            fontSize: (isTablet ? 14.sp : 13.sp)
+                                                .clamp(12.0, 15.0),
+                                            fontWeight: FontWeight.w700,
+                                            color: colors.textPrimary,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: (isTablet ? 14.w : 12.w)
+                                      .clamp(10.0, 16.0),
+                                  vertical:
+                                      (isTablet ? 9.h : 8.h).clamp(7.0, 11.0),
+                                ),
+                                decoration: BoxDecoration(
+                                  color: colors.textPrimary,
+                                  borderRadius: BorderRadius.circular(20.r),
+                                ),
+                                child: Text(
+                                  AppLocalizations.of(context).listen,
+                                  style: GoogleFonts.inter(
+                                    fontSize: (isTablet ? 12.sp : 11.sp)
+                                        .clamp(10.0, 13.0),
+                                    fontWeight: FontWeight.w700,
+                                    color: colors.textOnPrimary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  SizedBox(height: 12.h),
+                  Container(
                     padding: EdgeInsets.all(
                         (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
                     decoration: BoxDecoration(
-                      color: colors.textPrimary.withValues(alpha: 0.1),
+                      color: Colors.orange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        return Row(
-                          children: [
-                            Icon(
-                              Icons.play_circle_filled,
-                              color: colors.textPrimary,
-                              size: isTablet ? 24.sp : 22.sp,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          color: Colors.orange,
+                          size: (isTablet ? 20.sp : 18.sp).clamp(16.0, 22.0),
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Text(
+                            AppLocalizations.of(context)
+                                .noHealingSessionAvailable,
+                            style: GoogleFonts.inter(
+                              fontSize:
+                                  (isTablet ? 12.sp : 11.sp).clamp(10.0, 13.0),
+                              color: Colors.orange[800],
                             ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: FutureBuilder<String>(
-                                future: _getSessionTitle(
-                                    cause.recommendedSessionId,
-                                    currentLanguage),
-                                builder: (context, snapshot) {
-                                  final sessionTitle = snapshot.data ??
-                                      '${AppLocalizations.of(context).session} №${cause.sessionNumber}';
-
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        AppLocalizations.of(context)
-                                            .recommendedSession,
-                                        style: GoogleFonts.inter(
-                                          fontSize: (isTablet ? 11.sp : 10.sp)
-                                              .clamp(9.0, 12.0),
-                                          fontWeight: FontWeight.w500,
-                                          color: colors.textSecondary,
-                                        ),
-                                      ),
-                                      SizedBox(height: 2.h),
-                                      Text(
-                                        sessionTitle,
-                                        style: GoogleFonts.inter(
-                                          fontSize: (isTablet ? 14.sp : 13.sp)
-                                              .clamp(12.0, 15.0),
-                                          fontWeight: FontWeight.w700,
-                                          color: colors.textPrimary,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal:
-                                    (isTablet ? 14.w : 12.w).clamp(10.0, 16.0),
-                                vertical:
-                                    (isTablet ? 9.h : 8.h).clamp(7.0, 11.0),
-                              ),
-                              decoration: BoxDecoration(
-                                color: colors.textPrimary,
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Text(
-                                AppLocalizations.of(context).listen,
-                                style: GoogleFonts.inter(
-                                  fontSize: (isTablet ? 12.sp : 11.sp)
-                                      .clamp(10.0, 13.0),
-                                  fontWeight: FontWeight.w700,
-                                  color: colors.textOnPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ] else ...[
-                SizedBox(height: 12.h),
-                Container(
-                  padding: EdgeInsets.all(
-                      (isTablet ? 14.w : 12.w).clamp(10.0, 16.0)),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.orange,
-                        size: (isTablet ? 20.sp : 18.sp).clamp(16.0, 22.0),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Text(
-                          AppLocalizations.of(context)
-                              .noHealingSessionAvailable,
-                          style: GoogleFonts.inter(
-                            fontSize:
-                                (isTablet ? 12.sp : 11.sp).clamp(10.0, 13.0),
-                            color: Colors.orange[800],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ],
             ],
           ),
@@ -645,11 +648,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
       if (!mounted) return;
 
       // Navigate to audio player
-      await navigator.push(
-        MaterialPageRoute(
-          builder: (_) => AudioPlayerScreen(sessionData: completeSessionData),
-        ),
-      );
+      await navigator.push(PlayerRoute(sessionData: completeSessionData));
     } catch (e) {
       debugPrint('❌ [QuizResults] Error: $e');
 

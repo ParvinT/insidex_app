@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Effective Date:** September 11, 2025
+**Effective Date:** February 6, 2026
 
 **Data Controller:**  
 ALZHAMI LTD  
@@ -13,7 +13,7 @@ ALZHAMI LTD ("we," "our," or "us") respects your privacy and is committed to pro
 
 ## 1. Information We Collect
 
-We collect information to provide personalized subliminal audio recommendations and improve the App.
+We collect information to provide personalized HypnoTrack audio recommendations and improve the App.
 
 ### Personal Information:
 
@@ -55,7 +55,7 @@ We collect information to provide personalized subliminal audio recommendations 
 
 ### Service Delivery:
 
-- Provide access to subliminal audio sessions
+- Provide access to HypnoTrack audio sessions
 - Track your progress and listening history
 - Maintain your favorites and playlists
 - Enforce daily session limits (3 sessions/day for free users)

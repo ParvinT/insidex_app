@@ -5,7 +5,7 @@ class AppConstants {
 
   // App info
   static const String appName = 'INSIDEX';
-  static const String appTagline = 'Sound Healing & Subliminal';
+  static const String appTagline = 'Sound Healing & HypnoTrack';
 
   // Design size for responsive
   static const double designWidth = 375;

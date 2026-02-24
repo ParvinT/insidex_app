@@ -188,8 +188,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: Column(
         children: [
           const FeatureSlideshow(),
-          const GreetingSection(),
           const ExpandableQuizSection(),
+          SizedBox(height: context.isTablet ? 18.h : 14.h),
+          const GreetingSection(),
           SizedBox(height: 20.h),
           GridView.builder(
             shrinkWrap: true,

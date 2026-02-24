@@ -12,7 +12,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appName => 'InsideX';
 
   @override
-  String get appTagline => 'Ses İyileştirme ve Bilinçaltı';
+  String get appTagline => 'Ses Şifası & Hipnotrek';
 
   @override
   String get settings => 'Ayarlar';
@@ -103,7 +103,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get profile => 'Profil';
 
   @override
-  String get allSubliminals => 'Tüm Bilinçaltılar';
+  String get allSubliminals => 'Tüm Hipnotrekler';
 
   @override
   String get yourPlaylist => 'Çalma Listeniz';
@@ -333,7 +333,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get journey => 'Yolculuk';
 
   @override
-  String get subliminals => 'bilinçaltı';
+  String get subliminals => 'Hipnotrekler';
 
   @override
   String get personalInformation => 'Kişisel Bilgiler';
@@ -793,7 +793,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get createYourPersonalProfile =>
-      'Özel bilinçaltı seansları almak için\nkişisel profilinizi oluşturun';
+      'Kişiselleştirilmiş Hipnotrek seansları almak için\nprofilinizi oluşturun';
 
   @override
   String get emailPassword => 'E-posta + Şifre';
@@ -1075,7 +1075,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get introduction => 'Giriş';
 
   @override
-  String get subliminalSession => 'Bilinçaltı Seans';
+  String get subliminalSession => 'Hipnotrek Seansı';
 
   @override
   String get noIntroductionAvailable => 'Giriş mevcut değil';
@@ -1090,7 +1090,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get failedToPlayAudio => 'Ses çalınamadı';
 
   @override
-  String get subliminal => 'Bilinçaltı';
+  String get subliminal => 'Hipnotrek';
 
   @override
   String get sessionDetails => 'Seans Detayları';
@@ -1619,7 +1619,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get audioFiles => 'Ses Dosyaları';
 
   @override
-  String get subliminalAudio => 'Bilinçaltı Sesi';
+  String get subliminalAudio => 'Hipnotrek Ses';
 
   @override
   String get backgroundImages => 'Arka Plan Görselleri';
@@ -1981,12 +1981,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get unknownDisease => 'Bilinmeyen Hastalık';
 
   @override
-  String get browseAllSubliminals =>
-      'Tüm mevcut bilinçaltı seanslarına göz atın';
+  String get browseAllSubliminals => 'Tüm Hipnotrek seanslarına göz atın';
 
   @override
   String get yourPersonalizedCollection =>
-      'Kişiselleştirilmiş bilinçaltı koleksiyonun';
+      'Kişiselleştirilmiş Hipnotrek koleksiyonunuz';
 
   @override
   String get deletingSessionAndFiles => 'Seans ve dosyalar siliniyor...';
@@ -2696,4 +2695,56 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get adminPremiumReasonOther => 'Diğer';
+
+  @override
+  String get ourApproach => 'Yaklaşımımız';
+
+  @override
+  String get currentSession => 'Mevcut Seans';
+
+  @override
+  String get sessionNotAssigned => '⚠️ Session atanmamış';
+
+  @override
+  String get hasSession => '✅ Session Var';
+
+  @override
+  String get noSession => '⚠️ Session Yok';
+
+  @override
+  String statsSessionStatus(int hasCount, int noCount) {
+    return 'Session Var: $hasCount | Session Yok: $noCount';
+  }
+
+  @override
+  String get upNext => 'SIRADAKI';
+
+  @override
+  String get autoPlayOff => 'OTO-OYNATMA KAPALI';
+
+  @override
+  String get autoPlayNextSession => 'Sıradakini otomatik oynat';
+
+  @override
+  String get autoPlayNextSessionSubtitle =>
+      'Mevcut oturum bittiğinde sıradakini otomatik olarak çal';
+
+  @override
+  String get noAudio => 'Ses Yok';
+
+  @override
+  String get noImage => 'Görsel Yok';
+
+  @override
+  String get noIntro => 'Giriş Yok';
+
+  @override
+  String sessionsLoaded(int count) {
+    return '$count seans yüklendi';
+  }
+
+  @override
+  String filteredSessions(int filtered, int total) {
+    return '$filtered / $total seans';
+  }
 }
