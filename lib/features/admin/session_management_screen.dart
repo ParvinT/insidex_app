@@ -31,6 +31,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
   final TextEditingController _searchController = TextEditingController();
   final AdminSearchService _adminSearchService = AdminSearchService();
   String _selectedGenderFilter = 'all';
+  String _selectedStatusFilter = 'all';
 
   // Pagination
   List<Map<String, dynamic>> _sessions = [];
@@ -175,6 +176,44 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
       });
     } catch (e) {
       debugPrint('❌ Error loading sessions: $e');
+      setState(() {
+        _isLoading = false;
+        _isInitialLoad = false;
+      });
+    }
+  }
+
+  Future<void> _loadAllSessionsForStatusFilter() async {
+    if (_isLoading) return;
+    setState(() => _isLoading = true);
+
+    try {
+      Query query = FirebaseFirestore.instance
+          .collection('sessions')
+          .orderBy('sessionNumber');
+
+      if (_selectedCategoryId != null) {
+        query = query.where('categoryId', isEqualTo: _selectedCategoryId);
+      }
+      if (_selectedGenderFilter != 'all') {
+        query = query.where('gender', isEqualTo: _selectedGenderFilter);
+      }
+
+      final snapshot = await query.get();
+
+      final allSessions = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return {'id': doc.id, ...data};
+      }).toList();
+
+      setState(() {
+        _sessions = allSessions;
+        _hasMore = false;
+        _isLoading = false;
+        _isInitialLoad = false;
+      });
+    } catch (e) {
+      debugPrint('❌ Error loading all sessions: $e');
       setState(() {
         _isLoading = false;
         _isInitialLoad = false;
@@ -330,6 +369,71 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
     );
   }
 
+  List<Map<String, dynamic>> _applyStatusFilter(
+      List<Map<String, dynamic>> sessions) {
+    if (_selectedStatusFilter == 'all') return sessions;
+
+    return sessions.where((session) {
+      switch (_selectedStatusFilter) {
+        case 'no_audio':
+          final audioUrls = session['subliminal']?['audioUrls'];
+          return audioUrls == null || audioUrls is! Map || audioUrls.isEmpty;
+        case 'no_image':
+          final images = session['backgroundImages'];
+          return images == null || images is! Map || images.isEmpty;
+        case 'no_intro':
+          final content = session['content'];
+          if (content == null || content is! Map || content.isEmpty)
+            return true;
+          // Check if ANY language has intro content
+          for (final langContent in content.values) {
+            if (langContent is Map) {
+              final intro = langContent['introduction'];
+              if (intro is Map) {
+                final text = intro['content']?.toString().trim() ?? '';
+                if (text.isNotEmpty) return false;
+              }
+            }
+          }
+          return true;
+        case 'no_category':
+          final categoryId = session['categoryId'];
+          return categoryId == null || categoryId.toString().trim().isEmpty;
+        default:
+          return true;
+      }
+    }).toList();
+  }
+
+  Widget _buildStatusChip(
+      String value, String label, AppThemeExtension colors) {
+    final isSelected = _selectedStatusFilter == value;
+    return Padding(
+      padding: EdgeInsets.only(right: 8.w),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: isSelected,
+        onSelected: (selected) {
+          final newValue = selected ? value : 'all';
+          setState(() {
+            _selectedStatusFilter = newValue;
+          });
+          if (newValue != 'all') {
+            _loadAllSessionsForStatusFilter();
+          } else {
+            _loadSessions();
+          }
+        },
+        backgroundColor: colors.greyLight,
+        selectedColor: Colors.orange,
+        labelStyle: TextStyle(
+          fontSize: 12.sp,
+          color: isSelected ? Colors.white : colors.textPrimary,
+        ),
+      ),
+    );
+  }
+
   Widget _buildGenderChip(
       String value, String label, AppThemeExtension colors) {
     final isSelected = _selectedGenderFilter == value;
@@ -342,7 +446,11 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
           setState(() {
             _selectedGenderFilter = selected ? value : 'all';
           });
-          _loadSessions();
+          if (_selectedStatusFilter != 'all') {
+            _loadAllSessionsForStatusFilter();
+          } else {
+            _loadSessions();
+          }
         },
         backgroundColor: colors.greyLight,
         selectedColor: colors.textPrimary,
@@ -379,6 +487,7 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                     builder: (context) => const AddSessionScreen()),
               );
               _loadCategories();
+              _adminSearchService.clearCache();
               _loadSessions();
             },
           ),
@@ -418,7 +527,11 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       selected: _selectedCategoryId == null,
                       onSelected: (selected) {
                         setState(() => _selectedCategoryId = null);
-                        _loadSessions();
+                        if (_selectedStatusFilter != 'all') {
+                          _loadAllSessionsForStatusFilter();
+                        } else {
+                          _loadSessions();
+                        }
                       },
                       backgroundColor: colors.greyLight,
                       selectedColor: colors.textPrimary,
@@ -443,7 +556,11 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                       setState(() {
                         _selectedCategoryId = isSelected ? null : category.id;
                       });
-                      _loadSessions();
+                      if (_selectedStatusFilter != 'all') {
+                        _loadAllSessionsForStatusFilter();
+                      } else {
+                        _loadSessions();
+                      }
                     },
                     backgroundColor: colors.greyLight,
                     selectedColor: colors.textPrimary,
@@ -480,13 +597,42 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
             ),
           ),
 
+          // Status Filter
+          Container(
+            height: 44.h,
+            padding: EdgeInsets.symmetric(horizontal: 16.w),
+            margin: EdgeInsets.only(bottom: 8.h),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildStatusChip(
+                      'all', AppLocalizations.of(context).all, colors),
+                  _buildStatusChip('no_audio',
+                      '🔇 ${AppLocalizations.of(context).noAudio}', colors),
+                  _buildStatusChip('no_image',
+                      '🖼️ ${AppLocalizations.of(context).noImage}', colors),
+                  _buildStatusChip('no_intro',
+                      '📝 ${AppLocalizations.of(context).noIntro}', colors),
+                  _buildStatusChip('no_category',
+                      '📁 ${AppLocalizations.of(context).noCategory}', colors),
+                ],
+              ),
+            ),
+          ),
+
           // Session count
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
             child: Row(
               children: [
                 Text(
-                  '${_sessions.length} sessions loaded',
+                  _selectedStatusFilter == 'all'
+                      ? AppLocalizations.of(context)
+                          .sessionsLoaded(_sessions.length)
+                      : AppLocalizations.of(context).filteredSessions(
+                          _applyStatusFilter(_sessions).length,
+                          _sessions.length),
                   style: GoogleFonts.inter(
                     fontSize: 12.sp,
                     color: colors.textSecondary,
@@ -537,130 +683,141 @@ class _SessionManagementScreenState extends State<SessionManagementScreen> {
                           ],
                         ),
                       )
-                    : RefreshIndicator(
-                        onRefresh: _loadSessions,
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: EdgeInsets.all(20.w),
-                          itemCount: _sessions.length + (_hasMore ? 1 : 0),
-                          itemBuilder: (context, index) {
-                            // Loading indicator at bottom
-                            if (index == _sessions.length) {
-                              return Padding(
-                                padding: EdgeInsets.all(16.w),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: colors.textPrimary,
+                    : Builder(builder: (context) {
+                        final displaySessions = _applyStatusFilter(_sessions);
+                        return RefreshIndicator(
+                          onRefresh: _loadSessions,
+                          child: ListView.builder(
+                            controller: _scrollController,
+                            padding: EdgeInsets.all(20.w),
+                            itemCount: displaySessions.length +
+                                (_hasMore && _selectedStatusFilter == 'all'
+                                    ? 1
+                                    : 0),
+                            itemBuilder: (context, index) {
+                              // Loading indicator at bottom
+                              if (index == displaySessions.length) {
+                                return Padding(
+                                  padding: EdgeInsets.all(16.w),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: colors.textPrimary,
+                                    ),
                                   ),
+                                );
+                              }
+
+                              final session = displaySessions[index];
+                              final docId = session['id'] as String;
+                              final displayTitle =
+                                  _getDisplayTitleSync(session);
+                              final gender =
+                                  session['gender'] as String? ?? 'both';
+
+                              return Card(
+                                margin: EdgeInsets.only(bottom: 12.h),
+                                color: colors.backgroundCard,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  side: BorderSide(
+                                      color: colors.border, width: 0.5),
                                 ),
-                              );
-                            }
-
-                            final session = _sessions[index];
-                            final docId = session['id'] as String;
-                            final displayTitle = _getDisplayTitleSync(session);
-                            final gender =
-                                session['gender'] as String? ?? 'both';
-
-                            return Card(
-                              margin: EdgeInsets.only(bottom: 12.h),
-                              color: colors.backgroundCard,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.r),
-                                side: BorderSide(
-                                    color: colors.border, width: 0.5),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(16.w),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        // Gender icon
-                                        Text(
-                                          gender == 'male'
-                                              ? '♂'
-                                              : gender == 'female'
-                                                  ? '♀'
-                                                  : '⚥',
-                                          style: TextStyle(fontSize: 18.sp),
-                                        ),
-                                        SizedBox(width: 8.w),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                displayTitle,
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: colors.textPrimary,
+                                child: Padding(
+                                  padding: EdgeInsets.all(16.w),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          // Gender icon
+                                          Text(
+                                            gender == 'male'
+                                                ? '♂'
+                                                : gender == 'female'
+                                                    ? '♀'
+                                                    : '⚥',
+                                            style: TextStyle(fontSize: 18.sp),
+                                          ),
+                                          SizedBox(width: 8.w),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  displayTitle,
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: colors.textPrimary,
+                                                  ),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
+                                                SizedBox(height: 4.h),
+                                                Text(
+                                                  _getCategoryName(
+                                                      session['categoryId']),
+                                                  style: GoogleFonts.inter(
+                                                    fontSize: 12.sp,
+                                                    color: colors.textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuButton(
+                                            itemBuilder: (context) => [
+                                              PopupMenuItem(
+                                                value: 'edit',
+                                                child: Text(
+                                                    AppLocalizations.of(context)
+                                                        .edit),
                                               ),
-                                              SizedBox(height: 4.h),
-                                              Text(
-                                                _getCategoryName(
-                                                    session['categoryId']),
-                                                style: GoogleFonts.inter(
-                                                  fontSize: 12.sp,
-                                                  color: colors.textSecondary,
+                                              PopupMenuItem(
+                                                value: 'delete',
+                                                child: Text(
+                                                  AppLocalizations.of(context)
+                                                      .delete,
+                                                  style: const TextStyle(
+                                                      color: Colors.red),
                                                 ),
                                               ),
                                             ],
-                                          ),
-                                        ),
-                                        PopupMenuButton(
-                                          itemBuilder: (context) => [
-                                            PopupMenuItem(
-                                              value: 'edit',
-                                              child: Text(
-                                                  AppLocalizations.of(context)
-                                                      .edit),
-                                            ),
-                                            PopupMenuItem(
-                                              value: 'delete',
-                                              child: Text(
-                                                AppLocalizations.of(context)
-                                                    .delete,
-                                                style: const TextStyle(
-                                                    color: Colors.red),
-                                              ),
-                                            ),
-                                          ],
-                                          onSelected: (value) async {
-                                            if (value == 'edit') {
-                                              await Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      AddSessionScreen(
-                                                    sessionToEdit: session,
+                                            onSelected: (value) async {
+                                              if (value == 'edit') {
+                                                await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        AddSessionScreen(
+                                                      sessionToEdit: session,
+                                                    ),
                                                   ),
-                                                ),
-                                              );
-                                              _loadCategories();
-                                              _loadSessions();
-                                            } else if (value == 'delete') {
-                                              _deleteSession(docId);
-                                            }
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 12.h),
-                                    _buildLanguageBadges(session, colors),
-                                  ],
+                                                );
+                                                _loadCategories();
+                                                _adminSearchService
+                                                    .clearCache();
+                                                _loadSessions();
+                                              } else if (value == 'delete') {
+                                                _deleteSession(docId);
+                                              }
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 12.h),
+                                      _buildLanguageBadges(session, colors),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
+                              );
+                            },
+                          ),
+                        );
+                      }),
           ),
         ],
       ),

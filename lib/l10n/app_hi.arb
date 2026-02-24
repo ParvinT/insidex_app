@@ -924,5 +924,22 @@
   "upNext": "अगला",
   "autoPlayOff": "ऑटो-प्ले बंद",
   "autoPlayNextSession": "अगला सत्र स्वतः चलाएं",
-  "autoPlayNextSessionSubtitle": "वर्तमान सत्र समाप्त होने पर अगला सत्र स्वतः चलाएं"
+  "autoPlayNextSessionSubtitle": "वर्तमान सत्र समाप्त होने पर अगला सत्र स्वतः चलाएं",
+  "noAudio": "ऑडियो नहीं",
+  "noImage": "छवि नहीं",
+  "noIntro": "परिचय नहीं",
+  "noCategory": "श्रेणी नहीं",
+  "sessionsLoaded": "{count} सत्र लोड हुए",
+  "@sessionsLoaded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "filteredSessions": "{filtered} / {total} सत्र",
+  "@filteredSessions": {
+    "placeholders": {
+      "filtered": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  }
 }

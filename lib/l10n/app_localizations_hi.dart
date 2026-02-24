@@ -2200,7 +2200,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectCategoryOptional => 'श्रेणी चुनें (वैकल्पिक)';
 
   @override
-  String get noCategory => 'कोई श्रेणी नहीं';
+  String get noCategory => 'श्रेणी नहीं';
 
   @override
   String get addYourFirstQuizCategory => 'अपनी पहली प्रश्नोत्तरी श्रेणी जोड़ें';
@@ -2721,4 +2721,23 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get autoPlayNextSessionSubtitle =>
       'वर्तमान सत्र समाप्त होने पर अगला सत्र स्वतः चलाएं';
+
+  @override
+  String get noAudio => 'ऑडियो नहीं';
+
+  @override
+  String get noImage => 'छवि नहीं';
+
+  @override
+  String get noIntro => 'परिचय नहीं';
+
+  @override
+  String sessionsLoaded(int count) {
+    return '$count सत्र लोड हुए';
+  }
+
+  @override
+  String filteredSessions(int filtered, int total) {
+    return '$filtered / $total सत्र';
+  }
 }

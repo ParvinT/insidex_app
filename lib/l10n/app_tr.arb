@@ -969,6 +969,23 @@
   "upNext": "SIRADAKI",
   "autoPlayOff": "OTO-OYNATMA KAPALI",
   "autoPlayNextSession": "Sıradakini otomatik oynat",
-  "autoPlayNextSessionSubtitle": "Mevcut oturum bittiğinde sıradakini otomatik olarak çal"
+  "autoPlayNextSessionSubtitle": "Mevcut oturum bittiğinde sıradakini otomatik olarak çal",
+  "noAudio": "Ses Yok",
+  "noImage": "Görsel Yok",
+  "noIntro": "Giriş Yok",
+  "noCategory": "Kategori Yok",
+  "sessionsLoaded": "{count} seans yüklendi",
+  "@sessionsLoaded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "filteredSessions": "{filtered} / {total} seans",
+  "@filteredSessions": {
+    "placeholders": {
+      "filtered": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  }
   
 }

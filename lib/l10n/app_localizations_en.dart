@@ -2718,4 +2718,23 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get autoPlayNextSessionSubtitle =>
       'Automatically play the next session when current one ends';
+
+  @override
+  String get noAudio => 'No Audio';
+
+  @override
+  String get noImage => 'No Image';
+
+  @override
+  String get noIntro => 'No Intro';
+
+  @override
+  String sessionsLoaded(int count) {
+    return '$count sessions loaded';
+  }
+
+  @override
+  String filteredSessions(int filtered, int total) {
+    return '$filtered / $total sessions';
+  }
 }

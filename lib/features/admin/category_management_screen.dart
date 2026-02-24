@@ -340,78 +340,61 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Name + Language Badges
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            localizedName,
-                            style: GoogleFonts.inter(
-                              fontSize: isTablet ? 18.sp : 16.sp,
-                              fontWeight: FontWeight.w600,
-                              color: colors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        _buildLanguageBadges(category, isTablet, colors),
-                      ],
+                    // Row 1: Name (full width)
+                    Text(
+                      localizedName,
+                      style: GoogleFonts.inter(
+                        fontSize: isTablet ? 18.sp : 16.sp,
+                        fontWeight: FontWeight.w600,
+                        color: colors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
 
                     SizedBox(height: 8.h),
 
-                    // Metadata
+                    // Row 2: Languages + Gender + Session count + Image count
                     Row(
                       children: [
-                        // Session count - Real-time from Firestore
+                        _buildLanguageBadges(category, isTablet, colors),
+                        SizedBox(width: 8.w),
+                        _buildGenderBadge(category, colors),
+                        SizedBox(width: 12.w),
                         Icon(
                           Icons.play_circle_filled,
-                          size: isTablet ? 18.sp : 16.sp,
-                          color: colors.textPrimary,
-                        ),
-                        SizedBox(width: 4.w),
-                        Flexible(
-                          child: StreamBuilder<QuerySnapshot>(
-                            stream: FirebaseFirestore.instance
-                                .collection('sessions')
-                                .where('categoryId', isEqualTo: category.id)
-                                .snapshots(),
-                            builder: (context, snapshot) {
-                              final count = snapshot.data?.docs.length ?? 0;
-                              return Text(
-                                '$count ${AppLocalizations.of(context).sessions}',
-                                style: GoogleFonts.inter(
-                                  fontSize: isTablet ? 14.sp : 12.sp,
-                                  color: colors.textSecondary,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 16.w),
-
-                    // Image count
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.image,
-                          size: isTablet ? 18.sp : 16.sp,
+                          size: 14.sp,
                           color: colors.textSecondary,
                         ),
-                        SizedBox(width: 4.w),
-                        Flexible(
-                          child: Text(
-                            '${category.backgroundImages.length} ${AppLocalizations.of(context).images}',
-                            style: GoogleFonts.inter(
-                              fontSize: isTablet ? 14.sp : 12.sp,
-                              color: colors.textSecondary,
-                            ),
-                            overflow: TextOverflow.ellipsis,
+                        SizedBox(width: 2.w),
+                        StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collection('sessions')
+                              .where('categoryId', isEqualTo: category.id)
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            final count = snapshot.data?.docs.length ?? 0;
+                            return Text(
+                              '$count',
+                              style: GoogleFonts.inter(
+                                fontSize: 12.sp,
+                                color: colors.textSecondary,
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(width: 8.w),
+                        Icon(
+                          Icons.image,
+                          size: 14.sp,
+                          color: colors.textSecondary,
+                        ),
+                        SizedBox(width: 2.w),
+                        Text(
+                          '${category.backgroundImages.length}',
+                          style: GoogleFonts.inter(
+                            fontSize: 12.sp,
+                            color: colors.textSecondary,
                           ),
                         ),
                       ],
@@ -420,40 +403,43 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
                 ),
               ),
 
-              SizedBox(width: 12.w),
+              SizedBox(width: 8.w),
 
-              // Action Buttons
-              Row(
+              // Action Buttons (vertical)
+              Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Manage Images button
                   IconButton(
                     onPressed: () => _manageImages(category),
                     icon: Icon(
                       Icons.photo_library,
                       color: colors.textPrimary,
-                      size: isTablet ? 24.sp : 22.sp,
+                      size: isTablet ? 22.sp : 20.sp,
                     ),
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.all(6.w),
                     tooltip: AppLocalizations.of(context).manageImages,
                   ),
-                  // Edit button
                   IconButton(
                     onPressed: () => _navigateToEditCategory(category),
                     icon: Icon(
                       Icons.edit,
                       color: colors.textPrimary,
-                      size: isTablet ? 24.sp : 22.sp,
+                      size: isTablet ? 22.sp : 20.sp,
                     ),
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.all(6.w),
                     tooltip: AppLocalizations.of(context).editCategory,
                   ),
-                  // Delete button
                   IconButton(
                     onPressed: () => _showDeleteConfirmation(category),
                     icon: Icon(
                       Icons.delete,
                       color: Colors.red,
-                      size: isTablet ? 24.sp : 22.sp,
+                      size: isTablet ? 22.sp : 20.sp,
                     ),
+                    constraints: const BoxConstraints(),
+                    padding: EdgeInsets.all(6.w),
                     tooltip: AppLocalizations.of(context).deleteCategory,
                   ),
                 ],
@@ -462,6 +448,29 @@ class _CategoryManagementScreenState extends State<CategoryManagementScreen> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGenderBadge(CategoryModel category, AppThemeExtension colors) {
+    final l10n = AppLocalizations.of(context);
+    final label = category.gender == 'male'
+        ? l10n.male
+        : category.gender == 'female'
+            ? l10n.female
+            : l10n.genderBoth;
+    final color = category.gender == 'male'
+        ? Colors.blue
+        : category.gender == 'female'
+            ? Colors.pink
+            : Colors.purple;
+
+    return Text(
+      label,
+      style: GoogleFonts.inter(
+        fontSize: 11.sp,
+        fontWeight: FontWeight.w600,
+        color: color,
+      ),
     );
   }
 

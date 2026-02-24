@@ -2216,7 +2216,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get selectCategoryOptional => 'Выберите категорию (необязательно)';
 
   @override
-  String get noCategory => 'Без категории';
+  String get noCategory => 'Нет категории';
 
   @override
   String get addYourFirstQuizCategory => 'Добавьте свою первую категорию теста';
@@ -2736,4 +2736,23 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get autoPlayNextSessionSubtitle =>
       'Автоматически воспроизводить следующий сеанс';
+
+  @override
+  String get noAudio => 'Нет аудио';
+
+  @override
+  String get noImage => 'Нет изображения';
+
+  @override
+  String get noIntro => 'Нет вступления';
+
+  @override
+  String sessionsLoaded(int count) {
+    return '$count сессий загружено';
+  }
+
+  @override
+  String filteredSessions(int filtered, int total) {
+    return '$filtered / $total сессий';
+  }
 }

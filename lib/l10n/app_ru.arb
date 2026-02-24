@@ -975,6 +975,23 @@
   "upNext": "ДАЛЕЕ",
   "autoPlayOff": "АВТОВОСПР. ВЫКЛ.",
   "autoPlayNextSession": "Автовоспроизведение",
-  "autoPlayNextSessionSubtitle": "Автоматически воспроизводить следующий сеанс"
+  "autoPlayNextSessionSubtitle": "Автоматически воспроизводить следующий сеанс",
+  "noAudio": "Нет аудио",
+  "noImage": "Нет изображения",
+  "noIntro": "Нет вступления",
+  "noCategory": "Нет категории",
+  "sessionsLoaded": "{count} сессий загружено",
+  "@sessionsLoaded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "filteredSessions": "{filtered} / {total} сессий",
+  "@filteredSessions": {
+    "placeholders": {
+      "filtered": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  }
   
 }

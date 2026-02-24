@@ -2728,4 +2728,23 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get autoPlayNextSessionSubtitle =>
       'Mevcut oturum bittiğinde sıradakini otomatik olarak çal';
+
+  @override
+  String get noAudio => 'Ses Yok';
+
+  @override
+  String get noImage => 'Görsel Yok';
+
+  @override
+  String get noIntro => 'Giriş Yok';
+
+  @override
+  String sessionsLoaded(int count) {
+    return '$count seans yüklendi';
+  }
+
+  @override
+  String filteredSessions(int filtered, int total) {
+    return '$filtered / $total seans';
+  }
 }

@@ -29,6 +29,11 @@ class AdminSearchService {
   DateTime? _sessionCacheTime;
   static const _cacheDuration = Duration(minutes: 3);
 
+  void clearCache() {
+    _sessionCache = null;
+    _sessionCacheTime = null;
+  }
+
   // ============================================================
   // SESSION SEARCH
   // ============================================================

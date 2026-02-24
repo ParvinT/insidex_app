@@ -5207,6 +5207,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Automatically play the next session when current one ends'**
   String get autoPlayNextSessionSubtitle;
+
+  /// No description provided for @noAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'No Audio'**
+  String get noAudio;
+
+  /// No description provided for @noImage.
+  ///
+  /// In en, this message translates to:
+  /// **'No Image'**
+  String get noImage;
+
+  /// No description provided for @noIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'No Intro'**
+  String get noIntro;
+
+  /// No description provided for @sessionsLoaded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} sessions loaded'**
+  String sessionsLoaded(int count);
+
+  /// No description provided for @filteredSessions.
+  ///
+  /// In en, this message translates to:
+  /// **'{filtered} / {total} sessions'**
+  String filteredSessions(int filtered, int total);
 }
 
 class _AppLocalizationsDelegate

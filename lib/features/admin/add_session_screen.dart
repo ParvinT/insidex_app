@@ -666,6 +666,12 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                             builder: (context, snapshot) {
                               final name =
                                   snapshot.data ?? category.getName('en');
+                              final l10n = AppLocalizations.of(context);
+                              final genderLabel = category.gender == 'male'
+                                  ? l10n.male
+                                  : category.gender == 'female'
+                                      ? l10n.female
+                                      : l10n.genderBoth;
                               return Row(
                                 children: [
                                   CategoryIcon(
@@ -673,7 +679,26 @@ class _AddSessionScreenState extends State<AddSessionScreen> {
                                     size: 32.w,
                                   ),
                                   SizedBox(width: 12.w),
-                                  Expanded(child: Text(name)),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Flexible(child: Text(name)),
+                                        SizedBox(width: 8.w),
+                                        Text(
+                                          genderLabel,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: category.gender == 'male'
+                                                ? Colors.blue
+                                                : category.gender == 'female'
+                                                    ? Colors.pink
+                                                    : Colors.purple,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               );
                             },

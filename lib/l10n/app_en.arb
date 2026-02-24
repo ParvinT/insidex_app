@@ -1105,7 +1105,25 @@
   "upNext": "UP NEXT",
   "autoPlayOff": "AUTO-PLAY OFF",
   "autoPlayNextSession": "Auto-play next session",
-  "autoPlayNextSessionSubtitle": "Automatically play the next session when current one ends"
+  "autoPlayNextSessionSubtitle": "Automatically play the next session when current one ends",
+
+  "noAudio": "No Audio",
+  "noImage": "No Image",
+  "noIntro": "No Intro",
+  "noCategory": "No Category",
+  "sessionsLoaded": "{count} sessions loaded",
+  "@sessionsLoaded": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "filteredSessions": "{filtered} / {total} sessions",
+  "@filteredSessions": {
+    "placeholders": {
+      "filtered": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  }
 
 }
 
