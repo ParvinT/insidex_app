@@ -13,20 +13,20 @@ const admin = require("firebase-admin");
 
 const DEVICE_LOGOUT_TEXTS = {
   en: {
-    title: "Signed In From Another Device",
-    body: "Your account was accessed from another device. If this wasn't you, please change your password.",
+    title: "New Login Detected",
+    body: "Your account was signed in from another device. If this wasn't you, please change your password.",
   },
   tr: {
-    title: "Hesabınıza Başka Cihazdan Giriş Yapıldı",
-    body: "Hesabınıza başka bir cihazdan giriş yapıldı. Eğer siz değilseniz, lütfen şifrenizi değiştirin.",
+    title: "Yeni Cihaz Girişi",
+    body: "Hesabınıza başka bir cihazdan giriş yapıldı. Siz değilseniz şifrenizi değiştirin.",
   },
   ru: {
-    title: "Вход с другого устройства",
-    body: "В ваш аккаунт вошли с другого устройства. Если это были не вы, измените пароль.",
+    title: "Новый вход в аккаунт",
+    body: "В ваш аккаунт вошли с другого устройства. Если это не вы, смените пароль.",
   },
   hi: {
-    title: "दूसरे डिवाइस से लॉगिन किया गया",
-    body: "आपके खाते में दूसरे डिवाइस से लॉगिन हुआ। अगर यह आप नहीं थे, तो कृपया पासवर्ड बदलें।",
+    title: "नया लॉगिन",
+    body: "आपके खाते में दूसरे डिवाइस से लॉगिन हुआ। अगर यह आप नहीं थे, तो पासवर्ड बदलें।",
   },
 };
 
