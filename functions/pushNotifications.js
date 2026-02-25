@@ -114,12 +114,12 @@ function validateNotificationData(data) {
     return { valid: false, error: "No data provided" };
   }
 
-  if (!data.titles || !data.titles.en) {
-    return { valid: false, error: "English title is required" };
+  if (!data.titles || Object.keys(data.titles).length === 0) {
+    return { valid: false, error: "At least one title is required" };
   }
 
-  if (!data.bodies || !data.bodies.en) {
-    return { valid: false, error: "English body is required" };
+  if (!data.bodies || Object.keys(data.bodies).length === 0) {
+      return { valid: false, error: "At least one body is required" };
   }
 
   if (!data.target || !data.target.audience) {

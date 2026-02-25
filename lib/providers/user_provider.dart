@@ -243,6 +243,12 @@ class UserProvider extends ChangeNotifier {
     }
   }
 
+  /// Public method for forced logout (called from push notification handler)
+  Future<void> performForcedLogout() async {
+    debugPrint('🔐 performForcedLogout called from push notification');
+    await _performLogout(forcedByOtherDevice: true);
+  }
+
   // Load user data from Firestore
   Future<void> loadUserData(String uid) async {
     _isLoading = true;

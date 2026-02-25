@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart' as permission;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../../features/notifications/notification_models.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/notification_provider.dart';
+import '../../providers/user_provider.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import '../../app.dart';
 import '../../core/routes/app_routes.dart';
@@ -63,8 +65,177 @@ class NotificationService {
     // Create notification channels for Android
     await _createNotificationChannels();
 
+    await _setupFCMHandlers();
+    _clearBadge();
+
     _isInitialized = true;
     debugPrint('NotificationService initialized successfully');
+  }
+
+  // ============================================================
+  // FCM PUSH NOTIFICATION HANDLERS
+  // ============================================================
+
+  /// Setup Firebase Cloud Messaging handlers for push notifications.
+  ///
+  /// Handles three scenarios:
+  /// 1. App was terminated → user taps notification → getInitialMessage
+  /// 2. App in background → user taps notification → onMessageOpenedApp
+  /// 3. App in foreground → notification arrives → onMessage (show local)
+  Future<void> _setupFCMHandlers() async {
+    final messaging = FirebaseMessaging.instance;
+
+    // 1. App was terminated: check if opened via notification
+    try {
+      final initialMessage = await messaging.getInitialMessage();
+      if (initialMessage != null) {
+        debugPrint('📩 [FCM] App opened from terminated via notification');
+        _handleFCMNotificationTap(initialMessage);
+      }
+    } catch (e) {
+      debugPrint('⚠️ [FCM] Error checking initial message: $e');
+    }
+
+    // 2. App in background: user taps notification
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint('📩 [FCM] App opened from background via notification');
+      _handleFCMNotificationTap(message);
+    });
+
+    // 3. App in foreground: show as local notification
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint('📩 [FCM] Foreground message received');
+      _handleFCMForegroundMessage(message);
+    });
+
+    debugPrint('✅ [FCM] Push notification handlers configured');
+  }
+
+  /// Handle FCM notification tap (from background or terminated state).
+  /// Navigates to home screen and clears badge.
+  void _handleFCMNotificationTap(RemoteMessage message) {
+    debugPrint('🔔 FCM notification tapped: ${message.data}');
+    _clearBadge();
+
+    final type = message.data['type'] as String?;
+
+    if (type == 'device_logout') {
+      debugPrint('🔐 Device logout notification tapped — forcing logout');
+      _handleDeviceLogoutPush();
+      return;
+    }
+
+    final navigatorKey = InsidexApp.navigatorKey;
+    if (navigatorKey.currentState != null) {
+      navigatorKey.currentState!.pushNamedAndRemoveUntil(
+        AppRoutes.home,
+        (route) => false,
+      );
+    }
+  }
+
+  /// Handle device logout push notification.
+  /// Signs out user and navigates to welcome screen.
+  void _handleDeviceLogoutPush() {
+    final navigatorKey = InsidexApp.navigatorKey;
+    final navigatorState = navigatorKey.currentState;
+
+    if (navigatorState == null) {
+      debugPrint(
+          '❌ Navigator state is null — cannot handle device logout push');
+      return;
+    }
+
+    // Get UserProvider and trigger forced logout
+    try {
+      final context = navigatorState.context;
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      userProvider.performForcedLogout();
+    } catch (e) {
+      debugPrint('⚠️ Could not trigger forced logout via provider: $e');
+      // Fallback: just navigate to welcome
+      navigatorState.pushNamedAndRemoveUntil(
+        '/auth/welcome',
+        (route) => false,
+      );
+    }
+  }
+
+  /// Handle FCM message received while app is in foreground.
+  /// Shows a local notification so the user sees it.
+  void _handleFCMForegroundMessage(RemoteMessage message) {
+    debugPrint('📬 FCM foreground message: ${message.notification?.title}');
+
+    final type = message.data['type'] as String?;
+
+    // Device logout in foreground: trigger logout immediately
+    // (Firestore listener should already handle this, but this is a safety net)
+    if (type == 'device_logout') {
+      debugPrint(
+          '🔐 Device logout push received in foreground — ignoring (Firestore listener handles it)');
+      return;
+    }
+
+    if (message.notification != null) {
+      showNotification(
+        id: message.hashCode,
+        title: message.notification!.title ?? '',
+        body: message.notification!.body ?? '',
+        payload: message.data.toString(),
+      );
+    }
+  }
+
+  /// Clear app badge count on iOS and Android.
+  void _clearBadge() {
+    try {
+      // Clear via flutter_local_notifications
+      _notifications
+          .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin>()
+          ?.requestPermissions(
+            badge: true,
+          );
+
+      // Clear badge via Firebase Messaging
+      FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: false,
+        sound: true,
+      );
+
+      // Reset badge count to 0
+      _resetBadgeCount();
+
+      debugPrint('✅ [Badge] Badge cleared');
+    } catch (e) {
+      debugPrint('⚠️ [Badge] Error clearing badge: $e');
+    }
+  }
+
+  /// Reset badge count to zero on iOS.
+  Future<void> _resetBadgeCount() async {
+    try {
+      if (Platform.isIOS) {
+        // Show an empty notification with badge 0 then cancel it
+        await _notifications.show(
+          99999,
+          null,
+          null,
+          const NotificationDetails(
+            iOS: DarwinNotificationDetails(
+              presentAlert: false,
+              presentBadge: true,
+              presentSound: false,
+              badgeNumber: 0,
+            ),
+          ),
+        );
+        await _notifications.cancel(99999);
+      }
+    } catch (e) {
+      debugPrint('⚠️ [Badge] Error resetting badge count: $e');
+    }
   }
 
   /// Get local timezone name

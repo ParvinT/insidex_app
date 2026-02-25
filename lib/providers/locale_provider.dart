@@ -67,38 +67,52 @@ class LocaleProvider extends ChangeNotifier {
     _locale = locale;
     debugPrint('🟢 _locale set to: ${_locale.languageCode}');
 
+    // Step 1: Save to SharedPreferences (fast, critical for UI)
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('language_code', locale.languageCode);
-    debugPrint('🟢 Saved to SharedPreferences: ${locale.languageCode}');
 
-    // Save to Firestore for email language preference
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .update({'preferredLanguage': locale.languageCode});
-        debugPrint('🟢 Saved to Firestore: ${locale.languageCode}');
-      }
-    } catch (e) {
-      debugPrint('⚠️ Error saving language to Firestore: $e');
-    }
-
+    // Step 2: Clear cache & update UI immediately
     LanguageHelperService.clearCache();
-    // Update FCM language topic
-    try {
-      await TopicManagementService().updateLanguageTopic(locale.languageCode);
-    } catch (e) {
-      debugPrint('⚠️ FCM language topic update error: $e');
-    }
-
-    await Future.delayed(const Duration(seconds: 1));
-
     debugPrint('✅ Language changed: ${locale.languageCode}');
-    debugPrint('🔔 Calling notifyListeners()...');
-    await _rescheduleNotifications();
     notifyListeners();
+
+    // Step 3: Background tasks (fire-and-forget, UI doesn't wait)
+    _syncLanguageInBackground(locale.languageCode);
+  }
+
+  /// Syncs language change to Firestore, FCM topics, and notifications.
+  /// Runs in background without blocking UI.
+  void _syncLanguageInBackground(String languageCode) {
+    // Firestore update
+    Future(() async {
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user != null) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'preferredLanguage': languageCode});
+          debugPrint('🟢 [Background] Saved to Firestore: $languageCode');
+        }
+      } catch (e) {
+        debugPrint('⚠️ [Background] Firestore language sync error: $e');
+      }
+    });
+
+    // FCM topic update
+    Future(() async {
+      try {
+        await TopicManagementService().updateLanguageTopic(languageCode);
+        debugPrint('🟢 [Background] FCM topic updated: $languageCode');
+      } catch (e) {
+        debugPrint('⚠️ [Background] FCM topic update error: $e');
+      }
+    });
+
+    // Reschedule notifications with new language
+    Future(() async {
+      await _rescheduleNotifications();
+    });
   }
 
   Future<void> _rescheduleNotifications() async {

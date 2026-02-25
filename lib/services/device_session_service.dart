@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -56,6 +57,7 @@ class DeviceSessionService {
 
   /// Save current device as active device for user
   /// Returns the saved token for verification
+  /// Also sends push notification to old device if exists
   Future<String?> saveActiveDevice(String userId) async {
     String? fcmToken;
     String? platform;
@@ -78,12 +80,33 @@ class DeviceSessionService {
       platform = Platform.isIOS ? 'ios' : 'android';
       final loginTimestamp = DateTime.now().millisecondsSinceEpoch;
 
-      // ⭐ STEP 1: Save to LOCAL first (immediate)
+      // STEP 1: Save to LOCAL first (immediate)
       await _saveLocalToken(fcmToken);
       await _saveLoginTimestamp(loginTimestamp);
       debugPrint('💾 Token saved to local cache');
 
-      // ⭐ STEP 2: Then save to Firestore
+      // STEP 2: Read old device info BEFORE overwriting
+      String? oldToken;
+      String? oldPlatform;
+      String? oldUserLanguage;
+
+      try {
+        final userDoc = await _firestore.collection('users').doc(userId).get();
+        final userData = userDoc.data();
+
+        if (userData != null) {
+          final oldDevice = userData['activeDevice'] as Map<String, dynamic>?;
+          if (oldDevice != null) {
+            oldToken = oldDevice['token'] as String?;
+            oldPlatform = oldDevice['platform'] as String?;
+          }
+          oldUserLanguage = userData['preferredLanguage'] as String?;
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not read old device info: $e');
+      }
+
+      // STEP 3: Save new device to Firestore
       await _firestore.collection('users').doc(userId).update({
         'activeDevice': {
           'token': fcmToken,
@@ -96,6 +119,15 @@ class DeviceSessionService {
 
       debugPrint(
           '✅ Active device saved: $platform - ${fcmToken.substring(0, 20)}...');
+
+      // STEP 4: Send push notification to old device (fire-and-forget)
+      if (oldToken != null && oldToken != fcmToken) {
+        _sendLogoutPushToOldDevice(
+          oldToken: oldToken,
+          oldPlatform: oldPlatform ?? 'android',
+          language: oldUserLanguage ?? 'en',
+        );
+      }
 
       return fcmToken;
     } on FirebaseException catch (e) {
@@ -111,6 +143,32 @@ class DeviceSessionService {
     } catch (e) {
       debugPrint('❌ Unexpected error saving active device: $e');
       return fcmToken;
+    }
+  }
+
+  /// Send device logout push notification to old device via Cloud Function.
+  /// Fire-and-forget: does not block login flow on failure.
+  void _sendLogoutPushToOldDevice({
+    required String oldToken,
+    required String oldPlatform,
+    required String language,
+  }) async {
+    try {
+      debugPrint('📤 Sending logout push to old device...');
+
+      final callable = FirebaseFunctions.instance
+          .httpsCallable('sendDeviceLogoutNotification');
+
+      await callable.call<dynamic>({
+        'oldToken': oldToken,
+        'platform': oldPlatform,
+        'language': language,
+      });
+
+      debugPrint('✅ Logout push sent to old device');
+    } catch (e) {
+      // Non-blocking: log and move on
+      debugPrint('⚠️ Failed to send logout push (non-critical): $e');
     }
   }
 
@@ -151,27 +209,6 @@ class DeviceSessionService {
     } catch (e) {
       debugPrint('❌ Error checking device status: $e');
       return true; // ⭐ Return TRUE on error (don't logout on errors)
-    }
-  }
-
-  /// Send push notification to old device
-  /// Note: This requires Cloud Function to actually send the notification
-  /// We'll create a notification request in Firestore that Cloud Function will process
-  Future<void> sendLogoutNotification(
-      String oldDeviceToken, String platform) async {
-    try {
-      // Create notification request for Cloud Function to process
-      await _firestore.collection('notification_queue').add({
-        'token': oldDeviceToken,
-        'platform': platform,
-        'type': 'device_logout',
-        'createdAt': FieldValue.serverTimestamp(),
-        'processed': false,
-      });
-
-      debugPrint('✅ Logout notification queued for old device');
-    } catch (e) {
-      debugPrint('❌ Error sending logout notification: $e');
     }
   }
 

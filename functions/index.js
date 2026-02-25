@@ -5,6 +5,7 @@ const admin = require("firebase-admin");
 const nodemailer = require("nodemailer");
 const { onRevenueCatEvent, checkTrialEnding } = require("./subscriptionEmails");
 const { onPushNotificationCreated } = require("./pushNotifications");
+const { sendDeviceLogoutNotification } = require("./deviceLogout");
 
 // Import email templates
 const { 
@@ -490,3 +491,4 @@ exports.checkEmailExists = functions.https.onCall(async (data, context) => {
 exports.onRevenueCatEvent = onRevenueCatEvent;
 exports.checkTrialEnding = checkTrialEnding;
 exports.onPushNotificationCreated = onPushNotificationCreated;
+exports.sendDeviceLogoutNotification = sendDeviceLogoutNotification;

@@ -126,49 +126,8 @@ class _PushNotificationComposeTabState extends State<PushNotificationComposeTab>
             _buildSectionTitle(l10n.adminPushNotificationContent, colors),
             SizedBox(height: 12.h),
 
-            // English (required)
-            _buildLanguageFields(
-              flag: '🇬🇧',
-              label: l10n.adminPushEnglishRequired,
-              titleController: _titleEn,
-              bodyController: _bodyEn,
-              isRequired: true,
-              colors: colors,
-              l10n: l10n,
-            ),
-            SizedBox(height: 16.h),
-
-            // Turkish
-            _buildLanguageFields(
-              flag: '🇹🇷',
-              label: 'Türkçe',
-              titleController: _titleTr,
-              bodyController: _bodyTr,
-              colors: colors,
-              l10n: l10n,
-            ),
-            SizedBox(height: 16.h),
-
-            // Russian
-            _buildLanguageFields(
-              flag: '🇷🇺',
-              label: 'Русский',
-              titleController: _titleRu,
-              bodyController: _bodyRu,
-              colors: colors,
-              l10n: l10n,
-            ),
-            SizedBox(height: 16.h),
-
-            // Hindi
-            _buildLanguageFields(
-              flag: '🇮🇳',
-              label: 'हिन्दी',
-              titleController: _titleHi,
-              bodyController: _bodyHi,
-              colors: colors,
-              l10n: l10n,
-            ),
+            // Dynamic language fields based on audience mode
+            ..._buildLanguageFieldsList(colors, l10n),
 
             SizedBox(height: 24.h),
 
@@ -221,6 +180,62 @@ class _PushNotificationComposeTabState extends State<PushNotificationComposeTab>
   // ============================================================
   // WIDGETS
   // ============================================================
+
+  /// Whether English is required based on audience mode.
+  /// In "By Language" mode, EN is optional (fallback only).
+  bool get _isEnRequired => _audience != 'language';
+
+  /// All language definitions with their controllers.
+  List<_LanguageFieldConfig> get _allLanguages => [
+        _LanguageFieldConfig('en', '🇬🇧', 'English', _titleEn, _bodyEn),
+        _LanguageFieldConfig('tr', '🇹🇷', 'Türkçe', _titleTr, _bodyTr),
+        _LanguageFieldConfig('ru', '🇷🇺', 'Русский', _titleRu, _bodyRu),
+        _LanguageFieldConfig('hi', '🇮🇳', 'हिन्दी', _titleHi, _bodyHi),
+      ];
+
+  /// Build language input fields dynamically based on audience mode.
+  List<Widget> _buildLanguageFieldsList(
+      AppThemeExtension colors, AppLocalizations l10n) {
+    final widgets = <Widget>[];
+    final isLanguageMode = _audience == 'language';
+
+    for (final lang in _allLanguages) {
+      // In "By Language" mode: show EN (optional) + only selected languages
+      if (isLanguageMode &&
+          lang.code != 'en' &&
+          !_selectedLanguages.contains(lang.code)) {
+        continue;
+      }
+
+      final bool isRequired;
+      final String label;
+
+      if (lang.code == 'en') {
+        isRequired = _isEnRequired;
+        label =
+            isRequired ? l10n.adminPushEnglishRequired : 'English (Fallback)';
+      } else {
+        // In "By Language" mode, selected languages are required
+        isRequired = isLanguageMode && _selectedLanguages.contains(lang.code);
+        label = isRequired ? '${lang.label} ✱' : lang.label;
+      }
+
+      widgets.add(
+        _buildLanguageFields(
+          flag: lang.flag,
+          label: label,
+          titleController: lang.titleController,
+          bodyController: lang.bodyController,
+          isRequired: isRequired,
+          colors: colors,
+          l10n: l10n,
+        ),
+      );
+      widgets.add(SizedBox(height: 16.h));
+    }
+
+    return widgets;
+  }
 
   Widget _buildSectionTitle(String title, AppThemeExtension colors) {
     return Text(
@@ -564,6 +579,18 @@ class _PushNotificationComposeTabState extends State<PushNotificationComposeTab>
       return;
     }
 
+    // In "By Language" mode, ensure at least EN or selected languages have content
+    if (_audience == 'language') {
+      final hasAnyContent = _selectedLanguages.any((lang) {
+        final titleCtrl = _getControllerForLang(lang, isTitle: true);
+        return titleCtrl?.text.trim().isNotEmpty == true;
+      });
+      if (!hasAnyContent && _titleEn.text.trim().isEmpty) {
+        _showError(l10n.adminPushTitleBodyRequired);
+        return;
+      }
+    }
+
     // Confirmation dialog
     final confirmed = await _showConfirmationDialog();
     if (confirmed != true) return;
@@ -793,4 +820,37 @@ class _PushNotificationComposeTabState extends State<PushNotificationComposeTab>
       ),
     );
   }
+
+  TextEditingController? _getControllerForLang(String lang,
+      {required bool isTitle}) {
+    switch (lang) {
+      case 'en':
+        return isTitle ? _titleEn : _bodyEn;
+      case 'tr':
+        return isTitle ? _titleTr : _bodyTr;
+      case 'ru':
+        return isTitle ? _titleRu : _bodyRu;
+      case 'hi':
+        return isTitle ? _titleHi : _bodyHi;
+      default:
+        return null;
+    }
+  }
+}
+
+/// Configuration for a language input field group.
+class _LanguageFieldConfig {
+  final String code;
+  final String flag;
+  final String label;
+  final TextEditingController titleController;
+  final TextEditingController bodyController;
+
+  const _LanguageFieldConfig(
+    this.code,
+    this.flag,
+    this.label,
+    this.titleController,
+    this.bodyController,
+  );
 }
