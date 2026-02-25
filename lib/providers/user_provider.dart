@@ -156,16 +156,21 @@ class UserProvider extends ChangeNotifier {
   }
 
   /// Central logout handler. All logout paths must go through here.
-  /// [forcedByOtherDevice] = true: another device took over, don't clear activeDevice
-  /// [forcedByOtherDevice] = false: user initiated, clear activeDevice from Firestore
+  ///
+  /// [forcedByOtherDevice] = true: another device took over, don't clear
+  ///   activeDevice from Firestore (new device's token is there now)
+  /// [forcedByOtherDevice] = false: user initiated, clear activeDevice
   Future<void> _performLogout({bool forcedByOtherDevice = false}) async {
     _isShowingLogoutDialog = false;
 
     final uid = _firebaseUser?.uid;
-    debugPrint(
-        '🔄 [Logout] Starting logout (forced=$forcedByOtherDevice, uid=$uid)');
+    debugPrint('🔄 [Logout] Starting (forced=$forcedByOtherDevice, uid=$uid)');
 
-    // Capture providers before async gaps
+    // ── STEP 0: Stop Firestore listener IMMEDIATELY ──
+    // This MUST happen before signOut to prevent PERMISSION_DENIED errors
+    _stopDeviceSessionMonitoring();
+
+    // ── Capture providers before async gaps ──
     MiniPlayerProvider? miniPlayerProvider;
     DownloadProvider? downloadProvider;
     final navigatorState = InsidexApp.navigatorKey.currentState;
@@ -176,7 +181,7 @@ class UserProvider extends ChangeNotifier {
           listen: false,
         );
       } catch (e) {
-        debugPrint('⚠️ Could not get MiniPlayerProvider: $e');
+        debugPrint('⚠️ [Logout] Could not get MiniPlayerProvider: $e');
       }
       try {
         downloadProvider = Provider.of<DownloadProvider>(
@@ -184,67 +189,53 @@ class UserProvider extends ChangeNotifier {
           listen: false,
         );
       } catch (e) {
-        debugPrint('⚠️ Could not get DownloadProvider: $e');
+        debugPrint('⚠️ [Logout] Could not get DownloadProvider: $e');
       }
     }
 
-    // 1. Stop audio
-    try {
-      final audioService = AudioPlayerService();
-      await audioService.stop();
-      debugPrint('✅ [Logout] Audio stopped');
-    } catch (e) {
-      debugPrint('⚠️ [Logout] Audio stop error: $e');
-    }
+    // ── STEP 1: Parallel non-critical cleanup ──
+    await Future.wait([
+      _safeAsync(() async {
+        await AudioPlayerService().stop();
+        debugPrint('✅ [Logout] Audio stopped');
+      }),
+      _safeAsync(() async {
+        await DecryptionPreloader().clear();
+        debugPrint('✅ [Logout] Preloader cache cleared');
+      }),
+      _safeAsync(() async {
+        if (downloadProvider != null) {
+          await downloadProvider.clearUserData();
+          debugPrint('✅ [Logout] Downloads cleared');
+        }
+      }),
+      _safeAsync(() async {
+        await TopicManagementService().unsubscribeAllTopics();
+        debugPrint('✅ [Logout] FCM topics unsubscribed');
+      }),
+    ]);
 
-    // 2. Clear preloader cache
-    try {
-      await DecryptionPreloader().clear();
-      debugPrint('✅ [Logout] Preloader cache cleared');
-    } catch (e) {
-      debugPrint('⚠️ [Logout] Preloader clear error: $e');
-    }
-
-    // 3. Clear downloads
-    try {
-      if (downloadProvider != null) {
-        await downloadProvider.clearUserData();
-        debugPrint('✅ [Logout] Download provider cleared');
-      }
-    } catch (e) {
-      debugPrint('⚠️ [Logout] Download provider clear error: $e');
-    }
-
-    // 4. Clear device session from Firestore
-    //    ONLY when user-initiated. When forced by another device,
-    //    the NEW device's token is in Firestore — don't touch it!
+    // ── STEP 2: Device session cleanup ──
     if (uid != null && !forcedByOtherDevice) {
+      // User-initiated: remove activeDevice from Firestore
       debugPrint('🧹 [Logout] Clearing activeDevice (user initiated)');
       await DeviceSessionService().clearActiveDevice(uid);
-    } else if (forcedByOtherDevice) {
-      // Only clear local session data, keep Firestore intact
-      debugPrint(
-          '⏭️ [Logout] Skipping Firestore clear (forced by other device)');
+    } else {
+      // Forced by other device: only clear local cache, keep Firestore intact
+      debugPrint('⏭️ [Logout] Clearing local session only (forced)');
       await DeviceSessionService().clearLocalSession();
     }
 
-    // 5. Unsubscribe from FCM topics
-    try {
-      await TopicManagementService().unsubscribeAllTopics();
-      debugPrint('✅ [Logout] FCM topics unsubscribed');
-    } catch (e) {
-      debugPrint('⚠️ [Logout] FCM topic unsubscribe error: $e');
-    }
-
-    // 6. Firebase sign out + clear local state
+    // ── STEP 3: Sign out (Firebase Auth + SharedPreferences) ──
     await signOut();
 
-    // 7. Navigate to welcome screen
+    // ── STEP 4: Navigate to welcome screen ──
     if (navigatorState != null) {
       navigatorState.pushNamedAndRemoveUntil(
         '/auth/welcome',
         (route) => false,
       );
+      // Dismiss mini player after navigation frame
       Future.delayed(const Duration(milliseconds: 100), () {
         try {
           miniPlayerProvider?.dismiss();
@@ -258,6 +249,15 @@ class UserProvider extends ChangeNotifier {
     }
 
     debugPrint('✅ [Logout] Logout complete');
+  }
+
+  /// Safe async wrapper — catches exceptions so Future.wait doesn't fail
+  Future<void> _safeAsync(Future<void> Function() fn) async {
+    try {
+      await fn();
+    } catch (e) {
+      debugPrint('⚠️ [Logout] Cleanup error: $e');
+    }
   }
 
   /// Public method for forced logout (called from push notification handler or Firestore listener)

@@ -379,6 +379,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _handleSignOut() async {
     // Show confirmation dialog
+    final userProvider = context.read<UserProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -428,7 +429,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (shouldSignOut == true) {
       try {
-        final userProvider = context.read<UserProvider>();
         await userProvider.logout();
       } catch (e) {
         debugPrint('❌ Sign out error: $e');

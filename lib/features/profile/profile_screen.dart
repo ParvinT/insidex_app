@@ -145,6 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleSignOut() async {
+    final userProvider = context.read<UserProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -177,7 +178,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (shouldSignOut == true) {
       try {
-        final userProvider = context.read<UserProvider>();
         await userProvider.logout();
       } catch (e) {
         debugPrint('❌ Sign out error: $e');

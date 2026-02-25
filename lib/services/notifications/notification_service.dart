@@ -11,11 +11,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
+import '../../services/auth_persistence_service.dart';
+import '../../services/device_session_service.dart';
 import '../../features/notifications/notification_models.dart';
 import '../../core/constants/app_colors.dart';
 import '../../providers/notification_provider.dart';
-import '../../providers/user_provider.dart';
-import 'package:flutter_timezone/flutter_timezone.dart';
 import '../../app.dart';
 import '../../core/routes/app_routes.dart';
 import '../../l10n/app_localizations.dart';
@@ -90,7 +91,7 @@ class NotificationService {
       final initialMessage = await messaging.getInitialMessage();
       if (initialMessage != null) {
         debugPrint('📩 [FCM] App opened from terminated via notification');
-        _handleFCMNotificationTap(initialMessage);
+        await _handleFCMNotificationTap(initialMessage);
       }
     } catch (e) {
       debugPrint('⚠️ [FCM] Error checking initial message: $e');
@@ -113,7 +114,7 @@ class NotificationService {
 
   /// Handle FCM notification tap (from background or terminated state).
   /// Navigates to home screen and clears badge.
-  void _handleFCMNotificationTap(RemoteMessage message) {
+  Future<void> _handleFCMNotificationTap(RemoteMessage message) async {
     debugPrint('🔔 FCM notification tapped: ${message.data}');
     _clearBadge();
 
@@ -121,7 +122,7 @@ class NotificationService {
 
     if (type == 'device_logout') {
       debugPrint('🔐 Device logout notification tapped — forcing logout');
-      _handleDeviceLogoutPush();
+      await _handleDeviceLogoutPush();
       return;
     }
 
@@ -136,28 +137,35 @@ class NotificationService {
 
   /// Handle device logout push notification.
   /// Signs out user and navigates to welcome screen.
-  void _handleDeviceLogoutPush() {
-    final navigatorKey = InsidexApp.navigatorKey;
-    final navigatorState = navigatorKey.currentState;
+  Future<void> _handleDeviceLogoutPush() async {
+    debugPrint('🔐 [FCM] Handling device_logout push — lightweight cleanup');
 
-    if (navigatorState == null) {
-      debugPrint(
-          '❌ Navigator state is null — cannot handle device logout push');
-      return;
+    // Step 1: Clear all local session data (no Provider needed)
+    try {
+      await DeviceSessionService().clearLocalSession();
+      await AuthPersistenceService.fullLogout();
+      debugPrint('✅ [FCM] Session data cleared via persistence layer');
+    } catch (e) {
+      debugPrint('⚠️ [FCM] Error clearing session: $e');
     }
 
-    // Get UserProvider and trigger forced logout
+    // Step 2: Navigate to welcome screen
+    // If navigator isn't ready yet (terminated state), that's OK —
+    // splash screen will see no valid session and show welcome anyway.
     try {
-      final context = navigatorState.context;
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      userProvider.performForcedLogout();
+      final navigatorState = InsidexApp.navigatorKey.currentState;
+      if (navigatorState != null) {
+        navigatorState.pushNamedAndRemoveUntil(
+          '/auth/welcome',
+          (route) => false,
+        );
+        debugPrint('✅ [FCM] Navigated to welcome screen');
+      } else {
+        debugPrint(
+            'ℹ️ [FCM] Navigator not ready — splash will handle redirect');
+      }
     } catch (e) {
-      debugPrint('⚠️ Could not trigger forced logout via provider: $e');
-      // Fallback: just navigate to welcome
-      navigatorState.pushNamedAndRemoveUntil(
-        '/auth/welcome',
-        (route) => false,
-      );
+      debugPrint('⚠️ [FCM] Navigation error (splash will handle): $e');
     }
   }
 

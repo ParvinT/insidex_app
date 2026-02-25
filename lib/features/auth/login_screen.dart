@@ -70,41 +70,46 @@ class _LoginScreenState extends State<LoginScreen> {
     if (result['success']) {
       final user = result['user'];
       if (user != null) {
-        debugPrint('SAVING AUTH SESSION for: ${user.email}');
+        // Step 1: Save auth session (must complete before anything else)
         await AuthPersistenceService.saveAuthSession(user, password: password);
 
+        // Step 2: Parallel — device session + user data loading
+        await Future.wait([
+          DeviceSessionService().saveActiveDevice(user.uid).then((_) {
+            debugPrint('✅ Active device saved');
+          }),
+          userProvider.loadUserData(user.uid),
+        ]);
+
+        // Step 3: Cache login state
         final prefs = await SharedPreferences.getInstance();
-        debugPrint('After save - Email: ${prefs.getString('user_email')}');
-        debugPrint(
-            'After save - Has credentials: ${prefs.getString('auth_credentials') != null}');
-        debugPrint('💾 Saving active device session...');
-        final savedToken =
-            await DeviceSessionService().saveActiveDevice(user.uid);
-        debugPrint('✅ Active device saved: ${savedToken?.substring(0, 20)}...');
-
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        await userProvider.loadUserData(user.uid);
         await prefs.setBool('has_logged_in', true);
         await prefs.setString('cached_user_id', user.uid);
-        debugPrint('✅ [Login] has_logged_in flag and user ID saved');
+        debugPrint('✅ [Login] Login state cached');
 
-        // Subscribe to FCM topics for push notifications
-        try {
-          await subProvider.waitForInitialization();
-          await TopicManagementService().subscribeUserTopics(
-            language: locale,
-            tier: subProvider.tier.name,
-          );
-          debugPrint('✅ FCM topics subscribed');
-        } catch (e) {
-          debugPrint('⚠️ FCM topic subscription error: $e');
-        }
+        // Step 4: FCM topics — fire-and-forget (don't block navigation)
+        () async {
+          try {
+            await subProvider.waitForInitialization();
+            await TopicManagementService().subscribeUserTopics(
+              language: locale,
+              tier: subProvider.tier.name,
+            );
+            debugPrint('✅ FCM topics subscribed');
+          } catch (e) {
+            debugPrint('⚠️ FCM topic subscription error: $e');
+          }
+        }();
+
+        if (!mounted) return;
+
+        // Step 5: Navigate to home
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.home,
+          (route) => false,
+        );
       }
-
-      if (!mounted) return;
-
-      Navigator.pushReplacementNamed(context, AppRoutes.home);
     } else {
       final errorMessage = FirebaseErrorHandler.getErrorMessage(
         result['code'],
