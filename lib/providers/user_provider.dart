@@ -60,8 +60,9 @@ class UserProvider extends ChangeNotifier {
 
     debugPrint('🔍 Starting device session monitoring for: $userId');
 
-    // ⭐ Mark that we should skip the initial snapshot
+    // Reset flags for fresh monitoring session
     _skipInitialSnapshot = true;
+    _isShowingLogoutDialog = false;
 
     // Biraz gecikme ekle ki saveActiveDevice tamamlansın
     Future.delayed(const Duration(milliseconds: 2000), () {
@@ -154,10 +155,17 @@ class UserProvider extends ChangeNotifier {
     );
   }
 
-  // ⭐ NEW: Perform actual logout
+  /// Central logout handler. All logout paths must go through here.
+  /// [forcedByOtherDevice] = true: another device took over, don't clear activeDevice
+  /// [forcedByOtherDevice] = false: user initiated, clear activeDevice from Firestore
   Future<void> _performLogout({bool forcedByOtherDevice = false}) async {
     _isShowingLogoutDialog = false;
 
+    final uid = _firebaseUser?.uid;
+    debugPrint(
+        '🔄 [Logout] Starting logout (forced=$forcedByOtherDevice, uid=$uid)');
+
+    // Capture providers before async gaps
     MiniPlayerProvider? miniPlayerProvider;
     DownloadProvider? downloadProvider;
     final navigatorState = InsidexApp.navigatorKey.currentState;
@@ -180,51 +188,58 @@ class UserProvider extends ChangeNotifier {
       }
     }
 
-    debugPrint('🎵 [UserProvider] Stopping audio before logout...');
+    // 1. Stop audio
     try {
       final audioService = AudioPlayerService();
       await audioService.stop();
-      debugPrint('✅ [UserProvider] Audio stopped');
+      debugPrint('✅ [Logout] Audio stopped');
     } catch (e) {
-      debugPrint('⚠️ [UserProvider] Audio stop error: $e');
+      debugPrint('⚠️ [Logout] Audio stop error: $e');
     }
 
+    // 2. Clear preloader cache
     try {
       await DecryptionPreloader().clear();
-      debugPrint('✅ [UserProvider] Preloader cache cleared');
+      debugPrint('✅ [Logout] Preloader cache cleared');
     } catch (e) {
-      debugPrint('⚠️ [UserProvider] Preloader clear error: $e');
+      debugPrint('⚠️ [Logout] Preloader clear error: $e');
     }
 
+    // 3. Clear downloads
     try {
       if (downloadProvider != null) {
         await downloadProvider.clearUserData();
-        debugPrint('✅ [UserProvider] Download provider cleared');
+        debugPrint('✅ [Logout] Download provider cleared');
       }
     } catch (e) {
-      debugPrint('⚠️ [UserProvider] Download provider clear error: $e');
+      debugPrint('⚠️ [Logout] Download provider clear error: $e');
     }
 
-    // Clear device session
-    if (_firebaseUser != null && !forcedByOtherDevice) {
-      debugPrint('🧹 Clearing active device (user initiated logout)');
-      await DeviceSessionService().clearActiveDevice(_firebaseUser!.uid);
+    // 4. Clear device session from Firestore
+    //    ONLY when user-initiated. When forced by another device,
+    //    the NEW device's token is in Firestore — don't touch it!
+    if (uid != null && !forcedByOtherDevice) {
+      debugPrint('🧹 [Logout] Clearing activeDevice (user initiated)');
+      await DeviceSessionService().clearActiveDevice(uid);
     } else if (forcedByOtherDevice) {
-      debugPrint('⏭️ Skipping clearActiveDevice (forced by other device)');
+      // Only clear local session data, keep Firestore intact
+      debugPrint(
+          '⏭️ [Logout] Skipping Firestore clear (forced by other device)');
+      await DeviceSessionService().clearLocalSession();
     }
 
-    // Unsubscribe from all FCM topics
+    // 5. Unsubscribe from FCM topics
     try {
       await TopicManagementService().unsubscribeAllTopics();
-      debugPrint('✅ FCM topics unsubscribed');
+      debugPrint('✅ [Logout] FCM topics unsubscribed');
     } catch (e) {
-      debugPrint('⚠️ FCM topic unsubscribe error: $e');
+      debugPrint('⚠️ [Logout] FCM topic unsubscribe error: $e');
     }
 
-    // Sign out
+    // 6. Firebase sign out + clear local state
     await signOut();
 
-    // ✅ Navigate using GlobalKey
+    // 7. Navigate to welcome screen
     if (navigatorState != null) {
       navigatorState.pushNamedAndRemoveUntil(
         '/auth/welcome',
@@ -233,20 +248,29 @@ class UserProvider extends ChangeNotifier {
       Future.delayed(const Duration(milliseconds: 100), () {
         try {
           miniPlayerProvider?.dismiss();
-          debugPrint('✅ [UserProvider] Mini player dismissed after logout');
+          debugPrint('✅ [Logout] Mini player dismissed');
         } catch (e) {
-          debugPrint('⚠️ [UserProvider] Mini player dismiss error: $e');
+          debugPrint('⚠️ [Logout] Mini player dismiss error: $e');
         }
       });
     } else {
-      debugPrint('❌ Cannot navigate to login - Navigator state is null');
+      debugPrint('❌ [Logout] Cannot navigate — Navigator state is null');
     }
+
+    debugPrint('✅ [Logout] Logout complete');
   }
 
-  /// Public method for forced logout (called from push notification handler)
+  /// Public method for forced logout (called from push notification handler or Firestore listener)
   Future<void> performForcedLogout() async {
-    debugPrint('🔐 performForcedLogout called from push notification');
+    debugPrint('🔐 performForcedLogout called');
     await _performLogout(forcedByOtherDevice: true);
+  }
+
+  /// Public method for user-initiated logout (called from Settings / Profile screens)
+  /// This is the ONLY way UI screens should trigger logout.
+  Future<void> logout() async {
+    debugPrint('👤 User-initiated logout');
+    await _performLogout(forcedByOtherDevice: false);
   }
 
   // Load user data from Firestore
@@ -413,11 +437,7 @@ class UserProvider extends ChangeNotifier {
 
   // Sign out
   Future<void> signOut() async {
-    if (_firebaseUser != null) {
-      await DeviceSessionService().clearActiveDevice(_firebaseUser!.uid);
-    }
-    await AuthPersistenceService.clearSession();
-    await FirebaseAuth.instance.signOut();
+    await AuthPersistenceService.fullLogout();
     _firebaseUser = null;
     _userData = null;
     _isAdmin = false;

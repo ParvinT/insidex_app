@@ -15,10 +15,6 @@ import 'widgets/profile_action_button.dart';
 import 'widgets/profile_menu_section.dart';
 import 'widgets/avatar_picker_modal.dart';
 import 'progress_screen.dart';
-import '../../services/auth_persistence_service.dart';
-import '../../services/audio/audio_player_service.dart';
-import '../../providers/mini_player_provider.dart';
-import '../../providers/download_provider.dart';
 import '../../shared/widgets/upgrade_prompt.dart';
 import '../../providers/subscription_provider.dart';
 import '../subscription/paywall_screen.dart';
@@ -149,8 +145,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _handleSignOut() async {
-    final miniPlayerProvider = context.read<MiniPlayerProvider>();
-    final downloadProvider = context.read<DownloadProvider>();
     final shouldSignOut = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -182,35 +176,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (shouldSignOut == true) {
-      debugPrint('🎵 [Profile] Stopping audio before logout...');
       try {
-        final audioService = AudioPlayerService();
-        await audioService.stop();
-        debugPrint('✅ [Profile] Audio stopped');
+        final userProvider = context.read<UserProvider>();
+        await userProvider.logout();
       } catch (e) {
-        debugPrint('⚠️ [Profile] Audio stop error: $e');
-      }
-
-      debugPrint('🎵 [Profile] Dismissing mini player...');
-      try {
-        miniPlayerProvider.dismiss();
-        debugPrint('✅ [Profile] Mini player dismissed');
-      } catch (e) {
-        debugPrint('⚠️ [Profile] Mini player dismiss error: $e');
-      }
-      try {
-        await downloadProvider.clearUserData();
-        debugPrint('✅ [Settings] Download provider cleared');
-      } catch (e) {
-        debugPrint('⚠️ [Settings] Download provider clear error: $e');
-      }
-      await AuthPersistenceService.fullLogout();
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/auth/welcome',
-          (route) => false,
-        );
+        debugPrint('❌ Sign out error: $e');
       }
     }
   }

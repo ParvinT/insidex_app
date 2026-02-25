@@ -9,11 +9,8 @@ import '../../core/routes/app_routes.dart';
 import '../../core/constants/app_info.dart';
 import '../feedback/feedback_dialog.dart';
 import '../notifications/notification_settings_screen.dart';
-import '../../services/auth_persistence_service.dart';
-import '../../services/audio/audio_player_service.dart';
-import '../../providers/mini_player_provider.dart';
 import '../../providers/auto_play_provider.dart';
-import '../../providers/download_provider.dart';
+import '../../providers/user_provider.dart';
 import 'widgets/language_selector.dart';
 import 'widgets/theme_selector.dart';
 import '../../l10n/app_localizations.dart';
@@ -381,8 +378,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _handleSignOut() async {
-    final miniPlayerProvider = context.read<MiniPlayerProvider>();
-    final downloadProvider = context.read<DownloadProvider>();
     // Show confirmation dialog
     final shouldSignOut = await showDialog<bool>(
       context: context,
@@ -433,39 +428,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (shouldSignOut == true) {
       try {
-        debugPrint('🎵 [Settings] Stopping audio before logout...');
-        try {
-          final audioService = AudioPlayerService();
-          await audioService.stop();
-          debugPrint('✅ [Settings] Audio stopped');
-        } catch (e) {
-          debugPrint('⚠️ [Settings] Audio stop error: $e');
-        }
-
-        debugPrint('🎵 [Settings] Dismissing mini player...');
-        try {
-          miniPlayerProvider.dismiss();
-          debugPrint('✅ [Settings] Mini player dismissed');
-        } catch (e) {
-          debugPrint('⚠️ [Settings] Mini player dismiss error: $e');
-        }
-
-        try {
-          await downloadProvider.clearUserData();
-          debugPrint('✅ [Settings] Download provider cleared');
-        } catch (e) {
-          debugPrint('⚠️ [Settings] Download provider clear error: $e');
-        }
-
-        await AuthPersistenceService.fullLogout();
-
-        if (mounted) {
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            AppRoutes.welcome,
-            (route) => false,
-          );
-        }
+        final userProvider = context.read<UserProvider>();
+        await userProvider.logout();
       } catch (e) {
         debugPrint('❌ Sign out error: $e');
         if (mounted) {
